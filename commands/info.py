@@ -3,6 +3,7 @@ from evennia.utils.evtable import EvTable
 from evennia.utils import iter_to_str
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 from world.guilds import get_rank_title
+from world.stats import CORE_STAT_KEYS
 
 from .command import Command
 
@@ -17,20 +18,13 @@ class CmdScore(Command):
     def func(self):
         caller = self.caller
         stats = []
-        for key, disp in (
-            ("STR", "STR"),
-            ("CON", "CON"),
-            ("DEX", "DEX"),
-            ("INT", "INT"),
-            ("WIS", "WIS"),
-            ("LUCK", "LUCK"),
-        ):
+        for key in CORE_STAT_KEYS:
             trait = caller.traits.get(key)
             base = trait.base if trait else 0
             mod = trait.modifier if trait else 0
             total = base + mod
             text = f"{base}" if not mod else f"{base} ({total})"
-            stats.append([disp, text])
+            stats.append([key, text])
         table = EvTable(table=list(zip(*stats)), border="none")
         caller.msg(str(table))
 
@@ -66,17 +60,10 @@ class CmdFinger(Command):
             return
         desc = target.db.desc or "They have no description."
         stat_parts = []
-        for key, label in (
-            ("STR", "STR"),
-            ("CON", "CON"),
-            ("DEX", "DEX"),
-            ("INT", "INT"),
-            ("WIS", "WIS"),
-            ("LUCK", "LUCK"),
-        ):
+        for key in CORE_STAT_KEYS:
             trait = target.traits.get(key)
             value = trait.value if trait else 0
-            stat_parts.append(f"{label} {value}")
+            stat_parts.append(f"{key} {value}")
         stats = ", ".join(stat_parts)
         self.msg(f"|w{target.key}|n - {desc}")
         self.msg(stats)

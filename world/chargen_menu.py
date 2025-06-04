@@ -8,8 +8,9 @@ from evennia import create_object
 from evennia.utils import dedent
 from typeclasses.characters import PlayerCharacter, Character
 from world.scripts import races, classes
+from world.stats import CORE_STAT_KEYS
 
-STAT_LIST = ["STR", "CON", "DEX", "INT", "WIS", "LUCK"]
+STAT_LIST = CORE_STAT_KEYS
 STAT_POINTS = 24
 
 # ---------------- Welcome ----------------

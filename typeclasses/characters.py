@@ -93,40 +93,12 @@ class Character(ObjectParent, ClothedCharacter):
         )
 
     def at_object_creation(self):
-        # core stats
-        for stat in ("STR", "CON", "DEX", "INT", "WIS", "LUCK"):
-            self.traits.add(stat, trait_type="counter", min=0, max=100, base=5)
-        # resource stats
-        self.traits.add(
-            "health",
-            "Health",
-            trait_type="gauge",
-            min=0,
-            max=100,
-            base=100,
-            rate=0.1,
-        )
-        self.traits.add(
-            "mana",
-            "Mana",
-            trait_type="gauge",
-            min=0,
-            max=100,
-            base=100,
-            rate=0.1,
-        )
-        self.traits.add(
-            "stamina",
-            "Stamina",
-            trait_type="gauge",
-            min=0,
-            max=100,
-            base=100,
-            rate=0.1,
-        )
-        self.traits.add(
-            "evasion", trait_type="counter", min=0, max=100, base=0, stat="DEX"
-        )
+        from world import stats
+
+        # Apply all default stats in a single modular step. If stats already
+        # exist on the character, `apply_stats` will not overwrite them.
+        stats.apply_stats(self)
+
         self.db.guild = ""
         self.db.guild_honor = 0
 

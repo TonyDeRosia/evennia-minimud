@@ -1,5 +1,6 @@
 from evennia import CmdSet
 from evennia.utils.evtable import EvTable
+from world.stats import CORE_STAT_KEYS
 from .command import Command
 
 # A dict of all skills, with their associated stat as the value
@@ -35,17 +36,10 @@ class CmdStatSheet(Command):
         # display the primary stats
         self.msg("STATS")
         stats = []
-        for key, disp in (
-            ("STR", "STR"),
-            ("CON", "CON"),
-            ("DEX", "DEX"),
-            ("INT", "INT"),
-            ("WIS", "WIS"),
-            ("LUCK", "LUCK"),
-        ):
+        for key in CORE_STAT_KEYS:
             trait = caller.traits.get(key)
             value = trait.value if trait else 0
-            stats.append([disp, value])
+            stats.append([key, value])
         rows = list(zip(*stats))
         table = EvTable(table=rows, border="none")
         self.msg(str(table))
