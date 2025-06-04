@@ -25,6 +25,15 @@ class TestInfoCommands(EvenniaTest):
         self.char1.execute_cmd(f"finger {self.char2.key}")
         self.assertTrue(self.char1.msg.called)
 
+    def test_finger_self(self):
+        self.char1.execute_cmd("finger self")
+        self.assertTrue(self.char1.msg.called)
+
+    def test_finger_bounty(self):
+        self.char2.attributes.add("bounty", 10)
+        self.char1.execute_cmd(f"finger {self.char2.key}")
+        self.assertTrue(self.char1.msg.called)
+
     def test_score(self):
         self.char1.execute_cmd("score")
         self.assertTrue(self.char1.msg.called)
