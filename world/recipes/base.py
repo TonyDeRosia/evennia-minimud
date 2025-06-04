@@ -42,7 +42,7 @@ class SkillRecipe(CraftingRecipe):
             )
             return
 
-        success_rate = crafting_skill.value - difficulty
+        success_rate = int(crafting_skill.value - difficulty)
 
         # at this point the crafting attempt is considered happening, so subtract mental focus
         crafter.traits.fp.current -= 5

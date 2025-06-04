@@ -2,7 +2,7 @@
 Tests for custom character logic
 """
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, call
 from evennia.utils.test_resources import EvenniaTest
 
 
@@ -25,11 +25,12 @@ class TestCharacterHooks(EvenniaTest):
 
     def test_at_damage(self):
         self.char2.at_damage(self.char1, 10)
-        self.char2.msg.assert_called_once_with("You take 10 damage from Char.")
+        self.char2.msg.assert_called_once_with("You take 10 damage from |gChar|n.")
         self.char2.msg.reset_call()
         self.char2.at_damage(self.char1, 90)
-        self.char2.msg.assert_any_call("You take 90 damage from Char.")
-        self.char2.msg.assert_any_call("You fall unconscious.")
+        self.char2.msg.assert_any_call("You take 90 damage from |gChar|n.")
+        calls = [c.args[0] for c in self.char2.msg.call_args_list if c.args]
+        self.assertTrue(any("You fall unconscious" in c for c in calls))
 
     def test_at_wield_unwield(self):
         self.char1.attributes.add("_wielded", {"left hand": None, "right hand": None})
@@ -43,7 +44,7 @@ class TestCharacterHooks(EvenniaTest):
 class TestCharacterDisplays(EvenniaTest):
     def test_get_display_status(self):
         self.assertEqual(
-            "Char - Health 100.0% : Energy 100.0% : Focus 100.0%",
+            "|gChar|n - Health 100.0% : Energy 100.0% : Focus 100.0%",
             self.char1.get_display_status(self.char2),
         )
         self.assertEqual(

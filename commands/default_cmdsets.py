@@ -28,6 +28,7 @@ from commands.skills import SkillCmdSet
 from commands.interact import InteractCmdSet
 from commands.account import AccountOptsCmdSet
 from commands.shops import CmdMoney
+from commands.info import InfoCmdSet
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -55,6 +56,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CombatCmdSet)
         self.add(SkillCmdSet)
         self.add(InteractCmdSet)
+        self.add(InfoCmdSet)
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
