@@ -2,6 +2,7 @@ from random import randint, choice
 from string import punctuation
 from evennia import AttributeProperty
 from evennia.utils import lazy_property, iter_to_str, delay, logger
+from world.guilds import get_rank_title
 from evennia.contrib.rpg.traits import TraitHandler
 from evennia.contrib.game_systems.clothing.clothing import (
     ClothedCharacter,
@@ -22,6 +23,13 @@ class Character(ObjectParent, ClothedCharacter):
     """
 
     gender = AttributeProperty("plural")
+    guild = AttributeProperty("")
+    guild_honor = AttributeProperty(0)
+
+    @property
+    def guild_rank(self):
+        """Return this character's guild rank title."""
+        return get_rank_title(self.guild, self.guild_honor)
 
     @property
     def in_combat(self):
@@ -119,6 +127,8 @@ class Character(ObjectParent, ClothedCharacter):
         self.traits.add(
             "evasion", trait_type="counter", min=0, max=100, base=0, stat="DEX"
         )
+        self.db.guild = ""
+        self.db.guild_honor = 0
 
     def at_pre_move(self, destination, **kwargs):
         """

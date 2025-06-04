@@ -46,3 +46,14 @@ class TestInfoCommands(EvenniaTest):
         self.char1.execute_cmd("buffs")
         self.assertTrue(self.char1.msg.called)
 
+    def test_guild(self):
+        self.char1.db.guild = "Adventurers Guild"
+        self.char1.execute_cmd("guild")
+        self.assertTrue(self.char1.msg.called)
+
+    def test_guildwho(self):
+        self.char1.db.guild = "Adventurers Guild"
+        self.char2.db.guild = "Adventurers Guild"
+        self.char1.execute_cmd("guildwho")
+        self.assertTrue(self.char1.msg.called)
+
