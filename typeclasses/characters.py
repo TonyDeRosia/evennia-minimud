@@ -44,9 +44,9 @@ class Character(ObjectParent, ClothedCharacter):
         Returns:
             True if you can flee, otherwise False
         """
-        # use agility as a fallback for unskilled
+        # use dexterity as a fallback for unskilled
         if not (evade := self.use_skill("evasion")):
-            evade = self.db.agi
+            evade = self.traits.DEX.value
         # if you have more focus, you can escape more easily
         if (randint(0, 99) - self.traits.fp.value) < evade:
             return True
@@ -85,11 +85,9 @@ class Character(ObjectParent, ClothedCharacter):
         )
 
     def at_object_creation(self):
-        # basic stats
-        # i could - and wanted to - use the traits handler for these, but then i couldn't set them in NPC prototypes
-        self.db.str = 5
-        self.db.agi = 5
-        self.db.will = 5
+        # core stats
+        for stat in ("STR", "CON", "DEX", "INT", "WIS", "LUCK"):
+            self.traits.add(stat, trait_type="counter", min=0, max=100, base=5)
         # resource stats
         self.traits.add(
             "hp", "Health", trait_type="gauge", min=0, max=100, base=100, rate=0.1
@@ -101,7 +99,7 @@ class Character(ObjectParent, ClothedCharacter):
             "ep", "Energy", trait_type="gauge", min=0, max=100, base=100, rate=0.1
         )
         self.traits.add(
-            "evasion", trait_type="counter", min=0, max=100, base=0, stat="agi"
+            "evasion", trait_type="counter", min=0, max=100, base=0, stat="DEX"
         )
 
     def at_pre_move(self, destination, **kwargs):
@@ -275,8 +273,9 @@ class Character(ObjectParent, ClothedCharacter):
         # check if this skill has a related base stat
         stat_bonus = 0
         if stat := getattr(skill_trait, "stat", None):
-            # get the stat to be a modifier
-            stat_bonus = self.attributes.get(stat, 0)
+            # get the related stat as a modifier
+            if (stat_trait := self.traits.get(stat)):
+                stat_bonus = stat_trait.value
         # finally, return the skill plus stat
         return skill_trait.value + stat_bonus
 

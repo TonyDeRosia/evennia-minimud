@@ -16,9 +16,17 @@ class CmdScore(Command):
     def func(self):
         caller = self.caller
         stats = []
-        for key, disp in (("str", "Strength"), ("agi", "Agility"), ("will", "Willpower")):
-            base = caller.attributes.get(key, 0)
-            mod = caller.attributes.get(f"{key}_mod", 0)
+        for key, disp in (
+            ("STR", "Strength"),
+            ("CON", "Constitution"),
+            ("DEX", "Dexterity"),
+            ("INT", "Intelligence"),
+            ("WIS", "Wisdom"),
+            ("LUCK", "Luck"),
+        ):
+            trait = caller.traits.get(key)
+            base = trait.base if trait else 0
+            mod = trait.modifier if trait else 0
             total = base + mod
             text = f"{base}" if not mod else f"{base} ({total})"
             stats.append([disp, text])
@@ -56,7 +64,19 @@ class CmdFinger(Command):
         if not target:
             return
         desc = target.db.desc or "They have no description."
-        stats = f"STR {target.db.str or 0}, AGI {target.db.agi or 0}, WILL {target.db.will or 0}"
+        stat_parts = []
+        for key, label in (
+            ("STR", "STR"),
+            ("CON", "CON"),
+            ("DEX", "DEX"),
+            ("INT", "INT"),
+            ("WIS", "WIS"),
+            ("LUCK", "LUCK"),
+        ):
+            trait = target.traits.get(key)
+            value = trait.value if trait else 0
+            stat_parts.append(f"{label} {value}")
+        stats = ", ".join(stat_parts)
         self.msg(f"|w{target.key}|n - {desc}")
         self.msg(stats)
 
