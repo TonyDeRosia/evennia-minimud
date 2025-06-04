@@ -70,3 +70,28 @@ class TestCharacterProperties(EvenniaTest):
         self.assertFalse(self.char1.in_combat)
         combat_script.add_combatant(self.char1, enemy=self.char2)
         self.assertTrue(self.char1.in_combat)
+
+
+class TestGlobalTick(EvenniaTest):
+    def test_interval(self):
+        from typeclasses.scripts import GlobalTick
+
+        script = GlobalTick()
+        script.at_script_creation()
+        self.assertEqual(script.interval, 60)
+        self.assertTrue(script.persistent)
+
+    def test_tick_triggers_prompt(self):
+        from typeclasses.scripts import GlobalTick
+
+        script = GlobalTick()
+        script.at_script_creation()
+
+        self.char1.tags.add("tickable")
+        self.char1.at_tick = MagicMock()
+        self.char1.refresh_prompt = MagicMock()
+
+        script.at_repeat()
+
+        self.char1.at_tick.assert_called_once()
+        self.char1.refresh_prompt.assert_called()
