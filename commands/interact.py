@@ -56,8 +56,8 @@ class CmdEat(Command):
             self.msg("You cannot eat that.")
             return
 
-        energy = obj.attributes.get("energy", 0)
-        self.caller.traits.ep.current += energy
+        stamina = obj.attributes.get("stamina", 0)
+        self.caller.traits.stamina.current += stamina
         self.caller.at_emote(
             f"$conj({self.cmdstring}) the {{target}}.", mapping={"target": obj}
         )

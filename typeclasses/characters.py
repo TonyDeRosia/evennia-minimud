@@ -47,8 +47,8 @@ class Character(ObjectParent, ClothedCharacter):
         # use dexterity as a fallback for unskilled
         if not (evade := self.use_skill("evasion")):
             evade = self.traits.DEX.value
-        # if you have more focus, you can escape more easily
-        if (randint(0, 99) - self.traits.fp.value) < evade:
+        # if you have more mana, you can escape more easily
+        if (randint(0, 99) - self.traits.mana.value) < evade:
             return True
         else:
             self.msg("You can't find an opportunity to escape.")
@@ -90,13 +90,31 @@ class Character(ObjectParent, ClothedCharacter):
             self.traits.add(stat, trait_type="counter", min=0, max=100, base=5)
         # resource stats
         self.traits.add(
-            "hp", "Health", trait_type="gauge", min=0, max=100, base=100, rate=0.1
+            "health",
+            "Health",
+            trait_type="gauge",
+            min=0,
+            max=100,
+            base=100,
+            rate=0.1,
         )
         self.traits.add(
-            "fp", "Focus", trait_type="gauge", min=0, max=100, base=100, rate=0.1
+            "mana",
+            "Mana",
+            trait_type="gauge",
+            min=0,
+            max=100,
+            base=100,
+            rate=0.1,
         )
         self.traits.add(
-            "ep", "Energy", trait_type="gauge", min=0, max=100, base=100, rate=0.1
+            "stamina",
+            "Stamina",
+            trait_type="gauge",
+            min=0,
+            max=100,
+            base=100,
+            rate=0.1,
         )
         self.traits.add(
             "evasion", trait_type="counter", min=0, max=100, base=0, stat="DEX"
@@ -139,16 +157,16 @@ class Character(ObjectParent, ClothedCharacter):
         # apply armor damage reduction
         damage -= self.defense(damage_type)
         damage = max(0, damage)
-        self.traits.hp.current -= damage
+        self.traits.health.current -= damage
         self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
         attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
-        if self.traits.hp.value <= 0:
+        if self.traits.health.value <= 0:
             self.tags.add("unconscious", category="status")
             self.tags.add("lying down", category="status")
             self.msg(
                 "You fall unconscious. You can |wrespawn|n or wait to be |wrevive|nd."
             )
-            self.traits.hp.rate = 0
+            self.traits.health.rate = 0
             if self.in_combat:
                 combat = self.location.scripts.get("combat")[0]
                 if not combat.remove_combatant(self):
@@ -291,7 +309,7 @@ class Character(ObjectParent, ClothedCharacter):
 
         # add resource levels
         chunks.append(
-            f"Health {self.traits.hp.percent()} : Energy {self.traits.ep.percent()} : Focus {self.traits.fp.percent()}"
+            f"Health {self.traits.health.percent()} : Mana {self.traits.mana.percent()} : Stamina {self.traits.stamina.percent()}"
         )
 
         # get all the current status flags for this character
@@ -334,9 +352,9 @@ class Character(ObjectParent, ClothedCharacter):
             self.tags.remove("unconscious")
             self.tags.remove("lying down")
             # this sets the current HP to 20% of the max, a.k.a. one fifth
-            self.traits.hp.current = self.traits.hp.current.max // 5
+            self.traits.health.current = self.traits.health.current.max // 5
             self.msg(prompt=self.get_display_status(self))
-            self.traits.hp.rate = 0.1
+            self.traits.health.rate = 0.1
 
 
 class PlayerCharacter(Character):
@@ -375,7 +393,7 @@ class PlayerCharacter(Character):
 
     def at_damage(self, attacker, damage, damage_type=None):
         super().at_damage(attacker, damage, damage_type=damage_type)
-        if self.traits.hp.value < 50:
+        if self.traits.health.value < 50:
             status = self.get_display_status(self)
             self.msg(prompt=status)
 
@@ -430,8 +448,8 @@ class PlayerCharacter(Character):
         """
         self.tags.remove("unconscious", category="status")
         self.tags.remove("lying down", category="status")
-        self.traits.hp.reset()
-        self.traits.hp.rate = 0.1
+        self.traits.health.reset()
+        self.traits.health.rate = 0.1
         self.move_to(self.home)
         self.msg(prompt=self.get_display_status(self))
 
@@ -487,7 +505,7 @@ class NPC(Character):
         """
         super().at_damage(attacker, damage, damage_type=damage_type)
 
-        if self.traits.hp.value <= 0:
+        if self.traits.health.value <= 0:
             # we've been defeated!
             # create loot drops
             objs = spawn(*list(self.db.drops))
@@ -514,7 +532,7 @@ class NPC(Character):
             return
 
         threshold = self.attributes.get("flee_at", 25)
-        if self.traits.hp.value <= threshold:
+        if self.traits.health.value <= threshold:
             self.execute_cmd("flee")
 
         # change target to the attacker
@@ -584,7 +602,7 @@ class NPC(Character):
         if not (weapon := self.db.natural_weapon):
             return
         # make sure wielder has enough strength left
-        if self.traits.ep.value < weapon.get("energy_cost", 5):
+        if self.traits.stamina.value < weapon.get("stamina_cost", 5):
             return False
         # can't attack if on cooldown
         if not wielder.cooldowns.ready("attack"):
@@ -603,8 +621,8 @@ class NPC(Character):
         result = self.use_skill(weapon.get("skill"), speed=speed)
         # apply the weapon damage as a modifier to skill
         damage = damage * result
-        # subtract the energy required to use this
-        self.traits.ep.current -= weapon.get("energy_cost", 5)
+        # subtract the stamina required to use this
+        self.traits.stamina.current -= weapon.get("stamina_cost", 5)
         if not damage:
             # the attack failed
             self.at_emote(

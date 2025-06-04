@@ -12,7 +12,7 @@ class BareHand:
     """
 
     damage = 1
-    energy_cost = 3
+    stamina_cost = 3
     skill = "unarmed"
     name = "fist"
     speed = 5
@@ -22,7 +22,7 @@ class BareHand:
         Validate that this is usable - has ammo, etc.
         """
         # make sure wielder has enough strength left
-        if wielder.traits.ep.value < self.energy_cost:
+        if wielder.traits.stamina.value < self.stamina_cost:
             wielder.msg("You are too tired to hit anything.")
             return False
         # can't attack if on cooldown
@@ -37,8 +37,8 @@ class BareHand:
         Hit something with your fists!
         """
         damage = self.damage
-        # subtract the energy required to use this
-        wielder.traits.ep.current -= self.energy_cost
+        # subtract the stamina required to use this
+        wielder.traits.stamina.current -= self.stamina_cost
         if not damage:
             # the attack failed
             wielder.at_emote(
@@ -68,7 +68,7 @@ class MeleeWeapon(Object):
         Validate that this is usable - has ammo, etc.
         """
         # make sure wielder has enough strength left
-        if wielder.traits.ep.value < self.attributes.get("energy_cost", 0):
+        if wielder.traits.stamina.value < self.attributes.get("stamina_cost", 0):
             wielder.msg("You are too tired to use this.")
             return False
         # can't attack if on cooldown
@@ -103,8 +103,8 @@ class MeleeWeapon(Object):
             damage = damage * result
         # if no skill required, we are just using our unmodified damage value
 
-        # subtract the energy required to use this
-        wielder.traits.ep.current -= self.attributes.get("energy_cost", 0)
+        # subtract the stamina required to use this
+        wielder.traits.stamina.current -= self.attributes.get("stamina_cost", 0)
         if not damage:
             # the attack failed
             wielder.at_emote(

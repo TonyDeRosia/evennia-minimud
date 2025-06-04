@@ -44,8 +44,8 @@ class SkillRecipe(CraftingRecipe):
 
         success_rate = int(crafting_skill.value - difficulty)
 
-        # at this point the crafting attempt is considered happening, so subtract mental focus
-        crafter.traits.fp.current -= 5
+        # at this point the crafting attempt is considered happening, so subtract mana
+        crafter.traits.mana.current -= 5
         # you should get the experience reward regardless of success
         if self.exp_gain:
             exp = crafter.attributes.get("exp", 0)
