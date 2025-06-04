@@ -61,7 +61,8 @@ def _set_race(caller, raw_string, race, **kwargs):
     char.db.race = race
     char.db.charclass = None
     for stat in STAT_LIST:
-        char.db[stat.lower()] = 0
+        # store base values using the AttributeHandler
+        char.db.set(stat.lower(), 0)
     return "menunode_choose_class"
 
 # ---------------- Class ----------------
@@ -88,7 +89,8 @@ def _apply_base_stats(caller):
     class_mods = next((c["stat_mods"] for c in classes.CLASS_LIST if c["name"] == char.db.charclass), {})
     for stat in STAT_LIST:
         base = race_mods.get(stat, 0) + class_mods.get(stat, 0)
-        char.db[stat.lower()] = base
+        # set starting stat values using AttributeHandler
+        char.db.set(stat.lower(), base)
 
 # ---------------- Gender ----------------
 
@@ -142,7 +144,8 @@ def _adjust_stat(caller, raw_string, stat, change, **kwargs):
     base_val = race_mods.get(stat, 0) + class_mods.get(stat, 0)
     if current_val + change < base_val:
         return "menunode_stat_alloc"
-    char.db[stat.lower()] = current_val + change
+    # update the stat via AttributeHandler
+    char.db.set(stat.lower(), current_val + change)
     return "menunode_stat_alloc"
 
 # ---------------- Name ----------------
