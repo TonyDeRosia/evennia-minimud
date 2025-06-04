@@ -1,0 +1,2484 @@
+========== ./prototypes.py ==========
+"""
+Prototypes
+"""
+
+from random import randint, choice
+
+### Crafted prototypes which might be useful to access in other places, such as shops
+
+IRON_DAGGER = {
+    "typeclass": "typeclasses.gear.MeleeWeapon",
+    "key": "iron dagger",
+    "desc": "A keen-edged dagger, made of iron.",
+    "tags": [
+        ("pierce", "damage_type"),
+        ("slash", "damage_type"),
+        ("knife", "crafting_tool"),
+    ],
+    "value": 20,
+    "energy_cost": 3,
+    "speed": 3,
+    "dmg": 20,
+}
+
+IRON_SWORD = {
+    "typeclass": "typeclasses.gear.MeleeWeapon",
+    "key": "iron sword",
+    "desc": "A one-handed sword made of iron.",
+    "tags": [("pierce", "damage_type"), ("slash", "damage_type")],
+    "value": 30,
+    "energy_cost": 5,
+    "speed": 7,
+    "dmg": 40,
+}
+
+IRON_GREATSWORD = {
+    "typeclass": "typeclasses.gear.MeleeWeapon",
+    "key": "iron greatsword",
+    "desc": "A two-handed iron greatsword.",
+    "tags": [
+        ("slash", "damage_type"),
+        ("bludgeon", "damage_type"),
+        ("two_handed", "wielded"),
+    ],
+    "value": 50,
+    "energy_cost": 10,
+    "speed": 12,
+    "dmg": 60,
+}
+
+IRON_HAUBERK = {
+    "typeclass": "typeclasses.objects.ClothingObject",
+    "key": "iron hauberk",
+    "desc": "A standard iron chainmail tunic.",
+    "armor": 8,
+    "value": 20,
+    "clothing_type": "chestguard",
+}
+
+IRON_CHAUSSES = {
+    "typeclass": "typeclasses.objects.ClothingObject",
+    "key": "iron chausses",
+    "desc": "A pair of mail chausses constructed from iron.",
+    "armor": 8,
+    "value": 20,
+    "clothing_type": "legguard",
+}
+
+LEATHER_BOOTS = {
+    "typeclass": "typeclasses.objects.ClothingObject",
+    "key": "leather boots",
+    "desc": "A sturdy pair of leather boots.",
+    "armor": 1,
+    "value": 5,
+    "clothing_type": "shoes",
+}
+
+SMALL_BAG = {
+    "typeclass": "typeclasses.gear.WearableContainer",
+    "key": "small bag",
+    "desc": "A small leather bag.",
+    "capacity": 10,
+    "value": 5,
+    "clothing_type": "accessory",
+}
+MEDIUM_BAG = {
+    "typeclass": "typeclasses.gear.WearableContainer",
+    "key": "medium bag",
+    "desc": "A medium leather bag.",
+    "capacity": 20,
+    "value": 15,
+    "clothing_type": "accessory",
+}
+LARGE_BAG = {
+    "typeclass": "typeclasses.gear.WearableContainer",
+    "key": "large bag",
+    "desc": "A large leather bag.",
+    "capacity": 30,
+    "value": 30,
+    "clothing_type": "accessory",
+}
+
+PIE_CRUST = {
+    "key": "a pie crust",
+    "desc": "A golden brown, but empty, pie crust.",
+    "tags": [
+        "edible",
+    ],
+    "energy": 1,
+    "value": 10,
+}
+
+### Shop Items
+
+PIE_SLICE = {
+    "key": "slice of $choice('apple', 'blueberry', 'peach', 'cherry', 'custard') pie",
+    "desc": "A single slice of freshly-baked pie.",
+    "tags": [
+        "edible",
+    ],
+    "energy": 5,
+    "value": 5,
+}
+
+WOOL_TUNIC = {
+    "typeclass": "typeclasses.objects.ClothingObject",
+    "key": "$choice('red', 'green', 'blue', 'brown', 'cream') tunic",
+    "desc": "A simple, but comfortable, woolen tunic.",
+    "value": 3,
+    "clothing_type": "top",
+}
+WOOL_LEGGINGS = {
+    "typeclass": "typeclasses.objects.ClothingObject",
+    "key": "$choice('red', 'green', 'blue', 'brown', 'cream') leggings",
+    "desc": "A pair of soft and durable woolen leggings.",
+    "value": 3,
+    "clothing_type": "legs",
+}
+
+### Crafting tools
+
+SMITHING_HAMMER = {
+    "key": "smithing hammer",
+    "desc": "A sturdy hammer for beating metal.",
+    "tags": [("hammer", "crafting_tool")],
+    "locks": "get:false()",
+}
+
+SMITHING_ANVIL = {
+    "key": "anvil",
+    "desc": "A typical anvil, which has clearly seen much use.",
+    "tags": [("anvil", "crafting_tool")],
+    "locks": "get:false()",
+}
+
+SMITHING_FURNACE = {
+    "key": "furnace",
+    "desc": "An active furnace, hot enough to melt down metals.",
+    "tags": [("furnace", "crafting_tool")],
+    "locks": "get:false()",
+}
+
+COOKING_OVEN = {
+    "key": "oven",
+    "desc": "A cast iron stove - or is it an oven? Well, it's hot and you can cook on it.",
+    "tags": [("oven", "crafting_tool"), ("stove", "crafting_tool")],
+    "locks": "get:false()",
+}
+
+
+### Materials and their gather nodes
+
+IRON_ORE_NODE = {
+    "typeclass": "typeclasses.objects.GatherNode",
+    "key": "iron vein",
+    "desc": "An outcropping of rocks here appears to contain raw iron.",
+    "spawn_proto": "IRON_ORE",
+    "gathers": lambda: randint(2, 10),
+}
+IRON_ORE = {
+    "key": "iron ore",
+    "desc": "A clump of raw iron ore.",
+    "tags": [("iron ore", "crafting_material")],
+    "value": 2,
+}
+
+
+COPPER_ORE_NODE = {
+    "typeclass": "typeclasses.objects.GatherNode",
+    "key": "copper vein",
+    "desc": "An outcropping of rocks here appears to contain raw copper.",
+    "spawn_proto": "COPPER_ORE",
+    "gathers": lambda: randint(2, 10),
+}
+COPPER_ORE = {
+    "key": "copper ore",
+    "desc": "A clump of raw copper ore.",
+    "tags": [("copper ore", "crafting_material")],
+    "value": 1,
+}
+
+
+FRUIT_TREE = {
+    "typeclass": "typeclasses.objects.GatherNode",
+    "key": "fruit tree",
+    "desc": "A tree here is full of fruit, some of which seem to be ripe.",
+    "spawn_proto": lambda: choice(("APPLE_FRUIT", "PEAR_FRUIT", "PLUM_FRUIT")),
+    "gathers": lambda: randint(5, 10),
+}
+APPLE_FRUIT = {
+    "key": "apple",
+    "desc": "A delicious multi-colored apple.",
+    "tags": [("apple", "crafting_material"), ("fruit", "crafting_material"), "edible"],
+    "energy": 5,
+    "value": 1,
+}
+PEAR_FRUIT = {
+    "key": "pear",
+    "desc": "A fragant golden pear.",
+    "tags": [("pear", "crafting_material"), ("fruit", "crafting_material"), "edible"],
+    "energy": 5,
+    "value": 1,
+}
+PLUM_FRUIT = {
+    "key": "plum",
+    "desc": "A large red-black plum.",
+    "tags": [("plum", "crafting_material"), ("fruit", "crafting_material"), "edible"],
+    "energy": 5,
+    "value": 1,
+}
+
+
+BERRY_BUSH = {
+    "typeclass": "typeclasses.objects.GatherNode",
+    "key": "berry bush",
+    "desc": "A few bushes nearby are covered in berries",
+    "spawn_proto": lambda: choice(("BLACKBERRY", "BLUEBERRY", "RASPBERRY")),
+    "gathers": lambda: randint(5, 10),
+}
+BLACKBERRY = {
+    "key": "blackberry",
+    "desc": "A juicy blackberry.",
+    "tags": [
+        ("blackberry", "crafting_material"),
+        ("berry", "crafting_material"),
+        ("fruit", "crafting_material"),
+        "edible",
+    ],
+    "energy": 1,
+    "value": 0,
+}
+BLUEBERRY = {
+    "key": "blueberry",
+    "desc": "A single blueberry.",
+    "tags": [
+        ("blueberry", "crafting_material"),
+        ("berry", "crafting_material"),
+        ("fruit", "crafting_material"),
+        "edible",
+    ],
+    "energy": 1,
+    "value": 0,
+}
+RASPBERRY = {
+    "key": "raspberry",
+    "desc": "A large red raspberry.",
+    "tags": [
+        ("raspberry", "crafting_material"),
+        ("berry", "crafting_material"),
+        ("fruit", "crafting_material"),
+        "edible",
+    ],
+    "energy": 1,
+    "value": 0,
+}
+
+
+LUMBER_TREE = {
+    "typeclass": "typeclasses.objects.GatherNode",
+    "key": "$choice('pine', 'oak', 'ash') tree",
+    "desc": "This tree looks like a great source of lumber.",
+    "spawn_proto": "WOOD_LOG",
+    "gathers": lambda: randint(2, 10),
+}
+WOOD_LOG = {
+    "key": "log of wood",
+    "desc": "A decent-sized wooden log. Not so big you can't carry it.",
+    "tags": [
+        ("wood", "crafting_material"),
+    ],
+    "value": 1,
+}
+
+
+DRIFTWOOD = {
+    "typeclass": "typeclasses.objects.GatherNode",
+    "key": "pile of driftwood",
+    "desc": "Some of this wood looks like it would be useful.",
+    "spawn_proto": "WOOD_LOG",
+    "gathers": lambda: randint(1, 3),
+}
+WOOD_LOG = {
+    "key": "log of wood",
+    "desc": "A decent-sized wooden log. Not so big you can't carry it.",
+    "tags": [
+        ("wood", "crafting_material"),
+    ],
+    "value": 1,
+}
+
+
+### Mobs
+
+ANGRY_BEAR = {
+    "typeclass": "typeclasses.characters.NPC",
+    "key": "a large angry bear",
+    "desc": "A large brown bear. It really doesn't like you!",
+    "gender": "neutral",
+    "react_as": "aggressive",
+    "flee_at": 5,
+    "armor": 20,
+    "name_color": "r",
+    "str": 15,
+    "natural_weapon": {
+        "name": "claws",
+        "damage_type": "slash",
+        "damage": 10,
+        "speed": 8,
+        "energy_cost": 10,
+    },
+    "exp_reward": 10,
+    # randomly generate a list of drop prototype keys when the mob is spawned
+    "drops": lambda: ["RAW_MEAT"] * randint(3, 5) + ["ANIMAL_HIDE"] * randint(0, 5),
+    "can_attack": True,
+}
+
+COUGAR = {
+    "typeclass": "typeclasses.characters.NPC",
+    "key": "a mountain lion",
+    "desc": "A sleek mountain lion. It doesn't appreciate you invading its territory. At all.",
+    "gender": "neutral",
+    "react_as": "aggressive",
+    "flee_at": 15,
+    "armor": 15,
+    "name_color": "r",
+    "str": 8,
+    "agi": 15,
+    "natural_weapon": {
+        "name": "claws",
+        "damage_type": "slash",
+        "damage": 10,
+        "speed": 8,
+        "energy_cost": 10,
+    },
+    "exp_reward": 10,
+    # randomly generate a list of drop prototype keys when the mob is spawned
+    "drops": lambda: ["RAW_MEAT"] * randint(0, 3) + ["ANIMAL_HIDE"] * randint(0, 2),
+    "can_attack": True,
+}
+
+SQUIRREL = {
+    "typeclass": "typeclasses.characters.NPC",
+    "key": "a $choice('grey', 'brown') squirrel",
+    "desc": "Look! A squirrel!",
+    "react_as": "timid",
+    "gender": "neutral",
+    "drops": lambda: ["RAW_MEAT"] * randint(0, 1),
+    "can_attack": True,
+}
+
+PHEASANT = {
+    "typeclass": "typeclasses.characters.NPC",
+    "key": "a pheasant",
+    "desc": "A healthy wild pheasant.",
+    "react_as": "timid",
+    "gender": "neutral",
+    "drops": lambda: ["RAW_MEAT"] * randint(0, 1),
+    "can_attack": True,
+}
+
+DOE_DEER = {
+    "typeclass": "typeclasses.characters.NPC",
+    "key": "a doe",
+    "desc": "A skittish doe with large brown eyes.",
+    "gender": "female",
+    "react_as": "timid",
+    "armor": 10,
+    "agi": 15,
+    "can_attack": True,
+    # randomly generate a list of drop prototype keys when the mob is spawned
+    "drops": lambda: ["DEER_MEAT"] * randint(1, 3) + ["ANIMAL_HIDE"] * randint(0, 3),
+}
+
+STAG_DEER = {
+    "typeclass": "typeclasses.characters.NPC",
+    "key": "a stag",
+    "desc": "A wary adult stag, sporting a full rack of antlers.",
+    "gender": "male",
+    "armor": 10,
+    "agi": 15,
+    "natural_weapon": {
+        "name": "antlers",
+        "damage_type": "pierce",
+        "damage": 10,
+        "speed": 10,
+        "energy_cost": 5,
+    },
+    # randomly generate a list of drop prototype keys when the mob is spawned
+    "drops": lambda: ["DEER_MEAT"] * randint(1, 3)
+    + ["DEER_ANTLER"] * randint(0, 2)
+    + ["ANIMAL_HIDE"] * randint(0, 3),
+    "exp_reward": 10,
+    "can_attack": True,
+}
+
+### Mob drops
+
+RAW_MEAT = {
+    "key": "raw meat",
+    "desc": "A piece of meat from an animal. It hasn't been cooked.",
+    "tags": [("raw meat", "crafting_material")],
+}
+ANIMAL_HIDE = {
+    "key": "animal hide",
+    "desc": "A section of hide from an animal, suitable for leather-crafting",
+    "tags": [("leather", "crafting_material")],
+}
+DEER_MEAT = {
+    "key": "raw deer meat",
+    "desc": "A piece of meat from a deer. It hasn't been cooked.",
+    "tags": [("raw meat", "crafting_material"), ("venison", "crafting_material")],
+}
+DEER_ANTLER = {
+    "key": "antler",
+    "desc": "A forked antler bone from an adult stag.",
+    "tags": [
+        ("bone", "crafting_material"),
+    ],
+}
+
+
+
+========== ./recipes/tests/__init__.py ==========
+
+
+
+========== ./recipes/tests/test_smithing.py ==========
+"""
+Tests for smithing recipes
+
+"""
+
+from evennia.utils.test_resources import EvenniaTest
+from evennia.contrib.game_systems.crafting import crafting
+from world.recipes import smithing
+
+
+class TestSmithingRecipes(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.crafter = self.char2
+        self.crafter.traits.add(
+            "smithing", "Smithing", trait_type="counter", min=0, max=100
+        )
+        self.crafter.traits.smithing.base = 20
+
+    def test_ingot(self):
+        tools, ingredients = smithing.SmeltIronRecipe.seed()
+        results = crafting.craft(self.crafter, "iron ingot", *tools, *ingredients)
+        self.assertEqual(results[0].key, "iron ingot")
+
+
+
+========== ./recipes/carving.py ==========
+from .base import SkillRecipe
+
+
+class BoneHiltRecipe(SkillRecipe):
+    """
+    Carve a hilt out of bone
+    """
+
+    skill = ("whittling", 5)
+    exp_gain = 3
+
+    name = "bone hilt"
+    tool_tags = ["knife"]
+    consumable_tags = ["bone", "leather"]
+    output_prototypes = [
+        {
+            "key": "bone hilt",
+            "desc": "A leather-wrapped hilt for a bladed weapon, carved of bone.",
+            "tags": [
+                ("hilt", "crafting_material"),
+            ],
+            "value": 5,
+        }
+    ]
+
+
+class WoodHiltRecipe(SkillRecipe):
+    """
+    Carve a hilt out of bone
+    """
+
+    skill = ("whittling", 5)
+    exp_gain = 3
+
+    name = "wooden hilt"
+    tool_tags = ["knife"]
+    consumable_tags = ["wood", "leather"]
+    output_prototypes = [
+        {
+            "key": "wooden hilt",
+            "desc": "A leather-wrapped hilt for a bladed weapon, carved of wood.",
+            "tags": [
+                ("hilt", "crafting_material"),
+            ],
+            "value": 5,
+        }
+    ]
+
+
+
+========== ./recipes/__init__.py ==========
+
+
+
+========== ./recipes/leathercraft.py ==========
+from .base import SkillRecipe
+
+
+class SmallBagRecipe(SkillRecipe):
+    """
+    Sew a small bag out of leather.
+    """
+
+    skill = ("leatherwork", 5)
+    exp_gain = 3
+
+    name = "small bag"
+    tool_tags = ["heavy needle"]
+    consumable_tags = ["leather", "leather"]
+    output_prototypes = ["SMALL_BAG"]
+
+
+class MediumBagRecipe(SkillRecipe):
+    """
+    Sew a medium bag out of leather.
+    """
+
+    skill = ("leatherwork", 10)
+    exp_gain = 5
+
+    name = "medium bag"
+    tool_tags = ["heavy needle"]
+    consumable_tags = ["leather", "leather", "leather"]
+    output_prototypes = ["MEDIUM_BAG"]
+
+
+class LargeBagRecipe(SkillRecipe):
+    """
+    Sew a large bag out of leather.
+    """
+
+    skill = ("leatherwork", 20)
+    exp_gain = 10
+
+    name = "large bag"
+    tool_tags = ["heavy needle"]
+    consumable_tags = ["leather", "leather", "leather", "leather"]
+    output_prototypes = ["LARGE_BAG"]
+
+
+
+========== ./recipes/base.py ==========
+from random import randint
+from evennia.utils import iter_to_str
+from evennia.contrib.game_systems.crafting import CraftingRecipe
+
+
+class SkillRecipe(CraftingRecipe):
+    """
+    The base recipe class for implementing skill checks, modified from the example:
+
+    https://www.evennia.com/docs/latest/Contribs/Contrib-Crafting.html#skilled-crafters
+    """
+
+    # The skill requirement for the recipe.
+    skill = (None, 0)
+    exp_gain = 0
+
+    def craft(self, **kwargs):
+        """The input is ok. Determine if crafting succeeds"""
+
+        # this is set at initialization
+        crafter = self.crafter
+
+        # let's assume the skill is stored directly on the crafter
+        # - the skill is 0..100.
+        # get our skill requirements
+        req_skill, difficulty = self.skill
+
+        # if no requirement is set, just craft
+        if not req_skill or not difficulty:
+            return super().craft(**kwargs)
+
+        # otherwise, retrieve the skill from the crafter
+        crafting_skill = crafter.traits.get(req_skill)
+        # if crafter doesn't have the skill
+        if not crafting_skill:
+            self.msg("You don't know how to make this.")
+            return
+        # if crafter just isn't good enough
+        elif crafting_skill.value < difficulty:
+            self.msg(
+                "You are not good enough to make this yet. Better keep practicing!"
+            )
+            return
+
+        success_rate = crafting_skill.value - difficulty
+
+        # at this point the crafting attempt is considered happening, so subtract mental focus
+        crafter.traits.fp.current -= 5
+        # you should get the experience reward regardless of success
+        if self.exp_gain:
+            exp = crafter.attributes.get("exp", 0)
+            crafter.db.exp = self.exp_gain + exp
+        # implement some randomness - the higher the difference, the lower the chance of failure
+        if not randint(0, success_rate):
+            self.msg("It doesn't seem to work out. Maybe you should try again?")
+            return
+
+        # all is good, craft away
+        return super().craft(**kwargs)
+
+
+
+========== ./recipes/cooking.py ==========
+from .base import SkillRecipe
+
+
+class FruitSaladRecipe(SkillRecipe):
+    """
+    Chop and mix up a fresh fruit salad.
+    """
+
+    skill = ("cooking", 1)
+    exp_gain = 1
+
+    name = "fruit salad"
+    tool_tags = ["knife"]
+    consumable_tags = ["fruit", "fruit", "fruit"]
+    output_prototypes = [
+        {
+            "key": "fruit salad",
+            "desc": "A colorful medley of chopped-up fruits.",
+            "tags": [
+                ("edible"),
+            ],
+            "energy": 20,
+            "value": 3,
+        }
+    ]
+
+
+class CookedMeat(SkillRecipe):
+    skill = ("cooking", 0)
+    exp_gain = 1
+
+    name = "cooked meat"
+    tool_tags = ["oven"]
+    consumable_tags = ["raw meat"]
+    output_prototypes = [
+        {
+            "key": "cooked meat",
+            "desc": "A well-done piece of meat.",
+            "tags": [
+                ("edible"),
+            ],
+            "energy": 15,
+            "value": 1,
+        }
+    ]
+
+
+class MeatPieRecipe(SkillRecipe):
+    """
+    Bake yourself a pie!
+    """
+
+    skill = ("cooking", 10)
+    exp_gain = 10
+
+    name = "meat pie"
+    tool_tags = ["oven"]
+    consumable_tags = ["meat", "meat", "pie crust"]
+    output_prototypes = [
+        {
+            "key": "slice of meat pie",
+            "desc": "A single slice of a meat pie.",
+            "tags": [
+                ("edible"),
+            ],
+            "energy": 5,
+            "value": 5,
+        }
+    ] * 6
+
+
+class BerryPieRecipe(SkillRecipe):
+    """
+    Bake yourself a pie!
+    """
+
+    skill = ("cooking", 10)
+    exp_gain = 10
+
+    name = "mixed berry pie"
+    tool_tags = ["oven"]
+    consumable_tags = ["berry", "berry", "berry", "berry", "berry", "pie crust"]
+    output_prototypes = [
+        {
+            "key": "slice of mixed berry pie",
+            "desc": "A single slice of mixed berry pie.",
+            "tags": [
+                ("edible"),
+            ],
+            "energy": 5,
+            "value": 5,
+        }
+    ] * 6
+
+
+class ApplePieRecipe(SkillRecipe):
+    """
+    Bake yourself a pie!
+    """
+
+    skill = ("cooking", 10)
+    exp_gain = 10
+
+    name = "apple pie"
+    tool_tags = ["oven"]
+    consumable_tags = ["apple", "apple", "pie crust"]
+    output_prototypes = [
+        {
+            "key": "slice of apple pie",
+            "desc": "A single slice of apple pie.",
+            "tags": [
+                ("edible"),
+            ],
+            "energy": 5,
+            "value": 5,
+        }
+    ] * 6
+
+
+class PieCrustRecipe(SkillRecipe):
+    """
+    Bake a pie crust, ready to be made into a pie.
+    """
+
+    skill = ("cooking", 15)
+    exp_gain = 10
+
+    name = "pie crust"
+    tool_tags = ["oven"]
+    consumable_tags = ["butter", "flour"]
+    output_prototypes = ["PIE_CRUST"]
+
+
+
+========== ./recipes/smithing.py ==========
+from .base import SkillRecipe
+
+
+class SmeltIronRecipe(SkillRecipe):
+    """
+    Smelting metal ore into ingots
+    """
+
+    skill = ("smithing", 1)
+    exp_gain = 1
+
+    name = "iron ingot"
+    tool_tags = ["furnace"]
+    consumable_tags = ["iron ore", "iron ore"]
+    output_prototypes = [
+        {
+            "key": "iron ingot",
+            "desc": "An ingot of iron.",
+            "tags": [
+                ("iron ingot", "crafting_material"),
+                ("ingot", "crafting_material"),
+            ],
+            "value": 5,
+        }
+    ]
+
+
+class IronShortBladeRecipe(SkillRecipe):
+    """
+    Smith metal into a short blade
+    """
+
+    skill = ("smithing", 10)
+    exp_gain = 5
+
+    name = "short iron blade"
+    tool_tags = ["hammer", "anvil", "furnace"]
+    consumable_tags = ["iron ingot"]
+    output_prototypes = [
+        {
+            "key": "short iron blade",
+            "desc": "A short iron blade, useful for making knives or daggers.",
+            "tags": [("short iron blade", "crafting_material")],
+            "value": 7,
+        }
+    ]
+
+
+class IronLongBladeRecipe(SkillRecipe):
+    """
+    Smith metal into a long blade
+    """
+
+    skill = ("smithing", 20)
+    exp_gain = 10
+
+    name = "long iron blade"
+    tool_tags = ["hammer", "anvil", "furnace"]
+    consumable_tags = ["iron ingot", "iron ingot"]
+    output_prototypes = [
+        {
+            "key": "long iron blade",
+            "desc": "A long iron blade, perhaps destined to be a sword some day.",
+            "tags": [("long iron blade", "crafting_material")],
+            "value": 15,
+        }
+    ]
+
+
+class IronGreatBladeRecipe(SkillRecipe):
+    """
+    Smith metal into a very large blade
+    """
+
+    skill = ("smithing", 30)
+    exp_gain = 15
+
+    name = "iron great blade"
+    tool_tags = ["hammer", "anvil", "furnace"]
+    consumable_tags = ["iron ingot", "iron ingot", "iron ingot"]
+    output_prototypes = [
+        {
+            "key": "massive iron blade",
+            "desc": "A very large iron blade. A weapon made from this would require two hands.",
+            "tags": [("iron great blade", "crafting_material")],
+            "value": 25,
+        }
+    ]
+
+
+class SmallPommelRecipe(SkillRecipe):
+    """
+    Smith metal into a small pommel piece
+    """
+
+    skill = ("smithing", 5)
+    exp_gain = 3
+
+    name = "small pommel"
+    tool_tags = ["hammer", "anvil", "furnace"]
+    consumable_tags = ["ingot"]
+    output_prototypes = [
+        {
+            "key": "small pommel  piece",
+            "desc": "A small metal pommel, useful for a small blade.",
+            "tags": [("small pommel", "crafting_material")],
+            "value": 5,
+        }
+    ]
+
+
+class LargePommelRecipe(SkillRecipe):
+    """
+    Smith metal into a large pommel piece
+    """
+
+    skill = ("smithing", 5)
+    exp_gain = 3
+
+    name = "large pommel"
+    tool_tags = ["hammer", "anvil", "furnace"]
+    consumable_tags = ["ingot"]
+    output_prototypes = [
+        {
+            "key": "large pommel piece",
+            "desc": "A large metal pommel, useful for balancing a heavy weapon.",
+            "tags": [("large pommel", "crafting_material")],
+            "value": 5,
+        }
+    ]
+
+
+class SmallHiltGuardRecipe(SkillRecipe):
+    """
+    Smith metal into a small guard for a bladed weapon
+    """
+
+    skill = ("smithing", 7)
+    exp_gain = 3
+
+    name = "small guard"
+    tool_tags = ["hammer", "anvil", "furnace"]
+    consumable_tags = ["ingot"]
+    output_prototypes = [
+        {
+            "key": "small guard piece",
+            "desc": "A small blade guard, useful for a small weapon.",
+            "tags": [("small hilt guard", "crafting_material")],
+            "value": 5,
+        }
+    ]
+
+
+class LargeHiltGuardRecipe(SkillRecipe):
+    """
+    Smith metal into a small guard for a bladed weapon
+    """
+
+    skill = ("smithing", 15)
+    exp_gain = 3
+
+    name = "large guard"
+    tool_tags = ["hammer", "anvil", "furnace"]
+    consumable_tags = ["ingot"]
+    output_prototypes = [
+        {
+            "key": "large guard piece",
+            "desc": "A large blade guard, useful for a long weapon.",
+            "tags": [("large hilt guard", "crafting_material")],
+            "value": 5,
+        }
+    ]
+
+
+class IronDaggerRecipe(SkillRecipe):
+    """
+    Assemble a finished dagger
+    """
+
+    skill = ("smithing", 5)
+    exp_gain = 10
+
+    name = "dagger"
+    tool_tags = ["hammer", "anvil", "furnace"]
+    consumable_tags = ["short iron blade", "hilt", "small hilt guard", "small pommel"]
+    output_prototypes = ["IRON_DAGGER"]
+
+
+class IronSwordRecipe(SkillRecipe):
+    """
+    Assemble a finished sword
+    """
+
+    skill = ("smithing", 10)
+    exp_gain = 10
+
+    name = "sword"
+    tool_tags = ["hammer", "anvil", "furnace"]
+    consumable_tags = ["long iron blade", "hilt", "large hilt guard", "small pommel"]
+    output_prototypes = ["IRON_SWORD"]
+
+
+class IronGreatswordRecipe(SkillRecipe):
+    """
+    Assemble a finished greatsword
+    """
+
+    skill = ("smithing", 15)
+    exp_gain = 10
+
+    name = "greatsword"
+    tool_tags = ["hammer", "anvil", "furnace"]
+    consumable_tags = ["iron greatblade", "hilt", "large hilt guard", "large pommel"]
+    output_prototypes = ["IRON_GREATSWORD"]
+
+
+class IronHeavyWireRecipe(SkillRecipe):
+    """
+    Smith metal into heavy wire
+    """
+
+    skill = ("smithing", 10)
+    exp_gain = 2
+
+    name = "heavy iron wire"
+    tool_tags = ["drawing_die", "smithing_tongs", "furnace"]
+    consumable_tags = ["iron ingot"]
+    output_prototypes = [
+        {
+            "key": "spool of thick iron wire",
+            "desc": "A spool wrapped in thick iron wire.",
+            "tags": [("heavy iron wire", "crafting_material")],
+            "value": 5,
+        }
+    ]
+
+
+class CopperHeavyWireRecipe(SkillRecipe):
+    """
+    Smith metal into heavy wire
+    """
+
+    skill = ("smithing", 5)
+    exp_gain = 2
+
+    name = "heavy iron wire"
+    tool_tags = ["drawing_die", "smithing_tongs", "furnace"]
+    consumable_tags = ["copper ingot"]
+    output_prototypes = [
+        {
+            "key": "spool of thick copper wire",
+            "desc": "A spool wrapped in thick copper wire.",
+            "tags": [("heavy copper wire", "crafting_material")],
+            "value": 3,
+        }
+    ]
+
+
+class CopperFineWireRecipe(SkillRecipe):
+    """
+    Smith metal into fine wire
+    """
+
+    skill = ("smithing", 5)
+    exp_gain = 1
+
+    name = "fine copper wire"
+    tool_tags = ["drawing die", "smithing tongs"]
+    consumable_tags = ["heavy copper wire"]
+    output_prototypes = [
+        {
+            "key": "spool of fine copper wire",
+            "desc": "A spool wrapped in fine copper wire.",
+            "tags": [("fine copper wire", "crafting_material")],
+            "value": 3,
+        }
+    ]
+
+
+class IronChainmailShirtRecipe(SkillRecipe):
+    """
+    Craft chainmail out of heavy wire
+    """
+
+    skill = ("smithing", 10)
+    exp_gain = 5
+
+    name = "iron hauberk"
+    tool_tags = ["wire_cutter", "pliers"]
+    consumable_tags = ["heavy iron wire", "heavy iron wire", "heavy iron wire"]
+    output_prototypes = ["IRON_HAUBERK"]
+
+
+class IronChainmailLegsRecipe(SkillRecipe):
+    """
+    Craft chainmail out of heavy wire
+    """
+
+    skill = ("smithing", 10)
+    exp_gain = 5
+
+    name = "iron chausses"
+    tool_tags = ["wire_cutter", "pliers"]
+    consumable_tags = ["heavy iron wire", "heavy iron wire", "heavy iron wire"]
+    output_prototypes = ["IRON_CHAUSES"]
+
+
+class HeavyIronNeedle(SkillRecipe):
+    """
+    Craft a leatherworker needle out of iron
+    """
+
+    skill = ("smithing", 1)
+    exp_gain = 3
+
+    name = "heavy iron needle"
+    tool_tags = []
+    consumable_tags = ["heavy iron wire"]
+    output_prototypes = [
+        {
+            "key": "heavy iron needle",
+            "desc": "A thick, strong needle for sewing tough materials.",
+            "tags": [("heavy needle", "crafting_tool")],
+            "value": 3,
+        },
+        {
+            "key": "heavy iron needle",
+            "desc": "A thick, strong needle for sewing tough materials.",
+            "tags": [("heavy needle", "crafting_tool")],
+            "value": 3,
+        },
+        {
+            "key": "heavy iron needle",
+            "desc": "A thick, strong needle for sewing tough materials.",
+            "tags": [("heavy needle", "crafting_tool")],
+            "value": 3,
+        },
+    ]
+
+
+class HeavyCopperNeedle(SkillRecipe):
+    """
+    Craft a leatherworker needle out of copper
+    """
+
+    skill = ("smithing", 1)
+    exp_gain = 3
+
+    name = "heavy copper needle"
+    tool_tags = []
+    consumable_tags = ["heavy copper wire"]
+    output_prototypes = [
+        {
+            "key": "heavy copper needle",
+            "desc": "A thick, strong needle for sewing tough materials.",
+            "tags": [("heavy needle", "crafting_tool")],
+            "value": 3,
+        },
+        {
+            "key": "heavy copper needle",
+            "desc": "A thick, strong needle for sewing tough materials.",
+            "tags": [("heavy needle", "crafting_tool")],
+            "value": 3,
+        },
+        {
+            "key": "heavy copper needle",
+            "desc": "A thick, strong needle for sewing tough materials.",
+            "tags": [("heavy needle", "crafting_tool")],
+            "value": 3,
+        },
+    ]
+
+
+
+========== ./scripts/__init__.py ==========
+
+
+
+========== ./scripts/__pycache__/__init__.cpython-310.pyc ==========
+o
+    √@h    „                   @   s   d S )N© r   r   r   ˙?/home/anthonyderosia7/evennia-minimud/world/scripts/__init__.py⁄<module>   s    
+
+
+========== ./scripts/__pycache__/classes.cpython-310.pyc ==========
+o
+    =%@h®
+  „                   @   s"  d ddddúdúddddddúdúd	d
+ddddúdúdddddúdúdddddúdúddddddúdúddddddúdúdddddúdúdddddúdúdd ddd!údúd"d#dddúdúd$d%dddd&údúd'd(ddd)údúd*d+ddd,údúd-d.ddd/údúd0d1ddd2údúd3d4ddd5údúgZ d6S )7⁄Warriorz&A frontline tank and melee powerhouse.È   )⁄STR⁄CON)⁄name⁄desc⁄	stat_mods⁄MysticzFA monk who channels spiritual animal forms through martial discipline.È   )⁄WIS⁄DEXr   ⁄Wizardz>A disciplined scholar of arcane knowledge and raw spell power.È   Èˇˇˇˇ)⁄INTr
+   r   ⁄Sorcererz=A natural magic user with wild power and unpredictable force.)r   ⁄LUCK⁄Magez:An elemental caster with mastery over both fire and frost.)r   r
+   ⁄
+Battlemagez3A hybrid fighter-mage, blending swords and sorcery.)r   r   r   ⁄Necromancerz0Master of undeath, commanding bones and shadows.)r   r
+   ⁄CHA⁄Spellbinderz0Tactical controller with enchantments and traps.⁄PriestuA   Wielder of holy light or shadow‚Äîhealer, protector, or punisher.)r
+   r   ⁄Paladinz3A divine warrior devoted to justice and protection.)r   r
+   ⁄Druidu4   A wild shape-shifter bonded with nature‚Äôs essence.⁄Shamanz0A tribal caster channeling elements and spirits.)r
+   r   r   ⁄Roguez3A cunning assassin and master of stealth and traps.)r   r   ⁄Rangerz5Beastmaster and sharpshooter with survival instincts.)r   r
+   ⁄Warlockz5A forceful wielder of forbidden magic and domination.)r   r   ⁄Bardz?A charismatic performer wielding magic through music and story.)r   r   ⁄Swashbucklerz.A flashy duelist with wit, speed, and bravado.)r   r   N)⁄
+CLASS_LIST© r!   r!   ˙>/home/anthonyderosia7/evennia-minimud/world/scripts/classes.py⁄<module>   sä   ˝
+˝
+˝˝˝
+˝
+˝˝˝˝˝
+˝˝˝˝˝˝Ø
+
+
+========== ./scripts/__pycache__/races.cpython-310.pyc ==========
+o
+    *%@h  „                   @   sÍ   d di dúddddddúdúd	d
+ddddúdúddddddúdúddddddúdúddddddúdúddddddúdúddddddúdúddddddúdúd d!dddd"údúd#d$dddd%údúd&d'ddddúdúd(d)dddd*údúgZ d+S ),⁄Humanz&Versatile and balanced in all aspects.)⁄name⁄desc⁄	stat_mods⁄Elfz9Graceful and intelligent. Masters of precision and magic.È   È   Èˇˇˇˇ)⁄DEX⁄INT⁄STR⁄Tabaxiz5Feline agility and reflexes, always curious and fast.)r	   ⁄LUCK⁄CON⁄
+Lizardfolkz6Cold-blooded survivors with hardened bodies and minds.)r   r   ⁄CHA⁄Kitsunez0Clever fox-spirits gifted in illusion and charm.)r
+   r   r   ⁄Halflingz(Small, cheerful, and unbelievably lucky.)r   r	   r   ⁄Dwarfz.Stout and unwavering, born of stone and steel.)r   ⁄WISr	   ⁄Orcz-Fierce warriors bred for combat and survival.)r   r   r
+   ⁄Ogrez8Towering brutes with monstrous strength and low cunning.È   È˛ˇˇˇ)r   r   r	   ⁄Birdfolkz1Light-framed aerial hunters with sharp instincts.)r	   r   r   ⁄Pixiez/Tiny arcane pranksters full of speed and spark.)r
+   r   r   ⁄Minotaurz2Bull-headed warriors, disciplined and unstoppable.⁄Satyrz+Mischievous revelers full of wit and charm.)r   r   r   N)⁄	RACE_LIST© r   r   ˙</home/anthonyderosia7/evennia-minimud/world/scripts/races.py⁄<module>   sj   ˝
+˝
+˝
+˝
+˝
+˝
+˝
+˝
+˝
+˝
+˝
+˝
+˝√
+
+
+========== ./scripts/races.py ==========
+RACE_LIST = [
+    {
+        "name": "Human",
+        "desc": "Versatile and balanced in all aspects.",
+        "stat_mods": {}
+    },
+    {
+        "name": "Elf",
+        "desc": "Graceful and intelligent. Masters of precision and magic.",
+        "stat_mods": {"DEX": 2, "INT": 1, "STR": -1}
+    },
+    {
+        "name": "Tabaxi",
+        "desc": "Feline agility and reflexes, always curious and fast.",
+        "stat_mods": {"DEX": 2, "LUCK": 1, "CON": -1}
+    },
+    {
+        "name": "Lizardfolk",
+        "desc": "Cold-blooded survivors with hardened bodies and minds.",
+        "stat_mods": {"CON": 2, "STR": 1, "CHA": -1}
+    },
+    {
+        "name": "Kitsune",
+        "desc": "Clever fox-spirits gifted in illusion and charm.",
+        "stat_mods": {"INT": 2, "LUCK": 1, "STR": -1}
+    },
+    {
+        "name": "Halfling",
+        "desc": "Small, cheerful, and unbelievably lucky.",
+        "stat_mods": {"LUCK": 2, "DEX": 1, "CON": -1}
+    },
+    {
+        "name": "Dwarf",
+        "desc": "Stout and unwavering, born of stone and steel.",
+        "stat_mods": {"CON": 2, "WIS": 1, "DEX": -1}
+    },
+    {
+        "name": "Orc",
+        "desc": "Fierce warriors bred for combat and survival.",
+        "stat_mods": {"STR": 2, "CON": 1, "INT": -1}
+    },
+    {
+        "name": "Ogre",
+        "desc": "Towering brutes with monstrous strength and low cunning.",
+        "stat_mods": {"STR": 3, "CON": 1, "DEX": -2}
+    },
+    {
+        "name": "Birdfolk",
+        "desc": "Light-framed aerial hunters with sharp instincts.",
+        "stat_mods": {"DEX": 2, "WIS": 1, "STR": -1}
+    },
+    {
+        "name": "Pixie",
+        "desc": "Tiny arcane pranksters full of speed and spark.",
+        "stat_mods": {"INT": 2, "LUCK": 2, "CON": -2}
+    },
+    {
+        "name": "Minotaur",
+        "desc": "Bull-headed warriors, disciplined and unstoppable.",
+        "stat_mods": {"STR": 3, "CON": 1, "INT": -2}
+    },
+    {
+        "name": "Satyr",
+        "desc": "Mischievous revelers full of wit and charm.",
+        "stat_mods": {"LUCK": 2, "WIS": 1, "STR": -1}
+    },
+]
+
+
+
+========== ./scripts/classes.py ==========
+CLASS_LIST = [
+    {
+        "name": "Warrior",
+        "desc": "A frontline tank and melee powerhouse.",
+        "stat_mods": {"STR": 2, "CON": 2}
+    },
+    {
+        "name": "Mystic",
+        "desc": "A monk who channels spiritual animal forms through martial discipline.",
+        "stat_mods": {"WIS": 2, "DEX": 1, "CON": 1}
+    },
+    {
+        "name": "Wizard",
+        "desc": "A disciplined scholar of arcane knowledge and raw spell power.",
+        "stat_mods": {"INT": 3, "WIS": 1, "CON": -1}
+    },
+    {
+        "name": "Sorcerer",
+        "desc": "A natural magic user with wild power and unpredictable force.",
+        "stat_mods": {"INT": 2, "LUCK": 1}
+    },
+    {
+        "name": "Mage",
+        "desc": "An elemental caster with mastery over both fire and frost.",
+        "stat_mods": {"INT": 2, "WIS": 2}
+    },
+    {
+        "name": "Battlemage",
+        "desc": "A hybrid fighter-mage, blending swords and sorcery.",
+        "stat_mods": {"STR": 1, "INT": 2, "DEX": 1}
+    },
+    {
+        "name": "Necromancer",
+        "desc": "Master of undeath, commanding bones and shadows.",
+        "stat_mods": {"INT": 2, "WIS": 2, "CHA": -1}
+    },
+    {
+        "name": "Spellbinder",
+        "desc": "Tactical controller with enchantments and traps.",
+        "stat_mods": {"INT": 2, "LUCK": 2}
+    },
+    {
+        "name": "Priest",
+        "desc": "Wielder of holy light or shadow‚Äîhealer, protector, or punisher.",
+        "stat_mods": {"WIS": 3, "CON": 1}
+    },
+    {
+        "name": "Paladin",
+        "desc": "A divine warrior devoted to justice and protection.",
+        "stat_mods": {"STR": 2, "WIS": 2}
+    },
+    {
+        "name": "Druid",
+        "desc": "A wild shape-shifter bonded with nature‚Äôs essence.",
+        "stat_mods": {"WIS": 2, "CON": 2}
+    },
+    {
+        "name": "Shaman",
+        "desc": "A tribal caster channeling elements and spirits.",
+        "stat_mods": {"WIS": 2, "INT": 1, "LUCK": 1}
+    },
+    {
+        "name": "Rogue",
+        "desc": "A cunning assassin and master of stealth and traps.",
+        "stat_mods": {"DEX": 2, "LUCK": 2}
+    },
+    {
+        "name": "Ranger",
+        "desc": "Beastmaster and sharpshooter with survival instincts.",
+        "stat_mods": {"DEX": 2, "WIS": 2}
+    },
+    {
+        "name": "Warlock",
+        "desc": "A forceful wielder of forbidden magic and domination.",
+        "stat_mods": {"INT": 2, "CHA": 2}
+    },
+    {
+        "name": "Bard",
+        "desc": "A charismatic performer wielding magic through music and story.",
+        "stat_mods": {"CHA": 2, "LUCK": 2}
+    },
+    {
+        "name": "Swashbuckler",
+        "desc": "A flashy duelist with wit, speed, and bravado.",
+        "stat_mods": {"DEX": 2, "CHA": 2}
+    },
+]
+
+
+
+========== ./__init__.py ==========
+
+
+
+========== ./help_entries.py ==========
+"""
+File-based help entries. These complements command-based help and help entries
+added in the database using the `sethelp` command in-game.
+
+Control where Evennia reads these entries with `settings.FILE_HELP_ENTRY_MODULES`,
+which is a list of python-paths to modules to read.
+
+A module like this should hold a global `HELP_ENTRY_DICTS` list, containing
+dicts that each represent a help entry. If no `HELP_ENTRY_DICTS` variable is
+given, all top-level variables that are dicts in the module are read as help
+entries.
+
+Each dict is on the form
+::
+
+    {'key': <str>,
+     'text': <str>}``     # the actual help text. Can contain # subtopic sections
+     'category': <str>,   # optional, otherwise settings.DEFAULT_HELP_CATEGORY
+     'aliases': <list>,   # optional
+     'locks': <str>       # optional, 'view' controls seeing in help index, 'read'
+                          #           if the entry can be read. If 'view' is unset,
+                          #           'read' is used for the index. If unset, everyone
+                          #           can read/view the entry.
+
+"""
+
+HELP_ENTRY_DICTS = [
+    {
+        "key": "evennia",
+        "aliases": ["ev"],
+        "category": "General",
+        "locks": "read:perm(Developer)",
+        "text": """
+            Evennia is a MU-game server and framework written in Python. You can read more
+            on https://www.evennia.com.
+
+            # subtopics
+
+            ## Installation
+
+            You'll find installation instructions on https://www.evennia.com.
+
+            ## Community
+
+            There are many ways to get help and communicate with other devs!
+
+            ### Discussions
+
+            The Discussions forum is found at https://github.com/evennia/evennia/discussions.
+
+            ### Discord
+
+            There is also a discord channel for chatting - connect using the
+            following link: https://discord.gg/AJJpcRUhtF
+
+        """,
+    },
+    {
+        "key": "building",
+        "category": "building",
+        "text": """
+            Evennia comes with a bunch of default building commands. You can
+            find a beginner tutorial in the Evennia documentation.
+
+        """,
+    },
+]
+
+
+
+========== ./README.md ==========
+# world/
+
+This folder is meant as a miscellaneous folder for all that other stuff
+related to the game. Code which are not commands or typeclasses go
+here, like custom economy systems, combat code, batch-files etc. 
+
+You can restructure and even rename this folder as best fits your
+sense of organisation. Just remember that if you add new sub
+directories, you must add (optionally empty) `__init__.py` files in
+them for Python to be able to find the modules within. 
+
+
+
+========== ./batch_cmds.ev ==========
+#
+# A batch-command file is a way to build a game world
+# in a programmatic way, by placing a sequence of
+# build commands after one another. This allows for
+# using a real text editor to edit e.g. descriptions
+# rather than entering text on the command line.
+#
+# A batch-command file is loaded with @batchprocess in-game:
+#
+#   @batchprocess[/interactive] tutorial_examples.batch_cmds
+#
+# A # as the first symbol on a line begins a comment and
+# marks the end of a previous command definition. This is important,
+# - every command must be separated by at least one line of comment.
+#
+# All supplied commands are given as normal, on their own line
+# and accept arguments in any format up until the first next
+# comment line begins. Extra whitespace is removed; an empty
+# line in a command definition translates into a newline.
+#
+# See `evennia/contrib/tutorial_examples/batch_cmds.ev` for
+# an example of a batch-command code. See also the batch-code
+# system for loading python-code this way.
+#
+
+
+
+
+
+========== ./chargen_menu.py ==========
+"""
+Character Creator EvMenu module (Finalized Flow).
+
+Flow:
+    1. Race selection
+    2. Class selection
+    3. Primary stats auto-assigned by race/class
+    4. Stat point allocation (STR, CON, DEX, INT, WIS, LUCK) ‚Äì 24 points
+    5. Gender selection (Male/Female)
+    6. Name entry (duplicate check)
+    7. Description entry & confirmation
+    8. Finish ‚Äì Spawn gear, place in room
+
+Assumptions:
+- Races and classes are defined in world/scripts/races.py and world/scripts/classes.py as lists of dicts or via functions.
+- Each race/class dict has stat modifiers. Example:
+    {"name": "Elf", "desc": "...", "stat_mods": {"DEX": 2, "INT": 1}}
+    {"name": "Warrior", "desc": "...", "stat_mods": {"STR": 2, "CON": 2}}
+- Typeclass for new PC is typeclasses.characters.PlayerCharacter
+"""
+
+from evennia.prototypes.spawner import spawn
+from evennia.utils import dedent
+from typeclasses.characters import Character
+from world.scripts import races, classes
+
+STAT_LIST = ["STR", "CON", "DEX", "INT", "WIS", "LUCK"]
+STAT_POINTS = 24
+
+# Helper functions
+
+def _get_stat_mods(source_list, name):
+    return next((entry.get("stat_mods", {}) for entry in source_list if entry["name"] == name), {})
+
+def _get_total_base_stats(char):
+    race_list = getattr(races, "RACE_LIST", []) or getattr(races, "get_all_races", lambda: [])()
+    class_list = getattr(classes, "CLASS_LIST", []) or getattr(classes, "get_all_classes", lambda: [])()
+    race_mods = _get_stat_mods(race_list, char.db.race)
+    class_mods = _get_stat_mods(class_list, char.db.charclass)
+    return {stat: race_mods.get(stat, 0) + class_mods.get(stat, 0) for stat in STAT_LIST}
+
+# Menu Nodes
+
+def menunode_choose_race(caller, **kwargs):
+    race_list = getattr(races, "RACE_LIST", []) or getattr(races, "get_all_races", lambda: [])()
+    text = "|wRace Selection|n\n\nChoose your race:\n"
+    options = [
+        {"desc": f"{r['name']} - {r.get('desc', '')}", "goto": (_set_race, {"race": r["name"]})}
+        for r in race_list
+    ]
+    return text, options
+
+def _set_race(caller, raw_string, race, **kwargs):
+    caller.new_char.db.race = race
+    return "menunode_choose_class"
+
+def menunode_choose_class(caller, **kwargs):
+    class_list = getattr(classes, "CLASS_LIST", []) or getattr(classes, "get_all_classes", lambda: [])()
+    text = "|wClass Selection|n\n\nChoose your class:\n"
+    options = [
+        {"desc": f"{c['name']} - {c.get('desc', '')}", "goto": (_set_class, {"charclass": c["name"]})}
+        for c in class_list
+    ]
+    options.append({"desc": "Go back", "goto": "menunode_choose_race"})
+    return text, options
+
+def _set_class(caller, raw_string, charclass, **kwargs):
+    caller.new_char.db.charclass = charclass
+    _auto_assign_base_stats(caller)
+    return "menunode_stat_alloc"
+
+def _auto_assign_base_stats(caller):
+    char = caller.new_char
+    base_stats = _get_total_base_stats(char)
+    for stat in STAT_LIST:
+        setattr(char.db, stat.lower(), base_stats.get(stat, 0))
+
+def menunode_stat_alloc(caller, **kwargs):
+    char = caller.new_char
+    base_stats = _get_total_base_stats(char)
+    current = {stat: getattr(char.db, stat.lower(), 0) for stat in STAT_LIST}
+    spent = sum(current[stat] - base_stats[stat] for stat in STAT_LIST)
+    remaining = STAT_POINTS - spent
+
+    text = f"|wStat Allocation|n\n\nYou have {remaining} points left to assign.\n"
+    for stat in STAT_LIST:
+        text += f"{stat}: {current[stat]}\n"
+
+    options = []
+    if remaining > 0:
+        for stat in STAT_LIST:
+            options.append({"desc": f"Add to {stat}", "goto": (_adjust_stat, {"stat": stat, "change": 1})})
+    for stat in STAT_LIST:
+        if current[stat] > base_stats[stat]:
+            options.append({"desc": f"Remove from {stat}", "goto": (_adjust_stat, {"stat": stat, "change": -1})})
+    if remaining == 0:
+        options.append({"desc": "Continue", "goto": "menunode_gender"})
+    options.append({"desc": "Back", "goto": "menunode_choose_class"})
+    return text, options
+
+def _adjust_stat(caller, raw_string, stat, change, **kwargs):
+    val = getattr(caller.new_char.db, stat.lower(), 0)
+    setattr(caller.new_char.db, stat.lower(), val + change)
+    return "menunode_stat_alloc"
+
+def menunode_gender(caller, **kwargs):
+    text = "|wGender Selection|n\n\nSelect gender."
+    options = [
+        {"desc": "Male", "goto": (_set_gender, {"gender": "male"})},
+        {"desc": "Female", "goto": (_set_gender, {"gender": "female"})},
+        {"desc": "Back", "goto": "menunode_stat_alloc"},
+    ]
+    return text, options
+
+def _set_gender(caller, raw_string, gender, **kwargs):
+    caller.new_char.gender = gender
+    return "menunode_name"
+
+def menunode_name(caller, raw_string="", **kwargs):
+    err = kwargs.get("error", "")
+    text = f"|wName Selection|n\n{err}\nEnter a name:"
+    return text, {"key": "_default", "goto": _check_name}
+
+def _check_name(caller, raw_string, **kwargs):
+    name = caller.account.normalize_username(raw_string.strip())
+    if Character.objects.filter_family(db_key__iexact=name):
+        return "menunode_name", {"error": f"{name} is taken."}
+    caller.new_char.key = name
+    return "menunode_desc"
+
+def menunode_desc(caller, raw_string="", **kwargs):
+    return "|wDescription|n\nEnter your description:", {"key": "_default", "goto": _save_desc}
+
+def _save_desc(caller, raw_string, **kwargs):
+    caller.new_char.db.desc = raw_string.strip()
+    return "menunode_confirm_desc"
+
+def menunode_confirm_desc(caller, **kwargs):
+    text = f"|wConfirm Description|n\n{caller.new_char.db.desc}\nIs this okay?"
+    options = [
+        {"desc": "Yes", "goto": "menunode_finish"},
+        {"desc": "No", "goto": "menunode_desc"},
+    ]
+    return text, options
+
+def menunode_finish(caller, **kwargs):
+    char = caller.new_char
+    plaza = char.search("East half of a plaza", global_search=True, quiet=True)
+    if plaza:
+        char.home = char.db.prelogout_location = plaza[0]
+    gear = spawn("wool_leggings", "wool_tunic", "leather_boots")
+    for item in gear:
+        item.location = char
+        item.wear(char, True, quiet=True)
+    return dedent("""
+        |gCharacter Created!|n
+
+        Welcome to the world. You are now ready to begin your journey.
+    """), None
+
+
+
+========== ./__pycache__/__init__.cpython-310.pyc ==========
+o
+    S@h    „                   @   s   d S )N© r   r   r   ˙7/home/anthonyderosia7/evennia-minimud/world/__init__.py⁄<module>   s    
+
+
+========== ./__pycache__/help_entries.cpython-310.pyc ==========
+o
+    S@hä  „                   @   s&   d Z ddgddddúdddd	úgZd
+S )a8  
+File-based help entries. These complements command-based help and help entries
+added in the database using the `sethelp` command in-game.
+
+Control where Evennia reads these entries with `settings.FILE_HELP_ENTRY_MODULES`,
+which is a list of python-paths to modules to read.
+
+A module like this should hold a global `HELP_ENTRY_DICTS` list, containing
+dicts that each represent a help entry. If no `HELP_ENTRY_DICTS` variable is
+given, all top-level variables that are dicts in the module are read as help
+entries.
+
+Each dict is on the form
+::
+
+    {'key': <str>,
+     'text': <str>}``     # the actual help text. Can contain # subtopic sections
+     'category': <str>,   # optional, otherwise settings.DEFAULT_HELP_CATEGORY
+     'aliases': <list>,   # optional
+     'locks': <str>       # optional, 'view' controls seeing in help index, 'read'
+                          #           if the entry can be read. If 'view' is unset,
+                          #           'read' is used for the index. If unset, everyone
+                          #           can read/view the entry.
+
+⁄evennia⁄ev⁄Generalzread:perm(Developer)aó  
+            Evennia is a MU-game server and framework written in Python. You can read more
+            on https://www.evennia.com.
+
+            # subtopics
+
+            ## Installation
+
+            You'll find installation instructions on https://www.evennia.com.
+
+            ## Community
+
+            There are many ways to get help and communicate with other devs!
+
+            ### Discussions
+
+            The Discussions forum is found at https://github.com/evennia/evennia/discussions.
+
+            ### Discord
+
+            There is also a discord channel for chatting - connect using the
+            following link: https://discord.gg/AJJpcRUhtF
+
+        )⁄key⁄aliases⁄category⁄locks⁄text⁄buildingzö
+            Evennia comes with a bunch of default building commands. You can
+            find a beginner tutorial in the Evennia documentation.
+
+        )r   r   r   N)⁄__doc__⁄HELP_ENTRY_DICTS© r   r   ˙;/home/anthonyderosia7/evennia-minimud/world/help_entries.py⁄<module>   s    ˚˝·
+
+
+========== ./__pycache__/chargen_menu.cpython-310.pyc ==========
+o
+    `!@hG  „                   @   s‘   d Z ddlmZ ddlmZ ddlmZ ddlmZm	Z	 g d¢Z
+dZdd	Ñ Zd
+dÑ ZddÑ ZddÑ ZddÑ ZddÑ ZddÑ ZddÑ ZddÑ ZddÑ ZddÑ Zd,dd ÑZd!d"Ñ Zd,d#d$ÑZd%d&Ñ Zd'd(Ñ Zd)d*Ñ Zd+S )-u  
+Character Creator EvMenu module (Finalized Flow).
+
+Flow:
+    1. Race selection
+    2. Class selection
+    3. Primary stats auto-assigned by race/class
+    4. Stat point allocation (STR, CON, DEX, INT, WIS, LUCK) ‚Äì 24 points
+    5. Gender selection (Male/Female)
+    6. Name entry (duplicate check)
+    7. Description entry & confirmation
+    8. Finish ‚Äì Spawn gear, place in room
+
+Assumptions:
+- Races and classes are defined in world/scripts/races.py and world/scripts/classes.py as lists of dicts or via functions.
+- Each race/class dict has stat modifiers. Example:
+    {"name": "Elf", "desc": "...", "stat_mods": {"DEX": 2, "INT": 1}}
+    {"name": "Warrior", "desc": "...", "stat_mods": {"STR": 2, "CON": 2}}
+- Typeclass for new PC is typeclasses.characters.PlayerCharacter
+È    )⁄spawn)⁄dedent)⁄	Character)⁄races⁄classes)⁄STR⁄CON⁄DEX⁄INT⁄WIS⁄LUCKÈ   c                    s   t á fddÑ| D Éi ÉS )Nc                 3   s(   Å | ]}|d  à kr|† di °V  qdS )⁄name⁄	stat_modsN©⁄get)⁄.0⁄entry©r   © ˙;/home/anthonyderosia7/evennia-minimud/world/chargen_menu.py⁄	<genexpr>!   s   Ä& z!_get_stat_mods.<locals>.<genexpr>)⁄next)⁄source_listr   r   r   r   ⁄_get_stat_mods    s   r   c                    sl   t tdg Épt tdddÑ ÉÉ }t tdg Épt tdddÑ ÉÉ }t|| jjÉât|| jjÉâ á áfdd	ÑtD ÉS )
+N⁄	RACE_LIST⁄get_all_racesc                   S   Û   g S ©Nr   r   r   r   r   ⁄<lambda>$   Û    z'_get_total_base_stats.<locals>.<lambda>⁄
+CLASS_LIST⁄get_all_classesc                   S   r   r   r   r   r   r   r   r   %   r    c                    s&   i | ]}|à† |d °à † |d ° ìqS ©r   r   ©r   ⁄stat©⁄
+class_mods⁄	race_modsr   r   ⁄
+<dictcomp>(   s   & z)_get_total_base_stats.<locals>.<dictcomp>)⁄getattrr   r   r   ⁄db⁄race⁄	charclass⁄	STAT_LIST)⁄char⁄	race_list⁄
+class_listr   r&   r   ⁄_get_total_base_stats#   s
+   r2   c                 K   s8   t tdg Épt tdddÑ ÉÉ }d}ddÑ |D É}||fS )Nr   r   c                   S   r   r   r   r   r   r   r   r   -   r    z&menunode_choose_race.<locals>.<lambda>z&|wRace Selection|n
+
+Choose your race:
+c                 S   Û8   g | ]}|d  õ d|† dd°õ ùtd|d  ifdúëqS )r   ˙ - ⁄desc⁄ r,   ©r5   ⁄goto)r   ⁄	_set_race)r   ⁄rr   r   r   ⁄
+<listcomp>/   Û    *ˇˇz(menunode_choose_race.<locals>.<listcomp>)r*   r   )⁄caller⁄kwargsr0   ⁄text⁄optionsr   r   r   ⁄menunode_choose_race,   s   ˛rA   c                 K   s   || j j_dS )N⁄menunode_choose_class)⁄new_charr+   r,   )r=   ⁄
+raw_stringr,   r>   r   r   r   r9   5   s   
+r9   c                 K   sH   t tdg Épt tdddÑ ÉÉ }d}ddÑ |D É}|†dd	d
+ú° ||fS )Nr!   r"   c                   S   r   r   r   r   r   r   r   r   :   r    z'menunode_choose_class.<locals>.<lambda>z(|wClass Selection|n
+
+Choose your class:
+c                 S   r3   )r   r4   r5   r6   r-   r7   )r   ⁄
+_set_class)r   ⁄cr   r   r   r;   <   r<   z)menunode_choose_class.<locals>.<listcomp>zGo backrA   r7   )r*   r   ⁄append)r=   r>   r1   r?   r@   r   r   r   rB   9   s   ˛rB   c                 K   s   || j j_t| É dS )N⁄menunode_stat_alloc)rC   r+   r-   ⁄_auto_assign_base_stats)r=   rD   r-   r>   r   r   r   rE   C   s   
+rE   c                 C   s6   | j }t|É}tD ]}t|j|†° |†|d°É q	d S )Nr   )rC   r2   r.   ⁄setattrr+   ⁄lowerr   )r=   r/   ⁄
+base_statsr%   r   r   r   rI   H   s
+   ˇrI   c                    s  | j âtàÉâ áfddÑtD Éâtá áfddÑtD ÉÉ}t| }d|õ dù}tD ]}||õ dà| õ dù7 }q(g }|d	krRtD ]}|†d
+|õ ùt|ddúfdú° q?tD ]}à| à | krn|†d|õ ùt|ddúfdú° qT|d	kr{|†dddú° |†dddú° ||fS )Nc                    s    i | ]}|t à j|†° d ÉìqS r#   )r*   r+   rK   r$   )r/   r   r   r)   Q   s     z'menunode_stat_alloc.<locals>.<dictcomp>c                 3   s    Å | ]}à| à |  V  qd S r   r   r$   )rL   ⁄currentr   r   r   R   s   Ä z&menunode_stat_alloc.<locals>.<genexpr>z|wStat Allocation|n
+
+You have z points left to assign.
+z: ⁄
+r   zAdd to È   )r%   ⁄changer7   zRemove from Èˇˇˇˇ⁄Continue⁄menunode_gender⁄BackrB   )rC   r2   r.   ⁄sum⁄STAT_POINTSrG   ⁄_adjust_stat)r=   r>   ⁄spent⁄	remainingr?   r%   r@   r   )rL   r/   rM   r   rH   N   s(   " ÄrH   c                 K   s0   t | jj|†° dÉ}t| jj|†° || É dS )Nr   rH   )r*   rC   r+   rK   rJ   )r=   rD   r%   rP   r>   ⁄valr   r   r   rW   e   s   rW   c                 K   s8   d}dt ddifdúdt ddifdúdd	dúg}||fS )
+Nz$|wGender Selection|n
+
+Select gender.⁄Male⁄gender⁄maler7   ⁄Female⁄femalerT   rH   )⁄_set_gender©r=   r>   r?   r@   r   r   r   rS   j   s   ˝rS   c                 K   s   || j _dS )N⁄menunode_name)rC   r\   )r=   rD   r\   r>   r   r   r   r`   s   s   r`   r6   c                 K   s&   |† dd°}d|õ dù}|dtdúfS )N⁄errorr6   z|wName Selection|n
+z
+Enter a name:⁄_default©⁄keyr8   )r   ⁄_check_name)r=   rD   r>   ⁄errr?   r   r   r   rb   w   s   rb   c                 K   s<   | j †|†° °}tjj|dçrdd|õ dùifS || j_dS )N)⁄db_key__iexactrb   rc   z
+ is taken.⁄menunode_desc)⁄account⁄normalize_username⁄stripr   ⁄objects⁄filter_familyrC   rf   )r=   rD   r>   r   r   r   r   rg   |   s
+   rg   c                 K   s   ddt dúfS )Nz'|wDescription|n
+Enter your description:rd   re   )⁄
+_save_desc©r=   rD   r>   r   r   r   rj   É   s   rj   c                 K   s   |† ° | jj_dS )N⁄menunode_confirm_desc)rm   rC   r+   r5   rq   r   r   r   rp   Ü   s   rp   c                 K   s.   d| j jjõ dù}dddúdddúg}||fS )Nz|wConfirm Description|n
+z
+Is this okay?⁄Yes⁄menunode_finishr7   ⁄Norj   )rC   r+   r5   ra   r   r   r   rr   ä   s
+   ˛rr   c                 K   sd   | j }|jddddç}|r|d  |_|j_tdddÉ}|D ]}||_|j|dddç qtd	Éd fS )
+NzEast half of a plazaT)⁄global_search⁄quietr   ⁄wool_leggings⁄
+wool_tunic⁄leather_boots)rw   zl
+        |gCharacter Created!|n
+
+        Welcome to the world. You are now ready to begin your journey.
+    )	rC   ⁄search⁄homer+   ⁄prelogout_locationr   ⁄location⁄wearr   )r=   r>   r/   ⁄plaza⁄gear⁄itemr   r   r   rt   í   s   ¸rt   N)r6   )⁄__doc__⁄evennia.prototypes.spawnerr   ⁄evennia.utilsr   ⁄typeclasses.charactersr   ⁄world.scriptsr   r   r.   rV   r   r2   rA   r9   rB   rE   rI   rH   rW   rS   r`   rb   rg   rj   rp   rr   rt   r   r   r   r   ⁄<module>   s0    		
+	
+
+
+
+
+========== ./__pycache__/prototypes.cpython-310.pyc ==========
+o
+    ëº?hB,  „                   @   s¢  d Z ddlmZmZ dddg d¢ddddd	úZdd
+dddgddddd	úZdddg d¢ddddd	úZdddddddúZddd ddd!dúZdd"d#d$dd%dúZ	d&d'd(ddd)d*úZ
+d&d+d,dd-d)d*úZd&d.d/ddd)d*úZd0d1d2gd$dd3úZd4d5d2gddd3úZdd6d7dd8d9úZdd:d;dd<d9úZd=d>d?gd@dAúZdBdCdDgd@dAúZdEdFdGgd@dAúZdHdIdJdKgd@dAúZdLdMdNdOdPdQÑ dRúZdSdTdUgdVdWúZdLdXdYdZd[dQÑ dRúZd\d]d^gd$dWúZdLd_d`dadQÑ dbdQÑ dRúZdcddg de¢dd$d3úZdfdgg dh¢dd$d3úZdidjg dk¢dd$d3úZdLdldmdndQÑ dodQÑ dRúZdpdqg dr¢d$dd3úZdsdtg du¢d$dd3úZdvdwg dx¢d$dd3úZ dLdydzd{d|dQÑ dRúZ!d}d~dgd$dWúZ"dLdÄdÅd{dÇdQÑ dRúZ#d}d~dgd$dWúZ"dÉdÑdÖdÜdádddàd-dâdäddddãúddådQÑ dçdéúZ$dÉdèdêdÜdád-d-dàdd-dâdäddddãúddëdQÑ dçdíúZ%dÉdìdîdïdÜdñdQÑ dçdóúZ&dÉdòdôdïdÜdödQÑ dçdóúZ'dÉdõdúdùdïdd-dçdûdQÑ düú	Z(dÉd†d°d¢dd-d£d§ddddãúd•dQÑ ddçd¶ú
+Z)dßd®d©gd™úZ*d´d¨d≠gd™úZ+dÆdØd©d∞gd™úZ,d±d≤d≥gd™úZ-d¥S )µz
+Prototypes
+È    )⁄randint⁄choiceztypeclasses.gear.MeleeWeaponziron daggerz"A keen-edged dagger, made of iron.)©⁄pierce⁄damage_type©⁄slashr   )⁄knife⁄crafting_toolÈ   È   )⁄	typeclass⁄key⁄desc⁄tags⁄value⁄energy_cost⁄speed⁄dmgz
+iron swordz A one-handed sword made of iron.r   r   È   È   È   È(   ziron greatswordzA two-handed iron greatsword.)r   )⁄bludgeonr   )⁄
+two_handed⁄wieldedÈ2   È
+   È   È<   z"typeclasses.objects.ClothingObjectziron hauberkz A standard iron chainmail tunic.È   ⁄
+chestguard)r   r   r   ⁄armorr   ⁄clothing_typeziron chaussesz.A pair of mail chausses constructed from iron.⁄legguardzleather bootszA sturdy pair of leather boots.È   ⁄shoesz"typeclasses.gear.WearableContainerz	small bagzA small leather bag.⁄	accessory)r   r   r   ⁄capacityr   r#   z
+medium bagzA medium leather bag.È   z	large bagzA large leather bag.za pie crustz%A golden brown, but empty, pie crust.⁄edible)r   r   r   ⁄energyr   zHslice of $choice('apple', 'blueberry', 'peach', 'cherry', 'custard') piez$A single slice of freshly-baked pie.z7$choice('red', 'green', 'blue', 'brown', 'cream') tunicz(A simple, but comfortable, woolen tunic.⁄top)r   r   r   r   r#   z:$choice('red', 'green', 'blue', 'brown', 'cream') leggingsz+A pair of soft and durable woolen leggings.⁄legszsmithing hammerz"A sturdy hammer for beating metal.)⁄hammerr
+   zget:false())r   r   r   ⁄locks⁄anvilz1A typical anvil, which has clearly seen much use.)r0   r
+   ⁄furnacez2An active furnace, hot enough to melt down metals.)r1   r
+   ⁄ovenzLA cast iron stove - or is it an oven? Well, it's hot and you can cook on it.)r2   r
+   )⁄stover
+   ztypeclasses.objects.GatherNodez	iron veinz9An outcropping of rocks here appears to contain raw iron.⁄IRON_OREc                   C   Û
+   t ddÉS ©NÈ   r   ©r   © r9   r9   ˙9/home/anthonyderosia7/evennia-minimud/world/prototypes.py⁄<lambda>±   Û   
+ r;   )r   r   r   ⁄spawn_proto⁄gathers˙iron orezA clump of raw iron ore.)r?   ⁄crafting_materialr7   )r   r   r   r   zcopper veinz;An outcropping of rocks here appears to contain raw copper.⁄
+COPPER_OREc                   C   r5   r6   r8   r9   r9   r9   r:   r;   ¿   r<   ˙
+copper orezA clump of raw copper ore.)rB   r@   z
+fruit treez<A tree here is full of fruit, some of which seem to be ripe.c                   C   Û   t dÉS )N)⁄APPLE_FRUIT⁄
+PEAR_FRUIT⁄
+PLUM_FRUIT©r   r9   r9   r9   r:   r;   Œ   Û    c                   C   r5   ©Nr   r   r8   r9   r9   r9   r:   r;   œ   r<   ⁄applez A delicious multi-colored apple.))rJ   r@   ©⁄fruitr@   r*   ⁄pearzA fragant golden pear.))rM   r@   rK   r*   ⁄plumzA large red-black plum.))rN   r@   rK   r*   z
+berry bushz*A few bushes nearby are covered in berriesc                   C   rC   )N)⁄
+BLACKBERRY⁄	BLUEBERRY⁄	RASPBERRYrG   r9   r9   r9   r:   r;   Ï   rH   c                   C   r5   rI   r8   r9   r9   r9   r:   r;   Ì   r<   ⁄
+blackberryzA juicy blackberry.))rR   r@   ©⁄berryr@   rK   r*   ⁄	blueberryzA single blueberry.))rU   r@   rS   rK   r*   ⁄	raspberryzA large red raspberry.))rV   r@   rS   rK   r*   z"$choice('pine', 'oak', 'ash') treez.This tree looks like a great source of lumber.⁄WOOD_LOGc                   C   r5   r6   r8   r9   r9   r9   r:   r;     r<   zlog of woodz9A decent-sized wooden log. Not so big you can't carry it.)⁄woodr@   zpile of driftwoodz0Some of this wood looks like it would be useful.c                   C   r5   )Nr%   r   r8   r9   r9   r9   r:   r;   +  r<   ztypeclasses.characters.NPCza large angry bearz/A large brown bear. It really doesn't like you!⁄neutral⁄
+aggressive⁄r⁄clawsr   )⁄namer   ⁄damager   r   c                   C   Û    dgt ddÉ dgt ddÉ  S )N⁄RAW_MEATr   r   ⁄ANIMAL_HIDEr   r8   r9   r9   r9   r:   r;   L  Û     T)r   r   r   ⁄gender⁄react_as⁄flee_atr"   ⁄
+name_color⁄str⁄natural_weapon⁄
+exp_reward⁄drops⁄
+can_attackza mountain lionzPA sleek mountain lion. It doesn't appreciate you invading its territory. At all.c                   C   s    dgt ddÉ dgt ddÉ  S )Nr`   r   r   ra   r7   r8   r9   r9   r9   r:   r;   d  rb   )r   r   r   rc   rd   re   r"   rf   rg   ⁄agirh   ri   rj   rk   z#a $choice('grey', 'brown') squirrelzLook! A squirrel!⁄timidc                   C   Û   dgt ddÉ S ©Nr`   r   r%   r8   r9   r9   r9   r:   r;   n  Û    )r   r   r   rd   rc   rj   rk   z
+a pheasantzA healthy wild pheasant.c                   C   rn   ro   r8   r9   r9   r9   r:   r;   x  rp   za doez%A skittish doe with large brown eyes.⁄femalec                   C   r_   )N⁄	DEER_MEATr%   r   ra   r   r8   r9   r9   r9   r:   r;   Ü  rb   )	r   r   r   rc   rd   r"   rl   rk   rj   za stagz3A wary adult stag, sporting a full rack of antlers.⁄male⁄antlersr   c                   C   s0   dgt ddÉ dgt ddÉ  dgt ddÉ  S )Nrr   r%   r   ⁄DEER_ANTLERr   r7   ra   r8   r9   r9   r9   r:   r;   ò  s
+    ˇ˛)
+r   r   r   rc   r"   rl   rh   rj   ri   rk   ˙raw meatz6A piece of meat from an animal. It hasn't been cooked.)rv   r@   )r   r   r   zanimal hidez?A section of hide from an animal, suitable for leather-crafting)⁄leatherr@   zraw deer meatz3A piece of meat from a deer. It hasn't been cooked.)⁄venisonr@   ⁄antlerz(A forked antler bone from an adult stag.)⁄boner@   N).⁄__doc__⁄randomr   r   ⁄IRON_DAGGER⁄
+IRON_SWORD⁄IRON_GREATSWORD⁄IRON_HAUBERK⁄IRON_CHAUSSES⁄LEATHER_BOOTS⁄	SMALL_BAG⁄
+MEDIUM_BAG⁄	LARGE_BAG⁄	PIE_CRUST⁄	PIE_SLICE⁄
+WOOL_TUNIC⁄WOOL_LEGGINGS⁄SMITHING_HAMMER⁄SMITHING_ANVIL⁄SMITHING_FURNACE⁄COOKING_OVEN⁄IRON_ORE_NODEr4   ⁄COPPER_ORE_NODErA   ⁄
+FRUIT_TREErD   rE   rF   ⁄
+BERRY_BUSHrO   rP   rQ   ⁄LUMBER_TREErW   ⁄	DRIFTWOOD⁄
+ANGRY_BEAR⁄COUGAR⁄SQUIRREL⁄PHEASANT⁄DOE_DEER⁄	STAG_DEERr`   ra   rr   ru   r9   r9   r9   r:   ⁄<module>   sj   Ù¯Ù˙
+˙
+˙
+˙	˙	˙
+ˇ˘ˇ˘˚˚¸¸¸¸˚¸	˚¸	˚˚˚˚
+˚ˆˆˆ˚ˇ˙˚ˇ˙˚Ï˚Î˘˘ˆ˚Ì˝˝˝ˇ
+˝
+
+
+========== ./maps/starter_town.py ==========
+"""
+The beginning town where all new characters start.
+"""
+
+from evennia.contrib.grid.xyzgrid import xymap_legend
+
+
+MAP_STR = r"""
++
+                               
+5   o-----G-----G---R---R---o  
+    |      \    |           |  
+4   R     B-R $-R   $-B B   R  
+    |        \  |   |/  |   |  
+3   G-----R---#-#---R---R---G  
+    |          \    |   |   |  
+2   R         $-R-$ B   B   R  
+    |            \          |  
+1   o---R-----R---G-----R---o  
+                               
+0                              
+
++
+"""
+
+
+class RoadNode(xymap_legend.MapNode):
+    display_symbol = "#"
+    prototype = {
+        "prototype_parent": "xyz_room",
+        "tags": [("townsburg", "zone")],
+        "key": "A road",
+        "desc": "A wide road through Townsburg.",
+    }
+
+
+class GateNode(xymap_legend.MapNode):
+    display_symbol = "Œ∏"
+    prototype = {
+        "prototype_parent": "xyz_room",
+        "tags": [("townsburg", "zone")],
+        "key": "A road",
+        "desc": "The road here leads out of Townsburg and into the wilderness.",
+    }
+
+
+class BuildingNode(xymap_legend.MapNode):
+    prototype = {
+        "prototype_parent": "xyz_room",
+        "key": "Inside",
+        "desc": "A building in Townsburg.",
+    }
+
+
+class ShopNode(xymap_legend.MapNode):
+    prototype = {
+        "prototype_parent": "xyz_room",
+        "typeclass": "typeclasses.rooms.XYGridShop",
+        "key": "Inside",
+        "desc": "A shop in Townsburg.",
+    }
+
+
+LEGEND = {
+    "R": RoadNode,
+    "G": GateNode,
+    "B": BuildingNode,
+    "$": ShopNode,
+}
+
+PROTOTYPES = {
+    (6, 3): {
+        "prototype_parent": "xyz_room",
+        "tags": [("townsburg", "zone")],
+        "key": "West half of a plaza",
+        "desc": "The central plaza in Townsburg is wide-open, with at least as many livestock as people.",
+    },
+    (7, 3): {
+        "prototype_parent": "xyz_room",
+        "tags": [("townsburg", "zone")],
+        "key": "East half of a plaza",
+        "desc": "The central plaza in Townsburg is wide-open, with at least as many livestock as people.",
+    },
+    (9, 4): {
+        "typeclass": "typeclasses.rooms.XYGridShop",
+        "key": "A tavern",
+        "desc": "A bustling tavern, with food and drink for sale.",
+        "inventory": [
+            ("PIE_SLICE", 12),
+        ],
+    },
+    (6, 4): {
+        "typeclass": "typeclasses.rooms.XYGridShop",
+        "key": "General Store",
+        "desc": "Stuff! and Things",
+        "inventory": [
+            ("WOOL_TUNIC", 3),
+            ("WOOL_LEGGINGS", 3),
+            ("LEATHER_BOOTS", 3),
+            ("SMALL_BAG", 3),
+        ],
+    },
+    (4, 4): {
+        "typeclass": "typeclasses.rooms.XYGridTrain",
+        "key": "Boxing R Us",
+        "desc": "It looks like the perfect place for learning how to punch things.",
+        "skill_training": "unarmed",
+    },
+    (6, 2): {
+        "typeclass": "typeclasses.rooms.XYGridTrain",
+        "key": "Rogue's Guild",
+        "desc": "I dunno you can train daggers here.",
+        "skill_training": "daggers",
+    },
+    (8, 2): {
+        "typeclass": "typeclasses.rooms.XYGridTrain",
+        "key": "Fencing studio",
+        "desc": "Fencing dummies and practice swords are plentiful.",
+        "skill_training": "swords",
+    },
+    (9, 2): {
+        "prototype_parent": "xyz_room",
+        "typeclass": "typeclasses.rooms.XYZShopNTrain",
+        "tags": [("townsburg", "zone")],
+        "key": "A forge",
+        "desc": "A dimly smithing forge, heated to shirtless temps by a furnace all year round.",
+        "skill_training": "smithing",
+        "donation_tags": ["wood", "ore", "bone"],
+        "inventory": [
+            ("IRON_DAGGER", 6),
+            ("IRON_SWORD", 6),
+        ],
+    },
+    (10, 4): {
+        "prototype_parent": "xyz_room",
+        "typeclass": "typeclasses.rooms.XYZShopNTrain",
+        "tags": [("townsburg", "zone")],
+        "key": "A kitchen",
+        "desc": "The kitchens for the tavern next door.",
+        "skill_training": "cooking",
+        "donation_tags": ["fruit", "raw meat", "cooked meat"],
+        "inventory": [
+            ("PIE_CRUST", 4),
+        ],
+    },
+    (11, 4): {
+        "prototype_parent": "xyz_room",
+        "typeclass": "typeclasses.rooms.XYGridTrain",
+        "tags": [("townsburg", "zone")],
+        "key": "A leatherworker's",
+        "desc": "A small, unassuming room. Sections of leather are scattered around. It smells a bit funny.",
+        "skill_training": "leatherwork",
+    },
+    (11, 2): {
+        "prototype_parent": "xyz_room",
+        "typeclass": "typeclasses.rooms.XYGridTrain",
+        "tags": [("townsburg", "zone")],
+        "key": "A carpentry workshop",
+        "desc": "The lively scent of fresh sawdust fills the air. Actual sawdust fills the air, too.",
+        "skill_training": "carving",
+    },
+}
+
+
+XYMAP_DATA = {
+    "zcoord": "townsburg",
+    "map": MAP_STR,
+    "legend": LEGEND,
+    "prototypes": PROTOTYPES,
+    "options": {"map_visual_range": 1},
+}
+
+
+
+========== ./maps/overworld.py ==========
+MAP_STR = '''
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~.............................~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~.............................."""""""""""""%%%%%%%%%%%%%%....~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~.....^^^^^^^^^^^""""""""""""""""""""""""""""""%%%%%%%%%%%%%%%%%%.....~~~~~~~~~~~~~~
+~~~~~~~~~~~....%%%^^^^^^^^^""""""""""""""""""""""""""""""%%%%%%%%%%%%%%%%%%%%%%%%%.....~~~~~~~~~~
+~~~~~~~~~...%%%%%%%^^^^^^^^^^^""""""""""""""""""""""""""""%%%%%%%%%%%%%%%%%%%%%%%%%%%%..~~~~~~~~~
+~~~~~~~~..%%%%%%%%%%%^^^^^^^^^^^""""""""""""""""""""""""%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%..~~~~~~~~
+~~~~~~...%%%%%%%%%%^^^^^^^^^^^"""""""""""""""""""""""""""%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%...~~~~~~
+~~~~~~..%%%%%%%%%^^^^^^^^^^^"""""""""""""""""""""""""""""""%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%..~~~~~~
+~~~~~~~...%%%%%%%%^^^^^"""""""""""""""""""""""""""""""""""""""""%%%%%%%%%%%%%%%%%%%%%%%%..~~~~~~~
+~~~~~~~~~..%%%%%^^^^^^^^""""""""""""""""""""""""""""""""""""""""""""""""""""""""%%%%%%%..~~~~~~~~
+~~~~~~~~~~.%%%%^^^^^^^^""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""%%%%.~~~~~~~~~
+~~~~~~~~~..^^^^^^^^^^^^^"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""%%...~~~~~~~~~
+~~~~~~~~~.^^^^^^^^^^^%%%%%""""""""""""""""""""""""""""""""""""""""""""""""""""""".....~~~~~~~~~~~
+~~~~~~~~~.^^^^^^^^^^%%%%%%""""""""""""""""""""""""""""""""""""""""""""""""""""""..~~~~~~~~~~~~~~~
+~~~~~~~~..^^^^^^^^^^^%%%""""""""""""""""""""""""""O""""""""""""""""""""""""""""".~~~~~~~~~~~~~~~~
+~~~~~~~..%%%%^^^^^^^^%%%%%%%"""""""""""""""""""""""""""""""""""""""""""""""""""".~~~~~~~~~~~~~~~~
+~~~~~~..%%%%%%%^^^^^^^%%%%%%%%%%%"""""""""""""""""""""""""""""""""""""""""""""""...~~~~~~~~~~~~~~
+~~~~~~.%%%%%%%%%%%^^^^%%%%%%%%%%%%%%"""""""""""""""""""""""""""""""""""""""""""""".....~~~~~~~~~~
+~~~~~..%%%%%%%%%%%^^^^^^^^^^%%%%%%%%%%""""""""""""""""""""""""""""""""""""""""""""""""...~~~~~~~~
+~~~~~..%%%%%%^^^^^^^^^^^^^^^%%%%%%%%%"""""""""""""""""""""""""""""""""""""""""""""""""""...~~~~~~
+~~~~~~..%%%%%%%%^^^^^^^^^^^%%%%%%%%%%%%%""""""""""""""""""""""""""""""""""""""""""""""""""..~~~~~
+~~~~~~~..%%%%%%%%%%^^^^^%%%%%%%%%%%%%%%%""""""""""""""""""""""""""""""""""""""""""""""""""..~~~~~
+~~~~~~~~...%%%%%%%%%%^^^%%%%%%%%%%%%%%%%%""""""""""""""""""""""""""""""""""""""""""""""""".~~~~~~
+~~~~~~~~~~..%%%%%%%%%%^^%%%%%%%%%%%%%%%%%%"""""""""""""""""""""""""""""""""""""""""""""""..~~~~~~
+~~~~~~~~~~~.%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"""""""""""""""""""""""""""""""""""""""""""""..~~~~~~~
+~~~~~~~~~~..%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"""""""""""""""""""""""""""""""""""""""""...~~~~~~~~
+~~~~~~~~~~~..%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"""""""""""""""""""""""""""""""...~~~~~~~~~~
+~~~~~~~~~~~~...%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"""""""""""""""""""""""""""""".....~~~~~~~~~~~~
+~~~~~~~~~~~~~~....%%%%%%%%%%%%%%%%%%%%%%%%%%"""""""""""""""""""""""""""..........~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~.........%%%%%%%%%%%%%%%"""""""""""""""""""""""""".....~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~...........................................~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+'''
+
+weight = 1
+_MAX_NODES = 50
+_MAX_MOBS = 50
+
+
+MAP_KEY = {
+    "%": {
+        "biome": "forest",
+        "desc": "There are many trees here.",
+        "gathers": (
+            ("FRUIT_TREE", 1),
+            ("LUMBER_TREE", 5),
+            ("BERRY_BUSH", 3),
+        ),
+        "node cap": 10,
+        "mobs": (("DOE_DEER", 3), ("STAG_DEER", 1), ("SQUIRREL", 5)),
+        "mob cap": 25,
+    },
+    '"': {
+        "biome": "grass",
+        "desc": "A grassy meadow.",
+        "gathers": (("BERRY_BUSH", 3),),
+        "node cap": 10,
+        "mobs": (("DOE_DEER", 3), ("STAG_DEER", 1), ("PHEASANT", 10)),
+        "mob cap": 15,
+    },
+    ".": {
+        "biome": "beach",
+        "desc": "The sand and rocks slope gently into the ocean waves.",
+        "gathers": (("DRIFTWOOD", 1),),
+    },
+    "^": {
+        "biome": "mountains",
+        "desc": "The ground slopes sharply, littered with rocks and boulders.",
+        "gathers": (
+            ("IRON_ORE_NODE", 1),
+            ("COPPER_ORE_NODE", 5),
+            ("BERRY_BUSH", 1),
+        ),
+        "node cap": 25,
+        "mobs": (("ANGRY_BEAR", 1), ("COUGAR", 5)),
+        "mob cap": 15,
+    },
+    "O": {
+        "biome": "city",
+        "desc": "You stand outside of a city.",
+    },
+}
+
+from random import randint, choices
+from evennia.contrib.grid.wilderness import wilderness
+from evennia.prototypes import spawner
+from evennia.utils.search import search_tag
+from evennia.utils import logger, pad
+
+
+class OverworldMapProvider(wilderness.WildernessMapProvider):
+    room_typeclass = "typeclasses.rooms.OverworldRoom"
+    exit_typeclass = "typeclasses.exits.OverworldExit"
+
+    def is_valid_coordinates(self, wilderness, coordinates):
+        "Validates if these coordinates are inside the map"
+        x, y = coordinates
+        # split the map into lines, i.e. rows
+        # and reverse the order, since the wilderness contrib considers row 0 to be the bottom
+        rows = MAP_STR.split("\n")
+        rows.reverse()
+        # make sure that y is a valid coordinate
+        if y not in range(len(rows)):
+            return False
+        # get the y-coord row
+        row = rows[y]
+        # validate x as well
+        if x not in range(len(row)):
+            return False
+        # get the specific tile
+        tile = row[x]
+        # if it's a key in the map key dict, it's good
+        return tile in MAP_KEY
+
+    def get_location_name(self, coordinates):
+        """Returns the name for the given coordinate"""
+        x, y = coordinates
+
+        # we've already passed coord validation so we can just grab the data
+        rows = MAP_STR.split("\n")
+        rows.reverse()
+        tile = rows[y][x]
+        tile_data = MAP_KEY.get(tile, {})
+        return f"In the {tile_data.get('biome', 'wilderness')}"
+
+    def at_prepare_room(self, coordinates, caller, room):
+        """Any changes that need to be done to the room after 'moving'."""
+        x, y = coordinates
+
+        # we've already passed coord validation so we can just grab the data
+        rows = MAP_STR.split("\n")
+        rows.reverse()
+        tile = rows[y][x]
+        tile_data = MAP_KEY.get(tile, {})
+        room.ndb.active_desc = tile_data.get("desc")
+        # build the minimap
+        border = "-" * 29
+        minimap = [border]
+        for i in range(y + 2, y - 3, -1):
+            row = rows[i][x - 2 : x + 3]
+            if i == y:
+                # mark our location
+                row = row[:2] + "|g@|n" + row[3:]
+            minimap.append(" " * 12 + row + " " * 12)
+        minimap.append(border)
+        room.ndb.minimap = "\n".join(minimap)
+
+        if not randint(0, 5):
+            # try to generate a resource
+            self.spawn_resource(
+                room,
+                coordinates,
+                tile_data.get("gathers"),
+                cap=tile_data.get("node cap", _MAX_NODES),
+                tag=tile_data.get("biome"),
+                tag_cat="resource_node",
+            )
+
+        elif not randint(0, 10):
+            # possibly spawn a mob, but not at the same time as a resource
+            mob = self.spawn_resource(
+                room,
+                coordinates,
+                tile_data.get("mobs"),
+                cap=tile_data.get("mob cap", _MAX_MOBS),
+                tag=tile_data.get("biome"),
+                tag_cat="mob",
+            )
+            if mob:
+                mob.at_character_arrive(caller)
+
+    def spawn_resource(self, room, coordinates, weighted_options, **kwargs):
+        """
+        Create a new randomized object, if it hasn't reached the cap for this biome.
+        """
+        if not weighted_options:
+            # there's nothing for us to spawn!
+            return
+
+        if (tag := kwargs.get("tag")) and (tag_cat := kwargs.get("tag_cat")):
+            # we have a tag specified; check for a spawn cap amt
+            if spawn_cap := kwargs.get("cap"):
+                # there's a cap! make sure we don't already have enough
+                tagged = search_tag(key=tag, category=tag_cat)
+                if len(tagged) >= spawn_cap:
+                    # too many, don't spawn anything new
+                    return
+        # we're good to keep going
+        # split the weighted options into a list of materials and the corresponding list of weights
+        options, weights = zip(*weighted_options)
+        protkey = choices(options, weights=weights)[0]
+        # spawn the new object and put it in the room
+        try:
+            obj = spawner.spawn(protkey)[0]
+        except KeyError as e:
+            logger.log_msg(f"   {e} on {protkey}")
+            return
+        room.wilderness.move_obj(obj, coordinates)
+        if tag and tag_cat:
+            obj.tags.add(tag, category=tag_cat)
+
+        return obj
+
+
+def create():
+    """
+    Create the wilderness script for this map, if it doesn't already exist.
+    """
+    wilderness.create_wilderness(
+        mapprovider=OverworldMapProvider(), name="overworld", preserve_items=True
+    )
+
+
+def enter(obj, coordinates):
+    """
+    Move obj into the overworld map at coordinates x, y
+    """
+    wilderness.enter_wilderness(obj, coordinates=coordinates, name="overworld")
+
+
+
+========== ./project_dump.txt ==========
+
+
+
+========== ./chargen.py ==========
+from evennia.utils.evmenu import EvMenu
+from evennia import create_object
+from typeclasses.characters import PlayerCharacter
+from world.scripts import races, classes
+
+BASE_STATS = ["STR", "CON", "DEX", "INT", "WIS", "LUCK"]
+STAT_POOL = 10
+
+class CharacterBuilder:
+    def __init__(self, caller):
+        self.caller = caller
+        if not hasattr(caller.ndb, "_evmenu_data") or caller.ndb._evmenu_data is None:
+            caller.ndb._evmenu_data = {}
+        self.data = caller.ndb._evmenu_data
+
+    def set(self, key, value):
+        self.data[key] = value
+        self.caller.ndb._evmenu_data = self.data
+
+    def get(self, key):
+        return self.data.get(key)
+
+    def is_complete(self):
+        return all(self.get(k) for k in ("name", "race", "class", "stats"))
+
+    def finalize(self):
+        char = create_object(PlayerCharacter, key=self.get("name"), account=self.caller.account)
+        char.db.race = self.get("race")
+        char.db.class_name = self.get("class")
+        char.db.desc = self.get("desc") or "An adventurer."
+        char.db.stats = self.get("stats")
+        return char
+
+def start_menu(caller):
+    if not hasattr(caller.ndb, "_evmenu_data") or not caller.ndb._evmenu_data:
+        caller.ndb._evmenu_data = {}
+    EvMenu(caller, "world.chargen", startnode="menunode_select_race")
+
+# ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
+# Menu Nodes
+# ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
+
+def menunode_select_race(caller):
+    text = "Choose your race:"
+    options = []
+    for race in races.RACE_LIST:
+        options.append({
+            "key": race["name"].lower(),
+            "desc": f"{race['name']}: {race['desc']}",
+            "exec": lambda caller, race=race: CharacterBuilder(caller).set("race", race),
+            "goto": "menunode_select_class"
+        })
+    return text, options
+
+def menunode_select_class(caller):
+    text = "Choose your class:"
+    options = []
+    for cls in classes.CLASS_LIST:
+        options.append({
+            "key": cls["name"].lower(),
+            "desc": f"{cls['name']}: {cls['desc']}",
+            "exec": lambda caller, cls=cls: CharacterBuilder(caller).set("class", cls),
+            "goto": "menunode_allocate_stats"
+        })
+    return text, options
+
+def menunode_allocate_stats(caller):
+    builder = CharacterBuilder(caller)
+    stat_alloc = builder.get("stat_alloc") or {s: 0 for s in BASE_STATS}
+    pool = STAT_POOL - sum(stat_alloc.values())
+
+    text = "Allocate your stat points:\n"
+    for stat in BASE_STATS:
+        text += f"{stat}: {stat_alloc[stat]}\n"
+    text += f"\nPoints remaining: {pool}"
+
+    options = []
+    if pool > 0:
+        for stat in BASE_STATS:
+            options.append({
+                "key": stat.lower(),
+                "desc": f"Add 1 point to {stat}",
+                "exec": lambda caller, stat=stat: _add_stat(caller, stat),
+                "goto": "menunode_allocate_stats"
+            })
+    else:
+        final_stats = {s: stat_alloc[s] for s in BASE_STATS}
+
+        # Apply race/class modifiers
+        race_mods = builder.get("race")["stat_mods"]
+        class_mods = builder.get("class")["stat_mods"]
+        for key, val in race_mods.items():
+            final_stats[key] = final_stats.get(key, 0) + val
+        for key, val in class_mods.items():
+            final_stats[key] = final_stats.get(key, 0) + val
+
+        builder.set("stats", final_stats)
+        return "Stat allocation complete.", [{"desc": "Continue", "goto": "menunode_enter_name"}]
+
+    options.append({"desc": "Start Over", "goto": "menunode_allocate_stats"})
+    return text, options
+
+def _add_stat(caller, stat):
+    builder = CharacterBuilder(caller)
+    alloc = builder.get("stat_alloc") or {s: 0 for s in BASE_STATS}
+    if sum(alloc.values()) < STAT_POOL:
+        alloc[stat] += 1
+    builder.set("stat_alloc", alloc)
+
+def menunode_enter_name(caller):
+    text = "Enter your character's name:"
+    options = [
+        {"key": "_default", "exec": _set_name, "goto": "menunode_enter_desc"},
+        {"desc": "Go back", "goto": "menunode_allocate_stats"},
+    ]
+    return text, options
+
+def _set_name(caller, raw_string):
+    name = raw_string.strip().capitalize()
+    if not name.isalnum():
+        caller.msg("|rInvalid name.|n")
+        return
+    CharacterBuilder(caller).set("name", name)
+
+def menunode_enter_desc(caller):
+    text = "Write a short description for your character:"
+    options = [
+        {"key": "_default", "exec": _set_desc, "goto": "menunode_confirm"},
+        {"desc": "Skip", "exec": lambda c: CharacterBuilder(c).set("desc", None), "goto": "menunode_confirm"},
+    ]
+    return text, options
+
+def _set_desc(caller, raw_string):
+    CharacterBuilder(caller).set("desc", raw_string.strip())
+
+def menunode_confirm(caller):
+    builder = CharacterBuilder(caller)
+    stats = builder.get("stats")
+    text = (
+        f"|cSummary|n\n"
+        f"Name: {builder.get('name')}\n"
+        f"Race: {builder.get('race')['name']}\n"
+        f"Class: {builder.get('class')['name']}\n"
+        f"Stats: {stats}\n"
+        f"Desc: {builder.get('desc') or 'None'}\n\n"
+        "Do you want to finalize this character?"
+    )
+    options = [
+        {"desc": "Yes, finalize", "goto": "menunode_finalize"},
+        {"desc": "No, start over", "goto": "menunode_select_race"}
+    ]
+    return text, options
+
+def menunode_finalize(caller):
+    builder = CharacterBuilder(caller)
+    char = builder.finalize()
+    caller.account.db._last_puppet = char
+    caller.account.puppet_object(session=caller.sessions.get(), obj=char)
+    if hasattr(caller.ndb, "_evmenu_data"):
+        del caller.ndb._evmenu_data
+    return "Character created and you have entered the game!", []
+
+
+
+========== ./initial_build.ev ==========
+# initialize the overworld map
+py from world.maps import overworld; overworld.create()
+# move to the plaza
+tel (7, 3, townsburg)
+# create the exit for getting into town from the overworld
+create enter Townsburg;townsburg;enter:typeclasses.exits.Exit
+# link it to here
+link enter = here
+# move to a gate room
+tel (4, 5, townsburg)
+# create exit
+create/drop northwest;nw:typeclasses.exits.Exit
+# set the wilderness map
+set nw/wilderness_name = overworld
+# set the wilderness tile coords
+set nw/wilderness_coords = (50, 20)
+# move to the next gate room
+tel (7, 5, townsburg)
+# create exit
+create/drop north;n:typeclasses.exits.Exit
+# set the wilderness map
+set north/wilderness_name = overworld
+# set the wilderness tile coords
+set north/wilderness_coords = (50, 20)
+# move to the next gate room
+tel (1, 3, townsburg)
+# create exit
+create/drop west;w:typeclasses.exits.Exit
+# set the wilderness map
+set west/wilderness_name = overworld
+# set the wilderness tile coords
+set west/wilderness_coords = (50, 20)
+# move to the next gate room
+tel (13, 3, townsburg)
+# create exit
+create/drop east;e:typeclasses.exits.Exit
+# set the wilderness map
+set east/wilderness_name = overworld
+# set the wilderness tile coords
+set east/wilderness_coords = (50, 20)
+# move to the next gate room
+tel (8, 1, townsburg)
+# create exit
+create/drop southeast;se:typeclasses.exits.Exit
+# set the wilderness map
+set se/wilderness_name = overworld
+# set the wilderness tile coords
+set se/wilderness_coords = (50, 20)
+# move to the wilderness
+se
+# place the entrance to the town here
+drop enter
+
+# now we furnish some crafting rooms with some crafting tools
+# move to the smithy
+tel (9, 2, townsburg)
+# create a furnace
+spawn furnace
+# create an anvil
+spawn anvil
+# create a hammer
+spawn hammer
+# this is also a shop, so initialize the shop stock
+script/start here =
+
+# move to the kitchen
+tel (10, 4, townsburg)
+# create an oven
+spawn oven
+# initialize this shop stock too
+script/start here =
+
+# finish off the rest of the shop stocking
+# move to the tavern
+tel (9, 4, townsburg)
+# start all the scripts here too
+script/start here =
+# move to the general store
+tel (6, 4, townsburg)
+# start all the scripts here too
+script/start here =
+
+# and we're done!
+
+
