@@ -194,6 +194,11 @@ def menunode_finish(caller, **kwargs):
         char.home = start_room[0]
         char.db.prelogout_location = start_room[0]
 
+    # assign the newly created character to this account
+    char.account = caller
+    caller.characters.add(char)
+    char.save()
+
     caller.db._last_puppet = char
     caller.ndb.new_char = None
     caller.msg("|gCharacter Created! You can now use |wic <name>|g to enter the game.|n")
