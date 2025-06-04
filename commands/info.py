@@ -2,6 +2,7 @@ from evennia import CmdSet
 from evennia.utils.evtable import EvTable
 from evennia.utils import iter_to_str
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
+from world.guilds import get_rank_title
 
 from .command import Command
 
@@ -79,6 +80,13 @@ class CmdFinger(Command):
         stats = ", ".join(stat_parts)
         self.msg(f"|w{target.key}|n - {desc}")
         self.msg(stats)
+        if guild := target.db.guild:
+            honor = target.db.guild_honor or 0
+            rank = get_rank_title(guild, honor)
+            self.msg(f"Guild: {guild} ({rank})")
+            self.msg(f"Honor: {honor}")
+        if bounty := target.db.get("bounty"):
+            self.msg(f"Bounty: {bounty}")
 
 
 class CmdInventory(Command):
