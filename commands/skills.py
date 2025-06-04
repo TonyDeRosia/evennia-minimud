@@ -4,15 +4,15 @@ from .command import Command
 
 # A dict of all skills, with their associated stat as the value
 SKILL_DICT = {
-    "smithing": "str",
-    "tailoring": "agi",
-    "evasion": "agi",
-    "daggers": "agi",
-    "swords": "str",
-    "cooking": "will",
-    "carving": "str",
-    "unarmed": "agi",
-    "leatherwork": "will",
+    "smithing": "STR",
+    "tailoring": "DEX",
+    "evasion": "DEX",
+    "daggers": "DEX",
+    "swords": "STR",
+    "cooking": "WIS",
+    "carving": "STR",
+    "unarmed": "DEX",
+    "leatherwork": "WIS",
 }
 
 
@@ -34,11 +34,18 @@ class CmdStatSheet(Command):
 
         # display the primary stats
         self.msg("STATS")
-        stats = [
-            ["Strength", caller.db.str or 0],
-            ["Agility", caller.db.agi or 0],
-            ["Willpower", caller.db.will or 0],
-        ]
+        stats = []
+        for key, disp in (
+            ("STR", "Strength"),
+            ("CON", "Constitution"),
+            ("DEX", "Dexterity"),
+            ("INT", "Intelligence"),
+            ("WIS", "Wisdom"),
+            ("LUCK", "Luck"),
+        ):
+            trait = caller.traits.get(key)
+            value = trait.value if trait else 0
+            stats.append([disp, value])
         rows = list(zip(*stats))
         table = EvTable(table=rows, border="none")
         self.msg(str(table))

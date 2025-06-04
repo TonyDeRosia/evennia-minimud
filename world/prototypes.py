@@ -319,7 +319,7 @@ ANGRY_BEAR = {
     "flee_at": 5,
     "armor": 20,
     "name_color": "r",
-    "str": 15,
+    "STR": 15,
     "natural_weapon": {
         "name": "claws",
         "damage_type": "slash",
@@ -342,8 +342,8 @@ COUGAR = {
     "flee_at": 15,
     "armor": 15,
     "name_color": "r",
-    "str": 8,
-    "agi": 15,
+    "STR": 8,
+    "DEX": 15,
     "natural_weapon": {
         "name": "claws",
         "damage_type": "slash",
@@ -384,7 +384,7 @@ DOE_DEER = {
     "gender": "female",
     "react_as": "timid",
     "armor": 10,
-    "agi": 15,
+    "DEX": 15,
     "can_attack": True,
     # randomly generate a list of drop prototype keys when the mob is spawned
     "drops": lambda: ["DEER_MEAT"] * randint(1, 3) + ["ANIMAL_HIDE"] * randint(0, 3),
@@ -396,7 +396,7 @@ STAG_DEER = {
     "desc": "A wary adult stag, sporting a full rack of antlers.",
     "gender": "male",
     "armor": 10,
-    "agi": 15,
+    "DEX": 15,
     "natural_weapon": {
         "name": "antlers",
         "damage_type": "pierce",
