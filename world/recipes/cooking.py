@@ -19,7 +19,7 @@ class FruitSaladRecipe(SkillRecipe):
             "tags": [
                 ("edible"),
             ],
-            "energy": 20,
+            "stamina": 20,
             "value": 3,
         }
     ]
@@ -39,7 +39,7 @@ class CookedMeat(SkillRecipe):
             "tags": [
                 ("edible"),
             ],
-            "energy": 15,
+            "stamina": 15,
             "value": 1,
         }
     ]
@@ -63,7 +63,7 @@ class MeatPieRecipe(SkillRecipe):
             "tags": [
                 ("edible"),
             ],
-            "energy": 5,
+            "stamina": 5,
             "value": 5,
         }
     ] * 6
@@ -87,7 +87,7 @@ class BerryPieRecipe(SkillRecipe):
             "tags": [
                 ("edible"),
             ],
-            "energy": 5,
+            "stamina": 5,
             "value": 5,
         }
     ] * 6
@@ -111,7 +111,7 @@ class ApplePieRecipe(SkillRecipe):
             "tags": [
                 ("edible"),
             ],
-            "energy": 5,
+            "stamina": 5,
             "value": 5,
         }
     ] * 6

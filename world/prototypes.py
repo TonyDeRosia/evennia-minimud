@@ -16,7 +16,7 @@ IRON_DAGGER = {
         ("knife", "crafting_tool"),
     ],
     "value": 20,
-    "energy_cost": 3,
+    "stamina_cost": 3,
     "speed": 3,
     "dmg": 20,
 }
@@ -27,7 +27,7 @@ IRON_SWORD = {
     "desc": "A one-handed sword made of iron.",
     "tags": [("pierce", "damage_type"), ("slash", "damage_type")],
     "value": 30,
-    "energy_cost": 5,
+    "stamina_cost": 5,
     "speed": 7,
     "dmg": 40,
 }
@@ -42,7 +42,7 @@ IRON_GREATSWORD = {
         ("two_handed", "wielded"),
     ],
     "value": 50,
-    "energy_cost": 10,
+    "stamina_cost": 10,
     "speed": 12,
     "dmg": 60,
 }
@@ -105,7 +105,7 @@ PIE_CRUST = {
     "tags": [
         "edible",
     ],
-    "energy": 1,
+    "stamina": 1,
     "value": 10,
 }
 
@@ -117,7 +117,7 @@ PIE_SLICE = {
     "tags": [
         "edible",
     ],
-    "energy": 5,
+    "stamina": 5,
     "value": 5,
 }
 
@@ -210,21 +210,21 @@ APPLE_FRUIT = {
     "key": "apple",
     "desc": "A delicious multi-colored apple.",
     "tags": [("apple", "crafting_material"), ("fruit", "crafting_material"), "edible"],
-    "energy": 5,
+    "stamina": 5,
     "value": 1,
 }
 PEAR_FRUIT = {
     "key": "pear",
     "desc": "A fragant golden pear.",
     "tags": [("pear", "crafting_material"), ("fruit", "crafting_material"), "edible"],
-    "energy": 5,
+    "stamina": 5,
     "value": 1,
 }
 PLUM_FRUIT = {
     "key": "plum",
     "desc": "A large red-black plum.",
     "tags": [("plum", "crafting_material"), ("fruit", "crafting_material"), "edible"],
-    "energy": 5,
+    "stamina": 5,
     "value": 1,
 }
 
@@ -245,7 +245,7 @@ BLACKBERRY = {
         ("fruit", "crafting_material"),
         "edible",
     ],
-    "energy": 1,
+    "stamina": 1,
     "value": 0,
 }
 BLUEBERRY = {
@@ -257,7 +257,7 @@ BLUEBERRY = {
         ("fruit", "crafting_material"),
         "edible",
     ],
-    "energy": 1,
+    "stamina": 1,
     "value": 0,
 }
 RASPBERRY = {
@@ -269,7 +269,7 @@ RASPBERRY = {
         ("fruit", "crafting_material"),
         "edible",
     ],
-    "energy": 1,
+    "stamina": 1,
     "value": 0,
 }
 
@@ -325,7 +325,7 @@ ANGRY_BEAR = {
         "damage_type": "slash",
         "damage": 10,
         "speed": 8,
-        "energy_cost": 10,
+        "stamina_cost": 10,
     },
     "exp_reward": 10,
     # randomly generate a list of drop prototype keys when the mob is spawned
@@ -349,7 +349,7 @@ COUGAR = {
         "damage_type": "slash",
         "damage": 10,
         "speed": 8,
-        "energy_cost": 10,
+        "stamina_cost": 10,
     },
     "exp_reward": 10,
     # randomly generate a list of drop prototype keys when the mob is spawned
@@ -402,7 +402,7 @@ STAG_DEER = {
         "damage_type": "pierce",
         "damage": 10,
         "speed": 10,
-        "energy_cost": 5,
+        "stamina_cost": 5,
     },
     # randomly generate a list of drop prototype keys when the mob is spawned
     "drops": lambda: ["DEER_MEAT"] * randint(1, 3)

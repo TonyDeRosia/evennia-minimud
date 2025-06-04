@@ -17,12 +17,12 @@ class CmdScore(Command):
         caller = self.caller
         stats = []
         for key, disp in (
-            ("STR", "Strength"),
-            ("CON", "Constitution"),
-            ("DEX", "Dexterity"),
-            ("INT", "Intelligence"),
-            ("WIS", "Wisdom"),
-            ("LUCK", "Luck"),
+            ("STR", "STR"),
+            ("CON", "CON"),
+            ("DEX", "DEX"),
+            ("INT", "INT"),
+            ("WIS", "WIS"),
+            ("LUCK", "LUCK"),
         ):
             trait = caller.traits.get(key)
             base = trait.base if trait else 0
