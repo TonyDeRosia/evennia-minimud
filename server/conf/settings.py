@@ -32,6 +32,12 @@ SERVERNAME = "MiniMUD the RPG"
 # Defines the base character type as PlayerCharacter instead of Character
 BASE_CHARACTER_TYPECLASS = "typeclasses.characters.PlayerCharacter"
 
+# Enable command abbreviation matching
+CMD_IGNORE_INVALID_ABBREVIATIONS = False
+
+# Use our local base Command class for default commands
+COMMAND_DEFAULT_CLASS = "commands.command.Command"
+
 ######################################################################
 # Config for contrib packages
 ######################################################################
