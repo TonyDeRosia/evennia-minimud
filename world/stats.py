@@ -76,6 +76,7 @@ TEMPO_STATS: List[Stat] = [
 UTILITY_STATS: List[Stat] = [
     Stat("stealth", "Stealth"),
     Stat("detection", "Detection"),
+    Stat("perception", "Perception", base=5),
     Stat("threat", "Threat"),
     Stat("movement_speed", "Movement Speed", base=1),
     Stat("craft_bonus", "Crafting Bonus"),
@@ -121,3 +122,36 @@ def apply_stats(chara):
         if stat.stat:
             kwargs["stat"] = stat.stat
         chara.traits.add(stat.key, stat.display, **kwargs)
+
+
+def sum_bonus(obj, stat_key: str) -> int:
+    """Return the total value of a stat, including bonuses."""
+    total = 0
+    if (trait := obj.traits.get(stat_key)):
+        total += trait.value
+    # allow bonuses stored directly on the character
+    total += obj.db.get(f"{stat_key}_bonus", 0)
+    try:
+        from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
+
+        for item in get_worn_clothes(obj):
+            total += item.db.get(f"{stat_key}_bonus", 0)
+    except Exception:  # pragma: no cover - clothing contrib may not be loaded
+        pass
+    return total
+
+
+def check_stealth_detection(attacker, target) -> bool:
+    """Compare attacker stealth vs target perception."""
+    attacker_stealth = sum_bonus(attacker, "stealth")
+    target_perception = sum_bonus(target, "perception")
+    if target_perception >= attacker_stealth:
+        attacker.msg(
+            "|rYour stealth attempt fails. The target's perception is too high – they notice you!|n"
+        )
+        target.msg(
+            "|gYou sense movement nearby and spot the incoming attack before it lands!|n"
+        )
+        attacker.db.is_stealthed = False
+        return True
+    return False

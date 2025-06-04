@@ -23,7 +23,7 @@ class CmdStatSheet(Command):
     """
 
     key = "stats"
-    aliases = ("sheet", "skills")
+    aliases = ("sheet", "skills", "sc")
 
     def func(self):
         caller = self.caller
@@ -40,6 +40,8 @@ class CmdStatSheet(Command):
             trait = caller.traits.get(key)
             value = trait.value if trait else 0
             stats.append([key, value])
+        if (per := caller.traits.get("perception")):
+            stats.append(["PER", per.value])
         rows = list(zip(*stats))
         table = EvTable(table=rows, border="none")
         self.msg(str(table))
