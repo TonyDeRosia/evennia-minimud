@@ -55,12 +55,12 @@ class CmdFinger(Command):
     help_category = "general"
 
     def func(self):
-        if not self.args:
-            self.msg("Finger whom?")
-            return
-        target = self.caller.search(self.args.strip(), global_search=True)
-        if not target:
-            return
+        if not self.args or self.args.strip().lower() in {"self", "me"}:
+            target = self.caller
+        else:
+            target = self.caller.search(self.args.strip(), global_search=True)
+            if not target:
+                return
         desc = target.db.desc or "They have no description."
         stat_parts = []
         for key in CORE_STAT_KEYS:
@@ -77,7 +77,8 @@ class CmdFinger(Command):
             rank = get_rank_title(guild, honor)
             self.msg(f"Guild: {guild} ({rank})")
             self.msg(f"Honor: {honor}")
-        if bounty := target.db.get("bounty"):
+        bounty = target.attributes.get("bounty", 0)
+        if bounty > 0:
             self.msg(f"Bounty: {bounty}")
 
 
