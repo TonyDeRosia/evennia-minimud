@@ -14,3 +14,8 @@ class TestStats(EvenniaTest):
         stats.apply_stats(char)
         again = {key: char.traits.get(key).base for key in stats.CORE_STAT_KEYS}
         self.assertEqual(initial, again)
+
+    def test_perception_default(self):
+        char = self.char1
+        stats.apply_stats(char)
+        self.assertEqual(char.traits.perception.base, 5)

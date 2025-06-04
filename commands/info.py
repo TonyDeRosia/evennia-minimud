@@ -12,7 +12,7 @@ class CmdScore(Command):
     """View your basic stats."""
 
     key = "score"
-    aliases = ("sheet",)
+    aliases = ("sheet", "sc")
     help_category = "general"
 
     def func(self):
@@ -25,6 +25,9 @@ class CmdScore(Command):
             total = base + mod
             text = f"{base}" if not mod else f"{base} ({total})"
             stats.append([key, text])
+        perception = caller.traits.get("perception")
+        if perception:
+            stats.append(["PER", str(perception.value)])
         table = EvTable(table=list(zip(*stats)), border="none")
         caller.msg(str(table))
 
@@ -64,6 +67,8 @@ class CmdFinger(Command):
             trait = target.traits.get(key)
             value = trait.value if trait else 0
             stat_parts.append(f"{key} {value}")
+        if (per := target.traits.get("perception")):
+            stat_parts.append(f"PER {per.value}")
         stats = ", ".join(stat_parts)
         self.msg(f"|w{target.key}|n - {desc}")
         self.msg(stats)
