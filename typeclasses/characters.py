@@ -342,6 +342,14 @@ class Character(ObjectParent, ClothedCharacter):
         """
         pass
 
+    def at_tick(self):
+        """Called by the global ticker."""
+        self.refresh_prompt()
+
+    def refresh_prompt(self):
+        """Refresh the player's prompt display."""
+        self.msg(prompt=self.get_display_status(self))
+
     def revive(self, reviver, **kwargs):
         """
         Revive a defeated character at partial health.
@@ -366,6 +374,7 @@ class PlayerCharacter(Character):
         super().at_object_creation()
         # initialize hands
         self.db._wielded = {"left": None, "right": None}
+        self.tags.add("tickable")
 
     def get_display_name(self, looker, **kwargs):
         """

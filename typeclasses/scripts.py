@@ -233,3 +233,22 @@ class RestockScript(Script):
                     obj.db.value = obj.db.value or 1
                     # add to the shop stock
                     self.obj.add_stock(obj)
+
+
+class GlobalTick(Script):
+    """A global ticker calling ``at_tick`` on tickable objects."""
+
+    def at_script_creation(self):
+        self.interval = 60
+        self.persistent = True
+
+    def at_repeat(self):
+        from evennia.utils.search import search_tag
+        from .characters import PlayerCharacter
+
+        for obj in search_tag(key="tickable"):
+            if hasattr(obj, "at_tick"):
+                obj.at_tick()
+
+        for pc in PlayerCharacter.objects.all():
+            pc.refresh_prompt()
