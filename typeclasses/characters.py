@@ -295,7 +295,7 @@ class Character(ObjectParent, ClothedCharacter):
                 else:
                     # a weapon was found, provide this information
                     self.msg(
-                        f"You are already wielding {weap.get_display_name(self)} in your {key}."
+                        f"You are already wielding {weap.get_display_name(self)} in your {hand}."
                     )
                 return
         elif not free:
