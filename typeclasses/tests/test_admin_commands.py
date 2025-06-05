@@ -116,3 +116,33 @@ class TestAdminCommands(EvenniaTest):
         self.assertEqual(weapon.db.damage_dice, "3d7")
         self.assertEqual(weapon.db.dice_num, 3)
         self.assertEqual(weapon.db.dice_sides, 7)
+
+    def test_cweapon_duplicate_names_unique_keys(self):
+        """Creating weapons with the same name should result in unique keys."""
+
+        from commands.admin import CmdCWeapon
+
+        cmd = CmdCWeapon()
+        cmd.caller = self.char1
+        cmd.args = "Epee mainhand 1d4 A thin blade"
+        cmd.func()
+
+        cmd = CmdCWeapon()
+        cmd.caller = self.char1
+        cmd.args = "epee offhand 2d6 A second blade"
+        cmd.func()
+
+        w1 = next((o for o in self.char1.contents if o.key == "Epee" or o.key == "epee"), None)
+        w2 = next((o for o in self.char1.contents if o.key == "epee-1"), None)
+
+        self.assertIsNotNone(w1)
+        self.assertIsNotNone(w2)
+
+        self.assertEqual(w1.aliases.get("epee"), "epee")
+        self.assertEqual(w2.aliases.get("epee-1"), "epee-1")
+
+        self.assertEqual(w1.db.desc, "A thin blade")
+        self.assertEqual(w2.db.desc, "A second blade")
+
+        self.assertEqual(w1.db.damage_dice, "1d4")
+        self.assertEqual(w2.db.damage_dice, "2d6")
