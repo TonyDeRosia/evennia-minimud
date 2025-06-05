@@ -112,15 +112,16 @@ def get_display_scroll(chara):
     hp = chara.traits.get("health")
     mp = chara.traits.get("mana")
     sp = chara.traits.get("stamina")
+
     if hp and mp and sp:
-        hp_line = f"HP |g{int(round(hp.current))}|n/|g{int(round(hp.max))}|n"
-        mp_line = f"MP |c{int(round(mp.current))}|n/|c{int(round(mp.max))}|n"
-        sp_line = f"SP |w{int(round(sp.current))}|n/|w{int(round(sp.max))}|n"
+        hp_disp = f"{int(hp.current)}/{int(hp.max)}"
+        mp_disp = f"{int(mp.current)}/{int(mp.max)}"
+        sp_disp = f"{int(sp.current)}/{int(sp.max)}"
     else:
-        hp_line = mp_line = sp_line = "--/--"
+        hp_disp = mp_disp = sp_disp = "--/--"
 
     lines.append(
-        f"Lvl {level}  XP {xp}  {hp_line}  {mp_line}  {sp_line}"
+        f"|YLvl {level}|n  |CXP|n {xp}  |rHP|n {hp_disp}  |cMP|n {mp_disp}  |gSP|n {sp_disp}"
     )
 
     coins = _db_get(chara, "coins", 0)
@@ -130,10 +131,12 @@ def get_display_scroll(chara):
     silver = int(coins.get("silver", 0))
     gold = int(coins.get("gold", 0))
     platinum = int(coins.get("platinum", 0))
-    lines.append("COIN POUCH")
+    lines.append("")
+    lines.append("|YCOIN POUCH|n")
     lines.append(
         f"Copper: {copper}  Silver: {silver}  Gold: {gold}  Platinum: {platinum}"
     )
+    lines.append("")
 
     weight = chara.db.carry_weight or 0
     capacity = chara.db.carry_capacity or 0
@@ -141,7 +144,7 @@ def get_display_scroll(chara):
     cw_line = f"Carry Weight: {weight} / {capacity}"
     if enc:
         cw_line += f"  {enc}"
-    lines.append(cw_line)
+    lines.append(f"|Y{cw_line}|n")
 
     guild = _db_get(chara, "guild", "")
     if guild:
@@ -152,13 +155,15 @@ def get_display_scroll(chara):
     if buffs := chara.tags.get(category="buff", return_list=True):
         lines.append("Buffs: " + iter_to_str(sorted(buffs)))
 
-    lines.append("PRIMARY STATS")
+    lines.append("")
+    lines.append("|YPRIMARY STATS|n")
     primaries = "  ".join(
         f"{k}: |w{v}|n" for k, v in get_primary_stats(chara)
     )
     lines.append(primaries)
 
-    lines.append("SECONDARY STATS")
+    lines.append("")
+    lines.append("|YSECONDARY STATS|n")
     lines.extend(_columns(get_secondary_stats(chara)))
 
     width = max(len(_strip_colors(l)) for l in lines)
