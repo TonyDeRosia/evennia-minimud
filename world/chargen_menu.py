@@ -257,11 +257,12 @@ def menunode_finish(caller, **kwargs):
         char.attributes.remove(stat.lower())
 
     # assign the newly created character to this account
-    char.account = getattr(caller, "dbobj", caller)
-    caller.characters.add(char)
+    account = getattr(caller, "account", None) or getattr(caller, "dbobj", caller)
+    char.account = account
+    account.characters.add(char)
     char.save()
 
-    caller.db._last_puppet = char
+    account.db._last_puppet = char
     caller.ndb.new_char = None
     caller.msg("|gCharacter Created! You can now use |wic <name>|g to enter the game.|n")
     return "|gYour character has been saved. Use |wic %s|n to enter the world." % char.key, None
