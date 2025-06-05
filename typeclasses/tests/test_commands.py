@@ -81,6 +81,22 @@ class TestInfoCommands(EvenniaTest):
 class TestBounty(EvenniaTest):
     def setUp(self):
         super().setUp()
+        self.char1.db.coins = 20
+        self.char2.db.coins = 0
+        self.char2.db.bounty = 0
+
+    def test_bounty_reward_on_defeat(self):
+        self.char1.execute_cmd(f"bounty {self.char2.key}=10")
+        self.assertEqual(self.char2.db.bounty, 10)
+        self.assertEqual(self.char1.db.coins, 10)
+        self.char2.traits.health.current = 5
+        self.char2.at_damage(self.char1, 10)
+        self.assertEqual(self.char1.db.coins, 20)
+        self.assertEqual(self.char2.db.bounty, 0)
+
+class TestBounty(EvenniaTest):
+    def setUp(self):
+        super().setUp()
         self.char1.db.coins = 100
         self.char2.db.coins = 0
         self.char2.db.bounty = 0
@@ -93,7 +109,7 @@ class TestBounty(EvenniaTest):
     def test_bounty_reward_on_defeat(self):
         self.char1.execute_cmd(f"bounty {self.char2.key}=10")
         self.assertEqual(self.char2.db.bounty, 10)
-        self.assertEqual(self.char1.db.coins, 90)  # Started at 100 - 10 bounty
+        self.assertEqual(self.char1.db.coins, 90)  # 100 - 10 bounty
         self.char2.traits.health.current = 5
         self.char2.at_damage(self.char1, 10)
         self.assertEqual(self.char1.db.coins, 100)  # Got bounty back
@@ -105,5 +121,4 @@ class TestBounty(EvenniaTest):
         self.char2.at_damage(self.char1, 200)
         self.assertEqual(self.char1.db.coins, 40)
         self.assertEqual(self.char2.db.bounty, 0)
-
 
