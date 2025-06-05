@@ -189,3 +189,20 @@ class TestCommandPrompt(EvenniaTest):
     def test_command_refreshes_prompt(self):
         self.char1.execute_cmd("score")
         self.char1.refresh_prompt.assert_called_once()
+
+    def test_look_refreshes_prompt(self):
+        self.char1.execute_cmd("look")
+        self.char1.refresh_prompt.assert_called_once()
+
+
+class TestReturnAppearance(EvenniaTest):
+    def test_room_return_appearance_format(self):
+        self.room1.appearance_template = (
+            "╔{name}\n{desc}\n{exits}\n{characters}\n{things}\n╚"
+        )
+        output = self.room1.return_appearance(self.char1)
+        self.assertIn("╔", output)
+        self.assertIn("╚", output)
+        self.assertIn("|wExits:|n", output)
+        self.assertIn("|wCharacters:|n", output)
+        self.assertIn("|wYou see:|n", output)
