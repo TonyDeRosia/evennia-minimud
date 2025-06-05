@@ -156,6 +156,8 @@ class CmdTrainSkill(Command):
         caller.db.exp -= exp_cost
         skill.base += levels
         self.msg(f"You practice your {to_train} and improve it to level {skill.base}.")
+        from world.system import stat_manager
+        stat_manager.refresh_stats(caller)
 
 
 class TrainCmdSet(CmdSet):
