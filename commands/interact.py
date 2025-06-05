@@ -43,22 +43,33 @@ class CmdEat(Command):
     """
 
     key = "eat"
-    aliases = ("drink", "consume")
+    aliases = ("drink", "consume", "devour", "chug", "quaff")
 
     def func(self):
-        obj = self.caller.search(self.args.strip(), stacked=1)
+        caller = self.caller
+        obj = caller.search(self.args.strip(), stacked=1)
         if not obj:
             return
         # stacked sometimes returns a list, so make sure it is one for consistent handling
         obj = make_iter(obj)[0]
 
-        if not obj.tags.has("edible"):
-            self.msg("You cannot eat that.")
+        is_admin = caller.check_permstring("Admin") or caller.check_permstring("Builder")
+
+        if self.cmdstring == "quaff" and not getattr(obj.db, "is_potion", False):
+            caller.msg("You can only quaff potions.")
+            return
+
+        if not obj.tags.has("edible") and not is_admin:
+            caller.msg("You cannot eat that.")
             return
 
         stamina = obj.attributes.get("stamina", 0)
-        self.caller.traits.stamina.current += stamina
-        self.caller.at_emote(
+        caller.traits.stamina.current += stamina
+
+        sated = obj.attributes.get("sated", 0)
+        caller.db.sated = (caller.db.sated or 0) + sated
+
+        caller.at_emote(
             f"$conj({self.cmdstring}) the {{target}}.", mapping={"target": obj}
         )
         obj.delete()
