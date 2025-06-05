@@ -41,16 +41,30 @@ def _table_from_pairs(pairs):
     return str(table)
 
 
+def _db_get(obj, key, default=None):
+    """Safely get an AttributeHandler value."""
+    db = getattr(obj, "db", None)
+    if hasattr(db, "get"):
+        try:
+            return db.get(key, default)
+        except Exception:
+            pass
+    if hasattr(obj, "attributes"):
+        return obj.attributes.get(key, default=default)
+    return default
+
+
 def get_display_scroll(chara):
     """Return a parchment-style stats display for chara."""
     lines = []
     name_line = f"|w{chara.key}|n"
-    if chara.db.title:
-        name_line += f" - {chara.db.title}"
+    title = _db_get(chara, "title", None)
+    if title:
+        name_line += f" - {title}"
     lines.append(name_line)
 
-    level = chara.db.get("level", 1)
-    xp = chara.db.get("exp", 0)
+    level = _db_get(chara, "level", 1)
+    xp = _db_get(chara, "exp", 0)
     lines.append(f"Level: {level}    XP: {xp}")
 
     hp = chara.traits.health
@@ -60,12 +74,13 @@ def get_display_scroll(chara):
         f"Health {hp.current}/{hp.max}  Mana {mp.current}/{mp.max}  Stamina {sp.current}/{sp.max}"
     )
 
-    coins = chara.db.get("coins", 0)
+    coins = _db_get(chara, "coins", 0)
     lines.append(f"Coins: {coins}")
 
-    if guild := chara.db.guild:
+    guild = _db_get(chara, "guild", "")
+    if guild:
         lines.append(f"Guild: {guild} ({chara.guild_rank})")
-        honor = chara.db.guild_honor or 0
+        honor = _db_get(chara, "guild_honor", 0)
         lines.append(f"Honor: {honor}")
 
     if buffs := chara.tags.get(category="buff", return_list=True):
