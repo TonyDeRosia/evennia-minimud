@@ -174,7 +174,14 @@ def get_effective_stat(obj, key: str) -> int:
     base = 0
     if trait := obj.traits.get(key):
         base = trait.value
-    base += obj.db.get(f"{key}_bonus", 0)
+    bonus_get = getattr(getattr(obj, "db", None), "get", None)
+    if callable(bonus_get):
+        try:
+            base += bonus_get(f"{key}_bonus", 0)
+        except Exception:
+            pass
+    elif hasattr(obj, "attributes"):
+        base += obj.attributes.get(f"{key}_bonus", default=0)
     base += state_manager.get_temp_bonus(obj, key)
     return int(base)
 
