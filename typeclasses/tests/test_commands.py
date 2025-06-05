@@ -206,3 +206,32 @@ class TestReturnAppearance(EvenniaTest):
         self.assertIn("|wExits:|n", output)
         self.assertIn("|wCharacters:|n", output)
         self.assertIn("|wYou see:|n", output)
+
+
+class TestRestCommands(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.msg = MagicMock()
+
+    def test_rest_adds_status(self):
+        self.char1.execute_cmd("rest")
+        self.assertTrue(self.char1.tags.has("sitting", category="status"))
+
+    def test_sleep_adds_statuses(self):
+        self.char1.execute_cmd("sleep")
+        self.assertTrue(self.char1.tags.has("sleeping", category="status"))
+        self.assertTrue(self.char1.tags.has("lying down", category="status"))
+
+    def test_wake_removes_statuses(self):
+        self.char1.tags.add("sleeping", category="status")
+        self.char1.tags.add("lying down", category="status")
+        self.char1.tags.add("sitting", category="status")
+        self.char1.execute_cmd("wake")
+        self.assertFalse(self.char1.tags.has("sleeping", category="status"))
+        self.assertFalse(self.char1.tags.has("lying down", category="status"))
+        self.assertFalse(self.char1.tags.has("sitting", category="status"))
+
+    def test_look_while_sleeping(self):
+        self.char1.tags.add("sleeping", category="status")
+        self.char1.execute_cmd("look")
+        self.char1.msg.assert_any_call("You can't see anything with your eyes closed.")
