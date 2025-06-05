@@ -19,3 +19,19 @@ class TestStats(EvenniaTest):
         char = self.char1
         stats.apply_stats(char)
         self.assertEqual(char.traits.perception.base, 5)
+
+    def test_sum_bonus_fallback_attributes(self):
+        """sum_bonus should read from attributes if obj.db is unusable."""
+        char = self.char1
+        stats.apply_stats(char)
+
+        class Dummy:
+            pass
+
+        dummy = Dummy()
+        dummy.traits = char.traits
+        dummy.attributes = char.attributes
+        dummy.db = None
+
+        char.attributes.add("stealth_bonus", 7)
+        self.assertEqual(stats.sum_bonus(dummy, "stealth"), char.traits.stealth.value + 7)

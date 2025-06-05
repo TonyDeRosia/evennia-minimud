@@ -130,12 +130,18 @@ def sum_bonus(obj, stat_key: str) -> int:
     if (trait := obj.traits.get(stat_key)):
         total += trait.value
     # allow bonuses stored directly on the character
-    total += obj.db.get(f"{stat_key}_bonus", 0)
+    if hasattr(obj, "attributes"):
+        total += obj.attributes.get(f"{stat_key}_bonus", default=0)
+    elif hasattr(obj, "db") and hasattr(obj.db, "get"):
+        total += obj.db.get(f"{stat_key}_bonus", 0)
     try:
         from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 
         for item in get_worn_clothes(obj):
-            total += item.db.get(f"{stat_key}_bonus", 0)
+            if hasattr(item, "attributes"):
+                total += item.attributes.get(f"{stat_key}_bonus", default=0)
+            elif hasattr(item, "db") and hasattr(item.db, "get"):
+                total += item.db.get(f"{stat_key}_bonus", 0)
     except Exception:  # pragma: no cover - clothing contrib may not be loaded
         pass
     return total
