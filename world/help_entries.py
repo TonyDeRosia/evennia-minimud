@@ -132,4 +132,17 @@ HELP_ENTRY_DICTS = [
             Changes the name of the current room.
         """,
     },
+    {
+        "key": "rset",
+        "category": "building",
+        "text": """
+            Set properties on the current room.
+
+            Usage:
+                rset area <area name>
+                rset id <number>
+
+            The id must be unique within the area's range.
+        """,
+    },
 ]
