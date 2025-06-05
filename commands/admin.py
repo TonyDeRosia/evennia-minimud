@@ -1,4 +1,5 @@
 from evennia import CmdSet, create_object
+from evennia.objects.models import ObjectDB
 import re
 from .command import Command
 from .info import CmdScan
@@ -252,9 +253,24 @@ class CmdPurge(Command):
         caller.msg(f"Purged {target.key}.")
 
 
-def _create_gear(caller, typeclass, name, slot=None, value=None, attr="dmg"):
-    """Helper to create gear objects."""
-    obj = create_object(typeclass, key=name, location=caller)
+def _create_gear(caller, typeclass, name, slot=None, value=None, attr="dmg", desc=None):
+    """Helper to create gear objects.
+
+    Ensures a unique key by appending ``-1`` etc if needed and stores an
+    optional description. A lowercase alias matching the final key is added.
+    """
+
+    base_key = name
+    key = base_key
+    counter = 1
+    while ObjectDB.objects.filter(db_key__iexact=key).exists():
+        key = f"{base_key}-{counter}"
+        counter += 1
+
+    obj = create_object(typeclass, key=key, location=caller)
+    if desc:
+        obj.db.desc = desc
+    obj.aliases.add(key.lower())
     if slot:
         if obj.is_typeclass("typeclasses.objects.ClothingObject", exact=False):
             obj.db.clothing_type = slot
@@ -291,7 +307,7 @@ class CmdCGear(Command):
             except ValueError:
                 self.msg("Value must be a number.")
                 return
-        _create_gear(self.caller, tclass, name, slot, val)
+        _create_gear(self.caller, tclass, name, slot, val, desc=None)
 
 
 class CmdOCreate(Command):
@@ -316,11 +332,15 @@ class CmdCWeapon(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: cweapon <name> [slot] [damage]")
+            self.msg("Usage: cweapon <name> <slot> <damage> [description]")
             return
-        parts = self.args.split()
+        parts = self.args.split(None, 3)
+        if len(parts) < 3:
+            self.msg("Usage: cweapon <name> <slot> <damage> [description]")
+            return
         name = parts[0]
-        slot = parts[1].lower() if len(parts) > 1 else None
+        slot = parts[1].lower()
+        desc = parts[3] if len(parts) > 3 else None
 
         dmg = None
         dice = None
@@ -342,7 +362,7 @@ class CmdCWeapon(Command):
             self.msg("Slot must be mainhand, offhand, mainhand/offhand, or twohanded.")
             return
 
-        obj = _create_gear(self.caller, "typeclasses.gear.MeleeWeapon", name)
+        obj = _create_gear(self.caller, "typeclasses.gear.MeleeWeapon", name, desc=desc)
 
         if slot:
             if slot == "mainhand/offhand":
@@ -380,7 +400,7 @@ class CmdCShield(Command):
             except ValueError:
                 self.msg("Armor must be a number.")
                 return
-        _create_gear(self.caller, "typeclasses.objects.ClothingObject", name, slot, armor, attr="armor")
+        _create_gear(self.caller, "typeclasses.objects.ClothingObject", name, slot, armor, attr="armor", desc=None)
 
 
 class CmdCArmor(Command):
@@ -404,7 +424,7 @@ class CmdCArmor(Command):
             except ValueError:
                 self.msg("Armor must be a number.")
                 return
-        _create_gear(self.caller, "typeclasses.objects.ClothingObject", name, slot, armor, attr="armor")
+        _create_gear(self.caller, "typeclasses.objects.ClothingObject", name, slot, armor, attr="armor", desc=None)
 
 
 class CmdCTool(Command):
@@ -421,7 +441,7 @@ class CmdCTool(Command):
         parts = self.args.split()
         name = parts[0]
         tag = parts[1] if len(parts) > 1 else None
-        obj = _create_gear(self.caller, "typeclasses.objects.Object", name)
+        obj = _create_gear(self.caller, "typeclasses.objects.Object", name, desc=None)
         if tag:
             obj.tags.add(tag, category="crafting_tool")
 
