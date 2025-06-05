@@ -133,6 +133,8 @@ def menunode_stat_alloc(caller):
     if remaining == 0:
         options.append({"desc": "Continue", "goto": "menunode_choose_name"})
 
+    options.append({"key": "_default", "goto": _adjust_stat_manual})
+
     options.append({"desc": "Back", "goto": "menunode_choose_gender"})
     return text, options
 
@@ -146,6 +148,33 @@ def _adjust_stat(caller, raw_string, stat, change, **kwargs):
         return "menunode_stat_alloc"
     # update the stat via AttributeHandler or db assignment
     char.attributes.add(stat.lower(), current_val + change)
+    return "menunode_stat_alloc"
+
+def _adjust_stat_manual(caller, raw_string, **kwargs):
+    """Allow input like 'STR 5' to set a stat."""
+    args = raw_string.strip().split()
+    if len(args) != 2:
+        caller.msg("Enter '<stat> <value>' to set a stat amount.")
+        return "menunode_stat_alloc"
+    stat, value = args[0].upper(), args[1]
+    if stat not in STAT_LIST:
+        caller.msg("Invalid stat name.")
+        return "menunode_stat_alloc"
+    try:
+        value = int(value)
+    except ValueError:
+        caller.msg("Value must be a number.")
+        return "menunode_stat_alloc"
+
+    char = caller.ndb.new_char
+    race_mods = next((r["stat_mods"] for r in races.RACE_LIST if r["name"] == char.db.race), {})
+    class_mods = next((c["stat_mods"] for c in classes.CLASS_LIST if c["name"] == char.db.charclass), {})
+    base_stats = {s: race_mods.get(s, 0) + class_mods.get(s, 0) for s in STAT_LIST}
+    current = {s: char.attributes.get(s.lower(), default=0) for s in STAT_LIST}
+    spent_other = sum(max(current[s] - base_stats[s], 0) for s in STAT_LIST if s != stat)
+    max_value = base_stats[stat] + max(STAT_POINTS - spent_other, 0)
+    value = max(base_stats[stat], min(value, max_value))
+    char.attributes.add(stat.lower(), value)
     return "menunode_stat_alloc"
 
 # ---------------- Name ----------------
@@ -209,7 +238,7 @@ def menunode_finish(caller, **kwargs):
         char.attributes.remove(stat.lower())
 
     # assign the newly created character to this account
-    char.account = caller
+    char.account = getattr(caller, "dbobj", caller)
     caller.characters.add(char)
     char.save()
 
