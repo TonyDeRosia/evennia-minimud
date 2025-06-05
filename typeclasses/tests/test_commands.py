@@ -78,6 +78,13 @@ class TestInfoCommands(EvenniaTest):
         self.char1.execute_cmd("guildwho")
         self.assertTrue(self.char1.msg.called)
 
+    def test_who_hides_account(self):
+        self.char1.execute_cmd("who")
+        self.assertTrue(self.char1.msg.called)
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn(self.char1.key, out)
+        self.assertNotIn(self.char1.account.key, out)
+
 class TestBountySmall(EvenniaTest):
     def setUp(self):
         super().setUp()
