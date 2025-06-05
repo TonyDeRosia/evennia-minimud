@@ -54,3 +54,6 @@ nosetests.xml
 # PyCharm config
 .idea
 
+
+# Dump files
+world/project_dump.txt
