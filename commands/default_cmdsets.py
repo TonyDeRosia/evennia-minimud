@@ -30,6 +30,7 @@ from commands.account import AccountOptsCmdSet
 from commands.shops import CmdMoney
 from commands.info import InfoCmdSet
 from commands.guilds import GuildCmdSet
+from commands.who import CmdWho
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -81,6 +82,7 @@ class AccountCmdSet(default_cmds.AccountCmdSet):
         #
         self.add(ContribCmdCharCreate)
         self.add(AccountOptsCmdSet)
+        self.add(CmdWho)
 
 
 class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
