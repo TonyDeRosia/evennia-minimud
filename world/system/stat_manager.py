@@ -114,7 +114,9 @@ def refresh_stats(obj) -> None:
 
     # cache base stat values on first run so repeated refreshes don't
     # continue stacking static bonuses like race or class modifiers
-    if not hasattr(obj.db, "base_primary_stats"):
+    if not hasattr(obj.db, "base_primary_stats") or not isinstance(
+        obj.db.base_primary_stats, dict
+    ):
         obj.db.base_primary_stats = {
             key: (obj.traits.get(key).base if obj.traits.get(key) else 0)
             for key in PRIMARY_STATS
