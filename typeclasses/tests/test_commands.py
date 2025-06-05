@@ -86,7 +86,7 @@ class TestBountySmall(EvenniaTest):
         self.char2.db.bounty = 0
 
     def test_bounty_reward_on_defeat(self):
-        self.char1.execute_cmd(f"bounty {self.char2.key}=10")
+        self.char1.execute_cmd(f"bounty {self.char2.key} 10")
         self.assertEqual(self.char2.db.bounty, 10)
         self.assertEqual(self.char1.db.coins, 10)
         self.char2.traits.health.current = 5
@@ -107,7 +107,7 @@ class TestBountyLarge(EvenniaTest):
         self.assertEqual(self.char2.db.bounty, 30)
 
     def test_bounty_reward_on_defeat(self):
-        self.char1.execute_cmd(f"bounty {self.char2.key}=10")
+        self.char1.execute_cmd(f"bounty {self.char2.key} 10")
         self.assertEqual(self.char2.db.bounty, 10)
         self.assertEqual(self.char1.db.coins, 90)  # 100 - 10 bounty
         self.char2.traits.health.current = 5
