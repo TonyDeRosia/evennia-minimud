@@ -3,9 +3,11 @@
 from unittest.mock import MagicMock
 
 from evennia.utils.test_resources import EvenniaTest
+from django.test import override_settings
 from utils.currency import from_copper, to_copper
 
 
+@override_settings(DEFAULT_HOME=None)
 class TestInfoCommands(EvenniaTest):
     def setUp(self):
         super().setUp()
@@ -176,6 +178,41 @@ class TestInfoCommands(EvenniaTest):
         out = self.char1.msg.call_args[0][0]
         self.assertIn("Damage: 10", out)
         self.assertIn("Effects: flaming, STR+2", out)
+
+    def test_inspect_duplicate_named_weapons(self):
+        """Ensure inspect selects the correct weapon when names repeat."""
+
+        self.char1.execute_cmd("cweapon epee mainhand 1d4 first")
+        self.char1.execute_cmd("cweapon epee mainhand 2d5 second")
+        self.char1.execute_cmd("cweapon epee offhand 3d6 third")
+
+        w1 = next(o for o in self.char1.contents if o.key == "epee")
+        w2 = next(o for o in self.char1.contents if o.key == "epee-1")
+        w3 = next(o for o in self.char1.contents if o.key == "epee-2")
+
+        w2.tags.add("flaming", category="buff")
+        w2.tags.add("STR+2")
+        w3.tags.add("chilling", category="buff")
+        w1.db.identified = True
+        w2.db.identified = True
+        w3.db.identified = True
+        w1.db.slot = "mainhand"
+        w2.db.slot = "mainhand"
+        w3.db.slot = "offhand"
+
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("inspect epee-1")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Damage: 2d5", out)
+        self.assertIn("Slot: mainhand", out)
+        self.assertIn("Effects: flaming", out)
+
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("inspect epee-2")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Damage: 3d6", out)
+        self.assertIn("Slot: offhand", out)
+        self.assertIn("Effects: chilling", out)
 
     def test_buffs(self):
         self.char1.execute_cmd("buffs")
