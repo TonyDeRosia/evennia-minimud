@@ -134,9 +134,11 @@ class Character(ObjectParent, ClothedCharacter):
 
     def at_post_move(self, source_location, **kwargs):
         """
-        optional post-move auto prompt
+        Send the room's appearance after moving and optional auto prompt.
         """
         super().at_post_move(source_location, **kwargs)
+        if self.location:
+            self.msg(self.location.return_appearance(self))
         # check if we have auto-prompt in settings
         if self.account and (settings := self.account.db.settings):
             if settings.get("auto prompt"):
