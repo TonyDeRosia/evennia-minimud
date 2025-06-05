@@ -270,6 +270,12 @@ def menunode_finish(caller, **kwargs):
         # remove the temporary value stored on the attribute handler
         char.attributes.remove(stat.lower())
 
+    # cache the finalized core stats so future refreshes won't
+    # repeatedly reapply static bonuses
+    char.db.base_primary_stats = {
+        stat: char.traits.get(stat).base for stat in STAT_LIST
+    }
+
     from world.system import stat_manager
     stat_manager.refresh_stats(char)
 
