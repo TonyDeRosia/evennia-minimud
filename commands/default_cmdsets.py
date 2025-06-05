@@ -30,6 +30,7 @@ from commands.account import AccountOptsCmdSet
 from commands.shops import CmdMoney
 from commands.info import InfoCmdSet
 from commands.guilds import GuildCmdSet
+from commands.bounty import BountyCmdSet
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -57,6 +58,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CombatCmdSet)
         self.add(SkillCmdSet)
         self.add(InteractCmdSet)
+        self.add(BountyCmdSet)
         self.add(InfoCmdSet)
         self.add(GuildCmdSet)
 

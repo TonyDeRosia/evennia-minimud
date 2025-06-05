@@ -153,8 +153,14 @@ class Character(ObjectParent, ClothedCharacter):
                 combat = self.location.scripts.get("combat")[0]
                 if not combat.remove_combatant(self):
                     # something went wrong...
-                    logger.log_err(f"Could not remove defeated character from combat! Character: {self.name} (#{self.id}) Location: {self.location.name} (#{self.location.id})")
+                    logger.log_err(
+                        f"Could not remove defeated character from combat! Character: {self.name} (#{self.id}) Location: {self.location.name} (#{self.location.id})"
+                    )
                     return
+            if (bounty := self.db.bounty):
+                attacker.db.coins = (attacker.db.coins or 0) + bounty
+                attacker.msg(f"You claim {bounty} coins for defeating {self.key}.")
+                self.db.bounty = 0
 
     def at_emote(self, message, **kwargs):
         """
