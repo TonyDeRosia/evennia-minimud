@@ -1,8 +1,6 @@
 from evennia import CmdSet
-from evennia.commands.default.muxcommand import MuxCommand
 from evennia.utils.evtable import EvTable
-
-from .command import Command
+from .command import MuxCommand
 
 
 class CmdSettings(MuxCommand):

@@ -26,6 +26,12 @@ class Command(BaseCommand):
             session = to_obj.sessions.get() if to_obj != self.caller else self.session
         to_obj.msg(text, from_obj=from_obj, session=session, **kwargs)
 
+    def at_post_cmd(self):
+        """Hook called after command execution."""
+        super().at_post_cmd()
+        if hasattr(self.caller, "refresh_prompt"):
+            self.caller.refresh_prompt()
+
     # Each Command class implements the following methods, called in this order
     # (only func() is actually required):
     #
@@ -36,6 +42,15 @@ class Command(BaseCommand):
     #     - at_post_cmd(): Extra actions, often things done after
     #         every command, like prompts.
     #
+    pass
+
+
+from evennia.commands.default.muxcommand import MuxCommand as BaseMuxCommand
+
+
+class MuxCommand(Command, BaseMuxCommand):
+    """Project MUX command ensuring prompts refresh after execution."""
+
     pass
 
 
