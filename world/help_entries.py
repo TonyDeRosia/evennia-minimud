@@ -145,4 +145,96 @@ HELP_ENTRY_DICTS = [
             The id must be unique within the area's range.
         """,
     },
+    {
+        "key": "admin",
+        "category": "admin",
+        "text": """
+            Commands reserved for administrators. These bypass normal limits and
+            should be used carefully. Most require `perm(Admin)` access.
+        """,
+    },
+    {
+        "key": "setstat",
+        "category": "admin",
+        "text": """
+            Change a character's stat directly.
+
+            Usage:
+                setstat <target> <stat> <value>
+
+            This modifies the target's stat permanently. Creating or adjusting
+            stats incorrectly may break the character, so double-check your
+            inputs before committing changes.
+        """,
+    },
+    {
+        "key": "setattr",
+        "category": "admin",
+        "text": """
+            Set an arbitrary attribute on an object or character.
+
+            Usage:
+                setattr <target> <attr> <value>
+
+            This will create the attribute if it does not already exist and
+            overwrite it if it does. Be certain you really want to change the
+            value as there is no undo command.
+        """,
+    },
+    {
+        "key": "setbounty",
+        "category": "admin",
+        "text": """
+            Assign a bounty to a character.
+
+            Usage:
+                setbounty <target> <amount>
+
+            Adjusts the bounty value stored on the target. This has immediate
+            gameplay impact, so use it sparingly and verify the amount before
+            applying it.
+        """,
+    },
+    {
+        "key": "slay",
+        "category": "admin",
+        "text": """
+            Instantly reduce a target's health to zero.
+
+            Usage:
+                slay <target>
+
+            This command will defeat the target regardless of protections or
+            current hit points. It should be reserved for emergencies or heavy
+            disciplinary action.
+        """,
+    },
+    {
+        "key": "smite",
+        "category": "admin",
+        "text": """
+            Reduce a target to a single hit point.
+
+            Usage:
+                smite <target>
+
+            Smite leaves the target alive but on the brink of death. This is
+            useful for demonstrations or warnings when killing them would be too
+            extreme.
+        """,
+    },
+    {
+        "key": "scan",
+        "category": "admin",
+        "text": """
+            Look around and into adjacent rooms.
+
+            Usage:
+                scan
+
+            Admins see additional information such as hidden objects, room flags
+            and the current HP/MP/SP of nearby characters. Use this power
+            responsibly and avoid revealing secret data to regular players.
+        """,
+    },
 ]
