@@ -53,3 +53,11 @@ class TestStatManager(EvenniaTest):
         char.traits.DEX.base += 2
         stat_manager.refresh_stats(char)
         self.assertGreater(char.db.derived_stats.get("stealth"), base_stealth)
+
+    def test_refresh_stats_handles_missing_base_stats(self):
+        char = self.char1
+        char.db.base_primary_stats = None
+        stat_manager.refresh_stats(char)
+        self.assertIsInstance(char.db.base_primary_stats, dict)
+        for key in stats.CORE_STAT_KEYS:
+            self.assertIn(key, char.db.base_primary_stats)
