@@ -43,12 +43,12 @@ class CmdFinger(Command):
     help_category = "general"
 
     def func(self):
-        if not self.args:
-            self.msg("Finger whom?")
-            return
-        target = self.caller.search(self.args.strip(), global_search=True)
-        if not target:
-            return
+        if not self.args or self.args.strip().lower() in {"self", "me"}:
+            target = self.caller
+        else:
+            target = self.caller.search(self.args.strip(), global_search=True)
+            if not target:
+                return
         desc = target.db.desc or "They have no description."
         stat_parts = []
         for key in CORE_STAT_KEYS:
@@ -65,8 +65,45 @@ class CmdFinger(Command):
             rank = get_rank_title(guild, honor)
             self.msg(f"Guild: {guild} ({rank})")
             self.msg(f"Honor: {honor}")
-        if bounty := target.db.get("bounty"):
+        bounty = target.attributes.get("bounty", 0)
+        if bounty > 0:
             self.msg(f"Bounty: {bounty}")
+
+
+class CmdBounty(Command):
+    """Place a bounty on another character."""
+
+    key = "bounty"
+    help_category = "general"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: bounty <target> <amount>")
+            return
+
+        parts = self.args.split(None, 1)
+        if len(parts) != 2 or not parts[1].isdigit():
+            self.msg("Usage: bounty <target> <amount>")
+            return
+
+        target_name, amount_str = parts
+        amount = int(amount_str)
+        target = self.caller.search(target_name, global_search=True)
+        if not target:
+            return
+
+        if amount <= 0:
+            self.msg("Amount must be positive.")
+            return
+
+        coins = self.caller.db.coins or 0
+        if coins < amount:
+            self.msg("You don't have that many coins.")
+            return
+
+        self.caller.db.coins = coins - amount
+        target.db.bounty = (target.db.bounty or 0) + amount
+        self.msg(f"You place a bounty of {amount} coins on {target.get_display_name(self.caller)}.")
 
 
 class CmdInventory(Command):
@@ -155,6 +192,7 @@ class InfoCmdSet(CmdSet):
         self.add(CmdScore)
         self.add(CmdDesc)
         self.add(CmdFinger)
+        self.add(CmdBounty)
         self.add(CmdInventory)
         self.add(CmdEquipment)
         self.add(CmdBuffs)
