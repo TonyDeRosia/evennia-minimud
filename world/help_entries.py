@@ -99,6 +99,20 @@ HELP_ENTRY_DICTS = [
         """,
     },
     {
+        "key": "inspect",
+        "category": "General",
+        "text": """
+            Examine an item for more information.
+
+            Usage:
+                inspect <item>
+
+            Identified items reveal their weight, damage, slots,
+            buffs and any flags. Unidentified items only show a brief
+            description.
+        """,
+    },
+    {
         "key": "room flags",
         "aliases": ["rflags", "rflag"],
         "category": "building",

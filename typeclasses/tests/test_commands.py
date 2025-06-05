@@ -108,6 +108,31 @@ class TestInfoCommands(EvenniaTest):
         self.char1.execute_cmd("equipment")
         self.assertTrue(self.char1.msg.called)
 
+    def test_inspect_identified(self):
+        self.obj1.db.desc = "A sharp blade."
+        self.obj1.db.weight = 2
+        self.obj1.db.dmg = 5
+        self.obj1.db.slot = "hand"
+        self.obj1.db.buff = "speed"
+        self.obj1.db.identified = True
+        self.obj1.tags.add("equipment", category="flag")
+        self.char1.execute_cmd(f"inspect {self.obj1.key}")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("A sharp blade.", out)
+        self.assertIn("Weight: 2", out)
+        self.assertIn("Damage: 5", out)
+        self.assertIn("Slot: hand", out)
+        self.assertIn("Buff: speed", out)
+        self.assertIn("equipment", out)
+
+    def test_inspect_unidentified(self):
+        self.obj1.db.desc = "A mystery item."
+        self.obj1.db.identified = False
+        self.char1.execute_cmd(f"inspect {self.obj1.key}")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("A mystery item.", out)
+        self.assertNotIn("Weight:", out)
+
     def test_buffs(self):
         self.char1.execute_cmd("buffs")
         self.assertTrue(self.char1.msg.called)
