@@ -52,13 +52,13 @@ class CmdFinger(Command):
                 return
         # gather lines of information
         lines = []
-        name_line = f"|w{target.key}|n"
-        if target.db.title:
-            name_line += f" - {target.db.title}"
-        lines.append(name_line)
+        title = target.db.title or ""
+        if title:
+            lines.append(f"|w{target.key}|n - {title}")
+        else:
+            lines.append(f"|w{target.key}|n")
 
         desc = target.db.desc or "They have no description."
-        lines.extend(desc.splitlines() or [desc])
 
         race = target.db.race or "Unknown"
         charclass = target.db.charclass or "Unknown"
@@ -76,6 +76,9 @@ class CmdFinger(Command):
             lines.append(f"Bounty: {bounty}")
         else:
             lines.append("No bounty.")
+
+        lines.append("")
+        lines.extend(desc.splitlines() or ["They have no description."])
 
         width = max(len(_strip_colors(l)) for l in lines)
         top = "+" + "=" * (width + 2) + "+"
