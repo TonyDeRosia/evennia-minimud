@@ -190,10 +190,11 @@ HELP_ENTRY_DICTS = [
             Create a simple melee weapon.
 
             Usage:
-                cweapon <name> [slot] [damage]
+                cweapon <name> <slot> <damage> [description]
 
-            Damage may be a flat number or dice in the form |wNdN|n (for example |w3d7|n).
+            A lowercase alias matching the final key is created automatically.
             Valid slots are |wmainhand|n, |woffhand|n, |wmainhand/offhand|n or |wtwohanded|n.
+            Damage may be a flat number or an |wNdN|n dice string, which is stored on the item as given.
 
             The item is a |ctypeclasses.gear.MeleeWeapon|n.
         """,
