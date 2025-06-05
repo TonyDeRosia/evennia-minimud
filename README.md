@@ -25,6 +25,24 @@ You are absolutely correct!
 Since my goal was to write as little custom code as possible, most of the mechanics are as minimal as I could get away with. But the code is all here and free for the taking - if you like part of it but want it to be better, make it better!
 
 
+## Coins and Currency
+
+This game uses four types of coins. They convert as follows:
+
+```
+1 Silver = 100 Copper
+1 Gold  = 10 Silver  = 1,000 Copper
+1 Platinum = 100 Gold = 1,000 Silver = 100,000 Copper
+```
+
+Typical uses for each coin are roughly:
+
+- **Copper** – everyday expenses like a meal or a night at a cheap inn.
+- **Silver** – standard goods, basic gear or routine services.
+- **Gold** – quality equipment or costly services such as a house or mount.
+- **Platinum** – rare, high value purchases or very large transactions.
+
+
 ## Installation and Setup
 
 I set this up to make it reasonably easy to install and set up, but I had to make a decision between "write a bunch more code" and "add a couple more steps" and since my goal was to write *less* code.... Well, you've got a couple more steps.
