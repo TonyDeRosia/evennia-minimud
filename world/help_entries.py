@@ -86,4 +86,16 @@ HELP_ENTRY_DICTS = [
                 |wprompt [HP:{hp}/{hpmax}] [SP:{sp}/{spmax}] {enc}>|n
         """,
     },
+    {
+        "key": "affects",
+        "category": "General",
+        "text": """
+            View your active buffs and status effects.
+
+            Usage:
+                affects
+
+            Displays any active effects along with their remaining duration in ticks.
+        """,
+    },
 ]
