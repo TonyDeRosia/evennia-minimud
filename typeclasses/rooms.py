@@ -67,6 +67,19 @@ class RoomParent(ObjectParent):
         else:
             return ""
 
+    def get_display_exits(self, looker, **kwargs):
+        """Return a list of exits visible to ``looker``."""
+
+        exits = [
+            ex.key.capitalize()
+            for ex in self.exits
+            if ex.access(looker, "view")
+        ]
+        if exits:
+            return "|wExits:|n " + ", ".join(exits)
+        else:
+            return "|wExits:|n None"
+
 
 class Room(RoomParent, DefaultRoom):
     """
