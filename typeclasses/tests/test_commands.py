@@ -3,6 +3,7 @@
 from unittest.mock import MagicMock
 
 from evennia.utils.test_resources import EvenniaTest
+from utils.currency import from_copper, to_copper
 
 
 class TestInfoCommands(EvenniaTest):
@@ -88,44 +89,44 @@ class TestInfoCommands(EvenniaTest):
 class TestBountySmall(EvenniaTest):
     def setUp(self):
         super().setUp()
-        self.char1.db.coins = 20
-        self.char2.db.coins = 0
+        self.char1.db.coins = from_copper(20)
+        self.char2.db.coins = from_copper(0)
         self.char2.db.bounty = 0
 
     def test_bounty_reward_on_defeat(self):
         self.char1.execute_cmd(f"bounty {self.char2.key} 10")
         self.assertEqual(self.char2.db.bounty, 10)
-        self.assertEqual(self.char1.db.coins, 10)
+        self.assertEqual(to_copper(self.char1.db.coins), 10)
         self.char2.traits.health.current = 5
         self.char2.at_damage(self.char1, 10)
-        self.assertEqual(self.char1.db.coins, 20)
+        self.assertEqual(to_copper(self.char1.db.coins), 20)
         self.assertEqual(self.char2.db.bounty, 0)
 
 class TestBountyLarge(EvenniaTest):
     def setUp(self):
         super().setUp()
-        self.char1.db.coins = 100
-        self.char2.db.coins = 0
+        self.char1.db.coins = from_copper(100)
+        self.char2.db.coins = from_copper(0)
         self.char2.db.bounty = 0
 
     def test_bounty_place(self):
         self.char1.execute_cmd(f"bounty {self.char2.key} 30")
-        self.assertEqual(self.char1.db.coins, 70)
+        self.assertEqual(to_copper(self.char1.db.coins), 70)
         self.assertEqual(self.char2.db.bounty, 30)
 
     def test_bounty_reward_on_defeat(self):
         self.char1.execute_cmd(f"bounty {self.char2.key} 10")
         self.assertEqual(self.char2.db.bounty, 10)
-        self.assertEqual(self.char1.db.coins, 90)  # 100 - 10 bounty
+        self.assertEqual(to_copper(self.char1.db.coins), 90)  # 100 - 10 bounty
         self.char2.traits.health.current = 5
         self.char2.at_damage(self.char1, 10)
-        self.assertEqual(self.char1.db.coins, 100)  # Got bounty back
+        self.assertEqual(to_copper(self.char1.db.coins), 100)  # Got bounty back
         self.assertEqual(self.char2.db.bounty, 0)
 
     def test_bounty_claim(self):
         self.char2.db.bounty = 40
-        self.char1.db.coins = 0
+        self.char1.db.coins = from_copper(0)
         self.char2.at_damage(self.char1, 200)
-        self.assertEqual(self.char1.db.coins, 40)
+        self.assertEqual(to_copper(self.char1.db.coins), 40)
         self.assertEqual(self.char2.db.bounty, 0)
 

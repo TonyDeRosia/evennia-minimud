@@ -10,6 +10,8 @@ from evennia.contrib.game_systems.clothing.clothing import (
 )
 from evennia.contrib.game_systems.cooldowns import CooldownHandler
 from evennia.prototypes.spawner import spawn
+from utils.currency import to_copper, from_copper
+import math
 
 from .objects import ObjectParent
 
@@ -151,10 +153,15 @@ class Character(ObjectParent, ClothedCharacter):
             if isinstance(attacker, PlayerCharacter):
                 bounty = self.db.bounty or 0
                 if bounty:
-                    coins = attacker.db.coins or 0
-                    attacker.db.coins = coins + bounty
-                    attacker.msg(f"You claim {bounty} bounty coins from {self.get_display_name(attacker)}.")
-                    self.msg(f"{attacker.get_display_name(self)} claims your bounty of {bounty} coins.")
+                    wallet = attacker.db.coins or {}
+                    total = to_copper(wallet) + bounty
+                    attacker.db.coins = from_copper(total)
+                    attacker.msg(
+                        f"You claim {bounty} bounty coins from {self.get_display_name(attacker)}."
+                    )
+                    self.msg(
+                        f"{attacker.get_display_name(self)} claims your bounty of {bounty} coins."
+                    )
                     self.db.bounty = 0
             self.traits.health.rate = 0
             if self.in_combat:
@@ -166,7 +173,9 @@ class Character(ObjectParent, ClothedCharacter):
                     )
                     return
             if (bounty := self.db.bounty):
-                attacker.db.coins = (attacker.db.coins or 0) + bounty
+                wallet = attacker.db.coins or {}
+                total = to_copper(wallet) + bounty
+                attacker.db.coins = from_copper(total)
                 attacker.msg(f"You claim {bounty} coins for defeating {self.key}.")
                 self.db.bounty = 0
 
@@ -304,8 +313,11 @@ class Character(ObjectParent, ClothedCharacter):
             chunks.append(self.get_display_name(looker, **kwargs))
 
         # add resource levels
+        hp = int(math.ceil(self.traits.health.percent(None)))
+        mp = int(math.ceil(self.traits.mana.percent(None)))
+        sp = int(math.ceil(self.traits.stamina.percent(None)))
         chunks.append(
-            f"Health {self.traits.health.percent()} : Mana {self.traits.mana.percent()} : Stamina {self.traits.stamina.percent()}"
+            f"Health {hp}% : Mana {mp}% : Stamina {sp}%"
         )
 
         # get all the current status flags for this character
