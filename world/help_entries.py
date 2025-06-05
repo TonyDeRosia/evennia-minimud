@@ -98,4 +98,26 @@ HELP_ENTRY_DICTS = [
             Displays any active effects along with their remaining duration in ticks.
         """,
     },
+    {
+        "key": "room flags",
+        "aliases": ["rflags", "rflag"],
+        "category": "building",
+        "text": """
+            Rooms can be marked with special flags.
+
+            Use |wrflags|n to view flags on the current room.
+            Builders may add or remove them with |wrflag add <flag>|n
+            or |wrflag remove <flag>|n. Available flags:
+
+            dark - room is dark, requiring light to see.
+            nopvp - player versus player combat is blocked.
+            sanctuary - hostile actions are prevented.
+            indoors - counts as being indoors.
+            safe - NPCs won't start fights here.
+            no_recall - recall and teleport effects fail.
+            no_mount - mounts cannot be used.
+            no_flee - prevents fleeing from combat.
+            rest_area - resting recovers resources faster.
+        """,
+    },
 ]

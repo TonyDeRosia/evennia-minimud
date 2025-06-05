@@ -319,3 +319,22 @@ class TestExtendedDigTeleport(EvenniaTest):
         self.char1.location = start
         self.char1.execute_cmd("@teleport test:6")
         self.assertEqual(self.char1.location, start)
+
+
+class TestRoomFlagCommands(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.msg = MagicMock()
+
+    def test_rflags_empty(self):
+        self.char1.execute_cmd("rflags")
+        self.char1.msg.assert_called_with("This room has no flags.")
+
+    def test_rflag_add_and_remove(self):
+        self.char1.execute_cmd("rflag add dark")
+        self.assertTrue(self.char1.location.tags.has("dark", category="room_flag"))
+        self.char1.execute_cmd("rflags")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("dark", out)
+        self.char1.execute_cmd("rflag remove dark")
+        self.assertFalse(self.char1.location.tags.has("dark", category="room_flag"))
