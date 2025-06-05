@@ -78,7 +78,7 @@ class TestInfoCommands(EvenniaTest):
         self.char1.execute_cmd("guildwho")
         self.assertTrue(self.char1.msg.called)
 
-class TestBounty(EvenniaTest):
+class TestBountySmall(EvenniaTest):
     def setUp(self):
         super().setUp()
         self.char1.db.coins = 20
@@ -94,7 +94,7 @@ class TestBounty(EvenniaTest):
         self.assertEqual(self.char1.db.coins, 20)
         self.assertEqual(self.char2.db.bounty, 0)
 
-class TestBounty(EvenniaTest):
+class TestBountyLarge(EvenniaTest):
     def setUp(self):
         super().setUp()
         self.char1.db.coins = 100
