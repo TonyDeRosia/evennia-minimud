@@ -74,3 +74,16 @@ class TestInfoCommands(EvenniaTest):
         self.char1.execute_cmd("guildwho")
         self.assertTrue(self.char1.msg.called)
 
+    def test_bounty_place(self):
+        self.char1.db.coins = 100
+        self.char1.execute_cmd(f"bounty {self.char2.key} 30")
+        self.assertEqual(self.char1.db.coins, 70)
+        self.assertEqual(self.char2.db.bounty, 30)
+
+    def test_bounty_claim(self):
+        self.char2.db.bounty = 40
+        self.char1.db.coins = 0
+        self.char2.at_damage(self.char1, 200)
+        self.assertEqual(self.char1.db.coins, 40)
+        self.assertEqual(self.char2.db.bounty, 0)
+

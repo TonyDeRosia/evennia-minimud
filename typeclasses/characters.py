@@ -148,6 +148,14 @@ class Character(ObjectParent, ClothedCharacter):
             self.msg(
                 "You fall unconscious. You can |wrespawn|n or wait to be |wrevive|nd."
             )
+            if isinstance(attacker, PlayerCharacter):
+                bounty = self.db.bounty or 0
+                if bounty:
+                    coins = attacker.db.coins or 0
+                    attacker.db.coins = coins + bounty
+                    attacker.msg(f"You claim {bounty} bounty coins from {self.get_display_name(attacker)}.")
+                    self.msg(f"{attacker.get_display_name(self)} claims your bounty of {bounty} coins.")
+                    self.db.bounty = 0
             self.traits.health.rate = 0
             if self.in_combat:
                 combat = self.location.scripts.get("combat")[0]
