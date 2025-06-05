@@ -1,4 +1,4 @@
-from evennia import CmdSet
+from evennia import CmdSet, create_object
 from .command import Command
 from .info import CmdScan
 from world.stats import CORE_STAT_KEYS
@@ -238,6 +238,152 @@ class CmdPurge(Command):
         caller.msg(f"Purged {target.key}.")
 
 
+def _create_gear(caller, typeclass, name, slot=None, value=None, attr="dmg"):
+    """Helper to create gear objects."""
+    obj = create_object(typeclass, key=name, location=caller)
+    if slot:
+        if obj.is_typeclass("typeclasses.objects.ClothingObject", exact=False):
+            obj.db.clothing_type = slot
+        else:
+            obj.db.slot = slot
+    if value is not None:
+        obj.db[attr] = value
+    caller.msg(f"Created {obj.get_display_name(caller)}.")
+    return obj
+
+
+class CmdCGear(Command):
+    """Create a generic gear item."""
+
+    key = "cgear"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: cgear <typeclass> <name> [slot] [value]")
+            return
+        parts = self.args.split()
+        if len(parts) < 2:
+            self.msg("Usage: cgear <typeclass> <name> [slot] [value]")
+            return
+        tclass = parts[0]
+        name = parts[1]
+        slot = parts[2] if len(parts) > 2 else None
+        val = None
+        if len(parts) > 3:
+            try:
+                val = int(parts[3])
+            except ValueError:
+                self.msg("Value must be a number.")
+                return
+        _create_gear(self.caller, tclass, name, slot, val)
+
+
+class CmdOCreate(Command):
+    """Create a generic object."""
+
+    key = "ocreate"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        name = self.args.strip() or "object"
+        create_object("typeclasses.objects.Object", key=name, location=self.caller)
+        self.msg(f"Created {name}.")
+
+
+class CmdCWeapon(Command):
+    """Create a simple weapon."""
+
+    key = "cweapon"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: cweapon <name> [slot] [damage]")
+            return
+        parts = self.args.split()
+        name = parts[0]
+        slot = parts[1] if len(parts) > 1 else None
+        dmg = None
+        if len(parts) > 2:
+            try:
+                dmg = int(parts[2])
+            except ValueError:
+                self.msg("Damage must be a number.")
+                return
+        _create_gear(self.caller, "typeclasses.gear.MeleeWeapon", name, slot, dmg)
+
+
+class CmdCShield(Command):
+    """Create a shield."""
+
+    key = "cshield"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: cshield <name> [slot] [armor]")
+            return
+        parts = self.args.split()
+        name = parts[0]
+        slot = parts[1] if len(parts) > 1 else None
+        armor = None
+        if len(parts) > 2:
+            try:
+                armor = int(parts[2])
+            except ValueError:
+                self.msg("Armor must be a number.")
+                return
+        _create_gear(self.caller, "typeclasses.objects.ClothingObject", name, slot, armor, attr="armor")
+
+
+class CmdCArmor(Command):
+    """Create an armor piece."""
+
+    key = "carmor"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: carmor <name> [slot] [armor]")
+            return
+        parts = self.args.split()
+        name = parts[0]
+        slot = parts[1] if len(parts) > 1 else None
+        armor = None
+        if len(parts) > 2:
+            try:
+                armor = int(parts[2])
+            except ValueError:
+                self.msg("Armor must be a number.")
+                return
+        _create_gear(self.caller, "typeclasses.objects.ClothingObject", name, slot, armor, attr="armor")
+
+
+class CmdCTool(Command):
+    """Create a crafting tool."""
+
+    key = "ctool"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: ctool <name> [tag]")
+            return
+        parts = self.args.split()
+        name = parts[0]
+        tag = parts[1] if len(parts) > 1 else None
+        obj = _create_gear(self.caller, "typeclasses.objects.Object", name)
+        if tag:
+            obj.tags.add(tag, category="crafting_tool")
+
+
 class AdminCmdSet(CmdSet):
     """Command set with admin utilities."""
 
@@ -264,4 +410,10 @@ class BuilderCmdSet(CmdSet):
         super().at_cmdset_creation()
         self.add(CmdSetStat)
         self.add(CmdSetAttr)
+        self.add(CmdOCreate)
+        self.add(CmdCWeapon)
+        self.add(CmdCShield)
+        self.add(CmdCArmor)
+        self.add(CmdCTool)
+        self.add(CmdCGear)
 
