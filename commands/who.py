@@ -1,8 +1,9 @@
-from evennia.commands.default.muxcommand import MuxCommand
 from evennia.server.sessionhandler import SESSIONS
 from evennia.utils.evtable import EvTable
 from evennia.utils.utils import time_format
 import time
+
+from .command import MuxCommand
 
 
 class CmdWho(MuxCommand):

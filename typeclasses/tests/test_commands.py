@@ -179,3 +179,13 @@ class TestBountyLarge(EvenniaTest):
         self.char2.at_damage(self.char1, 200)
         self.assertEqual(to_copper(self.char1.db.coins), 40)
         self.assertEqual(self.char2.db.bounty, 0)
+
+
+class TestCommandPrompt(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.refresh_prompt = MagicMock()
+
+    def test_command_refreshes_prompt(self):
+        self.char1.execute_cmd("score")
+        self.char1.refresh_prompt.assert_called_once()
