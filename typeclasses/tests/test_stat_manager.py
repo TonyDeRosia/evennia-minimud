@@ -62,6 +62,12 @@ class TestStatManager(EvenniaTest):
         for key in stats.CORE_STAT_KEYS:
             self.assertIn(key, char.db.base_primary_stats)
 
+    def test_stat_overrides(self):
+        char = self.char1
+        char.db.stat_overrides = {"attack_power": 123}
+        stat_manager.refresh_stats(char)
+        self.assertEqual(char.db.derived_stats.get("attack_power"), 123)
+
     def test_active_effect_modifiers(self):
         char = self.char1
         stat_manager.refresh_stats(char)
