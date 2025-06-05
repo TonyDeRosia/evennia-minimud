@@ -15,7 +15,7 @@ class CmdSetStat(Command):
 
     key = "setstat"
     aliases = ("statset",)
-    locks = "cmd:perm(Admin)"
+    locks = "cmd:perm(Admin) or perm(Builder)"
     help_category = "admin"
 
     def func(self):
@@ -66,7 +66,7 @@ class CmdSetAttr(Command):
 
     key = "setattr"
     aliases = ("setattribute",)
-    locks = "cmd:perm(Admin)"
+    locks = "cmd:perm(Admin) or perm(Builder)"
     help_category = "admin"
 
     def func(self):
@@ -179,4 +179,15 @@ class AdminCmdSet(CmdSet):
         self.add(CmdSlay)
         self.add(CmdSmite)
         self.add(CmdScan)
+
+
+class BuilderCmdSet(CmdSet):
+    """Command set with builder utilities."""
+
+    key = "Builder CmdSet"
+
+    def at_cmdset_creation(self):
+        super().at_cmdset_creation()
+        self.add(CmdSetStat)
+        self.add(CmdSetAttr)
 
