@@ -197,12 +197,25 @@ class TestCommandPrompt(EvenniaTest):
 
 class TestReturnAppearance(EvenniaTest):
     def test_room_return_appearance_format(self):
-        self.room1.appearance_template = (
-            "╔{name}\n{desc}\n{exits}\n{characters}\n{things}\n╚"
-        )
         output = self.room1.return_appearance(self.char1)
         self.assertIn("╔", output)
         self.assertIn("╚", output)
-        self.assertIn("|wExits:|n", output)
-        self.assertIn("|wCharacters:|n", output)
-        self.assertIn("|wYou see:|n", output)
+        self.assertIn("|wPlayers:|n", output)
+        self.assertIn("|wItems:|n", output)
+
+
+class TestRoomDisplay(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.msg = MagicMock()
+
+    def test_look_uses_box_layout(self):
+        self.char1.execute_cmd("look")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("╔", out)
+        self.assertIn("|wPlayers:|n", out)
+
+    def test_movement_sends_box_layout(self):
+        self.char1.execute_cmd("out")
+        calls = [c.args[0] for c in self.char1.msg.call_args_list if c.args]
+        self.assertTrue(any("╔" in c for c in calls))
