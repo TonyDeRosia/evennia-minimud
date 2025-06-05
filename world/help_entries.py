@@ -271,6 +271,21 @@ HELP_ENTRY_DICTS = [
         """,
     },
     {
+        "key": "purge",
+        "category": "admin",
+        "text": """
+            Delete unwanted objects.
+
+            Usage:
+                purge
+                purge <target>
+
+            Without arguments, removes everything in the current room
+            except for you. When given a target it deletes that object.
+            Players, rooms and exits are protected from being purged.
+        """,
+    },
+    {
         "key": "revive",
         "aliases": ["resurrect"],
         "category": "combat",
