@@ -8,7 +8,9 @@ from evennia import create_object
 from evennia.utils import dedent
 from typeclasses.characters import PlayerCharacter, Character
 from world.scripts import races, classes
-from world.stats import CORE_STAT_KEYS, apply_stats
+from world.stats import CORE_STAT_KEYS, CORE_STATS, apply_stats
+
+CORE_BASE = {stat.key: stat.base for stat in CORE_STATS}
 
 STAT_LIST = CORE_STAT_KEYS
 STAT_POINTS = 24
@@ -88,7 +90,7 @@ def _apply_base_stats(caller):
     race_mods = next((r["stat_mods"] for r in races.RACE_LIST if r["name"] == char.db.race), {})
     class_mods = next((c["stat_mods"] for c in classes.CLASS_LIST if c["name"] == char.db.charclass), {})
     for stat in STAT_LIST:
-        base = race_mods.get(stat, 0) + class_mods.get(stat, 0)
+        base = CORE_BASE.get(stat, 0) + race_mods.get(stat, 0) + class_mods.get(stat, 0)
         # set starting stat values using AttributeHandler or db assignment
         char.attributes.add(stat.lower(), base)
 
@@ -113,12 +115,18 @@ def menunode_stat_alloc(caller):
     char = caller.ndb.new_char
     race_mods = next((r["stat_mods"] for r in races.RACE_LIST if r["name"] == char.db.race), {})
     class_mods = next((c["stat_mods"] for c in classes.CLASS_LIST if c["name"] == char.db.charclass), {})
-    base_stats = {s: race_mods.get(s, 0) + class_mods.get(s, 0) for s in STAT_LIST}
+    base_stats = {
+        s: CORE_BASE.get(s, 0) + race_mods.get(s, 0) + class_mods.get(s, 0)
+        for s in STAT_LIST
+    }
     current = {s: char.attributes.get(s.lower(), default=0) for s in STAT_LIST}
     spent = sum(max(current[s] - base_stats[s], 0) for s in STAT_LIST)
     remaining = STAT_POINTS - spent
 
-    text = f"|wDistribute {STAT_POINTS} Points|n (Remaining: {remaining})\n"
+    text = (
+        f"|wDistribute {STAT_POINTS} Points|n (Remaining: {remaining})\n"
+        "Enter '<stat> <value>' to set a stat directly.\n"
+    )
     for s in STAT_LIST:
         text += f"{s}: {current[s]} (base: {base_stats[s]})\n"
 
@@ -143,7 +151,7 @@ def _adjust_stat(caller, raw_string, stat, change, **kwargs):
     current_val = char.attributes.get(stat.lower(), default=0)
     race_mods = next((r["stat_mods"] for r in races.RACE_LIST if r["name"] == char.db.race), {})
     class_mods = next((c["stat_mods"] for c in classes.CLASS_LIST if c["name"] == char.db.charclass), {})
-    base_val = race_mods.get(stat, 0) + class_mods.get(stat, 0)
+    base_val = CORE_BASE.get(stat, 0) + race_mods.get(stat, 0) + class_mods.get(stat, 0)
     if current_val + change < base_val:
         return "menunode_stat_alloc"
     # update the stat via AttributeHandler or db assignment
@@ -169,7 +177,10 @@ def _adjust_stat_manual(caller, raw_string, **kwargs):
     char = caller.ndb.new_char
     race_mods = next((r["stat_mods"] for r in races.RACE_LIST if r["name"] == char.db.race), {})
     class_mods = next((c["stat_mods"] for c in classes.CLASS_LIST if c["name"] == char.db.charclass), {})
-    base_stats = {s: race_mods.get(s, 0) + class_mods.get(s, 0) for s in STAT_LIST}
+    base_stats = {
+        s: CORE_BASE.get(s, 0) + race_mods.get(s, 0) + class_mods.get(s, 0)
+        for s in STAT_LIST
+    }
     current = {s: char.attributes.get(s.lower(), default=0) for s in STAT_LIST}
     spent_other = sum(max(current[s] - base_stats[s], 0) for s in STAT_LIST if s != stat)
     max_value = base_stats[stat] + max(STAT_POINTS - spent_other, 0)
