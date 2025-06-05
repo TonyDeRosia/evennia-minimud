@@ -56,6 +56,10 @@ class CmdFinger(Command):
             name_line += f" - {target.db.title}"
         self.msg(name_line)
         self.msg(desc)
+        race = target.db.race or "Unknown"
+        charclass = target.db.charclass or "Unknown"
+        self.msg(f"Race: {race}")
+        self.msg(f"Class: {charclass}")
         if guild := target.db.guild:
             honor = target.db.guild_honor or 0
             rank = get_rank_title(guild, honor)

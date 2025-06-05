@@ -14,6 +14,10 @@ class TestInfoCommands(EvenniaTest):
         self.obj1.location = self.char1
         self.char1.db.desc = "A tester."
         self.char2.db.desc = "Another tester."
+        self.char1.db.race = "Elf"
+        self.char1.db.charclass = "Mage"
+        self.char2.db.race = "Human"
+        self.char2.db.charclass = "Warrior"
 
     def test_desc_set_and_view(self):
         self.char1.execute_cmd("desc")
@@ -25,10 +29,18 @@ class TestInfoCommands(EvenniaTest):
     def test_finger(self):
         self.char1.execute_cmd(f"finger {self.char2.key}")
         self.assertTrue(self.char1.msg.called)
+        calls = [c.args[0] for c in self.char1.msg.call_args_list if c.args]
+        output = "\n".join(calls)
+        self.assertIn("Race: Human", output)
+        self.assertIn("Class: Warrior", output)
 
     def test_finger_self(self):
         self.char1.execute_cmd("finger self")
         self.assertTrue(self.char1.msg.called)
+        calls = [c.args[0] for c in self.char1.msg.call_args_list if c.args]
+        output = "\n".join(calls)
+        self.assertIn("Race: Elf", output)
+        self.assertIn("Class: Mage", output)
 
     def test_finger_bounty(self):
         self.char2.attributes.add("bounty", 10)
