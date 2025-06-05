@@ -1,4 +1,3 @@
-from evennia.utils.evtable import EvTable
 from evennia.utils import iter_to_str
 from world.stats import (
     CORE_STAT_KEYS,
@@ -14,6 +13,7 @@ from world.stats import (
 )
 from utils.currency import from_copper
 import math
+import re
 
 PRIMARY_EXTRA = "perception"
 
@@ -56,11 +56,27 @@ def get_secondary_stats(chara):
     return stats
 
 
-def _table_from_pairs(pairs):
-    table = EvTable(border="none")
-    for key, val in pairs:
-        table.add_row(key, val)
-    return str(table)
+def _strip_colors(text: str) -> str:
+    """Remove simple Evennia color codes for width calculations."""
+    return re.sub(r"\|.", "", text)
+
+
+def _pad(text: str, width: int) -> str:
+    """Pad ``text`` with spaces to ``width`` accounting for color codes."""
+    return text + " " * (width - len(_strip_colors(text)))
+
+
+def _columns(pairs, cols=3):
+    """Return rows of formatted key/value pairs in ``cols`` columns."""
+    col_width = max(len(_strip_colors(f"{k}: {v}")) for k, v in pairs) + 2
+    lines = []
+    for i in range(0, len(pairs), cols):
+        row = []
+        for k, v in pairs[i : i + cols]:
+            entry = f"{k}: |w{v}|n"
+            row.append(_pad(entry, col_width))
+        lines.append(" ".join(row).rstrip())
+    return lines
 
 
 def _db_get(obj, key, default=None):
@@ -77,44 +93,46 @@ def _db_get(obj, key, default=None):
 
 
 def get_display_scroll(chara):
-    """Return a parchment-style stats display for ``chara``."""
+    """Return a formatted character sheet for ``chara``."""
 
     apply_stats(chara)
 
     lines = []
-    name_line = f"|w{chara.key}|n"
+
+    name = f"|w{chara.key}|n"
     title = _db_get(chara, "title", None)
     if title:
-        name_line += f" - {title}"
-    lines.append(name_line)
+        name += f" - {title}"
+    lines.append(name)
 
     level = _db_get(chara, "level", 1)
     xp = _db_get(chara, "exp", 0)
-    lines.append(f"Level: {level}    XP: {xp}")
 
     hp = chara.traits.get("health")
     mp = chara.traits.get("mana")
     sp = chara.traits.get("stamina")
     if hp and mp and sp:
-        lines.append(
-            "Health {} / {}  Mana {} / {}  Stamina {} / {}".format(
-                int(round(hp.current)),
-                int(round(hp.max)),
-                int(round(mp.current)),
-                int(round(mp.max)),
-                int(round(sp.current)),
-                int(round(sp.max)),
-            )
-        )
+        hp_line = f"HP |g{int(round(hp.current))}|n/|g{int(round(hp.max))}|n"
+        mp_line = f"MP |c{int(round(mp.current))}|n/|c{int(round(mp.max))}|n"
+        sp_line = f"SP |w{int(round(sp.current))}|n/|w{int(round(sp.max))}|n"
     else:
-        lines.append("Health --/--  Mana --/--  Stamina --/--")
+        hp_line = mp_line = sp_line = "--/--"
+
+    lines.append(
+        f"Lvl {level}  XP {xp}  {hp_line}  {mp_line}  {sp_line}"
+    )
 
     coins = _db_get(chara, "coins", 0)
     if isinstance(coins, int):
         coins = from_copper(coins)
-    for coin in ["copper", "silver", "gold", "platinum"]:
-        amount = int(coins.get(coin, 0))
-        lines.append(f"{coin.capitalize()}: {amount}")
+    copper = int(coins.get("copper", 0))
+    silver = int(coins.get("silver", 0))
+    gold = int(coins.get("gold", 0))
+    platinum = int(coins.get("platinum", 0))
+    lines.append("COIN POUCH")
+    lines.append(
+        f"Copper: {copper}  Silver: {silver}  Gold: {gold}  Platinum: {platinum}"
+    )
 
     guild = _db_get(chara, "guild", "")
     if guild:
@@ -126,9 +144,19 @@ def get_display_scroll(chara):
         lines.append("Buffs: " + iter_to_str(sorted(buffs)))
 
     lines.append("PRIMARY STATS")
-    lines.append(_table_from_pairs(get_primary_stats(chara)))
+    primaries = "  ".join(
+        f"{k}: |w{v}|n" for k, v in get_primary_stats(chara)
+    )
+    lines.append(primaries)
 
     lines.append("SECONDARY STATS")
-    lines.append(_table_from_pairs(get_secondary_stats(chara)))
+    lines.extend(_columns(get_secondary_stats(chara)))
 
-    return "\n".join(lines)
+    width = max(len(_strip_colors(l)) for l in lines)
+    top = "╔" + "═" * (width + 2) + "╗"
+    bottom = "╚" + "═" * (width + 2) + "╝"
+    out = [top]
+    for line in lines:
+        out.append("║ " + _pad(line, width) + " ║")
+    out.append(bottom)
+    return "\n".join(out)

@@ -59,11 +59,15 @@ class TestInfoCommands(EvenniaTest):
         self.assertTrue(self.char1.msg.called)
         args = self.char1.msg.call_args[0][0]
         self.assertIn("Tester", args)
+        self.assertIn("COIN POUCH", args)
         self.assertIn("Copper: 10", args)
-        self.assertIn("Silver: 2", args)
-        self.assertIn("Gold: 1", args)
         self.assertIn("Armor", args)
         self.assertIn("Attack Power", args)
+        self.assertIn("╔", args)
+        self.assertIn("╚", args)
+        self.assertIn("|g", args)
+        self.assertIn("|w", args)
+        self.assertIn("|c", args)
 
 
     def test_score_alias_sc(self):
@@ -71,6 +75,7 @@ class TestInfoCommands(EvenniaTest):
         self.assertTrue(self.char1.msg.called)
         out = self.char1.msg.call_args[0][0]
         self.assertIn("PRIMARY STATS", out)
+        self.assertIn("╔", out)
 
     def test_inventory(self):
         self.char1.execute_cmd("inventory")
