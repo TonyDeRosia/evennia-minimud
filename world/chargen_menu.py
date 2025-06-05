@@ -114,7 +114,7 @@ def menunode_stat_alloc(caller):
     race_mods = next((r["stat_mods"] for r in races.RACE_LIST if r["name"] == char.db.race), {})
     class_mods = next((c["stat_mods"] for c in classes.CLASS_LIST if c["name"] == char.db.charclass), {})
     base_stats = {s: race_mods.get(s, 0) + class_mods.get(s, 0) for s in STAT_LIST}
-    current = {s: char.db.get(s.lower(), 0) for s in STAT_LIST}
+    current = {s: char.attributes.get(s.lower(), default=0) for s in STAT_LIST}
     spent = sum(max(current[s] - base_stats[s], 0) for s in STAT_LIST)
     remaining = STAT_POINTS - spent
 
@@ -138,7 +138,7 @@ def menunode_stat_alloc(caller):
 
 def _adjust_stat(caller, raw_string, stat, change, **kwargs):
     char = caller.ndb.new_char
-    current_val = char.db.get(stat.lower(), 0)
+    current_val = char.attributes.get(stat.lower(), default=0)
     race_mods = next((r["stat_mods"] for r in races.RACE_LIST if r["name"] == char.db.race), {})
     class_mods = next((c["stat_mods"] for c in classes.CLASS_LIST if c["name"] == char.db.charclass), {})
     base_val = race_mods.get(stat, 0) + class_mods.get(stat, 0)
@@ -181,7 +181,7 @@ def menunode_confirm(caller, **kwargs):
     text = f"|wFinal Confirmation|n\n"
     text += f"Race: {char.db.race}\nClass: {char.db.charclass}\nGender: {char.db.gender}\n"
     for s in STAT_LIST:
-        text += f"{s}: {char.db.get(s.lower(), 0)}\n"
+        text += f"{s}: {char.attributes.get(s.lower(), default=0)}\n"
     text += f"Name: {char.key}\nDescription: {char.db.desc}\n\nIs everything correct?"
 
     options = [
@@ -201,7 +201,7 @@ def menunode_finish(caller, **kwargs):
     apply_stats(char)
 
     for stat in STAT_LIST:
-        value = char.db.get(stat.lower(), 0)
+        value = char.attributes.get(stat.lower(), default=0)
         trait = char.traits.get(stat)
         if trait:
             trait.base = value
