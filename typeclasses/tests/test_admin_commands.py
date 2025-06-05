@@ -106,3 +106,13 @@ class TestAdminCommands(EvenniaTest):
         obj = create_object(Object, key="target", location=self.room1)
         self.char1.execute_cmd("purge target")
         self.assertIsNone(obj.pk)
+
+    def test_cweapon_dice_and_slot(self):
+        self.char1.execute_cmd("cweapon dagger mainhand/offhand 3d7")
+        weapon = next((obj for obj in self.char1.contents if obj.key == "dagger"), None)
+        self.assertIsNotNone(weapon)
+        self.assertTrue(weapon.tags.has("mainhand", category="flag"))
+        self.assertTrue(weapon.tags.has("offhand", category="flag"))
+        self.assertEqual(weapon.db.damage_dice, "3d7")
+        self.assertEqual(weapon.db.dice_num, 3)
+        self.assertEqual(weapon.db.dice_sides, 7)
