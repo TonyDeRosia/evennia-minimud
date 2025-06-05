@@ -373,3 +373,28 @@ class TestRoomSetCommand(EvenniaTest):
         self.char1.msg.reset_mock()
         self.char1.execute_cmd("rset id 6")
         self.char1.msg.assert_called_with("Number outside area range.")
+
+
+class TestAdminCommands(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.msg = MagicMock()
+        self.char2.msg = MagicMock()
+
+    def test_setstat_core(self):
+        self.char1.execute_cmd(f"setstat {self.char2.key} STR 12")
+        self.assertEqual(self.char2.traits.STR.base, 12)
+
+    def test_setattr_and_bounty(self):
+        self.char1.execute_cmd(f"setattr {self.char2.key} testattr foo")
+        self.assertEqual(self.char2.db.testattr, "foo")
+        self.char1.execute_cmd(f"setbounty {self.char2.key} 5")
+        self.assertEqual(self.char2.db.bounty, 5)
+
+    def test_smite_and_slay(self):
+        self.char2.traits.health.current = 50
+        self.char1.execute_cmd(f"smite {self.char2.key}")
+        self.assertEqual(self.char2.traits.health.current, 1)
+        self.char1.execute_cmd(f"slay {self.char2.key}")
+        self.assertEqual(self.char2.traits.health.current, 0)
+        self.assertTrue(self.char2.tags.has("unconscious", category="status"))

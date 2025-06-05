@@ -35,6 +35,7 @@ from commands.who import CmdWho
 from commands.building import CmdDig, CmdTeleport
 from commands.areas import AreaCmdSet
 from commands.room_flags import RoomFlagCmdSet
+from commands.admin import AdminCmdSet
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -69,6 +70,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CmdTeleport)
         self.add(RoomFlagCmdSet)
         self.add(AreaCmdSet)
+        self.add(AdminCmdSet)
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
