@@ -5,7 +5,7 @@ from utils.currency import to_copper, from_copper
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 from world.guilds import get_rank_title
 from world.stats import CORE_STAT_KEYS
-from utils.stats_utils import get_display_scroll
+from utils.stats_utils import get_display_scroll, _strip_colors, _pad
 
 from .command import Command
 
@@ -50,26 +50,38 @@ class CmdFinger(Command):
             target = self.caller.search(self.args.strip(), global_search=True)
             if not target:
                 return
-        desc = target.db.desc or "They have no description."
+        # gather lines of information
+        lines = []
         name_line = f"|w{target.key}|n"
         if target.db.title:
             name_line += f" - {target.db.title}"
-        self.msg(name_line)
-        self.msg(desc)
+        lines.append(name_line)
+
+        desc = target.db.desc or "They have no description."
+        lines.extend(desc.splitlines() or [desc])
+
         race = target.db.race or "Unknown"
         charclass = target.db.charclass or "Unknown"
-        self.msg(f"Race: {race}")
-        self.msg(f"Class: {charclass}")
+        lines.append(f"Race: {race}")
+        lines.append(f"Class: {charclass}")
+
         if guild := target.db.guild:
             honor = target.db.guild_honor or 0
             rank = get_rank_title(guild, honor)
-            self.msg(f"Guild: {guild} ({rank})")
-            self.msg(f"Honor: {honor}")
+            lines.append(f"Guild: {guild} ({rank})")
+            lines.append(f"Honor: {honor}")
+
         bounty = target.attributes.get("bounty", 0)
         if bounty:
-            self.msg(f"Bounty: {bounty}")
+            lines.append(f"Bounty: {bounty}")
         else:
-            self.msg("No bounty.")
+            lines.append("No bounty.")
+
+        width = max(len(_strip_colors(l)) for l in lines)
+        top = "╔" + "═" * (width + 2) + "╗"
+        bottom = "╚" + "═" * (width + 2) + "╝"
+        boxed = [top] + [f"║ " + _pad(l, width) + " ║" for l in lines] + [bottom]
+        self.msg("\n".join(boxed))
 
 
 class CmdBounty(Command):
@@ -104,7 +116,9 @@ class CmdBounty(Command):
             return
         self.caller.db.coins = from_copper(to_copper(wallet) - amount)
         target.db.bounty = (target.db.bounty or 0) + amount
-        self.msg(f"You place a bounty of {amount} coins on {target.get_display_name(self.caller)}.")
+        self.msg(
+            f"You place a bounty of {amount} coins on {target.get_display_name(self.caller)}."
+        )
 
 
 class CmdInventory(Command):
@@ -198,4 +212,3 @@ class InfoCmdSet(CmdSet):
         self.add(CmdEquipment)
         self.add(CmdBuffs)
         self.add(CmdTitle)
-
