@@ -2,6 +2,7 @@ from collections import Counter
 from evennia import CmdSet
 from evennia.utils import iter_to_str, make_iter
 from evennia.utils.evtable import EvTable
+from utils.currency import to_copper, from_copper, format_wallet
 
 from .command import Command
 
@@ -87,7 +88,7 @@ class CmdBuy(Command):
             return
 
         # check if we have any money first
-        if not (coins := self.caller.db.coins):
+        if not (wallet := self.caller.db.coins):
             self.msg("You don't have any money!")
             return
 
@@ -112,7 +113,7 @@ class CmdBuy(Command):
         total = sum([obj.attributes.get("price", 0) for obj in objs])
 
         # do we have enough money?
-        if coins < total:
+        if to_copper(wallet) < total:
             self.msg(f"You need {total} coins to buy that.")
             return
 
@@ -130,7 +131,7 @@ class CmdBuy(Command):
         for obj in objs:
             obj.location = self.caller
 
-        self.caller.db.coins -= total
+        self.caller.db.coins = from_copper(to_copper(wallet) - total)
 
         self.msg(
             f"You exchange {total} coin{'' if total == 1 else 's'} for {count} {obj_name}."
@@ -207,8 +208,8 @@ class CmdSell(Command):
         for obj in objs:
             self.obj.add_stock(obj)
 
-        coins = self.caller.db.coins or 0
-        self.caller.db.coins = coins + total
+        wallet = self.caller.db.coins or {}
+        self.caller.db.coins = from_copper(to_copper(wallet) + total)
 
         self.msg(
             f"You exchange {obj_name} for {total} coin{'' if total == 1 else 's'}."
@@ -328,5 +329,5 @@ class CmdMoney(Command):
     aliases = ("wallet", "money")
 
     def func(self):
-        coins = self.caller.db.coins or "no"
-        self.msg(f"You have {coins} coin{'' if coins == 1 else 's'}.")
+        coins = self.caller.db.coins or {}
+        self.msg(f"You have {format_wallet(coins)}.")
