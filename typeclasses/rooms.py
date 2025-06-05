@@ -67,14 +67,6 @@ class RoomParent(ObjectParent):
         else:
             return ""
 
-    def return_appearance(self, looker, **kwargs):
-        """Return a formatted display of this room."""
-        from utils.room_display import get_room_display
-
-        if not looker:
-            return ""
-        return get_room_display(self, looker)
-
 
 class Room(RoomParent, DefaultRoom):
     """
