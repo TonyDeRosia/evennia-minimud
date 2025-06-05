@@ -266,6 +266,15 @@ def menunode_finish(caller, **kwargs):
     # assign the newly created character to this account
     account = getattr(caller, "account", None) or getattr(caller, "dbobj", caller)
     char.account = account
+    char.locks.add(
+        ";".join(
+            [
+                f"puppet:id({char.id}) or pid({account.id}) or perm(Developer) or pperm(Developer)",
+                f"delete:id({account.id}) or perm(Admin)",
+                f"edit:pid({account.id}) or perm(Admin)",
+            ]
+        )
+    )
     account.characters.add(char)
     char.save()
 
