@@ -21,21 +21,48 @@ def _save_status_dict(chara, data):
     chara.db.status_effects = data
 
 
-def add_temp_stat_bonus(chara, stat: str, amount: int, duration: int):
-    """Add a temporary bonus to ``stat`` lasting ``duration`` ticks."""
+def add_temp_stat_bonus(
+    chara, stat: str, amount: int, duration: int, effect_key: str | None = None
+):
+    """Add a temporary bonus to ``stat`` lasting ``duration`` ticks.
+
+    Args:
+        chara: Character getting the bonus.
+        stat: Stat to modify.
+        amount: Bonus amount.
+        duration: Number of ticks bonus lasts.
+        effect_key: Optional identifier for the effect providing this bonus.
+    """
+
     bonuses = _get_bonus_dict(chara)
-    bonuses.setdefault(stat, []).append({"amount": amount, "duration": duration})
+    bonuses.setdefault(stat, []).append(
+        {"amount": amount, "duration": duration, "key": effect_key}
+    )
     _save_bonus_dict(chara, bonuses)
     stat_manager.refresh_stats(chara)
 
 
-def remove_temp_stat_bonus(chara, stat: str):
-    """Remove all temporary bonuses for ``stat``."""
+def remove_temp_stat_bonus(chara, stat: str, effect_key: str | None = None):
+    """Remove temporary bonuses for ``stat``.
+
+    If ``effect_key`` is provided, only bonuses matching that key are
+    removed. Otherwise all bonuses for the stat are cleared.
+    """
+
     bonuses = _get_bonus_dict(chara)
-    if stat in bonuses:
+    if stat not in bonuses:
+        return
+
+    if effect_key is None:
         del bonuses[stat]
-        _save_bonus_dict(chara, bonuses)
-        stat_manager.refresh_stats(chara)
+    else:
+        bonuses[stat] = [
+            entry for entry in bonuses[stat] if entry.get("key") != effect_key
+        ]
+        if not bonuses[stat]:
+            del bonuses[stat]
+    _save_bonus_dict(chara, bonuses)
+    stat_manager.refresh_stats(chara)
 
 
 def add_status_effect(chara, status: str, duration: int):
@@ -90,6 +117,7 @@ def tick_character(chara):
     changed = False
     for stat, entries in list(bonuses.items()):
         for entry in list(entries):
+            # duration counts down while preserving the effect key
             entry["duration"] -= 1
             if entry["duration"] <= 0:
                 entries.remove(entry)

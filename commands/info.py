@@ -254,10 +254,15 @@ class CmdAffects(Command):
             rows.append((name, dur, desc))
 
         for stat, entries in (caller.db.temp_bonuses or {}).items():
-            effect = EFFECTS.get(stat)
             for entry in entries:
-                name = effect.name if effect else f"{stat.capitalize()} Bonus"
-                desc = effect.desc if effect else f"Temporary bonus to {stat}."
+                ekey = entry.get("key") or stat
+                effect = EFFECTS.get(ekey) or EFFECTS.get(stat)
+                if effect:
+                    name = effect.name
+                    desc = effect.desc
+                else:
+                    name = ekey if entry.get("key") else f"{stat.capitalize()} Bonus"
+                    desc = f"Temporary bonus to {stat}."
                 rows.append((name, entry.get("duration"), desc))
 
         if not rows:
