@@ -108,6 +108,11 @@ class Character(ObjectParent, ClothedCharacter):
         self.db.guild = ""
         self.db.guild_honor = 0
 
+    def at_post_puppet(self, **kwargs):
+        """Ensure stats refresh when a character is controlled."""
+        from world.system import stat_manager
+        stat_manager.refresh_stats(self)
+        
     def at_pre_move(self, destination, **kwargs):
         """
         Called by self.move_to when trying to move somewhere. If this returns
@@ -256,6 +261,8 @@ class Character(ObjectParent, ClothedCharacter):
 
         # update the character with the new wielded info
         self.db._wielded = wielded
+        from world.system import stat_manager
+        stat_manager.refresh_stats(self)
         # return the list of hands that are now holding the weapon
         return hands
 
@@ -284,6 +291,8 @@ class Character(ObjectParent, ClothedCharacter):
 
         # update the character with the new wielded info
         self.db._wielded = wielded
+        from world.system import stat_manager
+        stat_manager.refresh_stats(self)
         # return the list of hands that are no longer holding the weapon
         return freed
 
@@ -310,6 +319,9 @@ class Character(ObjectParent, ClothedCharacter):
         """
         Returns a quick view of the current status of this character
         """
+
+        from world.system import stat_manager
+        stat_manager.refresh_stats(self)
 
         chunks = []
         # prefix the status string with the character's name, if it's someone else checking

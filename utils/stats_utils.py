@@ -11,6 +11,7 @@ from world.stats import (
     sum_bonus,
     apply_stats,
 )
+from world.system import stat_manager
 from utils.currency import from_copper
 import math
 import re
@@ -95,7 +96,7 @@ def _db_get(obj, key, default=None):
 def get_display_scroll(chara):
     """Return a formatted character sheet for ``chara``."""
 
-    apply_stats(chara)
+    stat_manager.refresh_stats(chara)
 
     lines = []
 

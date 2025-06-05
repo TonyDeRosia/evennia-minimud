@@ -2,6 +2,7 @@
 
 from typing import Dict, List
 from world import stats
+from world.system import stat_manager
 
 
 def _get_bonus_dict(chara) -> Dict[str, List[dict]]:
@@ -25,6 +26,7 @@ def add_temp_stat_bonus(chara, stat: str, amount: int, duration: int):
     bonuses = _get_bonus_dict(chara)
     bonuses.setdefault(stat, []).append({"amount": amount, "duration": duration})
     _save_bonus_dict(chara, bonuses)
+    stat_manager.refresh_stats(chara)
 
 
 def remove_temp_stat_bonus(chara, stat: str):
@@ -33,6 +35,7 @@ def remove_temp_stat_bonus(chara, stat: str):
     if stat in bonuses:
         del bonuses[stat]
         _save_bonus_dict(chara, bonuses)
+        stat_manager.refresh_stats(chara)
 
 
 def add_status_effect(chara, status: str, duration: int):
@@ -96,16 +99,21 @@ def tick_character(chara):
             changed = True
     if changed:
         _save_bonus_dict(chara, bonuses)
+        stat_manager.refresh_stats(chara)
 
     statuses = _get_status_dict(chara)
+    status_changed = False
     for status, dur in list(statuses.items()):
         dur -= 1
         if dur <= 0:
             del statuses[status]
             chara.tags.remove(status, category="status")
+            status_changed = True
         else:
             statuses[status] = dur
-    _save_status_dict(chara, statuses)
+    if status_changed:
+        _save_status_dict(chara, statuses)
+        stat_manager.refresh_stats(chara)
 
 
 def tick_all():
