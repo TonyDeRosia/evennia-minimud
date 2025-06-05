@@ -280,3 +280,18 @@ class TestDigCommand(EvenniaTest):
         self.assertEqual(self.char1.location, new_room)
         self.char1.execute_cmd("south")
         self.assertEqual(self.char1.location, start)
+
+    def test_dig_sets_area_and_room_id(self):
+        start = self.char1.location
+        start.set_area("test", 1)
+        self.char1.execute_cmd("dig east test 2")
+        new_room = start.exits.get(key="east").destination
+        self.assertEqual(new_room.db.area, "test")
+        self.assertEqual(new_room.db.room_id, 2)
+
+
+class TestAreaMakeCommand(EvenniaTest):
+    def test_amake_sets_area_on_room(self):
+        self.char1.execute_cmd("amake foo 1-5")
+        self.assertEqual(self.char1.location.db.area, "foo")
+        self.assertEqual(self.char1.location.db.room_id, 1)

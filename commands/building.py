@@ -71,17 +71,27 @@ class CmdDig(Command):
 
     def func(self):
         caller = self.caller
-        direction = self.args.strip().lower()
-        if not direction:
-            caller.msg("Usage: dig <direction>")
+        args = self.args.strip().split()
+        if not args:
+            caller.msg("Usage: dig <direction> [area] [number]")
             return
-        direction = DIR_FULL.get(direction)
+        direction = DIR_FULL.get(args[0].lower())
         if not direction:
             caller.msg("Unknown direction.")
             return
+        area = args[1] if len(args) > 1 else caller.location.db.area
+        room_id = None
+        if len(args) > 2:
+            if args[2].isdigit():
+                room_id = int(args[2])
+            else:
+                caller.msg("Room id must be numeric.")
+                return
         opposite = OPPOSITE[direction]
 
         new_room = create_object(Room, key="Room")
+        if area:
+            new_room.set_area(area, room_id)
         exit_to = create_object(
             Exit,
             key=direction,

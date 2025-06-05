@@ -51,6 +51,32 @@ class RoomParent(ObjectParent):
                     continue
                 obj.at_character_depart(mover, destination, **kwargs)
 
+    # metadata helpers --------------------------------------------------
+
+    def set_area(self, area, room_id=None):
+        """Set this room's area and optional id."""
+        self.db.area = area
+        if room_id is not None:
+            try:
+                self.db.room_id = int(room_id)
+            except (TypeError, ValueError):  # pragma: no cover - guard
+                self.db.room_id = None
+
+    def get_area(self):
+        """Return this room's area name."""
+        return self.db.area
+
+    def set_room_id(self, room_id):
+        """Set this room's numeric id inside its area."""
+        try:
+            self.db.room_id = int(room_id)
+        except (TypeError, ValueError):  # pragma: no cover - guard
+            self.db.room_id = None
+
+    def get_room_id(self):
+        """Return the room id inside its area."""
+        return self.db.room_id
+
     def get_display_footer(self, looker, **kwargs):
         """
         Shows a list of commands available here to the viewer.
