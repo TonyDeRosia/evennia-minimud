@@ -260,4 +260,14 @@ HELP_ENTRY_DICTS = [
             responsibly and avoid revealing secret data to regular players.
         """,
     },
+    {
+        "key": "restoreall",
+        "category": "admin",
+        "text": """
+            Fully heal every player and remove all buffs and status effects.
+
+            Usage:
+                restoreall
+        """,
+    },
 ]

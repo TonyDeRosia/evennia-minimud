@@ -164,6 +164,31 @@ class CmdSmite(Command):
         self.msg(f"You smite {target.key}, leaving them on the brink of death.")
 
 
+class CmdRestoreAll(Command):
+    """Fully restore all player characters."""
+
+    key = "restoreall"
+    locks = "cmd:perm(Admin)"
+    help_category = "admin"
+
+    def func(self):
+        from typeclasses.characters import PlayerCharacter
+
+        for pc in PlayerCharacter.objects.all():
+            if pc.traits.get("health"):
+                pc.traits.health.reset()
+            if pc.traits.get("mana"):
+                pc.traits.mana.reset()
+            if pc.traits.get("stamina"):
+                pc.traits.stamina.reset()
+            pc.tags.clear(category="buff")
+            pc.tags.clear(category="status")
+            pc.db.status_effects = {}
+            pc.db.temp_bonuses = {}
+            pc.db.active_effects = {}
+        self.msg("All player characters fully restored.")
+
+
 class AdminCmdSet(CmdSet):
     """Command set with admin utilities."""
 
@@ -176,6 +201,7 @@ class AdminCmdSet(CmdSet):
         self.add(CmdSetBounty)
         self.add(CmdSlay)
         self.add(CmdSmite)
+        self.add(CmdRestoreAll)
         self.add(CmdScan)
 
 

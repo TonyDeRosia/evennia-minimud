@@ -56,8 +56,22 @@ class TestAdminCommands(EvenniaTest):
         self.assertIn("HP", admin_out)
 
     def test_help_entries_exist(self):
-        for cmd in ("slay", "smite", "setstat", "setattr", "scan"):
+        for cmd in ("slay", "smite", "setstat", "setattr", "scan", "restoreall"):
             self.char1.msg.reset_mock()
             self.char1.execute_cmd(f"help {cmd}")
             self.assertTrue(self.char1.msg.called)
+
+    def test_restoreall(self):
+        self.char1.traits.health.current = 10
+        self.char2.traits.mana.current = 5
+        self.char1.tags.add("speed", category="buff")
+        self.char2.tags.add("sleeping", category="status")
+        self.char_other.traits.stamina.current = 1
+        self.char1.execute_cmd("restoreall")
+        for pc in (self.char1, self.char2, self.char_other):
+            self.assertEqual(pc.traits.health.current, pc.traits.health.max)
+            self.assertEqual(pc.traits.mana.current, pc.traits.mana.max)
+            self.assertEqual(pc.traits.stamina.current, pc.traits.stamina.max)
+            self.assertFalse(pc.tags.get(category="buff", return_list=True))
+            self.assertFalse(pc.tags.get(category="status", return_list=True))
 
