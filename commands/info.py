@@ -78,9 +78,9 @@ class CmdFinger(Command):
             lines.append("No bounty.")
 
         width = max(len(_strip_colors(l)) for l in lines)
-        top = "╔" + "═" * (width + 2) + "╗"
-        bottom = "╚" + "═" * (width + 2) + "╝"
-        boxed = [top] + [f"║ " + _pad(l, width) + " ║" for l in lines] + [bottom]
+        top = "+" + "=" * (width + 2) + "+"
+        bottom = "+" + "=" * (width + 2) + "+"
+        boxed = [top] + [f"| " + _pad(l, width) + " |" for l in lines] + [bottom]
         self.msg("\n".join(boxed))
 
 

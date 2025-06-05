@@ -162,10 +162,10 @@ def get_display_scroll(chara):
     lines.extend(_columns(get_secondary_stats(chara)))
 
     width = max(len(_strip_colors(l)) for l in lines)
-    top = "╔" + "═" * (width + 2) + "╗"
-    bottom = "╚" + "═" * (width + 2) + "╝"
+    top = "+" + "=" * (width + 2) + "+"
+    bottom = "+" + "=" * (width + 2) + "+"
     out = [top]
     for line in lines:
-        out.append("║ " + _pad(line, width) + " ║")
+        out.append("| " + _pad(line, width) + " |")
     out.append(bottom)
     return "\n".join(out)
