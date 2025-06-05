@@ -189,6 +189,55 @@ class CmdRestoreAll(Command):
         self.msg("All player characters fully restored.")
 
 
+class CmdPurge(Command):
+    """Remove unwanted objects.
+
+    Usage:
+        purge
+        purge <target>
+
+    Without arguments this deletes all objects in the caller's
+    current room except for the caller themselves. With an argument
+    it deletes the specified target. Players, exits and rooms are
+    protected from deletion.
+    """
+
+    key = "purge"
+    locks = "cmd:perm(Admin)"
+    help_category = "admin"
+
+    def func(self):
+        caller = self.caller
+        location = caller.location
+        if not location:
+            caller.msg("You have no location.")
+            return
+
+        if not self.args:
+            removed = []
+            for obj in list(location.contents):
+                if obj is caller or obj.destination or obj.has_account:
+                    continue
+                if obj.location is None:
+                    continue
+                removed.append(obj.key)
+                obj.delete()
+            if removed:
+                caller.msg("Purged: " + ", ".join(removed))
+            else:
+                caller.msg("Nothing to purge.")
+            return
+
+        target = caller.search(self.args.strip(), global_search=True)
+        if not target:
+            return
+        if target is caller or target.has_account or target.destination or target.location is None:
+            caller.msg("You cannot purge that.")
+            return
+        target.delete()
+        caller.msg(f"Purged {target.key}.")
+
+
 class AdminCmdSet(CmdSet):
     """Command set with admin utilities."""
 
@@ -202,6 +251,7 @@ class AdminCmdSet(CmdSet):
         self.add(CmdSlay)
         self.add(CmdSmite)
         self.add(CmdRestoreAll)
+        self.add(CmdPurge)
         self.add(CmdScan)
 
 
