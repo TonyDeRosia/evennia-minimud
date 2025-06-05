@@ -181,6 +181,43 @@ class CmdEquipment(Command):
                 self.msg(line)
 
 
+class CmdInspect(Command):
+    """Inspect an item for detailed information."""
+
+    key = "inspect"
+    help_category = "general"
+
+    def func(self):
+        caller = self.caller
+        if not self.args:
+            caller.msg("Usage: inspect <item>")
+            return
+
+        obj = caller.search(self.args.strip())
+        if not obj:
+            return
+
+        lines = [f"|w{obj.get_display_name(caller)}|n"]
+        desc = obj.db.desc or "You see nothing special."
+        lines.append(desc)
+
+        if obj.db.identified:
+            if (weight := obj.db.weight) is not None:
+                lines.append(f"Weight: {weight}")
+            if (dmg := obj.db.dmg) is not None:
+                lines.append(f"Damage: {dmg}")
+            slot = obj.db.slot or obj.db.clothing_type
+            if slot:
+                lines.append(f"Slot: {slot}")
+            if (buff := obj.db.buff):
+                lines.append(f"Buff: {buff}")
+            flags = obj.tags.get(category="flag", return_list=True) or []
+            if flags:
+                lines.append("Flags: " + ", ".join(sorted(flags)))
+
+        caller.msg("\n".join(lines))
+
+
 class CmdBuffs(Command):
     """List active buff effects."""
 
@@ -395,6 +432,7 @@ class InfoCmdSet(CmdSet):
         self.add(CmdFinger)
         self.add(CmdBounty)
         self.add(CmdInventory)
+        self.add(CmdInspect)
         self.add(CmdEquipment)
         self.add(CmdAffects)
         self.add(CmdBuffs)
