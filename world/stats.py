@@ -36,57 +36,57 @@ EVASION_STAT = Stat("evasion", "Evasion", stat="DEX")
 
 # Defense-oriented stats
 DEFENSE_STATS: List[Stat] = [
-    Stat("armor", "Armor"),
-    Stat("magic_resist", "Magic Resist"),
-    Stat("dodge", "Dodge"),
-    Stat("block_rate", "Block Rate"),
-    Stat("parry_rate", "Parry Rate"),
-    Stat("status_resist", "Status Resist"),
-    Stat("crit_resist", "Critical Resist"),
+    Stat("armor", "Armor", stat="CON"),
+    Stat("magic_resist", "Magic Resist", stat="WIS"),
+    Stat("dodge", "Dodge", stat="DEX"),
+    Stat("block_rate", "Block Rate", stat="STR"),
+    Stat("parry_rate", "Parry Rate", stat="DEX"),
+    Stat("status_resist", "Status Resist", stat="CON"),
+    Stat("crit_resist", "Critical Resist", stat="CON"),
 ]
 
 # Offense-oriented stats
 OFFENSE_STATS: List[Stat] = [
-    Stat("attack_power", "Attack Power"),
-    Stat("spell_power", "Spell Power"),
-    Stat("crit_chance", "Critical Chance"),
-    Stat("crit_bonus", "Critical Damage Bonus"),
-    Stat("accuracy", "Accuracy"),
-    Stat("piercing", "Armor Penetration"),
-    Stat("spell_penetration", "Spell Penetration"),
+    Stat("attack_power", "Attack Power", stat="STR"),
+    Stat("spell_power", "Spell Power", stat="INT"),
+    Stat("crit_chance", "Critical Chance", stat="LUCK"),
+    Stat("crit_bonus", "Critical Damage Bonus", stat="STR"),
+    Stat("accuracy", "Accuracy", stat="DEX"),
+    Stat("piercing", "Armor Penetration", stat="STR"),
+    Stat("spell_penetration", "Spell Penetration", stat="INT"),
 ]
 
 # Regeneration & sustain stats
 REGEN_STATS: List[Stat] = [
-    Stat("health_regen", "Health Regen"),
-    Stat("mana_regen", "Mana Regen"),
-    Stat("stamina_regen", "Stamina Regen"),
-    Stat("lifesteal", "Lifesteal"),
-    Stat("leech", "Leech"),
+    Stat("health_regen", "Health Regen", stat="CON"),
+    Stat("mana_regen", "Mana Regen", stat="WIS"),
+    Stat("stamina_regen", "Stamina Regen", stat="CON"),
+    Stat("lifesteal", "Lifesteal", stat="STR"),
+    Stat("leech", "Leech", stat="INT"),
 ]
 
 # Combat timing & tempo stats
 TEMPO_STATS: List[Stat] = [
-    Stat("cooldown_reduction", "Cooldown Reduction"),
-    Stat("initiative", "Initiative"),
-    Stat("gcd_speed", "Global Cooldown Speed"),
+    Stat("cooldown_reduction", "Cooldown Reduction", stat="WIS"),
+    Stat("initiative", "Initiative", stat="DEX"),
+    Stat("gcd_speed", "Global Cooldown Speed", stat="DEX"),
 ]
 
 # Utility / miscellaneous stats
 UTILITY_STATS: List[Stat] = [
-    Stat("stealth", "Stealth"),
-    Stat("detection", "Detection"),
-    Stat("perception", "Perception", base=5),
-    Stat("threat", "Threat"),
-    Stat("movement_speed", "Movement Speed", base=1),
-    Stat("craft_bonus", "Crafting Bonus"),
+    Stat("stealth", "Stealth", stat="DEX"),
+    Stat("detection", "Detection", stat="WIS"),
+    Stat("perception", "Perception", base=5, stat="WIS"),
+    Stat("threat", "Threat", stat="STR"),
+    Stat("movement_speed", "Movement Speed", base=1, stat="DEX"),
+    Stat("craft_bonus", "Crafting Bonus", stat="INT"),
 ]
 
 # PvP / guild-related stats
 PVP_STATS: List[Stat] = [
-    Stat("pvp_power", "PvP Power"),
-    Stat("pvp_resilience", "PvP Resilience"),
-    Stat("guild_honor_mod", "Guild Honor Rank Modifiers"),
+    Stat("pvp_power", "PvP Power", stat="STR"),
+    Stat("pvp_resilience", "PvP Resilience", stat="CON"),
+    Stat("guild_honor_mod", "Guild Honor Rank Modifiers", stat="WIS"),
 ]
 
 
