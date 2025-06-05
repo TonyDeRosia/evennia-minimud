@@ -298,14 +298,6 @@ DRIFTWOOD = {
     "spawn_proto": "WOOD_LOG",
     "gathers": lambda: randint(1, 3),
 }
-WOOD_LOG = {
-    "key": "log of wood",
-    "desc": "A decent-sized wooden log. Not so big you can't carry it.",
-    "tags": [
-        ("wood", "crafting_material"),
-    ],
-    "value": 1,
-}
 
 
 ### Mobs
