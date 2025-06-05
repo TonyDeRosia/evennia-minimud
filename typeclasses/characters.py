@@ -354,6 +354,25 @@ class Character(ObjectParent, ClothedCharacter):
         # glue together the chunks and return
         return " - ".join(chunks)
 
+    def get_resource_prompt(self):
+        """Return a colorized prompt showing HP/MP/SP values."""
+        from world.system import stat_manager
+
+        stat_manager.refresh_stats(self)
+
+        hp_cur = int(self.traits.health.current)
+        hp_max = int(self.traits.health.max)
+        mp_cur = int(self.traits.mana.current)
+        mp_max = int(self.traits.mana.max)
+        sp_cur = int(self.traits.stamina.current)
+        sp_max = int(self.traits.stamina.max)
+
+        return (
+            f"[|r{hp_cur}|n/{hp_max}] "
+            f"[|b{mp_cur}|n/{mp_max}] "
+            f"[|g{sp_cur}|n/{sp_max}] >"
+        )
+
     def at_character_arrive(self, chara, **kwargs):
         """
         Respond to the arrival of a character
@@ -374,7 +393,7 @@ class Character(ObjectParent, ClothedCharacter):
     def refresh_prompt(self):
         """Refresh the player's prompt display."""
         if self.sessions.count():
-            self.msg(prompt=self.get_display_status(self))
+            self.msg(prompt=self.get_resource_prompt())
 
     def revive(self, reviver, **kwargs):
         """
