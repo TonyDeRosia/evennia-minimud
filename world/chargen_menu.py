@@ -125,7 +125,7 @@ def menunode_stat_alloc(caller):
 
     text = (
         f"|wDistribute {STAT_POINTS} Points|n (Remaining: {remaining})\n"
-        "Enter '<stat> <value>' to set a stat directly.\n"
+        "Enter '<stat> <amount>' to add points directly.\n"
     )
     for s in STAT_LIST:
         text += f"{s}: {current[s]} (base: {base_stats[s]})\n"
@@ -134,9 +134,7 @@ def menunode_stat_alloc(caller):
     if remaining > 0:
         for s in STAT_LIST:
             options.append({"desc": f"Add to {s}", "goto": (_adjust_stat, {"stat": s, "change": 1})})
-    for s in STAT_LIST:
-        if current[s] > base_stats[s]:
-            options.append({"desc": f"Remove from {s}", "goto": (_adjust_stat, {"stat": s, "change": -1})})
+    options.append({"desc": "Reset Points", "goto": _reset_stats})
 
     if remaining == 0:
         options.append({"desc": "Continue", "goto": "menunode_choose_name"})
@@ -159,10 +157,10 @@ def _adjust_stat(caller, raw_string, stat, change, **kwargs):
     return "menunode_stat_alloc"
 
 def _adjust_stat_manual(caller, raw_string, **kwargs):
-    """Allow input like 'STR 5' to set a stat."""
+    """Allow input like 'STR 5' to add points to a stat."""
     args = raw_string.strip().split()
     if len(args) != 2:
-        caller.msg("Enter '<stat> <value>' to set a stat amount.")
+        caller.msg("Enter '<stat> <amount>' to add that many points.")
         return "menunode_stat_alloc"
     stat, value = args[0].upper(), args[1]
     if stat not in STAT_LIST:
@@ -182,10 +180,20 @@ def _adjust_stat_manual(caller, raw_string, **kwargs):
         for s in STAT_LIST
     }
     current = {s: char.attributes.get(s.lower(), default=0) for s in STAT_LIST}
-    spent_other = sum(max(current[s] - base_stats[s], 0) for s in STAT_LIST if s != stat)
-    max_value = base_stats[stat] + max(STAT_POINTS - spent_other, 0)
-    value = max(base_stats[stat], min(value, max_value))
-    char.attributes.add(stat.lower(), value)
+    spent = sum(max(current[s] - base_stats[s], 0) for s in STAT_LIST)
+    remaining = STAT_POINTS - spent
+
+    # positive values add points, negatives subtract but never below base
+    if value >= 0:
+        delta = min(value, remaining)
+        char.attributes.add(stat.lower(), current[stat] + delta)
+    else:
+        char.attributes.add(stat.lower(), max(base_stats[stat], current[stat] + value))
+    return "menunode_stat_alloc"
+
+def _reset_stats(caller, raw_string="", **kwargs):
+    """Reset all stats to their base values."""
+    _apply_base_stats(caller)
     return "menunode_stat_alloc"
 
 # ---------------- Name ----------------

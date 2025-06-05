@@ -51,3 +51,16 @@ class TestChargen(EvenniaTest):
         self.assertEqual(self.char.db.race, "Human")
         self.assertEqual(self.char.db.charclass, "Warrior")
         self.assertEqual(self.char.db.gender, "male")
+
+    def test_adjust_stat_manual_adds_points(self):
+        chargen_menu._set_race(self.account, "", "Human")
+        chargen_menu._set_class(self.account, "", "Warrior")
+        chargen_menu._set_gender(self.account, "", "male")
+
+        base_str = self.char.attributes.get("str")
+        chargen_menu._adjust_stat_manual(self.account, "STR 5")
+        self.assertEqual(self.char.attributes.get("str"), base_str + 5)
+
+        # Reset should restore base values
+        chargen_menu._reset_stats(self.account)
+        self.assertEqual(self.char.attributes.get("str"), base_str)
