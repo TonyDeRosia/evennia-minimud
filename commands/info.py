@@ -1,7 +1,7 @@
 from evennia import CmdSet
 from evennia.utils.evtable import EvTable
 from evennia.utils import iter_to_str
-from utils.currency import to_copper, from_copper, format_wallet
+from utils.currency import to_copper, from_copper
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 from world.guilds import get_rank_title
 from world.stats import CORE_STAT_KEYS
