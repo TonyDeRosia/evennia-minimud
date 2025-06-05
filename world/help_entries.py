@@ -160,6 +160,76 @@ HELP_ENTRY_DICTS = [
         """,
     },
     {
+        "key": "ocreate",
+        "category": "building",
+        "text": """
+            Create a generic object and put it in your inventory.
+
+            Usage:
+                ocreate <name>
+        """,
+    },
+    {
+        "key": "cweapon",
+        "category": "building",
+        "text": """
+            Create a simple melee weapon.
+
+            Usage:
+                cweapon <name> [slot] [damage]
+
+            The item is a |ctypeclasses.gear.MeleeWeapon|n with optional damage value.
+        """,
+    },
+    {
+        "key": "cshield",
+        "category": "building",
+        "text": """
+            Create a shield piece of armor.
+
+            Usage:
+                cshield <name> [slot] [armor]
+
+            The armor value is stored on the item.
+        """,
+    },
+    {
+        "key": "carmor",
+        "category": "building",
+        "text": """
+            Create a wearable armor item.
+
+            Usage:
+                carmor <name> [slot] [armor]
+
+            Slot becomes the clothing type.
+        """,
+    },
+    {
+        "key": "ctool",
+        "category": "building",
+        "text": """
+            Create a crafting tool.
+
+            Usage:
+                ctool <name> [tag]
+
+            The tag is added with category 'crafting_tool'.
+        """,
+    },
+    {
+        "key": "cgear",
+        "category": "building",
+        "text": """
+            Generic helper for gear creation.
+
+            Usage:
+                cgear <typeclass> <name> [slot] [value]
+
+            Creates an object of the given typeclass and places it in your inventory.
+        """,
+    },
+    {
         "key": "admin",
         "category": "admin",
         "text": """
