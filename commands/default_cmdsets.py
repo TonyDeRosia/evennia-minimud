@@ -33,6 +33,7 @@ from commands.guilds import GuildCmdSet
 from commands.rest import RestCmdSet
 from commands.who import CmdWho
 from commands.building import CmdDig
+from commands.areas import AreaCmdSet
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -64,6 +65,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(RestCmdSet)
         self.add(GuildCmdSet)
         self.add(CmdDig)
+        self.add(AreaCmdSet)
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
