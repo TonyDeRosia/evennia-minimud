@@ -15,7 +15,7 @@ import math
 
 from .objects import ObjectParent
 
-_IMMOBILE = ("sitting", "lying down", "unconscious")
+_IMMOBILE = ("sitting", "lying down", "unconscious", "sleeping")
 
 # base stamina cost of moving between rooms
 _MOVE_SP_BASE = 5
@@ -465,9 +465,47 @@ class Character(ObjectParent, ClothedCharacter):
         pass
 
     def at_tick(self):
-        """Called by the global ticker."""
-        if self.sessions.count():
-            self.refresh_prompt()
+        """Called by the global ticker.
+
+        Regenerates resources based on current status and refreshes the prompt
+        to visually reflect the changes.
+        """
+        if not self.sessions.count():
+            return
+
+        statuses = self.tags.get(category="status", return_list=True) or []
+
+        if "sleeping" in statuses or "unconscious" in statuses:
+            low, high = 7, 12
+        elif any(s in statuses for s in ("sitting", "lying down")):
+            low, high = 3, 7
+        else:
+            low, high = 1, 3
+
+        healed = {}
+        for trait_key, color in (
+            ("health", "|r"),
+            ("mana", "|b"),
+            ("stamina", "|g"),
+        ):
+            trait = self.traits.get(trait_key)
+            if not trait:
+                continue
+            if trait.current >= trait.max:
+                continue
+            pct = randint(low, high)
+            amount = max(1, int(round(trait.max * pct / 100)))
+            new = min(trait.current + amount, trait.max)
+            gained = new - trait.current
+            trait.current = new
+            if gained:
+                healed[trait_key] = (gained, color)
+
+        if healed:
+            parts = [f"{col}+{amt} {k[:2].upper()}|n" for k, (amt, col) in healed.items()]
+            self.msg("You regenerate " + ", ".join(parts) + ".")
+
+        self.refresh_prompt()
 
     def refresh_prompt(self):
         """Refresh the player's prompt display."""
