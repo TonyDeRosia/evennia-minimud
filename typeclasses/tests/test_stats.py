@@ -35,3 +35,17 @@ class TestStats(EvenniaTest):
 
         char.attributes.add("stealth_bonus", 7)
         self.assertEqual(stats.sum_bonus(dummy, "stealth"), char.traits.stealth.value + 7)
+
+    def test_secondary_stats_follow_core(self):
+        char = self.char1
+        stats.apply_stats(char)
+
+        # dodge depends on DEX
+        initial_dodge = stats.sum_bonus(char, "dodge")
+        char.traits.DEX.base += 5
+        self.assertGreater(stats.sum_bonus(char, "dodge"), initial_dodge)
+
+        # block_rate depends on STR
+        initial_block = stats.sum_bonus(char, "block_rate")
+        char.traits.STR.base += 5
+        self.assertGreater(stats.sum_bonus(char, "block_rate"), initial_block)
