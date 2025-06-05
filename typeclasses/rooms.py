@@ -18,9 +18,12 @@ from commands.skills import TrainCmdSet
 
 
 class RoomParent(ObjectParent):
-    """
-    A mixin for logic that should be applied to all rooms.
-    """
+    """Mixin with logic shared by all rooms."""
+
+    # add a blank line after the room description and exits
+    appearance_template = (
+        "{name}\n{desc}\n\n{exits}\n\n{characters}\n{things}\n{footer}"
+    )
 
     def at_object_receive(self, mover, source_location, move_type=None, **kwargs):
         """
