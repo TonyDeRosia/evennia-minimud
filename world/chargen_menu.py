@@ -6,6 +6,7 @@ Flow: race → class → gender → stat allocation → name → description →
 
 from evennia import create_object
 from evennia.utils import dedent
+from django.conf import settings
 from typeclasses.characters import PlayerCharacter, Character
 from world.scripts import races, classes
 from world.stats import CORE_STAT_KEYS, CORE_STATS, apply_stats
@@ -19,6 +20,12 @@ STAT_POINTS = 24
 
 def menunode_welcome(caller):
     """Starting point of chargen."""
+    if len(caller.characters.all()) >= settings.MAX_NR_CHARACTERS:
+        text = (
+            f"You have reached the maximum allowed characters "
+            f"({settings.MAX_NR_CHARACTERS}). Please delete one before creating another."
+        )
+        return text, None
     if not hasattr(caller, "ndb"):
         caller.ndb = {}
 
