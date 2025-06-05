@@ -22,12 +22,52 @@ STAT_SCALING: Dict[str, Dict[str, float]] = {
     "DEF": {"CON": 2},
     "ACC": {"DEX": 1, "LUCK": 0.5},
     "EVA": {"DEX": 1, "LUCK": 0.5},
+    # Defense stats
+    "armor": {"CON": 1},
+    "magic_resist": {"WIS": 1},
+    "dodge": {"DEX": 1},
+    "block_rate": {"STR": 1},
+    "parry_rate": {"DEX": 1},
+    "status_resist": {"CON": 1},
+    "crit_resist": {"CON": 1},
+    # Offense stats
+    "attack_power": {"STR": 1},
+    "spell_power": {"INT": 1},
+    "crit_chance": {"LUCK": 1},
+    "crit_bonus": {"STR": 1},
+    "accuracy": {"DEX": 1},
+    "piercing": {"STR": 1},
+    "spell_penetration": {"INT": 1},
+    # Regeneration & sustain
+    "health_regen": {"CON": 1},
+    "mana_regen": {"WIS": 1},
+    "stamina_regen": {"CON": 1},
+    "lifesteal": {"STR": 1},
+    "leech": {"INT": 1},
+    # Tempo stats
+    "cooldown_reduction": {"WIS": 1},
+    "initiative": {"DEX": 1},
+    "gcd_speed": {"DEX": 1},
+    # Utility stats
+    "stealth": {"DEX": 1},
+    "detection": {"WIS": 1},
+    "perception": {"WIS": 1},
+    "threat": {"STR": 1},
+    "movement_speed": {"DEX": 1},
+    "craft_bonus": {"INT": 1},
+    # PvP stats
+    "pvp_power": {"STR": 1},
+    "pvp_resilience": {"CON": 1},
+    "guild_honor_mod": {"WIS": 1},
+    # Base evasion skill
+    "evasion": {"DEX": 1},
 }
 
 
 # -------------------------------------------------------------
 # Bonus collection helpers (stubs for future expansion)
 # -------------------------------------------------------------
+
 
 def _race_mods(obj) -> Dict[str, int]:
     """Return stat modifiers from the character's race."""
@@ -65,6 +105,7 @@ def _buff_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
 # Core API
 # -------------------------------------------------------------
 
+
 def refresh_stats(obj) -> None:
     """Recalculate and cache all stats for ``obj``."""
 
@@ -101,15 +142,15 @@ def refresh_stats(obj) -> None:
     obj.db.primary_stats = primary_totals
 
     # update resource traits
-    if (hp := obj.traits.get("health")):
+    if hp := obj.traits.get("health"):
         hp.base = derived.get("HP", hp.base)
         if hp.current > hp.max:
             hp.current = hp.max
-    if (mp := obj.traits.get("mana")):
+    if mp := obj.traits.get("mana"):
         mp.base = derived.get("MP", mp.base)
         if mp.current > mp.max:
             mp.current = mp.max
-    if (sp := obj.traits.get("stamina")):
+    if sp := obj.traits.get("stamina"):
         sp.base = derived.get("SP", sp.base)
         if sp.current > sp.max:
             sp.current = sp.max
@@ -128,7 +169,7 @@ def refresh_stats(obj) -> None:
 def get_effective_stat(obj, key: str) -> int:
     """Return ``key`` value including temporary bonuses."""
     base = 0
-    if (trait := obj.traits.get(key)):
+    if trait := obj.traits.get(key):
         base = trait.value
     base += obj.db.get(f"{key}_bonus", 0)
     base += state_manager.get_temp_bonus(obj, key)
@@ -171,7 +212,7 @@ def display_stat_block(obj) -> str:
     )
     lines.append(secondaries)
 
-    width = max(len(_strip(l)) for l in lines)
+    width = max(len(_strip(line)) for line in lines)
     top = "╔" + "═" * (width + 2) + "╗"
     bottom = "╚" + "═" * (width + 2) + "╝"
     out = [top]
@@ -179,4 +220,3 @@ def display_stat_block(obj) -> str:
         out.append("║ " + _pad(line, width) + " ║")
     out.append(bottom)
     return "\n".join(out)
-

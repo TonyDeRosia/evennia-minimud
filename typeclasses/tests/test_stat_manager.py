@@ -35,3 +35,21 @@ class TestStatManager(EvenniaTest):
         self.assertIn("STR", text)
         self.assertIn("HP", text)
 
+    def test_derived_stats_increase_with_primary(self):
+        char = self.char1
+        stat_manager.refresh_stats(char)
+
+        base_attack = char.db.derived_stats.get("attack_power")
+        char.traits.STR.base += 5
+        stat_manager.refresh_stats(char)
+        self.assertGreater(char.db.derived_stats.get("attack_power"), base_attack)
+
+        base_regen = char.db.derived_stats.get("mana_regen")
+        char.traits.WIS.base += 3
+        stat_manager.refresh_stats(char)
+        self.assertGreater(char.db.derived_stats.get("mana_regen"), base_regen)
+
+        base_stealth = char.db.derived_stats.get("stealth")
+        char.traits.DEX.base += 2
+        stat_manager.refresh_stats(char)
+        self.assertGreater(char.db.derived_stats.get("stealth"), base_stealth)
