@@ -295,3 +295,27 @@ class TestAreaMakeCommand(EvenniaTest):
         self.char1.execute_cmd("amake foo 1-5")
         self.assertEqual(self.char1.location.db.area, "foo")
         self.assertEqual(self.char1.location.db.room_id, 1)
+
+
+class TestExtendedDigTeleport(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.execute_cmd("amake test 1-5")
+
+    def test_dig_eq_syntax(self):
+        start = self.char1.location
+        self.char1.execute_cmd("dig north=test:2")
+        new_room = start.exits.get(key="north").destination
+        self.assertEqual(new_room.db.area, "test")
+        self.assertEqual(new_room.db.room_id, 2)
+
+    def test_teleport_to_area_room(self):
+        start = self.char1.location
+        self.char1.execute_cmd("dig east=test:3")
+        target = start.exits.get(key="east").destination
+        self.char1.execute_cmd("@teleport test:3")
+        self.assertEqual(self.char1.location, target)
+        # out of range should not move
+        self.char1.location = start
+        self.char1.execute_cmd("@teleport test:6")
+        self.assertEqual(self.char1.location, start)

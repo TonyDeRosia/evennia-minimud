@@ -32,7 +32,7 @@ from commands.info import InfoCmdSet
 from commands.guilds import GuildCmdSet
 from commands.rest import RestCmdSet
 from commands.who import CmdWho
-from commands.building import CmdDig
+from commands.building import CmdDig, CmdTeleport
 from commands.areas import AreaCmdSet
 
 
@@ -65,6 +65,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(RestCmdSet)
         self.add(GuildCmdSet)
         self.add(CmdDig)
+        self.add(CmdTeleport)
         self.add(AreaCmdSet)
 
 
