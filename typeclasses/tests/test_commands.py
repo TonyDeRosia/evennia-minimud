@@ -235,3 +235,20 @@ class TestRestCommands(EvenniaTest):
         self.char1.tags.add("sleeping", category="status")
         self.char1.execute_cmd("look")
         self.char1.msg.assert_any_call("You can't see anything with your eyes closed.")
+
+
+class TestDigCommand(EvenniaTest):
+    def test_dig_creates_room_and_exits(self):
+        start = self.char1.location
+        self.char1.execute_cmd("dig north")
+        new_exit = start.exits.get(key="north")
+        self.assertIsNotNone(new_exit)
+        self.assertIn("n", list(new_exit.aliases.all()))
+        new_room = new_exit.destination
+        back_exit = new_room.exits.get(key="south")
+        self.assertIsNotNone(back_exit)
+        self.assertIn("s", list(back_exit.aliases.all()))
+        self.char1.execute_cmd("north")
+        self.assertEqual(self.char1.location, new_room)
+        self.char1.execute_cmd("south")
+        self.assertEqual(self.char1.location, start)

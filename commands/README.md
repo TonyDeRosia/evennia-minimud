@@ -12,3 +12,15 @@ locations, you need to add the appropriate paths to
 Also remember that if you create new sub directories you must put
 (optionally empty) `__init__.py` files in there so that Python can
 find your modules.
+
+## Dig Command
+
+The `dig` command creates a new room in the given compass direction and
+links exits between the current location and the new room. Usage:
+
+```
+dig <direction>
+```
+
+For example, `dig north` will make a new room north of the current one
+and also create a south exit back.

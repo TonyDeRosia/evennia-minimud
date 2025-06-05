@@ -32,6 +32,7 @@ from commands.info import InfoCmdSet
 from commands.guilds import GuildCmdSet
 from commands.rest import RestCmdSet
 from commands.who import CmdWho
+from commands.building import CmdDig
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -62,6 +63,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(InfoCmdSet)
         self.add(RestCmdSet)
         self.add(GuildCmdSet)
+        self.add(CmdDig)
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
