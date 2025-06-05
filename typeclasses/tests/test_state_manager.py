@@ -32,3 +32,12 @@ class TestStateManager(EvenniaTest):
         self.assertTrue(char.cooldowns.time_left("test", use_int=True))
         state_manager.remove_cooldown(char, "test")
         self.assertEqual(char.cooldowns.time_left("test", use_int=True), 0)
+
+    def test_temp_bonus_effect_key_preserved(self):
+        char = self.char1
+        state_manager.add_temp_stat_bonus(char, "STR", 5, 2, effect_key="speed")
+        entry = char.db.temp_bonuses["STR"][0]
+        self.assertEqual(entry["key"], "speed")
+        state_manager.tick_character(char)
+        entry_after = char.db.temp_bonuses["STR"][0]
+        self.assertEqual(entry_after["key"], "speed")

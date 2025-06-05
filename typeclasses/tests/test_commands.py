@@ -132,6 +132,18 @@ class TestInfoCommands(EvenniaTest):
         self.assertIn("5", out)
         self.assertIn("3", out)
 
+    def test_affects_uses_effect_key_for_stat_bonus(self):
+        self.char1.msg.reset_mock()
+        from world.system import state_manager
+
+        state_manager.add_temp_stat_bonus(
+            self.char1, "STR", 2, 3, effect_key="speed"
+        )
+        self.char1.execute_cmd("affects")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Speed Boost", out)
+        self.assertNotIn("Strength Bonus", out)
+
     def test_guild(self):
         self.char1.db.guild = "Adventurers Guild"
         self.char1.execute_cmd("guild")
