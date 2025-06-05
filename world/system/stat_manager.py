@@ -141,6 +141,10 @@ def refresh_stats(obj) -> None:
             value += primary_totals.get(pkey, 0) * weight
         derived[dkey] = int(round(value))
 
+    overrides = getattr(obj.db, "stat_overrides", {}) or {}
+    for key, val in overrides.items():
+        derived[key] = val
+
     obj.db.derived_stats = derived
     obj.db.primary_stats = primary_totals
 

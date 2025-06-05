@@ -29,6 +29,7 @@ class Character(ObjectParent, ClothedCharacter):
     gender = AttributeProperty("plural")
     guild = AttributeProperty("")
     guild_honor = AttributeProperty(0)
+    stat_overrides = AttributeProperty({})
 
     @property
     def guild_rank(self):
@@ -134,6 +135,7 @@ class Character(ObjectParent, ClothedCharacter):
 
         self.db.guild = ""
         self.db.guild_honor = 0
+        self.db.stat_overrides = {}
 
     def at_post_puppet(self, **kwargs):
         """Ensure stats refresh when a character is controlled."""

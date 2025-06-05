@@ -47,14 +47,10 @@ class CmdSetStat(Command):
             self.msg(f"{stat_key_up} set to {value} on {target.key}.")
             return
         stat_key_low = stat_key.lower()
-        trait = target.traits.get(stat_key_low)
-        if trait:
-            trait.base = value
-        else:
-            target.traits.add(stat_key_low, stat_key_low, base=value)
-        data = target.db.derived_stats or {}
-        data[stat_key_low] = value
-        target.db.derived_stats = data
+        overrides = target.db.stat_overrides or {}
+        overrides[stat_key_low] = value
+        target.db.stat_overrides = overrides
+        stat_manager.refresh_stats(target)
         self.msg(f"{stat_key_low} set to {value} on {target.key}.")
 
 

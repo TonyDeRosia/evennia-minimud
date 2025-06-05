@@ -400,6 +400,11 @@ class TestAdminCommands(EvenniaTest):
         self.char1.execute_cmd(f"setstat {self.char2.key} STR 12")
         self.assertEqual(self.char2.traits.STR.base, 12)
 
+    def test_setstat_derived(self):
+        self.char1.execute_cmd(f"setstat {self.char2.key} attack_power 50")
+        self.assertEqual(self.char2.db.stat_overrides.get("attack_power"), 50)
+        self.assertEqual(self.char2.db.derived_stats.get("attack_power"), 50)
+
     def test_setattr_and_bounty(self):
         self.char1.execute_cmd(f"setattr {self.char2.key} testattr foo")
         self.assertEqual(self.char2.db.testattr, "foo")
