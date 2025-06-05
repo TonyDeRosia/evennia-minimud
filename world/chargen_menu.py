@@ -8,7 +8,7 @@ from evennia import create_object
 from evennia.utils import dedent
 from typeclasses.characters import PlayerCharacter, Character
 from world.scripts import races, classes
-from world.stats import CORE_STAT_KEYS
+from world.stats import CORE_STAT_KEYS, apply_stats
 
 STAT_LIST = CORE_STAT_KEYS
 STAT_POINTS = 24
@@ -196,6 +196,17 @@ def menunode_finish(caller, **kwargs):
     if start_room:
         char.home = start_room[0]
         char.db.prelogout_location = start_room[0]
+
+    # ensure all trait keys exist
+    apply_stats(char)
+
+    for stat in STAT_LIST:
+        value = char.db.get(stat.lower(), 0)
+        trait = char.traits.get(stat)
+        if trait:
+            trait.base = value
+        # remove the temporary value stored on the attribute handler
+        char.attributes.remove(stat.lower())
 
     # assign the newly created character to this account
     char.account = caller
