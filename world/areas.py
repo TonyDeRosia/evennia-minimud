@@ -1,5 +1,5 @@
 from dataclasses import dataclass, asdict
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from evennia.server.models import ServerConfig
 
