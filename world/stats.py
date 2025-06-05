@@ -147,10 +147,13 @@ def sum_bonus(obj, stat_key: str) -> int:
     return total
 
 
+from world.system import state_manager
+
+
 def check_stealth_detection(attacker, target) -> bool:
     """Compare attacker stealth vs target perception."""
-    attacker_stealth = sum_bonus(attacker, "stealth")
-    target_perception = sum_bonus(target, "perception")
+    attacker_stealth = state_manager.get_effective_stat(attacker, "stealth")
+    target_perception = state_manager.get_effective_stat(target, "perception")
     if target_perception >= attacker_stealth:
         attacker.msg(
             "|rYour stealth attempt fails. The target's perception is too high – they notice you!|n"

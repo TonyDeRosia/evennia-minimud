@@ -90,8 +90,11 @@ class TestGlobalTick(EvenniaTest):
         self.char1.tags.add("tickable")
         self.char1.at_tick = MagicMock()
         self.char1.refresh_prompt = MagicMock()
+        from world.system import state_manager
+        state_manager.tick_all = MagicMock()
 
         script.at_repeat()
 
         self.char1.at_tick.assert_called_once()
         self.char1.refresh_prompt.assert_called()
+        state_manager.tick_all.assert_called_once()
