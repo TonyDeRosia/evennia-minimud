@@ -2,7 +2,7 @@
 Tests for custom character logic
 """
 
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock, call, patch
 from evennia.utils.test_resources import EvenniaTest
 
 
@@ -98,3 +98,23 @@ class TestGlobalTick(EvenniaTest):
         self.char1.at_tick.assert_called_once()
         self.char1.refresh_prompt.assert_called()
         state_manager.tick_all.assert_called_once()
+
+
+class TestRegeneration(EvenniaTest):
+    def test_at_tick_heals_resources(self):
+        char = self.char1
+        for key in ("health", "mana", "stamina"):
+            trait = char.traits.get(key)
+            trait.current = trait.max // 2
+        char.refresh_prompt = MagicMock()
+        char.msg = MagicMock()
+
+        with patch("typeclasses.characters.randint", return_value=2):
+            char.at_tick()
+
+        for key in ("health", "mana", "stamina"):
+            trait = char.traits.get(key)
+            self.assertGreater(trait.current, trait.max // 2)
+
+        char.refresh_prompt.assert_called_once()
+        char.msg.assert_called()
