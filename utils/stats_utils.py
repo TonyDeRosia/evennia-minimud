@@ -1,6 +1,6 @@
 from evennia.utils.evtable import EvTable
 from evennia.utils import iter_to_str
-from world.stats import CORE_STAT_KEYS, sum_bonus
+from world.stats import CORE_STAT_KEYS, sum_bonus, apply_stats
 
 
 PRIMARY_EXTRA = "perception"
@@ -55,7 +55,17 @@ def _db_get(obj, key, default=None):
 
 
 def get_display_scroll(chara):
-    """Return a parchment-style stats display for chara."""
+    """Return a parchment-style stats display for ``chara``.
+
+    The character may not always have had their base stats initialized,
+    particularly if they were created before the stats system was added.
+    To avoid attribute errors we make sure all default stats exist before
+    accessing them.
+    """
+
+    # ensure the character has all required stats
+    apply_stats(chara)
+
     lines = []
     name_line = f"|w{chara.key}|n"
     title = _db_get(chara, "title", None)
@@ -67,12 +77,15 @@ def get_display_scroll(chara):
     xp = _db_get(chara, "exp", 0)
     lines.append(f"Level: {level}    XP: {xp}")
 
-    hp = chara.traits.health
-    mp = chara.traits.mana
-    sp = chara.traits.stamina
-    lines.append(
-        f"Health {hp.current}/{hp.max}  Mana {mp.current}/{mp.max}  Stamina {sp.current}/{sp.max}"
-    )
+    hp = chara.traits.get("health")
+    mp = chara.traits.get("mana")
+    sp = chara.traits.get("stamina")
+    if hp and mp and sp:
+        lines.append(
+            f"Health {hp.current}/{hp.max}  Mana {mp.current}/{mp.max}  Stamina {sp.current}/{sp.max}"
+        )
+    else:
+        lines.append("Health --/--  Mana --/--  Stamina --/--")
 
     coins = _db_get(chara, "coins", 0)
     lines.append(f"Coins: {coins}")
