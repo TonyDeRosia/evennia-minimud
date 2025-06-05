@@ -64,3 +64,13 @@ class TestChargen(EvenniaTest):
         # Reset should restore base values
         chargen_menu._reset_stats(self.account)
         self.assertEqual(self.char.attributes.get("str"), base_str)
+
+    def test_menu_welcome_accepts_session(self):
+        """menunode_welcome should work when passed a Session."""
+        try:
+            text, options = chargen_menu.menunode_welcome(self.session)
+        except AttributeError as err:
+            self.fail(f"menunode_welcome raised AttributeError: {err}")
+
+        self.assertTrue(text)
+        self.assertTrue(options)

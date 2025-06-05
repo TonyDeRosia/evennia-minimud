@@ -20,7 +20,8 @@ STAT_POINTS = 24
 
 def menunode_welcome(caller):
     """Starting point of chargen."""
-    if len(caller.characters.all()) >= settings.MAX_NR_CHARACTERS:
+    account = getattr(caller, "account", caller)
+    if hasattr(account, "characters") and len(account.characters.all()) >= settings.MAX_NR_CHARACTERS:
         text = (
             f"You have reached the maximum allowed characters "
             f"({settings.MAX_NR_CHARACTERS}). Please delete one before creating another."
@@ -30,9 +31,10 @@ def menunode_welcome(caller):
         caller.ndb = {}
 
     # clean up any unfinished placeholder characters
-    for leftover in caller.characters.filter_family(db_key__iexact="In Progress"):
-        leftover.account = None
-        leftover.delete()
+    if hasattr(account, "characters"):
+        for leftover in Character.objects.filter_family(db_account=account, db_key__iexact="In Progress"):
+            leftover.account = None
+            leftover.delete()
 
     if not caller.ndb.new_char:
         new_char = create_object(PlayerCharacter, key="In Progress", location=None)
