@@ -49,15 +49,28 @@ class TestInfoCommands(EvenniaTest):
 
     def test_score(self):
         self.char1.db.title = "Tester"
+        self.char1.db.coins = {
+            "copper": 10,
+            "silver": 2,
+            "gold": 1,
+            "platinum": 0,
+        }
         self.char1.execute_cmd("score")
         self.assertTrue(self.char1.msg.called)
         args = self.char1.msg.call_args[0][0]
         self.assertIn("Tester", args)
+        self.assertIn("Copper: 10", args)
+        self.assertIn("Silver: 2", args)
+        self.assertIn("Gold: 1", args)
+        self.assertIn("Armor", args)
+        self.assertIn("Attack Power", args)
 
 
     def test_score_alias_sc(self):
         self.char1.execute_cmd("sc")
         self.assertTrue(self.char1.msg.called)
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("PRIMARY STATS", out)
 
     def test_inventory(self):
         self.char1.execute_cmd("inventory")

@@ -1,16 +1,36 @@
 from evennia.utils.evtable import EvTable
 from evennia.utils import iter_to_str
-from world.stats import CORE_STAT_KEYS, sum_bonus, apply_stats
-from utils.currency import format_wallet, from_copper
+from world.stats import (
+    CORE_STAT_KEYS,
+    EVASION_STAT,
+    DEFENSE_STATS,
+    OFFENSE_STATS,
+    REGEN_STATS,
+    TEMPO_STATS,
+    UTILITY_STATS,
+    PVP_STATS,
+    sum_bonus,
+    apply_stats,
+)
+from utils.currency import from_copper
 import math
 
 PRIMARY_EXTRA = "perception"
-SECONDARY_KEYS = [
-    "armor",
-    "evasion",
-    "block_rate",
-    "accuracy",
-]
+
+# Build list of secondary stats from world.stats excluding core attributes,
+# resources and the perception stat which is displayed with the primaries.
+SECONDARY_STATS = (
+    [EVASION_STAT]
+    + DEFENSE_STATS
+    + OFFENSE_STATS
+    + REGEN_STATS
+    + TEMPO_STATS
+    + [stat for stat in UTILITY_STATS if stat.key != PRIMARY_EXTRA]
+    + PVP_STATS
+)
+
+SECONDARY_KEYS = [stat.key for stat in SECONDARY_STATS]
+SECONDARY_DISPLAY = {stat.key: stat.display for stat in SECONDARY_STATS}
 
 
 def get_primary_stats(chara):
@@ -30,8 +50,8 @@ def get_secondary_stats(chara):
     """Return computed secondary stats."""
     stats = []
     for key in SECONDARY_KEYS:
-        value = int(math.ceil(sum_bonus(chara, key)))
-        display = key.replace("_", " ").title()
+        value = int(round(sum_bonus(chara, key)))
+        display = SECONDARY_DISPLAY.get(key, key.replace("_", " ").title())
         stats.append((display, value))
     return stats
 
@@ -77,7 +97,14 @@ def get_display_scroll(chara):
     sp = chara.traits.get("stamina")
     if hp and mp and sp:
         lines.append(
-            f"Health {hp.current}/{hp.max}  Mana {mp.current}/{mp.max}  Stamina {sp.current}/{sp.max}"
+            "Health {} / {}  Mana {} / {}  Stamina {} / {}".format(
+                int(round(hp.current)),
+                int(round(hp.max)),
+                int(round(mp.current)),
+                int(round(mp.max)),
+                int(round(sp.current)),
+                int(round(sp.max)),
+            )
         )
     else:
         lines.append("Health --/--  Mana --/--  Stamina --/--")
@@ -85,7 +112,9 @@ def get_display_scroll(chara):
     coins = _db_get(chara, "coins", 0)
     if isinstance(coins, int):
         coins = from_copper(coins)
-    lines.append(f"Coins: {format_wallet(coins)}")
+    for coin in ["copper", "silver", "gold", "platinum"]:
+        amount = int(coins.get(coin, 0))
+        lines.append(f"{coin.capitalize()}: {amount}")
 
     guild = _db_get(chara, "guild", "")
     if guild:
