@@ -4,6 +4,7 @@ Tests for custom character logic
 
 from unittest.mock import MagicMock, call, patch
 from evennia.utils.test_resources import EvenniaTest
+from evennia.utils import create
 
 
 class TestCharacterHooks(EvenniaTest):
@@ -33,12 +34,51 @@ class TestCharacterHooks(EvenniaTest):
         self.assertTrue(any("You fall unconscious" in c for c in calls))
 
     def test_at_wield_unwield(self):
-        self.char1.attributes.add("_wielded", {"left hand": None, "right hand": None})
+        self.char1.attributes.add("_wielded", {"left": None, "right": None})
         used_hands = self.char1.at_wield(self.obj1)
         self.assertEqual(len(used_hands), 1)
         self.assertIn(self.obj1, self.char1.wielding)
         freed_hands = self.char1.at_unwield(self.obj1)
         self.assertEqual(used_hands, freed_hands)
+
+    def test_at_wield_offhand(self):
+        self.char1.attributes.add("_wielded", {"left": None, "right": None})
+        self.char1.db.handedness = "right"
+        weapon = create.create_object("typeclasses.gear.MeleeWeapon", key="weap", location=self.char1)
+        weapon.tags.add("equipment", category="flag")
+        weapon.tags.add("identified", category="flag")
+        weapon.tags.add("offhand", category="flag")
+        used = self.char1.at_wield(weapon)
+        self.assertEqual(used, ["left"])
+
+    def test_twohanded_blocked_by_shield(self):
+        self.char1.attributes.add("_wielded", {"left": None, "right": None})
+        shield = create.create_object("typeclasses.objects.ClothingObject", key="shield", location=self.char1)
+        shield.tags.add("equipment", category="flag")
+        shield.tags.add("identified", category="flag")
+        shield.tags.add("shield", category="flag")
+        shield.wear(self.char1, True)
+        # attempt to wield two-handed weapon
+        weapon = create.create_object("typeclasses.gear.MeleeWeapon", key="great", location=self.char1)
+        weapon.tags.add("equipment", category="flag")
+        weapon.tags.add("identified", category="flag")
+        weapon.tags.add("twohanded", category="flag")
+        self.assertIsNone(self.char1.at_wield(weapon))
+        self.assertNotIn(weapon, self.char1.wielding)
+
+    def test_wear_shield_blocked_by_twohanded(self):
+        self.char1.attributes.add("_wielded", {"left hand": None, "right hand": None})
+        weapon = create.create_object("typeclasses.gear.MeleeWeapon", key="great", location=self.char1)
+        weapon.tags.add("equipment", category="flag")
+        weapon.tags.add("identified", category="flag")
+        weapon.tags.add("twohanded", category="flag")
+        self.char1.at_wield(weapon)
+        shield = create.create_object("typeclasses.objects.ClothingObject", key="shield", location=self.char1)
+        shield.tags.add("equipment", category="flag")
+        shield.tags.add("identified", category="flag")
+        shield.tags.add("shield", category="flag")
+        shield.wear(self.char1, True)
+        self.assertFalse(shield.db.worn)
 
 
 class TestCharacterDisplays(EvenniaTest):
