@@ -135,6 +135,14 @@ def get_display_scroll(chara):
         f"Copper: {copper}  Silver: {silver}  Gold: {gold}  Platinum: {platinum}"
     )
 
+    weight = chara.db.carry_weight or 0
+    capacity = chara.db.carry_capacity or 0
+    enc = chara.encumbrance_level() if hasattr(chara, "encumbrance_level") else ""
+    cw_line = f"Carry Weight: {weight} / {capacity}"
+    if enc:
+        cw_line += f"  {enc}"
+    lines.append(cw_line)
+
     guild = _db_get(chara, "guild", "")
     if guild:
         lines.append(f"Guild: {guild} ({chara.guild_rank})")
