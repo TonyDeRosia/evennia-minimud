@@ -13,7 +13,7 @@ class CmdScore(Command):
     """View your character sheet."""
 
     key = "score"
-    aliases = ("sheet", "sc", "status")
+    aliases = ("sheet", "sc")
     help_category = "general"
 
     def func(self):

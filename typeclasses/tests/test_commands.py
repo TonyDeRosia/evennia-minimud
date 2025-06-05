@@ -32,9 +32,6 @@ class TestInfoCommands(EvenniaTest):
         args = self.char1.msg.call_args[0][0]
         self.assertIn("Tester", args)
 
-    def test_score_alias_status(self):
-        self.char1.execute_cmd("status")
-        self.assertTrue(self.char1.msg.called)
 
     def test_stats_alias_sc(self):
         self.char1.execute_cmd("sc")
