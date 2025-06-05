@@ -14,7 +14,7 @@ class CmdSetStat(Command):
     """
 
     key = "setstat"
-    aliases = ("statset",)
+    aliases = ("set",)
     locks = "cmd:perm(Admin) or perm(Builder)"
     help_category = "admin"
 
@@ -31,6 +31,8 @@ class CmdSetStat(Command):
         if not target:
             return
         value = int(value_str)
+        alias_map = {"hp": "health", "mp": "mana", "sp": "stamina"}
+        stat_key = alias_map.get(stat_key.lower(), stat_key)
         stat_key_up = stat_key.upper()
         if stat_key_up in CORE_STAT_KEYS:
             trait = target.traits.get(stat_key_up)

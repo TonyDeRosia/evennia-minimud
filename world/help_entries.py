@@ -169,12 +169,21 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "setstat",
+        "aliases": ["set"],
         "category": "admin",
         "text": """
             Change a character's stat directly.
 
             Usage:
                 setstat <target> <stat> <value>
+
+            Aliases:
+                set
+
+            The stat name accepts shorthands:
+                hp -> health
+                mp -> mana
+                sp -> stamina
 
             This modifies the target's stat permanently. Creating or adjusting
             stats incorrectly may break the character, so double-check your
