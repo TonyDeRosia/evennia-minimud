@@ -106,6 +106,7 @@ PIE_CRUST = {
         "edible",
     ],
     "stamina": 1,
+    "sated": 1,
     "value": 10,
 }
 
@@ -118,6 +119,7 @@ PIE_SLICE = {
         "edible",
     ],
     "stamina": 5,
+    "sated": 5,
     "value": 5,
 }
 
@@ -211,6 +213,7 @@ APPLE_FRUIT = {
     "desc": "A delicious multi-colored apple.",
     "tags": [("apple", "crafting_material"), ("fruit", "crafting_material"), "edible"],
     "stamina": 5,
+    "sated": 5,
     "value": 1,
 }
 PEAR_FRUIT = {
@@ -218,6 +221,7 @@ PEAR_FRUIT = {
     "desc": "A fragant golden pear.",
     "tags": [("pear", "crafting_material"), ("fruit", "crafting_material"), "edible"],
     "stamina": 5,
+    "sated": 5,
     "value": 1,
 }
 PLUM_FRUIT = {
@@ -225,6 +229,7 @@ PLUM_FRUIT = {
     "desc": "A large red-black plum.",
     "tags": [("plum", "crafting_material"), ("fruit", "crafting_material"), "edible"],
     "stamina": 5,
+    "sated": 5,
     "value": 1,
 }
 
@@ -246,6 +251,7 @@ BLACKBERRY = {
         "edible",
     ],
     "stamina": 1,
+    "sated": 1,
     "value": 0,
 }
 BLUEBERRY = {
@@ -258,6 +264,7 @@ BLUEBERRY = {
         "edible",
     ],
     "stamina": 1,
+    "sated": 1,
     "value": 0,
 }
 RASPBERRY = {
@@ -270,6 +277,7 @@ RASPBERRY = {
         "edible",
     ],
     "stamina": 1,
+    "sated": 1,
     "value": 0,
 }
 
