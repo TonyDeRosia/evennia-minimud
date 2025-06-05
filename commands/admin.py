@@ -1,5 +1,6 @@
 from evennia import CmdSet
 from .command import Command
+from .info import CmdScan
 from world.stats import CORE_STAT_KEYS
 from world.system import stat_manager
 
@@ -177,4 +178,5 @@ class AdminCmdSet(CmdSet):
         self.add(CmdSetBounty)
         self.add(CmdSlay)
         self.add(CmdSmite)
+        self.add(CmdScan)
 

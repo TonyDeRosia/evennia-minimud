@@ -310,6 +310,81 @@ class CmdPrompt(Command):
         caller.refresh_prompt()
 
 
+class CmdScan(Command):
+    """Scan adjacent rooms for visible activity.
+
+    Normal players see their current room description and a brief overview of
+    neighboring rooms. Callers with `perm(Admin)` also see hidden objects,
+    room tags or flags and the HP/MP/SP stats of any characters present.
+    """
+
+    key = "scan"
+    help_category = "movement"
+
+    def func(self):
+        caller = self.caller
+        location = caller.location
+        if not location:
+            caller.msg("You have no location.")
+            return
+
+        is_admin = caller.check_permstring("Admin")
+
+        out = [location.return_appearance(caller)]
+
+        for ex in location.exits:
+            if not ex.access(caller, "view"):
+                continue
+            dest = ex.destination
+            if not dest or not dest.access(caller, "view"):
+                continue
+
+            lines = [f"|c{ex.key.capitalize()}|n -> {dest.key}"]
+            lines.append(dest.db.desc or "You see nothing special.")
+
+            if is_admin:
+                flags = dest.tags.get(category="room_flag", return_list=True) or []
+                if flags:
+                    lines.append("Room flags: " + ", ".join(sorted(flags)))
+                tags = dest.tags.get(return_list=True) or []
+                if tags:
+                    lines.append("Tags: " + ", ".join(sorted(tags)))
+
+            chars = []
+            things = []
+            for obj in dest.contents:
+                if obj.destination:
+                    continue
+                if not is_admin and not obj.access(caller, "view"):
+                    continue
+
+                name = obj.get_display_name(caller)
+                if "character" in obj._content_types:
+                    if is_admin:
+                        try:
+                            hp = int(obj.traits.health.current)
+                            mp = int(obj.traits.mana.current)
+                            sp = int(obj.traits.stamina.current)
+                            name += f" (HP {hp}/{int(obj.traits.health.max)}, MP {mp}/{int(obj.traits.mana.max)}, SP {sp}/{int(obj.traits.stamina.max)})"
+                        except Exception:
+                            pass
+                    chars.append(name)
+                else:
+                    things.append(name)
+
+            if chars:
+                lines.append("|wCharacters:|n " + ", ".join(chars))
+            if things:
+                lines.append("|wYou see:|n " + ", ".join(things))
+
+            exits = [e.key.capitalize() for e in dest.exits if is_admin or e.access(caller, "view")]
+            lines.append("|wExits:|n " + (", ".join(exits) if exits else "None"))
+
+            out.append("\n".join(lines))
+
+        caller.msg("\n\n".join(out))
+
+
 class InfoCmdSet(CmdSet):
     key = "Info CmdSet"
 
@@ -325,3 +400,4 @@ class InfoCmdSet(CmdSet):
         self.add(CmdBuffs)
         self.add(CmdTitle)
         self.add(CmdPrompt)
+        self.add(CmdScan)
