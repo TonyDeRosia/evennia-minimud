@@ -302,7 +302,7 @@ class IronChainmailLegsRecipe(SkillRecipe):
     name = "iron chausses"
     tool_tags = ["wire_cutter", "pliers"]
     consumable_tags = ["heavy iron wire", "heavy iron wire", "heavy iron wire"]
-    output_prototypes = ["IRON_CHAUSES"]
+    output_prototypes = ["IRON_CHAUSSES"]
 
 
 class HeavyIronNeedle(SkillRecipe):
