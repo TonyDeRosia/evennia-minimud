@@ -4,32 +4,20 @@ from evennia.utils import iter_to_str
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 from world.guilds import get_rank_title
 from world.stats import CORE_STAT_KEYS
+from utils.stats_utils import get_display_scroll
 
 from .command import Command
 
 
 class CmdScore(Command):
-    """View your basic stats."""
+    """View your character sheet."""
 
     key = "score"
     aliases = ("sheet", "sc")
     help_category = "general"
 
     def func(self):
-        caller = self.caller
-        stats = []
-        for key in CORE_STAT_KEYS:
-            trait = caller.traits.get(key)
-            base = trait.base if trait else 0
-            mod = trait.modifier if trait else 0
-            total = base + mod
-            text = f"{base}" if not mod else f"{base} ({total})"
-            stats.append([key, text])
-        perception = caller.traits.get("perception")
-        if perception:
-            stats.append(["PER", str(perception.value)])
-        table = EvTable(table=list(zip(*stats)), border="none")
-        caller.msg(str(table))
+        self.caller.msg(get_display_scroll(self.caller))
 
 
 class CmdDesc(Command):
@@ -55,12 +43,12 @@ class CmdFinger(Command):
     help_category = "general"
 
     def func(self):
-        if not self.args:
-            self.msg("Finger whom?")
-            return
-        target = self.caller.search(self.args.strip(), global_search=True)
-        if not target:
-            return
+        if not self.args or self.args.strip().lower() in {"self", "me"}:
+            target = self.caller
+        else:
+            target = self.caller.search(self.args.strip(), global_search=True)
+            if not target:
+                return
         desc = target.db.desc or "They have no description."
         stat_parts = []
         for key in CORE_STAT_KEYS:
@@ -77,8 +65,45 @@ class CmdFinger(Command):
             rank = get_rank_title(guild, honor)
             self.msg(f"Guild: {guild} ({rank})")
             self.msg(f"Honor: {honor}")
-        if bounty := target.db.get("bounty"):
+        bounty = target.attributes.get("bounty", 0)
+        if bounty > 0:
             self.msg(f"Bounty: {bounty}")
+
+
+class CmdBounty(Command):
+    """Place a bounty on another character."""
+
+    key = "bounty"
+    help_category = "general"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: bounty <target> <amount>")
+            return
+
+        parts = self.args.split(None, 1)
+        if len(parts) != 2 or not parts[1].isdigit():
+            self.msg("Usage: bounty <target> <amount>")
+            return
+
+        target_name, amount_str = parts
+        amount = int(amount_str)
+        target = self.caller.search(target_name, global_search=True)
+        if not target:
+            return
+
+        if amount <= 0:
+            self.msg("Amount must be positive.")
+            return
+
+        coins = self.caller.db.coins or 0
+        if coins < amount:
+            self.msg("You don't have that many coins.")
+            return
+
+        self.caller.db.coins = coins - amount
+        target.db.bounty = (target.db.bounty or 0) + amount
+        self.msg(f"You place a bounty of {amount} coins on {target.get_display_name(self.caller)}.")
 
 
 class CmdInventory(Command):
@@ -144,6 +169,21 @@ class CmdBuffs(Command):
             self.msg("Active effects: " + iter_to_str(sorted(buffs)))
 
 
+class CmdTitle(Command):
+    """Set or view your character title."""
+
+    key = "title"
+    help_category = "general"
+
+    def func(self):
+        if not self.args:
+            title = self.caller.db.title or "You have no title."
+            self.msg(title)
+        else:
+            self.caller.db.title = self.args.strip()
+            self.msg("Title updated.")
+
+
 class InfoCmdSet(CmdSet):
     key = "Info CmdSet"
 
@@ -152,7 +192,9 @@ class InfoCmdSet(CmdSet):
         self.add(CmdScore)
         self.add(CmdDesc)
         self.add(CmdFinger)
+        self.add(CmdBounty)
         self.add(CmdInventory)
         self.add(CmdEquipment)
         self.add(CmdBuffs)
+        self.add(CmdTitle)
 
