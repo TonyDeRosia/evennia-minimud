@@ -30,8 +30,8 @@ class TestInfoCommands(EvenniaTest):
         self.char1.execute_cmd(f"finger {self.char2.key}")
         self.assertTrue(self.char1.msg.called)
         output = self.char1.msg.call_args[0][0]
-        self.assertIn("╔", output)
-        self.assertIn("╚", output)
+        self.assertIn("+", output)
+        self.assertIn("=", output)
         self.assertIn("Another tester.", output)
         self.assertIn("Race: Human", output)
         self.assertIn("Class: Warrior", output)
@@ -41,7 +41,7 @@ class TestInfoCommands(EvenniaTest):
         self.char1.execute_cmd("finger self")
         self.assertTrue(self.char1.msg.called)
         output = self.char1.msg.call_args[0][0]
-        self.assertIn("╔", output)
+        self.assertIn("+", output)
         self.assertIn("Race: Elf", output)
         self.assertIn("Class: Mage", output)
 
@@ -82,8 +82,8 @@ class TestInfoCommands(EvenniaTest):
         self.assertIn("Copper: 10", args)
         self.assertIn("Armor", args)
         self.assertIn("Attack Power", args)
-        self.assertIn("╔", args)
-        self.assertIn("╚", args)
+        self.assertIn("+", args)
+        self.assertIn("=", args)
         self.assertIn("|g", args)
         self.assertIn("|w", args)
         self.assertIn("|c", args)
@@ -93,7 +93,7 @@ class TestInfoCommands(EvenniaTest):
         self.assertTrue(self.char1.msg.called)
         out = self.char1.msg.call_args[0][0]
         self.assertIn("PRIMARY STATS", out)
-        self.assertIn("╔", out)
+        self.assertIn("+", out)
 
     def test_inventory(self):
         self.char1.execute_cmd("inventory")
