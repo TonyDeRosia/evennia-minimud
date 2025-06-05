@@ -98,10 +98,12 @@ class Character(ObjectParent, ClothedCharacter):
 
     def at_object_creation(self):
         from world import stats
+        from world.system import stat_manager
 
         # Apply all default stats in a single modular step. If stats already
         # exist on the character, `apply_stats` will not overwrite them.
         stats.apply_stats(self)
+        stat_manager.refresh_stats(self)
 
         self.db.guild = ""
         self.db.guild_honor = 0

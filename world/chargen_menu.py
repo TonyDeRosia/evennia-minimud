@@ -270,6 +270,9 @@ def menunode_finish(caller, **kwargs):
         # remove the temporary value stored on the attribute handler
         char.attributes.remove(stat.lower())
 
+    from world.system import stat_manager
+    stat_manager.refresh_stats(char)
+
     # assign the newly created character to this account
     account = getattr(caller, "account", None) or getattr(caller, "dbobj", caller)
     char.account = account
