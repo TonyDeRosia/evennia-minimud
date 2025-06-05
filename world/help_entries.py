@@ -120,4 +120,16 @@ HELP_ENTRY_DICTS = [
             rest_area - resting recovers resources faster.
         """,
     },
+    {
+        "key": "rname",
+        "category": "building",
+        "text": """
+            Rename the room you are currently in.
+
+            Usage:
+                rname <new name>
+
+            Changes the name of the current room.
+        """,
+    },
 ]
