@@ -5,7 +5,13 @@ from evennia.utils import make_iter
 
 class CmdGather(Command):
     """
-    Gather resources from the node in this location.
+    Collect resources from a gathering node.
+
+    Usage:
+        gather
+
+    Example:
+        gather
     """
 
     key = "gather"
@@ -33,10 +39,10 @@ class GatherCmdSet(CmdSet):
 
 class CmdEat(Command):
     """
-    Eat something edible
+    Eat or drink something edible.
 
     Usage:
-        eat <obj>
+        eat <item>
 
     Example:
         eat apple

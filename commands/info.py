@@ -11,7 +11,15 @@ from .command import Command
 
 
 class CmdScore(Command):
-    """View your character sheet (alias \"sc\")."""
+    """
+    View your character sheet.
+
+    Usage:
+        score
+
+    Example:
+        score
+    """
 
     key = "score"
     aliases = ("sheet", "sc")
@@ -22,7 +30,17 @@ class CmdScore(Command):
 
 
 class CmdDesc(Command):
-    """View or set your description."""
+    """
+    View your character description or set a new one.
+
+    Usage:
+        desc
+        desc <text>
+
+    Example:
+        desc
+        desc A scarred veteran
+    """
 
     key = "desc"
     help_category = "general"
@@ -37,7 +55,15 @@ class CmdDesc(Command):
 
 
 class CmdFinger(Command):
-    """Show information about another player."""
+    """
+    Show information about yourself or another player.
+
+    Usage:
+        finger <player>
+
+    Example:
+        finger Bob
+    """
 
     key = "finger"
     aliases = ("whois",)
@@ -88,7 +114,15 @@ class CmdFinger(Command):
 
 
 class CmdBounty(Command):
-    """Place a bounty on another character."""
+    """
+    Place a bounty on another character.
+
+    Usage:
+        bounty <target> <amount>
+
+    Example:
+        bounty orc 50
+    """
 
     key = "bounty"
     help_category = "general"
@@ -125,7 +159,17 @@ class CmdBounty(Command):
 
 
 class CmdInventory(Command):
-    """List your carried items."""
+    """
+    List the items you are carrying.
+
+    Usage:
+        inventory
+        inventory <filter>
+
+    Example:
+        inventory
+        inventory sword
+    """
 
     key = "inventory"
     aliases = ("inv", "i")
@@ -155,7 +199,15 @@ class CmdInventory(Command):
 
 
 class CmdEquipment(Command):
-    """List what you are wearing or wielding."""
+    """
+    Show what you are wearing or wielding.
+
+    Usage:
+        equipment
+
+    Example:
+        equipment
+    """
 
     key = "equipment"
     aliases = ("eq",)
@@ -196,7 +248,15 @@ class CmdEquipment(Command):
 
 
 class CmdInspect(Command):
-    """Inspect an item for detailed information."""
+    """
+    Inspect an item for detailed information.
+
+    Usage:
+        inspect <item>
+
+    Example:
+        inspect longsword
+    """
 
     key = "inspect"
     help_category = "general"
@@ -241,7 +301,15 @@ class CmdInspect(Command):
 
 
 class CmdBuffs(Command):
-    """List active buff effects."""
+    """
+    List active buff effects on you.
+
+    Usage:
+        buffs
+
+    Example:
+        buffs
+    """
 
     key = "buffs"
     help_category = "general"
@@ -285,7 +353,15 @@ class CmdBuffs(Command):
 
 
 class CmdAffects(Command):
-    """List all active effects."""
+    """
+    List all status and buff effects.
+
+    Usage:
+        affects
+
+    Example:
+        affects
+    """
 
     key = "affects"
     aliases = ("effects",)
@@ -337,7 +413,17 @@ class CmdAffects(Command):
 
 
 class CmdTitle(Command):
-    """Set or view your character title."""
+    """
+    View or set your character's title.
+
+    Usage:
+        title
+        title <new title>
+
+    Example:
+        title
+        title The Brave
+    """
 
     key = "title"
     help_category = "general"
@@ -352,7 +438,17 @@ class CmdTitle(Command):
 
 
 class CmdPrompt(Command):
-    """View or set your command prompt."""
+    """
+    View or set your command prompt.
+
+    Usage:
+        prompt
+        prompt <format>
+
+    Example:
+        prompt
+        prompt HP:{hp}/{hp_max}> 
+    """
 
     key = "prompt"
     help_category = "general"
@@ -370,11 +466,14 @@ class CmdPrompt(Command):
 
 
 class CmdScan(Command):
-    """Scan adjacent rooms for visible activity.
+    """
+    Scan adjacent rooms for visible activity.
 
-    Normal players see their current room description and a brief overview of
-    neighboring rooms. Callers with `perm(Admin)` also see hidden objects,
-    room tags or flags and the HP/MP/SP stats of any characters present.
+    Usage:
+        scan
+
+    Example:
+        scan
     """
 
     key = "scan"
