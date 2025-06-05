@@ -267,9 +267,29 @@ class CmdInspect(Command):
             caller.msg("Usage: inspect <item>")
             return
 
-        obj = caller.search(self.args.strip())
+        query = self.args.strip()
+        matches = caller.search(query, quiet=True)
+        obj = None
+        if matches:
+            if isinstance(matches, list):
+                if len(matches) == 1:
+                    obj = matches[0]
+                else:
+                    ql = query.lower()
+                    exact = [
+                        o
+                        for o in matches
+                        if o.key.lower() == ql
+                        or ql in [al.lower() for al in o.aliases.all()]
+                    ]
+                    if len(exact) == 1:
+                        obj = exact[0]
+            else:
+                obj = matches
         if not obj:
-            return
+            obj = caller.search(query)
+            if not obj:
+                return
 
         lines = [f"|w{obj.get_display_name(caller)}|n"]
         desc = obj.db.desc or "You see nothing special."
@@ -286,11 +306,30 @@ class CmdInspect(Command):
         if obj.db.identified:
             if (weight := obj.db.weight) is not None:
                 lines.append(f"Weight: {weight}")
-            if (dmg := obj.db.dmg) is not None:
-                lines.append(f"Damage: {dmg}")
-            slot = obj.db.slot or obj.db.clothing_type
-            if slot:
-                lines.append(f"Slot: {slot}")
+
+            if obj.is_typeclass("typeclasses.gear.MeleeWeapon", exact=False):
+                dmg = obj.db.damage_dice or obj.db.dmg
+                if dmg is not None:
+                    lines.append(f"Damage: {dmg}")
+                slot = obj.db.slot
+                if slot:
+                    lines.append(f"Slot: {slot}")
+                effects = obj.tags.get(category="buff", return_list=True) or []
+                import re
+
+                pattern = re.compile(r"[A-Z]+[+-]\d+")
+                effects.extend(
+                    t for t in obj.tags.all() if pattern.fullmatch(str(t))
+                )
+                if effects:
+                    lines.append("Effects: " + ", ".join(sorted(set(effects))))
+            else:
+                if (dmg := obj.db.dmg) is not None:
+                    lines.append(f"Damage: {dmg}")
+                slot = obj.db.slot or obj.db.clothing_type
+                if slot:
+                    lines.append(f"Slot: {slot}")
+
             if (buff := obj.db.buff):
                 lines.append(f"Buff: {buff}")
             flags = obj.tags.get(category="flag", return_list=True) or []
