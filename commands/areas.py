@@ -55,6 +55,9 @@ class CmdAMake(Command):
                 return
         new_area = Area(key=name, start=start, end=end)
         save_area(new_area)
+        # tag the current room as the first room of this area
+        if location := self.caller.location:
+            location.set_area(name, start)
         self.msg(f"Area '{name}' registered for rooms {start}-{end}.")
 
 
