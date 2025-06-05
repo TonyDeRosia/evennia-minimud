@@ -150,13 +150,14 @@ class CmdRooms(Command):
 class CmdRName(Command):
     """Rename the current room."""
 
-    key = "rname"
+    key = "rrename"
+    aliases = ("roomrename", "renameroom", "rname")
     locks = "cmd:perm(Builder)"
     help_category = "Building"
 
     def func(self):
         if not self.args:
-            self.msg("Usage: rname <new name>")
+            self.msg("Usage: rrename <new name>")
             return
         room = self.caller.location
         if not room:
@@ -165,6 +166,27 @@ class CmdRName(Command):
         new_name = self.args.strip()
         room.key = new_name
         self.msg(f"Room renamed to {new_name}.")
+
+
+class CmdRDesc(Command):
+    """View or set the room description."""
+
+    key = "rdesc"
+    aliases = ("roomdesc",)
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        room = self.caller.location
+        if not room:
+            self.msg("You have no location.")
+            return
+        if not self.args:
+            desc = room.db.desc or "This room has no description."
+            self.msg(desc)
+        else:
+            room.db.desc = self.args.strip()
+            self.msg("Room description updated.")
 
 
 class CmdRSet(Command):
@@ -231,4 +253,5 @@ class AreaCmdSet(CmdSet):
         self.add(CmdASet)
         self.add(CmdRooms)
         self.add(CmdRName)
+        self.add(CmdRDesc)
         self.add(CmdRSet)

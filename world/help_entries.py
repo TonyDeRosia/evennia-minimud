@@ -121,15 +121,29 @@ HELP_ENTRY_DICTS = [
         """,
     },
     {
-        "key": "rname",
+        "key": "rrename",
+        "aliases": ["roomrename", "renameroom", "rname"],
         "category": "building",
         "text": """
             Rename the room you are currently in.
 
             Usage:
-                rname <new name>
+                rrename <new name>
 
             Changes the name of the current room.
+        """,
+    },
+    {
+        "key": "rdesc",
+        "aliases": ["roomdesc"],
+        "category": "building",
+        "text": """
+            View or change the current room's description.
+
+            Usage:
+                rdesc <new description>
+
+            With no description given, shows the current one.
         """,
     },
     {

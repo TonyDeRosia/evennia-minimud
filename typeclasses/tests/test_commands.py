@@ -345,14 +345,29 @@ class TestRoomRenameCommand(EvenniaTest):
         super().setUp()
         self.char1.msg = MagicMock()
 
-    def test_rname_changes_room_name(self):
+    def test_rrename_changes_room_name(self):
         start = self.char1.location
-        self.char1.execute_cmd("rname New Room")
+        self.char1.execute_cmd("rrename New Room")
         self.assertEqual(start.key, "New Room")
 
-    def test_rname_usage(self):
-        self.char1.execute_cmd("rname")
-        self.char1.msg.assert_called_with("Usage: rname <new name>")
+    def test_rrename_usage(self):
+        self.char1.execute_cmd("rrename")
+        self.char1.msg.assert_called_with("Usage: rrename <new name>")
+
+
+class TestRoomDescCommand(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.msg = MagicMock()
+
+    def test_rdesc_sets_room_description(self):
+        self.char1.execute_cmd("rdesc A dark cavern")
+        self.assertEqual(self.char1.location.db.desc, "A dark cavern")
+
+    def test_rdesc_shows_description(self):
+        self.char1.location.db.desc = "Some desc"
+        self.char1.execute_cmd("rdesc")
+        self.char1.msg.assert_called_with("Some desc")
 
 
 class TestRoomSetCommand(EvenniaTest):

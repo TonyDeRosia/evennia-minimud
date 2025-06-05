@@ -24,3 +24,14 @@ dig <direction>
 
 For example, `dig north` will make a new room north of the current one
 and also create a south exit back.
+
+## Room Editing Commands
+
+Builders can tweak the current room with a few simple commands:
+
+* `rrename <new name>` - change the room's name. Aliases: `roomrename`,
+  `renameroom`, `rname`.
+* `rdesc <new description>` - set the room's description. With no
+  argument it will show the current description.
+* `rset area <area>` or `rset id <number>` - assign the room to an
+  area or change its id within that area.
