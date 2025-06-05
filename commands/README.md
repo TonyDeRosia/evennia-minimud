@@ -35,3 +35,13 @@ Builders can tweak the current room with a few simple commands:
   argument it will show the current description.
 * `rset area <area>` or `rset id <number>` - assign the room to an
   area or change its id within that area.
+
+## Object Editing Commands
+
+Builders and admins can adjust object attributes with these commands:
+
+* `setdesc <target> <description>` - change an object's description.
+* `setweight <target> <value>` - assign a numeric carry weight.
+* `setslot <target> <slot>` - set the slot or clothing type.
+* `setdamage <target> <amount>` - set the object's damage value.
+* `setbuff <target> <buff>` - label the object with a buff identifier.

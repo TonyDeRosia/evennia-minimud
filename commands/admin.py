@@ -1,6 +1,13 @@
 from evennia import CmdSet, create_object
 from .command import Command
 from .info import CmdScan
+from .building import (
+    CmdSetDesc,
+    CmdSetWeight,
+    CmdSetSlot,
+    CmdSetDamage,
+    CmdSetBuff,
+)
 from world.stats import CORE_STAT_KEYS
 from world.system import stat_manager
 
@@ -416,4 +423,9 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdCArmor)
         self.add(CmdCTool)
         self.add(CmdCGear)
+        self.add(CmdSetDesc)
+        self.add(CmdSetWeight)
+        self.add(CmdSetSlot)
+        self.add(CmdSetDamage)
+        self.add(CmdSetBuff)
 

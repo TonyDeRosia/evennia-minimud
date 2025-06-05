@@ -184,3 +184,114 @@ class CmdTeleport(Command):
             return
         self.caller.move_to(room, quiet=True, move_type="teleport")
         self.msg(f"Teleported to {room.get_display_name(self.caller)}.")
+
+
+class CmdSetDesc(Command):
+    """Set an object's description."""
+
+    key = "setdesc"
+    locks = "cmd:perm(Admin) or perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: setdesc <target> <description>")
+            return
+        target_name, *desc_parts = self.args.split(None, 1)
+        if not desc_parts:
+            self.msg("Usage: setdesc <target> <description>")
+            return
+        target = self.caller.search(target_name, global_search=True)
+        if not target:
+            return
+        target.db.desc = desc_parts[0].strip()
+        self.msg(f"Description set on {target.key}.")
+
+
+class CmdSetWeight(Command):
+    """Set an object's weight."""
+
+    key = "setweight"
+    locks = "cmd:perm(Admin) or perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: setweight <target> <value>")
+            return
+        parts = self.args.split(None, 1)
+        if len(parts) != 2 or not parts[1].isdigit():
+            self.msg("Usage: setweight <target> <value>")
+            return
+        target = self.caller.search(parts[0], global_search=True)
+        if not target:
+            return
+        target.db.weight = int(parts[1])
+        self.msg(f"Weight on {target.key} set to {parts[1]}.")
+
+
+class CmdSetSlot(Command):
+    """Set an object's slot attribute."""
+
+    key = "setslot"
+    locks = "cmd:perm(Admin) or perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: setslot <target> <slot>")
+            return
+        parts = self.args.split(None, 1)
+        if len(parts) != 2:
+            self.msg("Usage: setslot <target> <slot>")
+            return
+        target = self.caller.search(parts[0], global_search=True)
+        if not target:
+            return
+        target.db.slot = parts[1].strip()
+        self.msg(f"Slot on {target.key} set to {parts[1].strip()}.")
+
+
+class CmdSetDamage(Command):
+    """Set an object's damage value."""
+
+    key = "setdamage"
+    locks = "cmd:perm(Admin) or perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: setdamage <target> <amount>")
+            return
+        parts = self.args.split(None, 1)
+        if len(parts) != 2 or not parts[1].lstrip("-+").isdigit():
+            self.msg("Usage: setdamage <target> <amount>")
+            return
+        target = self.caller.search(parts[0], global_search=True)
+        if not target:
+            return
+        target.db.dmg = int(parts[1])
+        self.msg(f"Damage on {target.key} set to {parts[1]}.")
+
+
+class CmdSetBuff(Command):
+    """Set a buff identifier on a target."""
+
+    key = "setbuff"
+    locks = "cmd:perm(Admin) or perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: setbuff <target> <buff>")
+            return
+        parts = self.args.split(None, 1)
+        if len(parts) != 2:
+            self.msg("Usage: setbuff <target> <buff>")
+            return
+        target = self.caller.search(parts[0], global_search=True)
+        if not target:
+            return
+        target.db.buff = parts[1].strip()
+        self.msg(f"Buff on {target.key} set to {parts[1].strip()}.")
+
