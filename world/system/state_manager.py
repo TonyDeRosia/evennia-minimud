@@ -3,6 +3,7 @@
 from typing import Dict, List
 from world import stats
 from world.system import stat_manager
+from world.effects import EFFECTS
 
 
 def _get_bonus_dict(chara) -> Dict[str, List[dict]]:
@@ -19,6 +20,14 @@ def _get_status_dict(chara) -> Dict[str, int]:
 
 def _save_status_dict(chara, data):
     chara.db.status_effects = data
+
+
+def _get_effect_dict(chara) -> Dict[str, int]:
+    return chara.db.active_effects or {}
+
+
+def _save_effect_dict(chara, data):
+    chara.db.active_effects = data
 
 
 def add_temp_stat_bonus(
@@ -98,6 +107,42 @@ def remove_cooldown(chara, key: str):
     chara.cooldowns.remove(key)
 
 
+def add_effect(chara, key: str, duration: int):
+    """Add an active effect with a duration."""
+    effects = _get_effect_dict(chara)
+    effects[key] = duration
+    _save_effect_dict(chara, effects)
+    effect = EFFECTS.get(key)
+    if effect and effect.type == "buff":
+        chara.tags.add(key, category="buff")
+    else:
+        chara.tags.add(key, category="status")
+    stat_manager.refresh_stats(chara)
+
+
+def remove_effect(chara, key: str):
+    """Remove an active effect from ``chara``."""
+    effects = _get_effect_dict(chara)
+    if key in effects:
+        del effects[key]
+        _save_effect_dict(chara, effects)
+        chara.tags.remove(key, category="buff")
+        chara.tags.remove(key, category="status")
+        stat_manager.refresh_stats(chara)
+
+
+def get_effect_mods(chara) -> Dict[str, int]:
+    """Return aggregated stat modifiers from active effects."""
+    mods: Dict[str, int] = {}
+    for key in _get_effect_dict(chara):
+        effect = EFFECTS.get(key)
+        if not effect or not effect.mods:
+            continue
+        for stat, amt in effect.mods.items():
+            mods[stat] = mods.get(stat, 0) + amt
+    return mods
+
+
 def get_temp_bonus(chara, stat: str) -> int:
     total = 0
     for entry in _get_bonus_dict(chara).get(stat, []):
@@ -108,7 +153,9 @@ def get_temp_bonus(chara, stat: str) -> int:
 def get_effective_stat(chara, stat: str) -> int:
     """Return ``stat`` value including temporary bonuses."""
     base = stats.sum_bonus(chara, stat)
-    return base + get_temp_bonus(chara, stat)
+    base += get_temp_bonus(chara, stat)
+    base += get_effect_mods(chara).get(stat, 0)
+    return base
 
 
 def tick_character(chara):
@@ -127,6 +174,21 @@ def tick_character(chara):
             changed = True
     if changed:
         _save_bonus_dict(chara, bonuses)
+        stat_manager.refresh_stats(chara)
+
+    effects = _get_effect_dict(chara)
+    effect_changed = False
+    for key, dur in list(effects.items()):
+        dur -= 1
+        if dur <= 0:
+            del effects[key]
+            chara.tags.remove(key, category="buff")
+            chara.tags.remove(key, category="status")
+            effect_changed = True
+        else:
+            effects[key] = dur
+    if effect_changed:
+        _save_effect_dict(chara, effects)
         stat_manager.refresh_stats(chara)
 
     statuses = _get_status_dict(chara)

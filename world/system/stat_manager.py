@@ -93,8 +93,8 @@ def _gear_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
 
 
 def _buff_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
-    """Placeholder for buff/debuff bonus lookup."""
-    return {}
+    """Collect stat modifiers from active effects."""
+    return state_manager.get_effect_mods(obj)
 
 
 # -------------------------------------------------------------
@@ -186,6 +186,7 @@ def get_effective_stat(obj, key: str) -> int:
     elif hasattr(obj, "attributes"):
         base += obj.attributes.get(f"{key}_bonus", default=0)
     base += state_manager.get_temp_bonus(obj, key)
+    base += state_manager.get_effect_mods(obj).get(key, 0)
     return int(base)
 
 

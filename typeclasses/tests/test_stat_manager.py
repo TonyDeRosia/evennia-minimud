@@ -61,3 +61,23 @@ class TestStatManager(EvenniaTest):
         self.assertIsInstance(char.db.base_primary_stats, dict)
         for key in stats.CORE_STAT_KEYS:
             self.assertIn(key, char.db.base_primary_stats)
+
+    def test_active_effect_modifiers(self):
+        char = self.char1
+        stat_manager.refresh_stats(char)
+        base = char.traits.STR.base
+        state_manager.add_effect(char, "STR", 2)
+        self.assertEqual(char.traits.STR.base, base + 5)
+        self.assertEqual(stat_manager.get_effective_stat(char, "STR"), base + 5)
+        state_manager.tick_character(char)
+        state_manager.tick_character(char)
+        self.assertEqual(char.traits.STR.base, base)
+
+    def test_debuff_modifiers(self):
+        char = self.char1
+        stat_manager.refresh_stats(char)
+        base = char.traits.DEX.base
+        state_manager.add_effect(char, "stunned", 1)
+        self.assertEqual(char.traits.DEX.base, base - 5)
+        state_manager.tick_character(char)
+        self.assertEqual(char.traits.DEX.base, base)
