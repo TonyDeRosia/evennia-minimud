@@ -42,7 +42,7 @@ class TestInfoCommands(EvenniaTest):
         self.assertIn("Tester", args)
 
 
-    def test_stats_alias_sc(self):
+    def test_score_alias_sc(self):
         self.char1.execute_cmd("sc")
         self.assertTrue(self.char1.msg.called)
 
