@@ -7,6 +7,8 @@ from .building import (
     CmdSetSlot,
     CmdSetDamage,
     CmdSetBuff,
+    CmdSetFlag,
+    CmdRemoveFlag,
 )
 from world.stats import CORE_STAT_KEYS
 from world.system import stat_manager
@@ -428,4 +430,6 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdSetSlot)
         self.add(CmdSetDamage)
         self.add(CmdSetBuff)
+        self.add(CmdSetFlag)
+        self.add(CmdRemoveFlag)
 

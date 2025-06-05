@@ -418,3 +418,15 @@ class TestAdminCommands(EvenniaTest):
         self.char1.execute_cmd(f"slay {self.char2.key}")
         self.assertEqual(self.char2.traits.health.current, 0)
         self.assertTrue(self.char2.tags.has("unconscious", category="status"))
+
+
+class TestFlagCommands(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.msg = MagicMock()
+
+    def test_setflag_and_removeflag(self):
+        self.char1.execute_cmd(f"setflag {self.obj1.key} equipment")
+        self.assertTrue(self.obj1.tags.has("equipment", category="flag"))
+        self.char1.execute_cmd(f"removeflag {self.obj1.key} equipment")
+        self.assertFalse(self.obj1.tags.has("equipment", category="flag"))
