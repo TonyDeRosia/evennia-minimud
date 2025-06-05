@@ -286,9 +286,11 @@ class CmdRevive(Command):
 
     Usage:
         revive <player>
+        revive all
     """
 
     key = "revive"
+    aliases = ("resurrect",)
     help_category = "combat"
 
     def func(self):
@@ -298,7 +300,24 @@ class CmdRevive(Command):
             self.msg("Revive who?")
             return
 
-        target = caller.search(self.args.strip())
+        arg = self.args.strip()
+
+        if arg.lower() == "all":
+            from evennia.utils.search import search_tag
+
+            targets = [
+                obj
+                for obj in search_tag(key="unconscious", category="status")
+                if hasattr(obj, "revive")
+            ]
+            if not targets:
+                self.msg("No one is unconscious.")
+                return
+            for target in targets:
+                target.revive(caller)
+            return
+
+        target = caller.search(arg)
         if not target:
             return
 

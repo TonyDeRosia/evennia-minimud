@@ -270,4 +270,18 @@ HELP_ENTRY_DICTS = [
                 restoreall
         """,
     },
+    {
+        "key": "revive",
+        "aliases": ["resurrect"],
+        "category": "combat",
+        "text": """
+            Revive a defeated player at partial health.
+
+            Usage:
+                revive <player>
+                revive all
+
+            Using |wall|n revives every unconscious character in the game.
+        """,
+    },
 ]
