@@ -302,18 +302,38 @@ class Character(ObjectParent, ClothedCharacter):
             # there are no hands available to wield this
             self.msg(f"Your hands are full.")
             return
-        # handle two-handed weapons
-        if weapon.tags.has("mainhand", category="flag"):
-            main = self.db.handedness or "right"
-            if hand and hand != main:
-                self.msg(f"{weapon.get_display_name(self)} must be wielded in your {main} hand.")
-                return
-            if main not in free:
-                self.msg(f"Your {main} hand is not free.")
-                return
-            hand = main
+        # handle hand restrictions
+        main = self.db.handedness or "right"
+        off = "left" if main == "right" else "right"
 
-        if weapon.tags.has("two_handed", category="wielded"):
+        if weapon.tags.has("mainhand", category="flag"):
+            required = main
+        elif weapon.tags.has("offhand", category="flag"):
+            required = off
+        else:
+            required = None
+
+        if required:
+            if hand and hand != required:
+                self.msg(
+                    f"{weapon.get_display_name(self)} must be wielded in your {required} hand."
+                )
+                return
+            if required not in free:
+                self.msg(f"Your {required} hand is not free.")
+                return
+            hand = required
+
+        # handle two-handed weapons
+        twohanded = weapon.tags.has("two_handed", category="wielded") or weapon.tags.has(
+            "twohanded", category="flag"
+        )
+        if twohanded:
+            if any(obj.tags.has("shield", category="flag") for obj in get_worn_clothes(self)):
+                self.msg(
+                    f"You cannot wield {weapon.get_display_name(self)} while using a shield."
+                )
+                return
             if len(free) < 2:
                 # not enough free hands to hold this
                 self.msg(
@@ -322,13 +342,13 @@ class Character(ObjectParent, ClothedCharacter):
                 return
             # put the weapon as wielded in the first two hands
             hands = free[:2]
-            for hand in hands:
-                wielded[hand] = weapon
+            for h in hands:
+                wielded[h] = weapon
         else:
             if not hand:
                 # check handedness first, then find a hand
-                if main_hand := self.db.handedness:
-                    hand = main_hand if main_hand in free else free[0]
+                if main in free:
+                    hand = main
                 else:
                     hand = free[0]
             # put the weapon as wielded in the hand

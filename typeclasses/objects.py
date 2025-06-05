@@ -15,6 +15,7 @@ from random import randint
 from evennia.prototypes import spawner, prototypes
 from evennia.objects.objects import DefaultObject
 from evennia.contrib.game_systems.clothing import ContribClothing
+from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 
 from commands.interact import GatherCmdSet
 
@@ -210,6 +211,24 @@ class ClothingObject(ObjectParent, ContribClothing):
         if not self.tags.has("identified", category="flag"):
             wearer.msg(f"You don't know how to use {self.get_display_name(wearer)}.")
             return
+        # honor slot tags by preventing duplicates
+        if slots := self.tags.get(category="slot", return_list=True):
+            worn_items = get_worn_clothes(wearer)
+            for slot in slots:
+                for item in worn_items:
+                    if item.tags.has(slot, category="slot"):
+                        wearer.msg(f"You are already wearing something on your {slot}.")
+                        return
+
+        # shields can't be worn with two-handed weapons
+        if self.tags.has("shield", category="flag"):
+            for weap in wearer.wielding:
+                if weap.tags.has("twohanded", category="flag") or weap.tags.has(
+                    "two_handed", category="wielded"
+                ):
+                    wearer.msg("You cannot use a shield while wielding a two-handed weapon.")
+                    return
+
         return super().wear(wearer, wearstyle, quiet=quiet)
 
 
