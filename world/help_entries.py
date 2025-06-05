@@ -230,6 +230,23 @@ HELP_ENTRY_DICTS = [
         """,
     },
     {
+        "key": "item flags",
+        "aliases": ["setflag", "removeflag"],
+        "category": "building",
+        "text": """
+            Items may have special flags stored on them.
+
+            Use |wsetflag <item> <flag>|n to add a flag and
+            |wremoveflag <item> <flag>|n to remove it.
+
+            Some example flags:
+                identified - item can be equipped or wielded
+                equipment  - marks the object as equipable
+                stationary - item cannot be moved
+                mainhand   - must be wielded in your main hand
+        """,
+    },
+    {
         "key": "admin",
         "category": "admin",
         "text": """

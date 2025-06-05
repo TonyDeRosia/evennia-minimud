@@ -295,3 +295,52 @@ class CmdSetBuff(Command):
         target.db.buff = parts[1].strip()
         self.msg(f"Buff on {target.key} set to {parts[1].strip()}.")
 
+
+class CmdSetFlag(Command):
+    """Add a flag to an object."""
+
+    key = "setflag"
+    locks = "cmd:perm(Admin) or perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: setflag <target> <flag>")
+            return
+        parts = self.args.split(None, 1)
+        if len(parts) != 2:
+            self.msg("Usage: setflag <target> <flag>")
+            return
+        target = self.caller.search(parts[0], global_search=True)
+        if not target:
+            return
+        flag = parts[1].strip().lower()
+        target.tags.add(flag, category="flag")
+        self.msg(f"Flag {flag} set on {target.key}.")
+
+
+class CmdRemoveFlag(Command):
+    """Remove a flag from an object."""
+
+    key = "removeflag"
+    locks = "cmd:perm(Admin) or perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: removeflag <target> <flag>")
+            return
+        parts = self.args.split(None, 1)
+        if len(parts) != 2:
+            self.msg("Usage: removeflag <target> <flag>")
+            return
+        target = self.caller.search(parts[0], global_search=True)
+        if not target:
+            return
+        flag = parts[1].strip().lower()
+        if target.tags.has(flag, category="flag"):
+            target.tags.remove(flag, category="flag")
+            self.msg(f"Flag {flag} removed from {target.key}.")
+        else:
+            self.msg("Flag not set.")
+

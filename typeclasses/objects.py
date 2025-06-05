@@ -191,9 +191,26 @@ class Object(ObjectParent, DefaultObject):
             dropper.at_unwield(self)
         super().at_drop(dropper, **kwargs)
 
+    def at_pre_move(self, destination, move_type="move", **kwargs):
+        """Prevent moving if the stationary flag is set."""
+        if self.tags.has("stationary", category="flag"):
+            mover = kwargs.get("caller") or kwargs.get("mover")
+            if mover:
+                mover.msg(f"{self.get_display_name(mover)} refuses to budge.")
+            return False
+        return super().at_pre_move(destination, move_type=move_type, **kwargs)
+
 
 class ClothingObject(ObjectParent, ContribClothing):
-    pass
+    def wear(self, wearer, wearstyle, quiet=False):
+        """Only wearable if flagged as equipment and identified."""
+        if not self.tags.has("equipment", category="flag"):
+            wearer.msg(f"{self.get_display_name(wearer)} can't be worn.")
+            return
+        if not self.tags.has("identified", category="flag"):
+            wearer.msg(f"You don't know how to use {self.get_display_name(wearer)}.")
+            return
+        return super().wear(wearer, wearstyle, quiet=quiet)
 
 
 class GatherNode(Object):

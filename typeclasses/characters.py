@@ -158,6 +158,9 @@ class Character(ObjectParent, ClothedCharacter):
         Called by self.move_to when trying to move somewhere. If this returns
         False, the move is immediately cancelled.
         """
+        if self.tags.has("stationary", category="flag"):
+            self.msg("You cannot move.")
+            return False
         # check if we have any statuses that prevent us from moving
         if statuses := self.tags.get(_IMMOBILE, category="status", return_list=True):
             self.msg(
@@ -270,6 +273,14 @@ class Character(ObjectParent, ClothedCharacter):
         if wielded:
             wielded.deserialize()
 
+        # verify flags
+        if not weapon.tags.has("equipment", category="flag"):
+            self.msg(f"{weapon.get_display_name(self)} can't be wielded.")
+            return
+        if not weapon.tags.has("identified", category="flag"):
+            self.msg(f"You don't know how to use {weapon.get_display_name(self)}.")
+            return
+
         # which hand (or "hand") we'll wield it in
         # get all available hands
         free = self.free_hands
@@ -292,6 +303,16 @@ class Character(ObjectParent, ClothedCharacter):
             self.msg(f"Your hands are full.")
             return
         # handle two-handed weapons
+        if weapon.tags.has("mainhand", category="flag"):
+            main = self.db.handedness or "right"
+            if hand and hand != main:
+                self.msg(f"{weapon.get_display_name(self)} must be wielded in your {main} hand.")
+                return
+            if main not in free:
+                self.msg(f"Your {main} hand is not free.")
+                return
+            hand = main
+
         if weapon.tags.has("two_handed", category="wielded"):
             if len(free) < 2:
                 # not enough free hands to hold this
