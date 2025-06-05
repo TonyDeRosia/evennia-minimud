@@ -59,4 +59,10 @@ EFFECTS: Dict[str, Effect] = {
         desc="You are sprawled on the ground.",
         type="status",
     ),
+    "hungry_thirsty": Effect(
+        key="hungry_thirsty",
+        name="Hungry & Thirsty",
+        desc="You are weakened from hunger and thirst.",
+        type="status",
+    ),
 }

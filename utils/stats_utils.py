@@ -120,8 +120,16 @@ def get_display_scroll(chara):
     else:
         hp_disp = mp_disp = sp_disp = "--/--"
 
+    sated_val = int(_db_get(chara, "sated", 0) or 0)
+    if sated_val <= 0:
+        sated_disp = "|r0 (URGENT)|n"
+    elif sated_val < 5:
+        sated_disp = f"|y{sated_val}|n"
+    else:
+        sated_disp = f"|g{sated_val}|n"
+
     lines.append(
-        f"|YLvl {level}|n  |CXP|n {xp}  |rHP|n {hp_disp}  |cMP|n {mp_disp}  |gSP|n {sp_disp}"
+        f"|YLvl {level}|n  |CXP|n {xp}  |rHP|n {hp_disp}  |cMP|n {mp_disp}  |gSP|n {sp_disp}  |ySated|n {sated_disp}"
     )
 
     coins = _db_get(chara, "coins", 0)
