@@ -1,7 +1,8 @@
 from evennia.utils.evtable import EvTable
 from evennia.utils import iter_to_str
 from world.stats import CORE_STAT_KEYS, sum_bonus, apply_stats
-
+from utils.currency import format_wallet, from_copper
+import math
 
 PRIMARY_EXTRA = "perception"
 SECONDARY_KEYS = [
@@ -18,9 +19,10 @@ def get_primary_stats(chara):
     for key in CORE_STAT_KEYS:
         trait = chara.traits.get(key)
         val = trait.value if trait else 0
+        val = int(math.ceil(val))
         stats.append((key, val))
     if (per := chara.traits.get(PRIMARY_EXTRA)):
-        stats.append(("PER", per.value))
+        stats.append(("PER", int(math.ceil(per.value))))
     return stats
 
 
@@ -28,7 +30,7 @@ def get_secondary_stats(chara):
     """Return computed secondary stats."""
     stats = []
     for key in SECONDARY_KEYS:
-        value = sum_bonus(chara, key)
+        value = int(math.ceil(sum_bonus(chara, key)))
         display = key.replace("_", " ").title()
         stats.append((display, value))
     return stats
@@ -55,15 +57,8 @@ def _db_get(obj, key, default=None):
 
 
 def get_display_scroll(chara):
-    """Return a parchment-style stats display for ``chara``.
+    """Return a parchment-style stats display for ``chara``."""
 
-    The character may not always have had their base stats initialized,
-    particularly if they were created before the stats system was added.
-    To avoid attribute errors we make sure all default stats exist before
-    accessing them.
-    """
-
-    # ensure the character has all required stats
     apply_stats(chara)
 
     lines = []
@@ -88,7 +83,9 @@ def get_display_scroll(chara):
         lines.append("Health --/--  Mana --/--  Stamina --/--")
 
     coins = _db_get(chara, "coins", 0)
-    lines.append(f"Coins: {coins}")
+    if isinstance(coins, int):
+        coins = from_copper(coins)
+    lines.append(f"Coins: {format_wallet(coins)}")
 
     guild = _db_get(chara, "guild", "")
     if guild:

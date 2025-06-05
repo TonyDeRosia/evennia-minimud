@@ -44,11 +44,11 @@ class TestCharacterHooks(EvenniaTest):
 class TestCharacterDisplays(EvenniaTest):
     def test_get_display_status(self):
         self.assertEqual(
-            "|gChar|n - Health 100.0% : Mana 100.0% : Stamina 100.0%",
+            "|gChar|n - Health 100% : Mana 100% : Stamina 100%",
             self.char1.get_display_status(self.char2),
         )
         self.assertEqual(
-            "Health 100.0% : Mana 100.0% : Stamina 100.0%",
+            "Health 100% : Mana 100% : Stamina 100%",
             self.char1.get_display_status(self.char1),
         )
 

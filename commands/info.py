@@ -1,6 +1,7 @@
 from evennia import CmdSet
 from evennia.utils.evtable import EvTable
 from evennia.utils import iter_to_str
+from utils.currency import to_copper, from_copper, format_wallet
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 from world.guilds import get_rank_title
 from world.stats import CORE_STAT_KEYS
@@ -93,12 +94,11 @@ class CmdBounty(Command):
             self.msg("Amount must be positive.")
             return
 
-        coins = self.caller.db.coins or 0
-        if coins < amount:
+        wallet = self.caller.db.coins or {}
+        if to_copper(wallet) < amount:
             self.msg("You don't have that many coins.")
             return
-
-        self.caller.db.coins = coins - amount
+        self.caller.db.coins = from_copper(to_copper(wallet) - amount)
         target.db.bounty = (target.db.bounty or 0) + amount
         self.msg(f"You place a bounty of {amount} coins on {target.get_display_name(self.caller)}.")
 

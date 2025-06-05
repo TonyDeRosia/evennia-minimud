@@ -2,6 +2,7 @@ from evennia.commands.default.muxcommand import MuxCommand
 from evennia.server.sessionhandler import SESSIONS
 from evennia.utils.evtable import EvTable
 from evennia.utils.utils import time_format
+import time
 
 
 class CmdWho(MuxCommand):
@@ -29,7 +30,8 @@ class CmdWho(MuxCommand):
                 continue
             account = sess.account
             puppet = sess.puppet
-            idle = time_format(sess.idle(), 0)
+            delta_cmd = time.time() - sess.cmd_last_visible
+            idle = time_format(delta_cmd, 0)
             title = puppet.db.title if puppet else ""
             char = puppet.get_display_name(caller) if puppet else "None"
             if not puppet and not is_admin:
@@ -40,4 +42,3 @@ class CmdWho(MuxCommand):
             table.add_row(*row)
 
         caller.msg(str(table))
-
