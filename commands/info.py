@@ -4,32 +4,20 @@ from evennia.utils import iter_to_str
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 from world.guilds import get_rank_title
 from world.stats import CORE_STAT_KEYS
+from utils.stats_utils import get_display_scroll
 
 from .command import Command
 
 
 class CmdScore(Command):
-    """View your basic stats."""
+    """View your character sheet."""
 
     key = "score"
-    aliases = ("sheet", "sc")
+    aliases = ("sheet", "sc", "status")
     help_category = "general"
 
     def func(self):
-        caller = self.caller
-        stats = []
-        for key in CORE_STAT_KEYS:
-            trait = caller.traits.get(key)
-            base = trait.base if trait else 0
-            mod = trait.modifier if trait else 0
-            total = base + mod
-            text = f"{base}" if not mod else f"{base} ({total})"
-            stats.append([key, text])
-        perception = caller.traits.get("perception")
-        if perception:
-            stats.append(["PER", str(perception.value)])
-        table = EvTable(table=list(zip(*stats)), border="none")
-        caller.msg(str(table))
+        self.caller.msg(get_display_scroll(self.caller))
 
 
 class CmdDesc(Command):
@@ -144,6 +132,21 @@ class CmdBuffs(Command):
             self.msg("Active effects: " + iter_to_str(sorted(buffs)))
 
 
+class CmdTitle(Command):
+    """Set or view your character title."""
+
+    key = "title"
+    help_category = "general"
+
+    def func(self):
+        if not self.args:
+            title = self.caller.db.title or "You have no title."
+            self.msg(title)
+        else:
+            self.caller.db.title = self.args.strip()
+            self.msg("Title updated.")
+
+
 class InfoCmdSet(CmdSet):
     key = "Info CmdSet"
 
@@ -155,4 +158,5 @@ class InfoCmdSet(CmdSet):
         self.add(CmdInventory)
         self.add(CmdEquipment)
         self.add(CmdBuffs)
+        self.add(CmdTitle)
 

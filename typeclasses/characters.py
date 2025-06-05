@@ -326,11 +326,13 @@ class Character(ObjectParent, ClothedCharacter):
 
     def at_tick(self):
         """Called by the global ticker."""
-        self.refresh_prompt()
+        if self.sessions.count():
+            self.refresh_prompt()
 
     def refresh_prompt(self):
         """Refresh the player's prompt display."""
-        self.msg(prompt=self.get_display_status(self))
+        if self.sessions.count():
+            self.msg(prompt=self.get_display_status(self))
 
     def revive(self, reviver, **kwargs):
         """

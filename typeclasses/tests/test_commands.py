@@ -26,7 +26,14 @@ class TestInfoCommands(EvenniaTest):
         self.assertTrue(self.char1.msg.called)
 
     def test_score(self):
+        self.char1.db.title = "Tester"
         self.char1.execute_cmd("score")
+        self.assertTrue(self.char1.msg.called)
+        args = self.char1.msg.call_args[0][0]
+        self.assertIn("Tester", args)
+
+    def test_score_alias_status(self):
+        self.char1.execute_cmd("status")
         self.assertTrue(self.char1.msg.called)
 
     def test_stats_alias_sc(self):
@@ -64,4 +71,8 @@ class TestInfoCommands(EvenniaTest):
         self.char2.db.guild = "Adventurers Guild"
         self.char1.execute_cmd("guildwho")
         self.assertTrue(self.char1.msg.called)
+
+    def test_title(self):
+        self.char1.execute_cmd("title Brave")
+        self.assertEqual(self.char1.db.title, "Brave")
 
