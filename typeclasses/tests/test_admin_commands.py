@@ -2,9 +2,11 @@ from unittest.mock import MagicMock
 
 from evennia import create_object
 from commands.admin import AdminCmdSet
+from commands.default_cmdsets import CharacterCmdSet
 from evennia.utils.test_resources import EvenniaTest
 from django.test import override_settings
 from typeclasses.characters import PlayerCharacter
+from typeclasses.objects import Object
 
 
 @override_settings(DEFAULT_HOME=None)
@@ -24,6 +26,7 @@ class TestAdminCommands(EvenniaTest):
         self.char_other = create_object(
             PlayerCharacter, key="OtherChar", location=self.room2, home=self.room2
         )
+        self.char_other.cmdset.add_default(CharacterCmdSet)
 
     def test_setstat_and_setattr_offline(self):
         offline = create_object(PlayerCharacter, key="Offline", location=self.room1, home=self.room1)
@@ -75,3 +78,31 @@ class TestAdminCommands(EvenniaTest):
             self.assertFalse(pc.tags.get(category="buff", return_list=True))
             self.assertFalse(pc.tags.get(category="status", return_list=True))
 
+
+    def test_revive_all(self):
+        for pc in (self.char2, self.char_other):
+            pc.tags.add("unconscious", category="status")
+            pc.tags.add("lying down", category="status")
+            pc.traits.health.current = 0
+        from commands.combat import CmdRevive
+        cmd = CmdRevive()
+        cmd.caller = self.char1
+        cmd.args = "all"
+        cmd.msg = MagicMock()
+        cmd.func()
+        for pc in (self.char2, self.char_other):
+            self.assertFalse(pc.tags.has("unconscious", category="status"))
+            self.assertEqual(pc.traits.health.current, pc.traits.health.max // 5)
+
+    def test_purge_deletes_objects(self):
+        obj1 = create_object(Object, key="trash", location=self.room1)
+        obj2 = create_object(Object, key="garbage", location=self.room1)
+        self.char1.location = self.room1
+        self.char1.execute_cmd("purge")
+        self.assertIsNone(obj1.pk)
+        self.assertIsNone(obj2.pk)
+
+    def test_purge_target(self):
+        obj = create_object(Object, key="target", location=self.room1)
+        self.char1.execute_cmd("purge target")
+        self.assertIsNone(obj.pk)
