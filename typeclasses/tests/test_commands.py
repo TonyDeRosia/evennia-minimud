@@ -144,6 +144,39 @@ class TestInfoCommands(EvenniaTest):
         out = self.char1.msg.call_args[0][0]
         self.assertIn("Weight:", out)
 
+    def test_inspect_alias_exact_match(self):
+        from evennia.utils import create
+
+        w1 = create.create_object(
+            "typeclasses.gear.MeleeWeapon", key="epee-1", location=self.char1
+        )
+        w1.aliases.add("epee-1")
+        w1.db.dmg = 1
+        w1.db.slot = "mainhand"
+        w1.db.identified = True
+
+        w2 = create.create_object(
+            "typeclasses.gear.MeleeWeapon", key="epee-10", location=self.char1
+        )
+        w2.aliases.add("epee-10")
+        w2.db.dmg = 10
+        w2.db.slot = "mainhand"
+        w2.tags.add("flaming", category="buff")
+        w2.tags.add("STR+2")
+        w2.db.identified = True
+
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("inspect epee-1")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Damage: 1", out)
+        self.assertIn("Slot: mainhand", out)
+        self.char1.msg.reset_mock()
+
+        self.char1.execute_cmd("inspect epee-10")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Damage: 10", out)
+        self.assertIn("Effects: flaming, STR+2", out)
+
     def test_buffs(self):
         self.char1.execute_cmd("buffs")
         self.assertTrue(self.char1.msg.called)
