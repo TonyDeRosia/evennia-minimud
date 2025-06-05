@@ -88,8 +88,71 @@ def _class_mods(obj) -> Dict[str, int]:
 
 
 def _gear_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
-    """Placeholder for gear bonus lookup."""
-    return {}
+    """Collect stat bonuses from equipped gear.
+
+    This inspects both worn clothing and wielded items for attributes or
+    tags providing bonuses. Supported formats are attributes named
+    ``"<STAT>_bonus"`` or a mapping stored under ``"stat_mods"``. Any tag in the
+    form ``"<STAT>+N"`` will also be parsed as a bonus. Returned keys may be
+    primary or derived stat names.
+    """
+
+    bonus: Dict[str, int] = {}
+
+    try:
+        from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
+
+        worn = get_worn_clothes(obj)
+    except Exception:  # pragma: no cover - clothing contrib may not be loaded
+        worn = []
+
+    items = list(worn)
+    if hasattr(obj, "wielding"):
+        items.extend(obj.wielding)
+
+    stat_keys = set(PRIMARY_STATS) | set(STAT_SCALING.keys())
+
+    for item in items:
+        # attribute handler
+        if hasattr(item, "attributes"):
+            for key in stat_keys:
+                val = item.attributes.get(f"{key}_bonus", default=0)
+                if val:
+                    bonus[key] = bonus.get(key, 0) + int(val)
+            mods = item.attributes.get("stat_mods", default=None)
+            if mods:
+                for stat, val in mods.items():
+                    bonus[stat] = bonus.get(stat, 0) + int(val)
+        else:
+            getter = getattr(getattr(item, "db", None), "get", None)
+            if callable(getter):
+                for key in stat_keys:
+                    try:
+                        val = getter(f"{key}_bonus", 0)
+                    except Exception:
+                        val = 0
+                    if val:
+                        bonus[key] = bonus.get(key, 0) + int(val)
+                try:
+                    mods = getter("stat_mods", None)
+                except Exception:
+                    mods = None
+                if mods:
+                    for stat, val in mods.items():
+                        bonus[stat] = bonus.get(stat, 0) + int(val)
+
+        if hasattr(item, "tags"):
+            tags = item.tags.get(return_list=True)
+            for tag in tags:
+                if not isinstance(tag, str):
+                    continue
+                m = re.match(r"([A-Z_]+)\+(\-?\d+)$", tag)
+                if m:
+                    stat, amt = m.groups()
+                    if stat in stat_keys:
+                        bonus[stat] = bonus.get(stat, 0) + int(amt)
+
+    return bonus
 
 
 def _buff_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
@@ -139,6 +202,8 @@ def refresh_stats(obj) -> None:
         value = 0
         for pkey, weight in mapping.items():
             value += primary_totals.get(pkey, 0) * weight
+        value += gear_bonus.get(dkey, 0)
+        value += buff_bonus.get(dkey, 0)
         derived[dkey] = int(round(value))
 
     overrides = getattr(obj.db, "stat_overrides", {}) or {}
