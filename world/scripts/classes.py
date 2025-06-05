@@ -41,7 +41,7 @@ CLASS_LIST = [
     },
     {
         "name": "Priest",
-        "desc": "Wielder of holy light or shadow—healer, protector, or punisher.",
+        "desc": "Wielder of holy light or shadow--healer, protector, or punisher.",
         "stat_mods": {"WIS": 3, "CON": 1}
     },
     {
@@ -51,7 +51,7 @@ CLASS_LIST = [
     },
     {
         "name": "Druid",
-        "desc": "A wild shape-shifter bonded with nature’s essence.",
+        "desc": "A wild shape-shifter bonded with nature's essence.",
         "stat_mods": {"WIS": 2, "CON": 2}
     },
     {
