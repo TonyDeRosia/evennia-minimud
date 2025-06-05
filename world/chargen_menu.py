@@ -277,6 +277,8 @@ def menunode_finish(caller, **kwargs):
     )
     account.characters.add(char)
     char.save()
+    char.tags.add("player", category="role")
+    char.save()
 
     account.db._last_puppet = char
     caller.ndb.new_char = None
