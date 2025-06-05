@@ -120,7 +120,11 @@ def get_display_scroll(chara):
     else:
         hp_disp = mp_disp = sp_disp = "--/--"
 
-    sated_val = int(_db_get(chara, "sated", 0) or 0)
+    sated_val = 0
+    if hasattr(chara.db, "sated"):
+        sated_val = chara.db.sated or 0
+    elif chara.traits.get("sated"):
+        sated_val = chara.traits.sated.value
     if sated_val <= 0:
         sated_disp = "|r0 (URGENT)|n"
     elif sated_val < 5:
@@ -129,8 +133,9 @@ def get_display_scroll(chara):
         sated_disp = f"|g{sated_val}|n"
 
     lines.append(
-        f"|YLvl {level}|n  |CXP|n {xp}  |rHP|n {hp_disp}  |cMP|n {mp_disp}  |gSP|n {sp_disp}  |ySated|n {sated_disp}"
+        f"|YLvl {level}|n  |CXP|n {xp}  |rHP|n {hp_disp}  |cMP|n {mp_disp}  |gSP|n {sp_disp}"
     )
+    lines.append(f"|ySated|n {sated_disp}")
 
     coins = _db_get(chara, "coins", 0)
     if isinstance(coins, int):

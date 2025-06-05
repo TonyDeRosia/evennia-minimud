@@ -163,22 +163,36 @@ class CmdEquipment(Command):
 
     def func(self):
         caller = self.caller
-        out = []
+        slots = []
         wielded = caller.attributes.get("_wielded", {})
         if wielded:
             wielded.deserialize()
-            for hand, weap in wielded.items():
-                if weap:
-                    out.append(f"{hand.capitalize()}: {weap.get_display_name(caller)}")
+        main = caller.db.handedness or "right"
+        off = "left" if main == "right" else "right"
+        main_item = wielded.get(main)
+        off_item = wielded.get(off)
+        slots.append(("Mainhand", main_item))
+        slots.append(("Offhand", off_item))
+
         worn = get_worn_clothes(caller)
-        if worn:
-            worn_list = ", ".join(obj.get_display_name(caller) for obj in worn)
-            out.append(f"Worn: {worn_list}")
-        if not out:
-            self.msg("You have nothing equipped.")
-        else:
-            for line in out:
-                self.msg(line)
+        worn_map = {}
+        for item in worn:
+            ctype = item.db.clothing_type
+            if ctype and ctype not in worn_map:
+                worn_map[ctype] = item
+        from django.conf import settings
+        for ctype in getattr(settings, "CLOTHING_TYPE_ORDERED", []):
+            slots.append((ctype.capitalize(), worn_map.get(ctype)))
+
+        width = max(len(name) for name, _ in slots)
+        lines = ["+" + "=" * (width + 15) + "+"]
+        lines.append("| " + _pad("[ EQUIPMENT ]", width + 13) + " |")
+        for name, item in slots:
+            val = item.get_display_name(caller) if item else "|xNOTHING|n"
+            line = f"| {name.ljust(width)} : {val}"
+            lines.append(line)
+        lines.append("+" + "=" * (width + 15) + "+")
+        self.msg("\n".join(lines))
 
 
 class CmdInspect(Command):
@@ -200,6 +214,14 @@ class CmdInspect(Command):
         lines = [f"|w{obj.get_display_name(caller)}|n"]
         desc = obj.db.desc or "You see nothing special."
         lines.append(desc)
+
+        req = obj.db.required_perception_to_identify
+        if obj.tags.has("unidentified") and req is not None:
+            from world.system import stat_manager
+            per = stat_manager.get_effective_stat(caller, "perception")
+            if per >= req:
+                obj.tags.remove("unidentified")
+                obj.db.identified = True
 
         if obj.db.identified:
             if (weight := obj.db.weight) is not None:

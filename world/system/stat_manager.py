@@ -48,7 +48,7 @@ STAT_SCALING: Dict[str, Dict[str, float]] = {
     # Utility stats
     "stealth": {"DEX": 0.2, "perception": 0.2, "LUCK": 0.1},
     "detection": {"perception": 0.4, "WIS": 0.2},
-    "perception": {"WIS": 1},
+    "perception": {},
     "threat": {"STR": 0.2, "CON": 0.1},
     "movement_speed": {"DEX": 0.1, "perception": 0.1},
     "craft_bonus": {"INT": 0.2, "WIS": 0.2, "LUCK": 0.1},
@@ -205,6 +205,23 @@ def refresh_stats(obj) -> None:
         value += gear_bonus.get(dkey, 0)
         value += buff_bonus.get(dkey, 0)
         derived[dkey] = int(round(value))
+
+    # perception scales off primary stats but keeps its base value
+    if obj.traits.get("perception"):
+        base_per = getattr(obj.db, "base_perception", None)
+        if base_per is None:
+            base_per = obj.traits.get("perception").base
+            obj.db.base_perception = base_per
+    else:
+        base_per = 0
+    per_bonus = (
+        primary_totals.get("WIS", 0) * 0.3
+        + primary_totals.get("INT", 0) * 0.3
+        + primary_totals.get("LUCK", 0) * 0.2
+    )
+    per_bonus += gear_bonus.get("perception", 0)
+    per_bonus += buff_bonus.get("perception", 0)
+    derived["perception"] = int(round(base_per + per_bonus))
 
     overrides = getattr(obj.db, "stat_overrides", {}) or {}
     for key, val in overrides.items():
