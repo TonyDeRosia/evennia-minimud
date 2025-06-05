@@ -18,7 +18,7 @@ from .objects import ObjectParent
 _IMMOBILE = ("sitting", "lying down", "unconscious", "sleeping")
 
 # base stamina cost of moving between rooms
-_MOVE_SP_BASE = 5
+_MOVE_SP_BASE = 1
 
 
 class Character(ObjectParent, ClothedCharacter):
@@ -179,13 +179,9 @@ class Character(ObjectParent, ClothedCharacter):
         carry_capacity = self.db.carry_capacity or 0
         carry_weight = self.db.carry_weight or 0
         cost = _MOVE_SP_BASE
-        if carry_weight > carry_capacity:
-            if carry_weight <= 1.5 * carry_capacity:
-                cost += 5
-            elif carry_weight <= 2.0 * carry_capacity:
-                cost += 10
-            else:
-                cost += 20
+        if carry_weight > carry_capacity and carry_capacity > 0:
+            excess = carry_weight - carry_capacity
+            cost += excess // 10
         if self.traits.stamina:
             self.traits.stamina.current = max(
                 self.traits.stamina.current - cost, 0
