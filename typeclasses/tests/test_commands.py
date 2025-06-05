@@ -113,8 +113,24 @@ class TestInfoCommands(EvenniaTest):
         self.assertTrue(self.char1.msg.called)
         self.char1.msg.reset_mock()
         self.char1.tags.add("speed", category="buff")
+        self.char1.db.temp_bonuses = {"STR": [{"amount": 5, "duration": 3}]}
         self.char1.execute_cmd("buffs")
-        self.assertTrue(self.char1.msg.called)
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Speed Boost", out)
+        self.assertIn("Strength Bonus", out)
+        self.assertIn("3", out)
+
+    def test_affects(self):
+        self.char1.db.status_effects = {"stunned": 5}
+        self.char1.tags.add("speed", category="buff")
+        self.char1.db.temp_bonuses = {"STR": [{"amount": 5, "duration": 3}]}
+        self.char1.execute_cmd("affects")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Stunned", out)
+        self.assertIn("Speed Boost", out)
+        self.assertIn("Strength Bonus", out)
+        self.assertIn("5", out)
+        self.assertIn("3", out)
 
     def test_guild(self):
         self.char1.db.guild = "Adventurers Guild"

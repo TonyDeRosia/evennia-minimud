@@ -182,17 +182,94 @@ class CmdEquipment(Command):
 
 
 class CmdBuffs(Command):
-    """List active temporary effects."""
+    """List active buff effects."""
 
     key = "buffs"
     help_category = "general"
 
     def func(self):
-        buffs = self.caller.tags.get(category="buff", return_list=True)
-        if not buffs:
+        from world.effects import EFFECTS
+
+        caller = self.caller
+        rows = []
+
+        for tag in caller.tags.get(category="buff", return_list=True):
+            effect = EFFECTS.get(tag)
+            if effect and effect.type != "buff":
+                continue
+            name = effect.name if effect else tag
+            desc = effect.desc if effect else ""
+            dur = (
+                caller.db.status_effects.get(tag) if caller.db.status_effects else None
+            )
+            rows.append((name, dur, desc))
+
+        for stat, entries in (caller.db.temp_bonuses or {}).items():
+            effect = EFFECTS.get(stat)
+            if effect and effect.type != "buff":
+                continue
+            for entry in entries:
+                name = effect.name if effect else f"{stat.capitalize()} Bonus"
+                desc = effect.desc if effect else f"Temporary bonus to {stat}."
+                rows.append((name, entry.get("duration"), desc))
+
+        if not rows:
             self.msg("You have no active effects.")
-        else:
-            self.msg("Active effects: " + iter_to_str(sorted(buffs)))
+            return
+
+        table = EvTable(
+            "|wName|n", "|wDuration|n", "|wDescription|n", border="none", align="l"
+        )
+        for name, dur, desc in rows:
+            table.add_row(name, str(dur) if dur is not None else "-", desc)
+        self.msg(str(table))
+
+
+class CmdAffects(Command):
+    """List all active effects."""
+
+    key = "affects"
+    aliases = ("effects",)
+    help_category = "general"
+
+    def func(self):
+        from world.effects import EFFECTS
+
+        caller = self.caller
+        rows = []
+
+        for status, dur in (caller.db.status_effects or {}).items():
+            effect = EFFECTS.get(status)
+            name = effect.name if effect else status
+            desc = effect.desc if effect else ""
+            rows.append((name, dur, desc))
+
+        for tag in caller.tags.get(category="buff", return_list=True):
+            effect = EFFECTS.get(tag)
+            name = effect.name if effect else tag
+            desc = effect.desc if effect else ""
+            dur = (
+                caller.db.status_effects.get(tag) if caller.db.status_effects else None
+            )
+            rows.append((name, dur, desc))
+
+        for stat, entries in (caller.db.temp_bonuses or {}).items():
+            effect = EFFECTS.get(stat)
+            for entry in entries:
+                name = effect.name if effect else f"{stat.capitalize()} Bonus"
+                desc = effect.desc if effect else f"Temporary bonus to {stat}."
+                rows.append((name, entry.get("duration"), desc))
+
+        if not rows:
+            self.msg("You are not affected by any effects.")
+            return
+
+        table = EvTable(
+            "|wName|n", "|wDuration|n", "|wDescription|n", border="none", align="l"
+        )
+        for name, dur, desc in rows:
+            table.add_row(name, str(dur) if dur is not None else "-", desc)
+        self.msg(str(table))
 
 
 class CmdTitle(Command):
@@ -239,6 +316,7 @@ class InfoCmdSet(CmdSet):
         self.add(CmdBounty)
         self.add(CmdInventory)
         self.add(CmdEquipment)
+        self.add(CmdAffects)
         self.add(CmdBuffs)
         self.add(CmdTitle)
         self.add(CmdPrompt)
