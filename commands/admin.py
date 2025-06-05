@@ -1,4 +1,5 @@
 from evennia import CmdSet, create_object
+import re
 from .command import Command
 from .info import CmdScan
 from .building import (
@@ -260,7 +261,7 @@ def _create_gear(caller, typeclass, name, slot=None, value=None, attr="dmg"):
         else:
             obj.db.slot = slot
     if value is not None:
-        obj.db[attr] = value
+        obj.attributes.add(attr, value)
     caller.msg(f"Created {obj.get_display_name(caller)}.")
     return obj
 
@@ -319,15 +320,43 @@ class CmdCWeapon(Command):
             return
         parts = self.args.split()
         name = parts[0]
-        slot = parts[1] if len(parts) > 1 else None
+        slot = parts[1].lower() if len(parts) > 1 else None
+
         dmg = None
+        dice = None
+        dice_num = dice_sides = None
         if len(parts) > 2:
-            try:
-                dmg = int(parts[2])
-            except ValueError:
-                self.msg("Damage must be a number.")
-                return
-        _create_gear(self.caller, "typeclasses.gear.MeleeWeapon", name, slot, dmg)
+            dmg_arg = parts[2]
+            if re.match(r"^\d+d\d+$", dmg_arg):
+                dice = dmg_arg
+                dice_num, dice_sides = map(int, dmg_arg.lower().split("d"))
+            else:
+                try:
+                    dmg = int(dmg_arg)
+                except ValueError:
+                    self.msg("Damage must be a number or NdN dice string.")
+                    return
+
+        valid_slots = {"mainhand", "offhand", "mainhand/offhand", "twohanded"}
+        if slot and slot not in valid_slots:
+            self.msg("Slot must be mainhand, offhand, mainhand/offhand, or twohanded.")
+            return
+
+        obj = _create_gear(self.caller, "typeclasses.gear.MeleeWeapon", name)
+
+        if slot:
+            if slot == "mainhand/offhand":
+                obj.tags.add("mainhand", category="flag")
+                obj.tags.add("offhand", category="flag")
+            else:
+                obj.tags.add(slot, category="flag")
+
+        if dmg is not None:
+            obj.attributes.add("dmg", dmg)
+        if dice:
+            obj.attributes.add("damage_dice", dice)
+            obj.attributes.add("dice_num", dice_num)
+            obj.attributes.add("dice_sides", dice_sides)
 
 
 class CmdCShield(Command):

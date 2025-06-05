@@ -192,7 +192,10 @@ HELP_ENTRY_DICTS = [
             Usage:
                 cweapon <name> [slot] [damage]
 
-            The item is a |ctypeclasses.gear.MeleeWeapon|n with optional damage value.
+            Damage may be a flat number or dice in the form |wNdN|n (for example |w3d7|n).
+            Valid slots are |wmainhand|n, |woffhand|n, |wmainhand/offhand|n or |wtwohanded|n.
+
+            The item is a |ctypeclasses.gear.MeleeWeapon|n.
         """,
     },
     {
