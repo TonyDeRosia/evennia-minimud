@@ -250,8 +250,7 @@ class GlobalTick(Script):
         for obj in search_tag(key="tickable"):
             if hasattr(obj, "at_tick"):
                 obj.at_tick()
+            state_manager.tick_character(obj)
 
         for pc in PlayerCharacter.objects.all():
             pc.refresh_prompt()
-
-        state_manager.tick_all()

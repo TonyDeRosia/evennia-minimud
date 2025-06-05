@@ -41,3 +41,12 @@ class TestStateManager(EvenniaTest):
         state_manager.tick_character(char)
         entry_after = char.db.temp_bonuses["STR"][0]
         self.assertEqual(entry_after["key"], "speed")
+
+    def test_sated_and_hungry_effect(self):
+        char = self.char1
+        char.db.sated = 1
+        hp = char.traits.health.current
+        state_manager.tick_character(char)
+        self.assertEqual(char.db.sated, 0)
+        self.assertTrue(char.tags.has("hungry_thirsty", category="status"))
+        self.assertEqual(char.traits.health.current, hp - 1)

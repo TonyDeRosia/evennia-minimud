@@ -136,6 +136,7 @@ class Character(ObjectParent, ClothedCharacter):
         self.db.guild = ""
         self.db.guild_honor = 0
         self.db.stat_overrides = {}
+        self.db.sated = 5
 
     def at_post_puppet(self, **kwargs):
         """Ensure stats refresh when a character is controlled."""
@@ -184,6 +185,8 @@ class Character(ObjectParent, ClothedCharacter):
         if carry_weight > carry_capacity and carry_capacity > 0:
             excess = carry_weight - carry_capacity
             cost += excess // 10
+        if self.tags.has("hungry_thirsty", category="status"):
+            cost += 1
         if self.traits.stamina:
             self.traits.stamina.current = max(
                 self.traits.stamina.current - cost, 0

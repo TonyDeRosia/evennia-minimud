@@ -205,6 +205,17 @@ def tick_character(chara):
         _save_status_dict(chara, statuses)
         stat_manager.refresh_stats(chara)
 
+    # Hunger and thirst
+    if hasattr(chara.db, "sated"):
+        sated = chara.db.sated or 0
+        if sated > 0:
+            chara.db.sated = sated - 1
+        if chara.db.sated <= 0:
+            chara.db.sated = 0
+            add_effect(chara, "hungry_thirsty", 1)
+            if (hp := chara.traits.get("health")):
+                hp.current = max(hp.current - 1, 0)
+
 
 def tick_all():
     """Tick timers for all characters."""
