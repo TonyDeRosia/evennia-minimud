@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Dict
+from dataclasses import dataclass, field
+from typing import Dict, Optional
 
 
 @dataclass
@@ -10,6 +10,7 @@ class Effect:
     name: str
     desc: str
     type: str = "status"  # "buff" or "status"
+    mods: Optional[Dict[str, int]] = field(default_factory=dict)
 
 
 EFFECTS: Dict[str, Effect] = {
@@ -18,18 +19,21 @@ EFFECTS: Dict[str, Effect] = {
         name="Speed Boost",
         desc="You move more quickly than normal.",
         type="buff",
+        mods={"DEX": 2},
     ),
     "stunned": Effect(
         key="stunned",
         name="Stunned",
         desc="You are unable to act.",
         type="status",
+        mods={"DEX": -5},
     ),
     "STR": Effect(
         key="STR",
         name="Strength Bonus",
         desc="Your strength is temporarily increased.",
         type="buff",
+        mods={"STR": 5},
     ),
     "sleeping": Effect(
         key="sleeping",
