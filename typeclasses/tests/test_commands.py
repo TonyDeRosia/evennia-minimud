@@ -133,6 +133,17 @@ class TestInfoCommands(EvenniaTest):
         self.assertIn("A mystery item.", out)
         self.assertNotIn("Weight:", out)
 
+    def test_inspect_auto_identify(self):
+        self.obj1.db.desc = "A hidden gem."
+        self.obj1.db.identified = False
+        self.obj1.db.required_perception_to_identify = 5
+        self.obj1.tags.add("unidentified")
+        from world.system import stat_manager
+        stat_manager.refresh_stats(self.char1)
+        self.char1.execute_cmd(f"inspect {self.obj1.key}")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Weight:", out)
+
     def test_buffs(self):
         self.char1.execute_cmd("buffs")
         self.assertTrue(self.char1.msg.called)

@@ -279,6 +279,16 @@ def menunode_finish(caller, **kwargs):
     from world.system import stat_manager
     stat_manager.refresh_stats(char)
 
+    # start fully recovered
+    if char.traits.get("health"):
+        char.traits.health.current = char.traits.health.max
+    if char.traits.get("mana"):
+        char.traits.mana.current = char.traits.mana.max
+    if char.traits.get("stamina"):
+        char.traits.stamina.current = char.traits.stamina.max
+    char.db.sated = 100
+    stat_manager.refresh_stats(char)
+
     # assign the newly created character to this account
     account = getattr(caller, "account", None) or getattr(caller, "dbobj", caller)
     char.account = account

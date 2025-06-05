@@ -43,6 +43,11 @@ class CmdSetStat(Command):
         alias_map = {"hp": "health", "mp": "mana", "sp": "stamina"}
         stat_key = alias_map.get(stat_key.lower(), stat_key)
         stat_key_up = stat_key.upper()
+        stat_key_low = stat_key.lower()
+        if stat_key_low == "sated":
+            target.db.sated = value
+            self.msg(f"sated set to {value} on {target.key}.")
+            return
         if stat_key_up in CORE_STAT_KEYS:
             trait = target.traits.get(stat_key_up)
             if trait:
@@ -55,7 +60,6 @@ class CmdSetStat(Command):
             stat_manager.refresh_stats(target)
             self.msg(f"{stat_key_up} set to {value} on {target.key}.")
             return
-        stat_key_low = stat_key.lower()
         overrides = target.db.stat_overrides or {}
         overrides[stat_key_low] = value
         target.db.stat_overrides = overrides
