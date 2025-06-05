@@ -10,7 +10,7 @@ from .command import Command
 
 
 class CmdScore(Command):
-    """View your character sheet."""
+    """View your character sheet (alias \"sc\")."""
 
     key = "score"
     aliases = ("sheet", "sc")
