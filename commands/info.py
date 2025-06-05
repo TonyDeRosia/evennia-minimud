@@ -50,24 +50,21 @@ class CmdFinger(Command):
             if not target:
                 return
         desc = target.db.desc or "They have no description."
-        stat_parts = []
-        for key in CORE_STAT_KEYS:
-            trait = target.traits.get(key)
-            value = trait.value if trait else 0
-            stat_parts.append(f"{key} {value}")
-        if (per := target.traits.get("perception")):
-            stat_parts.append(f"PER {per.value}")
-        stats = ", ".join(stat_parts)
-        self.msg(f"|w{target.key}|n - {desc}")
-        self.msg(stats)
+        name_line = f"|w{target.key}|n"
+        if target.db.title:
+            name_line += f" - {target.db.title}"
+        self.msg(name_line)
+        self.msg(desc)
         if guild := target.db.guild:
             honor = target.db.guild_honor or 0
             rank = get_rank_title(guild, honor)
             self.msg(f"Guild: {guild} ({rank})")
             self.msg(f"Honor: {honor}")
         bounty = target.attributes.get("bounty", 0)
-        if bounty > 0:
+        if bounty:
             self.msg(f"Bounty: {bounty}")
+        else:
+            self.msg("No bounty.")
 
 
 class CmdBounty(Command):
