@@ -338,3 +338,18 @@ class TestRoomFlagCommands(EvenniaTest):
         self.assertIn("dark", out)
         self.char1.execute_cmd("rflag remove dark")
         self.assertFalse(self.char1.location.tags.has("dark", category="room_flag"))
+
+
+class TestRoomRenameCommand(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.msg = MagicMock()
+
+    def test_rname_changes_room_name(self):
+        start = self.char1.location
+        self.char1.execute_cmd("rname New Room")
+        self.assertEqual(start.key, "New Room")
+
+    def test_rname_usage(self):
+        self.char1.execute_cmd("rname")
+        self.char1.msg.assert_called_with("Usage: rname <new name>")

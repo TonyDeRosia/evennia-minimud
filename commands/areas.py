@@ -147,6 +147,26 @@ class CmdRooms(Command):
         self.msg("\n".join([header] + lines))
 
 
+class CmdRName(Command):
+    """Rename the current room."""
+
+    key = "rname"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: rname <new name>")
+            return
+        room = self.caller.location
+        if not room:
+            self.msg("You have no location.")
+            return
+        new_name = self.args.strip()
+        room.key = new_name
+        self.msg(f"Room renamed to {new_name}.")
+
+
 class AreaCmdSet(CmdSet):
     key = "Area CmdSet"
 
@@ -156,3 +176,4 @@ class AreaCmdSet(CmdSet):
         self.add(CmdAMake)
         self.add(CmdASet)
         self.add(CmdRooms)
+        self.add(CmdRName)
