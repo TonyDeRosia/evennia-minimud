@@ -16,7 +16,9 @@ import math
 from .objects import ObjectParent
 
 _IMMOBILE = ("sitting", "lying down", "unconscious")
-_MAX_CAPACITY = 10
+
+# base stamina cost of moving between rooms
+_MOVE_SP_BASE = 5
 
 
 class Character(ObjectParent, ClothedCharacter):
@@ -86,6 +88,31 @@ class Character(ObjectParent, ClothedCharacter):
             key for key, val in self.attributes.get("_wielded", {}).items() if not val
         ]
 
+    # -------------------------------------------------------------
+    # Carry weight helpers
+    # -------------------------------------------------------------
+
+    def update_carry_weight(self):
+        """Recalculate and store total weight of carried items."""
+        weight = 0
+        for obj in self.contents:
+            if obj.db.worn:
+                continue
+            weight += getattr(obj.db, "weight", 1)
+        self.db.carry_weight = weight
+
+    def encumbrance_level(self):
+        """Return a text description of current encumbrance."""
+        capacity = self.db.carry_capacity or 0
+        weight = self.db.carry_weight or 0
+        if capacity <= 0 or weight <= capacity:
+            return ""
+        if weight <= 1.5 * capacity:
+            return "Encumbered (Light)"
+        if weight <= 2.0 * capacity:
+            return "Encumbered (Moderate)"
+        return "Encumbered (Severe)"
+
     def defense(self, damage_type=None):
         """
         Get the total armor defense from equipped items and natural defenses
@@ -112,6 +139,16 @@ class Character(ObjectParent, ClothedCharacter):
         """Ensure stats refresh when a character is controlled."""
         from world.system import stat_manager
         stat_manager.refresh_stats(self)
+
+    def at_object_receive(self, obj, source_location, **kwargs):
+        """Update carry weight when gaining an item."""
+        super().at_object_receive(obj, source_location, **kwargs)
+        self.update_carry_weight()
+
+    def at_object_leave(self, obj, target_location, **kwargs):
+        """Update carry weight when losing an item."""
+        super().at_object_leave(obj, target_location, **kwargs)
+        self.update_carry_weight()
         
     def at_pre_move(self, destination, **kwargs):
         """
@@ -137,6 +174,23 @@ class Character(ObjectParent, ClothedCharacter):
         optional post-move auto prompt
         """
         super().at_post_move(source_location, **kwargs)
+        self.update_carry_weight()
+
+        carry_capacity = self.db.carry_capacity or 0
+        carry_weight = self.db.carry_weight or 0
+        cost = _MOVE_SP_BASE
+        if carry_weight > carry_capacity:
+            if carry_weight <= 1.5 * carry_capacity:
+                cost += 5
+            elif carry_weight <= 2.0 * carry_capacity:
+                cost += 10
+            else:
+                cost += 20
+        if self.traits.stamina:
+            self.traits.stamina.current = max(
+                self.traits.stamina.current - cost, 0
+            )
+
         # check if we have auto-prompt in settings
         if self.account and (settings := self.account.db.settings):
             if settings.get("auto prompt"):
@@ -355,7 +409,7 @@ class Character(ObjectParent, ClothedCharacter):
         return " - ".join(chunks)
 
     def get_resource_prompt(self):
-        """Return a colorized prompt showing HP/MP/SP values."""
+        """Return the player's prompt string."""
         from world.system import stat_manager
 
         stat_manager.refresh_stats(self)
@@ -366,6 +420,31 @@ class Character(ObjectParent, ClothedCharacter):
         mp_max = int(self.traits.mana.max)
         sp_cur = int(self.traits.stamina.current)
         sp_max = int(self.traits.stamina.max)
+
+        coins = self.db.coins or {}
+        data = {
+            "hp": hp_cur,
+            "hpmax": hp_max,
+            "mp": mp_cur,
+            "mpmax": mp_max,
+            "sp": sp_cur,
+            "spmax": sp_max,
+            "level": self.db.level or 1,
+            "xp": self.db.exp or 0,
+            "copper": coins.get("copper", 0),
+            "silver": coins.get("silver", 0),
+            "gold": coins.get("gold", 0),
+            "platinum": coins.get("platinum", 0),
+            "carry": self.db.carry_weight or 0,
+            "capacity": self.db.carry_capacity or 0,
+            "enc": self.encumbrance_level(),
+        }
+
+        if fmt := self.db.prompt_format:
+            try:
+                return fmt.format(**data)
+            except Exception as err:  # pragma: no cover - format errors
+                logger.log_err(f"Prompt format error for {self}: {err}")
 
         return (
             f"[|r{hp_cur}|n/{hp_max}] "
@@ -431,19 +510,6 @@ class PlayerCharacter(Character):
             return f"|c{name}|n"
         return f"|g{name}|n"
 
-    def at_pre_object_receive(self, object, source_location, **kwargs):
-        """
-        Called before picking something up or being given something. If this returns
-        False, the move is immediately cancelled.
-        """
-        # check if we have any statuses that prevent us from moving
-        if len([obj for obj in self.contents if not obj.db.worn]) > _MAX_CAPACITY:
-            self.msg("You can't carry any more things.")
-            source_location.msg(
-                f"{self.get_display_name(source_location)} can't carry any more things."
-            )
-            return False
-        return super().at_pre_object_receive(object, source_location, **kwargs)
 
     def at_damage(self, attacker, damage, damage_type=None):
         super().at_damage(attacker, damage, damage_type=damage_type)

@@ -64,4 +64,26 @@ HELP_ENTRY_DICTS = [
 
         """,
     },
+    {
+        "key": "prompt",
+        "category": "General",
+        "text": """
+            Customize the information shown in your command prompt.
+
+            Use |wprompt|n to view your current prompt string.
+            Use |wprompt <format>|n to set a new one. The string may use the
+            following fields:
+
+            {hp}, {hpmax} - current and max health
+            {mp}, {mpmax} - current and max mana
+            {sp}, {spmax} - current and max stamina
+            {level}, {xp} - your level and experience points
+            {copper}, {silver}, {gold}, {platinum} - coins carried
+            {carry}, {capacity} - carry weight and capacity
+            {enc} - encumbrance level
+
+            Example:
+                |wprompt [HP:{hp}/{hpmax}] [SP:{sp}/{spmax}] {enc}>|n
+        """,
+    },
 ]

@@ -165,6 +165,9 @@ def refresh_stats(obj) -> None:
         else:
             obj.traits.add(key, key, base=val)
 
+    if obj.traits.get("STR"):
+        obj.db.carry_capacity = get_effective_stat(obj, "STR") * 20
+
 
 def get_effective_stat(obj, key: str) -> int:
     """Return ``key`` value including temporary bonuses."""

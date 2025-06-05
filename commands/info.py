@@ -141,6 +141,14 @@ class CmdInventory(Command):
         for obj in items:
             table.add_row(obj.get_display_name(caller))
         caller.msg(str(table))
+        caller.update_carry_weight()
+        weight = caller.db.carry_weight or 0
+        capacity = caller.db.carry_capacity or 0
+        enc = caller.encumbrance_level()
+        line = f"Carry Weight: {weight} / {capacity}"
+        if enc:
+            line += f"  {enc}"
+        caller.msg(line)
 
 
 class CmdEquipment(Command):
@@ -199,6 +207,24 @@ class CmdTitle(Command):
             self.msg("Title updated.")
 
 
+class CmdPrompt(Command):
+    """View or set your command prompt."""
+
+    key = "prompt"
+    help_category = "general"
+
+    def func(self):
+        caller = self.caller
+        if not self.args:
+            current = caller.db.prompt_format or caller.get_resource_prompt()
+            caller.msg(f"Current prompt: {current}")
+            caller.msg("Set a new prompt with |wprompt <format>|n.")
+            return
+        caller.db.prompt_format = self.args.strip()
+        caller.msg("Prompt updated.")
+        caller.refresh_prompt()
+
+
 class InfoCmdSet(CmdSet):
     key = "Info CmdSet"
 
@@ -212,3 +238,4 @@ class InfoCmdSet(CmdSet):
         self.add(CmdEquipment)
         self.add(CmdBuffs)
         self.add(CmdTitle)
+        self.add(CmdPrompt)

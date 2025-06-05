@@ -35,8 +35,8 @@ BASE_CHARACTER_TYPECLASS = "typeclasses.characters.PlayerCharacter"
 # Enable command abbreviation matching
 CMD_IGNORE_INVALID_ABBREVIATIONS = False
 
-# Use the Evennia MuxCommand as the default command base
-COMMAND_DEFAULT_CLASS = "evennia.commands.default.muxcommand.MuxCommand"
+# Use the project MuxCommand so prompts refresh after every command
+COMMAND_DEFAULT_CLASS = "commands.command.MuxCommand"
 
 ######################################################################
 # Config for contrib packages

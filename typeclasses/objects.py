@@ -172,10 +172,16 @@ class Object(ObjectParent, DefaultObject):
      at_get(getter)            - called after object has been picked up.
                                  Does not stop pickup.
      at_drop(dropper)          - called when this object has been dropped.
-     at_say(speaker, message)  - by default, called if an object inside this
+    at_say(speaker, message)  - by default, called if an object inside this
                                  object speaks
 
     """
+
+    def at_object_creation(self):
+        """Set default attributes when object is first created."""
+        super().at_object_creation()
+        if self.db.weight is None:
+            self.db.weight = 1
 
     def at_drop(self, dropper, **kwargs):
         """
@@ -199,6 +205,7 @@ class GatherNode(Object):
         """
         Do some initial set-up
         """
+        super().at_object_creation()
         self.locks.add("get:false()")
         self.cmdset.add_default(GatherCmdSet)
 
