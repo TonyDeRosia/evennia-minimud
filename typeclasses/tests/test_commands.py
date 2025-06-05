@@ -353,3 +353,23 @@ class TestRoomRenameCommand(EvenniaTest):
     def test_rname_usage(self):
         self.char1.execute_cmd("rname")
         self.char1.msg.assert_called_with("Usage: rname <new name>")
+
+
+class TestRoomSetCommand(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.msg = MagicMock()
+
+    def test_rset_area(self):
+        self.char1.execute_cmd("rset area test")
+        self.assertEqual(self.char1.location.db.area, "test")
+
+    def test_rset_id_validation(self):
+        self.char1.execute_cmd("amake test 1-5")
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("dig north test 2")
+        self.char1.execute_cmd("rset id 2")
+        self.char1.msg.assert_called_with("Room already exists.")
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("rset id 6")
+        self.char1.msg.assert_called_with("Number outside area range.")

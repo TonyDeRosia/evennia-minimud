@@ -167,6 +167,60 @@ class CmdRName(Command):
         self.msg(f"Room renamed to {new_name}.")
 
 
+class CmdRSet(Command):
+    """Set properties on the current room."""
+
+    key = "rset"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: rset <area|id> <value>")
+            return
+        room = self.caller.location
+        if not room:
+            self.msg("You have no location.")
+            return
+        parts = self.args.split(None, 1)
+        if len(parts) < 2:
+            self.msg("Usage: rset <area|id> <value>")
+            return
+        prop, value = parts
+        prop = prop.lower()
+        if prop == "area":
+            area = value.strip()
+            room.set_area(area)
+            self.msg(f"Room assigned to area {area}.")
+        elif prop == "id":
+            if not value.isdigit():
+                self.msg("Room id must be numeric.")
+                return
+            room_id = int(value)
+            area = room.db.area
+            if not area:
+                self.msg("This room has no area.")
+                return
+            _, area_data = find_area(area)
+            if area_data and not (area_data.start <= room_id <= area_data.end):
+                self.msg("Number outside area range.")
+                return
+            objs = ObjectDB.objects.filter(
+                db_attributes__db_key="area",
+                db_attributes__db_strvalue__iexact=area,
+            )
+            for obj in objs:
+                if obj == room:
+                    continue
+                if obj.db.room_id == room_id:
+                    self.msg("Room already exists.")
+                    return
+            room.db.room_id = room_id
+            self.msg(f"Room id set to {room_id}.")
+        else:
+            self.msg("Usage: rset <area|id> <value>")
+
+
 class AreaCmdSet(CmdSet):
     key = "Area CmdSet"
 
@@ -177,3 +231,4 @@ class AreaCmdSet(CmdSet):
         self.add(CmdASet)
         self.add(CmdRooms)
         self.add(CmdRName)
+        self.add(CmdRSet)
