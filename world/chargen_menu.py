@@ -29,6 +29,11 @@ def menunode_welcome(caller):
     if not hasattr(caller, "ndb"):
         caller.ndb = {}
 
+    # clean up any unfinished placeholder characters
+    for leftover in caller.characters.filter_family(db_key__iexact="In Progress"):
+        leftover.account = None
+        leftover.delete()
+
     if not caller.ndb.new_char:
         new_char = create_object(PlayerCharacter, key="In Progress", location=None)
         caller.ndb.new_char = new_char
