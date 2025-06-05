@@ -6,7 +6,15 @@ from world.guilds import GUILDS, get_rank_title
 
 
 class CmdGuild(Command):
-    """Show guild information."""
+    """
+    Show information about your current guild.
+
+    Usage:
+        guild
+
+    Example:
+        guild
+    """
 
     key = "guild"
     aliases = ("/guild",)
@@ -31,7 +39,15 @@ class CmdGuild(Command):
 
 
 class CmdGuildWho(Command):
-    """List members of your guild."""
+    """
+    List members of your guild and their status.
+
+    Usage:
+        guildwho
+
+    Example:
+        guildwho
+    """
 
     key = "guildwho"
     help_category = "general"

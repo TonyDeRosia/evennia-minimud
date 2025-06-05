@@ -5,7 +5,15 @@ from .command import Command
 
 
 class CmdRest(Command):
-    """Sit down and rest."""
+    """
+    Sit down and rest to regain stamina.
+
+    Usage:
+        rest
+
+    Example:
+        rest
+    """
 
     key = "rest"
     aliases = ("relax",)
@@ -23,7 +31,15 @@ class CmdRest(Command):
 
 
 class CmdSleep(Command):
-    """Lie down and go to sleep."""
+    """
+    Lie down and go to sleep.
+
+    Usage:
+        sleep
+
+    Example:
+        sleep
+    """
 
     key = "sleep"
     help_category = "general"
@@ -40,7 +56,15 @@ class CmdSleep(Command):
 
 
 class CmdWake(Command):
-    """Stand up and wake from rest or sleep."""
+    """
+    Stand up from rest or sleep.
+
+    Usage:
+        wake
+
+    Example:
+        wake
+    """
 
     key = "wake"
     aliases = ("stand",)
@@ -61,7 +85,15 @@ class CmdWake(Command):
 
 
 class CmdLook(DefaultCmdLook):
-    """Look around, unless you are sleeping."""
+    """
+    Look around the area unless you are sleeping.
+
+    Usage:
+        look [<target>]
+
+    Example:
+        look
+    """
 
     def func(self):
         if self.caller.tags.has("sleeping", category="status"):
