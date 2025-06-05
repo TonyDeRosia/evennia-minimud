@@ -245,6 +245,7 @@ class GlobalTick(Script):
     def at_repeat(self):
         from evennia.utils.search import search_tag
         from .characters import PlayerCharacter
+        from world.system import state_manager
 
         for obj in search_tag(key="tickable"):
             if hasattr(obj, "at_tick"):
@@ -252,3 +253,5 @@ class GlobalTick(Script):
 
         for pc in PlayerCharacter.objects.all():
             pc.refresh_prompt()
+
+        state_manager.tick_all()

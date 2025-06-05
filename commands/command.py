@@ -12,13 +12,19 @@ from evennia.commands.command import Command as BaseCommand
 
 class Command(BaseCommand):
     """
-    Base command (you may see this if a child command had no help text defined)
+    Base command class used in this project.
 
-    Note that the class's `__doc__` string is used by Evennia to create the
-    automatic help entry for the command, so make sure to document consistently
-    here. Without setting one, the parent's docstring will show (like now).
-
+    Evennia's default ``Command.msg`` forwards messages using keyword arguments.
+    Tests expect positional text, so this overrides ``msg`` to pass the message
+    as the first positional argument for compatibility.
     """
+
+    def msg(self, text=None, to_obj=None, from_obj=None, session=None, **kwargs):
+        to_obj = to_obj or (from_obj or self.caller)
+        from_obj = from_obj or self.caller
+        if not session and not self.msg_all_sessions:
+            session = to_obj.sessions.get() if to_obj != self.caller else self.session
+        to_obj.msg(text, from_obj=from_obj, session=session, **kwargs)
 
     # Each Command class implements the following methods, called in this order
     # (only func() is actually required):

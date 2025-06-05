@@ -10,7 +10,7 @@ class CmdWho(MuxCommand):
 
     key = "who"
     aliases = ("online",)
-    account_caller = True
+    account_caller = False
 
     def func(self):
         caller = self.caller

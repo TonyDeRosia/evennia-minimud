@@ -55,8 +55,10 @@ class Character(ObjectParent, ClothedCharacter):
             True if you can flee, otherwise False
         """
         # use dexterity as a fallback for unskilled
+        from world.system import state_manager
+
         if not (evade := self.use_skill("evasion")):
-            evade = self.traits.DEX.value
+            evade = state_manager.get_effective_stat(self, "DEX")
         # if you have more mana, you can escape more easily
         if (randint(0, 99) - self.traits.mana.value) < evade:
             return True
@@ -293,12 +295,12 @@ class Character(ObjectParent, ClothedCharacter):
         # if we don't have the skill, we can't use it
         if not (skill_trait := self.traits.get(skill_name)):
             return 0
+        from world.system import state_manager
+
         # check if this skill has a related base stat
         stat_bonus = 0
         if stat := getattr(skill_trait, "stat", None):
-            # get the related stat as a modifier
-            if (stat_trait := self.traits.get(stat)):
-                stat_bonus = stat_trait.value
+            stat_bonus = state_manager.get_effective_stat(self, stat)
         # finally, return the skill plus stat
         return skill_trait.value + stat_bonus
 
