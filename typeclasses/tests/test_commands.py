@@ -29,23 +29,42 @@ class TestInfoCommands(EvenniaTest):
     def test_finger(self):
         self.char1.execute_cmd(f"finger {self.char2.key}")
         self.assertTrue(self.char1.msg.called)
-        calls = [c.args[0] for c in self.char1.msg.call_args_list if c.args]
-        output = "\n".join(calls)
+        output = self.char1.msg.call_args[0][0]
+        self.assertIn("╔", output)
+        self.assertIn("╚", output)
+        self.assertIn("Another tester.", output)
         self.assertIn("Race: Human", output)
         self.assertIn("Class: Warrior", output)
+        self.assertIn("No bounty.", output)
 
     def test_finger_self(self):
         self.char1.execute_cmd("finger self")
         self.assertTrue(self.char1.msg.called)
-        calls = [c.args[0] for c in self.char1.msg.call_args_list if c.args]
-        output = "\n".join(calls)
+        output = self.char1.msg.call_args[0][0]
+        self.assertIn("╔", output)
         self.assertIn("Race: Elf", output)
         self.assertIn("Class: Mage", output)
 
+    def test_finger_missing_info(self):
+        self.char2.db.race = None
+        self.char2.db.charclass = None
+        self.char1.execute_cmd(f"finger {self.char2.key}")
+        output = self.char1.msg.call_args[0][0]
+        self.assertIn("Race: Unknown", output)
+        self.assertIn("Class: Unknown", output)
+        self.assertIn("No bounty.", output)
+
     def test_finger_bounty(self):
+        self.char2.db.title = "The Warrior"
+        self.char2.db.guild = "Adventurers Guild"
+        self.char2.db.guild_honor = 20
         self.char2.attributes.add("bounty", 10)
         self.char1.execute_cmd(f"finger {self.char2.key}")
-        self.assertTrue(self.char1.msg.called)
+        output = self.char1.msg.call_args[0][0]
+        self.assertIn("The Warrior", output)
+        self.assertIn("Guild: Adventurers Guild", output)
+        self.assertIn("Honor: 20", output)
+        self.assertIn("Bounty: 10", output)
 
     def test_score(self):
         self.char1.db.title = "Tester"
@@ -68,7 +87,6 @@ class TestInfoCommands(EvenniaTest):
         self.assertIn("|g", args)
         self.assertIn("|w", args)
         self.assertIn("|c", args)
-
 
     def test_score_alias_sc(self):
         self.char1.execute_cmd("sc")
@@ -116,6 +134,7 @@ class TestInfoCommands(EvenniaTest):
         self.assertIn(self.char1.key, out)
         self.assertNotIn(self.char1.account.key, out)
 
+
 class TestBountySmall(EvenniaTest):
     def setUp(self):
         super().setUp()
@@ -131,6 +150,7 @@ class TestBountySmall(EvenniaTest):
         self.char2.at_damage(self.char1, 10)
         self.assertEqual(to_copper(self.char1.db.coins), 20)
         self.assertEqual(self.char2.db.bounty, 0)
+
 
 class TestBountyLarge(EvenniaTest):
     def setUp(self):
@@ -159,4 +179,3 @@ class TestBountyLarge(EvenniaTest):
         self.char2.at_damage(self.char1, 200)
         self.assertEqual(to_copper(self.char1.db.coins), 40)
         self.assertEqual(self.char2.db.bounty, 0)
-
