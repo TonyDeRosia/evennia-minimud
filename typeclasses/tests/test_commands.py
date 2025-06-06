@@ -434,7 +434,7 @@ class TestRemoveCommand(EvenniaTest):
         )
         item.tags.add("equipment", category="flag")
         item.tags.add("identified", category="flag")
-        item.tags.add("head", category="slot")
+        item.tags.add("helm", category="slot")
         item.wear(self.char1, True)
         self.assertTrue(item.db.worn)
         self.assertIsNone(item.location)
@@ -442,6 +442,36 @@ class TestRemoveCommand(EvenniaTest):
         self.char1.execute_cmd(f"remove {item.key}")
         self.assertFalse(item.db.worn)
         self.assertEqual(item.location, self.char1)
+
+
+class TestRemoveAllCommand(EvenniaTest):
+    def test_remove_all_removes_everything(self):
+        from evennia.utils import create
+
+        armor = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="cap",
+            location=self.char1,
+        )
+        armor.tags.add("equipment", category="flag")
+        armor.tags.add("identified", category="flag")
+        armor.tags.add("helm", category="slot")
+        armor.wear(self.char1, True)
+
+        weapon = create.create_object(
+            "typeclasses.gear.MeleeWeapon", key="stick", location=self.char1
+        )
+        weapon.tags.add("equipment", category="flag")
+        weapon.tags.add("identified", category="flag")
+        weapon.db.slot = "mainhand"
+        self.char1.attributes.add("_wielded", {"left": None, "right": None})
+        self.char1.at_wield(weapon)
+
+        self.char1.execute_cmd("remove all")
+        self.assertFalse(armor.db.worn)
+        self.assertEqual(armor.location, self.char1)
+        self.assertNotIn(weapon, self.char1.wielding)
+        self.assertEqual(weapon.location, self.char1)
 
 
 class TestDigCommand(EvenniaTest):

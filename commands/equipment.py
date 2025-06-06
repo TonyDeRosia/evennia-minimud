@@ -46,9 +46,31 @@ class CmdRemove(Command):
         caller.msg(f"You remove {obj.key}.")
 
 
+class CmdRemoveAll(Command):
+    """Remove all equipped items and return them to inventory."""
+
+    key = "remove all"
+    aliases = ("takeoff all", "removeall", "takeoffall")
+    help_category = "General"
+
+    def func(self):
+        caller = self.caller
+        eq = [item for item in caller.equipment.values() if item]
+        if not eq:
+            caller.msg("You are not wearing or wielding anything.")
+            return
+        for item in list(eq):
+            if item in caller.wielding:
+                caller.at_unwield(item)
+            else:
+                item.remove(caller)
+            caller.msg(f"You remove {item.key}.")
+
+
 class EquipmentCmdSet(CmdSet):
     key = "Equipment CmdSet"
 
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
         self.add(CmdRemove)
+        self.add(CmdRemoveAll)

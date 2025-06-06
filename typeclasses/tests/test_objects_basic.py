@@ -59,7 +59,7 @@ class TestObjectFlags(EvenniaTest):
         )
         first.tags.add("equipment", category="flag")
         first.tags.add("identified", category="flag")
-        first.tags.add("head", category="slot")
+        first.tags.add("helm", category="slot")
 
         second = create_object(
             "typeclasses.objects.ClothingObject",
@@ -68,7 +68,7 @@ class TestObjectFlags(EvenniaTest):
         )
         second.tags.add("equipment", category="flag")
         second.tags.add("identified", category="flag")
-        second.tags.add("head", category="slot")
+        second.tags.add("helm", category="slot")
 
         first.wear(self.char1, "wear")
         self.assertTrue(first.db.worn)
