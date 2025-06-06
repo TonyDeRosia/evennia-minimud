@@ -343,7 +343,15 @@ class CmdPurge(Command):
 
 
 def _create_gear(
-    caller, typeclass, name, slot=None, value=None, attr="dmg", desc=None, weight=0
+    caller,
+    typeclass,
+    name,
+    slot=None,
+    value=None,
+    attr="dmg",
+    desc=None,
+    weight=0,
+    identified=True,
 ):
     """Helper to create gear objects.
 
@@ -367,10 +375,14 @@ def _create_gear(
             obj.db.clothing_type = slot
         else:
             obj.db.slot = slot
-        # mark the object as equipment and identified
+        # mark the object as equipment and set identification state
         obj.tags.add("equipment", category="flag")
-        obj.tags.add("identified", category="flag")
-        obj.db.identified = True
+        if identified:
+            obj.tags.add("identified", category="flag")
+            obj.db.identified = True
+        else:
+            obj.tags.add("unidentified", category="flag")
+            obj.db.identified = False
         for part in slot.split("/"):
             obj.tags.add(part, category="slot")
     if value is not None:
@@ -384,7 +396,7 @@ class CmdCGear(Command):
     Generic helper for gear creation.
 
     Usage:
-        cgear <typeclass> <name> [slot] [value]
+        cgear [/unidentified] <typeclass> <name> [slot] [value] [weight]
 
     See |whelp cgear|n for details.
     """
@@ -394,12 +406,20 @@ class CmdCGear(Command):
     help_category = "Building"
 
     def func(self):
-        if not self.args:
-            self.msg("Usage: cgear <typeclass> <name> [slot] [value] [weight]")
+        argstr = self.args.strip()
+        identified = True
+        for prefix in ("/unidentified", "/unid"):
+            if argstr.lower().startswith(prefix):
+                identified = False
+                argstr = argstr[len(prefix):].lstrip()
+                break
+
+        if not argstr:
+            self.msg("Usage: cgear [/unidentified] <typeclass> <name> [slot] [value] [weight]")
             return
-        parts = self.args.split()
+        parts = argstr.split()
         if len(parts) < 2:
-            self.msg("Usage: cgear <typeclass> <name> [slot] [value] [weight]")
+            self.msg("Usage: cgear [/unidentified] <typeclass> <name> [slot] [value] [weight]")
             return
         tclass = parts[0]
         name = parts[1]
@@ -418,7 +438,16 @@ class CmdCGear(Command):
             except ValueError:
                 self.msg("Weight must be a number.")
                 return
-        _create_gear(self.caller, tclass, name, slot, val, desc=None, weight=weight)
+        _create_gear(
+            self.caller,
+            tclass,
+            name,
+            slot,
+            val,
+            desc=None,
+            weight=weight,
+            identified=identified,
+        )
 
 
 class CmdOCreate(Command):
@@ -464,7 +493,7 @@ class CmdCWeapon(Command):
     Create a simple melee weapon.
 
     Usage:
-        cweapon <name> <slot> <damage> <weight> <description>
+        cweapon [/unidentified] <name> <slot> <damage> <weight> [stat_mods] <description>
 
     See |whelp cweapon|n for details.
     """
@@ -474,15 +503,24 @@ class CmdCWeapon(Command):
     help_category = "Building"
 
     def func(self):
-        if not self.args:
+        argstr = self.args.strip()
+        identified = True
+        for prefix in ("/unidentified", "/unid"):
+            if argstr.lower().startswith(prefix):
+                identified = False
+                argstr = argstr[len(prefix):].lstrip()
+                break
+
+        if not argstr:
             self.msg(
-                "Usage: cweapon <name> <slot> <damage> <weight> [stat_mods] <description>"
+                "Usage: cweapon [/unidentified] <name> <slot> <damage> <weight> [stat_mods] <description>"
             )
             return
-        parts = self.args.split(None, 4)
+
+        parts = argstr.split(None, 4)
         if len(parts) < 5:
             self.msg(
-                "Usage: cweapon <name> <slot> <damage> <weight> [stat_mods] <description>"
+                "Usage: cweapon [/unidentified] <name> <slot> <damage> <weight> [stat_mods] <description>"
             )
             return
         name = parts[0]
@@ -559,6 +597,7 @@ class CmdCWeapon(Command):
             slot,
             desc=desc,
             weight=weight,
+            identified=identified,
         )
 
         if slot:
@@ -589,7 +628,7 @@ class CmdCShield(Command):
     Create a shield piece of armor.
 
     Usage:
-        cshield <name> <armor_rating> <block_rate> <weight> [stat_mods] <description>
+        cshield [/unidentified] <name> <armor_rating> <block_rate> <weight> [stat_mods] <description>
 
     See |whelp cshield|n for details.
     """
@@ -599,15 +638,23 @@ class CmdCShield(Command):
     help_category = "Building"
 
     def func(self):
-        if not self.args:
+        argstr = self.args.strip()
+        identified = True
+        for prefix in ("/unidentified", "/unid"):
+            if argstr.lower().startswith(prefix):
+                identified = False
+                argstr = argstr[len(prefix):].lstrip()
+                break
+
+        if not argstr:
             self.msg(
-                "Usage: cshield <name> <armor_rating> <block_rate> <weight> [stat_mods] <description>"
+                "Usage: cshield [/unidentified] <name> <armor_rating> <block_rate> <weight> [stat_mods] <description>"
             )
             return
-        parts = self.args.split(None, 4)
+        parts = argstr.split(None, 4)
         if len(parts) < 5:
             self.msg(
-                "Usage: cshield <name> <armor_rating> <block_rate> <weight> [stat_mods] <description>"
+                "Usage: cshield [/unidentified] <name> <armor_rating> <block_rate> <weight> [stat_mods] <description>"
             )
             return
         name = parts[0]
@@ -676,6 +723,7 @@ class CmdCShield(Command):
             attr="armor",
             desc=desc,
             weight=weight,
+            identified=identified,
         )
 
         obj.tags.add("shield", category="flag")
@@ -700,7 +748,7 @@ class CmdCArmor(Command):
     Create a wearable armor item.
 
     Usage:
-        carmor <name> [slot] [armor]
+        carmor [/unidentified] <name> <slot> <armor> <weight> <description>
 
     See |whelp carmor|n for details.
     """
@@ -710,12 +758,20 @@ class CmdCArmor(Command):
     help_category = "Building"
 
     def func(self):
-        if not self.args:
-            self.msg("Usage: carmor <name> <slot> <armor> <weight> <description>")
+        argstr = self.args.strip()
+        identified = True
+        for prefix in ("/unidentified", "/unid"):
+            if argstr.lower().startswith(prefix):
+                identified = False
+                argstr = argstr[len(prefix):].lstrip()
+                break
+
+        if not argstr:
+            self.msg("Usage: carmor [/unidentified] <name> <slot> <armor> <weight> <description>")
             return
-        parts = self.args.split(None, 4)
+        parts = argstr.split(None, 4)
         if len(parts) < 5:
-            self.msg("Usage: carmor <name> <slot> <armor> <weight> <description>")
+            self.msg("Usage: carmor [/unidentified] <name> <slot> <armor> <weight> <description>")
             return
         name, slot, armor_str, weight_str, desc = parts
         slot = slot.lower()
@@ -741,6 +797,7 @@ class CmdCArmor(Command):
             attr="armor",
             desc=desc,
             weight=weight,
+            identified=identified,
         )
 
         self.caller.msg(
@@ -797,7 +854,7 @@ class CmdCRing(Command):
     Create a wearable ring.
 
     Usage:
-        cring <name> [slot] [weight]
+        cring [/unidentified] <name> [slot] [weight]
 
     The slot defaults to ``ring1`` if omitted. You may specify ``ring2``
     instead to create a ring for the second slot.
@@ -808,10 +865,18 @@ class CmdCRing(Command):
     help_category = "Building"
 
     def func(self):
-        if not self.args:
-            self.msg("Usage: cring <name> [slot] [weight]")
+        argstr = self.args.strip()
+        identified = True
+        for prefix in ("/unidentified", "/unid"):
+            if argstr.lower().startswith(prefix):
+                identified = False
+                argstr = argstr[len(prefix):].lstrip()
+                break
+
+        if not argstr:
+            self.msg("Usage: cring [/unidentified] <name> [slot] [weight]")
             return
-        parts = self.args.split()
+        parts = argstr.split()
         name = parts[0]
         slot = parts[1].lower() if len(parts) > 1 else "ring1"
         weight = 0
@@ -829,6 +894,7 @@ class CmdCRing(Command):
             slot,
             desc=None,
             weight=weight,
+            identified=identified,
         )
 
 
@@ -837,7 +903,7 @@ class CmdCTrinket(Command):
     Create a wearable trinket or accessory.
 
     Usage:
-        ctrinket <name> [slot] [weight]
+        ctrinket [/unidentified] <name> [slot] [weight]
 
     The slot defaults to ``accessory``.
     """
@@ -847,10 +913,18 @@ class CmdCTrinket(Command):
     help_category = "Building"
 
     def func(self):
-        if not self.args:
-            self.msg("Usage: ctrinket <name> [slot] [weight]")
+        argstr = self.args.strip()
+        identified = True
+        for prefix in ("/unidentified", "/unid"):
+            if argstr.lower().startswith(prefix):
+                identified = False
+                argstr = argstr[len(prefix):].lstrip()
+                break
+
+        if not argstr:
+            self.msg("Usage: ctrinket [/unidentified] <name> [slot] [weight]")
             return
-        parts = self.args.split()
+        parts = argstr.split()
         name = parts[0]
         slot = parts[1].lower() if len(parts) > 1 else "accessory"
         weight = 0
@@ -868,6 +942,7 @@ class CmdCTrinket(Command):
             slot,
             desc=None,
             weight=weight,
+            identified=identified,
         )
 
 

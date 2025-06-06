@@ -170,6 +170,19 @@ class TestAdminCommands(EvenniaTest):
         self.assertTrue(hands)
         self.assertIn(weapon, self.char1.wielding)
 
+    def test_cweapon_unidentified(self):
+        """Weapon can be created as unidentified."""
+
+        self.char1.execute_cmd("cweapon /unidentified dagger mainhand 3 1 test")
+        weapon = next(
+            (o for o in self.char1.contents if "dagger" in list(o.aliases.all())),
+            None,
+        )
+        self.assertIsNotNone(weapon)
+        self.assertTrue(weapon.tags.has("unidentified", category="flag"))
+        self.assertFalse(weapon.tags.has("identified", category="flag"))
+        self.assertFalse(weapon.db.identified)
+
     def test_cweapon_with_stat_mods(self):
         """Weapon creation supports stat modifiers and description parsing."""
 

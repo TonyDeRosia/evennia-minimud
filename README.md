@@ -109,7 +109,7 @@ If you wind up having any issues or questions working with Evennia, [the Discord
 Builders can quickly create melee weapons with the `cweapon` command.
 
 ```
-cweapon <name> <slot> <damage> [weight] [stat_mods] <description>
+cweapon [/unidentified] <name> <slot> <damage> [weight] [stat_mods] <description>
 ```
 
 Damage may be a flat number or an `NdN` dice value. The item's key never
@@ -124,6 +124,8 @@ cweapon epee mainhand 1d4 2 STR+1 A sharp epee.
 cweapon epee offhand 2d6 3 A balanced offhand blade.
 inspect epee-2
 ```
+
+Add `/unidentified` before the name to create the weapon unidentified.
 
 When a weapon is identified, `inspect` shows its damage, slot, any bonuses and
 effects, so `inspect epee-2` will display the full details of the second
