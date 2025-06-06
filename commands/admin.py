@@ -636,6 +636,85 @@ class CmdCTool(Command):
             obj.tags.add(tag, category="crafting_tool")
 
 
+class CmdCRing(Command):
+    """
+    Create a wearable ring.
+
+    Usage:
+        cring <name> [slot] [weight]
+
+    The slot defaults to ``ring1`` if omitted. You may specify ``ring2``
+    instead to create a ring for the second slot.
+    """
+
+    key = "cring"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: cring <name> [slot] [weight]")
+            return
+        parts = self.args.split()
+        name = parts[0]
+        slot = parts[1].lower() if len(parts) > 1 else "ring1"
+        weight = 0
+        if len(parts) > 2:
+            if parts[2].isdigit():
+                weight = int(parts[2])
+            else:
+                self.msg("Weight must be a number.")
+                return
+
+        _create_gear(
+            self.caller,
+            "typeclasses.objects.ClothingObject",
+            name,
+            slot,
+            desc=None,
+            weight=weight,
+        )
+
+
+class CmdCTrinket(Command):
+    """
+    Create a wearable trinket or accessory.
+
+    Usage:
+        ctrinket <name> [slot] [weight]
+
+    The slot defaults to ``accessory``.
+    """
+
+    key = "ctrinket"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: ctrinket <name> [slot] [weight]")
+            return
+        parts = self.args.split()
+        name = parts[0]
+        slot = parts[1].lower() if len(parts) > 1 else "accessory"
+        weight = 0
+        if len(parts) > 2:
+            if parts[2].isdigit():
+                weight = int(parts[2])
+            else:
+                self.msg("Weight must be a number.")
+                return
+
+        _create_gear(
+            self.caller,
+            "typeclasses.objects.ClothingObject",
+            name,
+            slot,
+            desc=None,
+            weight=weight,
+        )
+
+
 class AdminCmdSet(CmdSet):
     """Command set with admin utilities."""
 
@@ -667,6 +746,8 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdCShield)
         self.add(CmdCArmor)
         self.add(CmdCTool)
+        self.add(CmdCRing)
+        self.add(CmdCTrinket)
         self.add(CmdCGear)
         self.add(CmdSetDesc)
         self.add(CmdSetWeight)
