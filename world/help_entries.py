@@ -354,7 +354,7 @@ Arguments:
     None
 
 Examples:
-    None
+    cweapon "Flaming Sword" mainhand 2d6 3 STR+1, Attack Power+3 A blazing blade.
 
 Notes:
     - A lowercase alias matching the final key is created automatically.
@@ -364,6 +364,8 @@ Notes:
     the item as given.
     - Optional stat modifiers can be provided as comma separated entries like
     |wSTR+2, Attack Power+5|n. Valid stats include all core and derived values.
+    - Modifiers use the form |wStat+Value|n and are comma separated.
+    - Enclose multiword or ANSI-colored names in quotes.
     - The item is a |ctypeclasses.gear.MeleeWeapon|n.
     - ANSI color codes are supported.
     - Add |w/unidentified|n before the name to create the item unidentified.
@@ -390,13 +392,15 @@ Arguments:
     None
 
 Examples:
-    None
+    cshield "Sturdy Kite" 2 8 3 STR+1, Critical Resist+4 A sturdy kite shield.
 
 Notes:
     - The armor and block rate values are stored on the item.
     - Optional comma separated modifiers may be given, such as
     |wBlock Rate+3|n or |wSTR+2, Attack Power+5|n. Valid stats include
     all core and derived values.
+    - Modifiers use the form |wStat+Value|n and are comma separated.
+    - Enclose multiword or ANSI-colored names in quotes.
     - Add |w/unidentified|n before the name to create the shield unidentified.
 
 Related:
@@ -412,7 +416,7 @@ Help for carmor
 Create a wearable armor item.
 
 Usage:
-    carmor [/unidentified] <name> <slot> <armor> <weight> <description>
+    carmor [/unidentified] <name> <slot> <armor> <weight> [modifiers] <description>
 
 Switches:
     None
@@ -421,11 +425,13 @@ Arguments:
     None
 
 Examples:
-    None
+    carmor "Gilded Chestplate" chest 5 4 STR+2, Armor+3 A brilliant golden chest.
 
 Notes:
     - Slot becomes the clothing type.
     - Add |w/unidentified|n before the name to create the armor unidentified.
+    - Modifiers use the form |wStat+Value|n and are comma separated.
+    - Enclose multiword or ANSI-colored names in quotes.
 
 Related:
     help ansi
@@ -440,7 +446,7 @@ Help for ctool
 Create a crafting tool.
 
 Usage:
-    ctool <name> [tag]
+    ctool <name> [tag] [weight] [stat_mods] <description>
 
 Switches:
     None
@@ -449,10 +455,12 @@ Arguments:
     None
 
 Examples:
-    None
+    ctool hammer smith 2 STR+2, Crafting Bonus+1 Heavy hammer.
 
 Notes:
     - The tag is added with category 'crafting_tool'.
+    - Modifiers use the form |wStat+Value|n and are comma separated.
+    - Enclose multiword or ANSI-colored names in quotes.
 
 Related:
     help ansi
@@ -467,7 +475,7 @@ Help for cgear
 Generic helper for gear creation.
 
 Usage:
-    cgear [/unidentified] <typeclass> <name> [slot] [value] [weight]
+    cgear [/unidentified] <typeclass> <name> [slot] [value] [weight] [stat_mods] <description>
 
 Switches:
     None
@@ -476,11 +484,13 @@ Arguments:
     None
 
 Examples:
-    None
+    cgear typeclasses.objects.Object token accessory 1 1 STR+1, CON+2 A special token.
 
 Notes:
     - Creates an object of the given typeclass and places it in your inventory.
     - Add |w/unidentified|n before the name to create the item unidentified.
+    - Modifiers use the form |wStat+Value|n and are comma separated.
+    - Enclose multiword or ANSI-colored names in quotes.
 
 Related:
     help ansi
@@ -495,7 +505,7 @@ Help for cring
 Create a wearable ring.
 
 Usage:
-    cring [/unidentified] <name> [slot] [weight]
+    cring [/unidentified] <name> [slot] [weight] [stat_mods] <description>
 
 Switches:
     None
@@ -504,11 +514,13 @@ Arguments:
     None
 
 Examples:
-    None
+    cring "Ruby Ring" ring2 1 STR+1, Luck+2 A jeweled ring.
 
 Notes:
     - Slot defaults to ring1. Use ring2 for the other finger.
     - Add |w/unidentified|n before the name to create the ring unidentified.
+    - Modifiers use the form |wStat+Value|n and are comma separated.
+    - Enclose multiword or ANSI-colored names in quotes.
 
 Related:
     help ansi
@@ -523,7 +535,7 @@ Help for ctrinket
 Create a wearable trinket or accessory.
 
 Usage:
-    ctrinket [/unidentified] <name> [slot] [weight]
+    ctrinket [/unidentified] <name> [slot] [weight] [stat_mods] <description>
 
 Switches:
     None
@@ -532,11 +544,13 @@ Arguments:
     None
 
 Examples:
-    None
+    ctrinket "Lucky Charm" accessory 1 WIS+2, Stealth+3 A shimmering charm.
 
 Notes:
     - Slot defaults to accessory.
     - Add |w/unidentified|n before the name to create the item unidentified.
+    - Modifiers use the form |wStat+Value|n and are comma separated.
+    - Enclose multiword or ANSI-colored names in quotes.
 
 Related:
     help ansi
