@@ -10,16 +10,12 @@ from typeclasses.scripts import get_or_create_combat_script
 
 class CmdAttack(Command):
     """
-    Attack an enemy with your equipped weapon.
+    Attack an enemy. Usage: attack <target> [with <weapon>]
 
     Usage:
-        attack <enemy> [with <weapon>]
+        attack
 
-    Example:
-        attack wolf
-        attack bear with sword
-        attack bear w sword
-        attack bear w/sword
+    See |whelp attack|n for details.
     """
 
     key = "attack"
@@ -113,14 +109,12 @@ class CmdAttack(Command):
 
 class CmdWield(Command):
     """
-    Wield a weapon
+    Wield a weapon. Usage: wield <weapon> [in <hand>]
 
     Usage:
-        wield <weapon> [in <hand>]
+        wield
 
-    Example:
-        wield sword
-        wield dagger in right
+    See |whelp wield|n for details.
     """
 
     key = "wield"
@@ -181,13 +175,12 @@ class CmdWield(Command):
 
 class CmdUnwield(Command):
     """
-    Stop wielding a weapon
+    Stop wielding a weapon. Usage: unwield <weapon>
 
     Usage:
-        unwield <weapon>
+        unwield
 
-    Example:
-        unwield dagger
+    See |whelp unwield|n for details.
     """
 
     key = "unwield"
@@ -214,10 +207,12 @@ class CmdUnwield(Command):
 
 class CmdFlee(Command):
     """
-    Attempt to escape from combat.
+    Attempt to escape from combat. Usage: flee
 
     Usage:
         flee
+
+    See |whelp flee|n for details.
     """
 
     key = "flee"
@@ -262,10 +257,12 @@ class CmdFlee(Command):
 
 class CmdRespawn(Command):
     """
-    Return to the center of town when defeated, with full health.
+    Return to town after being defeated. Usage: respawn
 
     Usage:
         respawn
+
+    See |whelp respawn|n for details.
     """
 
     key = "respawn"
@@ -282,11 +279,13 @@ class CmdRespawn(Command):
 
 class CmdRevive(Command):
     """
-    Revive another player who has been defeated. They will recover partial health.
+    Revive a defeated player at partial health.
 
     Usage:
         revive <player>
         revive all
+
+    See |whelp revive|n for details.
     """
 
     key = "revive"

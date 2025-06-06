@@ -19,10 +19,12 @@ from utils.stats_utils import get_display_scroll
 
 class CmdSetStat(Command):
     """
-    Set a base or derived stat on a target.
+    Change a character's stat directly.
 
     Usage:
         setstat <target> <stat> <value>
+
+    See |whelp setstat|n for details.
     """
 
     key = "setstat"
@@ -102,10 +104,12 @@ class CmdSetStat(Command):
 
 class CmdSetAttr(Command):
     """
-    Set an arbitrary attribute on a target.
+    Set an arbitrary attribute on an object or character.
 
     Usage:
         setattr <target> <attr> <value>
+
+    See |whelp setattr|n for details.
     """
 
     key = "setattr"
@@ -131,10 +135,12 @@ class CmdSetAttr(Command):
 
 class CmdSetBounty(Command):
     """
-    Set the bounty value on a target.
+    Assign a bounty to a character.
 
     Usage:
         setbounty <target> <amount>
+
+    See |whelp setbounty|n for details.
     """
 
     key = "setbounty"
@@ -159,10 +165,12 @@ class CmdSetBounty(Command):
 
 class CmdSlay(Command):
     """
-    Instantly defeat a target.
+    Instantly reduce a target's health to zero.
 
     Usage:
         slay <target>
+
+    See |whelp slay|n for details.
     """
 
     key = "slay"
@@ -190,6 +198,8 @@ class CmdSmite(Command):
 
     Usage:
         smite <target>
+
+    See |whelp smite|n for details.
     """
 
     key = "smite"
@@ -211,7 +221,14 @@ class CmdSmite(Command):
 
 
 class CmdRestoreAll(Command):
-    """Fully restore all player characters."""
+    """
+    Fully heal every player and remove all buffs and status effects.
+
+    Usage:
+        restoreall
+
+    See |whelp restoreall|n for details.
+    """
 
     key = "restoreall"
     locks = "cmd:perm(Admin)"
@@ -236,16 +253,14 @@ class CmdRestoreAll(Command):
 
 
 class CmdPurge(Command):
-    """Remove unwanted objects.
+    """
+    Delete unwanted objects.
 
     Usage:
         purge
         purge <target>
 
-    Without arguments this deletes all objects in the caller's
-    current room except for the caller themselves. With an argument
-    it deletes the specified target. Players, exits and rooms are
-    protected from deletion.
+    See |whelp purge|n for details.
     """
 
     key = "purge"
@@ -322,7 +337,14 @@ def _create_gear(
 
 
 class CmdCGear(Command):
-    """Create a generic gear item."""
+    """
+    Generic helper for gear creation.
+
+    Usage:
+        cgear <typeclass> <name> [slot] [value]
+
+    See |whelp cgear|n for details.
+    """
 
     key = "cgear"
     locks = "cmd:perm(Builder)"
@@ -357,7 +379,14 @@ class CmdCGear(Command):
 
 
 class CmdOCreate(Command):
-    """Create a generic object."""
+    """
+    Create a generic object and put it in your inventory.
+
+    Usage:
+        ocreate <name>
+
+    See |whelp ocreate|n for details.
+    """
 
     key = "ocreate"
     locks = "cmd:perm(Builder)"
@@ -388,7 +417,14 @@ class CmdOCreate(Command):
 
 
 class CmdCWeapon(Command):
-    """Create a simple weapon."""
+    """
+    Create a simple melee weapon.
+
+    Usage:
+        cweapon <name> <slot> <damage> [description]
+
+    See |whelp cweapon|n for details.
+    """
 
     key = "cweapon"
     locks = "cmd:perm(Builder)"
@@ -461,7 +497,14 @@ class CmdCWeapon(Command):
 
 
 class CmdCShield(Command):
-    """Create a shield."""
+    """
+    Create a shield piece of armor.
+
+    Usage:
+        cshield <name> [slot] [armor]
+
+    See |whelp cshield|n for details.
+    """
 
     key = "cshield"
     locks = "cmd:perm(Builder)"
@@ -501,7 +544,14 @@ class CmdCShield(Command):
 
 
 class CmdCArmor(Command):
-    """Create an armor piece."""
+    """
+    Create a wearable armor item.
+
+    Usage:
+        carmor <name> [slot] [armor]
+
+    See |whelp carmor|n for details.
+    """
 
     key = "carmor"
     locks = "cmd:perm(Builder)"
@@ -541,7 +591,14 @@ class CmdCArmor(Command):
 
 
 class CmdCTool(Command):
-    """Create a crafting tool."""
+    """
+    Create a crafting tool.
+
+    Usage:
+        ctool <name> [tag]
+
+    See |whelp ctool|n for details.
+    """
 
     key = "ctool"
     locks = "cmd:perm(Builder)"

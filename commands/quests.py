@@ -6,7 +6,14 @@ from world.quests import Quest, QuestManager
 
 
 class CmdQCreate(Command):
-    """Create and register a quest."""
+    """
+    Create and register a new quest. Usage: qcreate <quest_key> "<title>"
+
+    Usage:
+        qcreate
+
+    See |whelp qcreate|n for details.
+    """
 
     key = "qcreate"
     locks = "cmd:perm(Builder)"
@@ -29,7 +36,14 @@ class CmdQCreate(Command):
 
 
 class CmdQSet(Command):
-    """Set quest attributes."""
+    """
+    Change quest attributes. Usage: qset <quest_key> <attr> <value>
+
+    Usage:
+        qset
+
+    See |whelp qset|n for details.
+    """
 
     key = "qset"
     locks = "cmd:perm(Builder)"
@@ -81,7 +95,14 @@ class CmdQSet(Command):
 
 
 class CmdQItem(Command):
-    """Create a quest item linked to a quest."""
+    """
+    Spawn a quest item. Usage: qitem <quest_key> <item_key>
+
+    Usage:
+        qitem
+
+    See |whelp qitem|n for details.
+    """
 
     key = "qitem"
     locks = "cmd:perm(Builder)"
@@ -107,7 +128,14 @@ class CmdQItem(Command):
 
 
 class CmdQAssign(Command):
-    """Assign a quest to an NPC."""
+    """
+    Assign a quest to an NPC. Usage: qassign <npc> <quest_key>
+
+    Usage:
+        qassign
+
+    See |whelp qassign|n for details.
+    """
 
     key = "qassign"
     locks = "cmd:perm(Builder)"
@@ -139,7 +167,14 @@ class CmdQAssign(Command):
 
 
 class CmdQTag(Command):
-    """Tag quests with guild point rewards."""
+    """
+    Set guild point rewards on a quest. Usage: qtag <quest_key> guild <guild> <amount>
+
+    Usage:
+        qtag
+
+    See |whelp qtag|n for details.
+    """
 
     key = "qtag"
     locks = "cmd:perm(Builder)"
@@ -171,7 +206,14 @@ class CmdQTag(Command):
 
 
 class CmdQuestList(Command):
-    """List quests offered by NPCs in the current room."""
+    """
+    List quests offered by NPCs here. Usage: questlist
+
+    Usage:
+        questlist
+
+    See |whelp questlist|n for details.
+    """
 
     key = "questlist"
     aliases = ("quests",)
@@ -215,7 +257,14 @@ class CmdQuestList(Command):
 
 
 class CmdAcceptQuest(Command):
-    """Accept a quest offered by an NPC."""
+    """
+    Accept a quest. Usage: accept <quest>
+
+    Usage:
+        accept
+
+    See |whelp accept|n for details.
+    """
 
     key = "accept"
     help_category = "General"
@@ -262,7 +311,14 @@ class CmdAcceptQuest(Command):
 
 
 class CmdQuestProgress(Command):
-    """Show progress on your active quests."""
+    """
+    Show your progress on active quests. Usage: progress
+
+    Usage:
+        progress
+
+    See |whelp progress|n for details.
+    """
 
     key = "progress"
     help_category = "General"
@@ -291,7 +347,14 @@ class CmdQuestProgress(Command):
 
 
 class CmdCompleteQuest(Command):
-    """Turn in a completed quest."""
+    """
+    Turn in a completed quest. Usage: complete <quest>
+
+    Usage:
+        complete
+
+    See |whelp complete|n for details.
+    """
 
     key = "complete"
     help_category = "General"

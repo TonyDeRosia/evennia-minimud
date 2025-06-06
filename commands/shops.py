@@ -9,7 +9,12 @@ from .command import Command
 
 class CmdList(Command):
     """
-    View a list of items available for sale.
+    View items a shop has for sale. Usage: list
+
+    Usage:
+        list
+
+    See |whelp list|n for details.
     """
 
     key = "list"
@@ -46,15 +51,12 @@ class CmdList(Command):
 
 class CmdBuy(Command):
     """
-    Attempt to buy an item from this shop.
+    Purchase an item from a shop. Usage: buy <item>
 
     Usage:
-        buy <obj>
-        buy <num> <obj>
+        buy
 
-    Example:
-        buy iron sword
-        buy 12 arrow
+    See |whelp buy|n for details.
     """
 
     key = "buy"
@@ -140,15 +142,12 @@ class CmdBuy(Command):
 
 class CmdSell(Command):
     """
-    Offer something for sale to a shop.
+    Offer an item for sale to a shop. Usage: sell <item>
 
     Usage:
-        sell <obj>
-        sell <num> <obj>
+        sell
 
-    Example:
-        sell sword
-        sell 8 apple
+    See |whelp sell|n for details.
     """
 
     key = "sell"

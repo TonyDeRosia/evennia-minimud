@@ -6,13 +6,12 @@ from .command import Command
 
 class CmdRest(Command):
     """
-    Sit down and rest to regain stamina.
+    Sit down to recover stamina. Usage: rest
 
     Usage:
         rest
 
-    Example:
-        rest
+    See |whelp rest|n for details.
     """
 
     key = "rest"
@@ -32,13 +31,12 @@ class CmdRest(Command):
 
 class CmdSleep(Command):
     """
-    Lie down and go to sleep.
+    Lie down and go to sleep. Usage: sleep
 
     Usage:
         sleep
 
-    Example:
-        sleep
+    See |whelp sleep|n for details.
     """
 
     key = "sleep"
@@ -57,13 +55,12 @@ class CmdSleep(Command):
 
 class CmdWake(Command):
     """
-    Stand up from rest or sleep.
+    Stand up from rest or sleep. Usage: wake
 
     Usage:
         wake
 
-    Example:
-        wake
+    See |whelp wake|n for details.
     """
 
     key = "wake"
