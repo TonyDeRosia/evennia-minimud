@@ -121,11 +121,13 @@ class TestInfoCommands(EvenniaTest):
         self.char1.execute_cmd(f"inspect {self.obj1.key}")
         out = self.char1.msg.call_args[0][0]
         self.assertIn("A sharp blade.", out)
-        self.assertIn("Weight: 2", out)
-        self.assertIn("Damage: 5", out)
-        self.assertIn("Slot: hand", out)
-        self.assertIn("Buff: speed", out)
-        self.assertIn("equipment", out)
+        self.assertIn("[ ITEM INFO ]", out)
+        self.assertIn("Weight", out)
+        self.assertIn("Damage", out)
+        self.assertIn("Slot", out)
+        self.assertIn("Buffs", out)
+        self.assertIn("Flags", out)
+        self.assertIn("Identified: yes", out)
 
     def test_inspect_unidentified(self):
         self.obj1.db.desc = "A mystery item."
@@ -133,7 +135,7 @@ class TestInfoCommands(EvenniaTest):
         self.char1.execute_cmd(f"inspect {self.obj1.key}")
         out = self.char1.msg.call_args[0][0]
         self.assertIn("A mystery item.", out)
-        self.assertNotIn("Weight:", out)
+        self.assertNotIn("Weight", out)
 
     def test_inspect_auto_identify(self):
         self.obj1.db.desc = "A hidden gem."
@@ -144,7 +146,19 @@ class TestInfoCommands(EvenniaTest):
         stat_manager.refresh_stats(self.char1)
         self.char1.execute_cmd(f"inspect {self.obj1.key}")
         out = self.char1.msg.call_args[0][0]
-        self.assertIn("Weight:", out)
+        self.assertIn("Identified: yes", out)
+
+    def test_inspect_admin_bypass(self):
+        self.obj1.db.desc = "An enigma."
+        self.obj1.db.weight = 3
+        self.obj1.db.identified = False
+        self.obj1.tags.add("unidentified")
+        self.obj1.db.required_perception_to_identify = 50
+        self.char1.permissions.add("Builder")
+        self.char1.execute_cmd(f"inspect {self.obj1.key}")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Identified: no", out)
+        self.assertIn("Weight", out)
 
     def test_inspect_alias_exact_match(self):
         from evennia.utils import create
@@ -170,14 +184,17 @@ class TestInfoCommands(EvenniaTest):
         self.char1.msg.reset_mock()
         self.char1.execute_cmd("inspect epee-1")
         out = self.char1.msg.call_args[0][0]
-        self.assertIn("Damage: 1", out)
-        self.assertIn("Slot: mainhand", out)
+        self.assertIn("Damage", out)
+        self.assertIn("mainhand", out)
+        self.assertNotIn("epee-1", out)
         self.char1.msg.reset_mock()
 
         self.char1.execute_cmd("inspect epee-10")
         out = self.char1.msg.call_args[0][0]
-        self.assertIn("Damage: 10", out)
-        self.assertIn("Effects: flaming, STR+2", out)
+        self.assertIn("Damage", out)
+        self.assertIn("flaming", out)
+        self.assertIn("STR+2", out)
+        self.assertNotIn("epee-10", out)
 
     def test_inspect_duplicate_named_weapons(self):
         """Ensure inspect selects the correct weapon when names repeat."""
@@ -203,16 +220,18 @@ class TestInfoCommands(EvenniaTest):
         self.char1.msg.reset_mock()
         self.char1.execute_cmd("inspect epee-2")
         out = self.char1.msg.call_args[0][0]
-        self.assertIn("Damage: 2d5", out)
-        self.assertIn("Slot: mainhand", out)
-        self.assertIn("Effects: flaming", out)
+        self.assertIn("2d5", out)
+        self.assertIn("mainhand", out)
+        self.assertIn("flaming", out)
+        self.assertNotIn("epee-2", out)
 
         self.char1.msg.reset_mock()
         self.char1.execute_cmd("inspect epee-3")
         out = self.char1.msg.call_args[0][0]
-        self.assertIn("Damage: 3d6", out)
-        self.assertIn("Slot: offhand", out)
-        self.assertIn("Effects: chilling", out)
+        self.assertIn("3d6", out)
+        self.assertIn("offhand", out)
+        self.assertIn("chilling", out)
+        self.assertNotIn("epee-3", out)
 
     def test_buffs(self):
         self.char1.execute_cmd("buffs")

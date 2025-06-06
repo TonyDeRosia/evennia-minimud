@@ -291,7 +291,7 @@ class CmdInspect(Command):
             if not obj:
                 return
 
-        lines = [f"|w{obj.get_display_name(caller)}|n"]
+        lines = [f"|w{obj.key}|n"]
         desc = obj.db.desc or "You see nothing special."
         lines.append(desc)
 
@@ -303,38 +303,56 @@ class CmdInspect(Command):
                 obj.tags.remove("unidentified")
                 obj.db.identified = True
 
-        if obj.db.identified:
-            if (weight := obj.db.weight) is not None:
-                lines.append(f"Weight: {weight}")
+        is_admin = caller.check_permstring("Admin") or caller.check_permstring("Builder")
 
-            if obj.is_typeclass("typeclasses.gear.MeleeWeapon", exact=False):
-                dmg = obj.db.damage_dice or obj.db.dmg
-                if dmg is not None:
-                    lines.append(f"Damage: {dmg}")
-                slot = obj.db.slot
-                if slot:
-                    lines.append(f"Slot: {slot}")
-                effects = obj.tags.get(category="buff", return_list=True) or []
-                import re
+        if obj.db.identified or is_admin:
+            width = max(len(label) for label in [
+                "Slot",
+                "Damage",
+                "Buffs",
+                "Flags",
+                "Weight",
+                "Identified",
+            ])
+            lines.append("")
+            lines.append("|Y[ ITEM INFO ]|n")
 
-                pattern = re.compile(r"[A-Z]+[+-]\d+")
-                effects.extend(
-                    t for t in obj.tags.all() if pattern.fullmatch(str(t))
-                )
-                if effects:
-                    lines.append("Effects: " + ", ".join(sorted(set(effects))))
-            else:
-                if (dmg := obj.db.dmg) is not None:
-                    lines.append(f"Damage: {dmg}")
-                slot = obj.db.slot or obj.db.clothing_type
-                if slot:
-                    lines.append(f"Slot: {slot}")
+            def add(label, value):
+                lines.append(f"|c{label.ljust(width)}|n: {value}")
 
-            if (buff := obj.db.buff):
-                lines.append(f"Buff: {buff}")
+            slot = obj.db.slot or obj.db.clothing_type
+            if slot:
+                add("Slot", slot)
+
+            dmg = obj.db.damage_dice or obj.db.dmg
+            if dmg is not None:
+                dtype = None
+                dtypes = obj.tags.get(category="damage_type", return_list=True)
+                if dtypes:
+                    dtype = dtypes[0]
+                dmg_val = f"{dmg}"
+                if dtype:
+                    dmg_val += f" ({dtype})"
+                add("Damage", dmg_val)
+
+            effects = obj.tags.get(category="buff", return_list=True) or []
+            import re
+
+            pattern = re.compile(r"[A-Z]+[+-]\d+")
+            effects.extend(t for t in obj.tags.all() if pattern.fullmatch(str(t)))
+            if obj.db.buff:
+                effects.append(str(obj.db.buff))
+            if effects:
+                add("Buffs", ", ".join(sorted(set(effects))))
+
             flags = obj.tags.get(category="flag", return_list=True) or []
             if flags:
-                lines.append("Flags: " + ", ".join(sorted(flags)))
+                add("Flags", ", ".join(sorted(flags)))
+
+            if (weight := obj.db.weight) is not None:
+                add("Weight", weight)
+
+            add("Identified", "yes" if obj.db.identified else "no")
 
         caller.msg("\n".join(lines))
 
