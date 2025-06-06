@@ -3,7 +3,7 @@ VALID_SLOTS = {
     "offhand",
     "mainhand/offhand",
     "twohanded",
-    "helm",
+    "head",
     "neck",
     "shoulders",
     "chest",

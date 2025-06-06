@@ -136,7 +136,7 @@ class TestInfoCommands(EvenniaTest):
         )
         armor.tags.add("equipment", category="flag")
         armor.tags.add("identified", category="flag")
-        armor.tags.add("helm", category="slot")
+        armor.tags.add("head", category="slot")
         armor.db.stat_mods = {"CON": 2}
         armor.wear(self.char1, True)
 
@@ -507,7 +507,7 @@ class TestRemoveCommand(EvenniaTest):
         )
         item.tags.add("equipment", category="flag")
         item.tags.add("identified", category="flag")
-        item.tags.add("helm", category="slot")
+        item.tags.add("head", category="slot")
         item.wear(self.char1, True)
         self.assertTrue(item.db.worn)
         self.assertIsNone(item.location)
@@ -527,7 +527,7 @@ class TestRemoveCommand(EvenniaTest):
         item.aliases.add("capper")
         item.tags.add("equipment", category="flag")
         item.tags.add("identified", category="flag")
-        item.tags.add("helm", category="slot")
+        item.tags.add("head", category="slot")
         item.wear(self.char1, True)
 
         # partial key
@@ -553,7 +553,7 @@ class TestRemoveAllCommand(EvenniaTest):
         )
         armor.tags.add("equipment", category="flag")
         armor.tags.add("identified", category="flag")
-        armor.tags.add("helm", category="slot")
+        armor.tags.add("head", category="slot")
         armor.wear(self.char1, True)
 
         weapon = create.create_object(

@@ -217,7 +217,7 @@ class TestAdminCommands(EvenniaTest):
     def test_carmor_tags_and_wear(self):
         """Armor created with carmor gets tags and can be worn."""
 
-        self.char1.execute_cmd("carmor helm helm 1 1 basic")
+        self.char1.execute_cmd("carmor helm head 1 1 basic")
         armor = next(
             (o for o in self.char1.contents if "helm" in list(o.aliases.all())),
             None,
@@ -225,7 +225,7 @@ class TestAdminCommands(EvenniaTest):
         self.assertIsNotNone(armor)
         self.assertTrue(armor.tags.has("equipment", category="flag"))
         self.assertTrue(armor.tags.has("identified", category="flag"))
-        self.assertTrue(armor.tags.has("helm", category="slot"))
+        self.assertTrue(armor.tags.has("head", category="slot"))
         armor.wear(self.char1, True)
         self.assertTrue(armor.db.worn)
 
@@ -331,7 +331,7 @@ class TestAdminCommands(EvenniaTest):
         self.assertIn("charm", out.lower())
 
     def test_carmor_with_modifiers(self):
-        self.char1.execute_cmd("carmor helm helm 2 1 STR+1, Dex+2 A sturdy helm.")
+        self.char1.execute_cmd("carmor helm head 2 1 STR+1, Dex+2 A sturdy helm.")
         armor = next(
             (
                 o
@@ -411,7 +411,7 @@ class TestAdminCommands(EvenniaTest):
         shield = next((o for o in self.char1.contents if o.key == "kite shield"), None)
         self.assertIsNotNone(shield)
 
-        self.char1.execute_cmd('carmor "iron helm" helm 1 1 basic')
+        self.char1.execute_cmd('carmor "iron helm" head 1 1 basic')
         armor = next((o for o in self.char1.contents if o.key == "iron helm"), None)
         self.assertIsNotNone(armor)
 
