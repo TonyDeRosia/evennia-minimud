@@ -103,3 +103,21 @@ to create the "overworld" map and do some finishing touches to the town's set-up
 You want to make your own game? Awesome! The code here should help give you something to start from, but you should also check out the excellent Evennia docs - especially the [tutorial walkthrough](https://www.evennia.com/docs/latest/Howtos/Beginner-Tutorial/Beginner-Tutorial-Overview.html). It covers working with Evennia, developing within Evennia, and a walkthrough of building a full game within Evennia. (It's still in-progress but is *mostly* complete.)
 
 If you wind up having any issues or questions working with Evennia, [the Discord community](https://discord.gg/AJJpcRUhtF) is small but active and there's almost always someone around who's happy to help newcomers.
+
+## Weapon Creation and Inspection
+
+Builders can quickly create melee weapons with the `cweapon` command.
+
+```
+cweapon <name> <slot> <damage> [description]
+```
+
+Damage may be a flat number or an `NdN` dice value. If a weapon with the
+requested name already exists, a numeric suffix such as `-1` or `-2` is
+appended to make the key unique. A lowercase alias matching the final key is
+added automatically.
+
+The generated alias can be used with `inspect` to target that specific item.
+When a weapon is identified, `inspect` shows its damage, slot and any effects,
+so `inspect epee-2` will display the full details of the weapon named
+`epee-2`.
