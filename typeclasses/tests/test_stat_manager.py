@@ -1,4 +1,5 @@
 from evennia.utils.test_resources import EvenniaTest
+from evennia.utils import create
 from world.system import stat_manager, state_manager
 from world import stats
 
@@ -87,3 +88,19 @@ class TestStatManager(EvenniaTest):
         self.assertEqual(char.traits.DEX.base, base - 5)
         state_manager.tick_character(char)
         self.assertEqual(char.traits.DEX.base, base)
+
+    def test_gear_buffs_apply(self):
+        char = self.char1
+        stat_manager.refresh_stats(char)
+        base_hp = char.db.derived_stats.get("HP")
+        item = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="amulet",
+            location=char,
+        )
+        item.tags.add("equipment", category="flag")
+        item.tags.add("identified", category="flag")
+        item.db.buffs = {"HP": 100}
+        item.wear(char, True)
+        stat_manager.refresh_stats(char)
+        self.assertEqual(char.db.derived_stats.get("HP"), base_hp + 100)
