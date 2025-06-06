@@ -348,7 +348,9 @@ class CmdCompleteQuest(Command):
 
         if quest.currency_reward:
             wallet = caller.db.coins or {}
-            total = to_copper(wallet) + to_copper(quest.currency_reward)
+            total = to_copper(wallet)
+            for coin, amount in quest.currency_reward.items():
+                total += to_copper({coin: amount})
             caller.db.coins = from_copper(total)
             rewards.append(format_wallet(quest.currency_reward))
 

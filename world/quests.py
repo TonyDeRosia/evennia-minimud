@@ -26,6 +26,7 @@ class Quest:
     complete_dialogue: str = ""
     failure_dialogue: str = ""
     unique_tag: str = ""
+    # mapping of coin type to amount, e.g. {"platinum": 1, "gold": 5}
     currency_reward: Dict[str, int] = field(default_factory=dict)
     guild_points: Dict[str, int] = field(default_factory=dict)
 

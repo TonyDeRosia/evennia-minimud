@@ -507,4 +507,15 @@ HELP_ENTRY_DICTS = [
                 gwho
         """,
     },
+    {
+        "key": "quest rewards",
+        "category": "general",
+        "text": """
+            Some quests give coins of multiple types when completed.
+
+            Builders set the |wcurrency_reward|n field on the quest to a
+            mapping like ``{"platinum": 1, "gold": 5}``. Each coin type is
+            added to your wallet when you turn in the quest.
+        """,
+    },
 ]
