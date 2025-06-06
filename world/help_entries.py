@@ -345,7 +345,7 @@ Help for cweapon
 Create a simple melee weapon.
 
 Usage:
-    cweapon <name> <slot> <damage> [weight] [stat_mods] <description>
+    cweapon <name> <slot> <damage> <weight> [stat_mods] <description>
 
 Switches:
     None
@@ -380,7 +380,7 @@ Help for cshield
 Create a shield piece of armor.
 
 Usage:
-    cshield <name> [slot] [armor]
+    cshield <name> <armor_rating> <weight> <description>
 
 Switches:
     None
@@ -407,7 +407,7 @@ Help for carmor
 Create a wearable armor item.
 
 Usage:
-    carmor <name> [slot] [armor]
+    carmor <name> <slot> <armor> <weight> <description>
 
 Switches:
     None

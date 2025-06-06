@@ -15,6 +15,7 @@ from .building import (
 from world.stats import CORE_STAT_KEYS
 from world.system import stat_manager
 from utils.stats_utils import get_display_scroll
+from utils import VALID_SLOTS
 
 
 # Valid stats that can be modified by gear bonuses
@@ -463,7 +464,7 @@ class CmdCWeapon(Command):
     Create a simple melee weapon.
 
     Usage:
-        cweapon <name> <slot> <damage> [description]
+        cweapon <name> <slot> <damage> <weight> <description>
 
     See |whelp cweapon|n for details.
     """
@@ -475,22 +476,32 @@ class CmdCWeapon(Command):
     def func(self):
         if not self.args:
             self.msg(
-                "Usage: cweapon <name> <slot> <damage> [weight] [stat_mods] <description>"
+                "Usage: cweapon <name> <slot> <damage> <weight> [stat_mods] <description>"
             )
             return
-        parts = self.args.split(None, 3)
-        if len(parts) < 3:
+        parts = self.args.split(None, 4)
+        if len(parts) < 5:
             self.msg(
-                "Usage: cweapon <name> <slot> <damage> [weight] [stat_mods] <description>"
+                "Usage: cweapon <name> <slot> <damage> <weight> [stat_mods] <description>"
             )
             return
         name = parts[0]
         slot = parts[1].lower()
 
         dmg_arg = parts[2]
-        rest = parts[3] if len(parts) > 3 else ""
+        weight_str = parts[3]
+        rest = parts[4]
 
-        weight = 0
+        if slot not in VALID_SLOTS:
+            self.msg("Invalid slot name.")
+            return
+
+        try:
+            weight = int(weight_str)
+        except ValueError:
+            self.msg("Weight must be a number.")
+            return
+
         bonuses = {}
         desc = None
 
@@ -507,11 +518,6 @@ class CmdCWeapon(Command):
                 self.msg("Damage must be a number or NdN dice string.")
                 return
 
-        if rest:
-            m = re.match(r"(\d+)(.*)", rest)
-            if m:
-                weight = int(m.group(1))
-                rest = m.group(2).lstrip()
         if rest:
             pieces = [p.strip() for p in rest.split(",")]
             pattern = re.compile(r"([A-Za-z][A-Za-z _]*?)\+(-?\d+)")
@@ -542,9 +548,8 @@ class CmdCWeapon(Command):
         if desc is None and rest:
             desc = rest.strip()
 
-        valid_slots = {"mainhand", "offhand", "mainhand/offhand", "twohanded"}
-        if slot and slot not in valid_slots:
-            self.msg("Slot must be mainhand, offhand, mainhand/offhand, or twohanded.")
+        if slot not in VALID_SLOTS:
+            self.msg("Invalid slot name.")
             return
 
         obj = _create_gear(
@@ -573,13 +578,18 @@ class CmdCWeapon(Command):
             obj.db.bonuses = bonuses
             obj.db.stat_mods = bonuses
 
+        damage_display = dmg_arg
+        self.caller.msg(
+            f"Slot: {slot}\nDamage: {damage_display}\nWeight: {weight}\nDescription: {desc}"
+        )
+
 
 class CmdCShield(Command):
     """
     Create a shield piece of armor.
 
     Usage:
-        cshield <name> [slot] [armor]
+        cshield <name> <armor_rating> <weight> <description>
 
     See |whelp cshield|n for details.
     """
@@ -590,25 +600,25 @@ class CmdCShield(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: cshield <name> [slot] [armor] [weight]")
+            self.msg("Usage: cshield <name> <armor_rating> <weight> <description>")
             return
-        parts = self.args.split()
-        name = parts[0]
-        slot = parts[1] if len(parts) > 1 else None
-        armor = None
-        weight = 0
-        if len(parts) > 2:
-            try:
-                armor = int(parts[2])
-            except ValueError:
-                self.msg("Armor must be a number.")
-                return
-        if len(parts) > 3:
-            try:
-                weight = int(parts[3])
-            except ValueError:
-                self.msg("Weight must be a number.")
-                return
+        parts = self.args.split(None, 3)
+        if len(parts) < 4:
+            self.msg("Usage: cshield <name> <armor_rating> <weight> <description>")
+            return
+        name, armor_str, weight_str, desc = parts
+        try:
+            armor = int(armor_str)
+        except ValueError:
+            self.msg("Armor rating must be a number.")
+            return
+        try:
+            weight = int(weight_str)
+        except ValueError:
+            self.msg("Weight must be a number.")
+            return
+
+        slot = "offhand"
         obj = _create_gear(
             self.caller,
             "typeclasses.objects.ClothingObject",
@@ -616,11 +626,14 @@ class CmdCShield(Command):
             slot,
             armor,
             attr="armor",
-            desc=None,
+            desc=desc,
             weight=weight,
         )
 
         obj.tags.add("shield", category="flag")
+        self.caller.msg(
+            f"Slot: {slot}\nArmor: {armor}\nWeight: {weight}\nDescription: {desc}"
+        )
 
 
 class CmdCArmor(Command):
@@ -639,34 +652,40 @@ class CmdCArmor(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: carmor <name> [slot] [armor] [weight]")
+            self.msg("Usage: carmor <name> <slot> <armor> <weight> <description>")
             return
-        parts = self.args.split()
-        name = parts[0]
-        slot = parts[1] if len(parts) > 1 else None
-        armor = None
-        weight = 0
-        if len(parts) > 2:
-            try:
-                armor = int(parts[2])
-            except ValueError:
-                self.msg("Armor must be a number.")
-                return
-        if len(parts) > 3:
-            try:
-                weight = int(parts[3])
-            except ValueError:
-                self.msg("Weight must be a number.")
-                return
-        _create_gear(
+        parts = self.args.split(None, 4)
+        if len(parts) < 5:
+            self.msg("Usage: carmor <name> <slot> <armor> <weight> <description>")
+            return
+        name, slot, armor_str, weight_str, desc = parts
+        slot = slot.lower()
+        if slot not in VALID_SLOTS:
+            self.msg("Invalid slot name.")
+            return
+        try:
+            armor = int(armor_str)
+        except ValueError:
+            self.msg("Armor must be a number.")
+            return
+        try:
+            weight = int(weight_str)
+        except ValueError:
+            self.msg("Weight must be a number.")
+            return
+        obj = _create_gear(
             self.caller,
             "typeclasses.objects.ClothingObject",
             name,
             slot,
             armor,
             attr="armor",
-            desc=None,
+            desc=desc,
             weight=weight,
+        )
+
+        self.caller.msg(
+            f"Slot: {slot}\nArmor: {armor}\nWeight: {weight}\nDescription: {desc}"
         )
 
 

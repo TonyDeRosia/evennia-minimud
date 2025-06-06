@@ -5,6 +5,7 @@ from utils.currency import to_copper, from_copper
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 from world.stats import CORE_STAT_KEYS
 from utils.stats_utils import get_display_scroll, _strip_colors, _pad
+from utils import VALID_SLOTS
 
 
 def is_gettable(obj, caller):
@@ -16,8 +17,8 @@ EQUIPMENT_SLOTS = [
     "twohanded",
     "mainhand",
     "offhand",
-    "head",
-    "jewelry",
+    "helm",
+    "amulet",
     "shoulders",
     "chest",
     "cloak",

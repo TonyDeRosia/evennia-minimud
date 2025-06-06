@@ -108,7 +108,7 @@ class TestAdminCommands(EvenniaTest):
         self.assertIsNone(obj.pk)
 
     def test_cweapon_dice_and_slot(self):
-        self.char1.execute_cmd("cweapon dagger mainhand/offhand 3d7")
+        self.char1.execute_cmd("cweapon dagger mainhand/offhand 3d7 2 test")
         weapon = next((obj for obj in self.char1.contents if "dagger" in list(obj.aliases.all())), None)
         self.assertIsNotNone(weapon)
         self.assertTrue(weapon.tags.has("mainhand", category="flag"))
@@ -124,12 +124,12 @@ class TestAdminCommands(EvenniaTest):
 
         cmd = CmdCWeapon()
         cmd.caller = self.char1
-        cmd.args = "Epee mainhand 1d4 A thin blade"
+        cmd.args = "Epee mainhand 1d4 1 A thin blade"
         cmd.func()
 
         cmd = CmdCWeapon()
         cmd.caller = self.char1
-        cmd.args = "epee offhand 2d6 A second blade"
+        cmd.args = "epee offhand 2d6 1 A second blade"
         cmd.func()
 
         w1 = next((o for o in self.char1.contents if "epee-1" in list(o.aliases.all())), None)
@@ -155,7 +155,7 @@ class TestAdminCommands(EvenniaTest):
     def test_cweapon_tags_and_wield(self):
         """Weapon created with cweapon should get tags and be wieldable."""
 
-        self.char1.execute_cmd("cweapon axe mainhand 5")
+        self.char1.execute_cmd("cweapon axe mainhand 5 2 sharp")
         weapon = next(
             (o for o in self.char1.contents if "axe" in list(o.aliases.all())),
             None,
@@ -191,7 +191,7 @@ class TestAdminCommands(EvenniaTest):
     def test_carmor_tags_and_wear(self):
         """Armor created with carmor gets tags and can be worn."""
 
-        self.char1.execute_cmd("carmor helm head 1")
+        self.char1.execute_cmd("carmor helm helm 1 1 basic")
         armor = next(
             (o for o in self.char1.contents if "helm" in list(o.aliases.all())),
             None,
@@ -199,14 +199,14 @@ class TestAdminCommands(EvenniaTest):
         self.assertIsNotNone(armor)
         self.assertTrue(armor.tags.has("equipment", category="flag"))
         self.assertTrue(armor.tags.has("identified", category="flag"))
-        self.assertTrue(armor.tags.has("head", category="slot"))
+        self.assertTrue(armor.tags.has("helm", category="slot"))
         armor.wear(self.char1, True)
         self.assertTrue(armor.db.worn)
 
     def test_cshield_flags_and_blocks_twohanded(self):
         """Shield created with cshield should get shield flag and block two-handed weapons."""
 
-        self.char1.execute_cmd("cshield buckler offhand 1")
+        self.char1.execute_cmd("cshield buckler 1 1 buckler")
         shield = next((o for o in self.char1.contents if "buckler" in list(o.aliases.all())), None)
         self.assertIsNotNone(shield)
         self.assertTrue(shield.tags.has("shield", category="flag"))
