@@ -52,7 +52,7 @@ XYZROOM_PROTOTYPE_OVERRIDE = {"typeclass": "typeclasses.rooms.XYGridRoom"}
 # Clothing - https://www.evennia.com/docs/latest/Contribs/Contrib-Clothing.html#configuration
 CLOTHING_WEARSTYLE_MAXLENGTH = 40
 CLOTHING_TYPE_ORDERED = [
-    "hat",
+    "head",
     "jewelry",
     "chestguard",
     "top",
@@ -80,7 +80,7 @@ CLOTHING_TYPE_LIMIT = {
     "chestguard": 1,
     "legguard": 1,
     "bracers": 1,
-    "hat": 1,
+    "head": 1,
     "gloves": 1,
     "socks": 1,
     "shoes": 1,

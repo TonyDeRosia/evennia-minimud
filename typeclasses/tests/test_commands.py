@@ -110,7 +110,8 @@ class TestInfoCommands(EvenniaTest):
         out = self.char1.msg.call_args[0][0]
         self.assertIn("Mainhand", out)
         self.assertIn("Offhand", out)
-        self.assertIn("Hat", out)
+        self.assertIn("Head", out)
+        self.assertIn("Jewelry", out)
         self.assertIn("Accessory", out)
 
     def test_equipment_twohanded(self):
@@ -420,7 +421,7 @@ class TestRemoveCommand(EvenniaTest):
         )
         item.tags.add("equipment", category="flag")
         item.tags.add("identified", category="flag")
-        item.tags.add("hat", category="slot")
+        item.tags.add("head", category="slot")
         item.wear(self.char1, True)
         self.assertTrue(item.db.worn)
         self.assertIsNone(item.location)
