@@ -51,6 +51,32 @@ class TestObjectFlags(EvenniaTest):
         item.wear(self.char1, "wear")
         mock_wear.assert_called()
 
+    def test_wear_replaces_existing(self):
+        first = create_object(
+            "typeclasses.objects.ClothingObject",
+            key="hat1",
+            location=self.char1,
+        )
+        first.tags.add("equipment", category="flag")
+        first.tags.add("identified", category="flag")
+        first.tags.add("hat", category="slot")
+
+        second = create_object(
+            "typeclasses.objects.ClothingObject",
+            key="hat2",
+            location=self.char1,
+        )
+        second.tags.add("equipment", category="flag")
+        second.tags.add("identified", category="flag")
+        second.tags.add("hat", category="slot")
+
+        first.wear(self.char1, "wear")
+        self.assertTrue(first.db.worn)
+
+        second.wear(self.char1, "wear")
+        self.assertTrue(second.db.worn)
+        self.assertFalse(first.db.worn)
+
 
 class TestInspectFlags(EvenniaTest):
     def test_inspect_shows_flags(self):

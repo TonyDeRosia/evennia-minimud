@@ -51,6 +51,27 @@ class TestCharacterHooks(EvenniaTest):
         used = self.char1.at_wield(weapon)
         self.assertEqual(used, ["left"])
 
+    def test_at_wield_replaces_existing(self):
+        self.char1.attributes.add("_wielded", {"left": None, "right": None})
+        weapon1 = create.create_object(
+            "typeclasses.gear.MeleeWeapon", key="sword", location=self.char1
+        )
+        weapon1.tags.add("equipment", category="flag")
+        weapon1.tags.add("identified", category="flag")
+
+        weapon2 = create.create_object(
+            "typeclasses.gear.MeleeWeapon", key="axe", location=self.char1
+        )
+        weapon2.tags.add("equipment", category="flag")
+        weapon2.tags.add("identified", category="flag")
+
+        self.char1.at_wield(weapon1, hand="right")
+        self.assertIn(weapon1, self.char1.wielding)
+
+        self.char1.at_wield(weapon2, hand="right")
+        self.assertIn(weapon2, self.char1.wielding)
+        self.assertNotIn(weapon1, self.char1.wielding)
+
     def test_twohanded_blocked_by_shield(self):
         self.char1.attributes.add("_wielded", {"left": None, "right": None})
         shield = create.create_object("typeclasses.objects.ClothingObject", key="shield", location=self.char1)

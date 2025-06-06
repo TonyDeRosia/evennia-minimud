@@ -308,22 +308,27 @@ class Character(ObjectParent, ClothedCharacter):
         free = self.free_hands
 
         if hand := kwargs.get("hand"):
-            # if a specific hand was requested, check if it's available
+            # if a specific hand was requested, free it if occupied
             if hand not in free:
-                # check if this is even a valid hand by trying to get what's in it
                 if not (weap := wielded.get(hand)):
-                    # no weapon was got, so it's not there
                     self.msg(f"You do not have a {hand}.")
-                else:
-                    # a weapon was found, provide this information
-                    self.msg(
-                        f"You are already wielding {weap.get_display_name(self)} in your {hand}."
-                    )
-                return
+                    return
+                self.at_unwield(weap)
+                wielded = self.attributes.get("_wielded", {})
+                if wielded:
+                    wielded.deserialize()
+                free = self.free_hands
         elif not free:
-            # there are no hands available to wield this
-            self.msg(f"Your hands are full.")
-            return
+            # no free hands - automatically free the main hand weapon
+            if weap := next((w for w in wielded.values() if w), None):
+                self.at_unwield(weap)
+                wielded = self.attributes.get("_wielded", {})
+                if wielded:
+                    wielded.deserialize()
+                free = self.free_hands
+            else:
+                self.msg(f"Your hands are full.")
+                return
         # handle hand restrictions
         main = self.db.handedness or "right"
         off = "left" if main == "right" else "right"

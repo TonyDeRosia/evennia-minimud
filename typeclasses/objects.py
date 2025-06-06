@@ -211,14 +211,13 @@ class ClothingObject(ObjectParent, ContribClothing):
         if not self.tags.has("identified", category="flag"):
             wearer.msg(f"You don't know how to use {self.get_display_name(wearer)}.")
             return
-        # honor slot tags by preventing duplicates
+        # honor slot tags by automatically replacing duplicates
         if slots := self.tags.get(category="slot", return_list=True):
             worn_items = get_worn_clothes(wearer)
             for slot in slots:
                 for item in worn_items:
                     if item.tags.has(slot, category="slot"):
-                        wearer.msg(f"You are already wearing something on your {slot}.")
-                        return
+                        item.remove(wearer, quiet=quiet)
 
         # shields can't be worn with two-handed weapons
         if self.tags.has("shield", category="flag"):
