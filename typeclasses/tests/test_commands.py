@@ -125,7 +125,7 @@ class TestInfoCommands(EvenniaTest):
         self.char1.attributes.add("_wielded", {"left": weapon, "right": weapon})
         self.char1.execute_cmd("equipment")
         out = self.char1.msg.call_args[0][0]
-        self.assertIn("Twohands", out)
+        self.assertIn("Twohanded", out)
         self.assertNotIn("Mainhand", out)
         self.assertNotIn("Offhand", out)
 
