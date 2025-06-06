@@ -345,7 +345,7 @@ Help for cweapon
 Create a simple melee weapon.
 
 Usage:
-    cweapon <name> <slot> <damage> <weight> [stat_mods] <description>
+    cweapon [/unidentified] <name> <slot> <damage> <weight> [stat_mods] <description>
 
 Switches:
     None
@@ -366,6 +366,7 @@ Notes:
     |wSTR+2, Attack Power+5|n. Valid stats include all core and derived values.
     - The item is a |ctypeclasses.gear.MeleeWeapon|n.
     - ANSI color codes are supported.
+    - Add |w/unidentified|n before the name to create the item unidentified.
 
 Related:
     help ansi
@@ -380,7 +381,7 @@ Help for cshield
 Create a shield piece of armor.
 
 Usage:
-    cshield <name> <armor> <block_rate> <weight> [modifiers] <description>
+    cshield [/unidentified] <name> <armor> <block_rate> <weight> [modifiers] <description>
 
 Switches:
     None
@@ -396,6 +397,7 @@ Notes:
     - Optional comma separated modifiers may be given, such as
     |wBlock Rate+3|n or |wSTR+2, Attack Power+5|n. Valid stats include
     all core and derived values.
+    - Add |w/unidentified|n before the name to create the shield unidentified.
 
 Related:
     help ansi
@@ -410,7 +412,7 @@ Help for carmor
 Create a wearable armor item.
 
 Usage:
-    carmor <name> <slot> <armor> <weight> <description>
+    carmor [/unidentified] <name> <slot> <armor> <weight> <description>
 
 Switches:
     None
@@ -423,6 +425,7 @@ Examples:
 
 Notes:
     - Slot becomes the clothing type.
+    - Add |w/unidentified|n before the name to create the armor unidentified.
 
 Related:
     help ansi
@@ -464,7 +467,7 @@ Help for cgear
 Generic helper for gear creation.
 
 Usage:
-    cgear <typeclass> <name> [slot] [value]
+    cgear [/unidentified] <typeclass> <name> [slot] [value] [weight]
 
 Switches:
     None
@@ -477,6 +480,7 @@ Examples:
 
 Notes:
     - Creates an object of the given typeclass and places it in your inventory.
+    - Add |w/unidentified|n before the name to create the item unidentified.
 
 Related:
     help ansi
@@ -491,7 +495,7 @@ Help for cring
 Create a wearable ring.
 
 Usage:
-    cring <name> [slot] [weight]
+    cring [/unidentified] <name> [slot] [weight]
 
 Switches:
     None
@@ -504,6 +508,7 @@ Examples:
 
 Notes:
     - Slot defaults to ring1. Use ring2 for the other finger.
+    - Add |w/unidentified|n before the name to create the ring unidentified.
 
 Related:
     help ansi
@@ -518,7 +523,7 @@ Help for ctrinket
 Create a wearable trinket or accessory.
 
 Usage:
-    ctrinket <name> [slot] [weight]
+    ctrinket [/unidentified] <name> [slot] [weight]
 
 Switches:
     None
@@ -531,6 +536,7 @@ Examples:
 
 Notes:
     - Slot defaults to accessory.
+    - Add |w/unidentified|n before the name to create the item unidentified.
 
 Related:
     help ansi
