@@ -122,6 +122,7 @@ def get_display_scroll(chara):
 
     level = _db_get(chara, "level", 1)
     xp = _db_get(chara, "exp", 0)
+    tnl = max(level * 100 - xp, 0)
 
     hp = chara.traits.get("health")
     mp = chara.traits.get("mana")
@@ -147,7 +148,7 @@ def get_display_scroll(chara):
         sated_disp = f"|g{sated_val}|n"
 
     lines.append(
-        f"|YLvl {level}|n  |CXP|n {xp}  |rHP|n {hp_disp}  |cMP|n {mp_disp}  |gSP|n {sp_disp}"
+        f"|YLvl {level}|n  |CXP|n {xp}  |yTNL|n {tnl}  |rHP|n {hp_disp}  |cMP|n {mp_disp}  |gSP|n {sp_disp}"
     )
     lines.append(f"|ySated|n {sated_disp}")
 
@@ -171,10 +172,10 @@ def get_display_scroll(chara):
     weight = chara.db.carry_weight or 0
     capacity = chara.db.carry_capacity or 0
     enc = chara.encumbrance_level() if hasattr(chara, "encumbrance_level") else ""
-    cw_line = f"Carry Weight: {weight} / {capacity}"
+    cw_line = f"|YCarry Weight:|n {weight} / {capacity}"
     if enc:
         cw_line += f"  {enc}"
-    lines.append(f"|Y{cw_line}|n")
+    lines.append(cw_line)
 
     guild = _db_get(chara, "guild", "")
     if guild:
