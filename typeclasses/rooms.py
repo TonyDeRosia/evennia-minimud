@@ -25,6 +25,10 @@ class RoomParent(ObjectParent):
         "{name}\n{desc}\n\n{exits}\n\n{characters}\n{things}\n{footer}"
     )
 
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.exits = self.db.exits or {}
+
     def at_object_receive(self, mover, source_location, move_type=None, **kwargs):
         """
         Apply extra hooks when an object enters this room, so things (e.g. NPCs) can react.
@@ -99,13 +103,9 @@ class RoomParent(ObjectParent):
     def get_display_exits(self, looker, **kwargs):
         """Return a list of exits visible to ``looker``."""
 
-        exits = [
-            ex.key.capitalize()
-            for ex in self.exits
-            if ex.access(looker, "view")
-        ]
-        if exits:
-            return "|wExits:|n " + ", ".join(exits)
+        exit_names = [key.capitalize() for key in (self.db.exits or {})]
+        if exit_names:
+            return "|wExits:|n " + ", ".join(exit_names)
         else:
             return "|wExits:|n None"
 

@@ -5,16 +5,11 @@ from utils.currency import to_copper, from_copper
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 from world.stats import CORE_STAT_KEYS
 from utils.stats_utils import get_display_scroll, _strip_colors, _pad
-from evennia.objects.objects import DefaultExit
 
 
 def is_gettable(obj, caller):
     """Return True if caller can pick up obj."""
-    return (
-        obj.access(caller, "get")
-        and not isinstance(obj, DefaultExit)
-        and obj.db.gettable is not False
-    )
+    return obj.access(caller, "get") and obj.db.gettable is not False
 
 
 def render_equipment(caller):
