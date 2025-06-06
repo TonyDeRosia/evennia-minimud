@@ -131,7 +131,7 @@ class TestInfoCommands(EvenniaTest):
         self.assertIn("Offhand", out)
         self.assertIn("Head", out)
         self.assertIn("Jewelry", out)
-        self.assertIn("Accessory", out)
+        self.assertIn("Trinket", out)
 
     def test_equipment_twohanded(self):
         from evennia.utils import create
