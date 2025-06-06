@@ -84,6 +84,31 @@ class Character(ObjectParent, ClothedCharacter):
             key for key, val in self.attributes.get("_wielded", {}).items() if not val
         ]
 
+    @property
+    def equipment(self):
+        """Return mapping of equipment slots to worn or wielded items."""
+        eq = {}
+
+        wielded = self.attributes.get("_wielded", {})
+        if wielded:
+            wielded.deserialize()
+
+        main = self.db.handedness or "right"
+        off = "left" if main == "right" else "right"
+
+        eq["mainhand"] = wielded.get(main)
+        eq["offhand"] = wielded.get(off)
+
+        for item in get_worn_clothes(self):
+            slots = item.tags.get(category="slot", return_list=True) or []
+            if not slots and (ctype := item.db.clothing_type):
+                slots = [ctype]
+            for slot in slots:
+                if slot:
+                    eq[slot] = item
+
+        return eq
+
     # -------------------------------------------------------------
     # Carry weight helpers
     # -------------------------------------------------------------

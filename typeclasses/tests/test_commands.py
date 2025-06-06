@@ -105,9 +105,30 @@ class TestInfoCommands(EvenniaTest):
         self.assertTrue(self.char1.msg.called)
 
     def test_equipment(self):
-        self.char1.attributes.add("_wielded", {"left": self.obj1})
+        self.char1.attributes.add("_wielded", {"left": None, "right": None})
         self.char1.execute_cmd("equipment")
-        self.assertTrue(self.char1.msg.called)
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Mainhand", out)
+        self.assertIn("Offhand", out)
+        self.assertIn("Hat", out)
+        self.assertIn("Accessory", out)
+
+    def test_equipment_twohanded(self):
+        from evennia.utils import create
+
+        weapon = create.create_object(
+            "typeclasses.gear.MeleeWeapon", key="great", location=self.char1
+        )
+        weapon.tags.add("equipment", category="flag")
+        weapon.tags.add("identified", category="flag")
+        weapon.db.twohanded = True
+
+        self.char1.attributes.add("_wielded", {"left": weapon, "right": weapon})
+        self.char1.execute_cmd("equipment")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Twohands", out)
+        self.assertNotIn("Mainhand", out)
+        self.assertNotIn("Offhand", out)
 
     def test_inspect_identified(self):
         self.obj1.db.desc = "A sharp blade."
