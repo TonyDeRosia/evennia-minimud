@@ -115,6 +115,60 @@ class TestInfoCommands(EvenniaTest):
         out = self.char1.msg.call_args[0][0]
         self.assertIn("(+1)", out)
 
+    def test_score_shows_multiple_item_bonuses(self):
+        from evennia.utils import create
+
+        ring = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="ring",
+            location=self.char1,
+        )
+        ring.tags.add("equipment", category="flag")
+        ring.tags.add("identified", category="flag")
+        ring.tags.add("jewelry", category="slot")
+        ring.db.stat_mods = {"STR": 1}
+        ring.wear(self.char1, True)
+
+        armor = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="helm",
+            location=self.char1,
+        )
+        armor.tags.add("equipment", category="flag")
+        armor.tags.add("identified", category="flag")
+        armor.tags.add("helm", category="slot")
+        armor.db.stat_mods = {"CON": 2}
+        armor.wear(self.char1, True)
+
+        shield = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="shield",
+            location=self.char1,
+        )
+        shield.tags.add("equipment", category="flag")
+        shield.tags.add("identified", category="flag")
+        shield.tags.add("shield", category="flag")
+        shield.db.stat_mods = {"DEX": 3}
+        shield.wear(self.char1, True)
+
+        trinket = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="trinket",
+            location=self.char1,
+        )
+        trinket.tags.add("equipment", category="flag")
+        trinket.tags.add("identified", category="flag")
+        trinket.tags.add("trinket", category="slot")
+        trinket.db.stat_mods = {"WIS": 4}
+        trinket.wear(self.char1, True)
+
+        self.char1.execute_cmd("score")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("(+1)", out)
+        self.assertIn("(+2)", out)
+        self.assertIn("(+3)", out)
+        self.assertIn("(+4)", out)
+
     def test_inventory(self):
         self.char1.execute_cmd("inventory")
         self.assertTrue(self.char1.msg.called)
