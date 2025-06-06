@@ -158,6 +158,7 @@ class Character(ObjectParent, ClothedCharacter):
         self.db.guild_points = {}
         self.db.guild_rank = ""
         self.db.stat_overrides = {}
+        self.db.equip_bonuses = {}
         self.db.sated = 5
 
     def at_post_puppet(self, **kwargs):
@@ -385,6 +386,7 @@ class Character(ObjectParent, ClothedCharacter):
         weapon.location = None
         self.update_carry_weight()
         from world.system import stat_manager
+        stat_manager.add_equip_bonus(self, weapon)
         stat_manager.refresh_stats(self)
         # return the list of hands that are now holding the weapon
         return hands
@@ -417,6 +419,7 @@ class Character(ObjectParent, ClothedCharacter):
         weapon.location = self
         self.update_carry_weight()
         from world.system import stat_manager
+        stat_manager.remove_equip_bonus(self, weapon)
         stat_manager.refresh_stats(self)
         # return the list of hands that are no longer holding the weapon
         return freed

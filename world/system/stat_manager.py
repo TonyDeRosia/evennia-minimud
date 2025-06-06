@@ -87,93 +87,92 @@ def _class_mods(obj) -> Dict[str, int]:
     return {}
 
 
-def _gear_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
-    """Collect stat bonuses from equipped gear.
-
-    This inspects both worn clothing and wielded items for attributes or
-    tags providing bonuses. Supported formats are attributes named
-    ``"<STAT>_bonus"`` or a mapping stored under ``"stat_mods"``. Any tag in the
-    form ``"<STAT>+N"`` will also be parsed as a bonus. Returned keys may be
-    primary or derived stat names.
-    """
+def collect_item_mods(item) -> Dict[str, int]:  # pragma: no cover - helper
+    """Return stat modifiers contributed by a single item."""
 
     bonus: Dict[str, int] = {}
 
-    try:
-        from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
-
-        worn = get_worn_clothes(obj)
-    except Exception:  # pragma: no cover - clothing contrib may not be loaded
-        worn = []
-
-    items = list(worn)
-    if hasattr(obj, "wielding"):
-        items.extend(obj.wielding)
-
     stat_keys = set(PRIMARY_STATS) | set(STAT_SCALING.keys())
 
-    for item in items:
-        # attribute handler
-        if hasattr(item, "attributes"):
+    if hasattr(item, "attributes"):
+        for key in stat_keys:
+            val = item.attributes.get(f"{key}_bonus", default=0)
+            if val:
+                bonus[key] = bonus.get(key, 0) + int(val)
+        mods = (
+            item.attributes.get("stat_mods", default=None)
+            or item.attributes.get("bonuses", default=None)
+            or item.attributes.get("modifiers", default=None)
+            or item.attributes.get("buffs", default=None)
+        )
+        if mods:
+            for stat, val in mods.items():
+                bonus[stat] = bonus.get(stat, 0) + int(val)
+    else:
+        getter = getattr(getattr(item, "db", None), "get", None)
+        if callable(getter):
             for key in stat_keys:
-                val = item.attributes.get(f"{key}_bonus", default=0)
+                try:
+                    val = getter(f"{key}_bonus", 0)
+                except Exception:
+                    val = 0
                 if val:
                     bonus[key] = bonus.get(key, 0) + int(val)
-            mods = item.attributes.get("stat_mods", default=None)
-            if not mods:
-                mods = item.attributes.get("bonuses", default=None)
-            if not mods:
-                mods = item.attributes.get("modifiers", default=None)
-            if not mods:
-                mods = item.attributes.get("buffs", default=None)
+            mods = None
+            for field in ("stat_mods", "bonuses", "modifiers", "buffs"):
+                try:
+                    mods = getter(field, None)
+                except Exception:
+                    mods = None
+                if mods:
+                    break
             if mods:
                 for stat, val in mods.items():
                     bonus[stat] = bonus.get(stat, 0) + int(val)
-        else:
-            getter = getattr(getattr(item, "db", None), "get", None)
-            if callable(getter):
-                for key in stat_keys:
-                    try:
-                        val = getter(f"{key}_bonus", 0)
-                    except Exception:
-                        val = 0
-                    if val:
-                        bonus[key] = bonus.get(key, 0) + int(val)
-                try:
-                    mods = getter("stat_mods", None)
-                except Exception:
-                    mods = None
-                if not mods:
-                    try:
-                        mods = getter("bonuses", None)
-                    except Exception:
-                        mods = None
-                if not mods:
-                    try:
-                        mods = getter("modifiers", None)
-                    except Exception:
-                        mods = None
-                if not mods:
-                    try:
-                        mods = getter("buffs", None)
-                    except Exception:
-                        mods = None
-                if mods:
-                    for stat, val in mods.items():
-                        bonus[stat] = bonus.get(stat, 0) + int(val)
 
-        if hasattr(item, "tags"):
-            tags = item.tags.get(return_list=True)
-            for tag in tags:
-                if not isinstance(tag, str):
-                    continue
-                m = re.match(r"([A-Z_]+)\+(\-?\d+)$", tag)
-                if m:
-                    stat, amt = m.groups()
-                    if stat in stat_keys:
-                        bonus[stat] = bonus.get(stat, 0) + int(amt)
+    if hasattr(item, "tags"):
+        tags = item.tags.get(return_list=True)
+        for tag in tags:
+            if not isinstance(tag, str):
+                continue
+            m = re.match(r"([A-Z_]+)\+(\-?\d+)$", tag)
+            if m:
+                stat, amt = m.groups()
+                if stat in stat_keys:
+                    bonus[stat] = bonus.get(stat, 0) + int(amt)
 
     return bonus
+
+
+def add_equip_bonus(chara, item) -> None:
+    """Add ``item`` modifiers to ``chara.db.equip_bonuses``."""
+    mods = collect_item_mods(item)
+    if not mods:
+        return
+    bonuses = chara.db.equip_bonuses or {}
+    for stat, val in mods.items():
+        bonuses[stat] = bonuses.get(stat, 0) + int(val)
+    chara.db.equip_bonuses = bonuses
+
+
+def remove_equip_bonus(chara, item) -> None:
+    """Remove ``item`` modifiers from ``chara.db.equip_bonuses``."""
+    mods = collect_item_mods(item)
+    if not mods:
+        return
+    bonuses = chara.db.equip_bonuses or {}
+    for stat, val in mods.items():
+        if stat in bonuses:
+            bonuses[stat] = bonuses.get(stat, 0) - int(val)
+            if not bonuses[stat]:
+                del bonuses[stat]
+    chara.db.equip_bonuses = bonuses
+
+
+def _gear_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
+    """Return cached stat bonuses from equipped gear."""
+
+    return getattr(obj.db, "equip_bonuses", {}) or {}
 
 
 def _buff_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
