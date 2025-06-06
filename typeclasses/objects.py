@@ -202,6 +202,19 @@ class Object(ObjectParent, DefaultObject):
             return False
         return super().at_pre_move(destination, move_type=move_type, **kwargs)
 
+    def at_object_delete(self):
+        """Clean up bonuses if this item is equipped when deleted."""
+        from evennia import search_object
+        from evennia.utils.utils import inherits_from
+
+        for char in search_object("*"):
+            if not inherits_from(char, "typeclasses.characters.Character"):
+                continue
+            if self in char.equipment.values():
+                stat_manager.remove_bonuses(char, self)
+                break
+        return True
+
 
 class ClothingObject(ObjectParent, ContribClothing):
     def wear(self, wearer, wearstyle, quiet=False):

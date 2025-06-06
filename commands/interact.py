@@ -69,6 +69,10 @@ class CmdEat(Command):
             caller.msg("You cannot eat that.")
             return
 
+        if obj in caller.equipment.values():
+            caller.msg("You must unequip that first.")
+            return
+
         stamina = obj.attributes.get("stamina", 0)
         caller.traits.stamina.current += stamina
 
