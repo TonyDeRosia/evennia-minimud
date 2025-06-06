@@ -99,7 +99,8 @@ class Character(ObjectParent, ClothedCharacter):
         for obj in self.contents:
             if obj.db.worn:
                 continue
-            weight += getattr(obj.db, "weight", 1)
+            w = getattr(obj.db, "weight", 0)
+            weight += w if isinstance(w, (int, float)) else 0
         self.db.carry_weight = weight
 
     def encumbrance_level(self):

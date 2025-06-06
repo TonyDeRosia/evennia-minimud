@@ -284,7 +284,9 @@ class CmdPurge(Command):
         caller.msg(f"Purged {target.key}.")
 
 
-def _create_gear(caller, typeclass, name, slot=None, value=None, attr="dmg", desc=None):
+def _create_gear(
+    caller, typeclass, name, slot=None, value=None, attr="dmg", desc=None, weight=0
+):
     """Helper to create gear objects.
 
     Uses the given ``name`` as-is for the key and assigns a numbered
@@ -299,6 +301,7 @@ def _create_gear(caller, typeclass, name, slot=None, value=None, attr="dmg", des
     obj = create_object(typeclass, key=key, location=caller)
     if desc:
         obj.db.desc = desc
+    obj.db.weight = weight
     obj.aliases.add(alias_base)
     obj.aliases.add(f"{alias_base}-{count + 1}")
     if slot:
@@ -321,23 +324,30 @@ class CmdCGear(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: cgear <typeclass> <name> [slot] [value]")
+            self.msg("Usage: cgear <typeclass> <name> [slot] [value] [weight]")
             return
         parts = self.args.split()
         if len(parts) < 2:
-            self.msg("Usage: cgear <typeclass> <name> [slot] [value]")
+            self.msg("Usage: cgear <typeclass> <name> [slot] [value] [weight]")
             return
         tclass = parts[0]
         name = parts[1]
         slot = parts[2] if len(parts) > 2 else None
         val = None
+        weight = 0
         if len(parts) > 3:
             try:
                 val = int(parts[3])
             except ValueError:
                 self.msg("Value must be a number.")
                 return
-        _create_gear(self.caller, tclass, name, slot, val, desc=None)
+        if len(parts) > 4:
+            try:
+                weight = int(parts[4])
+            except ValueError:
+                self.msg("Weight must be a number.")
+                return
+        _create_gear(self.caller, tclass, name, slot, val, desc=None, weight=weight)
 
 
 class CmdOCreate(Command):
@@ -348,9 +358,27 @@ class CmdOCreate(Command):
     help_category = "Building"
 
     def func(self):
-        name = self.args.strip() or "object"
-        create_object("typeclasses.objects.Object", key=name, location=self.caller)
-        self.msg(f"Created {name}.")
+        if not self.args:
+            name = "object"
+            weight = 0
+        else:
+            parts = self.args.split(None, 1)
+            name = parts[0]
+            weight = 0
+            if len(parts) > 1:
+                if parts[1].isdigit():
+                    weight = int(parts[1])
+                else:
+                    self.msg("Weight must be a number.")
+                    return
+        obj = _create_gear(
+            self.caller,
+            "typeclasses.objects.Object",
+            name,
+            desc=None,
+            weight=weight,
+        )
+        self.msg(f"Created {obj.key}.")
 
 
 class CmdCWeapon(Command):
@@ -362,15 +390,17 @@ class CmdCWeapon(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: cweapon <name> <slot> <damage> [description]")
+            self.msg("Usage: cweapon <name> <slot> <damage> [weight] [description]")
             return
-        parts = self.args.split(None, 3)
+        parts = self.args.split(None, 4)
         if len(parts) < 3:
-            self.msg("Usage: cweapon <name> <slot> <damage> [description]")
+            self.msg("Usage: cweapon <name> <slot> <damage> [weight] [description]")
             return
         name = parts[0]
         slot = parts[1].lower()
-        desc = parts[3] if len(parts) > 3 else None
+        weight = 0
+        desc = None
+        remaining = parts[3:] if len(parts) > 3 else []
 
         dmg = None
         dice = None
@@ -387,6 +417,14 @@ class CmdCWeapon(Command):
                     self.msg("Damage must be a number or NdN dice string.")
                     return
 
+        if remaining:
+            if remaining[0].isdigit():
+                weight = int(remaining[0])
+                if len(remaining) > 1:
+                    desc = " ".join(remaining[1:])
+            else:
+                desc = " ".join(remaining)
+
         valid_slots = {"mainhand", "offhand", "mainhand/offhand", "twohanded"}
         if slot and slot not in valid_slots:
             self.msg("Slot must be mainhand, offhand, mainhand/offhand, or twohanded.")
@@ -397,6 +435,7 @@ class CmdCWeapon(Command):
             "typeclasses.gear.MeleeWeapon",
             name.capitalize(),
             desc=desc,
+            weight=weight,
         )
 
         if slot:
@@ -426,19 +465,35 @@ class CmdCShield(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: cshield <name> [slot] [armor]")
+            self.msg("Usage: cshield <name> [slot] [armor] [weight]")
             return
         parts = self.args.split()
         name = parts[0]
         slot = parts[1] if len(parts) > 1 else None
         armor = None
+        weight = 0
         if len(parts) > 2:
             try:
                 armor = int(parts[2])
             except ValueError:
                 self.msg("Armor must be a number.")
                 return
-        _create_gear(self.caller, "typeclasses.objects.ClothingObject", name, slot, armor, attr="armor", desc=None)
+        if len(parts) > 3:
+            try:
+                weight = int(parts[3])
+            except ValueError:
+                self.msg("Weight must be a number.")
+                return
+        _create_gear(
+            self.caller,
+            "typeclasses.objects.ClothingObject",
+            name,
+            slot,
+            armor,
+            attr="armor",
+            desc=None,
+            weight=weight,
+        )
 
 
 class CmdCArmor(Command):
@@ -450,19 +505,35 @@ class CmdCArmor(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: carmor <name> [slot] [armor]")
+            self.msg("Usage: carmor <name> [slot] [armor] [weight]")
             return
         parts = self.args.split()
         name = parts[0]
         slot = parts[1] if len(parts) > 1 else None
         armor = None
+        weight = 0
         if len(parts) > 2:
             try:
                 armor = int(parts[2])
             except ValueError:
                 self.msg("Armor must be a number.")
                 return
-        _create_gear(self.caller, "typeclasses.objects.ClothingObject", name, slot, armor, attr="armor", desc=None)
+        if len(parts) > 3:
+            try:
+                weight = int(parts[3])
+            except ValueError:
+                self.msg("Weight must be a number.")
+                return
+        _create_gear(
+            self.caller,
+            "typeclasses.objects.ClothingObject",
+            name,
+            slot,
+            armor,
+            attr="armor",
+            desc=None,
+            weight=weight,
+        )
 
 
 class CmdCTool(Command):
@@ -474,12 +545,30 @@ class CmdCTool(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: ctool <name> [tag]")
+            self.msg("Usage: ctool <name> [tag] [weight]")
             return
         parts = self.args.split()
         name = parts[0]
-        tag = parts[1] if len(parts) > 1 else None
-        obj = _create_gear(self.caller, "typeclasses.objects.Object", name, desc=None)
+        tag = None
+        weight = 0
+        if len(parts) > 1:
+            if parts[1].isdigit():
+                weight = int(parts[1])
+            else:
+                tag = parts[1]
+                if len(parts) > 2:
+                    if parts[2].isdigit():
+                        weight = int(parts[2])
+                    else:
+                        self.msg("Weight must be a number.")
+                        return
+        obj = _create_gear(
+            self.caller,
+            "typeclasses.objects.Object",
+            name,
+            desc=None,
+            weight=weight,
+        )
         if tag:
             obj.tags.add(tag, category="crafting_tool")
 

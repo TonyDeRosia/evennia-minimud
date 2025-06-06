@@ -7,7 +7,7 @@ from evennia.utils.test_resources import EvenniaTest
 class TestObjectCreation(EvenniaTest):
     def test_default_weight_on_creation(self):
         obj = create_object("typeclasses.objects.Object", key="widget")
-        self.assertEqual(obj.db.weight, 1)
+        self.assertEqual(obj.db.weight, 0)
 
     def test_weight_not_overwritten(self):
         obj = create_object("typeclasses.objects.Object", key="stone")
