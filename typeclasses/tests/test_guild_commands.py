@@ -43,3 +43,40 @@ class TestGuildCommands(EvenniaTest):
         self.assertEqual(self.char2.db.guild_honor, 5)
         self.char1.execute_cmd(f"gkick {self.char2.key}")
         self.assertEqual(self.char2.db.guild, "")
+
+    def test_npc_roles(self):
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        npc_master = create.create_object(NPC, key="Master", location=self.room1)
+        npc_master.cmdset.add_default(GuildCmdSet)
+        npc_master.msg = MagicMock()
+        npc_master.tags.add("guildmaster", category="npc_role")
+
+        npc_master.execute_cmd("gcreate roleguild")
+        idx, guild = find_guild("roleguild")
+        self.assertNotEqual(idx, -1)
+
+        guild.members[str(self.char1.id)] = 0
+        guild.members[str(self.char2.id)] = 0
+        from world.guilds import update_guild
+        update_guild(idx, guild)
+
+        npc_master.db.guild = "roleguild"
+        self.char1.db.guild = "roleguild"
+        self.char2.db.guild = "roleguild"
+        npc_master.execute_cmd(f"gkick {self.char1.key}")
+        self.assertEqual(self.char1.db.guild, "")
+
+        npc_rec = create.create_object(NPC, key="Rec", location=self.room1)
+        npc_rec.cmdset.add_default(GuildCmdSet)
+        npc_rec.msg = MagicMock()
+        npc_rec.tags.add("guild_receptionist", category="npc_role")
+        npc_rec.db.guild = "roleguild"
+        self.char2.db.guild_honor = 0
+
+        npc_rec.execute_cmd(f"gpromote {self.char2.key}")
+        self.assertEqual(self.char2.db.guild_honor, 1)
+        npc_rec.execute_cmd("gcreate shouldfail")
+        idx2, _ = find_guild("shouldfail")
+        self.assertEqual(idx2, -1)

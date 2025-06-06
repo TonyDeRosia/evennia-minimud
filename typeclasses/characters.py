@@ -658,6 +658,8 @@ class PlayerCharacter(Character):
 class NPC(Character):
     """
     The base typeclass for non-player characters, implementing behavioral AI.
+
+    NPCs can be assigned roles with ``obj.tags.add("<role>", category="npc_role")``.
     """
 
     # defines what color this NPC's name will display in

@@ -1,6 +1,7 @@
 from evennia import CmdSet, search_object
 from evennia.utils.evtable import EvTable
 from evennia.utils.utils import make_iter
+from utils.roles import is_guildmaster, is_receptionist
 
 from .command import Command
 from world.guilds import (
@@ -87,10 +88,13 @@ class CmdGCreate(Command):
     """Create a new guild and register it."""
 
     key = "gcreate"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:all()"
     help_category = "Building"
 
     def func(self):
+        if not is_guildmaster(self.caller):
+            self.msg("You do not have permission to do that.")
+            return
         if not self.args:
             self.msg("Usage: gcreate <name>")
             return
@@ -108,10 +112,13 @@ class CmdGRank(Command):
     """Manage guild rank titles."""
 
     key = "grank"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:all()"
     help_category = "Building"
 
     def func(self):
+        if not is_guildmaster(self.caller):
+            self.msg("You do not have permission to do that.")
+            return
         if not self.args:
             self.msg("Usage: grank add/remove/list <guild> [level title]")
             return
@@ -165,10 +172,13 @@ class CmdGSetHome(Command):
     """Set the home location for a guild."""
 
     key = "gsethome"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:all()"
     help_category = "Building"
 
     def func(self):
+        if not is_guildmaster(self.caller):
+            self.msg("You do not have permission to do that.")
+            return
         if not self.args:
             self.msg("Usage: gsethome <guild>")
             return
@@ -189,10 +199,13 @@ class CmdGDesc(Command):
     """Set the description of a guild."""
 
     key = "gdesc"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:all()"
     help_category = "Building"
 
     def func(self):
+        if not is_guildmaster(self.caller):
+            self.msg("You do not have permission to do that.")
+            return
         if not self.args:
             self.msg("Usage: gdesc <guild> <description>")
             return
@@ -239,6 +252,9 @@ class CmdGAccept(Command):
     help_category = "general"
 
     def func(self):
+        if not is_guildmaster(self.caller):
+            self.msg("You do not have permission to do that.")
+            return
         if not self.args:
             self.msg("Usage: gaccept <player>")
             return
@@ -272,6 +288,9 @@ class _BaseAdjustHonor(Command):
     help_category = "general"
 
     def adjust(self, amount: int):
+        if not (is_guildmaster(self.caller) or is_receptionist(self.caller)):
+            self.msg("You do not have permission to do that.")
+            return
         if not self.args:
             self.msg(f"Usage: {self.key} <player> [amount]")
             return
@@ -326,6 +345,9 @@ class CmdGKick(Command):
     help_category = "general"
 
     def func(self):
+        if not is_guildmaster(self.caller):
+            self.msg("You do not have permission to do that.")
+            return
         if not self.args:
             self.msg("Usage: gkick <player>")
             return
