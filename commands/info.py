@@ -31,6 +31,7 @@ EQUIPMENT_SLOTS = [
     "legs",
     "feet",
     "accessory",
+    "trinket",
 ]
 
 
