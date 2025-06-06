@@ -64,3 +64,44 @@ class TestInspectFlags(EvenniaTest):
         out = self.char1.msg.call_args[0][0]
         self.assertIn("Flags: equipment, rare", out)
 
+
+class TestMeleeWeaponUtility(EvenniaTest):
+    def test_is_twohanded_attribute(self):
+        weapon = create_object(
+            "typeclasses.gear.MeleeWeapon",
+            key="great",
+            location=self.char1,
+            nohome=True,
+        )
+        weapon.db.twohanded = True
+        self.assertTrue(weapon.is_twohanded())
+
+    def test_is_twohanded_flag_tag(self):
+        weapon = create_object(
+            "typeclasses.gear.MeleeWeapon",
+            key="axe",
+            location=self.char1,
+            nohome=True,
+        )
+        weapon.tags.add("twohanded", category="flag")
+        self.assertTrue(weapon.is_twohanded())
+
+    def test_is_twohanded_wielded_tag(self):
+        weapon = create_object(
+            "typeclasses.gear.MeleeWeapon",
+            key="spear",
+            location=self.char1,
+            nohome=True,
+        )
+        weapon.tags.add("two_handed", category="wielded")
+        self.assertTrue(weapon.is_twohanded())
+
+    def test_is_twohanded_false(self):
+        weapon = create_object(
+            "typeclasses.gear.MeleeWeapon",
+            key="sword",
+            location=self.char1,
+            nohome=True,
+        )
+        self.assertFalse(weapon.is_twohanded())
+

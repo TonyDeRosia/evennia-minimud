@@ -223,9 +223,8 @@ class ClothingObject(ObjectParent, ContribClothing):
         # shields can't be worn with two-handed weapons
         if self.tags.has("shield", category="flag"):
             for weap in wearer.wielding:
-                if weap.tags.has("twohanded", category="flag") or weap.tags.has(
-                    "two_handed", category="wielded"
-                ):
+                is_twohanded = getattr(weap, "is_twohanded", lambda: False)()
+                if is_twohanded:
                     wearer.msg("You cannot use a shield while wielding a two-handed weapon.")
                     return
 

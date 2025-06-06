@@ -18,8 +18,15 @@ def render_equipment(caller):
     display = ["+=========================+", "| [ EQUIPMENT ]"]
 
     twohanded_weapon = None
-    if eq.get("mainhand") and eq.get("mainhand") == eq.get("offhand"):
-        twohanded_weapon = eq["mainhand"]
+    main = eq.get("mainhand")
+    off = eq.get("offhand")
+    if main and main == off:
+        twohanded_weapon = main
+    else:
+        for weap in (main, off):
+            if weap and getattr(weap, "is_twohanded", lambda: False)():
+                twohanded_weapon = weap
+                break
 
     if twohanded_weapon:
         display.append(
