@@ -15,6 +15,33 @@ from world.system import stat_manager
 import math
 import re
 
+ALIAS_MAP = {
+    "str": "STR",
+    "con": "CON",
+    "dex": "DEX",
+    "int": "INT",
+    "wis": "WIS",
+    "luck": "LUCK",
+    "per": "perception",
+    "critical_chance": "crit_chance",
+    "critical_damage_bonus": "crit_bonus",
+    "critical_resist": "crit_resist",
+    "armor_penetration": "piercing",
+    "crafting_bonus": "craft_bonus",
+    "guild_honor_rank_modifiers": "guild_honor_mod",
+}
+
+
+def normalize_stat_key(key: str) -> str:
+    """Return canonical stat key for ``key``."""
+    name = str(key).strip().replace(" ", "_")
+    lower = name.lower()
+    if lower in ALIAS_MAP:
+        return ALIAS_MAP[lower]
+    if lower in {"str", "con", "dex", "int", "wis", "luck"}:
+        return lower.upper()
+    return lower
+
 PRIMARY_EXTRA = "perception"
 
 # Build list of secondary stats from world.stats excluding core attributes,
