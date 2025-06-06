@@ -87,7 +87,7 @@ Examples:
     None
 
 Notes:
-    - None
+    - Primary stats cap at 99 and HP/MP/SP cannot exceed 999.
 
 Related:
     help ansi
@@ -124,6 +124,7 @@ Notes:
     - {copper}, {silver}, {gold}, {platinum} - coins carried
     - {carry}, {capacity} - carry weight and capacity
     - {enc} - encumbrance level
+    - Primary stats are capped at 99 and HP/MP/SP at 999.
 
 Related:
     help ansi
@@ -649,6 +650,7 @@ Notes:
     - This modifies the target's stat permanently. Creating or adjusting
     - stats incorrectly may break the character, so double-check your
     - inputs before committing changes.
+    - Primary stats cannot exceed 99 and HP/MP/SP cap at 999.
 
 Related:
     help ansi

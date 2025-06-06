@@ -9,6 +9,17 @@ from utils.stats_utils import normalize_stat_key
 
 from world import stats
 from world.system import state_manager
+from .constants import (
+    MAX_STR,
+    MAX_CON,
+    MAX_DEX,
+    MAX_INT,
+    MAX_WIS,
+    MAX_LUCK,
+    MAX_HP,
+    MAX_MP,
+    MAX_SP,
+)
 from world.scripts import races, classes
 
 # Primary and secondary stat keys
@@ -246,6 +257,18 @@ def refresh_stats(obj) -> None:
         total = base
         total += gear_bonus.get(key, 0)
         total += buff_bonus.get(key, 0)
+
+        cap_map = {
+            "STR": MAX_STR,
+            "CON": MAX_CON,
+            "DEX": MAX_DEX,
+            "INT": MAX_INT,
+            "WIS": MAX_WIS,
+            "LUCK": MAX_LUCK,
+        }
+        if key in cap_map:
+            total = min(total, cap_map[key])
+
         if obj.traits.get(key):
             obj.traits.get(key).base = total
         else:
@@ -259,7 +282,15 @@ def refresh_stats(obj) -> None:
             value += primary_totals.get(pkey, 0) * weight
         value += gear_bonus.get(dkey, 0)
         value += buff_bonus.get(dkey, 0)
-        derived[dkey] = int(round(value))
+        result = int(round(value))
+        cap_map = {
+            "HP": MAX_HP,
+            "MP": MAX_MP,
+            "SP": MAX_SP,
+        }
+        if dkey in cap_map:
+            result = min(result, cap_map[dkey])
+        derived[dkey] = result
 
     # perception scales off primary stats but keeps its base value
     if obj.traits.get("perception"):
@@ -287,15 +318,15 @@ def refresh_stats(obj) -> None:
 
     # update resource traits
     if hp := obj.traits.get("health"):
-        hp.base = derived.get("HP", hp.base)
+        hp.base = min(derived.get("HP", hp.base), MAX_HP)
         if hp.current > hp.max:
             hp.current = hp.max
     if mp := obj.traits.get("mana"):
-        mp.base = derived.get("MP", mp.base)
+        mp.base = min(derived.get("MP", mp.base), MAX_MP)
         if mp.current > mp.max:
             mp.current = mp.max
     if sp := obj.traits.get("stamina"):
-        sp.base = derived.get("SP", sp.base)
+        sp.base = min(derived.get("SP", sp.base), MAX_SP)
         if sp.current > sp.max:
             sp.current = sp.max
 
