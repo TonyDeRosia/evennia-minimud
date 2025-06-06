@@ -151,3 +151,36 @@ class TestAdminCommands(EvenniaTest):
 
         self.assertEqual(w1.db.damage_dice, "1d4")
         self.assertEqual(w2.db.damage_dice, "2d6")
+
+    def test_cweapon_tags_and_wield(self):
+        """Weapon created with cweapon should get tags and be wieldable."""
+
+        self.char1.execute_cmd("cweapon axe mainhand 5")
+        weapon = next(
+            (o for o in self.char1.contents if "axe" in list(o.aliases.all())),
+            None,
+        )
+        self.assertIsNotNone(weapon)
+        self.assertTrue(weapon.tags.has("equipment", category="flag"))
+        self.assertTrue(weapon.tags.has("identified", category="flag"))
+        self.assertTrue(weapon.tags.has("mainhand", category="flag"))
+        self.assertTrue(weapon.tags.has("mainhand", category="slot"))
+        self.char1.attributes.add("_wielded", {"left": None, "right": None})
+        hands = self.char1.at_wield(weapon)
+        self.assertTrue(hands)
+        self.assertIn(weapon, self.char1.wielding)
+
+    def test_carmor_tags_and_wear(self):
+        """Armor created with carmor gets tags and can be worn."""
+
+        self.char1.execute_cmd("carmor helm head 1")
+        armor = next(
+            (o for o in self.char1.contents if "helm" in list(o.aliases.all())),
+            None,
+        )
+        self.assertIsNotNone(armor)
+        self.assertTrue(armor.tags.has("equipment", category="flag"))
+        self.assertTrue(armor.tags.has("identified", category="flag"))
+        self.assertTrue(armor.tags.has("head", category="slot"))
+        armor.wear(self.char1, True)
+        self.assertTrue(armor.db.worn)
