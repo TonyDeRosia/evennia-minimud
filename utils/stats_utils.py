@@ -12,7 +12,6 @@ from world.stats import (
     apply_stats,
 )
 from world.system import stat_manager
-from utils.currency import from_copper
 import math
 import re
 
@@ -137,9 +136,12 @@ def get_display_scroll(chara):
     )
     lines.append(f"|ySated|n {sated_disp}")
 
-    coins = _db_get(chara, "coins", 0)
-    if isinstance(coins, int):
-        coins = from_copper(coins)
+    coins = {
+        "copper": _db_get(chara, "copper", 0),
+        "silver": _db_get(chara, "silver", 0),
+        "gold": _db_get(chara, "gold", 0),
+        "platinum": _db_get(chara, "platinum", 0),
+    }
     copper = int(coins.get("copper", 0))
     silver = int(coins.get("silver", 0))
     gold = int(coins.get("gold", 0))
