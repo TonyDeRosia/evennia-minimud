@@ -181,8 +181,8 @@ class Object(ObjectParent, DefaultObject):
     def at_object_creation(self):
         """Set default attributes when object is first created."""
         super().at_object_creation()
-        if self.db.weight is None:
-            self.db.weight = 1
+        if getattr(self.db, "weight", None) is None:
+            self.db.weight = 0
 
     def at_drop(self, dropper, **kwargs):
         """
