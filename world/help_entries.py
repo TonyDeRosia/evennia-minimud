@@ -26,785 +26,2199 @@ Each dict is on the form
 
 HELP_ENTRY_DICTS = [
     {
-        "key": "evennia",
-        "aliases": ["ev"],
-        "category": "General",
-        "locks": "read:perm(Developer)",
+        "key": 'evennia',
+        "aliases": ['ev'],
+        "category": 'General',
+        "locks": 'read:perm(Developer)',
         "text": """
-            Evennia is a MU-game server and framework written in Python. You can read more
-            on https://www.evennia.com.
+Help for evennia
 
-            # subtopics
+Evennia is a MU-game server and framework written in Python. You can read more
+on https://www.evennia.com.
 
-            ## Installation
+Usage:
+    evennia
 
-            You'll find installation instructions on https://www.evennia.com.
+Switches:
+    None
 
-            ## Community
+Arguments:
+    None
 
-            There are many ways to get help and communicate with other devs!
+Examples:
+    None
 
-            ### Discussions
+Notes:
+    - # subtopics
+    - ## Installation
+    - You'll find installation instructions on https://www.evennia.com.
+    - ## Community
+    - There are many ways to get help and communicate with other devs!
+    - ### Discussions
+    - The Discussions forum is found at
+    https://github.com/evennia/evennia/discussions.
+    - ### Discord
+    - There is also a discord channel for chatting - connect using the
+    - following link: https://discord.gg/AJJpcRUhtF
 
-            The Discussions forum is found at https://github.com/evennia/evennia/discussions.
-
-            ### Discord
-
-            There is also a discord channel for chatting - connect using the
-            following link: https://discord.gg/AJJpcRUhtF
-
-        """,
+Related:
+    help ansi
+""",
     },
     {
-        "key": "building",
-        "category": "Building",
+        "key": 'building',
+        "category": 'Building',
         "text": """
-            Evennia comes with a bunch of default building commands. You can
-            find a beginner tutorial in the Evennia documentation.
+Help for building
+
+Evennia comes with a bunch of default building commands. You can find a beginner
+tutorial in the Evennia documentation.
+
+Usage:
+    building
+
+Switches:
+    None
+
+Arguments:
+    None
 
-        """,
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "prompt",
-        "category": "General",
+        "key": 'prompt',
+        "category": 'General',
         "text": """
-            Customize the information shown in your command prompt.
+Help for prompt
+
+Customize the information shown in your command prompt.
+
+Usage:
+    prompt
 
-            Use |wprompt|n to view your current prompt string.
-            Use |wprompt <format>|n to set a new one. The string may use the
-            following fields:
+Switches:
+    None
 
-            {hp}, {hpmax} - current and max health
-            {mp}, {mpmax} - current and max mana
-            {sp}, {spmax} - current and max stamina
-            {level}, {xp} - your level and experience points
-            {copper}, {silver}, {gold}, {platinum} - coins carried
-            {carry}, {capacity} - carry weight and capacity
-            {enc} - encumbrance level
+Arguments:
+    None
 
-            Example:
-                |wprompt [HP:{hp}/{hpmax}] [SP:{sp}/{spmax}] {enc}>|n
-        """,
+Examples:
+    |wprompt [HP:{hp}/{hpmax}] [SP:{sp}/{spmax}] {enc}>|n
+
+Notes:
+    - Use |wprompt|n to view your current prompt string.
+    - Use |wprompt <format>|n to set a new one. The string may use the
+    - following fields:
+    - {hp}, {hpmax} - current and max health
+    - {mp}, {mpmax} - current and max mana
+    - {sp}, {spmax} - current and max stamina
+    - {level}, {xp} - your level and experience points
+    - {copper}, {silver}, {gold}, {platinum} - coins carried
+    - {carry}, {capacity} - carry weight and capacity
+    - {enc} - encumbrance level
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "affects",
-        "category": "General",
+        "key": 'affects',
+        "category": 'General',
         "text": """
-            View your active buffs and status effects.
+Help for affects
+
+View your active buffs and status effects.
+
+Usage:
+    affects
 
-            Usage:
-                affects
+Switches:
+    None
 
-            Displays any active effects along with their remaining duration in ticks.
-        """,
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - Displays any active effects along with their remaining duration in ticks.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "inspect",
-        "category": "General",
+        "key": 'inspect',
+        "category": 'General',
         "text": """
-            Examine an item for more information.
+Help for inspect
+
+Examine an item for more information.
+
+Usage:
+    inspect <item>
+
+Switches:
+    None
+
+Arguments:
+    None
 
-            Usage:
-                inspect <item>
+Examples:
+    None
 
-            Identified items reveal their weight, damage, slots,
-            buffs and any flags. Unidentified items only show a brief
-            description.
-        """,
+Notes:
+    - Identified items reveal their weight, damage, slots,
+    - buffs and any flags. Unidentified items only show a brief
+    - description.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "room flags",
-        "aliases": ["rflags", "rflag"],
-        "category": "Building",
+        "key": 'room flags',
+        "aliases": ['rflags', 'rflag'],
+        "category": 'Building',
         "text": """
-            Rooms can be marked with special flags.
+Help for room flags
+
+Rooms can be marked with special flags.
+
+Usage:
+    room flags
+
+Switches:
+    None
 
-            Use |wrflags|n to view flags on the current room.
-            Builders may add or remove them with |wrflag add <flag>|n
-            or |wrflag remove <flag>|n. Available flags:
+Arguments:
+    None
 
-            dark - room is dark, requiring light to see.
-            nopvp - player versus player combat is blocked.
-            sanctuary - hostile actions are prevented.
-            indoors - counts as being indoors.
-            safe - NPCs won't start fights here.
-            no_recall - recall and teleport effects fail.
-            no_mount - mounts cannot be used.
-            no_flee - prevents fleeing from combat.
-            rest_area - resting recovers resources faster.
-        """,
+Examples:
+    None
+
+Notes:
+    - Use |wrflags|n to view flags on the current room.
+    - Builders may add or remove them with |wrflag add <flag>|n
+    - or |wrflag remove <flag>|n. Available flags:
+    - dark - room is dark, requiring light to see.
+    - nopvp - player versus player combat is blocked.
+    - sanctuary - hostile actions are prevented.
+    - indoors - counts as being indoors.
+    - safe - NPCs won't start fights here.
+    - no_recall - recall and teleport effects fail.
+    - no_mount - mounts cannot be used.
+    - no_flee - prevents fleeing from combat.
+    - rest_area - resting recovers resources faster.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "rrename",
-        "aliases": ["roomrename", "renameroom", "rname"],
-        "category": "Building",
+        "key": 'rrename',
+        "aliases": ['roomrename', 'renameroom', 'rname'],
+        "category": 'Building',
         "text": """
-            Rename the room you are currently in.
+Help for rrename
+
+Rename the room you are currently in.
+
+Usage:
+    rrename <new name>
 
-            Usage:
-                rrename <new name>
+Switches:
+    None
 
-            Changes the name of the current room.
-        """,
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - Changes the name of the current room.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "rdesc",
-        "aliases": ["roomdesc"],
-        "category": "Building",
+        "key": 'rdesc',
+        "aliases": ['roomdesc'],
+        "category": 'Building',
         "text": """
-            View or change the current room's description.
+Help for rdesc
+
+View or change the current room's description.
+
+Usage:
+    rdesc <new description>
+
+Switches:
+    None
+
+Arguments:
+    None
 
-            Usage:
-                rdesc <new description>
+Examples:
+    None
 
-            With no description given, shows the current one.
-        """,
+Notes:
+    - With no description given, shows the current one.
+    - ANSI color codes are supported.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "rset",
-        "category": "Building",
+        "key": 'rset',
+        "category": 'Building',
         "text": """
-            Set properties on the current room.
+Help for rset
+
+Set properties on the current room.
+
+Usage:
+    rset area <area name>
+    rset id <number>
+
+Switches:
+    None
 
-            Usage:
-                rset area <area name>
-                rset id <number>
+Arguments:
+    None
 
-            The id must be unique within the area's range.
-        """,
+Examples:
+    None
+
+Notes:
+    - The id must be unique within the area's range.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "ocreate",
-        "category": "Building",
+        "key": 'ocreate',
+        "category": 'Building',
         "text": """
-            Create a generic object and put it in your inventory.
+Help for ocreate
+
+Create a generic object and put it in your inventory.
+
+Usage:
+    ocreate <name>
 
-            Usage:
-                ocreate <name>
-        """,
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "cweapon",
-        "category": "Building",
+        "key": 'cweapon',
+        "category": 'Building',
         "text": """
-            Create a simple melee weapon.
+Help for cweapon
+
+Create a simple melee weapon.
+
+Usage:
+    cweapon <name> <slot> <damage> [description]
+
+Switches:
+    None
 
-            Usage:
-                cweapon <name> <slot> <damage> [description]
+Arguments:
+    None
 
-            A lowercase alias matching the final key is created automatically.
-            Valid slots are |wmainhand|n, |woffhand|n, |wmainhand/offhand|n or |wtwohanded|n.
-            Damage may be a flat number or an |wNdN|n dice string, which is stored on the item as given.
+Examples:
+    None
 
-            The item is a |ctypeclasses.gear.MeleeWeapon|n.
-        """,
+Notes:
+    - A lowercase alias matching the final key is created automatically.
+    - Valid slots are |wmainhand|n, |woffhand|n, |wmainhand/offhand|n or
+    |wtwohanded|n.
+    - Damage may be a flat number or an |wNdN|n dice string, which is stored on
+    the item as given.
+    - The item is a |ctypeclasses.gear.MeleeWeapon|n.
+    - ANSI color codes are supported.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "cshield",
-        "category": "Building",
+        "key": 'cshield',
+        "category": 'Building',
         "text": """
-            Create a shield piece of armor.
+Help for cshield
+
+Create a shield piece of armor.
+
+Usage:
+    cshield <name> [slot] [armor]
+
+Switches:
+    None
 
-            Usage:
-                cshield <name> [slot] [armor]
+Arguments:
+    None
 
-            The armor value is stored on the item.
-        """,
+Examples:
+    None
+
+Notes:
+    - The armor value is stored on the item.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "carmor",
-        "category": "Building",
+        "key": 'carmor',
+        "category": 'Building',
         "text": """
-            Create a wearable armor item.
+Help for carmor
+
+Create a wearable armor item.
+
+Usage:
+    carmor <name> [slot] [armor]
 
-            Usage:
-                carmor <name> [slot] [armor]
+Switches:
+    None
 
-            Slot becomes the clothing type.
-        """,
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - Slot becomes the clothing type.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "ctool",
-        "category": "Building",
+        "key": 'ctool',
+        "category": 'Building',
         "text": """
-            Create a crafting tool.
+Help for ctool
+
+Create a crafting tool.
+
+Usage:
+    ctool <name> [tag]
+
+Switches:
+    None
+
+Arguments:
+    None
 
-            Usage:
-                ctool <name> [tag]
+Examples:
+    None
 
-            The tag is added with category 'crafting_tool'.
-        """,
+Notes:
+    - The tag is added with category 'crafting_tool'.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "cgear",
-        "category": "Building",
+        "key": 'cgear',
+        "category": 'Building',
         "text": """
-            Generic helper for gear creation.
+Help for cgear
+
+Generic helper for gear creation.
+
+Usage:
+    cgear <typeclass> <name> [slot] [value]
+
+Switches:
+    None
 
-            Usage:
-                cgear <typeclass> <name> [slot] [value]
+Arguments:
+    None
 
-            Creates an object of the given typeclass and places it in your inventory.
-        """,
+Examples:
+    None
+
+Notes:
+    - Creates an object of the given typeclass and places it in your inventory.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "item flags",
-        "aliases": ["setflag", "removeflag"],
-        "category": "Building",
+        "key": 'item flags',
+        "aliases": ['setflag', 'removeflag'],
+        "category": 'Building',
         "text": """
-            Items may have special flags stored on them.
+Help for item flags
+
+Items may have special flags stored on them.
+
+Usage:
+    item flags
 
-            Use |wsetflag <item> <flag>|n to add a flag and
-            |wremoveflag <item> <flag>|n to remove it.
+Switches:
+    None
 
-            Some example flags:
-                identified - item can be equipped or wielded
-                equipment  - marks the object as equipable
-                stationary - item cannot be moved
-                mainhand   - must be wielded in your main hand
-        """,
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - Use |wsetflag <item> <flag>|n to add a flag and
+    - |wremoveflag <item> <flag>|n to remove it.
+    - Some example flags:
+    - identified - item can be equipped or wielded
+    - equipment  - marks the object as equipable
+    - stationary - item cannot be moved
+    - mainhand   - must be wielded in your main hand
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "admin",
-        "category": "Admin",
+        "key": 'admin',
+        "category": 'Admin',
         "text": """
-            Commands reserved for administrators. These bypass normal limits and
-            should be used carefully. Most require `perm(Admin)` access.
-        """,
+Help for admin
+
+Commands reserved for administrators. These bypass normal limits and should be
+used carefully. Most require `perm(Admin)` access.
+
+Usage:
+    admin
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "setstat",
-        "aliases": ["set"],
-        "category": "Admin",
+        "key": 'setstat',
+        "aliases": ['set'],
+        "category": 'Admin',
         "text": """
-            Change a character's stat directly.
+Help for setstat
+
+Change a character's stat directly.
 
-            Usage:
-                setstat <target> <stat> <value>
+Usage:
+    setstat <target> <stat> <value>
 
-            Aliases:
-                set
+Switches:
+    None
 
-            The stat name accepts shorthands:
-                hp -> health
-                mp -> mana
-                sp -> stamina
+Arguments:
+    None
 
-            This modifies the target's stat permanently. Creating or adjusting
-            stats incorrectly may break the character, so double-check your
-            inputs before committing changes.
-        """,
+Examples:
+    None
+
+Notes:
+    - Aliases:
+    - set
+    - The stat name accepts shorthands:
+    - hp -> health
+    - mp -> mana
+    - sp -> stamina
+    - This modifies the target's stat permanently. Creating or adjusting
+    - stats incorrectly may break the character, so double-check your
+    - inputs before committing changes.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "setattr",
-        "category": "Admin",
+        "key": 'setattr',
+        "category": 'Admin',
         "text": """
-            Set an arbitrary attribute on an object or character.
+Help for setattr
+
+Set an arbitrary attribute on an object or character.
+
+Usage:
+    setattr <target> <attr> <value>
 
-            Usage:
-                setattr <target> <attr> <value>
+Switches:
+    None
 
-            This will create the attribute if it does not already exist and
-            overwrite it if it does. Be certain you really want to change the
-            value as there is no undo command.
-        """,
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - This will create the attribute if it does not already exist and
+    - overwrite it if it does. Be certain you really want to change the
+    - value as there is no undo command.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "setbounty",
-        "category": "Admin",
+        "key": 'setbounty',
+        "category": 'Admin',
         "text": """
-            Assign a bounty to a character.
+Help for setbounty
+
+Assign a bounty to a character.
+
+Usage:
+    setbounty <target> <amount>
+
+Switches:
+    None
+
+Arguments:
+    None
 
-            Usage:
-                setbounty <target> <amount>
+Examples:
+    None
 
-            Adjusts the bounty value stored on the target. This has immediate
-            gameplay impact, so use it sparingly and verify the amount before
-            applying it.
-        """,
+Notes:
+    - Adjusts the bounty value stored on the target. This has immediate
+    - gameplay impact, so use it sparingly and verify the amount before
+    - applying it.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "slay",
-        "category": "Admin",
+        "key": 'slay',
+        "category": 'Admin',
         "text": """
-            Instantly reduce a target's health to zero.
+Help for slay
+
+Instantly reduce a target's health to zero.
+
+Usage:
+    slay <target>
+
+Switches:
+    None
 
-            Usage:
-                slay <target>
+Arguments:
+    None
 
-            This command will defeat the target regardless of protections or
-            current hit points. It should be reserved for emergencies or heavy
-            disciplinary action.
-        """,
+Examples:
+    None
+
+Notes:
+    - This command will defeat the target regardless of protections or
+    - current hit points. It should be reserved for emergencies or heavy
+    - disciplinary action.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "smite",
-        "category": "Admin",
+        "key": 'smite',
+        "category": 'Admin',
         "text": """
-            Reduce a target to a single hit point.
+Help for smite
+
+Reduce a target to a single hit point.
+
+Usage:
+    smite <target>
 
-            Usage:
-                smite <target>
+Switches:
+    None
 
-            Smite leaves the target alive but on the brink of death. This is
-            useful for demonstrations or warnings when killing them would be too
-            extreme.
-        """,
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - Smite leaves the target alive but on the brink of death. This is
+    - useful for demonstrations or warnings when killing them would be too
+    - extreme.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "scan",
-        "category": "Admin",
+        "key": 'scan',
+        "category": 'Admin',
         "text": """
-            Look around and into adjacent rooms.
+Help for scan
+
+Look around and into adjacent rooms.
+
+Usage:
+    scan
+
+Switches:
+    None
+
+Arguments:
+    None
 
-            Usage:
-                scan
+Examples:
+    None
 
-            Admins see additional information such as hidden objects, room flags
-            and the current HP/MP/SP of nearby characters. Use this power
-            responsibly and avoid revealing secret data to regular players.
-        """,
+Notes:
+    - Admins see additional information such as hidden objects, room flags
+    - and the current HP/MP/SP of nearby characters. Use this power
+    - responsibly and avoid revealing secret data to regular players.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "restoreall",
-        "category": "Admin",
+        "key": 'restoreall',
+        "category": 'Admin',
         "text": """
-            Fully heal every player and remove all buffs and status effects.
+Help for restoreall
+
+Fully heal every player and remove all buffs and status effects.
+
+Usage:
+    restoreall
+
+Switches:
+    None
 
-            Usage:
-                restoreall
-        """,
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "purge",
-        "category": "Admin",
+        "key": 'purge',
+        "category": 'Admin',
         "text": """
-            Delete unwanted objects.
+Help for purge
+
+Delete unwanted objects.
 
-            Usage:
-                purge
-                purge <target>
+Usage:
+    purge
+    purge <target>
 
-            Without arguments, removes everything in the current room
-            except for you. When given a target it deletes that object.
-            Players, rooms and exits are protected from being purged.
-        """,
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - Without arguments, removes everything in the current room
+    - except for you. When given a target it deletes that object.
+    - Players, rooms and exits are protected from being purged.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "revive",
-        "aliases": ["resurrect"],
-        "category": "Combat",
+        "key": 'revive',
+        "aliases": ['resurrect'],
+        "category": 'Combat',
         "text": """
-            Revive a defeated player at partial health.
+Help for revive
+
+Revive a defeated player at partial health.
+
+Usage:
+    revive <player>
+    revive all
+
+Switches:
+    None
 
-            Usage:
-                revive <player>
-                revive all
+Arguments:
+    None
 
-            Using |wall|n revives every unconscious character in the game.
-        """,
+Examples:
+    None
+
+Notes:
+    - Using |wall|n revives every unconscious character in the game.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "gcreate",
-        "category": "Building",
+        "key": 'gcreate',
+        "category": 'Building',
         "text": """
-            Create a new guild.
+Help for gcreate
+
+Create a new guild.
+
+Usage:
+    gcreate <name>
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
 
-            Usage:
-                gcreate <name>
-        """,
+Related:
+    help ansi
+""",
     },
     {
-        "key": "grank",
-        "category": "Building",
+        "key": 'grank',
+        "category": 'Building',
         "text": """
-            Manage guild rank titles.
+Help for grank
 
-            Usage:
-                grank add <guild> <level> <title>
-                grank remove <guild> <level>
-                grank list <guild>
-        """,
+Manage guild rank titles.
+
+Usage:
+    grank add <guild> <level> <title>
+    grank remove <guild> <level>
+    grank list <guild>
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "gsethome",
-        "category": "Building",
+        "key": 'gsethome',
+        "category": 'Building',
         "text": """
-            Set a guild's home location to your current room.
+Help for gsethome
+
+Set a guild's home location to your current room.
 
-            Usage:
-                gsethome <guild>
-        """,
+Usage:
+    gsethome <guild>
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "gdesc",
-        "category": "Building",
+        "key": 'gdesc',
+        "category": 'Building',
         "text": """
-            Set a guild's description.
+Help for gdesc
+
+Set a guild's description.
+
+Usage:
+    gdesc <guild> <description>
+
+Switches:
+    None
 
-            Usage:
-                gdesc <guild> <description>
-        """,
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+    - ANSI color codes are supported.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "gjoin",
-        "category": "General",
+        "key": 'gjoin',
+        "category": 'General',
         "text": """
-            Request to join a guild.
+Help for gjoin
+
+Request to join a guild.
+
+Usage:
+    gjoin <guild>
+
+Switches:
+    None
+
+Arguments:
+    None
 
-            Usage:
-                gjoin <guild>
-        """,
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "gaccept",
-        "category": "General",
+        "key": 'gaccept',
+        "category": 'General',
         "text": """
-            Accept a player's guild request.
+Help for gaccept
+
+Accept a player's guild request.
+
+Usage:
+    gaccept <player>
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
 
-            Usage:
-                gaccept <player>
-        """,
+Related:
+    help ansi
+""",
     },
     {
-        "key": "gpromote",
-        "category": "General",
+        "key": 'gpromote',
+        "category": 'General',
         "text": """
-            Increase a member's guild points.
+Help for gpromote
 
-            Usage:
-                gpromote <player> [amount]
-        """,
+Increase a member's guild points.
+
+Usage:
+    gpromote <player> [amount]
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "gdemote",
-        "category": "General",
+        "key": 'gdemote',
+        "category": 'General',
         "text": """
-            Decrease a member's guild points.
+Help for gdemote
+
+Decrease a member's guild points.
 
-            Usage:
-                gdemote <player> [amount]
-        """,
+Usage:
+    gdemote <player> [amount]
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "gkick",
-        "category": "General",
+        "key": 'gkick',
+        "category": 'General',
         "text": """
-            Remove a member from your guild.
+Help for gkick
+
+Remove a member from your guild.
+
+Usage:
+    gkick <player>
+
+Switches:
+    None
 
-            Usage:
-                gkick <player>
-        """,
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "gwho",
-        "aliases": ["guildwho"],
-        "category": "General",
+        "key": 'gwho',
+        "aliases": ['guildwho'],
+        "category": 'General',
         "text": """
-            List members of your guild.
+Help for gwho
+
+List members of your guild.
+
+Usage:
+    gwho
+
+Switches:
+    None
+
+Arguments:
+    None
 
-            Usage:
-                gwho
-        """,
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "quest rewards",
-        "category": "General",
+        "key": 'quest rewards',
+        "category": 'General',
         "text": """
-            Some quests give coins of multiple types when completed.
+Help for quest rewards
+
+Some quests give coins of multiple types when completed.
+
+Usage:
+    quest rewards
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - Builders set the |wcurrency_reward|n field on the quest to a
+    - mapping like ``{"platinum": 1, "gold": 5}``. Each coin type is
+    - added to your wallet when you turn in the quest. Quests can also
+    - award |wguild_points|n that count toward automatic promotion in a
+    - guild.
 
-            Builders set the |wcurrency_reward|n field on the quest to a
-            mapping like ``{"platinum": 1, "gold": 5}``. Each coin type is
-            added to your wallet when you turn in the quest. Quests can also
-            award |wguild_points|n that count toward automatic promotion in a
-            guild.
-        """,
+Related:
+    help ansi
+""",
     },
     {
-        "key": "alist",
-        "category": "Building",
+        "key": 'alist',
+        "category": 'Building',
         "text": """
-            List all registered areas and their number ranges.
-        """,
+Help for alist
+
+List all registered areas and their number ranges.
+
+Usage:
+    alist
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "amake",
-        "category": "Building",
+        "key": 'amake',
+        "category": 'Building',
         "text": """
-            Register a new area. Usage: amake <name> <start>-<end>
-        """,
+Help for amake
+
+Register a new area. Usage: amake <name> <start>-<end>
+
+Usage:
+    amake
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "aset",
-        "category": "Building",
+        "key": 'aset',
+        "category": 'Building',
         "text": """
-            Update an area's properties. Usage: aset <area> <name|range|desc> <value>
-        """,
+Help for aset
+
+Update an area's properties. Usage: aset <area> <name|range|desc> <value>
+
+Usage:
+    aset
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "rooms",
-        "category": "Building",
+        "key": 'rooms',
+        "category": 'Building',
         "text": """
-            Show rooms belonging to your current area.
-        """,
+Help for rooms
+
+Show rooms belonging to your current area.
+
+Usage:
+    rooms
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "dig",
-        "category": "Building",
+        "key": 'dig',
+        "category": 'Building',
         "text": """
-            Create a new room in a direction. Usage: dig <direction> [<area>:<number>]
-        """,
+Help for dig
+
+Create a new room in a direction. Usage: dig <direction> [<area>:<number>]
+
+Usage:
+    dig
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "@teleport",
-        "category": "Building",
+        "key": '@teleport',
+        "category": 'Building',
         "text": """
-            Teleport directly to a room. Usage: @teleport <area>:<number>
-        """,
+Help for @teleport
+
+Teleport directly to a room. Usage: @teleport <area>:<number>
+
+Usage:
+    @teleport
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "setdesc",
-        "category": "Building",
+        "key": 'setdesc',
+        "category": 'Building',
         "text": """
-            Set an object's description. Usage: setdesc <target> <description>
-        """,
+Help for setdesc
+
+Set an object's description. Usage: setdesc <target> <description>
+
+Usage:
+    setdesc
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+    - ANSI color codes are supported.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "setweight",
-        "category": "Building",
+        "key": 'setweight',
+        "category": 'Building',
         "text": """
-            Set an object's weight. Usage: setweight <target> <value>
-        """,
+Help for setweight
+
+Set an object's weight. Usage: setweight <target> <value>
+
+Usage:
+    setweight
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "setslot",
-        "category": "Building",
+        "key": 'setslot',
+        "category": 'Building',
         "text": """
-            Define the slot or clothing type on an item. Usage: setslot <target> <slot>
-        """,
+Help for setslot
+
+Define the slot or clothing type on an item. Usage: setslot <target> <slot>
+
+Usage:
+    setslot
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "setdamage",
-        "category": "Building",
+        "key": 'setdamage',
+        "category": 'Building',
         "text": """
-            Assign a damage value to a weapon. Usage: setdamage <target> <amount>
-        """,
+Help for setdamage
+
+Assign a damage value to a weapon. Usage: setdamage <target> <amount>
+
+Usage:
+    setdamage
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "setbuff",
-        "category": "Building",
+        "key": 'setbuff',
+        "category": 'Building',
         "text": """
-            Add a buff identifier to an object. Usage: setbuff <target> <buff>
-        """,
+Help for setbuff
+
+Add a buff identifier to an object. Usage: setbuff <target> <buff>
+
+Usage:
+    setbuff
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "qcreate",
-        "category": "Building",
+        "key": 'qcreate',
+        "category": 'Building',
         "text": """
-            Create and register a new quest. Usage: qcreate <quest_key> "<title>"
-        """,
+Help for qcreate
+
+Create and register a new quest. Usage: qcreate <quest_key> "<title>"
+
+Usage:
+    qcreate
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "qset",
-        "category": "Building",
+        "key": 'qset',
+        "category": 'Building',
         "text": """
-            Change quest attributes. Usage: qset <quest_key> <attr> <value>
-        """,
+Help for qset
+
+Change quest attributes. Usage: qset <quest_key> <attr> <value>
+
+Usage:
+    qset
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "qitem",
-        "category": "Building",
+        "key": 'qitem',
+        "category": 'Building',
         "text": """
-            Spawn a quest item. Usage: qitem <quest_key> <item_key>
-        """,
+Help for qitem
+
+Spawn a quest item. Usage: qitem <quest_key> <item_key>
+
+Usage:
+    qitem
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "qassign",
-        "category": "Building",
+        "key": 'qassign',
+        "category": 'Building',
         "text": """
-            Assign a quest to an NPC. Usage: qassign <npc> <quest_key>
-        """,
+Help for qassign
+
+Assign a quest to an NPC. Usage: qassign <npc> <quest_key>
+
+Usage:
+    qassign
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "qtag",
-        "category": "Building",
+        "key": 'qtag',
+        "category": 'Building',
         "text": """
-            Set guild point rewards on a quest. Usage: qtag <quest_key> guild <guild> <amount>
-        """,
+Help for qtag
+
+Set guild point rewards on a quest. Usage: qtag <quest_key> guild <guild>
+<amount>
+
+Usage:
+    qtag
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "score",
-        "category": "General",
+        "key": 'score',
+        "category": 'General',
         "text": """
-            View your character sheet. Usage: score
-        """,
+Help for score
+
+View your character sheet. Usage: score
+
+Usage:
+    score
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "desc",
-        "category": "General",
+        "key": 'desc',
+        "category": 'General',
         "text": """
-            View or set your description. Usage: desc [text]
-        """,
+Help for desc
+
+View or set your description. Usage: desc [text]
+
+Usage:
+    desc
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+    - ANSI color codes are supported.
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "finger",
-        "category": "General",
+        "key": 'finger',
+        "category": 'General',
         "text": """
-            Show information about a player. Usage: finger <player>
-        """,
+Help for finger
+
+Show information about a player. Usage: finger <player>
+
+Usage:
+    finger
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "bounty",
-        "category": "General",
+        "key": 'bounty',
+        "category": 'General',
         "text": """
-            Place a bounty on another character. Usage: bounty <target> <amount>
-        """,
+Help for bounty
+
+Place a bounty on another character. Usage: bounty <target> <amount>
+
+Usage:
+    bounty
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "inventory",
-        "category": "General",
+        "key": 'inventory',
+        "category": 'General',
         "text": """
-            List items you are carrying. Usage: inventory [filter]
-        """,
+Help for inventory
+
+List items you are carrying. Usage: inventory [filter]
+
+Usage:
+    inventory
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "equipment",
-        "category": "General",
+        "key": 'equipment',
+        "category": 'General',
         "text": """
-            Show what you are wearing and wielding. Usage: equipment
-        """,
+Help for equipment
+
+Show what you are wearing and wielding. Usage: equipment
+
+Usage:
+    equipment
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "buffs",
-        "category": "General",
+        "key": 'buffs',
+        "category": 'General',
         "text": """
-            Display active buff effects. Usage: buffs
-        """,
+Help for buffs
+
+Display active buff effects. Usage: buffs
+
+Usage:
+    buffs
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "title",
-        "category": "General",
+        "key": 'title',
+        "category": 'General',
         "text": """
-            View or change your title. Usage: title [new title]
-        """,
+Help for title
+
+View or change your title. Usage: title [new title]
+
+Usage:
+    title
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "questlist",
-        "category": "General",
+        "key": 'questlist',
+        "category": 'General',
         "text": """
-            List quests offered by NPCs here. Usage: questlist
-        """,
+Help for questlist
+
+List quests offered by NPCs here. Usage: questlist
+
+Usage:
+    questlist
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "accept",
-        "category": "General",
+        "key": 'accept',
+        "category": 'General',
         "text": """
-            Accept a quest. Usage: accept <quest>
-        """,
+Help for accept
+
+Accept a quest. Usage: accept <quest>
+
+Usage:
+    accept
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "progress",
-        "category": "General",
+        "key": 'progress',
+        "category": 'General',
         "text": """
-            Show your progress on active quests. Usage: progress
-        """,
+Help for progress
+
+Show your progress on active quests. Usage: progress
+
+Usage:
+    progress
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "complete",
-        "category": "General",
+        "key": 'complete',
+        "category": 'General',
         "text": """
-            Turn in a completed quest. Usage: complete <quest>
-        """,
+Help for complete
+
+Turn in a completed quest. Usage: complete <quest>
+
+Usage:
+    complete
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "list",
-        "category": "Here",
+        "key": 'list',
+        "category": 'Here',
         "text": """
-            View items a shop has for sale. Usage: list
-        """,
+Help for list
+
+View items a shop has for sale. Usage: list
+
+Usage:
+    list
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "buy",
-        "category": "Here",
+        "key": 'buy',
+        "category": 'Here',
         "text": """
-            Purchase an item from a shop. Usage: buy <item>
-        """,
+Help for buy
+
+Purchase an item from a shop. Usage: buy <item>
+
+Usage:
+    buy
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "sell",
-        "category": "Here",
+        "key": 'sell',
+        "category": 'Here',
         "text": """
-            Offer an item for sale to a shop. Usage: sell <item>
-        """,
+Help for sell
+
+Offer an item for sale to a shop. Usage: sell <item>
+
+Usage:
+    sell
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "guild",
-        "category": "General",
+        "key": 'guild',
+        "category": 'General',
         "text": """
-            Display information about your guild membership. Usage: guild
-        """,
+Help for guild
+
+Display information about your guild membership. Usage: guild
+
+Usage:
+    guild
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "gather",
-        "category": "Here",
+        "key": 'gather',
+        "category": 'Here',
         "text": """
-            Collect resources from a gathering node. Usage: gather
-        """,
+Help for gather
+
+Collect resources from a gathering node. Usage: gather
+
+Usage:
+    gather
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "attack",
-        "category": "Combat",
+        "key": 'attack',
+        "category": 'Combat',
         "text": """
-            Attack an enemy. Usage: attack <target> [with <weapon>]
-        """,
+Help for attack
+
+Attack an enemy. Usage: attack <target> [with <weapon>]
+
+Usage:
+    attack
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "wield",
-        "category": "Combat",
+        "key": 'wield',
+        "category": 'Combat',
         "text": """
-            Wield a weapon. Usage: wield <weapon> [in <hand>]
-        """,
+Help for wield
+
+Wield a weapon. Usage: wield <weapon> [in <hand>]
+
+Usage:
+    wield
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "unwield",
-        "category": "Combat",
+        "key": 'unwield',
+        "category": 'Combat',
         "text": """
-            Stop wielding a weapon. Usage: unwield <weapon>
-        """,
+Help for unwield
+
+Stop wielding a weapon. Usage: unwield <weapon>
+
+Usage:
+    unwield
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "flee",
-        "category": "Combat",
+        "key": 'flee',
+        "category": 'Combat',
         "text": """
-            Attempt to escape from combat. Usage: flee
-        """,
+Help for flee
+
+Attempt to escape from combat. Usage: flee
+
+Usage:
+    flee
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "respawn",
-        "category": "Combat",
+        "key": 'respawn',
+        "category": 'Combat',
         "text": """
-            Return to town after being defeated. Usage: respawn
-        """,
+Help for respawn
+
+Return to town after being defeated. Usage: respawn
+
+Usage:
+    respawn
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "rest",
-        "category": "General",
+        "key": 'rest',
+        "category": 'General',
         "text": """
-            Sit down to recover stamina. Usage: rest
-        """,
+Help for rest
+
+Sit down to recover stamina. Usage: rest
+
+Usage:
+    rest
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "sleep",
-        "category": "General",
+        "key": 'sleep',
+        "category": 'General',
         "text": """
-            Lie down and go to sleep. Usage: sleep
-        """,
+Help for sleep
+
+Lie down and go to sleep. Usage: sleep
+
+Usage:
+    sleep
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
     {
-        "key": "wake",
-        "category": "General",
+        "key": 'wake',
+        "category": 'General',
         "text": """
-            Stand up from rest or sleep. Usage: wake
-        """,
+Help for wake
+
+Stand up from rest or sleep. Usage: wake
+
+Usage:
+    wake
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
     },
 ]
