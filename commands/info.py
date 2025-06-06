@@ -12,50 +12,57 @@ def is_gettable(obj, caller):
     return obj.access(caller, "get") and obj.db.gettable is not False
 
 
+SLOTS = [
+    "mainhand",
+    "offhand",
+    "twohanded",
+    "helm",
+    "amulet",
+    "shoulders",
+    "chest",
+    "cloak",
+    "wrists",
+    "hands",
+    "ring1",
+    "ring2",
+    "tabard",
+    "waist",
+    "legs",
+    "feet",
+    "accessory",
+]
+
+
 def render_equipment(caller):
     """Return formatted equipment display for caller."""
     eq = caller.equipment
     display = ["+=========================+", "| [ EQUIPMENT ]"]
 
-    twohanded_weapon = None
     main = eq.get("mainhand")
     off = eq.get("offhand")
-    if main and main == off:
-        twohanded_weapon = main
-    else:
-        for weap in (main, off):
-            if weap and getattr(weap, "is_twohanded", lambda: False)():
-                twohanded_weapon = weap
-                break
+    show_twohanded = (
+        main
+        and main == off
+        and getattr(getattr(main, "db", None), "slot", None) == "twohanded"
+    )
 
-    if twohanded_weapon:
-        display.append(
-            f"| Twohands   : {twohanded_weapon.get_display_name(caller)}"
-        )
-    else:
-        for hand in ["mainhand", "offhand"]:
-            item = eq.get(hand)
-            name = item.get_display_name(caller) if item else "|xNOTHING|n"
-            display.append(f"| {hand.capitalize():<10}: {name}")
+    for slot in SLOTS:
+        if slot == "twohanded":
+            if not show_twohanded:
+                continue
+            item = main
+        elif slot == "mainhand":
+            if show_twohanded:
+                continue
+            item = main
+        elif slot == "offhand":
+            if show_twohanded:
+                continue
+            item = off
+        else:
+            item = eq.get(slot)
 
-    for slot in [
-        "hat",
-        "jewelry",
-        "chestguard",
-        "top",
-        "undershirt",
-        "bracers",
-        "gloves",
-        "fullbody",
-        "legguard",
-        "bottom",
-        "underpants",
-        "socks",
-        "shoes",
-        "accessory",
-    ]:
-        item = eq.get(slot)
-        name = item.get_display_name(caller) if item else "|xNOTHING|n"
+        name = item.get_display_name(caller) if item else ""
         display.append(f"| {slot.capitalize():<10}: {name}")
 
     display.append("+=========================+")
