@@ -27,7 +27,7 @@ class CmdGuild(Command):
 
     key = "guild"
     aliases = ("/guild",)
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         caller = self.caller
@@ -60,7 +60,7 @@ class CmdGuildWho(Command):
 
     key = "gwho"
     aliases = ("guildwho",)
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         caller = self.caller
@@ -230,7 +230,7 @@ class CmdGJoin(Command):
     """Request to join a guild."""
 
     key = "gjoin"
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         if not self.args:
@@ -252,7 +252,7 @@ class CmdGAccept(Command):
     """Accept a player's join request."""
 
     key = "gaccept"
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         if not is_guildmaster(self.caller):
@@ -291,7 +291,7 @@ class CmdGAccept(Command):
 
 class _BaseAdjustHonor(Command):
     locks = "cmd:all()"
-    help_category = "general"
+    help_category = "General"
 
     def adjust(self, amount: int):
         if not (is_guildmaster(self.caller) or is_receptionist(self.caller)):
@@ -351,7 +351,7 @@ class CmdGKick(Command):
     """Remove a member from your guild."""
 
     key = "gkick"
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         if not is_guildmaster(self.caller):

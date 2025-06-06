@@ -57,7 +57,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "building",
-        "category": "building",
+        "category": "Building",
         "text": """
             Evennia comes with a bunch of default building commands. You can
             find a beginner tutorial in the Evennia documentation.
@@ -115,7 +115,7 @@ HELP_ENTRY_DICTS = [
     {
         "key": "room flags",
         "aliases": ["rflags", "rflag"],
-        "category": "building",
+        "category": "Building",
         "text": """
             Rooms can be marked with special flags.
 
@@ -137,7 +137,7 @@ HELP_ENTRY_DICTS = [
     {
         "key": "rrename",
         "aliases": ["roomrename", "renameroom", "rname"],
-        "category": "building",
+        "category": "Building",
         "text": """
             Rename the room you are currently in.
 
@@ -150,7 +150,7 @@ HELP_ENTRY_DICTS = [
     {
         "key": "rdesc",
         "aliases": ["roomdesc"],
-        "category": "building",
+        "category": "Building",
         "text": """
             View or change the current room's description.
 
@@ -162,7 +162,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "rset",
-        "category": "building",
+        "category": "Building",
         "text": """
             Set properties on the current room.
 
@@ -175,7 +175,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "ocreate",
-        "category": "building",
+        "category": "Building",
         "text": """
             Create a generic object and put it in your inventory.
 
@@ -185,7 +185,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "cweapon",
-        "category": "building",
+        "category": "Building",
         "text": """
             Create a simple melee weapon.
 
@@ -201,7 +201,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "cshield",
-        "category": "building",
+        "category": "Building",
         "text": """
             Create a shield piece of armor.
 
@@ -213,7 +213,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "carmor",
-        "category": "building",
+        "category": "Building",
         "text": """
             Create a wearable armor item.
 
@@ -225,7 +225,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "ctool",
-        "category": "building",
+        "category": "Building",
         "text": """
             Create a crafting tool.
 
@@ -237,7 +237,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "cgear",
-        "category": "building",
+        "category": "Building",
         "text": """
             Generic helper for gear creation.
 
@@ -250,7 +250,7 @@ HELP_ENTRY_DICTS = [
     {
         "key": "item flags",
         "aliases": ["setflag", "removeflag"],
-        "category": "building",
+        "category": "Building",
         "text": """
             Items may have special flags stored on them.
 
@@ -266,7 +266,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "admin",
-        "category": "admin",
+        "category": "Admin",
         "text": """
             Commands reserved for administrators. These bypass normal limits and
             should be used carefully. Most require `perm(Admin)` access.
@@ -275,7 +275,7 @@ HELP_ENTRY_DICTS = [
     {
         "key": "setstat",
         "aliases": ["set"],
-        "category": "admin",
+        "category": "Admin",
         "text": """
             Change a character's stat directly.
 
@@ -297,7 +297,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "setattr",
-        "category": "admin",
+        "category": "Admin",
         "text": """
             Set an arbitrary attribute on an object or character.
 
@@ -311,7 +311,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "setbounty",
-        "category": "admin",
+        "category": "Admin",
         "text": """
             Assign a bounty to a character.
 
@@ -325,7 +325,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "slay",
-        "category": "admin",
+        "category": "Admin",
         "text": """
             Instantly reduce a target's health to zero.
 
@@ -339,7 +339,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "smite",
-        "category": "admin",
+        "category": "Admin",
         "text": """
             Reduce a target to a single hit point.
 
@@ -353,7 +353,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "scan",
-        "category": "admin",
+        "category": "Admin",
         "text": """
             Look around and into adjacent rooms.
 
@@ -367,7 +367,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "restoreall",
-        "category": "admin",
+        "category": "Admin",
         "text": """
             Fully heal every player and remove all buffs and status effects.
 
@@ -377,7 +377,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "purge",
-        "category": "admin",
+        "category": "Admin",
         "text": """
             Delete unwanted objects.
 
@@ -393,7 +393,7 @@ HELP_ENTRY_DICTS = [
     {
         "key": "revive",
         "aliases": ["resurrect"],
-        "category": "combat",
+        "category": "Combat",
         "text": """
             Revive a defeated player at partial health.
 
@@ -406,7 +406,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "gcreate",
-        "category": "building",
+        "category": "Building",
         "text": """
             Create a new guild.
 
@@ -416,7 +416,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "grank",
-        "category": "building",
+        "category": "Building",
         "text": """
             Manage guild rank titles.
 
@@ -428,7 +428,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "gsethome",
-        "category": "building",
+        "category": "Building",
         "text": """
             Set a guild's home location to your current room.
 
@@ -438,7 +438,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "gdesc",
-        "category": "building",
+        "category": "Building",
         "text": """
             Set a guild's description.
 
@@ -448,7 +448,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "gjoin",
-        "category": "general",
+        "category": "General",
         "text": """
             Request to join a guild.
 
@@ -458,7 +458,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "gaccept",
-        "category": "general",
+        "category": "General",
         "text": """
             Accept a player's guild request.
 
@@ -468,7 +468,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "gpromote",
-        "category": "general",
+        "category": "General",
         "text": """
             Increase a member's guild points.
 
@@ -478,7 +478,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "gdemote",
-        "category": "general",
+        "category": "General",
         "text": """
             Decrease a member's guild points.
 
@@ -488,7 +488,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "gkick",
-        "category": "general",
+        "category": "General",
         "text": """
             Remove a member from your guild.
 
@@ -499,7 +499,7 @@ HELP_ENTRY_DICTS = [
     {
         "key": "gwho",
         "aliases": ["guildwho"],
-        "category": "general",
+        "category": "General",
         "text": """
             List members of your guild.
 
@@ -509,7 +509,7 @@ HELP_ENTRY_DICTS = [
     },
     {
         "key": "quest rewards",
-        "category": "general",
+        "category": "General",
         "text": """
             Some quests give coins of multiple types when completed.
 

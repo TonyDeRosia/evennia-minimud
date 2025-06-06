@@ -175,7 +175,7 @@ class CmdQuestList(Command):
 
     key = "questlist"
     aliases = ("quests",)
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         caller = self.caller
@@ -218,7 +218,7 @@ class CmdAcceptQuest(Command):
     """Accept a quest offered by an NPC."""
 
     key = "accept"
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         caller = self.caller
@@ -265,7 +265,7 @@ class CmdQuestProgress(Command):
     """Show progress on your active quests."""
 
     key = "progress"
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         caller = self.caller
@@ -294,7 +294,7 @@ class CmdCompleteQuest(Command):
     """Turn in a completed quest."""
 
     key = "complete"
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         caller = self.caller
