@@ -20,6 +20,18 @@ from utils.stats_utils import get_display_scroll, normalize_stat_key
 from utils import VALID_SLOTS
 
 
+def _safe_split(text):
+    """Safely split command arguments using ``shlex``.
+
+    Provides a clearer error message when quotes are unbalanced.
+    """
+
+    try:
+        return shlex.split(text)
+    except ValueError:
+        raise ValueError("No closing quotation found; enclose multiword names in quotes.")
+
+
 # Valid stats that can be modified by gear bonuses
 VALID_STATS = {normalize_stat_key(stat.key) for stat in ALL_STATS}
 
@@ -435,7 +447,11 @@ class CmdCGear(Command):
                 "Usage: cgear [/unidentified] <typeclass> <name> [slot] [value] [weight] [stat_mods] <description>"
             )
             return
-        parts = shlex.split(argstr)
+        try:
+            parts = _safe_split(argstr)
+        except ValueError as err:
+            self.msg(str(err))
+            return
         if len(parts) < 2:
             self.msg(
                 "Usage: cgear [/unidentified] <typeclass> <name> [slot] [value] [weight] [stat_mods] <description>"
@@ -503,7 +519,11 @@ class CmdOCreate(Command):
             name = "object"
             weight = 0
         else:
-            parts = shlex.split(self.args)
+            try:
+                parts = _safe_split(self.args)
+            except ValueError as err:
+                self.msg(str(err))
+                return
             if not parts:
                 self.msg("Usage: ocreate <name>")
                 return
@@ -555,7 +575,11 @@ class CmdCWeapon(Command):
             )
             return
 
-        parts = shlex.split(argstr)
+        try:
+            parts = _safe_split(argstr)
+        except ValueError as err:
+            self.msg(str(err))
+            return
         if len(parts) < 5:
             self.msg(
                 "Usage: cweapon [/unidentified] <name> <slot> <damage> <weight> [stat_mods] <description>"
@@ -693,7 +717,11 @@ class CmdCShield(Command):
                 "Usage: cshield [/unidentified] <name> <armor_rating> <block_rate> <weight> [stat_mods] <description>"
             )
             return
-        parts = shlex.split(argstr)
+        try:
+            parts = _safe_split(argstr)
+        except ValueError as err:
+            self.msg(str(err))
+            return
         if len(parts) < 5:
             self.msg(
                 "Usage: cshield [/unidentified] <name> <armor_rating> <block_rate> <weight> [stat_mods] <description>"
@@ -817,7 +845,11 @@ class CmdCArmor(Command):
                 "Usage: carmor [/unidentified] <name> <slot> <armor> <weight> [stat_mods] <description>"
             )
             return
-        parts = shlex.split(argstr)
+        try:
+            parts = _safe_split(argstr)
+        except ValueError as err:
+            self.msg(str(err))
+            return
         if len(parts) < 4:
             self.msg(
                 "Usage: carmor [/unidentified] <name> <slot> <armor> <weight> [stat_mods] <description>"
@@ -883,7 +915,11 @@ class CmdCTool(Command):
         if not self.args:
             self.msg("Usage: ctool <name> [tag] [weight] [stat_mods] <description>")
             return
-        parts = shlex.split(self.args)
+        try:
+            parts = _safe_split(self.args)
+        except ValueError as err:
+            self.msg(str(err))
+            return
         if not parts:
             self.msg("Usage: ctool <name> [tag] [weight] [stat_mods] <description>")
             return
@@ -952,7 +988,11 @@ class CmdCRing(Command):
                 "Usage: cring [/unidentified] <name> [slot] [weight] [stat_mods] <description>"
             )
             return
-        parts = shlex.split(argstr)
+        try:
+            parts = _safe_split(argstr)
+        except ValueError as err:
+            self.msg(str(err))
+            return
         if not parts:
             self.msg(
                 "Usage: cring [/unidentified] <name> [slot] [weight] [stat_mods] <description>"
@@ -1023,7 +1063,11 @@ class CmdCTrinket(Command):
                 "Usage: ctrinket [/unidentified] <name> [weight] [stat_mods] <description>"
             )
             return
-        parts = shlex.split(argstr)
+        try:
+            parts = _safe_split(argstr)
+        except ValueError as err:
+            self.msg(str(err))
+            return
         if not parts:
             self.msg(
                 "Usage: ctrinket [/unidentified] <name> [weight] [stat_mods] <description>"
@@ -1067,7 +1111,11 @@ class CmdCFood(Command):
     help_category = "Building"
 
     def func(self):
-        parts = shlex.split(self.args)
+        try:
+            parts = _safe_split(self.args)
+        except ValueError as err:
+            self.msg(str(err))
+            return
         if len(parts) < 3:
             self.msg("Usage: cfood <name> <sated_boost> <description>")
             return
@@ -1098,7 +1146,11 @@ class CmdCDrink(Command):
     help_category = "Building"
 
     def func(self):
-        parts = shlex.split(self.args)
+        try:
+            parts = _safe_split(self.args)
+        except ValueError as err:
+            self.msg(str(err))
+            return
         if len(parts) < 3:
             self.msg("Usage: cdrink <name> <sated_boost> <description>")
             return
@@ -1129,7 +1181,11 @@ class CmdCPotion(Command):
     help_category = "Building"
 
     def func(self):
-        parts = shlex.split(self.args)
+        try:
+            parts = _safe_split(self.args)
+        except ValueError as err:
+            self.msg(str(err))
+            return
         if len(parts) < 2:
             self.msg("Usage: cpotion <name> <bonuses> <description>")
             return
