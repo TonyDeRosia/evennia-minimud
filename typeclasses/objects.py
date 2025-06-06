@@ -193,6 +193,8 @@ class Object(ObjectParent, DefaultObject):
         if self in dropper.wielding:
             dropper.at_unwield(self)
         super().at_drop(dropper, **kwargs)
+        from world.system import stat_manager
+        stat_manager.recalculate_stats(dropper)
 
     def at_pre_move(self, destination, move_type="move", **kwargs):
         """Prevent moving if the stationary flag is set."""
@@ -247,6 +249,7 @@ class ClothingObject(ObjectParent, ContribClothing):
         self.location = None
         wearer.update_carry_weight()
         stat_manager.apply_bonuses(wearer, self)
+        stat_manager.recalculate_stats(wearer)
         return result
 
     def remove(self, wearer, quiet=False):
@@ -255,6 +258,7 @@ class ClothingObject(ObjectParent, ContribClothing):
         self.location = wearer
         wearer.update_carry_weight()
         stat_manager.remove_bonuses(wearer, self)
+        stat_manager.recalculate_stats(wearer)
         return result
 
 

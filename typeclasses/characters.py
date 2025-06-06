@@ -166,7 +166,7 @@ class Character(ObjectParent, ClothedCharacter):
     def at_post_puppet(self, **kwargs):
         """Ensure stats refresh when a character is controlled."""
         from world.system import stat_manager
-        stat_manager.refresh_stats(self)
+        stat_manager.recalculate_stats(self)
 
     def at_object_receive(self, obj, source_location, **kwargs):
         """Update carry weight when gaining an item."""
