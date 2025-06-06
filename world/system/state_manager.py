@@ -5,6 +5,9 @@ from world import stats
 from world.system import stat_manager
 from world.effects import EFFECTS
 
+# Maximum fullness a character can reach from food or drink.
+MAX_SATED = 100
+
 
 def _get_bonus_dict(chara) -> Dict[str, List[dict]]:
     return chara.db.temp_bonuses or {}
@@ -207,7 +210,7 @@ def tick_character(chara):
 
     # Hunger and thirst
     if hasattr(chara.db, "sated"):
-        sated = chara.db.sated or 0
+        sated = min(chara.db.sated or 0, MAX_SATED)
         if sated > 0:
             chara.db.sated = sated - 1
         if chara.db.sated <= 0:

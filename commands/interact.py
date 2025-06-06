@@ -1,6 +1,7 @@
 from .command import Command
 from evennia import CmdSet
 from evennia.utils import make_iter
+from world.system.state_manager import MAX_SATED
 
 
 class CmdGather(Command):
@@ -72,7 +73,7 @@ class CmdEat(Command):
         caller.traits.stamina.current += stamina
 
         sated = obj.attributes.get("sated", 0)
-        caller.db.sated = (caller.db.sated or 0) + sated
+        caller.db.sated = min((caller.db.sated or 0) + sated, MAX_SATED)
 
         caller.at_emote(
             f"$conj({self.cmdstring}) the {{target}}.", mapping={"target": obj}

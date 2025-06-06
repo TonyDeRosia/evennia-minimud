@@ -15,3 +15,10 @@ class TestDisplayScroll(EvenniaTest):
         char.db.equip_bonuses = {"STR": 2}
         sheet = get_display_scroll(char)
         self.assertIn("(+2)", sheet)
+
+    def test_sated_display_full(self):
+        char = self.char1
+        char.db.sated = 150
+        sheet = get_display_scroll(char)
+        self.assertIn("Sated", sheet)
+        self.assertIn("100", sheet)

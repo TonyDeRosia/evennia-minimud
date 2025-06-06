@@ -46,3 +46,10 @@ class TestInteractCommands(EvenniaTest):
         self.assertIsNone(potion.pk)
         self.assertEqual(self.char1.traits.stamina.current, stam + 2)
         self.assertEqual(self.char1.db.sated, sated + 3)
+
+    def test_sated_cap(self):
+        food = self._make_food()
+        food.db.sated = 10
+        self.char1.db.sated = 95
+        self.char1.execute_cmd(f"eat {food.key}")
+        self.assertEqual(self.char1.db.sated, 100)
