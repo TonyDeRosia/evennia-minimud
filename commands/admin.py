@@ -997,12 +997,12 @@ class CmdCRing(Command):
 
 class CmdCTrinket(Command):
     """
-    Create a wearable trinket or accessory.
+    Create a wearable trinket.
 
     Usage:
-        ctrinket [/unidentified] <name> [slot] [weight]
+        ctrinket [/unidentified] <name> [weight]
 
-    The slot defaults to ``accessory``.
+    Trinkets always use the ``trinket`` slot.
     """
 
     key = "ctrinket"
@@ -1020,17 +1020,16 @@ class CmdCTrinket(Command):
 
         if not argstr:
             self.msg(
-                "Usage: ctrinket [/unidentified] <name> [slot] [weight] [stat_mods] <description>"
+                "Usage: ctrinket [/unidentified] <name> [weight] [stat_mods] <description>"
             )
             return
         parts = shlex.split(argstr)
         if not parts:
             self.msg(
-                "Usage: ctrinket [/unidentified] <name> [slot] [weight] [stat_mods] <description>"
+                "Usage: ctrinket [/unidentified] <name> [weight] [stat_mods] <description>"
             )
             return
         name = parts[0].strip("'\"")
-        slot = "accessory"
         weight = 0
         idx = 1
         if idx < len(parts):
@@ -1038,14 +1037,8 @@ class CmdCTrinket(Command):
                 weight = int(parts[idx])
                 idx += 1
             else:
-                slot = parts[idx].lower()
-                idx += 1
-                if idx < len(parts) and parts[idx].isdigit():
-                    weight = int(parts[idx])
-                    idx += 1
-                elif idx < len(parts) and not parts[idx].isdigit():
-                    self.msg("Weight must be a number.")
-                    return
+                self.msg("Weight must be a number.")
+                return
         rest = " ".join(parts[idx:])
         try:
             bonuses, desc = parse_stat_mods(rest)
@@ -1057,7 +1050,7 @@ class CmdCTrinket(Command):
             self.caller,
             "typeclasses.objects.ClothingObject",
             name,
-            slot,
+            "trinket",
             desc=desc,
             weight=weight,
             identified=identified,
