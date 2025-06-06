@@ -229,19 +229,17 @@ class ClothingObject(ObjectParent, ContribClothing):
                     return
 
         result = super().wear(wearer, wearstyle, quiet=quiet)
-        if result:
-            self.location = None
-            wearer.update_carry_weight()
-            stat_manager.apply_bonuses(wearer, self)
+        self.location = None
+        wearer.update_carry_weight()
+        stat_manager.apply_bonuses(wearer, self)
         return result
 
     def remove(self, wearer, quiet=False):
         """Return to inventory when removed."""
         result = super().remove(wearer, quiet=quiet)
-        if result:
-            self.location = wearer
-            wearer.update_carry_weight()
-            stat_manager.remove_bonuses(wearer, self)
+        self.location = wearer
+        wearer.update_carry_weight()
+        stat_manager.remove_bonuses(wearer, self)
         return result
 
 
