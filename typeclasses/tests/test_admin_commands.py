@@ -217,9 +217,9 @@ class TestAdminCommands(EvenniaTest):
     def test_carmor_tags_and_wear(self):
         """Armor created with carmor gets tags and can be worn."""
 
-        self.char1.execute_cmd("carmor helm head 1 1 basic")
+        self.char1.execute_cmd("carmor head head 1 1 basic")
         armor = next(
-            (o for o in self.char1.contents if "helm" in list(o.aliases.all())),
+            (o for o in self.char1.contents if "head" in list(o.aliases.all())),
             None,
         )
         self.assertIsNotNone(armor)
@@ -331,18 +331,18 @@ class TestAdminCommands(EvenniaTest):
         self.assertIn("charm", out.lower())
 
     def test_carmor_with_modifiers(self):
-        self.char1.execute_cmd("carmor helm head 2 1 STR+1, Dex+2 A sturdy helm.")
+        self.char1.execute_cmd("carmor head head 2 1 STR+1, Dex+2 A sturdy head.")
         armor = next(
             (
                 o
                 for o in self.char1.contents
-                if "helm" in [al.lower() for al in o.aliases.all()]
+                if "head" in [al.lower() for al in o.aliases.all()]
             ),
             None,
         )
         self.assertIsNotNone(armor)
         self.assertEqual(armor.db.stat_mods, {"str": 1, "dex": 2})
-        self.assertEqual(armor.db.desc, "A sturdy helm.")
+        self.assertEqual(armor.db.desc, "A sturdy head.")
 
     def test_ctool_with_modifiers(self):
         self.char1.execute_cmd(
@@ -411,8 +411,8 @@ class TestAdminCommands(EvenniaTest):
         shield = next((o for o in self.char1.contents if o.key == "kite shield"), None)
         self.assertIsNotNone(shield)
 
-        self.char1.execute_cmd('carmor "iron helm" head 1 1 basic')
-        armor = next((o for o in self.char1.contents if o.key == "iron helm"), None)
+        self.char1.execute_cmd('carmor "iron head" head 1 1 basic')
+        armor = next((o for o in self.char1.contents if o.key == "iron head"), None)
         self.assertIsNotNone(armor)
 
         self.char1.execute_cmd('ctool "rock hammer" smith 2 heavy')

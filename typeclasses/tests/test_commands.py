@@ -131,7 +131,7 @@ class TestInfoCommands(EvenniaTest):
 
         armor = create.create_object(
             "typeclasses.objects.ClothingObject",
-            key="helm",
+            key="head",
             location=self.char1,
         )
         armor.tags.add("equipment", category="flag")
@@ -184,7 +184,7 @@ class TestInfoCommands(EvenniaTest):
         self.assertIn("Mainhand", out)
         self.assertIn("Offhand", out)
         self.assertIn("Head", out)
-        self.assertIn("Jewelry", out)
+        self.assertIn("Accessory", out)
         self.assertIn("Trinket", out)
 
     def test_equipment_twohanded(self):
