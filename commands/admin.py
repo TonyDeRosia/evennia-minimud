@@ -28,7 +28,7 @@ class CmdSetStat(Command):
     key = "setstat"
     aliases = ("set",)
     locks = "cmd:perm(Admin) or perm(Builder)"
-    help_category = "admin"
+    help_category = "Admin"
 
     def func(self):
         if not self.args:
@@ -111,7 +111,7 @@ class CmdSetAttr(Command):
     key = "setattr"
     aliases = ("setattribute",)
     locks = "cmd:perm(Admin) or perm(Builder)"
-    help_category = "admin"
+    help_category = "Admin"
 
     def func(self):
         if not self.args:
@@ -139,7 +139,7 @@ class CmdSetBounty(Command):
 
     key = "setbounty"
     locks = "cmd:perm(Admin)"
-    help_category = "admin"
+    help_category = "Admin"
 
     def func(self):
         if not self.args:
@@ -167,7 +167,7 @@ class CmdSlay(Command):
 
     key = "slay"
     locks = "cmd:perm(Admin)"
-    help_category = "admin"
+    help_category = "Admin"
 
     def func(self):
         if not self.args:
@@ -194,7 +194,7 @@ class CmdSmite(Command):
 
     key = "smite"
     locks = "cmd:perm(Admin)"
-    help_category = "admin"
+    help_category = "Admin"
 
     def func(self):
         if not self.args:
@@ -215,7 +215,7 @@ class CmdRestoreAll(Command):
 
     key = "restoreall"
     locks = "cmd:perm(Admin)"
-    help_category = "admin"
+    help_category = "Admin"
 
     def func(self):
         from typeclasses.characters import PlayerCharacter
@@ -250,7 +250,7 @@ class CmdPurge(Command):
 
     key = "purge"
     locks = "cmd:perm(Admin)"
-    help_category = "admin"
+    help_category = "Admin"
 
     def func(self):
         caller = self.caller

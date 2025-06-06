@@ -16,7 +16,7 @@ class CmdGather(Command):
 
     key = "gather"
     aliases = ("collect", "harvest")
-    help_category = "here"
+    help_category = "Here"
 
     def func(self):
         if not self.obj:

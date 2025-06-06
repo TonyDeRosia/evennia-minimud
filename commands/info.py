@@ -22,7 +22,7 @@ class CmdScore(Command):
 
     key = "score"
     aliases = ("sheet", "sc")
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         self.caller.msg(get_display_scroll(self.caller))
@@ -42,7 +42,7 @@ class CmdDesc(Command):
     """
 
     key = "desc"
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         if not self.args:
@@ -66,7 +66,7 @@ class CmdFinger(Command):
 
     key = "finger"
     aliases = ("whois",)
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         if not self.args or self.args.strip().lower() in {"self", "me"}:
@@ -125,7 +125,7 @@ class CmdBounty(Command):
     """
 
     key = "bounty"
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         if not self.args:
@@ -173,7 +173,7 @@ class CmdInventory(Command):
 
     key = "inventory"
     aliases = ("inv", "i")
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         caller = self.caller
@@ -211,7 +211,7 @@ class CmdEquipment(Command):
 
     key = "equipment"
     aliases = ("eq",)
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         caller = self.caller
@@ -259,7 +259,7 @@ class CmdInspect(Command):
     """
 
     key = "inspect"
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         caller = self.caller
@@ -369,7 +369,7 @@ class CmdBuffs(Command):
     """
 
     key = "buffs"
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         from world.effects import EFFECTS
@@ -422,7 +422,7 @@ class CmdAffects(Command):
 
     key = "affects"
     aliases = ("effects",)
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         from world.effects import EFFECTS
@@ -483,7 +483,7 @@ class CmdTitle(Command):
     """
 
     key = "title"
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         if not self.args:
@@ -508,7 +508,7 @@ class CmdPrompt(Command):
     """
 
     key = "prompt"
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         caller = self.caller
@@ -534,7 +534,7 @@ class CmdScan(Command):
     """
 
     key = "scan"
-    help_category = "movement"
+    help_category = "Movement"
 
     def func(self):
         caller = self.caller

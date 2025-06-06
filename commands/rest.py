@@ -17,7 +17,7 @@ class CmdRest(Command):
 
     key = "rest"
     aliases = ("relax",)
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         caller = self.caller
@@ -42,7 +42,7 @@ class CmdSleep(Command):
     """
 
     key = "sleep"
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         caller = self.caller
@@ -68,7 +68,7 @@ class CmdWake(Command):
 
     key = "wake"
     aliases = ("stand",)
-    help_category = "general"
+    help_category = "General"
 
     def func(self):
         caller = self.caller
