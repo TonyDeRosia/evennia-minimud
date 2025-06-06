@@ -190,6 +190,20 @@ def remove_bonuses(chara, item) -> None:
     refresh_stats(chara)
 
 
+def clear_all_equipment_bonuses(chara) -> None:
+    """Remove all cached equipment bonuses for ``chara``."""
+    chara.db.equip_bonuses = {}
+
+
+def recalculate_stats(chara) -> None:
+    """Reapply bonuses from all equipped items and refresh stats."""
+    clear_all_equipment_bonuses(chara)
+    for item in chara.equipment.values():
+        if item:
+            apply_bonuses(chara, item)
+    refresh_stats(chara)
+
+
 def _gear_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
     """Return cached stat bonuses from equipped gear."""
 
