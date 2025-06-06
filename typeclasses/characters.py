@@ -347,9 +347,7 @@ class Character(ObjectParent, ClothedCharacter):
             hand = required
 
         # handle two-handed weapons
-        twohanded = weapon.tags.has("two_handed", category="wielded") or weapon.tags.has(
-            "twohanded", category="flag"
-        )
+        twohanded = getattr(weapon, "is_twohanded", lambda: False)()
         if twohanded:
             if any(obj.tags.has("shield", category="flag") for obj in get_worn_clothes(self)):
                 self.msg(
