@@ -5,7 +5,7 @@ from utils.currency import to_copper, from_copper
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 from world.stats import CORE_STAT_KEYS
 from utils.stats_utils import get_display_scroll, _strip_colors, _pad
-from utils import VALID_SLOTS
+from utils import VALID_SLOTS, normalize_slot
 
 
 def is_gettable(obj, caller):
@@ -49,6 +49,7 @@ def render_equipment(caller):
     )
 
     for slot in EQUIPMENT_SLOTS:
+        canonical = normalize_slot(slot)
         if slot == "twohanded":
             if not show_twohanded:
                 continue
@@ -62,7 +63,7 @@ def render_equipment(caller):
                 continue
             item = off
         else:
-            item = eq.get(slot)
+            item = eq.get(canonical)
 
         name = item.get_display_name(caller) if item else "NOTHING"
         display.append(f"| {slot.capitalize():<10}: {name}")

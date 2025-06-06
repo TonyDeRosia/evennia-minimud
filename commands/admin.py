@@ -17,7 +17,7 @@ from world.stats import CORE_STAT_KEYS, ALL_STATS
 from world.system import stat_manager
 from world.system.constants import MAX_LEVEL
 from utils.stats_utils import get_display_scroll, normalize_stat_key
-from utils import VALID_SLOTS
+from utils import VALID_SLOTS, normalize_slot
 
 
 def _safe_split(text):
@@ -399,6 +399,7 @@ def _create_gear(
     obj.aliases.add(alias_base)
     obj.aliases.add(f"{alias_base}-{count + 1}")
     if slot:
+        slot = normalize_slot(slot)
         if obj.is_typeclass("typeclasses.objects.ClothingObject", exact=False):
             obj.db.clothing_type = slot
         else:
@@ -462,7 +463,7 @@ class CmdCGear(Command):
         idx = 2
         slot = None
         if idx < len(parts) and not parts[idx].lstrip("-+").isdigit():
-            slot = parts[idx]
+            slot = normalize_slot(parts[idx])
             idx += 1
         val = None
         if idx < len(parts):
@@ -486,6 +487,10 @@ class CmdCGear(Command):
         except ValueError as err:
             self.msg(f"Invalid stat modifier: {err}")
             return
+        if slot and slot not in VALID_SLOTS:
+            self.msg("Invalid slot name.")
+            return
+
         obj = _create_gear(
             self.caller,
             tclass,
@@ -586,7 +591,7 @@ class CmdCWeapon(Command):
             )
             return
         name = parts[0].strip("'\"")
-        slot = parts[1].lower()
+        slot = normalize_slot(parts[1])
 
         dmg_arg = parts[2]
         weight_str = parts[3]
@@ -787,7 +792,7 @@ class CmdCShield(Command):
         if desc is None and rest:
             desc = rest.strip()
 
-        slot = "offhand"
+        slot = normalize_slot("offhand")
         obj = _create_gear(
             self.caller,
             "typeclasses.objects.ClothingObject",
@@ -863,7 +868,7 @@ class CmdCArmor(Command):
         except ValueError as err:
             self.msg(f"Invalid stat modifier: {err}")
             return
-        slot = slot.lower()
+        slot = normalize_slot(slot)
         if slot not in VALID_SLOTS:
             self.msg("Invalid slot name.")
             return
@@ -1007,7 +1012,7 @@ class CmdCRing(Command):
                 weight = int(parts[idx])
                 idx += 1
             else:
-                slot = parts[idx].lower()
+                slot = normalize_slot(parts[idx])
                 idx += 1
                 if idx < len(parts) and parts[idx].isdigit():
                     weight = int(parts[idx])
@@ -1020,6 +1025,10 @@ class CmdCRing(Command):
             bonuses, desc = parse_stat_mods(rest)
         except ValueError as err:
             self.msg(f"Invalid stat modifier: {err}")
+            return
+
+        if slot not in VALID_SLOTS:
+            self.msg("Invalid slot name.")
             return
 
         obj = _create_gear(
@@ -1094,7 +1103,7 @@ class CmdCTrinket(Command):
             self.caller,
             "typeclasses.objects.ClothingObject",
             name,
-            "trinket",
+            normalize_slot("trinket"),
             desc=desc,
             weight=weight,
             identified=identified,

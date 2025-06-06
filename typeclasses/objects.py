@@ -19,6 +19,7 @@ from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 
 from commands.interact import GatherCmdSet
 from world.system import stat_manager
+from utils import normalize_slot
 
 
 class ObjectParent:
@@ -229,8 +230,9 @@ class ClothingObject(ObjectParent, ContribClothing):
         if slots := self.tags.get(category="slot", return_list=True):
             worn_items = get_worn_clothes(wearer)
             for slot in slots:
+                canonical = normalize_slot(slot)
                 for item in worn_items:
-                    if item.tags.has(slot, category="slot"):
+                    if item.tags.has(canonical, category="slot"):
                         item.remove(wearer, quiet=quiet)
 
         # shields can't be worn with two-handed weapons

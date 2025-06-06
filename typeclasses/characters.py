@@ -10,6 +10,7 @@ from evennia.contrib.game_systems.clothing.clothing import (
 from evennia.contrib.game_systems.cooldowns import CooldownHandler
 from evennia.prototypes.spawner import spawn
 from utils.currency import to_copper, from_copper
+from utils import normalize_slot
 import math
 
 from .objects import ObjectParent
@@ -105,6 +106,7 @@ class Character(ObjectParent, ClothedCharacter):
                 slots = [ctype]
             for slot in slots:
                 if slot:
+                    slot = normalize_slot(slot)
                     eq[slot] = item
 
         return eq
