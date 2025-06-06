@@ -39,7 +39,7 @@ from world.stats import (
     apply_stats,
 )
 from world.system import stat_manager
-from world.system.state_manager import MAX_SATED, MAX_LEVEL
+from world.system.constants import MAX_SATED, MAX_LEVEL
 import math
 import re
 

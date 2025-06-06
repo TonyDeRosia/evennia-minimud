@@ -4,12 +4,7 @@ from typing import Dict, List
 from world import stats
 from world.system import stat_manager
 from world.effects import EFFECTS
-
-# Maximum fullness a character can reach from food or drink.
-MAX_SATED = 100
-
-# Highest level a player character can reach.
-MAX_LEVEL = 100
+from .constants import MAX_SATED, MAX_LEVEL
 
 
 def _get_bonus_dict(chara) -> Dict[str, List[dict]]:

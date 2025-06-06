@@ -1,7 +1,7 @@
 from .command import Command
 from evennia import CmdSet
 from evennia.utils import make_iter
-from world.system.state_manager import MAX_SATED, MAX_LEVEL
+from world.system.constants import MAX_SATED, MAX_LEVEL
 
 
 class CmdGather(Command):
