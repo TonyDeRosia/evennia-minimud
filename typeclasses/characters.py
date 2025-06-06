@@ -352,8 +352,10 @@ class Character(ObjectParent, ClothedCharacter):
             hands = [hand]
             wielded[hand] = weapon
 
-        # update the character with the new wielded info
+        # update the character with the new wielded info and move the item out of inventory
         self.db._wielded = wielded
+        weapon.location = None
+        self.update_carry_weight()
         from world.system import stat_manager
         stat_manager.refresh_stats(self)
         # return the list of hands that are now holding the weapon
@@ -382,8 +384,10 @@ class Character(ObjectParent, ClothedCharacter):
                 # append the hand to the list of freed hands
                 freed.append(hand)
 
-        # update the character with the new wielded info
+        # update the character with the new wielded info and return weapon to inventory
         self.db._wielded = wielded
+        weapon.location = self
+        self.update_carry_weight()
         from world.system import stat_manager
         stat_manager.refresh_stats(self)
         # return the list of hands that are no longer holding the weapon

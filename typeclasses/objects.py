@@ -229,7 +229,19 @@ class ClothingObject(ObjectParent, ContribClothing):
                     wearer.msg("You cannot use a shield while wielding a two-handed weapon.")
                     return
 
-        return super().wear(wearer, wearstyle, quiet=quiet)
+        result = super().wear(wearer, wearstyle, quiet=quiet)
+        if result:
+            self.location = None
+            wearer.update_carry_weight()
+        return result
+
+    def remove(self, wearer, quiet=False):
+        """Return to inventory when removed."""
+        result = super().remove(wearer, quiet=quiet)
+        if result:
+            self.location = wearer
+            wearer.update_carry_weight()
+        return result
 
 
 class GatherNode(Object):

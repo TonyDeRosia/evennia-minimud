@@ -189,6 +189,51 @@ class CmdInventory(Command):
         caller.msg(line)
 
 
+class CmdDropAll(Command):
+    """Drop everything you are carrying."""
+
+    key = "drop all"
+    aliases = ("dropall",)
+    help_category = "General"
+
+    def func(self):
+        caller = self.caller
+        items = [obj for obj in list(caller.contents) if not obj.db.worn]
+        if not items:
+            caller.msg("You have nothing to drop.")
+            return
+        for obj in items:
+            obj.location = caller.location
+            obj.at_drop(caller)
+        caller.update_carry_weight()
+        caller.msg("You drop everything you are carrying.")
+
+
+class CmdGetAll(Command):
+    """Pick up everything in the room."""
+
+    key = "get all"
+    aliases = ("getall",)
+    help_category = "General"
+
+    def func(self):
+        caller = self.caller
+        location = caller.location
+        if not location:
+            caller.msg("You cannot pick anything up.")
+            return
+        items = [obj for obj in list(location.contents) if obj.access(caller, "get")]
+        items = [obj for obj in items if obj != caller]
+        if not items:
+            caller.msg("There is nothing here to pick up.")
+            return
+        for obj in items:
+            obj.location = caller
+            obj.at_get(caller)
+        caller.update_carry_weight()
+        caller.msg("You pick up everything you can.")
+
+
 class CmdEquipment(Command):
     """
     Show what you are wearing and wielding. Usage: equipment
@@ -213,8 +258,19 @@ class CmdEquipment(Command):
         off = "left" if main == "right" else "right"
         main_item = wielded.get(main)
         off_item = wielded.get(off)
-        slots.append(("Mainhand", main_item))
-        slots.append(("Offhand", off_item))
+        twohanded = (
+            main_item
+            and main_item == off_item
+            and (
+                main_item.tags.has("twohanded", category="flag")
+                or main_item.tags.has("two_handed", category="wielded")
+            )
+        )
+        if twohanded:
+            slots.append(("Twohands", main_item))
+        else:
+            slots.append(("Mainhand", main_item))
+            slots.append(("Offhand", off_item))
 
         worn = get_worn_clothes(caller)
         worn_map = {}
@@ -224,7 +280,8 @@ class CmdEquipment(Command):
                 worn_map[ctype] = item
         from django.conf import settings
         for ctype in getattr(settings, "CLOTHING_TYPE_ORDERED", []):
-            slots.append((ctype.capitalize(), worn_map.get(ctype)))
+            if ctype in worn_map:
+                slots.append((ctype.capitalize(), worn_map.get(ctype)))
 
         width = max(len(name) for name, _ in slots)
         lines = ["+" + "=" * (width + 15) + "+"]
@@ -590,6 +647,8 @@ class InfoCmdSet(CmdSet):
         self.add(CmdFinger)
         self.add(CmdBounty)
         self.add(CmdInventory)
+        self.add(CmdGetAll)
+        self.add(CmdDropAll)
         self.add(CmdInspect)
         self.add(CmdEquipment)
         self.add(CmdAffects)
