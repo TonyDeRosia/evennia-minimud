@@ -232,8 +232,7 @@ class ClothingObject(ObjectParent, ContribClothing):
         if result:
             self.location = None
             wearer.update_carry_weight()
-            stat_manager.add_equip_bonus(wearer, self)
-            stat_manager.refresh_stats(wearer)
+            stat_manager.apply_bonuses(wearer, self)
         return result
 
     def remove(self, wearer, quiet=False):
@@ -242,8 +241,7 @@ class ClothingObject(ObjectParent, ContribClothing):
         if result:
             self.location = wearer
             wearer.update_carry_weight()
-            stat_manager.remove_equip_bonus(wearer, self)
-            stat_manager.refresh_stats(wearer)
+            stat_manager.remove_bonuses(wearer, self)
         return result
 
 

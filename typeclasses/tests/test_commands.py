@@ -102,7 +102,7 @@ class TestInfoCommands(EvenniaTest):
 
         item = create.create_object(
             "typeclasses.objects.ClothingObject",
-            key="amulet",
+            key="neck",
             location=self.char1,
         )
         item.tags.add("equipment", category="flag")
