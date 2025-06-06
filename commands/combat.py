@@ -190,7 +190,7 @@ class CmdUnwield(Command):
     def func(self):
         caller = self.caller
 
-        weapon = caller.search(self.args, location=caller)
+        weapon = caller.search(self.args, candidates=caller.wielding)
         if not weapon:
             # no valid object found
             return
