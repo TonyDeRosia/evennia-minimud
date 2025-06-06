@@ -6,6 +6,57 @@ from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 from world.stats import CORE_STAT_KEYS
 from utils.stats_utils import get_display_scroll, _strip_colors, _pad
 
+
+def render_equipment(caller):
+    """Return formatted equipment display for caller."""
+    eq = caller.equipment
+    display = ["+=========================+", "| [ EQUIPMENT ]"]
+
+    twohanded_weapon = None
+    if (
+        "mainhand" in eq
+        and eq["mainhand"]
+        and (
+            getattr(eq["mainhand"].db, "twohanded", False)
+            or eq["mainhand"].tags.has("twohanded", category="flag")
+            or eq["mainhand"].tags.has("two_handed", category="wielded")
+        )
+    ):
+        twohanded_weapon = eq["mainhand"]
+
+    if twohanded_weapon:
+        display.append(
+            f"| Twohands   : {twohanded_weapon.get_display_name(caller)}"
+        )
+    else:
+        for hand in ["mainhand", "offhand"]:
+            item = eq.get(hand)
+            name = item.get_display_name(caller) if item else "|xNOTHING|n"
+            display.append(f"| {hand.capitalize():<10}: {name}")
+
+    for slot in [
+        "hat",
+        "jewelry",
+        "chestguard",
+        "top",
+        "undershirt",
+        "bracers",
+        "gloves",
+        "fullbody",
+        "legguard",
+        "bottom",
+        "underpants",
+        "socks",
+        "shoes",
+        "accessory",
+    ]:
+        item = eq.get(slot)
+        name = item.get_display_name(caller) if item else "|xNOTHING|n"
+        display.append(f"| {slot.capitalize():<10}: {name}")
+
+    display.append("+=========================+")
+    return "\n".join(display)
+
 from .command import Command
 
 
@@ -249,49 +300,7 @@ class CmdEquipment(Command):
     help_category = "General"
 
     def func(self):
-        caller = self.caller
-        slots = []
-        wielded = caller.attributes.get("_wielded", {})
-        if wielded:
-            wielded.deserialize()
-        main = caller.db.handedness or "right"
-        off = "left" if main == "right" else "right"
-        main_item = wielded.get(main)
-        off_item = wielded.get(off)
-        twohanded = (
-            main_item
-            and main_item == off_item
-            and (
-                main_item.tags.has("twohanded", category="flag")
-                or main_item.tags.has("two_handed", category="wielded")
-            )
-        )
-        if twohanded:
-            slots.append(("Twohands", main_item))
-        else:
-            slots.append(("Mainhand", main_item))
-            slots.append(("Offhand", off_item))
-
-        worn = get_worn_clothes(caller)
-        worn_map = {}
-        for item in worn:
-            ctype = item.db.clothing_type
-            if ctype and ctype not in worn_map:
-                worn_map[ctype] = item
-        from django.conf import settings
-        for ctype in getattr(settings, "CLOTHING_TYPE_ORDERED", []):
-            if ctype in worn_map:
-                slots.append((ctype.capitalize(), worn_map.get(ctype)))
-
-        width = max(len(name) for name, _ in slots)
-        lines = ["+" + "=" * (width + 15) + "+"]
-        lines.append("| " + _pad("[ EQUIPMENT ]", width + 13) + " |")
-        for name, item in slots:
-            val = item.get_display_name(caller) if item else "|xNOTHING|n"
-            line = f"| {name.ljust(width)} : {val}"
-            lines.append(line)
-        lines.append("+" + "=" * (width + 15) + "+")
-        self.msg("\n".join(lines))
+        self.msg(render_equipment(self.caller))
 
 
 class CmdInspect(Command):
