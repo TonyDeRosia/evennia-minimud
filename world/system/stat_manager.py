@@ -16,9 +16,6 @@ from .constants import (
     MAX_INT,
     MAX_WIS,
     MAX_LUCK,
-    MAX_HP,
-    MAX_MP,
-    MAX_SP,
 )
 from world.scripts import races, classes
 
@@ -283,13 +280,6 @@ def refresh_stats(obj) -> None:
         value += gear_bonus.get(dkey, 0)
         value += buff_bonus.get(dkey, 0)
         result = int(round(value))
-        cap_map = {
-            "HP": MAX_HP,
-            "MP": MAX_MP,
-            "SP": MAX_SP,
-        }
-        if dkey in cap_map:
-            result = min(result, cap_map[dkey])
         derived[dkey] = result
 
     # perception scales off primary stats but keeps its base value
@@ -318,15 +308,15 @@ def refresh_stats(obj) -> None:
 
     # update resource traits
     if hp := obj.traits.get("health"):
-        hp.base = min(derived.get("HP", hp.base), MAX_HP)
+        hp.base = derived.get("HP", hp.base)
         if hp.current > hp.max:
             hp.current = hp.max
     if mp := obj.traits.get("mana"):
-        mp.base = min(derived.get("MP", mp.base), MAX_MP)
+        mp.base = derived.get("MP", mp.base)
         if mp.current > mp.max:
             mp.current = mp.max
     if sp := obj.traits.get("stamina"):
-        sp.base = min(derived.get("SP", sp.base), MAX_SP)
+        sp.base = derived.get("SP", sp.base)
         if sp.current > sp.max:
             sp.current = sp.max
 
