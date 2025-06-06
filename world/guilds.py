@@ -28,6 +28,7 @@ class Guild:
     home: Optional[int] = None
     ranks: List[Tuple[int, str]] = field(default_factory=list)
     members: Dict[str, int] = field(default_factory=dict)
+    rank_thresholds: Dict[str, int] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, data: Dict) -> "Guild":
@@ -37,6 +38,7 @@ class Guild:
             home=data.get("home"),
             ranks=data.get("ranks", []),
             members=data.get("members", {}),
+            rank_thresholds=data.get("rank_thresholds", {}),
         )
 
     def to_dict(self) -> Dict:
@@ -64,6 +66,7 @@ def get_guilds() -> List[Guild]:
             name="Adventurers Guild",
             desc="The guild of brave adventurers.",
             ranks=ADVENTURERS_GUILD_RANKS,
+            rank_thresholds={title: lvl for lvl, title in ADVENTURERS_GUILD_RANKS},
         )
         guilds.append(default)
         _save_registry([g.to_dict() for g in guilds])
@@ -124,3 +127,19 @@ def get_rank_title(guild_name: str, honor: int) -> str:
         else:
             break
     return title
+
+
+def auto_promote(player, guild: Guild):
+    """Update player's guild rank based on their points in the guild."""
+    if not guild.rank_thresholds:
+        return
+    gp_map = player.db.guild_points or {}
+    points = gp_map.get(guild.name, 0)
+    new_rank = ""
+    for title, threshold in sorted(guild.rank_thresholds.items(), key=lambda it: it[1]):
+        if points >= threshold:
+            new_rank = title
+        else:
+            break
+    if player.db.guild_rank != new_rank:
+        player.db.guild_rank = new_rank

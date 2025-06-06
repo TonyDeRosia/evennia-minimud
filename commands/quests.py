@@ -335,7 +335,7 @@ class CmdCompleteQuest(Command):
 
         from utils.currency import to_copper, from_copper, format_wallet
         from evennia.prototypes.spawner import spawn
-        from world.guilds import find_guild, update_guild
+        from world.guilds import find_guild, update_guild, auto_promote
 
         for proto in make_iter(quest.items_reward):
             try:
@@ -357,14 +357,16 @@ class CmdCompleteQuest(Command):
         if quest.guild_points:
             for guild, pts in quest.guild_points.items():
                 if caller.db.guild == guild:
-                    honor = caller.db.guild_honor or 0
-                    honor += pts
-                    caller.db.guild_honor = honor
+                    gp_map = caller.db.guild_points or {}
+                    total = gp_map.get(guild, 0) + pts
+                    gp_map[guild] = total
+                    caller.db.guild_points = gp_map
                     idx, gobj = find_guild(guild)
                     if gobj:
-                        gobj.members[str(caller.id)] = honor
+                        gobj.members[str(caller.id)] = total
                         update_guild(idx, gobj)
-                    rewards.append(f"{pts} honor in {guild}")
+                        auto_promote(caller, gobj)
+                    rewards.append(f"{pts} guild points in {guild}")
 
         completed = caller.db.completed_quests or []
         if quest_key not in completed:

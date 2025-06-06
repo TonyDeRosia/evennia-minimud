@@ -27,7 +27,8 @@ class TestGuildCommands(EvenniaTest):
         from world.guilds import update_guild
         update_guild(idx, guild)
         self.char1.db.guild = "testguild"
-        self.char1.db.guild_honor = 0
+        self.char1.db.guild_points = {"testguild": 0}
+        self.char1.db.guild_rank = ""
 
         # char2 requests to join
         self.char2.execute_cmd("gjoin testguild")
@@ -40,7 +41,7 @@ class TestGuildCommands(EvenniaTest):
 
         # promote and then kick
         self.char1.execute_cmd(f"gpromote {self.char2.key} 5")
-        self.assertEqual(self.char2.db.guild_honor, 5)
+        self.assertEqual(self.char2.db.guild_points.get("testguild"), 5)
         self.char1.execute_cmd(f"gkick {self.char2.key}")
         self.assertEqual(self.char2.db.guild, "")
 
@@ -73,10 +74,11 @@ class TestGuildCommands(EvenniaTest):
         npc_rec.msg = MagicMock()
         npc_rec.tags.add("guild_receptionist", category="npc_role")
         npc_rec.db.guild = "roleguild"
-        self.char2.db.guild_honor = 0
+        self.char2.db.guild_points = {"roleguild": 0}
+        self.char2.db.guild_rank = ""
 
         npc_rec.execute_cmd(f"gpromote {self.char2.key}")
-        self.assertEqual(self.char2.db.guild_honor, 1)
+        self.assertEqual(self.char2.db.guild_points.get("roleguild"), 1)
         npc_rec.execute_cmd("gcreate shouldfail")
         idx2, _ = find_guild("shouldfail")
         self.assertEqual(idx2, -1)

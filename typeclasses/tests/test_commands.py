@@ -59,13 +59,14 @@ class TestInfoCommands(EvenniaTest):
     def test_finger_bounty(self):
         self.char2.db.title = "The Warrior"
         self.char2.db.guild = "Adventurers Guild"
-        self.char2.db.guild_honor = 20
+        self.char2.db.guild_points = {"Adventurers Guild": 20}
+        self.char2.db.guild_rank = "Corporal"
         self.char2.attributes.add("bounty", 10)
         self.char1.execute_cmd(f"finger {self.char2.key}")
         output = self.char1.msg.call_args[0][0]
         self.assertIn("The Warrior", output)
         self.assertIn("Guild: Adventurers Guild", output)
-        self.assertIn("Honor: 20", output)
+        self.assertIn("Guild Points: 20", output)
         self.assertIn("Bounty: 10", output)
 
     def test_score(self):

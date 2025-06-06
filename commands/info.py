@@ -3,7 +3,6 @@ from evennia.utils.evtable import EvTable
 from evennia.utils import iter_to_str
 from utils.currency import to_copper, from_copper
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
-from world.guilds import get_rank_title
 from world.stats import CORE_STAT_KEYS
 from utils.stats_utils import get_display_scroll, _strip_colors, _pad
 
@@ -92,10 +91,11 @@ class CmdFinger(Command):
         lines.append(f"Class: {charclass}")
 
         if guild := target.db.guild:
-            honor = target.db.guild_honor or 0
-            rank = get_rank_title(guild, honor)
+            gp_map = target.db.guild_points or {}
+            points = gp_map.get(guild, 0)
+            rank = target.db.guild_rank or ""
             lines.append(f"Guild: {guild} ({rank})")
-            lines.append(f"Honor: {honor}")
+            lines.append(f"Guild Points: {points}")
 
         bounty = target.attributes.get("bounty", 0)
         if bounty:

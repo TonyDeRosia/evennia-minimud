@@ -470,7 +470,7 @@ HELP_ENTRY_DICTS = [
         "key": "gpromote",
         "category": "general",
         "text": """
-            Increase a member's guild honor.
+            Increase a member's guild points.
 
             Usage:
                 gpromote <player> [amount]
@@ -480,7 +480,7 @@ HELP_ENTRY_DICTS = [
         "key": "gdemote",
         "category": "general",
         "text": """
-            Decrease a member's guild honor.
+            Decrease a member's guild points.
 
             Usage:
                 gdemote <player> [amount]
@@ -515,7 +515,9 @@ HELP_ENTRY_DICTS = [
 
             Builders set the |wcurrency_reward|n field on the quest to a
             mapping like ``{"platinum": 1, "gold": 5}``. Each coin type is
-            added to your wallet when you turn in the quest.
+            added to your wallet when you turn in the quest. Quests can also
+            award |wguild_points|n that count toward automatic promotion in a
+            guild.
         """,
     },
 ]
