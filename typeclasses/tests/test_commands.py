@@ -443,6 +443,31 @@ class TestRemoveCommand(EvenniaTest):
         self.assertFalse(item.db.worn)
         self.assertEqual(item.location, self.char1)
 
+    def test_remove_partial_and_alias(self):
+        from evennia.utils import create
+
+        item = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="|gbright cap|n",
+            location=self.char1,
+        )
+        item.aliases.add("capper")
+        item.tags.add("equipment", category="flag")
+        item.tags.add("identified", category="flag")
+        item.tags.add("helm", category="slot")
+        item.wear(self.char1, True)
+
+        # partial key
+        self.char1.execute_cmd("remove bright")
+        self.assertFalse(item.db.worn)
+        self.assertEqual(item.location, self.char1)
+
+        item.wear(self.char1, True)
+        # alias
+        self.char1.execute_cmd("remove capper")
+        self.assertFalse(item.db.worn)
+        self.assertEqual(item.location, self.char1)
+
 
 class TestRemoveAllCommand(EvenniaTest):
     def test_remove_all_removes_everything(self):

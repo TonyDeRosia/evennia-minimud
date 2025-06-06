@@ -3,17 +3,17 @@ from evennia.utils.ansi import strip_ansi
 from .command import Command
 
 
-def match_name(obj, name):
-    """Return True if obj.key matches name ignoring ANSI."""
-    return strip_ansi(obj.key).lower() == name.lower()
-
-
 def get_equipped_item_by_name(caller, itemname):
     """Find equipped item by name."""
     eq = caller.equipment
+    candidates = [item for item in eq.values() if item]
+    searchstr = strip_ansi(itemname)
+    obj = caller.search(searchstr, candidates=candidates)
+    if not obj:
+        return None, None
     for slot, item in eq.items():
-        if item and match_name(item, itemname):
-            return slot, item
+        if item == obj:
+            return slot, obj
     return None, None
 
 
