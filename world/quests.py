@@ -27,6 +27,7 @@ class Quest:
     failure_dialogue: str = ""
     unique_tag: str = ""
     currency_reward: Dict[str, int] = field(default_factory=dict)
+    guild_points: Dict[str, int] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, data: Dict) -> "Quest":
@@ -48,6 +49,7 @@ class Quest:
             failure_dialogue=data.get("failure_dialogue", ""),
             unique_tag=data.get("unique_tag", ""),
             currency_reward=data.get("currency_reward", {}),
+            guild_points=data.get("guild_points", {}),
         )
 
     def to_dict(self) -> Dict:
