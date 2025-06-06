@@ -386,8 +386,7 @@ class Character(ObjectParent, ClothedCharacter):
         weapon.location = None
         self.update_carry_weight()
         from world.system import stat_manager
-        stat_manager.add_equip_bonus(self, weapon)
-        stat_manager.refresh_stats(self)
+        stat_manager.apply_bonuses(self, weapon)
         # return the list of hands that are now holding the weapon
         return hands
 
@@ -419,8 +418,7 @@ class Character(ObjectParent, ClothedCharacter):
         weapon.location = self
         self.update_carry_weight()
         from world.system import stat_manager
-        stat_manager.remove_equip_bonus(self, weapon)
-        stat_manager.refresh_stats(self)
+        stat_manager.remove_bonuses(self, weapon)
         # return the list of hands that are no longer holding the weapon
         return freed
 

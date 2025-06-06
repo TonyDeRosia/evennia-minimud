@@ -95,7 +95,7 @@ class TestStatManager(EvenniaTest):
         base_hp = char.db.derived_stats.get("HP")
         item = create.create_object(
             "typeclasses.objects.ClothingObject",
-            key="amulet",
+            key="neck",
             location=char,
         )
         item.tags.add("equipment", category="flag")

@@ -18,7 +18,7 @@ EQUIPMENT_SLOTS = [
     "mainhand",
     "offhand",
     "helm",
-    "amulet",
+    "neck",
     "shoulders",
     "chest",
     "cloak",

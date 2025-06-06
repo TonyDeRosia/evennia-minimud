@@ -4,7 +4,7 @@ VALID_SLOTS = {
     "mainhand/offhand",
     "twohanded",
     "helm",
-    "amulet",
+    "neck",
     "shoulders",
     "chest",
     "cloak",
