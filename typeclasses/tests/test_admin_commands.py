@@ -206,13 +206,17 @@ class TestAdminCommands(EvenniaTest):
     def test_cshield_flags_and_blocks_twohanded(self):
         """Shield created with cshield should get shield flag and block two-handed weapons."""
 
-        self.char1.execute_cmd("cshield buckler 1 5 1 buckler")
-        shield = next((o for o in self.char1.contents if "buckler" in list(o.aliases.all())), None)
+        self.char1.execute_cmd("cshield buckler 1 5 1 basic shield")
+        shield = next(
+            (o for o in self.char1.contents if "buckler" in list(o.aliases.all())),
+            None,
+        )
         self.assertIsNotNone(shield)
-        self.assertTrue(shield.tags.has("shield", category="flag"))
         self.assertEqual(shield.db.block_rate, 5)
+        self.assertTrue(shield.tags.has("shield", category="flag"))
         shield.wear(self.char1, True)
         self.assertTrue(shield.db.worn)
+        self.assertTrue(shield.tags.has("shield", category="flag"))
 
         self.char1.attributes.add("_wielded", {"left": None, "right": None})
         weapon = create_object("typeclasses.gear.MeleeWeapon", key="great", location=self.char1)
@@ -244,6 +248,26 @@ class TestAdminCommands(EvenniaTest):
         )
         self.assertEqual(shield.db.stat_mods, {"str": 1, "critical_resist": 4})
         self.assertEqual(shield.db.desc, "A sturdy kite shield.")
+
+    def test_cshield_block_and_magic_resist_mods(self):
+        """cshield correctly parses block and magic resist modifiers."""
+
+        self.char1.execute_cmd(
+            "cshield buckler 2 5 1 Block Rate+5, Magic Resist+3 basic shield"
+        )
+        shield = next(
+            (
+                o
+                for o in self.char1.contents
+                if "buckler" in [al.lower() for al in o.aliases.all()]
+            ),
+            None,
+        )
+        self.assertIsNotNone(shield)
+        self.assertEqual(
+            shield.db.modifiers,
+            {"block_rate": 5, "magic_resist": 3},
+        )
 
     def test_cring_and_ctrinket_wear_and_display(self):
         """Rings and trinkets created by builders can be worn and show in equipment."""
