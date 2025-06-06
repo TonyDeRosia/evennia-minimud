@@ -184,3 +184,21 @@ class TestAdminCommands(EvenniaTest):
         self.assertTrue(armor.tags.has("head", category="slot"))
         armor.wear(self.char1, True)
         self.assertTrue(armor.db.worn)
+
+    def test_cshield_flags_and_blocks_twohanded(self):
+        """Shield created with cshield should get shield flag and block two-handed weapons."""
+
+        self.char1.execute_cmd("cshield buckler offhand 1")
+        shield = next((o for o in self.char1.contents if "buckler" in list(o.aliases.all())), None)
+        self.assertIsNotNone(shield)
+        self.assertTrue(shield.tags.has("shield", category="flag"))
+        shield.wear(self.char1, True)
+        self.assertTrue(shield.db.worn)
+
+        self.char1.attributes.add("_wielded", {"left": None, "right": None})
+        weapon = create_object("typeclasses.gear.MeleeWeapon", key="great", location=self.char1)
+        weapon.tags.add("equipment", category="flag")
+        weapon.tags.add("identified", category="flag")
+        weapon.tags.add("twohanded", category="flag")
+        self.assertIsNone(self.char1.at_wield(weapon))
+        self.assertNotIn(weapon, self.char1.wielding)
