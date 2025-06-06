@@ -404,4 +404,107 @@ HELP_ENTRY_DICTS = [
             Using |wall|n revives every unconscious character in the game.
         """,
     },
+    {
+        "key": "gcreate",
+        "category": "building",
+        "text": """
+            Create a new guild.
+
+            Usage:
+                gcreate <name>
+        """,
+    },
+    {
+        "key": "grank",
+        "category": "building",
+        "text": """
+            Manage guild rank titles.
+
+            Usage:
+                grank add <guild> <level> <title>
+                grank remove <guild> <level>
+                grank list <guild>
+        """,
+    },
+    {
+        "key": "gsethome",
+        "category": "building",
+        "text": """
+            Set a guild's home location to your current room.
+
+            Usage:
+                gsethome <guild>
+        """,
+    },
+    {
+        "key": "gdesc",
+        "category": "building",
+        "text": """
+            Set a guild's description.
+
+            Usage:
+                gdesc <guild> <description>
+        """,
+    },
+    {
+        "key": "gjoin",
+        "category": "general",
+        "text": """
+            Request to join a guild.
+
+            Usage:
+                gjoin <guild>
+        """,
+    },
+    {
+        "key": "gaccept",
+        "category": "general",
+        "text": """
+            Accept a player's guild request.
+
+            Usage:
+                gaccept <player>
+        """,
+    },
+    {
+        "key": "gpromote",
+        "category": "general",
+        "text": """
+            Increase a member's guild honor.
+
+            Usage:
+                gpromote <player> [amount]
+        """,
+    },
+    {
+        "key": "gdemote",
+        "category": "general",
+        "text": """
+            Decrease a member's guild honor.
+
+            Usage:
+                gdemote <player> [amount]
+        """,
+    },
+    {
+        "key": "gkick",
+        "category": "general",
+        "text": """
+            Remove a member from your guild.
+
+            Usage:
+                gkick <player>
+        """,
+    },
+    {
+        "key": "gwho",
+        "aliases": ["guildwho"],
+        "category": "general",
+        "text": """
+            List members of your guild.
+
+            Usage:
+                gwho
+        """,
+    },
 ]
