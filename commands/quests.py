@@ -170,6 +170,216 @@ class CmdQTag(Command):
         self.msg(f"{guild_name} awards {gp_value} GP for {quest_key}.")
 
 
+class CmdQuestList(Command):
+    """List quests offered by NPCs in the current room."""
+
+    key = "questlist"
+    aliases = ("quests",)
+    help_category = "general"
+
+    def func(self):
+        caller = self.caller
+        if not (location := caller.location):
+            return
+        givers = [
+            obj
+            for obj in location.contents
+            if obj.tags.has("quest_giver", category="role")
+        ]
+        if not givers:
+            self.msg("There are no quest givers here.")
+            return
+
+        completed = caller.db.completed_quests or []
+        active = caller.db.active_quests or {}
+        lines = []
+        for npc in givers:
+            quests = []
+            for qkey in npc.attributes.get("quests", default=[]):
+                idx, quest = QuestManager.find(qkey)
+                if not quest:
+                    continue
+                if not quest.repeatable and qkey in completed:
+                    continue
+                if qkey in active:
+                    continue
+                title = quest.title or qkey
+                quests.append(title)
+            if quests:
+                lines.append(f"{npc.get_display_name(caller)}: {', '.join(quests)}")
+
+        if not lines:
+            self.msg("No available quests here.")
+            return
+        self.msg("\n".join(lines))
+
+
+class CmdAcceptQuest(Command):
+    """Accept a quest offered by an NPC."""
+
+    key = "accept"
+    help_category = "general"
+
+    def func(self):
+        caller = self.caller
+        if not self.args:
+            self.msg("Usage: accept <quest>")
+            return
+
+        quest_key = self.args.strip()
+        active = caller.db.active_quests or {}
+        if quest_key in active:
+            self.msg("You are already on that quest.")
+            return
+
+        completed = caller.db.completed_quests or []
+        idx, quest = QuestManager.find(quest_key)
+        if not quest:
+            self.msg("Unknown quest.")
+            return
+        if not quest.repeatable and quest_key in completed:
+            self.msg("You have already completed that quest.")
+            return
+
+        giver = None
+        if location := caller.location:
+            for obj in location.contents:
+                if obj.tags.has("quest_giver", category="role") and quest_key in (
+                    obj.attributes.get("quests", default=[])
+                ):
+                    giver = obj
+                    break
+        if not giver:
+            self.msg("No one here offers that quest.")
+            return
+
+        active[quest_key] = {"progress": 0}
+        caller.db.active_quests = active
+        title = quest.title or quest_key
+        self.msg(f"You accept the quest '{title}'.")
+        if quest.start_dialogue:
+            self.msg(quest.start_dialogue)
+
+
+class CmdQuestProgress(Command):
+    """Show progress on your active quests."""
+
+    key = "progress"
+    help_category = "general"
+
+    def func(self):
+        caller = self.caller
+        active = caller.db.active_quests or {}
+        if not active:
+            self.msg("You have no active quests.")
+            return
+
+        lines = []
+        for qkey, data in active.items():
+            idx, quest = QuestManager.find(qkey)
+            if not quest:
+                continue
+            progress = data.get("progress", 0)
+            if quest.goal_type == "collect":
+                progress = len(
+                    [obj for obj in caller.contents if obj.db.quest == qkey]
+                )
+            title = quest.title or qkey
+            lines.append(f"{title}: {progress}/{quest.amount}")
+
+        self.msg("\n".join(lines))
+
+
+class CmdCompleteQuest(Command):
+    """Turn in a completed quest."""
+
+    key = "complete"
+    help_category = "general"
+
+    def func(self):
+        caller = self.caller
+        if not self.args:
+            self.msg("Usage: complete <quest>")
+            return
+
+        quest_key = self.args.strip()
+        active = caller.db.active_quests or {}
+        if quest_key not in active:
+            self.msg("You have not accepted that quest.")
+            return
+
+        idx, quest = QuestManager.find(quest_key)
+        if not quest:
+            self.msg("Unknown quest.")
+            return
+
+        progress = active[quest_key].get("progress", 0)
+        if quest.goal_type == "collect":
+            items = [obj for obj in caller.contents if obj.db.quest == quest_key]
+            progress = len(items)
+        else:
+            items = []
+
+        if progress < quest.amount:
+            self.msg("You have not completed the objectives yet.")
+            return
+
+        # remove quest items if necessary
+        for obj in items:
+            obj.delete()
+
+        rewards = []
+        if quest.xp_reward:
+            caller.db.exp = (caller.db.exp or 0) + quest.xp_reward
+            rewards.append(f"{quest.xp_reward} XP")
+
+        from utils.currency import to_copper, from_copper, format_wallet
+        from evennia.prototypes.spawner import spawn
+        from world.guilds import find_guild, update_guild
+
+        for proto in make_iter(quest.items_reward):
+            try:
+                objs = spawn(proto)
+            except Exception:
+                continue
+            for obj in objs:
+                obj.location = caller
+                rewards.append(obj.key)
+
+        if quest.currency_reward:
+            wallet = caller.db.coins or {}
+            total = to_copper(wallet) + to_copper(quest.currency_reward)
+            caller.db.coins = from_copper(total)
+            rewards.append(format_wallet(quest.currency_reward))
+
+        if quest.guild_points:
+            for guild, pts in quest.guild_points.items():
+                if caller.db.guild == guild:
+                    honor = caller.db.guild_honor or 0
+                    honor += pts
+                    caller.db.guild_honor = honor
+                    idx, gobj = find_guild(guild)
+                    if gobj:
+                        gobj.members[str(caller.id)] = honor
+                        update_guild(idx, gobj)
+                    rewards.append(f"{pts} honor in {guild}")
+
+        completed = caller.db.completed_quests or []
+        if quest_key not in completed:
+            completed.append(quest_key)
+        caller.db.completed_quests = completed
+        del active[quest_key]
+        caller.db.active_quests = active
+
+        title = quest.title or quest_key
+        if rewards:
+            self.msg(f"Quest '{title}' completed! You receive: {', '.join(rewards)}.")
+        else:
+            self.msg(f"Quest '{title}' completed!")
+        if quest.complete_dialogue:
+            self.msg(quest.complete_dialogue)
+
+
 class QuestCmdSet(CmdSet):
     """CmdSet for quest builder commands."""
 
@@ -182,3 +392,7 @@ class QuestCmdSet(CmdSet):
         self.add(CmdQItem)
         self.add(CmdQAssign)
         self.add(CmdQTag)
+        self.add(CmdQuestList)
+        self.add(CmdAcceptQuest)
+        self.add(CmdQuestProgress)
+        self.add(CmdCompleteQuest)
