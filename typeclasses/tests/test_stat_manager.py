@@ -123,3 +123,25 @@ class TestStatManager(EvenniaTest):
         item.remove(char, True)
         stat_manager.refresh_stats(char)
         self.assertFalse(char.db.equip_bonuses)
+
+    def test_lowercase_item_modifiers(self):
+        char = self.char1
+        stat_manager.refresh_stats(char)
+        base_str = char.traits.STR.base
+        base_per = char.db.derived_stats.get("perception")
+
+        item = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="bauble",
+            location=char,
+        )
+        item.tags.add("equipment", category="flag")
+        item.tags.add("identified", category="flag")
+        item.db.stat_mods = {"str": 2, "per": 100}
+        item.wear(char, True)
+        stat_manager.refresh_stats(char)
+
+        self.assertEqual(char.db.equip_bonuses.get("STR"), 2)
+        self.assertEqual(char.db.equip_bonuses.get("perception"), 100)
+        self.assertEqual(char.traits.STR.base, base_str + 2)
+        self.assertEqual(char.db.derived_stats.get("perception"), base_per + 100)

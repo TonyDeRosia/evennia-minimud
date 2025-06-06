@@ -13,52 +13,15 @@ from .building import (
     CmdSetFlag,
     CmdRemoveFlag,
 )
-from world.stats import CORE_STAT_KEYS
+from world.stats import CORE_STAT_KEYS, ALL_STATS
 from world.system import stat_manager
-from utils.stats_utils import get_display_scroll
+from utils.stats_utils import get_display_scroll, normalize_stat_key
 from utils import VALID_SLOTS
 
 
 # Valid stats that can be modified by gear bonuses
-VALID_STATS = [
-    "str",
-    "con",
-    "dex",
-    "int",
-    "wis",
-    "luck",
-    "per",
-    "evasion",
-    "armor",
-    "magic_resist",
-    "dodge",
-    "block_rate",
-    "parry_rate",
-    "status_resist",
-    "critical_resist",
-    "attack_power",
-    "spell_power",
-    "critical_chance",
-    "critical_damage_bonus",
-    "accuracy",
-    "armor_penetration",
-    "spell_penetration",
-    "health_regen",
-    "mana_regen",
-    "stamina_regen",
-    "lifesteal",
-    "leech",
-    "cooldown_reduction",
-    "initiative",
-    "stealth",
-    "detection",
-    "threat",
-    "movement_speed",
-    "crafting_bonus",
-    "pvp_power",
-    "pvp_resilience",
-    "guild_honor_rank_modifiers",
-]
+VALID_STATS = {normalize_stat_key(stat.key) for stat in ALL_STATS}
+VALID_STATS.update({"HP", "MP", "SP"})
 
 
 def parse_stat_mods(text):
@@ -86,7 +49,7 @@ def parse_stat_mods(text):
         if match:
             stat_name = match.group(1).strip()
             amount = int(match.group(2))
-            key = stat_name.lower().replace(" ", "_")
+            key = normalize_stat_key(stat_name)
             if key not in VALID_STATS:
                 raise ValueError(stat_name)
             bonuses[key] = amount

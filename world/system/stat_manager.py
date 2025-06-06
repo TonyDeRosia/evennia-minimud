@@ -5,6 +5,8 @@ from __future__ import annotations
 from typing import Dict
 import re
 
+from utils.stats_utils import normalize_stat_key
+
 from world import stats
 from world.system import state_manager
 from world.scripts import races, classes
@@ -98,7 +100,8 @@ def collect_item_mods(item) -> Dict[str, int]:  # pragma: no cover - helper
         for key in stat_keys:
             val = item.attributes.get(f"{key}_bonus", default=0)
             if val:
-                bonus[key] = bonus.get(key, 0) + int(val)
+                norm = normalize_stat_key(key)
+                bonus[norm] = bonus.get(norm, 0) + int(val)
         mods = (
             item.attributes.get("stat_mods", default=None)
             or item.attributes.get("bonuses", default=None)
@@ -107,6 +110,7 @@ def collect_item_mods(item) -> Dict[str, int]:  # pragma: no cover - helper
         )
         if mods:
             for stat, val in mods.items():
+                stat = normalize_stat_key(stat)
                 bonus[stat] = bonus.get(stat, 0) + int(val)
     else:
         getter = getattr(getattr(item, "db", None), "get", None)
@@ -117,7 +121,8 @@ def collect_item_mods(item) -> Dict[str, int]:  # pragma: no cover - helper
                 except Exception:
                     val = 0
                 if val:
-                    bonus[key] = bonus.get(key, 0) + int(val)
+                    norm = normalize_stat_key(key)
+                    bonus[norm] = bonus.get(norm, 0) + int(val)
             mods = None
             for field in ("stat_mods", "bonuses", "modifiers", "buffs"):
                 try:
@@ -128,6 +133,7 @@ def collect_item_mods(item) -> Dict[str, int]:  # pragma: no cover - helper
                     break
             if mods:
                 for stat, val in mods.items():
+                    stat = normalize_stat_key(stat)
                     bonus[stat] = bonus.get(stat, 0) + int(val)
 
     if hasattr(item, "tags"):
@@ -138,6 +144,7 @@ def collect_item_mods(item) -> Dict[str, int]:  # pragma: no cover - helper
             m = re.match(r"([A-Z_]+)\+(\-?\d+)$", tag)
             if m:
                 stat, amt = m.groups()
+                stat = normalize_stat_key(stat)
                 if stat in stat_keys:
                     bonus[stat] = bonus.get(stat, 0) + int(amt)
 
@@ -151,6 +158,7 @@ def add_equip_bonus(chara, item) -> None:
         return
     bonuses = chara.db.equip_bonuses or {}
     for stat, val in mods.items():
+        stat = normalize_stat_key(stat)
         bonuses[stat] = bonuses.get(stat, 0) + int(val)
     chara.db.equip_bonuses = bonuses
 
@@ -162,6 +170,7 @@ def remove_equip_bonus(chara, item) -> None:
         return
     bonuses = chara.db.equip_bonuses or {}
     for stat, val in mods.items():
+        stat = normalize_stat_key(stat)
         if stat in bonuses:
             bonuses[stat] = bonuses.get(stat, 0) - int(val)
             if not bonuses[stat]:
