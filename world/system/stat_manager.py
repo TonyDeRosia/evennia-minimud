@@ -122,6 +122,8 @@ def _gear_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
             mods = item.attributes.get("stat_mods", default=None)
             if not mods:
                 mods = item.attributes.get("bonuses", default=None)
+            if not mods:
+                mods = item.attributes.get("modifiers", default=None)
             if mods:
                 for stat, val in mods.items():
                     bonus[stat] = bonus.get(stat, 0) + int(val)
@@ -142,6 +144,11 @@ def _gear_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
                 if not mods:
                     try:
                         mods = getter("bonuses", None)
+                    except Exception:
+                        mods = None
+                if not mods:
+                    try:
+                        mods = getter("modifiers", None)
                     except Exception:
                         mods = None
                 if mods:
