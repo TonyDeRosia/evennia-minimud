@@ -17,4 +17,5 @@ VALID_SLOTS = {
     "legs",
     "feet",
     "accessory",
+    "trinket",
 }
