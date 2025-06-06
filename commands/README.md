@@ -48,10 +48,10 @@ Builders and admins can adjust object attributes with these commands:
 
 ## Object Creation Commands
 
-* `cweapon <name> <slot> <damage> [description]` - create a melee weapon in your
-  inventory. The item's key stays exactly as typed. A lowercase alias plus a
-  numbered alias like `name-1`, `name-2`, and so forth is added silently for
-  each item with the same name.
+* `cweapon <name> <slot> <damage> [weight] [stat_mods] <description>` - create a
+  melee weapon in your inventory. The item's key stays exactly as typed. A
+  lowercase alias plus a numbered alias like `name-1`, `name-2`, and so forth is
+  added silently for each item with the same name.
 
 ## Inspect Command
 

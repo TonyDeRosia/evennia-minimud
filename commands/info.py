@@ -364,6 +364,17 @@ class CmdInspect(Command):
         desc = obj.db.desc or "You see nothing special."
         lines.append(desc)
 
+        mods = getattr(obj.db, "bonuses", None) or getattr(obj.db, "stat_mods", None)
+        if mods:
+            lines.append("Bonuses:")
+            for stat, amt in mods.items():
+                label = stat.replace("_", " ")
+                if stat.isupper():
+                    label = stat.upper()
+                else:
+                    label = label.title()
+                lines.append(f"  {label} {amt:+d}")
+
         req = obj.db.required_perception_to_identify
         if obj.tags.has("unidentified") and req is not None:
             from world.system import stat_manager
