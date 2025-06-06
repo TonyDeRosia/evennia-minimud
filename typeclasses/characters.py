@@ -11,6 +11,7 @@ from evennia.contrib.game_systems.cooldowns import CooldownHandler
 from evennia.prototypes.spawner import spawn
 from utils.currency import to_copper, from_copper
 from utils import normalize_slot
+from utils.slots import SLOT_ORDER
 import math
 
 from .objects import ObjectParent
@@ -88,7 +89,9 @@ class Character(ObjectParent, ClothedCharacter):
     @property
     def equipment(self):
         """Return mapping of equipment slots to worn or wielded items."""
-        eq = {}
+        # initialize dictionary with all canonical slots so lookups always
+        # succeed even if nothing is equipped in a given location
+        eq = {slot: None for slot in SLOT_ORDER}
 
         wielded = self.attributes.get("_wielded", {})
         if wielded:
