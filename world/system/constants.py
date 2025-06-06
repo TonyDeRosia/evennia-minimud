@@ -7,17 +7,17 @@ MAX_SATED = 100
 MAX_LEVEL = 100
 
 # Primary stat caps
-MAX_STR = 99
-MAX_CON = 99
-MAX_DEX = 99
-MAX_INT = 99
-MAX_WIS = 99
-MAX_LUCK = 99
+MAX_STR = 999
+MAX_CON = 999
+MAX_DEX = 999
+MAX_INT = 999
+MAX_WIS = 999
+MAX_LUCK = 999
 
 # Derived resource caps
-MAX_HP = 999
-MAX_MP = 999
-MAX_SP = 999
+MAX_HP = 9999
+MAX_MP = 9999
+MAX_SP = 9999
 
 __all__ = [
     "MAX_SATED",
