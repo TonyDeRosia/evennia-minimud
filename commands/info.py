@@ -365,7 +365,11 @@ class CmdInspect(Command):
         desc = obj.db.desc or "You see nothing special."
         lines.append(desc)
 
-        mods = getattr(obj.db, "bonuses", None) or getattr(obj.db, "stat_mods", None)
+        mods = (
+            getattr(obj.db, "bonuses", None)
+            or getattr(obj.db, "stat_mods", None)
+            or getattr(obj.db, "modifiers", None)
+        )
         if mods:
             lines.append("Bonuses:")
             for stat, amt in mods.items():
