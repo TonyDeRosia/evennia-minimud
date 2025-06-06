@@ -15,6 +15,7 @@ from .building import (
 )
 from world.stats import CORE_STAT_KEYS, ALL_STATS
 from world.system import stat_manager
+from world.system.state_manager import MAX_LEVEL
 from utils.stats_utils import get_display_scroll, normalize_stat_key
 from utils import VALID_SLOTS
 
@@ -135,6 +136,7 @@ class CmdSetStat(Command):
             return
 
         if stat_key_low == "level":
+            value = min(value, MAX_LEVEL)
             target.db.level = value
             stat_manager.refresh_stats(target)
             self.msg(f"level set to {value} on {target.key}.")

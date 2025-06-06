@@ -8,6 +8,9 @@ from world.effects import EFFECTS
 # Maximum fullness a character can reach from food or drink.
 MAX_SATED = 100
 
+# Highest level a player character can reach.
+MAX_LEVEL = 100
+
 
 def _get_bonus_dict(chara) -> Dict[str, List[dict]]:
     return chara.db.temp_bonuses or {}
@@ -208,8 +211,8 @@ def tick_character(chara):
         _save_status_dict(chara, statuses)
         stat_manager.refresh_stats(chara)
 
-    # Hunger and thirst
-    if hasattr(chara.db, "sated"):
+    # Hunger and thirst is ignored for max-level characters
+    if hasattr(chara.db, "sated") and (chara.db.level or 1) < MAX_LEVEL:
         sated = min(chara.db.sated or 0, MAX_SATED)
         if sated > 0:
             chara.db.sated = sated - 1
