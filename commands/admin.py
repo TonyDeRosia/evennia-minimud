@@ -17,6 +17,48 @@ from world.system import stat_manager
 from utils.stats_utils import get_display_scroll
 
 
+# Valid stats that can be modified by gear bonuses
+VALID_STATS = [
+    "str",
+    "con",
+    "dex",
+    "int",
+    "wis",
+    "luck",
+    "per",
+    "evasion",
+    "armor",
+    "magic_resist",
+    "dodge",
+    "block_rate",
+    "parry_rate",
+    "status_resist",
+    "critical_resist",
+    "attack_power",
+    "spell_power",
+    "critical_chance",
+    "critical_damage_bonus",
+    "accuracy",
+    "armor_penetration",
+    "spell_penetration",
+    "health_regen",
+    "mana_regen",
+    "stamina_regen",
+    "lifesteal",
+    "leech",
+    "cooldown_reduction",
+    "initiative",
+    "stealth",
+    "detection",
+    "threat",
+    "movement_speed",
+    "crafting_bonus",
+    "pvp_power",
+    "pvp_resilience",
+    "guild_honor_rank_modifiers",
+]
+
+
 class CmdSetStat(Command):
     """
     Change a character's stat directly.
@@ -432,40 +474,73 @@ class CmdCWeapon(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: cweapon <name> <slot> <damage> [weight] [description]")
+            self.msg(
+                "Usage: cweapon <name> <slot> <damage> [weight] [stat_mods] <description>"
+            )
             return
-        parts = self.args.split(None, 4)
+        parts = self.args.split(None, 3)
         if len(parts) < 3:
-            self.msg("Usage: cweapon <name> <slot> <damage> [weight] [description]")
+            self.msg(
+                "Usage: cweapon <name> <slot> <damage> [weight] [stat_mods] <description>"
+            )
             return
         name = parts[0]
         slot = parts[1].lower()
+
+        dmg_arg = parts[2]
+        rest = parts[3] if len(parts) > 3 else ""
+
         weight = 0
+        bonuses = {}
         desc = None
-        remaining = parts[3:] if len(parts) > 3 else []
 
         dmg = None
         dice = None
         dice_num = dice_sides = None
-        if len(parts) > 2:
-            dmg_arg = parts[2]
-            if re.match(r"^\d+d\d+$", dmg_arg):
-                dice = dmg_arg
-                dice_num, dice_sides = map(int, dmg_arg.lower().split("d"))
-            else:
-                try:
-                    dmg = int(dmg_arg)
-                except ValueError:
-                    self.msg("Damage must be a number or NdN dice string.")
-                    return
+        if re.match(r"^\d+d\d+$", dmg_arg):
+            dice = dmg_arg
+            dice_num, dice_sides = map(int, dmg_arg.lower().split("d"))
+        else:
+            try:
+                dmg = int(dmg_arg)
+            except ValueError:
+                self.msg("Damage must be a number or NdN dice string.")
+                return
 
-        if remaining:
-            if remaining[0].isdigit():
-                weight = int(remaining[0])
-                if len(remaining) > 1:
-                    desc = " ".join(remaining[1:])
-            else:
-                desc = " ".join(remaining)
+        if rest:
+            m = re.match(r"(\d+)(.*)", rest)
+            if m:
+                weight = int(m.group(1))
+                rest = m.group(2).lstrip()
+        if rest:
+            pieces = [p.strip() for p in rest.split(",")]
+            pattern = re.compile(r"([A-Za-z][A-Za-z _]*?)\+(-?\d+)")
+            desc_parts = []
+            for piece in pieces:
+                if not piece:
+                    continue
+                match = pattern.match(piece)
+                if match:
+                    stat_name = match.group(1).strip()
+                    amount = int(match.group(2))
+                    key = stat_name.lower().replace(" ", "_")
+                    if key not in VALID_STATS:
+                        self.msg(f"Invalid stat modifier: {stat_name}")
+                        return
+                    bonuses[key] = amount
+                    remainder = piece[match.end():].strip()
+                    if remainder:
+                        desc_parts.append(remainder)
+                        desc_parts.extend(p.strip() for p in pieces[pieces.index(piece)+1:])
+                        break
+                else:
+                    desc_parts.append(piece)
+                    desc_parts.extend(p.strip() for p in pieces[pieces.index(piece)+1:])
+                    break
+            if desc_parts:
+                desc = ", ".join(desc_parts).strip()
+        if desc is None and rest:
+            desc = rest.strip()
 
         valid_slots = {"mainhand", "offhand", "mainhand/offhand", "twohanded"}
         if slot and slot not in valid_slots:
@@ -494,6 +569,9 @@ class CmdCWeapon(Command):
             obj.attributes.add("damage_dice", dice)
             obj.attributes.add("dice_num", dice_num)
             obj.attributes.add("dice_sides", dice_sides)
+        if bonuses:
+            obj.db.bonuses = bonuses
+            obj.db.stat_mods = bonuses
 
 
 class CmdCShield(Command):

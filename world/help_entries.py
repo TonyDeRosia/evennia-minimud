@@ -345,7 +345,7 @@ Help for cweapon
 Create a simple melee weapon.
 
 Usage:
-    cweapon <name> <slot> <damage> [description]
+    cweapon <name> <slot> <damage> [weight] [stat_mods] <description>
 
 Switches:
     None
@@ -362,6 +362,8 @@ Notes:
     |wtwohanded|n.
     - Damage may be a flat number or an |wNdN|n dice string, which is stored on
     the item as given.
+    - Optional stat modifiers can be provided as comma separated entries like
+    |wSTR+2, Attack Power+5|n. Valid stats include all core and derived values.
     - The item is a |ctypeclasses.gear.MeleeWeapon|n.
     - ANSI color codes are supported.
 

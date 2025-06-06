@@ -170,6 +170,24 @@ class TestAdminCommands(EvenniaTest):
         self.assertTrue(hands)
         self.assertIn(weapon, self.char1.wielding)
 
+    def test_cweapon_with_stat_mods(self):
+        """Weapon creation supports stat modifiers and description parsing."""
+
+        self.char1.execute_cmd(
+            "cweapon longsword mainhand 3d10 5 STR+2, Attack Power+5, Accuracy+3 A vicious longsword."
+        )
+        weapon = next(
+            (o for o in self.char1.contents if "longsword" in [al.lower() for al in o.aliases.all()]),
+            None,
+        )
+        self.assertIsNotNone(weapon)
+        self.assertEqual(weapon.db.weight, 5)
+        self.assertEqual(
+            weapon.db.bonuses,
+            {"str": 2, "attack_power": 5, "accuracy": 3},
+        )
+        self.assertEqual(weapon.db.desc, "A vicious longsword.")
+
     def test_carmor_tags_and_wear(self):
         """Armor created with carmor gets tags and can be worn."""
 
