@@ -309,6 +309,12 @@ def _create_gear(
             obj.db.clothing_type = slot
         else:
             obj.db.slot = slot
+        # mark the object as equipment and identified
+        obj.tags.add("equipment", category="flag")
+        obj.tags.add("identified", category="flag")
+        obj.db.identified = True
+        for part in slot.split("/"):
+            obj.tags.add(part, category="slot")
     if value is not None:
         obj.attributes.add(attr, value)
     caller.msg(f"Created {obj.get_display_name(caller)}.")
@@ -434,12 +440,10 @@ class CmdCWeapon(Command):
             self.caller,
             "typeclasses.gear.MeleeWeapon",
             name.capitalize(),
+            slot,
             desc=desc,
             weight=weight,
         )
-
-        if slot:
-            obj.db.slot = slot
 
         if slot:
             if slot == "mainhand/offhand":
