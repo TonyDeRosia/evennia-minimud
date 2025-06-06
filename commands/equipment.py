@@ -1,6 +1,20 @@
 from evennia import CmdSet
-from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
+from evennia.utils.ansi import strip_ansi
 from .command import Command
+
+
+def match_name(obj, name):
+    """Return True if obj.key matches name ignoring ANSI."""
+    return strip_ansi(obj.key).lower() == name.lower()
+
+
+def get_equipped_item_by_name(caller, itemname):
+    """Find equipped item by name."""
+    eq = caller.equipment
+    for slot, item in eq.items():
+        if item and match_name(item, itemname):
+            return slot, item
+    return None, None
 
 
 class CmdRemove(Command):
@@ -16,13 +30,20 @@ class CmdRemove(Command):
             caller.msg("Remove what?")
             return
 
-        candidates = list(get_worn_clothes(caller))
-        # include worn items still in inventory
-        candidates.extend(o for o in caller.contents if getattr(o.db, "worn", False))
-        obj = caller.search(self.args.strip(), candidates=candidates)
+        itemname = self.args.strip()
+
+        # search equipped items (worn or wielded)
+        slot, obj = get_equipped_item_by_name(caller, itemname)
         if not obj:
+            caller.msg(f"Could not find '{itemname}'.")
             return
-        obj.remove(caller)
+
+        if obj in caller.wielding:
+            caller.at_unwield(obj)
+        else:
+            obj.remove(caller)
+
+        caller.msg(f"You remove {obj.key}.")
 
 
 class EquipmentCmdSet(CmdSet):

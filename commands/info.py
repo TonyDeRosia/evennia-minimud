@@ -12,10 +12,10 @@ def is_gettable(obj, caller):
     return obj.access(caller, "get") and obj.db.gettable is not False
 
 
-SLOTS = [
+EQUIPMENT_SLOTS = [
+    "twohanded",
     "mainhand",
     "offhand",
-    "twohanded",
     "helm",
     "amulet",
     "shoulders",
@@ -46,7 +46,7 @@ def render_equipment(caller):
         and getattr(getattr(main, "db", None), "slot", None) == "twohanded"
     )
 
-    for slot in SLOTS:
+    for slot in EQUIPMENT_SLOTS:
         if slot == "twohanded":
             if not show_twohanded:
                 continue
@@ -62,7 +62,7 @@ def render_equipment(caller):
         else:
             item = eq.get(slot)
 
-        name = item.get_display_name(caller) if item else ""
+        name = item.get_display_name(caller) if item else "NOTHING"
         display.append(f"| {slot.capitalize():<10}: {name}")
 
     display.append("+=========================+")
