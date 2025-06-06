@@ -21,7 +21,6 @@ from utils import VALID_SLOTS
 
 # Valid stats that can be modified by gear bonuses
 VALID_STATS = {normalize_stat_key(stat.key) for stat in ALL_STATS}
-VALID_STATS.update({"HP", "MP", "SP"})
 
 
 def parse_stat_mods(text):
@@ -604,7 +603,7 @@ class CmdCWeapon(Command):
                 if match:
                     stat_name = match.group(1).strip()
                     amount = int(match.group(2))
-                    key = stat_name.lower().replace(" ", "_")
+                    key = normalize_stat_key(stat_name)
                     if key not in VALID_STATS:
                         self.msg(f"Invalid stat modifier: {stat_name}")
                         return
@@ -735,7 +734,7 @@ class CmdCShield(Command):
                 if match:
                     stat_name = match.group(1).strip()
                     amount = int(match.group(2))
-                    key = stat_name.lower().replace(" ", "_")
+                    key = normalize_stat_key(stat_name)
                     if key not in VALID_STATS:
                         self.msg(f"Invalid stat modifier: {stat_name}")
                         return
