@@ -17,7 +17,7 @@ EQUIPMENT_SLOTS = [
     "twohanded",
     "mainhand",
     "offhand",
-    "helm",
+    "head",
     "neck",
     "shoulders",
     "chest",
