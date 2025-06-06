@@ -397,3 +397,37 @@ class TestAdminCommands(EvenniaTest):
         self.assertIsNotNone(gear)
         self.assertEqual(gear.db.stat_mods, {"str": 1, "con": 2})
         self.assertEqual(gear.db.desc, "A special token.")
+
+    def test_creation_commands_strip_quotes(self):
+        self.char1.execute_cmd('cweapon "long sword" mainhand 3 1 sharp blade')
+        weapon = next((o for o in self.char1.contents if o.key == "Long sword"), None)
+        self.assertIsNotNone(weapon)
+
+        self.char1.execute_cmd('cshield "kite shield" 2 5 1 sturdy')
+        shield = next((o for o in self.char1.contents if o.key == "kite shield"), None)
+        self.assertIsNotNone(shield)
+
+        self.char1.execute_cmd('carmor "iron helm" helm 1 1 basic')
+        armor = next((o for o in self.char1.contents if o.key == "iron helm"), None)
+        self.assertIsNotNone(armor)
+
+        self.char1.execute_cmd('ctool "rock hammer" smith 2 heavy')
+        tool = next((o for o in self.char1.contents if o.key == "rock hammer"), None)
+        self.assertIsNotNone(tool)
+
+        self.char1.execute_cmd('cring "ruby ring" ring2 1 shiny')
+        ring = next((o for o in self.char1.contents if o.key == "ruby ring"), None)
+        self.assertIsNotNone(ring)
+
+        self.char1.execute_cmd('ctrinket "lucky charm" accessory 1 shiny')
+        trinket = next((o for o in self.char1.contents if o.key == "lucky charm"), None)
+        self.assertIsNotNone(trinket)
+
+        self.char1.execute_cmd('cgear typeclasses.objects.Object "mysterious orb" accessory 1 1 odd')
+        gear = next((o for o in self.char1.contents if o.key == "mysterious orb"), None)
+        self.assertIsNotNone(gear)
+
+        self.char1.execute_cmd('ocreate "strange box" 1')
+        obj = next((o for o in self.char1.contents if o.key == "strange box"), None)
+        self.assertIsNotNone(obj)
+

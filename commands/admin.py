@@ -478,7 +478,7 @@ class CmdCGear(Command):
             )
             return
         tclass = parts[0]
-        name = parts[1]
+        name = parts[1].strip("'\"")
         idx = 2
         slot = None
         if idx < len(parts) and not parts[idx].lstrip("-+").isdigit():
@@ -539,12 +539,16 @@ class CmdOCreate(Command):
             name = "object"
             weight = 0
         else:
-            parts = self.args.split(None, 1)
-            name = parts[0]
+            parts = shlex.split(self.args)
+            if not parts:
+                self.msg("Usage: ocreate <name>")
+                return
+            name = parts[0].strip("'\"")
             weight = 0
-            if len(parts) > 1:
-                if parts[1].isdigit():
-                    weight = int(parts[1])
+            weight_str = " ".join(parts[1:])
+            if weight_str:
+                if weight_str.isdigit():
+                    weight = int(weight_str)
                 else:
                     self.msg("Weight must be a number.")
                     return
@@ -587,18 +591,18 @@ class CmdCWeapon(Command):
             )
             return
 
-        parts = argstr.split(None, 4)
+        parts = shlex.split(argstr)
         if len(parts) < 5:
             self.msg(
                 "Usage: cweapon [/unidentified] <name> <slot> <damage> <weight> [stat_mods] <description>"
             )
             return
-        name = parts[0]
+        name = parts[0].strip("'\"")
         slot = parts[1].lower()
 
         dmg_arg = parts[2]
         weight_str = parts[3]
-        rest = parts[4]
+        rest = " ".join(parts[4:])
 
         if slot not in VALID_SLOTS:
             self.msg("Invalid slot name.")
@@ -725,17 +729,17 @@ class CmdCShield(Command):
                 "Usage: cshield [/unidentified] <name> <armor_rating> <block_rate> <weight> [stat_mods] <description>"
             )
             return
-        parts = argstr.split(None, 4)
+        parts = shlex.split(argstr)
         if len(parts) < 5:
             self.msg(
                 "Usage: cshield [/unidentified] <name> <armor_rating> <block_rate> <weight> [stat_mods] <description>"
             )
             return
-        name = parts[0]
+        name = parts[0].strip("'\"")
         armor_str = parts[1]
         block_rate_str = parts[2]
         weight_str = parts[3]
-        rest = parts[4]
+        rest = " ".join(parts[4:])
 
         try:
             armor = int(armor_str)
@@ -856,6 +860,7 @@ class CmdCArmor(Command):
             )
             return
         name, slot, armor_str, weight_str = parts[:4]
+        name = name.strip("'\"")
         rest = " ".join(parts[4:])
         try:
             bonuses, desc = parse_stat_mods(rest)
@@ -918,7 +923,7 @@ class CmdCTool(Command):
         if not parts:
             self.msg("Usage: ctool <name> [tag] [weight] [stat_mods] <description>")
             return
-        name = parts[0]
+        name = parts[0].strip("'\"")
         tag = None
         weight = 0
         idx = 1
@@ -989,7 +994,7 @@ class CmdCRing(Command):
                 "Usage: cring [/unidentified] <name> [slot] [weight] [stat_mods] <description>"
             )
             return
-        name = parts[0]
+        name = parts[0].strip("'\"")
         slot = "ring1"
         weight = 0
         idx = 1
@@ -1060,7 +1065,7 @@ class CmdCTrinket(Command):
                 "Usage: ctrinket [/unidentified] <name> [slot] [weight] [stat_mods] <description>"
             )
             return
-        name = parts[0]
+        name = parts[0].strip("'\"")
         slot = "accessory"
         weight = 0
         idx = 1
