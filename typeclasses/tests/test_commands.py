@@ -96,6 +96,25 @@ class TestInfoCommands(EvenniaTest):
         self.assertIn("PRIMARY STATS", out)
         self.assertIn("+", out)
 
+    def test_score_shows_gear_bonus(self):
+        from evennia.utils import create
+        from world.system import stat_manager
+
+        item = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="amulet",
+            location=self.char1,
+        )
+        item.tags.add("equipment", category="flag")
+        item.tags.add("identified", category="flag")
+        item.db.stat_mods = {"STR": 1}
+        item.wear(self.char1, True)
+        stat_manager.refresh_stats(self.char1)
+
+        self.char1.execute_cmd("score")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("(+1)", out)
+
     def test_inventory(self):
         self.char1.execute_cmd("inventory")
         self.assertTrue(self.char1.msg.called)

@@ -1,20 +1,3 @@
-from evennia.utils import iter_to_str
-from world.stats import (
-    CORE_STAT_KEYS,
-    EVASION_STAT,
-    DEFENSE_STATS,
-    OFFENSE_STATS,
-    REGEN_STATS,
-    TEMPO_STATS,
-    UTILITY_STATS,
-    PVP_STATS,
-    sum_bonus,
-    apply_stats,
-)
-from world.system import stat_manager
-import math
-import re
-
 ALIAS_MAP = {
     "str": "STR",
     "con": "CON",
@@ -42,6 +25,23 @@ def normalize_stat_key(key: str) -> str:
         return lower.upper()
     return lower
 
+from evennia.utils import iter_to_str
+from world.stats import (
+    CORE_STAT_KEYS,
+    EVASION_STAT,
+    DEFENSE_STATS,
+    OFFENSE_STATS,
+    REGEN_STATS,
+    TEMPO_STATS,
+    UTILITY_STATS,
+    PVP_STATS,
+    sum_bonus,
+    apply_stats,
+)
+from world.system import stat_manager
+import math
+import re
+
 PRIMARY_EXTRA = "perception"
 
 # Build list of secondary stats from world.stats excluding core attributes,
@@ -63,20 +63,29 @@ SECONDARY_DISPLAY = {stat.key: stat.display for stat in SECONDARY_STATS}
 def get_primary_stats(chara):
     """Return current core stat values with equipment bonuses."""
 
+    from world.system import state_manager
+
     stats = []
-    bonuses = getattr(chara.db, "equip_bonuses", {}) or {}
+    gear_bonus = getattr(chara.db, "equip_bonuses", {}) or {}
+    buff_bonus = state_manager.get_effect_mods(chara)
 
     for key in CORE_STAT_KEYS:
-        trait = chara.traits.get(key)
-        total = int(math.ceil(trait.value)) if trait else 0
-        bonus = int(bonuses.get(key, 0))
-        base = total - bonus
+        norm = normalize_stat_key(key)
+        base = (chara.db.base_primary_stats or {}).get(norm, 0)
+        temp = state_manager.get_temp_bonus(chara, norm)
+        g_bonus = int(gear_bonus.get(norm, 0))
+        b_bonus = int(buff_bonus.get(norm, 0))
+        total = base + g_bonus + b_bonus + temp
+        bonus = g_bonus + b_bonus + temp
         stats.append((key, base, bonus))
 
-    if (per := chara.traits.get(PRIMARY_EXTRA)):
-        total = int(math.ceil(per.value))
-        bonus = int(bonuses.get(PRIMARY_EXTRA, 0))
-        base = total - bonus
+    if chara.traits.get(PRIMARY_EXTRA):
+        norm = normalize_stat_key(PRIMARY_EXTRA)
+        base = getattr(chara.db, "base_perception", 0)
+        temp = state_manager.get_temp_bonus(chara, norm)
+        g_bonus = int(gear_bonus.get(norm, 0))
+        b_bonus = int(buff_bonus.get(norm, 0))
+        bonus = g_bonus + b_bonus + temp
         stats.append(("PER", base, bonus))
 
     return stats
@@ -85,14 +94,21 @@ def get_primary_stats(chara):
 def get_secondary_stats(chara):
     """Return computed secondary stats with equipment bonuses."""
 
+    from world.system import state_manager
+
     stats = []
-    bonuses = getattr(chara.db, "equip_bonuses", {}) or {}
+    gear_bonus = getattr(chara.db, "equip_bonuses", {}) or {}
+    buff_bonus = state_manager.get_effect_mods(chara)
 
     for key in SECONDARY_KEYS:
-        total = int(round(sum_bonus(chara, key)))
-        bonus = int(bonuses.get(key, 0))
-        base = total - bonus
-        display = SECONDARY_DISPLAY.get(key, key.replace("_", " ").title())
+        norm = normalize_stat_key(key)
+        derived = stat_manager.get_secondary_stat(chara, norm)
+        g_bonus = int(gear_bonus.get(norm, 0))
+        b_bonus = int(buff_bonus.get(norm, 0))
+        temp = state_manager.get_temp_bonus(chara, norm)
+        base = derived - g_bonus - b_bonus
+        bonus = g_bonus + b_bonus + temp
+        display = SECONDARY_DISPLAY.get(norm, norm.replace("_", " ").title())
         stats.append((display, base, bonus))
 
     return stats
