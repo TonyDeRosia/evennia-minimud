@@ -276,7 +276,7 @@ def menunode_finish(caller, **kwargs):
         stat: char.traits.get(stat).base for stat in STAT_LIST
     }
 
-    from world.system import stat_manager
+    from world.system import stat_manager, state_manager
     stat_manager.refresh_stats(char)
 
     # start fully recovered
@@ -286,7 +286,7 @@ def menunode_finish(caller, **kwargs):
         char.traits.mana.current = char.traits.mana.max
     if char.traits.get("stamina"):
         char.traits.stamina.current = char.traits.stamina.max
-    char.db.sated = 100
+    char.db.sated = state_manager.MAX_SATED
     stat_manager.refresh_stats(char)
 
     # assign the newly created character to this account

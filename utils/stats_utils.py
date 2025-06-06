@@ -39,6 +39,7 @@ from world.stats import (
     apply_stats,
 )
 from world.system import stat_manager
+from world.system.state_manager import MAX_SATED
 import math
 import re
 
@@ -180,9 +181,9 @@ def get_display_scroll(chara):
 
     sated_val = 0
     if hasattr(chara.db, "sated"):
-        sated_val = chara.db.sated or 0
+        sated_val = min(chara.db.sated or 0, MAX_SATED)
     elif chara.traits.get("sated"):
-        sated_val = chara.traits.sated.value
+        sated_val = min(chara.traits.sated.value, MAX_SATED)
     if sated_val <= 0:
         sated_disp = "|r0 (URGENT)|n"
     elif sated_val < 5:
