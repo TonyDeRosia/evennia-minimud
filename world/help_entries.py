@@ -478,6 +478,60 @@ Related:
 """,
     },
     {
+        "key": 'cring',
+        "category": 'Building',
+        "text": """
+Help for cring
+
+Create a wearable ring.
+
+Usage:
+    cring <name> [slot] [weight]
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - Slot defaults to ring1. Use ring2 for the other finger.
+
+Related:
+    help ansi
+""",
+    },
+    {
+        "key": 'ctrinket',
+        "category": 'Building',
+        "text": """
+Help for ctrinket
+
+Create a wearable trinket or accessory.
+
+Usage:
+    ctrinket <name> [slot] [weight]
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - Slot defaults to accessory.
+
+Related:
+    help ansi
+""",
+    },
+    {
         "key": 'item flags',
         "aliases": ['setflag', 'removeflag'],
         "category": 'Building',

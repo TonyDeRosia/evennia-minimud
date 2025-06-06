@@ -202,3 +202,30 @@ class TestAdminCommands(EvenniaTest):
         weapon.tags.add("twohanded", category="flag")
         self.assertIsNone(self.char1.at_wield(weapon))
         self.assertNotIn(weapon, self.char1.wielding)
+
+    def test_cring_and_ctrinket_wear_and_display(self):
+        """Rings and trinkets created by builders can be worn and show in equipment."""
+
+        self.char1.execute_cmd("cring ruby")
+        ring = next((o for o in self.char1.contents if "ruby" in list(o.aliases.all())), None)
+        self.assertIsNotNone(ring)
+        ring.wear(self.char1, True)
+        self.assertTrue(ring.db.worn)
+
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("equipment")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Ring1", out)
+        self.assertIn("ruby", out.lower())
+
+        self.char1.execute_cmd("ctrinket charm")
+        trinket = next((o for o in self.char1.contents if "charm" in list(o.aliases.all())), None)
+        self.assertIsNotNone(trinket)
+        trinket.wear(self.char1, True)
+        self.assertTrue(trinket.db.worn)
+
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("equipment")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Accessory", out)
+        self.assertIn("charm", out.lower())
