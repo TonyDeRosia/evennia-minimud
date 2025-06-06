@@ -520,4 +520,291 @@ HELP_ENTRY_DICTS = [
             guild.
         """,
     },
+    {
+        "key": "alist",
+        "category": "Building",
+        "text": """
+            List all registered areas and their number ranges.
+        """,
+    },
+    {
+        "key": "amake",
+        "category": "Building",
+        "text": """
+            Register a new area. Usage: amake <name> <start>-<end>
+        """,
+    },
+    {
+        "key": "aset",
+        "category": "Building",
+        "text": """
+            Update an area's properties. Usage: aset <area> <name|range|desc> <value>
+        """,
+    },
+    {
+        "key": "rooms",
+        "category": "Building",
+        "text": """
+            Show rooms belonging to your current area.
+        """,
+    },
+    {
+        "key": "dig",
+        "category": "Building",
+        "text": """
+            Create a new room in a direction. Usage: dig <direction> [<area>:<number>]
+        """,
+    },
+    {
+        "key": "@teleport",
+        "category": "Building",
+        "text": """
+            Teleport directly to a room. Usage: @teleport <area>:<number>
+        """,
+    },
+    {
+        "key": "setdesc",
+        "category": "Building",
+        "text": """
+            Set an object's description. Usage: setdesc <target> <description>
+        """,
+    },
+    {
+        "key": "setweight",
+        "category": "Building",
+        "text": """
+            Set an object's weight. Usage: setweight <target> <value>
+        """,
+    },
+    {
+        "key": "setslot",
+        "category": "Building",
+        "text": """
+            Define the slot or clothing type on an item. Usage: setslot <target> <slot>
+        """,
+    },
+    {
+        "key": "setdamage",
+        "category": "Building",
+        "text": """
+            Assign a damage value to a weapon. Usage: setdamage <target> <amount>
+        """,
+    },
+    {
+        "key": "setbuff",
+        "category": "Building",
+        "text": """
+            Add a buff identifier to an object. Usage: setbuff <target> <buff>
+        """,
+    },
+    {
+        "key": "qcreate",
+        "category": "Building",
+        "text": """
+            Create and register a new quest. Usage: qcreate <quest_key> "<title>"
+        """,
+    },
+    {
+        "key": "qset",
+        "category": "Building",
+        "text": """
+            Change quest attributes. Usage: qset <quest_key> <attr> <value>
+        """,
+    },
+    {
+        "key": "qitem",
+        "category": "Building",
+        "text": """
+            Spawn a quest item. Usage: qitem <quest_key> <item_key>
+        """,
+    },
+    {
+        "key": "qassign",
+        "category": "Building",
+        "text": """
+            Assign a quest to an NPC. Usage: qassign <npc> <quest_key>
+        """,
+    },
+    {
+        "key": "qtag",
+        "category": "Building",
+        "text": """
+            Set guild point rewards on a quest. Usage: qtag <quest_key> guild <guild> <amount>
+        """,
+    },
+    {
+        "key": "score",
+        "category": "General",
+        "text": """
+            View your character sheet. Usage: score
+        """,
+    },
+    {
+        "key": "desc",
+        "category": "General",
+        "text": """
+            View or set your description. Usage: desc [text]
+        """,
+    },
+    {
+        "key": "finger",
+        "category": "General",
+        "text": """
+            Show information about a player. Usage: finger <player>
+        """,
+    },
+    {
+        "key": "bounty",
+        "category": "General",
+        "text": """
+            Place a bounty on another character. Usage: bounty <target> <amount>
+        """,
+    },
+    {
+        "key": "inventory",
+        "category": "General",
+        "text": """
+            List items you are carrying. Usage: inventory [filter]
+        """,
+    },
+    {
+        "key": "equipment",
+        "category": "General",
+        "text": """
+            Show what you are wearing and wielding. Usage: equipment
+        """,
+    },
+    {
+        "key": "buffs",
+        "category": "General",
+        "text": """
+            Display active buff effects. Usage: buffs
+        """,
+    },
+    {
+        "key": "title",
+        "category": "General",
+        "text": """
+            View or change your title. Usage: title [new title]
+        """,
+    },
+    {
+        "key": "questlist",
+        "category": "General",
+        "text": """
+            List quests offered by NPCs here. Usage: questlist
+        """,
+    },
+    {
+        "key": "accept",
+        "category": "General",
+        "text": """
+            Accept a quest. Usage: accept <quest>
+        """,
+    },
+    {
+        "key": "progress",
+        "category": "General",
+        "text": """
+            Show your progress on active quests. Usage: progress
+        """,
+    },
+    {
+        "key": "complete",
+        "category": "General",
+        "text": """
+            Turn in a completed quest. Usage: complete <quest>
+        """,
+    },
+    {
+        "key": "list",
+        "category": "Here",
+        "text": """
+            View items a shop has for sale. Usage: list
+        """,
+    },
+    {
+        "key": "buy",
+        "category": "Here",
+        "text": """
+            Purchase an item from a shop. Usage: buy <item>
+        """,
+    },
+    {
+        "key": "sell",
+        "category": "Here",
+        "text": """
+            Offer an item for sale to a shop. Usage: sell <item>
+        """,
+    },
+    {
+        "key": "guild",
+        "category": "General",
+        "text": """
+            Display information about your guild membership. Usage: guild
+        """,
+    },
+    {
+        "key": "gather",
+        "category": "Here",
+        "text": """
+            Collect resources from a gathering node. Usage: gather
+        """,
+    },
+    {
+        "key": "attack",
+        "category": "Combat",
+        "text": """
+            Attack an enemy. Usage: attack <target> [with <weapon>]
+        """,
+    },
+    {
+        "key": "wield",
+        "category": "Combat",
+        "text": """
+            Wield a weapon. Usage: wield <weapon> [in <hand>]
+        """,
+    },
+    {
+        "key": "unwield",
+        "category": "Combat",
+        "text": """
+            Stop wielding a weapon. Usage: unwield <weapon>
+        """,
+    },
+    {
+        "key": "flee",
+        "category": "Combat",
+        "text": """
+            Attempt to escape from combat. Usage: flee
+        """,
+    },
+    {
+        "key": "respawn",
+        "category": "Combat",
+        "text": """
+            Return to town after being defeated. Usage: respawn
+        """,
+    },
+    {
+        "key": "rest",
+        "category": "General",
+        "text": """
+            Sit down to recover stamina. Usage: rest
+        """,
+    },
+    {
+        "key": "sleep",
+        "category": "General",
+        "text": """
+            Lie down and go to sleep. Usage: sleep
+        """,
+    },
+    {
+        "key": "wake",
+        "category": "General",
+        "text": """
+            Stand up from rest or sleep. Usage: wake
+        """,
+    },
 ]
