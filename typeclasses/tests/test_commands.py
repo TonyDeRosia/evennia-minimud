@@ -70,12 +70,10 @@ class TestInfoCommands(EvenniaTest):
 
     def test_score(self):
         self.char1.db.title = "Tester"
-        self.char1.db.coins = {
-            "copper": 10,
-            "silver": 2,
-            "gold": 1,
-            "platinum": 0,
-        }
+        self.char1.db.copper = 10
+        self.char1.db.silver = 2
+        self.char1.db.gold = 1
+        self.char1.db.platinum = 0
         self.char1.execute_cmd("score")
         self.assertTrue(self.char1.msg.called)
         args = self.char1.msg.call_args[0][0]
