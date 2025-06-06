@@ -29,7 +29,9 @@ class TestAdminCommands(EvenniaTest):
         self.char_other.cmdset.add_default(CharacterCmdSet)
 
     def test_setstat_and_setattr_offline(self):
-        offline = create_object(PlayerCharacter, key="Offline", location=self.room1, home=self.room1)
+        offline = create_object(
+            PlayerCharacter, key="Offline", location=self.room1, home=self.room1
+        )
         self.char1.execute_cmd(f"setstat {offline.key} STR 15")
         self.assertEqual(offline.traits.STR.base, 15)
         self.char1.execute_cmd(f"setattr {offline.key} foo bar")
@@ -78,13 +80,13 @@ class TestAdminCommands(EvenniaTest):
             self.assertFalse(pc.tags.get(category="buff", return_list=True))
             self.assertFalse(pc.tags.get(category="status", return_list=True))
 
-
     def test_revive_all(self):
         for pc in (self.char2, self.char_other):
             pc.tags.add("unconscious", category="status")
             pc.tags.add("lying down", category="status")
             pc.traits.health.current = 0
         from commands.combat import CmdRevive
+
         cmd = CmdRevive()
         cmd.caller = self.char1
         cmd.args = "all"
@@ -109,7 +111,10 @@ class TestAdminCommands(EvenniaTest):
 
     def test_cweapon_dice_and_slot(self):
         self.char1.execute_cmd("cweapon dagger mainhand/offhand 3d7 2 test")
-        weapon = next((obj for obj in self.char1.contents if "dagger" in list(obj.aliases.all())), None)
+        weapon = next(
+            (obj for obj in self.char1.contents if "dagger" in list(obj.aliases.all())),
+            None,
+        )
         self.assertIsNotNone(weapon)
         self.assertTrue(weapon.tags.has("mainhand", category="flag"))
         self.assertTrue(weapon.tags.has("offhand", category="flag"))
@@ -132,8 +137,12 @@ class TestAdminCommands(EvenniaTest):
         cmd.args = "epee offhand 2d6 1 A second blade"
         cmd.func()
 
-        w1 = next((o for o in self.char1.contents if "epee-1" in list(o.aliases.all())), None)
-        w2 = next((o for o in self.char1.contents if "epee-2" in list(o.aliases.all())), None)
+        w1 = next(
+            (o for o in self.char1.contents if "epee-1" in list(o.aliases.all())), None
+        )
+        w2 = next(
+            (o for o in self.char1.contents if "epee-2" in list(o.aliases.all())), None
+        )
 
         self.assertIsNotNone(w1)
         self.assertIsNotNone(w2)
@@ -190,7 +199,11 @@ class TestAdminCommands(EvenniaTest):
             "cweapon longsword mainhand 3d10 5 STR+2, Attack Power+5, Accuracy+3 A vicious longsword."
         )
         weapon = next(
-            (o for o in self.char1.contents if "longsword" in [al.lower() for al in o.aliases.all()]),
+            (
+                o
+                for o in self.char1.contents
+                if "longsword" in [al.lower() for al in o.aliases.all()]
+            ),
             None,
         )
         self.assertIsNotNone(weapon)
@@ -232,7 +245,9 @@ class TestAdminCommands(EvenniaTest):
         self.assertTrue(shield.tags.has("shield", category="flag"))
 
         self.char1.attributes.add("_wielded", {"left": None, "right": None})
-        weapon = create_object("typeclasses.gear.MeleeWeapon", key="great", location=self.char1)
+        weapon = create_object(
+            "typeclasses.gear.MeleeWeapon", key="great", location=self.char1
+        )
         weapon.tags.add("equipment", category="flag")
         weapon.tags.add("identified", category="flag")
         weapon.tags.add("twohanded", category="flag")
@@ -286,7 +301,9 @@ class TestAdminCommands(EvenniaTest):
         """Rings and trinkets created by builders can be worn and show in equipment."""
 
         self.char1.execute_cmd("cring ruby")
-        ring = next((o for o in self.char1.contents if "ruby" in list(o.aliases.all())), None)
+        ring = next(
+            (o for o in self.char1.contents if "ruby" in list(o.aliases.all())), None
+        )
         self.assertIsNotNone(ring)
         ring.wear(self.char1, True)
         self.assertTrue(ring.db.worn)
@@ -298,7 +315,9 @@ class TestAdminCommands(EvenniaTest):
         self.assertIn("ruby", out.lower())
 
         self.char1.execute_cmd("ctrinket charm")
-        trinket = next((o for o in self.char1.contents if "charm" in list(o.aliases.all())), None)
+        trinket = next(
+            (o for o in self.char1.contents if "charm" in list(o.aliases.all())), None
+        )
         self.assertIsNotNone(trinket)
         trinket.wear(self.char1, True)
         self.assertTrue(trinket.db.worn)
@@ -308,3 +327,73 @@ class TestAdminCommands(EvenniaTest):
         out = self.char1.msg.call_args[0][0]
         self.assertIn("Accessory", out)
         self.assertIn("charm", out.lower())
+
+    def test_carmor_with_modifiers(self):
+        self.char1.execute_cmd("carmor helm helm 2 1 STR+1, Dex+2 A sturdy helm.")
+        armor = next(
+            (
+                o
+                for o in self.char1.contents
+                if "helm" in [al.lower() for al in o.aliases.all()]
+            ),
+            None,
+        )
+        self.assertIsNotNone(armor)
+        self.assertEqual(armor.db.stat_mods, {"str": 1, "dex": 2})
+        self.assertEqual(armor.db.desc, "A sturdy helm.")
+
+    def test_ctool_with_modifiers(self):
+        self.char1.execute_cmd(
+            "ctool hammer smith 3 STR+2, Crafting Bonus+1 Heavy hammer."
+        )
+        tool = next((o for o in self.char1.contents if "hammer" in o.key.lower()), None)
+        self.assertIsNotNone(tool)
+        self.assertEqual(tool.db.weight, 3)
+        self.assertEqual(tool.db.stat_mods, {"str": 2, "crafting_bonus": 1})
+        self.assertEqual(tool.db.desc, "Heavy hammer.")
+
+    def test_cring_with_modifiers(self):
+        self.char1.execute_cmd("cring ruby ring2 1 STR+1, Luck+2 A jeweled ring.")
+        ring = next(
+            (
+                o
+                for o in self.char1.contents
+                if "ruby" in [al.lower() for al in o.aliases.all()]
+            ),
+            None,
+        )
+        self.assertIsNotNone(ring)
+        self.assertEqual(ring.db.stat_mods, {"str": 1, "luck": 2})
+        self.assertEqual(ring.db.desc, "A jeweled ring.")
+
+    def test_ctrinket_with_modifiers(self):
+        self.char1.execute_cmd(
+            "ctrinket charm accessory 1 Wis+2, Stealth+3 A lucky charm."
+        )
+        trinket = next(
+            (
+                o
+                for o in self.char1.contents
+                if "charm" in [al.lower() for al in o.aliases.all()]
+            ),
+            None,
+        )
+        self.assertIsNotNone(trinket)
+        self.assertEqual(trinket.db.stat_mods, {"wis": 2, "stealth": 3})
+        self.assertEqual(trinket.db.desc, "A lucky charm.")
+
+    def test_cgear_with_modifiers(self):
+        self.char1.execute_cmd(
+            "cgear typeclasses.objects.Object token accessory 1 1 STR+1, CON+2 A special token."
+        )
+        gear = next(
+            (
+                o
+                for o in self.char1.contents
+                if "token" in [al.lower() for al in o.aliases.all()]
+            ),
+            None,
+        )
+        self.assertIsNotNone(gear)
+        self.assertEqual(gear.db.stat_mods, {"str": 1, "con": 2})
+        self.assertEqual(gear.db.desc, "A special token.")

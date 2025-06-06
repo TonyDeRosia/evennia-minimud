@@ -1,5 +1,6 @@
 from evennia import CmdSet, create_object
 from evennia.objects.models import ObjectDB
+import shlex
 import re
 from .command import Command
 from .info import CmdScan
@@ -58,6 +59,52 @@ VALID_STATS = [
     "pvp_resilience",
     "guild_honor_rank_modifiers",
 ]
+
+
+def parse_stat_mods(text):
+    """Parse comma-separated stat modifiers from a string.
+
+    Returns a tuple ``(mods, desc)`` where ``mods`` is a dict mapping stat
+    keys to integer bonuses and ``desc`` is any remaining description text.
+
+    Raises ``ValueError`` if an unknown stat is encountered.
+    """
+
+    bonuses = {}
+    desc = None
+    if not text:
+        return bonuses, desc
+
+    pieces = [p.strip() for p in text.split(",")]
+    pattern = re.compile(r"([A-Za-z][A-Za-z _]*?)\+(-?\d+)")
+    desc_parts = []
+
+    for i, piece in enumerate(pieces):
+        if not piece:
+            continue
+        match = pattern.match(piece)
+        if match:
+            stat_name = match.group(1).strip()
+            amount = int(match.group(2))
+            key = stat_name.lower().replace(" ", "_")
+            if key not in VALID_STATS:
+                raise ValueError(stat_name)
+            bonuses[key] = amount
+            remainder = piece[match.end() :].strip()
+            if remainder:
+                desc_parts.append(remainder)
+                desc_parts.extend(p.strip() for p in pieces[i + 1 :])
+                break
+        else:
+            desc_parts.append(piece)
+            desc_parts.extend(p.strip() for p in pieces[i + 1 :])
+            break
+
+    if desc_parts:
+        desc = ", ".join(desc_parts).strip()
+    if desc is None and text:
+        desc = text.strip()
+    return bonuses, desc
 
 
 class CmdSetStat(Command):
@@ -335,7 +382,12 @@ class CmdPurge(Command):
         target = caller.search(self.args.strip(), global_search=True)
         if not target:
             return
-        if target is caller or target.has_account or target.destination or target.location is None:
+        if (
+            target is caller
+            or target.has_account
+            or target.destination
+            or target.location is None
+        ):
             caller.msg("You cannot purge that.")
             return
         target.delete()
@@ -411,43 +463,61 @@ class CmdCGear(Command):
         for prefix in ("/unidentified", "/unid"):
             if argstr.lower().startswith(prefix):
                 identified = False
-                argstr = argstr[len(prefix):].lstrip()
+                argstr = argstr[len(prefix) :].lstrip()
                 break
 
         if not argstr:
-            self.msg("Usage: cgear [/unidentified] <typeclass> <name> [slot] [value] [weight]")
+            self.msg(
+                "Usage: cgear [/unidentified] <typeclass> <name> [slot] [value] [weight] [stat_mods] <description>"
+            )
             return
-        parts = argstr.split()
+        parts = shlex.split(argstr)
         if len(parts) < 2:
-            self.msg("Usage: cgear [/unidentified] <typeclass> <name> [slot] [value] [weight]")
+            self.msg(
+                "Usage: cgear [/unidentified] <typeclass> <name> [slot] [value] [weight] [stat_mods] <description>"
+            )
             return
         tclass = parts[0]
         name = parts[1]
-        slot = parts[2] if len(parts) > 2 else None
+        idx = 2
+        slot = None
+        if idx < len(parts) and not parts[idx].lstrip("-+").isdigit():
+            slot = parts[idx]
+            idx += 1
         val = None
-        weight = 0
-        if len(parts) > 3:
-            try:
-                val = int(parts[3])
-            except ValueError:
+        if idx < len(parts):
+            if parts[idx].lstrip("-+").isdigit():
+                val = int(parts[idx])
+                idx += 1
+            else:
                 self.msg("Value must be a number.")
                 return
-        if len(parts) > 4:
-            try:
-                weight = int(parts[4])
-            except ValueError:
+        weight = 0
+        if idx < len(parts):
+            if parts[idx].lstrip("-+").isdigit():
+                weight = int(parts[idx])
+                idx += 1
+            else:
                 self.msg("Weight must be a number.")
                 return
-        _create_gear(
+        rest = " ".join(parts[idx:])
+        try:
+            bonuses, desc = parse_stat_mods(rest)
+        except ValueError as err:
+            self.msg(f"Invalid stat modifier: {err}")
+            return
+        obj = _create_gear(
             self.caller,
             tclass,
             name,
             slot,
             val,
-            desc=None,
+            desc=desc,
             weight=weight,
             identified=identified,
         )
+        if bonuses:
+            obj.db.stat_mods = bonuses
 
 
 class CmdOCreate(Command):
@@ -508,7 +578,7 @@ class CmdCWeapon(Command):
         for prefix in ("/unidentified", "/unid"):
             if argstr.lower().startswith(prefix):
                 identified = False
-                argstr = argstr[len(prefix):].lstrip()
+                argstr = argstr[len(prefix) :].lstrip()
                 break
 
         if not argstr:
@@ -572,14 +642,18 @@ class CmdCWeapon(Command):
                         self.msg(f"Invalid stat modifier: {stat_name}")
                         return
                     bonuses[key] = amount
-                    remainder = piece[match.end():].strip()
+                    remainder = piece[match.end() :].strip()
                     if remainder:
                         desc_parts.append(remainder)
-                        desc_parts.extend(p.strip() for p in pieces[pieces.index(piece)+1:])
+                        desc_parts.extend(
+                            p.strip() for p in pieces[pieces.index(piece) + 1 :]
+                        )
                         break
                 else:
                     desc_parts.append(piece)
-                    desc_parts.extend(p.strip() for p in pieces[pieces.index(piece)+1:])
+                    desc_parts.extend(
+                        p.strip() for p in pieces[pieces.index(piece) + 1 :]
+                    )
                     break
             if desc_parts:
                 desc = ", ".join(desc_parts).strip()
@@ -643,7 +717,7 @@ class CmdCShield(Command):
         for prefix in ("/unidentified", "/unid"):
             if argstr.lower().startswith(prefix):
                 identified = False
-                argstr = argstr[len(prefix):].lstrip()
+                argstr = argstr[len(prefix) :].lstrip()
                 break
 
         if not argstr:
@@ -699,14 +773,18 @@ class CmdCShield(Command):
                         self.msg(f"Invalid stat modifier: {stat_name}")
                         return
                     bonuses[key] = amount
-                    remainder = piece[match.end():].strip()
+                    remainder = piece[match.end() :].strip()
                     if remainder:
                         desc_parts.append(remainder)
-                        desc_parts.extend(p.strip() for p in pieces[pieces.index(piece)+1:])
+                        desc_parts.extend(
+                            p.strip() for p in pieces[pieces.index(piece) + 1 :]
+                        )
                         break
                 else:
                     desc_parts.append(piece)
-                    desc_parts.extend(p.strip() for p in pieces[pieces.index(piece)+1:])
+                    desc_parts.extend(
+                        p.strip() for p in pieces[pieces.index(piece) + 1 :]
+                    )
                     break
             if desc_parts:
                 desc = ", ".join(desc_parts).strip()
@@ -763,17 +841,27 @@ class CmdCArmor(Command):
         for prefix in ("/unidentified", "/unid"):
             if argstr.lower().startswith(prefix):
                 identified = False
-                argstr = argstr[len(prefix):].lstrip()
+                argstr = argstr[len(prefix) :].lstrip()
                 break
 
         if not argstr:
-            self.msg("Usage: carmor [/unidentified] <name> <slot> <armor> <weight> <description>")
+            self.msg(
+                "Usage: carmor [/unidentified] <name> <slot> <armor> <weight> [stat_mods] <description>"
+            )
             return
-        parts = argstr.split(None, 4)
-        if len(parts) < 5:
-            self.msg("Usage: carmor [/unidentified] <name> <slot> <armor> <weight> <description>")
+        parts = shlex.split(argstr)
+        if len(parts) < 4:
+            self.msg(
+                "Usage: carmor [/unidentified] <name> <slot> <armor> <weight> [stat_mods] <description>"
+            )
             return
-        name, slot, armor_str, weight_str, desc = parts
+        name, slot, armor_str, weight_str = parts[:4]
+        rest = " ".join(parts[4:])
+        try:
+            bonuses, desc = parse_stat_mods(rest)
+        except ValueError as err:
+            self.msg(f"Invalid stat modifier: {err}")
+            return
         slot = slot.lower()
         if slot not in VALID_SLOTS:
             self.msg("Invalid slot name.")
@@ -800,6 +888,9 @@ class CmdCArmor(Command):
             identified=identified,
         )
 
+        if bonuses:
+            obj.db.stat_mods = bonuses
+
         self.caller.msg(
             f"Slot: {slot}\nArmor: {armor}\nWeight: {weight}\nDescription: {desc}"
         )
@@ -821,32 +912,46 @@ class CmdCTool(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: ctool <name> [tag] [weight]")
+            self.msg("Usage: ctool <name> [tag] [weight] [stat_mods] <description>")
             return
-        parts = self.args.split()
+        parts = shlex.split(self.args)
+        if not parts:
+            self.msg("Usage: ctool <name> [tag] [weight] [stat_mods] <description>")
+            return
         name = parts[0]
         tag = None
         weight = 0
-        if len(parts) > 1:
-            if parts[1].isdigit():
-                weight = int(parts[1])
+        idx = 1
+        if idx < len(parts):
+            if parts[idx].isdigit():
+                weight = int(parts[idx])
+                idx += 1
             else:
-                tag = parts[1]
-                if len(parts) > 2:
-                    if parts[2].isdigit():
-                        weight = int(parts[2])
-                    else:
-                        self.msg("Weight must be a number.")
-                        return
+                tag = parts[idx]
+                idx += 1
+                if idx < len(parts) and parts[idx].isdigit():
+                    weight = int(parts[idx])
+                    idx += 1
+                elif idx < len(parts) and not parts[idx].isdigit():
+                    self.msg("Weight must be a number.")
+                    return
+        rest = " ".join(parts[idx:])
+        try:
+            bonuses, desc = parse_stat_mods(rest)
+        except ValueError as err:
+            self.msg(f"Invalid stat modifier: {err}")
+            return
         obj = _create_gear(
             self.caller,
             "typeclasses.objects.Object",
             name,
-            desc=None,
+            desc=desc,
             weight=weight,
         )
         if tag:
             obj.tags.add(tag, category="crafting_tool")
+        if bonuses:
+            obj.db.stat_mods = bonuses
 
 
 class CmdCRing(Command):
@@ -870,32 +975,55 @@ class CmdCRing(Command):
         for prefix in ("/unidentified", "/unid"):
             if argstr.lower().startswith(prefix):
                 identified = False
-                argstr = argstr[len(prefix):].lstrip()
+                argstr = argstr[len(prefix) :].lstrip()
                 break
 
         if not argstr:
-            self.msg("Usage: cring [/unidentified] <name> [slot] [weight]")
+            self.msg(
+                "Usage: cring [/unidentified] <name> [slot] [weight] [stat_mods] <description>"
+            )
             return
-        parts = argstr.split()
+        parts = shlex.split(argstr)
+        if not parts:
+            self.msg(
+                "Usage: cring [/unidentified] <name> [slot] [weight] [stat_mods] <description>"
+            )
+            return
         name = parts[0]
-        slot = parts[1].lower() if len(parts) > 1 else "ring1"
+        slot = "ring1"
         weight = 0
-        if len(parts) > 2:
-            if parts[2].isdigit():
-                weight = int(parts[2])
+        idx = 1
+        if idx < len(parts):
+            if parts[idx].isdigit():
+                weight = int(parts[idx])
+                idx += 1
             else:
-                self.msg("Weight must be a number.")
-                return
+                slot = parts[idx].lower()
+                idx += 1
+                if idx < len(parts) and parts[idx].isdigit():
+                    weight = int(parts[idx])
+                    idx += 1
+                elif idx < len(parts) and not parts[idx].isdigit():
+                    self.msg("Weight must be a number.")
+                    return
+        rest = " ".join(parts[idx:])
+        try:
+            bonuses, desc = parse_stat_mods(rest)
+        except ValueError as err:
+            self.msg(f"Invalid stat modifier: {err}")
+            return
 
-        _create_gear(
+        obj = _create_gear(
             self.caller,
             "typeclasses.objects.ClothingObject",
             name,
             slot,
-            desc=None,
+            desc=desc,
             weight=weight,
             identified=identified,
         )
+        if bonuses:
+            obj.db.stat_mods = bonuses
 
 
 class CmdCTrinket(Command):
@@ -918,32 +1046,55 @@ class CmdCTrinket(Command):
         for prefix in ("/unidentified", "/unid"):
             if argstr.lower().startswith(prefix):
                 identified = False
-                argstr = argstr[len(prefix):].lstrip()
+                argstr = argstr[len(prefix) :].lstrip()
                 break
 
         if not argstr:
-            self.msg("Usage: ctrinket [/unidentified] <name> [slot] [weight]")
+            self.msg(
+                "Usage: ctrinket [/unidentified] <name> [slot] [weight] [stat_mods] <description>"
+            )
             return
-        parts = argstr.split()
+        parts = shlex.split(argstr)
+        if not parts:
+            self.msg(
+                "Usage: ctrinket [/unidentified] <name> [slot] [weight] [stat_mods] <description>"
+            )
+            return
         name = parts[0]
-        slot = parts[1].lower() if len(parts) > 1 else "accessory"
+        slot = "accessory"
         weight = 0
-        if len(parts) > 2:
-            if parts[2].isdigit():
-                weight = int(parts[2])
+        idx = 1
+        if idx < len(parts):
+            if parts[idx].isdigit():
+                weight = int(parts[idx])
+                idx += 1
             else:
-                self.msg("Weight must be a number.")
-                return
+                slot = parts[idx].lower()
+                idx += 1
+                if idx < len(parts) and parts[idx].isdigit():
+                    weight = int(parts[idx])
+                    idx += 1
+                elif idx < len(parts) and not parts[idx].isdigit():
+                    self.msg("Weight must be a number.")
+                    return
+        rest = " ".join(parts[idx:])
+        try:
+            bonuses, desc = parse_stat_mods(rest)
+        except ValueError as err:
+            self.msg(f"Invalid stat modifier: {err}")
+            return
 
-        _create_gear(
+        obj = _create_gear(
             self.caller,
             "typeclasses.objects.ClothingObject",
             name,
             slot,
-            desc=None,
+            desc=desc,
             weight=weight,
             identified=identified,
         )
+        if bonuses:
+            obj.db.stat_mods = bonuses
 
 
 class AdminCmdSet(CmdSet):
@@ -987,4 +1138,3 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdSetBuff)
         self.add(CmdSetFlag)
         self.add(CmdRemoveFlag)
-
