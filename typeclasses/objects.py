@@ -18,6 +18,7 @@ from evennia.contrib.game_systems.clothing import ContribClothing
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 
 from commands.interact import GatherCmdSet
+from world.system import stat_manager
 
 
 class ObjectParent:
@@ -231,6 +232,7 @@ class ClothingObject(ObjectParent, ContribClothing):
         if result:
             self.location = None
             wearer.update_carry_weight()
+            stat_manager.refresh_stats(wearer)
         return result
 
     def remove(self, wearer, quiet=False):
@@ -239,6 +241,7 @@ class ClothingObject(ObjectParent, ContribClothing):
         if result:
             self.location = wearer
             wearer.update_carry_weight()
+            stat_manager.refresh_stats(wearer)
         return result
 
 
