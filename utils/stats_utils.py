@@ -34,25 +34,40 @@ SECONDARY_DISPLAY = {stat.key: stat.display for stat in SECONDARY_STATS}
 
 
 def get_primary_stats(chara):
-    """Return current core stat values."""
+    """Return current core stat values with equipment bonuses."""
+
     stats = []
+    bonuses = getattr(chara.db, "equip_bonuses", {}) or {}
+
     for key in CORE_STAT_KEYS:
         trait = chara.traits.get(key)
-        val = trait.value if trait else 0
-        val = int(math.ceil(val))
-        stats.append((key, val))
+        total = int(math.ceil(trait.value)) if trait else 0
+        bonus = int(bonuses.get(key, 0))
+        base = total - bonus
+        stats.append((key, base, bonus))
+
     if (per := chara.traits.get(PRIMARY_EXTRA)):
-        stats.append(("PER", int(math.ceil(per.value))))
+        total = int(math.ceil(per.value))
+        bonus = int(bonuses.get(PRIMARY_EXTRA, 0))
+        base = total - bonus
+        stats.append(("PER", base, bonus))
+
     return stats
 
 
 def get_secondary_stats(chara):
-    """Return computed secondary stats."""
+    """Return computed secondary stats with equipment bonuses."""
+
     stats = []
+    bonuses = getattr(chara.db, "equip_bonuses", {}) or {}
+
     for key in SECONDARY_KEYS:
-        value = int(round(sum_bonus(chara, key)))
+        total = int(round(sum_bonus(chara, key)))
+        bonus = int(bonuses.get(key, 0))
+        base = total - bonus
         display = SECONDARY_DISPLAY.get(key, key.replace("_", " ").title())
-        stats.append((display, value))
+        stats.append((display, base, bonus))
+
     return stats
 
 
@@ -173,14 +188,24 @@ def get_display_scroll(chara):
 
     lines.append("")
     lines.append("|YPRIMARY STATS|n")
-    primaries = "  ".join(
-        f"{k}: |w{v}|n" for k, v in get_primary_stats(chara)
-    )
+    primaries_list = []
+    for key, base, bonus in get_primary_stats(chara):
+        total = base + bonus
+        if bonus:
+            primaries_list.append(f"{key}: |w{total}|n (+{bonus})")
+        else:
+            primaries_list.append(f"{key}: |w{total}|n")
+    primaries = "  ".join(primaries_list)
     lines.append(primaries)
 
     lines.append("")
     lines.append("|YSECONDARY STATS|n")
-    lines.extend(_columns(get_secondary_stats(chara)))
+    secondary_pairs = []
+    for name, base, bonus in get_secondary_stats(chara):
+        total = base + bonus
+        val = f"{total} (+{bonus})" if bonus else f"{total}"
+        secondary_pairs.append((name, val))
+    lines.extend(_columns(secondary_pairs))
 
     width = max(len(_strip_colors(l)) for l in lines)
     top = "+" + "=" * (width + 2) + "+"

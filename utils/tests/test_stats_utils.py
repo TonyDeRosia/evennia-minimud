@@ -9,3 +9,9 @@ class TestDisplayScroll(EvenniaTest):
         sheet = get_display_scroll(char)
         self.assertIn("Sated", sheet)
         self.assertIn("URGENT", sheet)
+
+    def test_bonus_display(self):
+        char = self.char1
+        char.db.equip_bonuses = {"STR": 2}
+        sheet = get_display_scroll(char)
+        self.assertIn("(+2)", sheet)
