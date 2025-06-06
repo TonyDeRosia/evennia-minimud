@@ -109,7 +109,7 @@ class TestAdminCommands(EvenniaTest):
 
     def test_cweapon_dice_and_slot(self):
         self.char1.execute_cmd("cweapon dagger mainhand/offhand 3d7")
-        weapon = next((obj for obj in self.char1.contents if obj.key == "dagger"), None)
+        weapon = next((obj for obj in self.char1.contents if "dagger" in list(obj.aliases.all())), None)
         self.assertIsNotNone(weapon)
         self.assertTrue(weapon.tags.has("mainhand", category="flag"))
         self.assertTrue(weapon.tags.has("offhand", category="flag"))
@@ -117,8 +117,8 @@ class TestAdminCommands(EvenniaTest):
         self.assertEqual(weapon.db.dice_num, 3)
         self.assertEqual(weapon.db.dice_sides, 7)
 
-    def test_cweapon_duplicate_names_unique_keys(self):
-        """Creating weapons with the same name should result in unique keys."""
+    def test_cweapon_duplicate_names_numbered_aliases(self):
+        """Creating weapons with the same name should give numbered aliases."""
 
         from commands.admin import CmdCWeapon
 
@@ -132,14 +132,19 @@ class TestAdminCommands(EvenniaTest):
         cmd.args = "epee offhand 2d6 A second blade"
         cmd.func()
 
-        w1 = next((o for o in self.char1.contents if o.key == "Epee" or o.key == "epee"), None)
-        w2 = next((o for o in self.char1.contents if o.key == "epee-1"), None)
+        w1 = next((o for o in self.char1.contents if "epee-1" in list(o.aliases.all())), None)
+        w2 = next((o for o in self.char1.contents if "epee-2" in list(o.aliases.all())), None)
 
         self.assertIsNotNone(w1)
         self.assertIsNotNone(w2)
 
-        self.assertEqual(w1.aliases.get("epee"), "epee")
-        self.assertEqual(w2.aliases.get("epee-1"), "epee-1")
+        self.assertEqual(w1.key, "Epee")
+        self.assertEqual(w2.key, "Epee")
+
+        self.assertIn("epee", w1.aliases.all())
+        self.assertIn("epee", w2.aliases.all())
+        self.assertIn("epee-1", w1.aliases.all())
+        self.assertIn("epee-2", w2.aliases.all())
 
         self.assertEqual(w1.db.desc, "A thin blade")
         self.assertEqual(w2.db.desc, "A second blade")

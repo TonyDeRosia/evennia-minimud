@@ -186,9 +186,9 @@ class TestInfoCommands(EvenniaTest):
         self.char1.execute_cmd("cweapon epee mainhand 2d5 second")
         self.char1.execute_cmd("cweapon epee offhand 3d6 third")
 
-        w1 = next(o for o in self.char1.contents if o.key == "epee")
-        w2 = next(o for o in self.char1.contents if o.key == "epee-1")
-        w3 = next(o for o in self.char1.contents if o.key == "epee-2")
+        w1 = next(o for o in self.char1.contents if "epee-1" in list(o.aliases.all()))
+        w2 = next(o for o in self.char1.contents if "epee-2" in list(o.aliases.all()))
+        w3 = next(o for o in self.char1.contents if "epee-3" in list(o.aliases.all()))
 
         w2.tags.add("flaming", category="buff")
         w2.tags.add("STR+2")
@@ -201,14 +201,14 @@ class TestInfoCommands(EvenniaTest):
         w3.db.slot = "offhand"
 
         self.char1.msg.reset_mock()
-        self.char1.execute_cmd("inspect epee-1")
+        self.char1.execute_cmd("inspect epee-2")
         out = self.char1.msg.call_args[0][0]
         self.assertIn("Damage: 2d5", out)
         self.assertIn("Slot: mainhand", out)
         self.assertIn("Effects: flaming", out)
 
         self.char1.msg.reset_mock()
-        self.char1.execute_cmd("inspect epee-2")
+        self.char1.execute_cmd("inspect epee-3")
         out = self.char1.msg.call_args[0][0]
         self.assertIn("Damage: 3d6", out)
         self.assertIn("Slot: offhand", out)

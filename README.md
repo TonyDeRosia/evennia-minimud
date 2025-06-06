@@ -112,10 +112,9 @@ Builders can quickly create melee weapons with the `cweapon` command.
 cweapon <name> <slot> <damage> [description]
 ```
 
-Damage may be a flat number or an `NdN` dice value. If a weapon with the
-requested name already exists, a numeric suffix such as `-1` or `-2` is
-appended to make the key unique. A lowercase alias matching the final key is
-added automatically.
+Damage may be a flat number or an `NdN` dice value. The weapon's key always uses
+the capitalized name, but a lowercase alias plus a numbered alias like `name-1`
+or `name-2` is added depending on how many weapons with that key already exist.
 
 The generated alias can be used with `inspect` to target that specific item.
 When a weapon is identified, `inspect` shows its damage, slot and any effects,

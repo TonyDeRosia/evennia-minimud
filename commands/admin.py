@@ -256,21 +256,20 @@ class CmdPurge(Command):
 def _create_gear(caller, typeclass, name, slot=None, value=None, attr="dmg", desc=None):
     """Helper to create gear objects.
 
-    Ensures a unique key by appending ``-1`` etc if needed and stores an
-    optional description. A lowercase alias matching the final key is added.
+    Uses the given ``name`` as-is for the key and assigns a numbered
+    alias based on how many objects with the same key already exist. A
+    lowercase base alias matching ``name`` is always added.
     """
 
-    base_key = name
-    key = base_key
-    counter = 1
-    while ObjectDB.objects.filter(db_key__iexact=key).exists():
-        key = f"{base_key}-{counter}"
-        counter += 1
+    key = name
+    alias_base = key.lower()
+    count = ObjectDB.objects.filter(db_key__iexact=key).count()
 
     obj = create_object(typeclass, key=key, location=caller)
     if desc:
         obj.db.desc = desc
-    obj.aliases.add(key.lower())
+    obj.aliases.add(alias_base)
+    obj.aliases.add(f"{alias_base}-{count + 1}")
     if slot:
         if obj.is_typeclass("typeclasses.objects.ClothingObject", exact=False):
             obj.db.clothing_type = slot
@@ -362,7 +361,15 @@ class CmdCWeapon(Command):
             self.msg("Slot must be mainhand, offhand, mainhand/offhand, or twohanded.")
             return
 
-        obj = _create_gear(self.caller, "typeclasses.gear.MeleeWeapon", name, desc=desc)
+        obj = _create_gear(
+            self.caller,
+            "typeclasses.gear.MeleeWeapon",
+            name.capitalize(),
+            desc=desc,
+        )
+
+        if slot:
+            obj.db.slot = slot
 
         if slot:
             if slot == "mainhand/offhand":
