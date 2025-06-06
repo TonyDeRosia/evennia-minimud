@@ -121,7 +121,6 @@ class TestInfoCommands(EvenniaTest):
         )
         weapon.tags.add("equipment", category="flag")
         weapon.tags.add("identified", category="flag")
-        weapon.db.twohanded = True
 
         self.char1.attributes.add("_wielded", {"left": weapon, "right": weapon})
         self.char1.execute_cmd("equipment")

@@ -18,15 +18,7 @@ def render_equipment(caller):
     display = ["+=========================+", "| [ EQUIPMENT ]"]
 
     twohanded_weapon = None
-    if (
-        "mainhand" in eq
-        and eq["mainhand"]
-        and (
-            getattr(eq["mainhand"].db, "twohanded", False)
-            or eq["mainhand"].tags.has("twohanded", category="flag")
-            or eq["mainhand"].tags.has("two_handed", category="wielded")
-        )
-    ):
+    if eq.get("mainhand") and eq.get("mainhand") == eq.get("offhand"):
         twohanded_weapon = eq["mainhand"]
 
     if twohanded_weapon:
