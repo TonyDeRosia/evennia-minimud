@@ -16,6 +16,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 from evennia import default_cmds
 from evennia.contrib.game_systems.clothing import ClothedCharacterCmdSet
+from commands.equip import CmdWear
 
 from evennia.contrib.game_systems.containers.containers import ContainerCmdSet
 from evennia.contrib.grid.xyzgrid.commands import XYZGridCmdSet
@@ -59,6 +60,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         # any commands you add below will overload the default ones.
         #
         self.add(ClothedCharacterCmdSet)
+        self.add(CmdWear())
         self.add(CmdMoney)
         self.add(ContainerCmdSet)
         self.add(MovementCmdSet)
