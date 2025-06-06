@@ -535,7 +535,7 @@ Help for ctrinket
 Create a wearable trinket or accessory.
 
 Usage:
-    ctrinket [/unidentified] <name> [slot] [weight] [stat_mods] <description>
+    ctrinket [/unidentified] <name> [weight] [stat_mods] <description>
 
 Switches:
     None
@@ -547,7 +547,7 @@ Examples:
     ctrinket "Lucky Charm" accessory 1 WIS+2, Stealth+3 A shimmering charm.
 
 Notes:
-    - Slot defaults to accessory.
+    - Trinkets occupy the dedicated trinket slot.
     - Add |w/unidentified|n before the name to create the item unidentified.
     - Modifiers use the form |wStat+Value|n and are comma separated.
     - Enclose multiword or ANSI-colored names in quotes.
