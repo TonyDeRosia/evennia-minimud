@@ -46,7 +46,7 @@ COMMAND_DEFAULT_CLASS = "commands.command.MuxCommand"
 EXTRA_LAUNCHER_COMMANDS["xyzgrid"] = "evennia.contrib.grid.xyzgrid.launchcmd.xyzcommand"
 PROTOTYPE_MODULES += ["evennia.contrib.grid.xyzgrid.prototypes"]
 XYZROOM_PROTOTYPE_OVERRIDE = {"typeclass": "typeclasses.rooms.XYGridRoom"}
-XYZEXIT_PROTOTYPE_OVERRIDE = {"typeclass": "typeclasses.exits.XYGridExit"}
+# exits are stored as room.db.exits mappings
 
 
 # Clothing - https://www.evennia.com/docs/latest/Contribs/Contrib-Clothing.html#configuration

@@ -19,6 +19,7 @@ from evennia.contrib.game_systems.clothing import ClothedCharacterCmdSet
 
 from evennia.contrib.game_systems.containers.containers import ContainerCmdSet
 from evennia.contrib.grid.xyzgrid.commands import XYZGridCmdSet
+from commands.movement import MovementCmdSet
 from evennia.contrib.rpg.character_creator.character_creator import ContribCmdCharCreate
 from evennia.contrib.game_systems.crafting.crafting import CmdCraft
 
@@ -59,6 +60,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(ClothedCharacterCmdSet)
         self.add(CmdMoney)
         self.add(ContainerCmdSet)
+        self.add(MovementCmdSet)
         self.add(XYZGridCmdSet)
         self.add(CmdCraft)
         self.add(CombatCmdSet)

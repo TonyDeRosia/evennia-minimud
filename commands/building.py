@@ -2,7 +2,6 @@ from evennia import create_object
 from evennia.objects.models import ObjectDB
 from .command import Command
 from typeclasses.rooms import Room
-from typeclasses.exits import Exit
 from world.areas import find_area
 
 
@@ -138,20 +137,13 @@ class CmdDig(Command):
         new_room = create_object(Room, key="Room")
         if area:
             new_room.set_area(area, room_id)
-        exit_to = create_object(
-            Exit,
-            key=direction,
-            aliases=[SHORT[direction]],
-            location=caller.location,
-            destination=new_room,
-        )
-        exit_back = create_object(
-            Exit,
-            key=opposite,
-            aliases=[SHORT[opposite]],
-            location=new_room,
-            destination=caller.location,
-        )
+
+        # add exits in both directions
+        caller.location.db.exits = caller.location.db.exits or {}
+        new_room.db.exits = new_room.db.exits or {}
+        caller.location.db.exits[direction] = new_room
+        new_room.db.exits[opposite] = caller.location
+
         caller.msg(f"You dig {direction} and create a new room.")
 
 

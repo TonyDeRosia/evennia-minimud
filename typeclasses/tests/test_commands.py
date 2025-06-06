@@ -414,13 +414,10 @@ class TestDigCommand(EvenniaTest):
     def test_dig_creates_room_and_exits(self):
         start = self.char1.location
         self.char1.execute_cmd("dig north")
-        new_exit = start.exits.get(key="north")
-        self.assertIsNotNone(new_exit)
-        self.assertIn("n", list(new_exit.aliases.all()))
-        new_room = new_exit.destination
-        back_exit = new_room.exits.get(key="south")
-        self.assertIsNotNone(back_exit)
-        self.assertIn("s", list(back_exit.aliases.all()))
+        new_room = start.db.exits.get("north")
+        self.assertIsNotNone(new_room)
+        back = new_room.db.exits.get("south")
+        self.assertEqual(back, start)
         self.char1.execute_cmd("north")
         self.assertEqual(self.char1.location, new_room)
         self.char1.execute_cmd("south")
@@ -430,7 +427,7 @@ class TestDigCommand(EvenniaTest):
         start = self.char1.location
         start.set_area("test", 1)
         self.char1.execute_cmd("dig east test 2")
-        new_room = start.exits.get(key="east").destination
+        new_room = start.db.exits.get("east")
         self.assertEqual(new_room.db.area, "test")
         self.assertEqual(new_room.db.room_id, 2)
 
@@ -450,14 +447,14 @@ class TestExtendedDigTeleport(EvenniaTest):
     def test_dig_eq_syntax(self):
         start = self.char1.location
         self.char1.execute_cmd("dig north=test:2")
-        new_room = start.exits.get(key="north").destination
+        new_room = start.db.exits.get("north")
         self.assertEqual(new_room.db.area, "test")
         self.assertEqual(new_room.db.room_id, 2)
 
     def test_teleport_to_area_room(self):
         start = self.char1.location
         self.char1.execute_cmd("dig east=test:3")
-        target = start.exits.get(key="east").destination
+        target = start.db.exits.get("east")
         self.char1.execute_cmd("@teleport test:3")
         self.assertEqual(self.char1.location, target)
         # out of range should not move
