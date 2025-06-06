@@ -380,7 +380,7 @@ Help for cshield
 Create a shield piece of armor.
 
 Usage:
-    cshield <name> <armor_rating> <weight> <description>
+    cshield <name> <armor_rating> <block_rate> <weight> [stat_mods] <description>
 
 Switches:
     None
@@ -392,7 +392,9 @@ Examples:
     None
 
 Notes:
-    - The armor value is stored on the item.
+    - The armor and block rate values are stored on the item.
+    - Optional stat modifiers can be provided as comma separated entries like
+    |wSTR+2, Attack Power+5|n. Valid stats include all core and derived values.
 
 Related:
     help ansi

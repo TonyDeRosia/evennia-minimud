@@ -206,10 +206,11 @@ class TestAdminCommands(EvenniaTest):
     def test_cshield_flags_and_blocks_twohanded(self):
         """Shield created with cshield should get shield flag and block two-handed weapons."""
 
-        self.char1.execute_cmd("cshield buckler 1 1 buckler")
+        self.char1.execute_cmd("cshield buckler 1 5 1 buckler")
         shield = next((o for o in self.char1.contents if "buckler" in list(o.aliases.all())), None)
         self.assertIsNotNone(shield)
         self.assertTrue(shield.tags.has("shield", category="flag"))
+        self.assertEqual(shield.db.block_rate, 5)
         shield.wear(self.char1, True)
         self.assertTrue(shield.db.worn)
 
@@ -220,6 +221,29 @@ class TestAdminCommands(EvenniaTest):
         weapon.tags.add("twohanded", category="flag")
         self.assertIsNone(self.char1.at_wield(weapon))
         self.assertNotIn(weapon, self.char1.wielding)
+
+    def test_cshield_with_modifiers(self):
+        """Shield creation supports stat modifiers and description parsing."""
+
+        self.char1.execute_cmd(
+            "cshield kite 2 8 3 STR+1, Critical Resist+4 A sturdy kite shield."
+        )
+        shield = next(
+            (
+                o
+                for o in self.char1.contents
+                if "kite" in [al.lower() for al in o.aliases.all()]
+            ),
+            None,
+        )
+        self.assertIsNotNone(shield)
+        self.assertEqual(shield.db.block_rate, 8)
+        self.assertEqual(
+            shield.db.modifiers,
+            {"str": 1, "critical_resist": 4},
+        )
+        self.assertEqual(shield.db.stat_mods, {"str": 1, "critical_resist": 4})
+        self.assertEqual(shield.db.desc, "A sturdy kite shield.")
 
     def test_cring_and_ctrinket_wear_and_display(self):
         """Rings and trinkets created by builders can be worn and show in equipment."""
