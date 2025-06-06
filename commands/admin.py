@@ -14,6 +14,7 @@ from .building import (
 )
 from world.stats import CORE_STAT_KEYS
 from world.system import stat_manager
+from utils.stats_utils import get_display_scroll
 
 
 class CmdSetStat(Command):
@@ -46,27 +47,57 @@ class CmdSetStat(Command):
         stat_key = alias_map.get(stat_key.lower(), stat_key)
         stat_key_up = stat_key.upper()
         stat_key_low = stat_key.lower()
+
+        trait = target.traits.get(stat_key_up) or target.traits.get(stat_key_low)
+        if trait:
+            trait.base = value
+            if stat_key_up in CORE_STAT_KEYS:
+                base = target.db.base_primary_stats or {}
+                base[stat_key_up] = value
+                target.db.base_primary_stats = base
+            else:
+                overrides = target.db.stat_overrides or {}
+                overrides[trait.key.lower()] = value
+                target.db.stat_overrides = overrides
+            stat_manager.refresh_stats(target)
+            self.msg(f"{trait.key} set to {value} on {target.key}.")
+            self.msg(get_display_scroll(target))
+            return
+
+        if stat_key_low in {"copper", "silver", "gold", "platinum"}:
+            coins = target.db.coins or {}
+            coins[stat_key_low] = value
+            target.db.coins = coins
+            stat_manager.refresh_stats(target)
+            self.msg(f"{stat_key_low} set to {value} on {target.key}.")
+            self.msg(get_display_scroll(target))
+            return
+
         if stat_key_low == "sated":
             target.db.sated = value
-            self.msg(f"sated set to {value} on {target.key}.")
-            return
-        if stat_key_up in CORE_STAT_KEYS:
-            trait = target.traits.get(stat_key_up)
-            if trait:
-                trait.base = value
-            else:
-                target.traits.add(stat_key_up, stat_key_up, base=value)
-            base = target.db.base_primary_stats or {}
-            base[stat_key_up] = value
-            target.db.base_primary_stats = base
             stat_manager.refresh_stats(target)
-            self.msg(f"{stat_key_up} set to {value} on {target.key}.")
+            self.msg(f"sated set to {value} on {target.key}.")
+            self.msg(get_display_scroll(target))
             return
-        overrides = target.db.stat_overrides or {}
-        overrides[stat_key_low] = value
-        target.db.stat_overrides = overrides
+
+        if stat_key_low == "level":
+            target.db.level = value
+            stat_manager.refresh_stats(target)
+            self.msg(f"level set to {value} on {target.key}.")
+            self.msg(get_display_scroll(target))
+            return
+
+        if stat_key_low == "exp":
+            target.db.exp = value
+            stat_manager.refresh_stats(target)
+            self.msg(f"exp set to {value} on {target.key}.")
+            self.msg(get_display_scroll(target))
+            return
+
+        target.attributes.add(stat_key_low, value)
         stat_manager.refresh_stats(target)
         self.msg(f"{stat_key_low} set to {value} on {target.key}.")
+        self.msg(get_display_scroll(target))
 
 
 class CmdSetAttr(Command):
