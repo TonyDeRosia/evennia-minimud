@@ -27,6 +27,7 @@ from evennia.contrib.game_systems.crafting.crafting import CmdCraft
 from commands.combat import CombatCmdSet
 from commands.skills import SkillCmdSet
 from commands.interact import InteractCmdSet
+from commands.equipment import EquipmentCmdSet
 from commands.account import AccountOptsCmdSet
 from commands.shops import CmdMoney
 from commands.info import InfoCmdSet
@@ -69,6 +70,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(InfoCmdSet)
         self.add(RestCmdSet)
         self.add(GuildCmdSet)
+        self.add(EquipmentCmdSet)
         self.add(CmdDig)
         self.add(CmdTeleport)
         self.add(RoomFlagCmdSet)

@@ -76,6 +76,7 @@ class TestObjectFlags(EvenniaTest):
         second.wear(self.char1, "wear")
         self.assertTrue(second.db.worn)
         self.assertFalse(first.db.worn)
+        self.assertEqual(first.location, self.char1)
 
 
 class TestInspectFlags(EvenniaTest):

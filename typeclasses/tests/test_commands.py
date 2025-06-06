@@ -409,6 +409,27 @@ class TestRestCommands(EvenniaTest):
         self.char1.msg.assert_any_call("You can't see anything with your eyes closed.")
 
 
+class TestRemoveCommand(EvenniaTest):
+    def test_remove_returns_to_inventory(self):
+        from evennia.utils import create
+
+        item = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="cap",
+            location=self.char1,
+        )
+        item.tags.add("equipment", category="flag")
+        item.tags.add("identified", category="flag")
+        item.tags.add("hat", category="slot")
+        item.wear(self.char1, True)
+        self.assertTrue(item.db.worn)
+        self.assertIsNone(item.location)
+
+        self.char1.execute_cmd(f"remove {item.key}")
+        self.assertFalse(item.db.worn)
+        self.assertEqual(item.location, self.char1)
+
+
 class TestDigCommand(EvenniaTest):
     def test_dig_creates_room_and_exits(self):
         start = self.char1.location
