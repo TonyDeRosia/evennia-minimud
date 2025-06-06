@@ -319,13 +319,15 @@ class TestAdminCommands(EvenniaTest):
             (o for o in self.char1.contents if "charm" in list(o.aliases.all())), None
         )
         self.assertIsNotNone(trinket)
+        self.assertEqual(trinket.db.clothing_type, "trinket")
+        self.assertTrue(trinket.tags.has("trinket", category="slot"))
         trinket.wear(self.char1, True)
         self.assertTrue(trinket.db.worn)
 
         self.char1.msg.reset_mock()
         self.char1.execute_cmd("equipment")
         out = self.char1.msg.call_args[0][0]
-        self.assertIn("Accessory", out)
+        self.assertIn("Trinket", out)
         self.assertIn("charm", out.lower())
 
     def test_carmor_with_modifiers(self):
@@ -368,7 +370,7 @@ class TestAdminCommands(EvenniaTest):
 
     def test_ctrinket_with_modifiers(self):
         self.char1.execute_cmd(
-            "ctrinket charm accessory 1 Wis+2, Stealth+3 A lucky charm."
+            "ctrinket charm 1 Wis+2, Stealth+3 A lucky charm."
         )
         trinket = next(
             (
@@ -379,6 +381,8 @@ class TestAdminCommands(EvenniaTest):
             None,
         )
         self.assertIsNotNone(trinket)
+        self.assertEqual(trinket.db.clothing_type, "trinket")
+        self.assertTrue(trinket.tags.has("trinket", category="slot"))
         self.assertEqual(trinket.db.stat_mods, {"wis": 2, "stealth": 3})
         self.assertEqual(trinket.db.desc, "A lucky charm.")
 
@@ -419,9 +423,11 @@ class TestAdminCommands(EvenniaTest):
         ring = next((o for o in self.char1.contents if o.key == "ruby ring"), None)
         self.assertIsNotNone(ring)
 
-        self.char1.execute_cmd('ctrinket "lucky charm" accessory 1 shiny')
+        self.char1.execute_cmd('ctrinket "lucky charm" 1 shiny')
         trinket = next((o for o in self.char1.contents if o.key == "lucky charm"), None)
         self.assertIsNotNone(trinket)
+        self.assertEqual(trinket.db.clothing_type, "trinket")
+        self.assertTrue(trinket.tags.has("trinket", category="slot"))
 
         self.char1.execute_cmd('cgear typeclasses.objects.Object "mysterious orb" accessory 1 1 odd')
         gear = next((o for o in self.char1.contents if o.key == "mysterious orb"), None)
