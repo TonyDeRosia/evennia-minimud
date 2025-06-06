@@ -6,4 +6,29 @@ MAX_SATED = 100
 # Highest level a player character can reach.
 MAX_LEVEL = 100
 
-__all__ = ["MAX_SATED", "MAX_LEVEL"]
+# Primary stat caps
+MAX_STR = 99
+MAX_CON = 99
+MAX_DEX = 99
+MAX_INT = 99
+MAX_WIS = 99
+MAX_LUCK = 99
+
+# Derived resource caps
+MAX_HP = 999
+MAX_MP = 999
+MAX_SP = 999
+
+__all__ = [
+    "MAX_SATED",
+    "MAX_LEVEL",
+    "MAX_STR",
+    "MAX_CON",
+    "MAX_DEX",
+    "MAX_INT",
+    "MAX_WIS",
+    "MAX_LUCK",
+    "MAX_HP",
+    "MAX_MP",
+    "MAX_SP",
+]
