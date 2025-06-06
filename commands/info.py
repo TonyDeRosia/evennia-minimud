@@ -11,13 +11,12 @@ from .command import Command
 
 class CmdScore(Command):
     """
-    View your character sheet.
+    View your character sheet. Usage: score
 
     Usage:
         score
 
-    Example:
-        score
+    See |whelp score|n for details.
     """
 
     key = "score"
@@ -30,15 +29,12 @@ class CmdScore(Command):
 
 class CmdDesc(Command):
     """
-    View your character description or set a new one.
+    View or set your description. Usage: desc [text]
 
     Usage:
         desc
-        desc <text>
 
-    Example:
-        desc
-        desc A scarred veteran
+    See |whelp desc|n for details.
     """
 
     key = "desc"
@@ -55,13 +51,12 @@ class CmdDesc(Command):
 
 class CmdFinger(Command):
     """
-    Show information about yourself or another player.
+    Show information about a player. Usage: finger <player>
 
     Usage:
-        finger <player>
+        finger
 
-    Example:
-        finger Bob
+    See |whelp finger|n for details.
     """
 
     key = "finger"
@@ -115,13 +110,12 @@ class CmdFinger(Command):
 
 class CmdBounty(Command):
     """
-    Place a bounty on another character.
+    Place a bounty on another character. Usage: bounty <target> <amount>
 
     Usage:
-        bounty <target> <amount>
+        bounty
 
-    Example:
-        bounty orc 50
+    See |whelp bounty|n for details.
     """
 
     key = "bounty"
@@ -160,15 +154,12 @@ class CmdBounty(Command):
 
 class CmdInventory(Command):
     """
-    List the items you are carrying.
+    List items you are carrying. Usage: inventory [filter]
 
     Usage:
         inventory
-        inventory <filter>
 
-    Example:
-        inventory
-        inventory sword
+    See |whelp inventory|n for details.
     """
 
     key = "inventory"
@@ -200,13 +191,12 @@ class CmdInventory(Command):
 
 class CmdEquipment(Command):
     """
-    Show what you are wearing or wielding.
+    Show what you are wearing and wielding. Usage: equipment
 
     Usage:
         equipment
 
-    Example:
-        equipment
+    See |whelp equipment|n for details.
     """
 
     key = "equipment"
@@ -249,13 +239,12 @@ class CmdEquipment(Command):
 
 class CmdInspect(Command):
     """
-    Inspect an item for detailed information.
+    Examine an item for more information.
 
     Usage:
         inspect <item>
 
-    Example:
-        inspect longsword
+    See |whelp inspect|n for details.
     """
 
     key = "inspect"
@@ -359,13 +348,12 @@ class CmdInspect(Command):
 
 class CmdBuffs(Command):
     """
-    List active buff effects on you.
+    Display active buff effects. Usage: buffs
 
     Usage:
         buffs
 
-    Example:
-        buffs
+    See |whelp buffs|n for details.
     """
 
     key = "buffs"
@@ -411,13 +399,12 @@ class CmdBuffs(Command):
 
 class CmdAffects(Command):
     """
-    List all status and buff effects.
+    View your active buffs and status effects.
 
     Usage:
         affects
 
-    Example:
-        affects
+    See |whelp affects|n for details.
     """
 
     key = "affects"
@@ -471,15 +458,12 @@ class CmdAffects(Command):
 
 class CmdTitle(Command):
     """
-    View or set your character's title.
+    View or change your title. Usage: title [new title]
 
     Usage:
         title
-        title <new title>
 
-    Example:
-        title
-        title The Brave
+    See |whelp title|n for details.
     """
 
     key = "title"
@@ -496,15 +480,12 @@ class CmdTitle(Command):
 
 class CmdPrompt(Command):
     """
-    View or set your command prompt.
+    Customize the information shown in your command prompt.
 
     Usage:
         prompt
-        prompt <format>
 
-    Example:
-        prompt
-        prompt HP:{hp}/{hp_max}> 
+    See |whelp prompt|n for details.
     """
 
     key = "prompt"
@@ -524,13 +505,12 @@ class CmdPrompt(Command):
 
 class CmdScan(Command):
     """
-    Scan adjacent rooms for visible activity.
+    Look around and into adjacent rooms.
 
     Usage:
         scan
 
-    Example:
-        scan
+    See |whelp scan|n for details.
     """
 
     key = "scan"

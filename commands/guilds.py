@@ -16,13 +16,12 @@ from world.guilds import (
 
 class CmdGuild(Command):
     """
-    Show information about your current guild.
+    Display information about your guild membership. Usage: guild
 
     Usage:
         guild
 
-    Example:
-        guild
+    See |whelp guild|n for details.
     """
 
     key = "guild"
@@ -49,13 +48,12 @@ class CmdGuild(Command):
 
 class CmdGuildWho(Command):
     """
-    List members of your guild and their status.
+    List members of your guild.
 
     Usage:
-        guildwho
+        gwho
 
-    Example:
-        guildwho
+    See |whelp gwho|n for details.
     """
 
     key = "gwho"
@@ -88,7 +86,14 @@ class CmdGuildWho(Command):
 
 
 class CmdGCreate(Command):
-    """Create a new guild and register it."""
+    """
+    Create a new guild.
+
+    Usage:
+        gcreate <name>
+
+    See |whelp gcreate|n for details.
+    """
 
     key = "gcreate"
     locks = "cmd:all()"
@@ -112,7 +117,16 @@ class CmdGCreate(Command):
 
 
 class CmdGRank(Command):
-    """Manage guild rank titles."""
+    """
+    Manage guild rank titles.
+
+    Usage:
+        grank add <guild> <level> <title>
+        grank remove <guild> <level>
+        grank list <guild>
+
+    See |whelp grank|n for details.
+    """
 
     key = "grank"
     locks = "cmd:all()"
@@ -172,7 +186,14 @@ class CmdGRank(Command):
 
 
 class CmdGSetHome(Command):
-    """Set the home location for a guild."""
+    """
+    Set a guild's home location to your current room.
+
+    Usage:
+        gsethome <guild>
+
+    See |whelp gsethome|n for details.
+    """
 
     key = "gsethome"
     locks = "cmd:all()"
@@ -199,7 +220,14 @@ class CmdGSetHome(Command):
 
 
 class CmdGDesc(Command):
-    """Set the description of a guild."""
+    """
+    Set a guild's description.
+
+    Usage:
+        gdesc <guild> <description>
+
+    See |whelp gdesc|n for details.
+    """
 
     key = "gdesc"
     locks = "cmd:all()"
@@ -227,7 +255,14 @@ class CmdGDesc(Command):
 
 
 class CmdGJoin(Command):
-    """Request to join a guild."""
+    """
+    Request to join a guild.
+
+    Usage:
+        gjoin <guild>
+
+    See |whelp gjoin|n for details.
+    """
 
     key = "gjoin"
     help_category = "General"
@@ -249,7 +284,14 @@ class CmdGJoin(Command):
 
 
 class CmdGAccept(Command):
-    """Accept a player's join request."""
+    """
+    Accept a player's guild request.
+
+    Usage:
+        gaccept <player>
+
+    See |whelp gaccept|n for details.
+    """
 
     key = "gaccept"
     help_category = "General"
@@ -330,7 +372,14 @@ class _BaseAdjustHonor(Command):
 
 
 class CmdGPromote(_BaseAdjustHonor):
-    """Increase a member's guild points."""
+    """
+    Increase a member's guild points.
+
+    Usage:
+        gpromote <player> [amount]
+
+    See |whelp gpromote|n for details.
+    """
 
     key = "gpromote"
 
@@ -339,7 +388,14 @@ class CmdGPromote(_BaseAdjustHonor):
 
 
 class CmdGDemote(_BaseAdjustHonor):
-    """Decrease a member's guild points."""
+    """
+    Decrease a member's guild points.
+
+    Usage:
+        gdemote <player> [amount]
+
+    See |whelp gdemote|n for details.
+    """
 
     key = "gdemote"
 
@@ -348,7 +404,14 @@ class CmdGDemote(_BaseAdjustHonor):
 
 
 class CmdGKick(Command):
-    """Remove a member from your guild."""
+    """
+    Remove a member from your guild.
+
+    Usage:
+        gkick <player>
+
+    See |whelp gkick|n for details.
+    """
 
     key = "gkick"
     help_category = "General"

@@ -65,7 +65,14 @@ SHORT = {
 
 
 class CmdDig(Command):
-    """Dig a new room in a direction."""
+    """
+    Create a new room in a direction. Usage: dig <direction> [<area>:<number>]
+
+    Usage:
+        dig
+
+    See |whelp dig|n for details.
+    """
 
     key = "dig"
     locks = "cmd:perm(Builder)"
@@ -149,7 +156,14 @@ class CmdDig(Command):
 
 
 class CmdTeleport(Command):
-    """Teleport to a room using ``<area>:<number>``."""
+    """
+    Teleport directly to a room. Usage: @teleport <area>:<number>
+
+    Usage:
+        @teleport
+
+    See |whelp @teleport|n for details.
+    """
 
     key = "@teleport"
     locks = "cmd:perm(Builder)"
@@ -187,7 +201,14 @@ class CmdTeleport(Command):
 
 
 class CmdSetDesc(Command):
-    """Set an object's description."""
+    """
+    Set an object's description. Usage: setdesc <target> <description>
+
+    Usage:
+        setdesc
+
+    See |whelp setdesc|n for details.
+    """
 
     key = "setdesc"
     locks = "cmd:perm(Admin) or perm(Builder)"
@@ -209,7 +230,14 @@ class CmdSetDesc(Command):
 
 
 class CmdSetWeight(Command):
-    """Set an object's weight."""
+    """
+    Set an object's weight. Usage: setweight <target> <value>
+
+    Usage:
+        setweight
+
+    See |whelp setweight|n for details.
+    """
 
     key = "setweight"
     locks = "cmd:perm(Admin) or perm(Builder)"
@@ -231,7 +259,14 @@ class CmdSetWeight(Command):
 
 
 class CmdSetSlot(Command):
-    """Set an object's slot attribute."""
+    """
+    Define the slot or clothing type on an item. Usage: setslot <target> <slot>
+
+    Usage:
+        setslot
+
+    See |whelp setslot|n for details.
+    """
 
     key = "setslot"
     locks = "cmd:perm(Admin) or perm(Builder)"
@@ -253,7 +288,14 @@ class CmdSetSlot(Command):
 
 
 class CmdSetDamage(Command):
-    """Set an object's damage value."""
+    """
+    Assign a damage value to a weapon. Usage: setdamage <target> <amount>
+
+    Usage:
+        setdamage
+
+    See |whelp setdamage|n for details.
+    """
 
     key = "setdamage"
     locks = "cmd:perm(Admin) or perm(Builder)"
@@ -275,7 +317,14 @@ class CmdSetDamage(Command):
 
 
 class CmdSetBuff(Command):
-    """Set a buff identifier on a target."""
+    """
+    Add a buff identifier to an object. Usage: setbuff <target> <buff>
+
+    Usage:
+        setbuff
+
+    See |whelp setbuff|n for details.
+    """
 
     key = "setbuff"
     locks = "cmd:perm(Admin) or perm(Builder)"

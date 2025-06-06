@@ -7,7 +7,14 @@ from world.areas import Area, get_areas, save_area, update_area, find_area
 
 
 class CmdAreas(Command):
-    """List all registered areas."""
+    """
+    List all registered areas and their number ranges.
+
+    Usage:
+        alist
+
+    See |whelp alist|n for details.
+    """
 
     key = "alist"
     aliases = ("areas",)
@@ -26,7 +33,14 @@ class CmdAreas(Command):
 
 
 class CmdAMake(Command):
-    """Register a new area."""
+    """
+    Register a new area. Usage: amake <name> <start>-<end>
+
+    Usage:
+        amake
+
+    See |whelp amake|n for details.
+    """
 
     key = "amake"
     locks = "cmd:perm(Builder)"
@@ -62,7 +76,14 @@ class CmdAMake(Command):
 
 
 class CmdASet(Command):
-    """Update an existing area's info."""
+    """
+    Update an area's properties. Usage: aset <area> <name|range|desc> <value>
+
+    Usage:
+        aset
+
+    See |whelp aset|n for details.
+    """
 
     key = "aset"
     locks = "cmd:perm(Builder)"
@@ -113,7 +134,14 @@ class CmdASet(Command):
 
 
 class CmdRooms(Command):
-    """List rooms in the current area."""
+    """
+    Show rooms belonging to your current area.
+
+    Usage:
+        rooms
+
+    See |whelp rooms|n for details.
+    """
 
     key = "rooms"
     aliases = ("roomsall",)
@@ -148,7 +176,14 @@ class CmdRooms(Command):
 
 
 class CmdRName(Command):
-    """Rename the current room."""
+    """
+    Rename the room you are currently in.
+
+    Usage:
+        rrename <new name>
+
+    See |whelp rrename|n for details.
+    """
 
     key = "rrename"
     aliases = ("roomrename", "renameroom", "rname")
@@ -169,7 +204,14 @@ class CmdRName(Command):
 
 
 class CmdRDesc(Command):
-    """View or set the room description."""
+    """
+    View or change the current room's description.
+
+    Usage:
+        rdesc <new description>
+
+    See |whelp rdesc|n for details.
+    """
 
     key = "rdesc"
     aliases = ("roomdesc",)
@@ -190,7 +232,15 @@ class CmdRDesc(Command):
 
 
 class CmdRSet(Command):
-    """Set properties on the current room."""
+    """
+    Set properties on the current room.
+
+    Usage:
+        rset area <area name>
+        rset id <number>
+
+    See |whelp rset|n for details.
+    """
 
     key = "rset"
     locks = "cmd:perm(Builder)"

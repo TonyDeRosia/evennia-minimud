@@ -5,13 +5,12 @@ from evennia.utils import make_iter
 
 class CmdGather(Command):
     """
-    Collect resources from a gathering node.
+    Collect resources from a gathering node. Usage: gather
 
     Usage:
         gather
 
-    Example:
-        gather
+    See |whelp gather|n for details.
     """
 
     key = "gather"
