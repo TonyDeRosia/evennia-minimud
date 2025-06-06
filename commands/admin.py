@@ -589,7 +589,7 @@ class CmdCShield(Command):
     Create a shield piece of armor.
 
     Usage:
-        cshield <name> <armor_rating> <weight> <description>
+        cshield <name> <armor_rating> <block_rate> <weight> [stat_mods] <description>
 
     See |whelp cshield|n for details.
     """
@@ -600,23 +600,71 @@ class CmdCShield(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: cshield <name> <armor_rating> <weight> <description>")
+            self.msg(
+                "Usage: cshield <name> <armor_rating> <block_rate> <weight> [stat_mods] <description>"
+            )
             return
-        parts = self.args.split(None, 3)
-        if len(parts) < 4:
-            self.msg("Usage: cshield <name> <armor_rating> <weight> <description>")
+        parts = self.args.split(None, 4)
+        if len(parts) < 5:
+            self.msg(
+                "Usage: cshield <name> <armor_rating> <block_rate> <weight> [stat_mods] <description>"
+            )
             return
-        name, armor_str, weight_str, desc = parts
+        name = parts[0]
+        armor_str = parts[1]
+        block_rate_str = parts[2]
+        weight_str = parts[3]
+        rest = parts[4]
+
         try:
             armor = int(armor_str)
         except ValueError:
             self.msg("Armor rating must be a number.")
             return
+
+        try:
+            block_rate = int(block_rate_str)
+        except ValueError:
+            self.msg("Block rate must be a number.")
+            return
+
         try:
             weight = int(weight_str)
         except ValueError:
             self.msg("Weight must be a number.")
             return
+
+        bonuses = {}
+        desc = None
+        if rest:
+            pieces = [p.strip() for p in rest.split(",")]
+            pattern = re.compile(r"([A-Za-z][A-Za-z _]*?)\+(-?\d+)")
+            desc_parts = []
+            for piece in pieces:
+                if not piece:
+                    continue
+                match = pattern.match(piece)
+                if match:
+                    stat_name = match.group(1).strip()
+                    amount = int(match.group(2))
+                    key = stat_name.lower().replace(" ", "_")
+                    if key not in VALID_STATS:
+                        self.msg(f"Invalid stat modifier: {stat_name}")
+                        return
+                    bonuses[key] = amount
+                    remainder = piece[match.end():].strip()
+                    if remainder:
+                        desc_parts.append(remainder)
+                        desc_parts.extend(p.strip() for p in pieces[pieces.index(piece)+1:])
+                        break
+                else:
+                    desc_parts.append(piece)
+                    desc_parts.extend(p.strip() for p in pieces[pieces.index(piece)+1:])
+                    break
+            if desc_parts:
+                desc = ", ".join(desc_parts).strip()
+        if desc is None and rest:
+            desc = rest.strip()
 
         slot = "offhand"
         obj = _create_gear(
@@ -631,9 +679,20 @@ class CmdCShield(Command):
         )
 
         obj.tags.add("shield", category="flag")
-        self.caller.msg(
-            f"Slot: {slot}\nArmor: {armor}\nWeight: {weight}\nDescription: {desc}"
+        obj.db.block_rate = block_rate
+        if bonuses:
+            obj.db.modifiers = bonuses
+            obj.db.stat_mods = bonuses
+
+        msg = (
+            f"Slot: {slot}\nArmor: {armor}\nBlock Rate: {block_rate}\nWeight: {weight}"
         )
+        if bonuses:
+            mods = ", ".join(f"{k}+{v}" for k, v in bonuses.items())
+            msg += f"\nModifiers: {mods}"
+        if desc:
+            msg += f"\nDescription: {desc}"
+        self.caller.msg(msg)
 
 
 class CmdCArmor(Command):
