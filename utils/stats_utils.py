@@ -164,8 +164,9 @@ def get_display_scroll(chara):
     guild = _db_get(chara, "guild", "")
     if guild:
         lines.append(f"Guild: {guild} ({chara.guild_rank})")
-        honor = _db_get(chara, "guild_honor", 0)
-        lines.append(f"Honor: {honor}")
+        gp_map = _db_get(chara, "guild_points", {}) or {}
+        points = gp_map.get(guild, 0)
+        lines.append(f"Guild Points: {points}")
 
     if buffs := chara.tags.get(category="buff", return_list=True):
         lines.append("Buffs: " + iter_to_str(sorted(buffs)))

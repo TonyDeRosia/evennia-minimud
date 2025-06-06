@@ -10,7 +10,7 @@ from world.guilds import (
     save_guild,
     update_guild,
     find_guild,
-    get_rank_title,
+    auto_promote,
 )
 
 
@@ -32,16 +32,17 @@ class CmdGuild(Command):
     def func(self):
         caller = self.caller
         guild = caller.db.guild
-        honor = caller.db.guild_honor or 0
+        gp_map = caller.db.guild_points or {}
+        points = gp_map.get(guild, 0)
         if not guild:
             self.msg("You are not a member of any guild.")
             return
         _, gobj = find_guild(guild)
         desc = gobj.desc if gobj else ""
-        rank = get_rank_title(guild, honor)
+        rank = caller.db.guild_rank or ""
         self.msg(f"|w{guild}|n")
         self.msg(f"Rank: {rank}")
-        self.msg(f"Honor: {honor}")
+        self.msg(f"Guild Points: {points}")
         if desc:
             self.msg(desc)
 
@@ -76,11 +77,13 @@ class CmdGuildWho(Command):
         if not members:
             self.msg("No members found.")
             return
-        table = EvTable("Name", "Rank", "Status", border="none")
+        table = EvTable("Name", "Rank", "GP", "Status", border="none")
         for mem in members:
             status = "Online" if mem.sessions.count() else "Offline"
-            rank = get_rank_title(guild, mem.db.guild_honor or 0)
-            table.add_row(mem.key, rank, status)
+            rank = mem.db.guild_rank or ""
+            gp_map = mem.db.guild_points or {}
+            pts = gp_map.get(guild, 0)
+            table.add_row(mem.key, rank, str(pts), status)
         self.msg(str(table))
 
 
@@ -278,7 +281,10 @@ class CmdGAccept(Command):
         gobj.members[str(target.id)] = 0
         update_guild(idx, gobj)
         target.db.guild = guild
-        target.db.guild_honor = 0
+        gp_map = target.db.guild_points or {}
+        gp_map[guild] = 0
+        target.db.guild_points = gp_map
+        target.db.guild_rank = ""
         target.db.guild_request = None
         self.msg(f"{target.key} is now a member of {guild}.")
 
@@ -308,20 +314,23 @@ class _BaseAdjustHonor(Command):
         amt = 1
         if len(parts) > 1 and parts[1].lstrip("-+").isdigit():
             amt = int(parts[1])
-        honor = target.db.guild_honor or 0
-        honor += amount * amt
-        if honor < 0:
-            honor = 0
-        target.db.guild_honor = honor
+        gp_map = target.db.guild_points or {}
+        points = gp_map.get(guild, 0)
+        points += amount * amt
+        if points < 0:
+            points = 0
+        gp_map[guild] = points
+        target.db.guild_points = gp_map
         idx, gobj = find_guild(guild)
         if gobj:
-            gobj.members[str(target.id)] = honor
+            gobj.members[str(target.id)] = points
             update_guild(idx, gobj)
-        self.msg(f"{target.key} now has honor {honor}.")
+            auto_promote(target, gobj)
+        self.msg(f"{target.key} now has {points} guild points.")
 
 
 class CmdGPromote(_BaseAdjustHonor):
-    """Increase a member's guild honor."""
+    """Increase a member's guild points."""
 
     key = "gpromote"
 
@@ -330,7 +339,7 @@ class CmdGPromote(_BaseAdjustHonor):
 
 
 class CmdGDemote(_BaseAdjustHonor):
-    """Decrease a member's guild honor."""
+    """Decrease a member's guild points."""
 
     key = "gdemote"
 
@@ -366,7 +375,10 @@ class CmdGKick(Command):
             del gobj.members[str(target.id)]
             update_guild(idx, gobj)
         target.db.guild = ""
-        target.db.guild_honor = 0
+        gp_map = target.db.guild_points or {}
+        gp_map.pop(guild, None)
+        target.db.guild_points = gp_map
+        target.db.guild_rank = ""
         target.db.guild_request = None
         self.msg(f"{target.key} has been kicked from {guild}.")
 
