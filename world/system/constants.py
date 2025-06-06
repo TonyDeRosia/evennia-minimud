@@ -14,11 +14,6 @@ MAX_INT = 999
 MAX_WIS = 999
 MAX_LUCK = 999
 
-# Derived resource caps
-MAX_HP = 9999
-MAX_MP = 9999
-MAX_SP = 9999
-
 __all__ = [
     "MAX_SATED",
     "MAX_LEVEL",
@@ -28,7 +23,4 @@ __all__ = [
     "MAX_INT",
     "MAX_WIS",
     "MAX_LUCK",
-    "MAX_HP",
-    "MAX_MP",
-    "MAX_SP",
 ]
