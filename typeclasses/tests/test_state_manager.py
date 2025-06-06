@@ -68,3 +68,13 @@ class TestStateManager(EvenniaTest):
         char.db.sated = 150
         state_manager.tick_character(char)
         self.assertLessEqual(char.db.sated, state_manager.MAX_SATED)
+
+    def test_hunger_ignored_at_max_level(self):
+        char = self.char1
+        char.db.level = state_manager.MAX_LEVEL
+        char.db.sated = 1
+        hp = char.traits.health.current
+        state_manager.tick_character(char)
+        self.assertEqual(char.db.sated, 1)
+        self.assertFalse(char.tags.has("hungry_thirsty", category="status"))
+        self.assertEqual(char.traits.health.current, hp)

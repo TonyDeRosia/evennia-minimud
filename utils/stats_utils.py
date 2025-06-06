@@ -39,7 +39,7 @@ from world.stats import (
     apply_stats,
 )
 from world.system import stat_manager
-from world.system.state_manager import MAX_SATED
+from world.system.state_manager import MAX_SATED, MAX_LEVEL
 import math
 import re
 
@@ -180,21 +180,24 @@ def get_display_scroll(chara):
         hp_disp = mp_disp = sp_disp = "--/--"
 
     sated_val = 0
-    if hasattr(chara.db, "sated"):
-        sated_val = min(chara.db.sated or 0, MAX_SATED)
-    elif chara.traits.get("sated"):
-        sated_val = min(chara.traits.sated.value, MAX_SATED)
-    if sated_val <= 0:
-        sated_disp = "|r0 (URGENT)|n"
-    elif sated_val < 5:
-        sated_disp = f"|y{sated_val}|n"
-    else:
-        sated_disp = f"|g{sated_val}|n"
+    show_sated = level < MAX_LEVEL
+    if show_sated:
+        if hasattr(chara.db, "sated"):
+            sated_val = min(chara.db.sated or 0, MAX_SATED)
+        elif chara.traits.get("sated"):
+            sated_val = min(chara.traits.sated.value, MAX_SATED)
+        if sated_val <= 0:
+            sated_disp = "|r0 (URGENT)|n"
+        elif sated_val < 5:
+            sated_disp = f"|y{sated_val}|n"
+        else:
+            sated_disp = f"|g{sated_val}|n"
 
     lines.append(
         f"|YLvl {level}|n  |CXP|n {xp}  |yTNL|n {tnl}  |rHP|n {hp_disp}  |cMP|n {mp_disp}  |gSP|n {sp_disp}"
     )
-    lines.append(f"|ySated|n {sated_disp}")
+    if show_sated:
+        lines.append(f"|ySated|n {sated_disp}")
 
     coins = {
         "copper": _db_get(chara, "copper", 0),

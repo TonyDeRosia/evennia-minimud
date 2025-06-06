@@ -22,3 +22,10 @@ class TestDisplayScroll(EvenniaTest):
         sheet = get_display_scroll(char)
         self.assertIn("Sated", sheet)
         self.assertIn("100", sheet)
+
+    def test_sated_hidden_at_max_level(self):
+        char = self.char1
+        char.db.level = 100
+        char.db.sated = 50
+        sheet = get_display_scroll(char)
+        self.assertNotIn("Sated", sheet)
