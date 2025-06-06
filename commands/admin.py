@@ -531,7 +531,7 @@ class CmdCShield(Command):
             except ValueError:
                 self.msg("Weight must be a number.")
                 return
-        _create_gear(
+        obj = _create_gear(
             self.caller,
             "typeclasses.objects.ClothingObject",
             name,
@@ -541,6 +541,8 @@ class CmdCShield(Command):
             desc=None,
             weight=weight,
         )
+
+        obj.tags.add("shield", category="flag")
 
 
 class CmdCArmor(Command):
