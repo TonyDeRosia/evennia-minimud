@@ -5,6 +5,16 @@ from utils.currency import to_copper, from_copper
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 from world.stats import CORE_STAT_KEYS
 from utils.stats_utils import get_display_scroll, _strip_colors, _pad
+from evennia.objects.objects import DefaultExit
+
+
+def is_gettable(obj, caller):
+    """Return True if caller can pick up obj."""
+    return (
+        obj.access(caller, "get")
+        and not isinstance(obj, DefaultExit)
+        and obj.db.gettable is not False
+    )
 
 
 def render_equipment(caller):
@@ -219,7 +229,7 @@ class CmdInventory(Command):
 
     def func(self):
         caller = self.caller
-        items = [obj for obj in caller.contents if not obj.db.worn]
+        items = [obj for obj in caller.contents if not obj.db.worn and is_gettable(obj, caller)]
         if self.args:
             filt = self.args.lower()
             items = [obj for obj in items if filt in obj.key.lower()]
@@ -273,8 +283,11 @@ class CmdGetAll(Command):
         if not location:
             caller.msg("You cannot pick anything up.")
             return
-        items = [obj for obj in list(location.contents) if obj.access(caller, "get")]
-        items = [obj for obj in items if obj != caller]
+        items = [
+            obj
+            for obj in location.contents
+            if is_gettable(obj, caller) and obj != caller
+        ]
         if not items:
             caller.msg("There is nothing here to pick up.")
             return
