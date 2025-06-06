@@ -1064,6 +1064,101 @@ class CmdCTrinket(Command):
             obj.db.stat_mods = bonuses
 
 
+class CmdCFood(Command):
+    """Create a food item."""
+
+    key = "cfood"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        parts = shlex.split(self.args)
+        if len(parts) < 3:
+            self.msg("Usage: cfood <name> <sated_boost> <description>")
+            return
+        name = parts[0].strip("'\"")
+        boost_str = parts[1]
+        rest = " ".join(parts[2:])
+        if not boost_str.lstrip("-+").isdigit():
+            self.msg("Sated boost must be a number.")
+            return
+        boost = int(boost_str)
+
+        obj = _create_gear(
+            self.caller,
+            "typeclasses.objects.Object",
+            name,
+            desc=rest,
+        )
+        obj.tags.add("edible")
+        obj.db.item_type = "food"
+        obj.db.sated = boost
+
+
+class CmdCDrink(Command):
+    """Create a drink item."""
+
+    key = "cdrink"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        parts = shlex.split(self.args)
+        if len(parts) < 3:
+            self.msg("Usage: cdrink <name> <sated_boost> <description>")
+            return
+        name = parts[0].strip("'\"")
+        boost_str = parts[1]
+        rest = " ".join(parts[2:])
+        if not boost_str.lstrip("-+").isdigit():
+            self.msg("Sated boost must be a number.")
+            return
+        boost = int(boost_str)
+
+        obj = _create_gear(
+            self.caller,
+            "typeclasses.objects.Object",
+            name,
+            desc=rest,
+        )
+        obj.tags.add("edible")
+        obj.db.item_type = "drink"
+        obj.db.sated = boost
+
+
+class CmdCPotion(Command):
+    """Create a potion item."""
+
+    key = "cpotion"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        parts = shlex.split(self.args)
+        if len(parts) < 2:
+            self.msg("Usage: cpotion <name> <bonuses> <description>")
+            return
+        name = parts[0].strip("'\"")
+        rest = " ".join(parts[1:])
+        try:
+            bonuses, desc = parse_stat_mods(rest)
+        except ValueError as err:
+            self.msg(f"Invalid stat modifier: {err}")
+            return
+
+        obj = _create_gear(
+            self.caller,
+            "typeclasses.objects.Object",
+            name,
+            desc=desc,
+        )
+        obj.tags.add("edible")
+        obj.db.item_type = "drink"
+        obj.db.is_potion = True
+        if bonuses:
+            obj.db.buffs = bonuses
+
+
 class AdminCmdSet(CmdSet):
     """Command set with admin utilities."""
 
@@ -1095,6 +1190,9 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdCShield)
         self.add(CmdCArmor)
         self.add(CmdCTool)
+        self.add(CmdCFood)
+        self.add(CmdCDrink)
+        self.add(CmdCPotion)
         self.add(CmdCRing)
         self.add(CmdCTrinket)
         self.add(CmdCGear)
