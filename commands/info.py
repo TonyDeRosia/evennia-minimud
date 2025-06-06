@@ -5,7 +5,7 @@ from utils.currency import to_copper, from_copper
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 from world.stats import CORE_STAT_KEYS
 from utils.stats_utils import get_display_scroll, _strip_colors, _pad
-from utils import VALID_SLOTS, normalize_slot
+from utils.slots import SLOT_ORDER
 
 
 def is_gettable(obj, caller):
@@ -13,26 +13,9 @@ def is_gettable(obj, caller):
     return obj.access(caller, "get") and obj.db.gettable is not False
 
 
-EQUIPMENT_SLOTS = [
-    "twohanded",
-    "mainhand",
-    "offhand",
-    "head",
-    "neck",
-    "shoulders",
-    "chest",
-    "cloak",
-    "wrists",
-    "hands",
-    "ring1",
-    "ring2",
-    "tabard",
-    "waist",
-    "legs",
-    "feet",
-    "accessory",
-    "trinket",
-]
+# Canonical equipment slot order for displaying items.  This mirrors the
+# ordering used when building ``Character.equipment``.
+EQUIPMENT_SLOTS = SLOT_ORDER
 
 
 def render_equipment(caller):
@@ -49,7 +32,6 @@ def render_equipment(caller):
     )
 
     for slot in EQUIPMENT_SLOTS:
-        canonical = normalize_slot(slot)
         if slot == "twohanded":
             if not show_twohanded:
                 continue
@@ -63,7 +45,7 @@ def render_equipment(caller):
                 continue
             item = off
         else:
-            item = eq.get(canonical)
+            item = eq.get(slot)
 
         name = item.get_display_name(caller) if item else "NOTHING"
         display.append(f"| {slot.capitalize():<10}: {name}")

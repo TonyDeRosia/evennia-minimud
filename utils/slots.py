@@ -1,8 +1,10 @@
-VALID_SLOTS = {
+# Canonical slot names understood by the game.  The order in this
+# list represents the preferred display order when showing equipped
+# items.
+SLOT_ORDER = [
+    "twohanded",
     "mainhand",
     "offhand",
-    "mainhand/offhand",
-    "twohanded",
     "head",
     "neck",
     "shoulders",
@@ -18,7 +20,10 @@ VALID_SLOTS = {
     "feet",
     "accessory",
     "trinket",
-}
+]
+
+# Set of all valid equipment slot identifiers.
+VALID_SLOTS = set(SLOT_ORDER + ["mainhand/offhand"])
 
 # Maps common slot synonyms to their canonical counterparts.
 SLOT_MAP = {
