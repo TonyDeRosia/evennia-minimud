@@ -2350,10 +2350,48 @@ Notes:
     - After reviewing the summary choose |wYes|n to confirm and create or
       update the NPC.
     - Use |wcnpc edit <npc>|n to modify an existing NPC.
+    - At the triggers step, use |wadd trigger <event> "<match>" -> <reaction>|n
+      to add an automatic response.
+    - Remove one with |wdel <event> <#>|n and enter |wdone|n when finished.
+    - See |whelp triggers|n for available events and reactions.
     - ANSI color codes are supported in names and descriptions.
 
 Related:
     help ansi
+    help triggers
+""",
+    },
+    {
+        "key": 'triggers',
+        "category": 'Building',
+        "text": """
+Help for triggers
+
+NPCs may react automatically to events. Each trigger defines an event,
+an optional match text and one or more reactions to perform.
+
+Events:
+    on_say     - someone speaks in the room
+    on_enter   - someone enters the room
+    on_give    - the NPC receives an item
+    on_look    - someone looks at the NPC
+    on_attack  - combat starts or damage occurs
+    on_time    - once every game tick
+
+Reactions:
+    say <text>         - speak
+    emote/pose <text>  - emote
+    move <cmd>         - perform a movement command
+    attack [target]    - attack a character
+    script <module.fn> - call a Python function
+    <command>          - run any other command string
+
+The match text only applies to some events like |won_say|n and |won_look|n.
+Multiple reactions can be listed separated by commas or by using multiple
+triggers.
+
+Related:
+    help cnpc
 """,
     },
 ]

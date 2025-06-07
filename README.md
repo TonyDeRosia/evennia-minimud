@@ -113,6 +113,10 @@ your NPC. You can later update them with `@cnpc edit <npc>`.
 
 See the `cnpc` help entry for a full breakdown of every menu option.
 
+While editing, there's a step to manage triggers. Use `add trigger <event> "<match>" -> <reaction>`
+to create a response and `del <event> <#>` to remove one. Type `done` when finished.
+See the `triggers` help entry for the list of events and possible reactions.
+
 ## Weapon Creation and Inspection
 
 Builders can quickly create melee weapons with the `cweapon` command.
