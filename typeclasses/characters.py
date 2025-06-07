@@ -1,7 +1,8 @@
 from random import randint, choice
 from string import punctuation
 from evennia import AttributeProperty
-from evennia.utils import lazy_property, iter_to_str, delay, logger
+from evennia.utils import lazy_property, iter_to_str, delay, logger, make_iter
+import importlib
 from evennia.contrib.rpg.traits import TraitHandler
 from evennia.contrib.game_systems.clothing.clothing import (
     ClothedCharacter,
@@ -737,6 +738,71 @@ class NPC(Character):
 
     # defines what color this NPC's name will display in
     name_color = AttributeProperty("w")
+    # mapping of event triggers -> reactions
+    triggers = AttributeProperty({})
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        if self.db.triggers is None:
+            self.db.triggers = {}
+
+    def check_triggers(self, event, **kwargs):
+        """Evaluate stored triggers for a given event."""
+        triggers = (self.db.triggers or {}).get(event)
+        if not triggers:
+            return
+        for trig in make_iter(triggers):
+            if not isinstance(trig, dict):
+                continue
+            match = trig.get("match")
+            if match:
+                text = str(kwargs.get("message") or kwargs.get("text") or "")
+                if isinstance(match, (list, tuple)):
+                    if not any(m.lower() in text.lower() for m in match):
+                        continue
+                elif str(match).lower() not in text.lower():
+                    continue
+            reactions = trig.get("reactions") or trig.get("reaction") or []
+            for react in make_iter(reactions):
+                if isinstance(react, str):
+                    if " " in react:
+                        action, arg = react.split(" ", 1)
+                    else:
+                        action, arg = react, ""
+                elif isinstance(react, dict) and len(react) == 1:
+                    action, arg = next(iter(react.items()))
+                else:
+                    continue
+                self._execute_reaction(action.lower(), arg, **kwargs)
+
+    def _execute_reaction(self, action, arg, **kwargs):
+        """Execute a single reaction action."""
+        try:
+            if action == "say":
+                self.execute_cmd(f"say {arg}")
+            elif action in ("emote", "pose"):
+                self.execute_cmd(f"{action} {arg}")
+            elif action == "move":
+                if arg:
+                    self.execute_cmd(arg)
+            elif action == "attack":
+                target = arg or kwargs.get("target")
+                if isinstance(target, str):
+                    target = self.search(target)
+                if target:
+                    if not self.in_combat:
+                        self.enter_combat(target)
+                    else:
+                        weapon = self.wielding[0] if self.wielding else self
+                        self.attack(target, weapon)
+            elif action == "script":
+                module, func = arg.rsplit(".", 1)
+                mod = importlib.import_module(module)
+                getattr(mod, func)(self, **kwargs)
+            else:
+                self.execute_cmd(f"{action} {arg}" if arg else action)
+        except Exception as err:  # pragma: no cover - log errors
+            logger.log_err(f"NPC trigger error on {self}: {err}")
 
     # property to mimic weapons
     @property
@@ -753,12 +819,18 @@ class NPC(Character):
         name = super().get_display_name(looker, **kwargs)
         return f"|{self.name_color}{name}|n"
 
+    def at_say(self, speaker, message, **kwargs):
+        """React to someone speaking in the room."""
+        if speaker != self:
+            self.check_triggers("on_say", speaker=speaker, message=message)
+
     def at_character_arrive(self, chara, **kwargs):
         """
         Respond to the arrival of a character
         """
         if "aggressive" in self.attributes.get("react_as", ""):
             delay(0.1, self.enter_combat, chara)
+        self.check_triggers("on_enter", chara=chara)
 
     def at_character_depart(self, chara, destination, **kwargs):
         """
@@ -775,11 +847,22 @@ class NPC(Character):
                 # use the exit
                 self.execute_cmd(exits[0].name)
 
+    def at_object_receive(self, obj, source_location, **kwargs):
+        super().at_object_receive(obj, source_location, **kwargs)
+        self.check_triggers("on_give", item=obj, giver=source_location)
+
+    def return_appearance(self, looker, **kwargs):
+        text = super().return_appearance(looker, **kwargs)
+        if looker != self:
+            self.check_triggers("on_look", looker=looker)
+        return text
+
     def at_damage(self, attacker, damage, damage_type=None):
         """
         Apply damage, after taking into account damage resistances.
         """
         super().at_damage(attacker, damage, damage_type=damage_type)
+        self.check_triggers("on_attack", attacker=attacker, damage=damage)
 
         if self.traits.health.value <= 0:
             # we've been defeated!
@@ -868,6 +951,7 @@ class NPC(Character):
         weapon.at_attack(self, target)
         # queue up next attack; use None for target to reference stored target on execution
         delay(weapon.speed + 1, self.attack, None, weapon, persistent=True)
+        self.check_triggers("on_attack", target=target, weapon=weapon)
 
     def at_pre_attack(self, wielder, **kwargs):
         """
@@ -915,3 +999,7 @@ class NPC(Character):
             target.at_damage(wielder, damage, weapon.get("damage_type"))
         wielder.msg(f"[ Cooldown: {speed} seconds ]")
         wielder.cooldowns.add("attack", speed)
+
+    def at_tick(self):
+        super().at_tick()
+        self.check_triggers("on_time")
