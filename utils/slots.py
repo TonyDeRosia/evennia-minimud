@@ -38,6 +38,11 @@ SLOT_MAP = {
     "gloves": "hands",
     "bracelet": "wrists",
     "ring": "ring1",
+    # additional synonyms used by game prototypes
+    "top": "chest",
+    "chestguard": "chest",
+    "legguard": "legs",
+    "shoes": "feet",
 }
 
 
