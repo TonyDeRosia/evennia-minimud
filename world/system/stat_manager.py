@@ -188,7 +188,7 @@ def remove_equip_bonus(chara, item) -> None:
 
 def apply_item_bonuses_once(chara, item) -> None:
     """Apply bonuses from ``item`` if not already applied."""
-    if not item or item.db.get("bonuses_applied", False):
+    if not item or getattr(item.db, "bonuses_applied", False):
         return
     if item not in chara.equipment.values():
         return
@@ -199,7 +199,7 @@ def apply_item_bonuses_once(chara, item) -> None:
 
 def remove_item_bonuses(chara, item) -> None:
     """Remove bonuses from ``item`` if previously applied."""
-    if not item or not item.db.get("bonuses_applied", False):
+    if not item or not getattr(item.db, "bonuses_applied", False):
         return
     remove_equip_bonus(chara, item)
     item.db.bonuses_applied = False
