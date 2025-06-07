@@ -110,3 +110,17 @@ try:
     from server.conf.secret_settings import *
 except ImportError:
     print("secret_settings.py file not found or failed to import.")
+
+######################################################################
+# Global scripts
+######################################################################
+
+# Ensure the global tick script always runs at server start
+GLOBAL_SCRIPTS = {
+    "global_tick": {
+        "key": "global_tick",
+        "typeclass": "typeclasses.scripts.GlobalTick",
+        "interval": 60,
+        "persistent": True,
+    }
+}
