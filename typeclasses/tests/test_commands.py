@@ -372,12 +372,14 @@ class TestInfoCommands(EvenniaTest):
         )
         weapon = next(o for o in self.char1.contents if "longsword" in o.key.lower())
         weapon.db.identified = True
+        weapon.db.armor = 3
         self.char1.msg.reset_mock()
         self.char1.execute_cmd("inspect longsword")
         out = self.char1.msg.call_args[0][0]
         self.assertIn("Bonuses:", out)
         self.assertIn("STR +2", out)
         self.assertIn("Attack Power +5", out)
+        self.assertIn("Armor +3", out)
 
     def test_buffs(self):
         self.char1.execute_cmd("buffs")
