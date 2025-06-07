@@ -312,6 +312,7 @@ class CmdDrop(Command):
             )
             coin.db.coin_type = ctype
             coin.db.amount = amount
+            coin.db.from_pouch = True
             caller.msg(f"You drop {amount} {ctype} coin{'s' if amount != 1 else ''}.")
             return
 

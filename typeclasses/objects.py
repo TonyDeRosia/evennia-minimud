@@ -359,6 +359,7 @@ class CoinPile(Object):
         self.db.coin_type = "copper"
         self.db.amount = 0
         self.db.weight = 0
+        self.db.from_pouch = False
 
     def get_display_name(self, looker, **kwargs):
         ctype = (self.db.coin_type or "coin").capitalize()
@@ -370,7 +371,7 @@ class CoinPile(Object):
         dest = self.location
         if not dest:
             return
-        if dest.is_typeclass("typeclasses.characters.Character", exact=False):
+        if dest.is_typeclass("typeclasses.characters.Character", exact=False) and self.db.from_pouch:
             wallet = dest.db.coins or {}
             ctype = self.db.coin_type
             wallet[ctype] = int(wallet.get(ctype, 0)) + int(self.db.amount or 0)
