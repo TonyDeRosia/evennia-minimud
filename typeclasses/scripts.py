@@ -237,20 +237,50 @@ class RestockScript(Script):
 
 
 class GlobalTick(Script):
-    """A global ticker calling ``at_tick`` on tickable objects."""
+    """A global ticker that regenerates health/mana/stamina and refreshes prompts."""
 
     def at_script_creation(self):
         self.interval = 60
         self.persistent = True
 
     def at_repeat(self):
+        from evennia.utils.search import search_tag
         from .characters import PlayerCharacter
-        from world.system import state_manager
+        from random import randint
 
-        for char in Character.objects.all():
-            if hasattr(char, "at_tick"):
-                char.at_tick()
-            state_manager.tick_character(char)
+        tickables = search_tag(key="tickable")
+        for obj in tickables:
+            if not hasattr(obj, "traits"):
+                continue
 
-        for pc in PlayerCharacter.objects.all():
-            pc.refresh_prompt()
+            # Determine regeneration scale
+            statuses = obj.tags.get(category="status", return_list=True) or []
+            if "sleeping" in statuses or "unconscious" in statuses:
+                low, high = 7, 12
+            elif any(s in statuses for s in ("sitting", "lying down", "resting")):
+                low, high = 3, 7
+            else:
+                low, high = 1, 3
+
+            healed = {}
+
+            for trait_key, color in (
+                ("health", "|r"),
+                ("mana", "|b"),
+                ("stamina", "|g"),
+            ):
+                trait = obj.traits.get(trait_key)
+                if not trait or trait.current >= trait.max:
+                    continue
+
+                pct = randint(low, high)
+                amount = max(1, int(round(trait.max * pct / 100)))
+                trait.current = min(trait.current + amount, trait.max)
+                healed[trait_key] = (amount, color)
+
+            if healed and hasattr(obj, "msg"):
+                parts = [f"{col}+{amt} {k[:2].upper()}|n" for k, (amt, col) in healed.items()]
+                obj.msg("You regenerate " + ", ".join(parts) + ".")
+
+            if hasattr(obj, "refresh_prompt"):
+                obj.refresh_prompt()
