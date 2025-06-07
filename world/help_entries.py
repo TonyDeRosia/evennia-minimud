@@ -2035,6 +2035,37 @@ Related:
 """,
     },
     {
+        "key": 'bank',
+        "category": 'Here',
+        "text": """\
+Help for bank
+
+Manage your account with a banker NPC.
+
+Usage:
+    bank
+    deposit <amount> <coin>
+    withdraw <amount> <coin>
+
+Switches:
+    None
+
+Arguments:
+    amount - how many coins
+    coin   - copper, silver, gold or platinum
+
+Examples:
+    deposit 50 silver
+    withdraw 1 gold
+
+Notes:
+    - Deposit moves coins from your coin pouch into the bank.
+    - Withdraw moves coins from the bank into your coin pouch.
+
+Related:
+    help ansi
+""",
+    },
         "key": 'guild',
         "category": 'General',
         "text": """
