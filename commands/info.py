@@ -42,10 +42,10 @@ EQUIPMENT_SLOTS = SLOT_ORDER
 
 def render_equipment(caller):
     """Return formatted equipment display for caller."""
-    # pull the raw equipment mapping from caller.db so tests can easily
-    # manipulate equipped items without relying on Character.equipment. If
-    # nothing is stored, fall back to an empty mapping.
-    eq = caller.db.equipment if isinstance(caller.db.equipment, dict) else {}
+    # use the Character.equipment property to include both worn and wielded
+    # items.  Tests can still manipulate caller.db.equipment directly since the
+    # property merges those values.
+    eq = caller.equipment
     display = ["+=========================+", "| [ EQUIPMENT ]"]
 
     main = eq.get("mainhand")
