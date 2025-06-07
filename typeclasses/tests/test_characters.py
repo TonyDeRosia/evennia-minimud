@@ -167,9 +167,9 @@ class TestGlobalTick(EvenniaTest):
 
         script.at_repeat()
 
-        self.char1.at_tick.assert_not_called()
-        self.char1.refresh_prompt.assert_called()
-        state_manager.tick_character.assert_not_called()
+        self.char1.at_tick.assert_called_once()
+        self.char1.refresh_prompt.assert_not_called()
+        state_manager.tick_character.assert_called_once_with(self.char1)
 
     def test_tick_offline_characters(self):
         from typeclasses.scripts import GlobalTick
@@ -205,10 +205,10 @@ class TestGlobalTick(EvenniaTest):
 
         script.at_repeat()
 
-        pc.at_tick.assert_not_called()
-        npc.at_tick.assert_not_called()
+        pc.at_tick.assert_called_once()
+        npc.at_tick.assert_called_once()
 
-        state_manager.tick_character.assert_not_called()
+        state_manager.tick_character.assert_has_calls([call(pc), call(npc)], any_order=True)
 
         for char in (pc, npc):
             for key in ("health", "mana", "stamina"):
