@@ -2418,6 +2418,8 @@ Notes:
       guild_receptionist, banker and craftsman.
     - The builder prompts for description, NPC type, creature type, level,
       HP MP SP, primary stats, behavior, skills and AI type.
+    - Behavior and AI type are descriptive only; they have no effect unless
+      your game code uses them.
     - Humanoid body type grants the standard equipment slots automatically.
       Quadrupeds receive head, body, front_legs and hind_legs and lack weapon
       slots. Unique lets you add or remove any slots in the next step.
