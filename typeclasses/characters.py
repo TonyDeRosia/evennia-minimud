@@ -194,9 +194,34 @@ class Character(ObjectParent, ClothedCharacter):
         self.update_carry_weight()
 
     def at_object_leave(self, obj, target_location, **kwargs):
-        """Update carry weight when losing an item."""
+        """Handle cleanup when an object leaves our inventory."""
         super().at_object_leave(obj, target_location, **kwargs)
+        from world.system import stat_manager
+
+        # check if this object was equipped when removed
+        if obj in self.wielding:
+            # clear from wielded mapping without moving it back
+            wielded = self.attributes.get("_wielded", {})
+            if wielded:
+                wielded.deserialize()
+            for hand, weap in list(wielded.items()):
+                if weap == obj:
+                    wielded[hand] = None
+            self.db._wielded = wielded
+            stat_manager.remove_item_bonuses(self, obj)
+        elif obj in self.equipment.values():
+            # remove worn item from equipment mapping
+            obj.db.worn = False
+            eq = self.db.equipment or {}
+            for slot, itm in list(eq.items()):
+                if itm == obj:
+                    eq.pop(slot, None)
+                    break
+            self.db.equipment = eq
+            stat_manager.remove_item_bonuses(self, obj)
+
         self.update_carry_weight()
+        stat_manager.refresh_stats(self)
         
     def at_pre_move(self, destination, **kwargs):
         """
