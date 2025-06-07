@@ -734,7 +734,15 @@ class NPC(Character):
         triggers = (self.db.triggers or {}).get(event)
         if not triggers:
             return
-        for trig in make_iter(triggers):
+
+        if isinstance(triggers, tuple):
+            triglist = [{"match": triggers[0], "reaction": triggers[1]}]
+        elif isinstance(triggers, dict) and "match" in triggers:
+            triglist = [triggers]
+        else:
+            triglist = make_iter(triggers)
+
+        for trig in triglist:
             if not isinstance(trig, dict):
                 continue
             match = trig.get("match")
@@ -805,7 +813,7 @@ class NPC(Character):
     def at_say(self, speaker, message, **kwargs):
         """React to someone speaking in the room."""
         if speaker != self:
-            self.check_triggers("on_say", speaker=speaker, message=message)
+            self.check_triggers("on_speak", speaker=speaker, message=message)
 
     def at_character_arrive(self, chara, **kwargs):
         """
@@ -832,7 +840,7 @@ class NPC(Character):
 
     def at_object_receive(self, obj, source_location, **kwargs):
         super().at_object_receive(obj, source_location, **kwargs)
-        self.check_triggers("on_give", item=obj, giver=source_location)
+        self.check_triggers("on_give_item", item=obj, giver=source_location)
 
     def return_appearance(self, looker, **kwargs):
         text = super().return_appearance(looker, **kwargs)
@@ -985,4 +993,4 @@ class NPC(Character):
 
     def at_tick(self):
         super().at_tick()
-        self.check_triggers("on_time")
+        self.check_triggers("on_timer")

@@ -113,8 +113,9 @@ your NPC. You can later update them with `@cnpc edit <npc>`.
 
 See the `cnpc` help entry for a full breakdown of every menu option.
 
-While editing, there's a step to manage triggers. Use `add trigger <event> "<match>" -> <reaction>`
-to create a response and `del <event> <#>` to remove one. Type `done` when finished.
+While editing, there's a step to manage triggers using a numbered menu. Choose
+`Add trigger` to create a new reaction, `Delete trigger` to remove one, `List
+triggers` to review them and `Finish` when done.
 See the `triggers` help entry for the list of events and possible reactions.
 
 ## Weapon Creation and Inspection
