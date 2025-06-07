@@ -71,6 +71,8 @@ def parse_stat_mods(text):
                 desc_parts.extend(p.strip() for p in pieces[i + 1 :])
                 break
         else:
+            if "+" in piece:
+                raise ValueError(piece)
             desc_parts.append(piece)
             desc_parts.extend(p.strip() for p in pieces[i + 1 :])
             break
@@ -491,7 +493,7 @@ class CmdCGear(Command):
         try:
             bonuses, desc = parse_stat_mods(rest)
         except ValueError as err:
-            self.msg(f"Invalid stat modifier: {err}")
+            self.msg(f"Invalid stat modifier: {err}. See 'help statmods' for valid stats.")
             return
         if slot and slot not in VALID_SLOTS:
             self.msg("Invalid slot name.")
@@ -654,7 +656,9 @@ class CmdCWeapon(Command):
                     amount = int(match.group(2))
                     key = normalize_stat_key(stat_name)
                     if key not in VALID_STATS:
-                        self.msg(f"Invalid stat modifier: {stat_name}")
+                        self.msg(
+                            f"Invalid stat modifier: {stat_name}. See 'help statmods' for valid stats."
+                        )
                         return
                     bonuses[key] = amount
                     remainder = piece[match.end() :].strip()
@@ -794,7 +798,9 @@ class CmdCShield(Command):
                     amount = int(match.group(2))
                     key = normalize_stat_key(stat_name)
                     if key not in VALID_STATS:
-                        self.msg(f"Invalid stat modifier: {stat_name}")
+                        self.msg(
+                            f"Invalid stat modifier: {stat_name}. See 'help statmods' for valid stats."
+                        )
                         return
                     bonuses[key] = amount
                     remainder = piece[match.end() :].strip()
@@ -895,7 +901,7 @@ class CmdCArmor(Command):
         try:
             bonuses, desc = parse_stat_mods(rest)
         except ValueError as err:
-            self.msg(f"Invalid stat modifier: {err}")
+            self.msg(f"Invalid stat modifier: {err}. See 'help statmods' for valid stats.")
             return
         slot = normalize_slot(slot)
         if slot not in VALID_SLOTS:
@@ -977,7 +983,7 @@ class CmdCTool(Command):
         try:
             bonuses, desc = parse_stat_mods(rest)
         except ValueError as err:
-            self.msg(f"Invalid stat modifier: {err}")
+            self.msg(f"Invalid stat modifier: {err}. See 'help statmods' for valid stats.")
             return
         obj = _create_gear(
             self.caller,
@@ -1058,7 +1064,7 @@ class CmdCRing(Command):
         try:
             bonuses, desc = parse_stat_mods(rest)
         except ValueError as err:
-            self.msg(f"Invalid stat modifier: {err}")
+            self.msg(f"Invalid stat modifier: {err}. See 'help statmods' for valid stats.")
             return
 
         if slot not in VALID_SLOTS:
@@ -1136,7 +1142,7 @@ class CmdCTrinket(Command):
         try:
             bonuses, desc = parse_stat_mods(rest)
         except ValueError as err:
-            self.msg(f"Invalid stat modifier: {err}")
+            self.msg(f"Invalid stat modifier: {err}. See 'help statmods' for valid stats.")
             return
 
         obj = _create_gear(
@@ -1275,7 +1281,7 @@ class CmdCPotion(Command):
         try:
             bonuses, desc = parse_stat_mods(rest)
         except ValueError as err:
-            self.msg(f"Invalid stat modifier: {err}")
+            self.msg(f"Invalid stat modifier: {err}. See 'help statmods' for valid stats.")
             return
 
         obj = _create_gear(

@@ -17,9 +17,13 @@ ALIAS_MAP = {
     "eva": "EVA",
     "per": "perception",
     "critical_chance": "crit_chance",
+    "critchance": "crit_chance",
     "critical_damage_bonus": "crit_bonus",
+    "crit_dmg_bonus": "crit_bonus",
     "critical_resist": "crit_resist",
     "armor_penetration": "piercing",
+    "armor_pen": "piercing",
+    "spell_pen": "spell_penetration",
     "crafting_bonus": "craft_bonus",
     "guild_honor_rank_modifiers": "guild_honor_mod",
 }
