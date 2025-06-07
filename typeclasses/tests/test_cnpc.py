@@ -97,27 +97,26 @@ class TestCNPC(EvenniaTest):
         npc_builder._set_skills(self.char1, "")
         npc_builder._set_ai(self.char1, "passive")
 
-        self.char1.ndb.buildnpc["triggers"] = {
-            "on_speak": ("hello", "say Squawk!"),
-            "on_give_item": ("", "say Thanks!"),
-        }
+        self.char1.ndb.buildnpc["triggers"] = [
+            {"event": "on_speak", "match": "hello", "action": "say Squawk!"},
+            {"event": "on_speak", "match": "hello", "action": "emote flaps"},
+            {"event": "on_give_item", "match": "", "action": "say Thanks!"},
+        ]
 
         npc_builder._create_npc(self.char1, "")
 
         npc = self._find("parrot")
         self.assertIsNotNone(npc)
-        self.assertEqual(
-            npc.db.triggers,
-            {
-                "on_speak": ("hello", "say Squawk!"),
-                "on_give_item": ("", "say Thanks!"),
-            },
-        )
+        self.assertEqual(npc.db.triggers, self.char1.ndb.buildnpc["triggers"])
 
         with patch.object(npc, "execute_cmd") as mock_exec:
             npc.at_say(self.char2, "hello there")
+            self.assertEqual(mock_exec.call_count, 2)
+            mock_exec.assert_any_call("say Squawk!")
+            mock_exec.assert_any_call("emote flaps")
         with patch.object(npc, "execute_cmd") as mock_exec:
             npc.at_object_receive(self.obj1, self.char2)
+            mock_exec.assert_called_once_with("say Thanks!")
 
     def test_unique_slots(self):
         with patch("commands.npc_builder.EvMenu"):

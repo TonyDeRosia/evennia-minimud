@@ -2066,6 +2066,7 @@ Related:
     help ansi
 """,
     },
+    {
         "key": 'guild',
         "category": 'General',
         "text": """
@@ -2446,8 +2447,9 @@ Related:
         "text": """
 Help for triggers
 
-NPCs may react automatically to events. Each trigger defines an event,
-an optional match text and one or more reactions to perform.
+NPCs may react automatically to events. Triggers are stored as a list of
+dictionaries ``{"event": <event>, "match": <text>, "action": <command>}``.
+Multiple entries for the same event are allowed.
 
 Events:
     on_speak   - someone speaks in the room
@@ -2466,8 +2468,7 @@ Reactions:
     <command>          - run any other command string
 
 The match text only applies to some events like |won_speak|n and |won_look|n.
-Multiple reactions can be listed separated by commas or by using multiple
-triggers.
+Use multiple triggers to provide several reactions.
 
 Examples:
     Trigger Menu

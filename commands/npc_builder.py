@@ -7,6 +7,28 @@ from utils.slots import SLOT_ORDER
 from .command import Command
 import re
 
+
+def _convert_triggers(triggers):
+    """Translate old trigger formats to list of dicts."""
+    if not triggers:
+        return []
+    if isinstance(triggers, list):
+        return triggers
+    new = []
+    if isinstance(triggers, dict):
+        for event, data in triggers.items():
+            if isinstance(data, tuple):
+                match, reacts = data
+                reacts = [reacts]
+            elif isinstance(data, dict):
+                match = data.get("match")
+                reacts = data.get("reactions") or data.get("reaction") or []
+            else:
+                continue
+            for react in make_iter(reacts):
+                new.append({"event": event, "match": match, "action": react})
+    return new
+
 # NPC types that can be selected in the builder
 ALLOWED_NPC_TYPES = (
     "merchant",
@@ -308,11 +330,14 @@ def menunode_triggers(caller, raw_string="", **kwargs):
 
 def menunode_trigger_list(caller, raw_string="", **kwargs):
     """Show all triggers."""
-    triggers = caller.ndb.buildnpc.get("triggers") or {}
+    triggers = caller.ndb.buildnpc.get("triggers") or []
     text = "|wCurrent Triggers|n\n"
     if triggers:
-        for event, (match, reaction) in triggers.items():
-            text += f"{event}: \"{match}\" -> {reaction}\n"
+        for trig in triggers:
+            event = trig.get("event")
+            match = trig.get("match", "")
+            action = trig.get("action", "")
+            text += f"{event}: \"{match}\" -> {action}\n"
     else:
         text += "None\n"
     options = [{"desc": "Back", "goto": "menunode_triggers"}]
@@ -367,8 +392,8 @@ def _save_trigger(caller, raw_string, **kwargs):
     reaction = raw_string.strip()
     event = caller.ndb.trigger_event
     match = caller.ndb.trigger_match
-    triggers = caller.ndb.buildnpc.setdefault("triggers", {})
-    triggers[event] = (match, reaction)
+    triggers = caller.ndb.buildnpc.setdefault("triggers", [])
+    triggers.append({"event": event, "match": match, "action": reaction})
     caller.ndb.trigger_event = None
     caller.ndb.trigger_match = None
     caller.msg("Trigger added.")
@@ -376,22 +401,22 @@ def _save_trigger(caller, raw_string, **kwargs):
 
 def menunode_trigger_delete(caller, raw_string="", **kwargs):
     """Select trigger to delete."""
-    triggers = caller.ndb.buildnpc.get("triggers") or {}
+    triggers = caller.ndb.buildnpc.get("triggers") or []
     if not triggers:
         caller.msg("No triggers to delete.")
         return "menunode_triggers"
     text = "|wSelect trigger to delete|n"
     options = []
-    for event, (match, reaction) in triggers.items():
-        desc = f"{event}: \"{match}\" -> {reaction}"
-        options.append({"desc": desc, "goto": (_del_trigger, {"event": event})})
+    for idx, trig in enumerate(triggers):
+        desc = f"{trig.get('event')}: \"{trig.get('match','')}\" -> {trig.get('action','')}"
+        options.append({"desc": desc, "goto": (_del_trigger, {"index": idx})})
     options.append({"desc": "Back", "goto": "menunode_triggers"})
     return text, options
 
-def _del_trigger(caller, raw_string, event=None, **kwargs):
-    triggers = caller.ndb.buildnpc.get("triggers") or {}
-    if event in triggers:
-        del triggers[event]
+def _del_trigger(caller, raw_string, index=None, **kwargs):
+    triggers = caller.ndb.buildnpc.get("triggers") or []
+    if index is not None and 0 <= index < len(triggers):
+        del triggers[index]
         caller.msg("Trigger removed.")
     return "menunode_triggers"
 
@@ -409,8 +434,8 @@ def menunode_confirm(caller, raw_string="", **kwargs):
             text += f"{key}: {stats}\n"
         elif key == "triggers":
             if val:
-                for event, (match, reaction) in val.items():
-                    text += f"trigger {event}: \"{match}\" -> {reaction}\n"
+                for trig in val:
+                    text += f"trigger {trig.get('event')}: \"{trig.get('match','')}\" -> {trig.get('action','')}\n"
             else:
                 text += "triggers: None\n"
         else:
@@ -439,7 +464,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.ai_type = data.get("ai_type")
     npc.db.behavior = data.get("behavior")
     npc.db.skills = data.get("skills")
-    npc.db.triggers = data.get("triggers") or {}
+    npc.db.triggers = _convert_triggers(data.get("triggers"))
     npc.db.creature_type = data.get("creature_type")
     npc.db.level = data.get("level", 1)
     for trait, val in {
@@ -498,7 +523,7 @@ class CmdCNPC(Command):
             if not rest:
                 self.msg("Usage: cnpc start <key>")
                 return
-            self.caller.ndb.buildnpc = {"key": rest.strip(), "triggers": {}}
+            self.caller.ndb.buildnpc = {"key": rest.strip(), "triggers": []}
             EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
             return
         if sub == "edit":
@@ -524,7 +549,7 @@ class CmdCNPC(Command):
                 "behavior": npc.db.behavior or "",
                 "skills": npc.db.skills or [],
                 "ai_type": npc.db.ai_type or "",
-                "triggers": npc.db.triggers or {},
+                "triggers": _convert_triggers(npc.db.triggers),
             }
             self.caller.ndb.buildnpc = data
             EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
