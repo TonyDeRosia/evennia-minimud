@@ -390,6 +390,10 @@ class CmdInspect(Command):
                     label = label.title()
                 lines.append(f"  {label} {amt:+d}")
 
+        armor = getattr(obj.db, "armor", 0)
+        if armor:
+            lines.append(f"  Armor +{armor}")
+
         req = obj.db.required_perception_to_identify
         if obj.tags.has("unidentified") and req is not None:
             from world.system import stat_manager
