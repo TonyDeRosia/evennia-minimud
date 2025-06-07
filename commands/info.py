@@ -7,6 +7,28 @@ from world.stats import CORE_STAT_KEYS
 from utils.stats_utils import get_display_scroll, _strip_colors, _pad
 from utils.slots import SLOT_ORDER
 
+# Mapping of canonical equipment slot keys to the labels shown to players.
+SLOT_LABELS = {
+    "twohanded": "Twohanded",
+    "mainhand": "Mainhand",
+    "offhand": "Offhand",
+    "head": "Head",
+    "neck": "Neck",
+    "shoulders": "Shoulders",
+    "chest": "Chest",
+    "cloak": "Cloak",
+    "wrists": "Wrists",
+    "hands": "Hands",
+    "ring1": "Ring1",
+    "ring2": "Ring2",
+    "tabard": "Tabard",
+    "waist": "Waist",
+    "legs": "Legs",
+    "feet": "Feet",
+    "accessory": "Accessory",
+    "trinket": "Trinket",
+}
+
 
 def is_gettable(obj, caller):
     """Return True if caller can pick up obj."""
@@ -48,7 +70,8 @@ def render_equipment(caller):
             item = eq.get(slot)
 
         name = item.get_display_name(caller) if item else "NOTHING"
-        display.append(f"| {slot.capitalize():<10}: {name}")
+        label = SLOT_LABELS.get(slot, slot.capitalize())
+        display.append(f"| {label:<10}: {name}")
 
     display.append("+=========================+")
     return "\n".join(display)
