@@ -397,8 +397,9 @@ def _del_trigger(caller, raw_string, event=None, **kwargs):
 
 def menunode_confirm(caller, raw_string="", **kwargs):
     data = caller.ndb.buildnpc
-    if not isinstance(data, dict):
-        caller.msg("Error: NPC data missing. Restarting builder.")
+    required = {"key"}
+    if not isinstance(data, dict) or not required.issubset(data):
+        caller.msg("Error: NPC data incomplete. Restarting builder.")
         return None
     text = "|wConfirm NPC Creation|n\n"
     for key, val in data.items():

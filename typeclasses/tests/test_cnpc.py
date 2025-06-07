@@ -140,3 +140,12 @@ class TestCNPC(EvenniaTest):
         npc = self._find("chimera")
         self.assertIn("tail", npc.db.equipment_slots)
         self.assertNotIn("offhand", npc.db.equipment_slots)
+
+    def test_confirm_incomplete_data(self):
+        """menunode_confirm should handle missing data gracefully."""
+        self.char1.ndb.buildnpc = {}
+        result = npc_builder.menunode_confirm(self.char1)
+        self.assertIsNone(result)
+        self.char1.msg.assert_called()
+        msg = self.char1.msg.call_args[0][0]
+        self.assertIn("Error", msg)
