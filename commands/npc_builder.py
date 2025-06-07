@@ -1,6 +1,7 @@
 from evennia.utils.evmenu import EvMenu
 from evennia.utils import make_iter
 from evennia import create_object
+from evennia.prototypes import spawner
 from typeclasses.characters import NPC
 from utils.slots import SLOT_ORDER
 from .command import Command
@@ -488,7 +489,7 @@ class CmdCNPC(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: cnpc start <key> | cnpc edit <npc>")
+            self.msg("Usage: cnpc start <key> | cnpc edit <npc> | cnpc dev_spawn <proto>")
             return
         parts = self.args.split(None, 1)
         sub = parts[0].lower()
@@ -528,5 +529,21 @@ class CmdCNPC(Command):
             self.caller.ndb.buildnpc = data
             EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
             return
-        self.msg("Usage: cnpc start <key> | cnpc edit <npc>")
+        if sub == "dev_spawn":
+            if not self.caller.check_permstring("Developer"):
+                self.msg("Developer permission required.")
+                return
+            if not rest:
+                self.msg("Usage: cnpc dev_spawn <proto>")
+                return
+            proto = rest
+            try:
+                obj = spawner.spawn(proto)[0]
+            except KeyError:
+                self.msg(f"Unknown prototype: {proto}")
+                return
+            obj.location = self.caller.location
+            self.msg(f"Spawned {obj.get_display_name(self.caller)}.")
+            return
+        self.msg("Usage: cnpc start <key> | cnpc edit <npc> | cnpc dev_spawn <proto>")
 
