@@ -2365,6 +2365,7 @@ Create or edit an NPC using a guided menu.
 Usage:
     cnpc start <key>
     cnpc edit <npc>
+    cnpc dev_spawn <proto> [amt]
 
 Switches:
     None
@@ -2375,17 +2376,28 @@ Arguments:
 Examples:
     cnpc start guard_01
     cnpc edit Bob
+    cnpc dev_spawn guard_01 5
 
 Notes:
+    - NPC types include merchant, guard, questgiver, guildmaster,
+      guild_receptionist, banker and craftsman.
     - The builder prompts for description, NPC type, creature type, level,
       HP MP SP, primary stats, behavior, skills and AI type.
-    - Humanoids gain all equipment slots; quadrupeds lack twohanded,
-      mainhand and offhand slots.
+    - Humanoid body type grants the standard equipment slots automatically.
+      Quadrupeds receive head, body, front_legs and hind_legs and lack weapon
+      slots. Unique lets you add or remove any slots in the next step.
     - After reviewing the summary choose |wYes|n to confirm and create or
       update the NPC.
     - Use |wcnpc edit <npc>|n to modify an existing NPC.
-    - At the triggers step use the numbered menu to add, delete or list
-      automatic reactions.
+    - At the triggers step you will see a menu to add, delete or list
+      automatic reactions. Example:
+          1) Add trigger
+          2) Delete trigger
+          3) List triggers
+          4) Finish
+      Choosing Add prompts for the event type, match text and reaction
+      command.
+    - |wcnpc dev_spawn|n quickly spawns prototype NPCs for testing.
     - See |whelp triggers|n for available events and reactions.
     - ANSI color codes are supported in names and descriptions.
 
@@ -2422,6 +2434,15 @@ Reactions:
 The match text only applies to some events like |won_speak|n and |won_look|n.
 Multiple reactions can be listed separated by commas or by using multiple
 triggers.
+
+Examples:
+    Trigger Menu
+        1) Add trigger
+        2) Delete trigger
+        3) List triggers
+        4) Finish
+    Adding a trigger asks for event type, optional match text and the
+    command that should run when the event occurs.
 
 Related:
     help cnpc
