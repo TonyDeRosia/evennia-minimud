@@ -1,5 +1,6 @@
 from evennia.utils.test_resources import EvenniaTest
 from evennia.utils import create
+from django.test import override_settings
 from world.system import stat_manager, state_manager
 from world import stats
 
@@ -169,6 +170,7 @@ class TestStatManager(EvenniaTest):
         self.assertEqual(char.db.derived_stats.get("ATK"), base_atk + 3)
 
 
+@override_settings(DEFAULT_HOME=None)
 class TestBonusPersistence(EvenniaTest):
     def setUp(self):
         super().setUp()
@@ -205,3 +207,23 @@ class TestBonusPersistence(EvenniaTest):
         self.char1.execute_cmd("look")
         self.assertEqual(self.char1.traits.STR.base, base_str)
         self.assertEqual(self.char1.db.derived_stats.get("HP"), base_hp)
+
+    def test_equipment_reload_keeps_bonuses(self):
+        item = self._equip_item()
+        base_bonus = dict(self.char1.db.equip_bonuses)
+
+        equip_data = dict(self.char1.db.equipment)
+        self.char1.db.equip_bonuses = {}
+        self.char1.db.equipment = equip_data
+
+        stat_manager.recalculate_stats(self.char1)
+
+        self.assertEqual(self.char1.db.equip_bonuses, base_bonus)
+
+    def test_remove_clears_slot_and_bonus(self):
+        item = self._equip_item()
+        item.remove(self.char1, True)
+        stat_manager.refresh_stats(self.char1)
+
+        self.assertFalse(self.char1.db.equipment.get("neck"))
+        self.assertFalse(self.char1.db.equip_bonuses)
