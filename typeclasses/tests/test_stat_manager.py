@@ -167,3 +167,41 @@ class TestStatManager(EvenniaTest):
         self.assertEqual(char.db.equip_bonuses.get("ATK"), 3)
         self.assertEqual(char.db.derived_stats.get("HP"), base_hp + 25)
         self.assertEqual(char.db.derived_stats.get("ATK"), base_atk + 3)
+
+
+class TestBonusPersistence(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        stats.apply_stats(self.char1)
+
+    def _equip_item(self):
+        item = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="amulet",
+            location=self.char1,
+        )
+        item.tags.add("equipment", category="flag")
+        item.tags.add("identified", category="flag")
+        item.tags.add("amulet", category="slot")
+        item.db.stat_mods = {"STR": 2, "HP": 10}
+        item.wear(self.char1, True)
+        stat_manager.refresh_stats(self.char1)
+        return item
+
+    def test_score_does_not_stack_bonuses(self):
+        self._equip_item()
+        base_str = self.char1.traits.STR.base
+        base_hp = self.char1.db.derived_stats.get("HP")
+        self.char1.execute_cmd("score")
+        self.char1.execute_cmd("score")
+        self.assertEqual(self.char1.traits.STR.base, base_str)
+        self.assertEqual(self.char1.db.derived_stats.get("HP"), base_hp)
+
+    def test_look_does_not_stack_bonuses(self):
+        self._equip_item()
+        base_str = self.char1.traits.STR.base
+        base_hp = self.char1.db.derived_stats.get("HP")
+        self.char1.execute_cmd("look")
+        self.char1.execute_cmd("look")
+        self.assertEqual(self.char1.traits.STR.base, base_str)
+        self.assertEqual(self.char1.db.derived_stats.get("HP"), base_hp)

@@ -186,6 +186,37 @@ def remove_equip_bonus(chara, item) -> None:
     chara.db.equip_bonuses = bonuses
 
 
+def apply_item_bonuses_once(chara, item) -> None:
+    """Apply bonuses from ``item`` if not already applied."""
+    if not item or item.db.get("bonuses_applied", False):
+        return
+    if item not in chara.equipment.values():
+        return
+    add_equip_bonus(chara, item)
+    item.db.bonuses_applied = True
+    refresh_stats(chara)
+
+
+def remove_item_bonuses(chara, item) -> None:
+    """Remove bonuses from ``item`` if previously applied."""
+    if not item or not item.db.get("bonuses_applied", False):
+        return
+    remove_equip_bonus(chara, item)
+    item.db.bonuses_applied = False
+    refresh_stats(chara)
+
+
+def reset_all_item_bonuses(chara) -> None:
+    """Reset and reapply bonuses from all equipped items."""
+    chara.db.equip_bonuses = {}
+    for itm in set(chara.equipment.values()):
+        if itm:
+            itm.db.bonuses_applied = False
+    for itm in set(chara.equipment.values()):
+        if itm:
+            apply_item_bonuses_once(chara, itm)
+
+
 def apply_bonuses(chara, item) -> None:
     """Apply bonuses from ``item`` and refresh character stats."""
     add_equip_bonus(chara, item)
@@ -205,10 +236,7 @@ def clear_all_equipment_bonuses(chara) -> None:
 
 def recalculate_stats(chara) -> None:
     """Reapply bonuses from all equipped items and refresh stats."""
-    clear_all_equipment_bonuses(chara)
-    for item in chara.equipment.values():
-        if item:
-            apply_bonuses(chara, item)
+    reset_all_item_bonuses(chara)
     refresh_stats(chara)
 
 
