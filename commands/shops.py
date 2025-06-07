@@ -330,3 +330,118 @@ class CmdMoney(Command):
     def func(self):
         coins = self.caller.db.coins or {}
         self.msg(f"You have {format_wallet(coins)}.")
+
+class CmdSellMerchant(CmdSell):
+    """Merchant-aware sell command applying discounts."""
+    def func(self):
+        if not (self.obj.db.storage):
+            self.msg("This shop is not open for business.")
+            return
+        objs = self.caller.search(self.args, location=self.caller, stacked=self.count)
+        if not objs:
+            return
+        objs = make_iter(objs)
+        example = objs[0]
+        count = len(objs)
+        obj_name = example.get_numbered_name(count, self.caller)[1]
+        total = sum(obj.attributes.get("value", 0) for obj in objs)
+        discount = self.obj.db.sell_discount or 1
+        total = int(total * discount)
+        confirm = yield (
+            f"Do you want to sell {obj_name} for {total} coin{'' if total == 1 else 's'}? Yes/No"
+        )
+        if confirm.lower().strip() not in ("yes", "y"):
+            self.msg("Sale cancelled.")
+            return
+        for obj in objs:
+            self.obj.add_stock(obj)
+        wallet = self.caller.db.coins or {}
+        self.caller.db.coins = from_copper(to_copper(wallet) + total)
+        self.msg(
+            f"You exchange {obj_name} for {total} coin{'' if total == 1 else 's'}."
+        )
+
+
+class CmdSellAll(Command):
+    """Sell everything in your inventory."""
+
+    key = "sell all"
+    aliases = ("sellall",)
+    help_category = "Here"
+
+    def func(self):
+        if not (self.obj.db.storage):
+            self.msg("This shop is not open for business.")
+            return
+        objs = [o for o in self.caller.contents if o.attributes.has("value") and not o.db.worn]
+        if not objs:
+            self.msg("You have nothing to sell.")
+            return
+        total = sum(o.attributes.get("value", 0) for o in objs)
+        discount = self.obj.db.sell_discount or 1
+        total = int(total * discount)
+        confirm = yield (
+            f"Do you want to sell everything for {total} coin{'' if total == 1 else 's'}? Yes/No"
+        )
+        if confirm.lower().strip() not in ("yes", "y"):
+            self.msg("Sale cancelled.")
+            return
+        for obj in objs:
+            self.obj.add_stock(obj)
+        wallet = self.caller.db.coins or {}
+        self.caller.db.coins = from_copper(to_copper(wallet) + total)
+        self.msg(
+            f"You exchange your belongings for {total} coin{'' if total == 1 else 's'}."
+        )
+
+
+class CmdBuyMerchant(CmdBuy):
+    """Merchant-aware buy command paying the merchant."""
+    def func(self):
+        if not (storage := self.obj.db.storage):
+            self.msg("This shop is not open for business.")
+            return
+        if not (wallet := self.caller.db.coins):
+            self.msg("You don't have any money!")
+            return
+        objs = self.caller.search(self.args, location=storage, stacked=self.count)
+        if not objs:
+            return
+        objs = make_iter(objs)
+        objs = [o for o in objs if o.db.price]
+        if not objs:
+            self.msg(f"There are no {self.args} for sale.")
+            return
+        example = objs[0]
+        count = len(objs)
+        obj_name = example.get_numbered_name(count, self.caller)[1]
+        total = sum(o.attributes.get("price", 0) for o in objs)
+        if to_copper(wallet) < total:
+            self.msg(f"You need {total} coins to buy that.")
+            return
+        confirm = yield (
+            f"Do you want to buy {obj_name} for {total} coin{'' if total == 1 else 's'}? Yes/No"
+        )
+        if confirm.lower().strip() not in ("yes", "y"):
+            self.msg("Purchase cancelled.")
+            return
+        for obj in objs:
+            obj.move_to(self.caller, quiet=True, move_type="get")
+        self.caller.db.coins = from_copper(to_copper(wallet) - total)
+        purse = self.obj.db.coins or {}
+        self.obj.db.coins = from_copper(to_copper(purse) + total)
+        self.msg(
+            f"You exchange {total} coin{'' if total == 1 else 's'} for {count} {obj_name}."
+        )
+
+
+class MerchantCmdSet(CmdSet):
+    key = "Merchant CmdSet"
+
+    def at_cmdset_creation(self):
+        super().at_cmdset_creation()
+        self.add(CmdList)
+        self.add(CmdBuyMerchant)
+        self.add(CmdSellMerchant)
+        self.add(CmdSellAll)
+

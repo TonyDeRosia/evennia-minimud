@@ -1972,7 +1972,7 @@ Examples:
     None
 
 Notes:
-    - None
+    - Shows everything a nearby merchant has in stock and their prices.
 
 Related:
     help ansi
@@ -1999,7 +1999,8 @@ Examples:
     None
 
 Notes:
-    - None
+    - Pays the asking price to the merchant and moves the item to you.
+    - Prices may vary depending on the merchant's markup.
 
 Related:
     help ansi
@@ -2026,7 +2027,8 @@ Examples:
     None
 
 Notes:
-    - None
+    - Trades your item to the merchant for its value in coins.
+    - Use |wsell all|n to sell everything you are carrying.
 
 Related:
     help ansi
