@@ -19,6 +19,7 @@ from world.system import stat_manager
 from world.system.constants import MAX_LEVEL
 from utils.stats_utils import get_display_scroll, normalize_stat_key
 from utils import VALID_SLOTS, normalize_slot
+from .npc_builder import CmdCNPC
 
 
 def _safe_split(text):
@@ -1347,3 +1348,4 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdSetBuff)
         self.add(CmdSetFlag)
         self.add(CmdRemoveFlag)
+        self.add(CmdCNPC)
