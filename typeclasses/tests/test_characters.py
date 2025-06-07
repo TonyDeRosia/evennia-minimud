@@ -252,3 +252,28 @@ class TestCharacterCreationStats(EvenniaTest):
         )
         self.assertIsNotNone(char.traits.get("armor"))
         self.assertEqual(char.traits.armor.base, 0)
+
+
+class TestReviveRespawn(EvenniaTest):
+    def test_revive_sets_partial_health_without_regen(self):
+        char = self.char1
+        char2 = self.char2
+        char.traits.health.current = 0
+        char.tags.add("unconscious", category="status")
+        char.tags.add("lying down", category="status")
+        char.traits.health.rate = 1.0
+        char.revive(char2)
+        self.assertEqual(char.traits.health.current, char.traits.health.max // 5)
+        self.assertEqual(char.traits.health.rate, 0.0)
+        self.assertFalse(char.tags.has("unconscious", category="status"))
+
+    def test_respawn_restores_full_health_without_regen(self):
+        char = self.char1
+        char.traits.health.current = 0
+        char.tags.add("unconscious", category="status")
+        char.tags.add("lying down", category="status")
+        char.traits.health.rate = 1.0
+        char.respawn()
+        self.assertEqual(char.traits.health.current, char.traits.health.max)
+        self.assertEqual(char.traits.health.rate, 0.0)
+        self.assertFalse(char.tags.has("unconscious", category="status"))
