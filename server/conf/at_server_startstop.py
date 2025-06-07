@@ -33,25 +33,33 @@ def at_server_start():
     from evennia.utils import create
     from evennia.scripts.models import ScriptDB
 
-    script = ScriptDB.objects.filter(db_key="global_tick").first()
+    scripts = list(ScriptDB.objects.filter(db_key="global_tick"))
+    script = None
+    if scripts:
+        script = scripts[0]
+        for extra in scripts[1:]:
+            extra.stop()
+            extra.delete()
+
+    if script and script.typeclass_path != "typeclasses.scripts.GlobalTick":
+        script.stop()
+        script.delete()
+        script = None
+
     if script:
-        if script.typeclass_path != "typeclasses.scripts.GlobalTick":
-            script.stop()
-            script.delete()
-            script = None
-        else:
-            # Make sure the script is configured correctly
-            changed = False
-            if script.interval != 60:
-                script.interval = 60
-                changed = True
-            if not script.persistent:
-                script.persistent = True
-                changed = True
-            if changed:
-                script.save()
-            if not script.is_active:
-                script.start()
+        # Make sure the script is configured correctly
+        changed = False
+        if script.interval != 60:
+            script.interval = 60
+            changed = True
+        if not script.persistent:
+            script.persistent = True
+            changed = True
+        if changed:
+            script.save()
+            script.restart()
+        elif not script.is_active:
+            script.start()
 
     if not script:
         script = create.create_script("typeclasses.scripts.GlobalTick", key="global_tick")
