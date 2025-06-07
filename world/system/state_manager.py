@@ -179,6 +179,15 @@ def apply_regen(chara):
         return healed
 
     derived = getattr(chara.db, "derived_stats", {}) or {}
+
+    statuses = chara.tags.get(category="status", return_list=True) or []
+    if "sleeping" in statuses or "unconscious" in statuses:
+        multiplier = 3
+    elif any(s in statuses for s in ("sitting", "lying down")):
+        multiplier = 2
+    else:
+        multiplier = 1
+
     for key in ("health", "mana", "stamina"):
         trait = chara.traits.get(key)
         if not trait:
@@ -186,7 +195,8 @@ def apply_regen(chara):
         regen = int(derived.get(f"{key}_regen", 0))
         if regen <= 0 or trait.current >= trait.max:
             continue
-        new_val = min(trait.current + regen, trait.max)
+        healed_amt = max(1, int(round(regen * multiplier)))
+        new_val = min(trait.current + healed_amt, trait.max)
         gained = new_val - trait.current
         if gained:
             trait.current = new_val
