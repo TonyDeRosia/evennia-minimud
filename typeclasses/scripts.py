@@ -254,6 +254,7 @@ class GlobalTick(Script):
                 continue
 
             state_manager.apply_regen(obj)
+            state_manager.tick_character(obj)
 
             if hasattr(obj, "refresh_prompt"):
                 obj.refresh_prompt()
