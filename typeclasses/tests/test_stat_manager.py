@@ -145,3 +145,25 @@ class TestStatManager(EvenniaTest):
         self.assertEqual(char.db.equip_bonuses.get("perception"), 100)
         self.assertEqual(char.traits.STR.base, base_str + 2)
         self.assertEqual(char.db.derived_stats.get("perception"), base_per + 100)
+
+    def test_hp_and_atk_alias_modifiers(self):
+        char = self.char1
+        stat_manager.refresh_stats(char)
+        base_hp = char.db.derived_stats.get("HP")
+        base_atk = char.db.derived_stats.get("ATK")
+
+        item = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="charm",
+            location=char,
+        )
+        item.tags.add("equipment", category="flag")
+        item.tags.add("identified", category="flag")
+        item.db.stat_mods = {"hp": 25, "atk": 3}
+        item.wear(char, True)
+        stat_manager.refresh_stats(char)
+
+        self.assertEqual(char.db.equip_bonuses.get("HP"), 25)
+        self.assertEqual(char.db.equip_bonuses.get("ATK"), 3)
+        self.assertEqual(char.db.derived_stats.get("HP"), base_hp + 25)
+        self.assertEqual(char.db.derived_stats.get("ATK"), base_atk + 3)
