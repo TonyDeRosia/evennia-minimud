@@ -3,6 +3,7 @@ from evennia.utils import make_iter, logger
 from evennia.scripts.scripts import DefaultScript
 from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from evennia.prototypes.spawner import spawn
+from .characters import Character
 
 
 class Script(DefaultScript):
@@ -243,14 +244,13 @@ class GlobalTick(Script):
         self.persistent = True
 
     def at_repeat(self):
-        from evennia.utils.search import search_tag
         from .characters import PlayerCharacter
         from world.system import state_manager
 
-        for obj in search_tag(key="tickable"):
-            if hasattr(obj, "at_tick"):
-                obj.at_tick()
-            state_manager.tick_character(obj)
+        for char in Character.objects.all():
+            if hasattr(char, "at_tick"):
+                char.at_tick()
+            state_manager.tick_character(char)
 
         for pc in PlayerCharacter.objects.all():
             pc.refresh_prompt()
