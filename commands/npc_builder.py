@@ -267,7 +267,11 @@ def _set_stats(caller, raw_string, **kwargs):
 
 def menunode_behavior(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("behavior", "")
-    text = "|wDescribe basic behavior or reactions|n"
+    text = (
+        "|wDescribe basic behavior or reactions|n "
+        "(e.g. passive, aggressive). This is only informational unless "
+        "your game code interprets it."
+    )
     if default:
         text += f" [default: {default}]"
     text += "\n(back to go back, skip for default)"
@@ -306,7 +310,10 @@ def _set_skills(caller, raw_string, **kwargs):
 
 def menunode_ai(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("ai_type", "")
-    text = "|wAI type (e.g. passive, aggressive)|n"
+    text = (
+        "|wAI type|n (e.g. passive, aggressive). This is informational only "
+        "unless your code makes use of it."
+    )
     if default:
         text += f" [default: {default}]"
     text += "\n(back to go back, skip for default)"
