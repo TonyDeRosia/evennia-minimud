@@ -159,6 +159,42 @@ def get_effective_stat(chara, stat: str) -> int:
     return base
 
 
+def apply_regen(chara):
+    """Apply resource regeneration to ``chara``.
+
+    Adds ``health_regen``, ``mana_regen`` and ``stamina_regen`` values to the
+    current amounts of their respective resources. The resulting values are
+    capped at each resource's maximum.
+
+    Args:
+        chara: The character gaining regeneration.
+
+    Returns:
+        dict: Mapping of resource keys to the amount actually regenerated.
+    """
+
+    healed: Dict[str, int] = {}
+
+    if not hasattr(chara, "traits"):
+        return healed
+
+    derived = getattr(chara.db, "derived_stats", {}) or {}
+    for key in ("health", "mana", "stamina"):
+        trait = chara.traits.get(key)
+        if not trait:
+            continue
+        regen = int(derived.get(f"{key}_regen", 0))
+        if regen <= 0 or trait.current >= trait.max:
+            continue
+        new_val = min(trait.current + regen, trait.max)
+        gained = new_val - trait.current
+        if gained:
+            trait.current = new_val
+            healed[key] = gained
+
+    return healed
+
+
 def tick_character(chara):
     """Advance effect timers on ``chara`` and expire as needed."""
     bonuses = _get_bonus_dict(chara)
