@@ -221,6 +221,24 @@ class TestInfoCommands(EvenniaTest):
         self.assertNotIn("Mainhand", out)
         self.assertNotIn("Offhand", out)
 
+    def test_equipment_wielded_weapon_shown(self):
+        """Verify that wielded weapons show up in the equipment display."""
+        from evennia.utils import create
+
+        weapon = create.create_object(
+            "typeclasses.gear.MeleeWeapon", key="sword", location=self.char1
+        )
+        weapon.tags.add("equipment", category="flag")
+        weapon.tags.add("identified", category="flag")
+
+        self.char1.attributes.add("_wielded", {"left": None, "right": None})
+        self.char1.at_wield(weapon)
+
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("equipment")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("sword", out)
+
     def test_inspect_identified(self):
         self.obj1.db.desc = "A sharp blade."
         self.obj1.db.weight = 2
