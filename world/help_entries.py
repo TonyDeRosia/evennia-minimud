@@ -2431,8 +2431,9 @@ Notes:
           3) Delete trigger
           4) List triggers
           5) Finish
-      Choosing Add prompts for the event type, match text and reaction
-      command. |wAdd greeting|n quickly sets up an |won_enter|n trigger
+      Choosing Add prompts for the event type and reaction command. Some
+      events also ask for optional match text. |wAdd greeting|n quickly
+      sets up an |won_enter|n trigger
       with `say "Hello there!"`.
     - |wcnpc dev_spawn|n quickly spawns prototype NPCs for testing (Developer only).
     - Example: |wcnpc dev_spawn test_blacksmith|n
@@ -2470,7 +2471,8 @@ Reactions:
     script <module.fn> - call a Python function
     <command>          - run any other command string
 
-The match text only applies to some events like |won_speak|n and |won_look|n.
+The match text only applies to the events |won_speak|n, |won_give_item|n and
+|won_look|n, as well as any custom events.
 Use multiple triggers to provide several reactions.
 
 Examples:

@@ -40,6 +40,11 @@ ALLOWED_NPC_TYPES = (
     "craftsman",
 )
 
+# Trigger events that require specifying a match string before the reaction.
+# Any event not listed here is assumed to not use a match and will skip
+# directly to setting the reaction in the builder menu.
+MATCH_REQUIRED_EVENTS = ["on_speak", "on_give_item", "on_look"]
+
 
 # Menu nodes for NPC creation
 
@@ -377,7 +382,21 @@ def _set_custom_event(caller, raw_string, **kwargs):
 
 def _set_trigger_event(caller, raw_string, event=None, **kwargs):
     caller.ndb.trigger_event = event
-    return "menunode_trigger_match"
+
+    # determine if this event requires a match string before entering the
+    # reaction prompt. Unrecognized events are treated as custom events and
+    # therefore also require a match.
+    if event in MATCH_REQUIRED_EVENTS or event not in (
+        "on_enter",
+        "on_attack",
+        "on_timer",
+        *MATCH_REQUIRED_EVENTS,
+    ):
+        return "menunode_trigger_match"
+
+    # events that don't use match text skip directly to setting the reaction
+    caller.ndb.trigger_match = ""
+    return "menunode_trigger_react"
 
 def menunode_trigger_match(caller, raw_string="", **kwargs):
     text = "|wEnter match text (blank for none)|n"
