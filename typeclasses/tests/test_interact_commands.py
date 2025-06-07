@@ -53,3 +53,10 @@ class TestInteractCommands(EvenniaTest):
         self.char1.db.sated = 95
         self.char1.execute_cmd(f"eat {food.key}")
         self.assertEqual(self.char1.db.sated, 100)
+
+    def test_eat_feedback(self):
+        food = self._make_food()
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd(f"eat {food.key}")
+        out = "".join(call.args[0] for call in self.char1.msg.call_args_list)
+        self.assertIn("(Sated +3)", out)
