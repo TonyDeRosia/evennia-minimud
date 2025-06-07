@@ -278,9 +278,8 @@ class GlobalTick(Script):
                 trait.current = min(trait.current + amount, trait.max)
                 healed[trait_key] = (amount, color)
 
-            if healed and hasattr(obj, "msg"):
-                parts = [f"{col}+{amt} {k[:2].upper()}|n" for k, (amt, col) in healed.items()]
-                obj.msg("You regenerate " + ", ".join(parts) + ".")
+            # We silently apply regeneration to avoid tick message spam
+            # when the global tick heals resources.
 
             if hasattr(obj, "refresh_prompt"):
                 obj.refresh_prompt()
