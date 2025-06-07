@@ -239,6 +239,15 @@ class TestBonusPersistence(EvenniaTest):
 
         self.assertEqual(self.char1.db.equip_bonuses, base_bonus)
 
+    def test_recalculate_does_not_stack(self):
+        item = self._equip_item()
+        base_str = self.char1.traits.STR.base
+
+        stat_manager.recalculate_stats(self.char1)
+        stat_manager.recalculate_stats(self.char1)
+
+        self.assertEqual(self.char1.traits.STR.base, base_str)
+
     def test_remove_clears_slot_and_bonus(self):
         item = self._equip_item()
         item.remove(self.char1, True)

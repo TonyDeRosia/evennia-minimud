@@ -212,13 +212,21 @@ def remove_item_bonuses(chara, item) -> None:
 
 def reset_all_item_bonuses(chara) -> None:
     """Reset and reapply bonuses from all equipped items."""
-    chara.db.equip_bonuses = {}
+
+    # remove any currently applied bonuses so repeated calls don't stack
     for itm in set(chara.equipment.values()):
-        if itm:
+        if itm and getattr(itm.db, "bonuses_applied", False):
+            remove_equip_bonus(chara, itm)
             itm.db.bonuses_applied = False
+
+    chara.db.equip_bonuses = {}
+
     for itm in set(chara.equipment.values()):
         if itm:
-            apply_item_bonuses_once(chara, itm)
+            add_equip_bonus(chara, itm)
+            itm.db.bonuses_applied = True
+
+    refresh_stats(chara)
 
 
 def apply_bonuses(chara, item) -> None:
@@ -241,7 +249,6 @@ def clear_all_equipment_bonuses(chara) -> None:
 def recalculate_stats(chara) -> None:
     """Reapply bonuses from all equipped items and refresh stats."""
     reset_all_item_bonuses(chara)
-    refresh_stats(chara)
 
 
 def _gear_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
