@@ -253,7 +253,7 @@ class ClothingObject(ObjectParent, ContribClothing):
         result = super().wear(wearer, wearstyle, quiet=quiet)
         self.location = None
         wearer.update_carry_weight()
-        stat_manager.recalculate_stats(wearer)
+        stat_manager.apply_item_bonuses_once(wearer, self)
         return result
 
     def remove(self, wearer, quiet=False):
@@ -261,7 +261,7 @@ class ClothingObject(ObjectParent, ContribClothing):
         result = super().remove(wearer, quiet=quiet)
         self.location = wearer
         wearer.update_carry_weight()
-        stat_manager.recalculate_stats(wearer)
+        stat_manager.remove_item_bonuses(wearer, self)
         return result
 
 
