@@ -209,7 +209,7 @@ class TestAdminCommands(EvenniaTest):
         self.assertIsNotNone(weapon)
         self.assertEqual(weapon.db.weight, 5)
         self.assertEqual(
-            weapon.db.bonuses,
+            weapon.db.stat_mods,
             {"str": 2, "attack_power": 5, "accuracy": 3},
         )
         self.assertEqual(weapon.db.desc, "A vicious longsword.")
