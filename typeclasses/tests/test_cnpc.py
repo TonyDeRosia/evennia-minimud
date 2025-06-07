@@ -27,7 +27,7 @@ class TestCNPC(EvenniaTest):
             self.char1.execute_cmd("cnpc start goblin")
 
         npc_builder._set_desc(self.char1, "A nasty goblin")
-        npc_builder._set_npc_type(self.char1, "monster")
+        npc_builder._set_npc_type(self.char1, "merchant")
         npc_builder._set_creature_type(self.char1, "humanoid")
         npc_builder._set_level(self.char1, "2")
         npc_builder._set_resources(self.char1, "30 10 5")
@@ -40,7 +40,7 @@ class TestCNPC(EvenniaTest):
         npc = self._find("goblin")
         self.assertIsNotNone(npc)
         self.assertTrue(npc.tags.has("npc"))
-        self.assertTrue(npc.tags.has("monster", category="npc_type"))
+        self.assertTrue(npc.tags.has("merchant", category="npc_type"))
         self.assertEqual(npc.db.base_primary_stats, {
             "STR": 5,
             "CON": 4,
@@ -66,7 +66,7 @@ class TestCNPC(EvenniaTest):
             self.char1.execute_cmd("cnpc start ogre")
 
         npc_builder._set_desc(self.char1, "A big ogre")
-        npc_builder._set_npc_type(self.char1, "monster")
+        npc_builder._set_npc_type(self.char1, "guard")
         npc_builder._set_creature_type(self.char1, "humanoid")
         npc_builder._set_level(self.char1, "1")
         npc_builder._set_resources(self.char1, "20 5 5")
@@ -87,7 +87,7 @@ class TestCNPC(EvenniaTest):
             self.char1.execute_cmd("cnpc start parrot")
 
         npc_builder._set_desc(self.char1, "A colorful parrot")
-        npc_builder._set_npc_type(self.char1, "critter")
+        npc_builder._set_npc_type(self.char1, "craftsman")
         npc_builder._set_creature_type(self.char1, "humanoid")
         npc_builder._set_level(self.char1, "1")
         npc_builder._set_resources(self.char1, "10 0 0")
