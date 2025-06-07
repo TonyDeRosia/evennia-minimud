@@ -240,7 +240,8 @@ class TestRegeneration(EvenniaTest):
             self.assertGreater(trait.current, trait.max // 2)
 
         char.refresh_prompt.assert_called_once()
-        char.msg.assert_called()
+        # Healing during the global tick should not produce a message.
+        char.msg.assert_not_called()
 
 
 class TestCharacterCreationStats(EvenniaTest):
