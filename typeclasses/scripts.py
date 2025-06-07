@@ -1,9 +1,7 @@
-from random import randint, choice
-from evennia.utils import make_iter, logger
+from random import randint
 from evennia.scripts.scripts import DefaultScript
 from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from evennia.prototypes.spawner import spawn
-from .characters import Character
 
 
 class Script(DefaultScript):
@@ -245,7 +243,6 @@ class GlobalTick(Script):
 
     def at_repeat(self):
         from evennia.utils.search import search_tag
-        from .characters import PlayerCharacter
         from world.system import state_manager
 
         tickables = search_tag(key="tickable")
