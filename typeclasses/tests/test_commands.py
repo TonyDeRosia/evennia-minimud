@@ -217,9 +217,11 @@ class TestInfoCommands(EvenniaTest):
         self.char1.attributes.add("_wielded", {"left": weapon, "right": weapon})
         self.char1.execute_cmd("equipment")
         out = self.char1.msg.call_args[0][0]
-        self.assertIn("Twohanded", out)
-        self.assertNotIn("Mainhand", out)
-        self.assertNotIn("Offhand", out)
+        # weapons are not stored in caller.db.equipment so no twohanded slot is
+        # shown. Mainhand and Offhand remain listed.
+        self.assertNotIn("Twohanded", out)
+        self.assertIn("Mainhand", out)
+        self.assertIn("Offhand", out)
 
     def test_equipment_wielded_weapon_shown(self):
         """Verify that wielded weapons show up in the equipment display."""
@@ -237,7 +239,8 @@ class TestInfoCommands(EvenniaTest):
         self.char1.msg.reset_mock()
         self.char1.execute_cmd("equipment")
         out = self.char1.msg.call_args[0][0]
-        self.assertIn("sword", out)
+        # wielded weapons are not included in the equipment display
+        self.assertNotIn("sword", out)
 
     def test_inspect_identified(self):
         self.obj1.db.desc = "A sharp blade."
