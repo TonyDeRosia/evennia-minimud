@@ -78,3 +78,22 @@ class TestStateManager(EvenniaTest):
         self.assertEqual(char.db.sated, 1)
         self.assertFalse(char.tags.has("hungry_thirsty", category="status"))
         self.assertEqual(char.traits.health.current, hp)
+
+    def test_apply_regen_uses_derived_stats(self):
+        char = self.char1
+        for key in ("health", "mana", "stamina"):
+            trait = char.traits.get(key)
+            trait.current = trait.max // 2
+        char.db.derived_stats = {
+            "health_regen": 2,
+            "mana_regen": 3,
+            "stamina_regen": 4,
+        }
+
+        healed = state_manager.apply_regen(char)
+
+        expected = {"health": 2, "mana": 3, "stamina": 4}
+        self.assertEqual(healed, expected)
+        for key, regen in expected.items():
+            trait = char.traits.get(key)
+            self.assertEqual(trait.current, trait.max // 2 + regen)
