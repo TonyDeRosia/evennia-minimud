@@ -26,9 +26,9 @@ CORE_STATS: List[Stat] = [
 
 # Primary resources
 RESOURCE_STATS: List[Stat] = [
-    Stat("health", "Health", trait_type="gauge", base=100, rate=0.1),
-    Stat("mana", "Mana", trait_type="gauge", base=100, rate=0.1),
-    Stat("stamina", "Stamina", trait_type="gauge", base=100, rate=0.1),
+    Stat("health", "Health", trait_type="gauge", base=100, rate=0.0),
+    Stat("mana", "Mana", trait_type="gauge", base=100, rate=0.0),
+    Stat("stamina", "Stamina", trait_type="gauge", base=100, rate=0.0),
 ]
 
 # Base skill for avoiding damage
