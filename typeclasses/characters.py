@@ -642,7 +642,11 @@ class Character(ObjectParent, ClothedCharacter):
             # this sets the current HP to 20% of the max, a.k.a. one fifth
             self.traits.health.current = self.traits.health.max // 5
             self.msg(prompt=self.get_display_status(self))
-            self.traits.health.rate = 0.1
+            self.traits.health.rate = 0.0
+            if self.traits.mana:
+                self.traits.mana.rate = 0.0
+            if self.traits.stamina:
+                self.traits.stamina.rate = 0.0
 
 
 class PlayerCharacter(Character):
@@ -724,7 +728,11 @@ class PlayerCharacter(Character):
         self.tags.remove("unconscious", category="status")
         self.tags.remove("lying down", category="status")
         self.traits.health.reset()
-        self.traits.health.rate = 0.1
+        self.traits.health.rate = 0.0
+        if self.traits.mana:
+            self.traits.mana.rate = 0.0
+        if self.traits.stamina:
+            self.traits.stamina.rate = 0.0
         self.move_to(self.home)
         self.msg(prompt=self.get_display_status(self))
 
