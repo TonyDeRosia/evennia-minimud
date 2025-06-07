@@ -236,19 +236,21 @@ class ClothingObject(ObjectParent, ContribClothing):
         if not self.tags.has("identified", category="flag"):
             wearer.msg(f"You don't know how to use {self.get_display_name(wearer)}.")
             return
-        # honor slot tags by automatically replacing duplicates
+        # honor slot tags by normalizing to canonical names
         if slots := self.tags.get(category="slot", return_list=True):
             for slot in slots:
                 canonical = normalize_slot(slot)
                 if canonical and not self.tags.has(canonical, category="slot"):
                     self.tags.add(canonical, category="slot")
 
-            worn_items = get_worn_clothes(wearer)
-            for slot in slots:
-                canonical = normalize_slot(slot)
-                for item in worn_items:
-                    if item.tags.has(canonical, category="slot"):
-                        item.remove(wearer, quiet=quiet)
+        # replace any existing item in the same slot
+        if not isinstance(wearer.db.equipment, dict):
+            wearer.db.equipment = {}
+        slot = self.db.slot or self.db.clothing_type
+        if slot:
+            slot = normalize_slot(slot) or slot
+            if (existing := wearer.db.equipment.get(slot)):
+                existing.remove(wearer, quiet=quiet)
 
         # shields can't be worn with two-handed weapons
         if self.tags.has("shield", category="flag"):
@@ -259,10 +261,6 @@ class ClothingObject(ObjectParent, ContribClothing):
                         "You cannot use a shield while wielding a two-handed weapon."
                     )
                     return
-
-        # ensure equipment mapping exists
-        if not isinstance(wearer.db.equipment, dict):
-            wearer.db.equipment = {}
 
         result = super().wear(wearer, wearstyle, quiet=quiet)
         self.location = None
