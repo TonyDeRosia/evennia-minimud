@@ -2,7 +2,7 @@ from evennia import CmdSet, create_object
 from evennia.utils.utils import make_iter
 
 from .command import Command
-from world.quests import Quest, QuestManager
+from world.quests import Quest, QuestManager, normalize_quest_key
 
 
 class CmdQCreate(Command):
@@ -24,7 +24,7 @@ class CmdQCreate(Command):
             self.msg("Usage: qcreate <quest_key> \"<title>\"")
             return
         parts = self.args.split(None, 1)
-        quest_key = parts[0]
+        quest_key = normalize_quest_key(parts[0])
         title = parts[1].strip("\"") if len(parts) > 1 else ""
         _, quest = QuestManager.find(quest_key)
         if quest:
@@ -58,6 +58,7 @@ class CmdQSet(Command):
             self.msg("Usage: qset <quest_key> <attribute> <value>")
             return
         quest_key, attr, value = parts
+        quest_key = normalize_quest_key(quest_key)
         idx, quest = QuestManager.find(quest_key)
         if quest is None:
             self.msg("Unknown quest.")
@@ -117,6 +118,7 @@ class CmdQItem(Command):
             self.msg("Usage: qitem <quest_key> <item_key>")
             return
         quest_key, item_key = parts
+        quest_key = normalize_quest_key(quest_key)
         idx, quest = QuestManager.find(quest_key)
         if quest is None:
             self.msg("Unknown quest.")
@@ -150,6 +152,7 @@ class CmdQAssign(Command):
             self.msg("Usage: qassign <npc_key> <quest_key>")
             return
         npc_key, quest_key = parts
+        quest_key = normalize_quest_key(quest_key)
         npc = self.caller.search(npc_key, global_search=True)
         if not npc or npc.has_account:
             self.msg("Invalid NPC.")
@@ -275,7 +278,7 @@ class CmdAcceptQuest(Command):
             self.msg("Usage: accept <quest>")
             return
 
-        quest_key = self.args.strip()
+        quest_key = normalize_quest_key(self.args.strip())
         active = caller.db.active_quests or {}
         if quest_key in active:
             self.msg("You are already on that quest.")
@@ -365,7 +368,7 @@ class CmdCompleteQuest(Command):
             self.msg("Usage: complete <quest>")
             return
 
-        quest_key = self.args.strip()
+        quest_key = normalize_quest_key(self.args.strip())
         active = caller.db.active_quests or {}
         if quest_key not in active:
             self.msg("You have not accepted that quest.")

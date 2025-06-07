@@ -6,6 +6,11 @@ from typing import Dict, List, Optional
 from evennia.server.models import ServerConfig
 
 
+def normalize_quest_key(quest_key: str) -> str:
+    """Return the canonical quest key."""
+    return str(quest_key).lower().strip()
+
+
 @dataclass
 class Quest:
     """Simple data container for a quest."""
@@ -76,6 +81,7 @@ def get_quests() -> List[Quest]:
 def save_quest(quest: Quest):
     """Add a new quest to the registry."""
     registry = _load_registry()
+    quest.quest_key = normalize_quest_key(quest.quest_key)
     registry.append(quest.to_dict())
     _save_registry(registry)
 
@@ -83,16 +89,18 @@ def save_quest(quest: Quest):
 def update_quest(index: int, quest: Quest):
     """Update quest at index."""
     registry = _load_registry()
+    quest.quest_key = normalize_quest_key(quest.quest_key)
     registry[index] = quest.to_dict()
     _save_registry(registry)
 
 
 def find_quest(key: str) -> tuple[int, Optional[Quest]]:
     """Return index and quest matching key (case-insensitive)."""
+    key = normalize_quest_key(key)
     registry = _load_registry()
     for i, data in enumerate(registry):
         quest = Quest.from_dict(data)
-        if quest.quest_key.lower() == key.lower():
+        if normalize_quest_key(quest.quest_key) == key:
             return i, quest
     return -1, None
 
