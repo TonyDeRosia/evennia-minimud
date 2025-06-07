@@ -246,3 +246,12 @@ class TestBonusPersistence(EvenniaTest):
 
         self.assertFalse(self.char1.db.equipment.get("neck"))
         self.assertFalse(self.char1.db.equip_bonuses)
+
+    def test_forced_move_clears_bonus(self):
+        item = self._equip_item()
+        # forcibly move the equipped item out of inventory
+        item.location = self.room2
+        stat_manager.refresh_stats(self.char1)
+
+        self.assertFalse(self.char1.db.equip_bonuses)
+        self.assertFalse(any(itm == item for itm in self.char1.db.equipment.values()))
