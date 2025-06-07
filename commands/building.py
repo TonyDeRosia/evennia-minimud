@@ -3,6 +3,7 @@ from evennia.objects.models import ObjectDB
 from .command import Command
 from typeclasses.rooms import Room
 from world.areas import find_area
+from utils import VALID_SLOTS, normalize_slot
 
 
 DIR_FULL = {
@@ -275,8 +276,14 @@ class CmdSetSlot(Command):
         target = self.caller.search(parts[0], global_search=True)
         if not target:
             return
-        target.db.slot = parts[1].strip()
-        self.msg(f"Slot on {target.key} set to {parts[1].strip()}.")
+
+        slot = normalize_slot(parts[1])
+        if slot not in VALID_SLOTS:
+            self.msg("Invalid slot name.")
+            return
+
+        target.db.slot = slot
+        self.msg(f"Slot on {target.key} set to {slot}.")
 
 
 class CmdSetDamage(Command):
