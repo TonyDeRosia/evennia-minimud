@@ -398,14 +398,19 @@ class CmdInspect(Command):
         is_admin = caller.check_permstring("Admin") or caller.check_permstring("Builder")
 
         if obj.db.identified or is_admin:
-            width = max(len(label) for label in [
-                "Slot",
-                "Damage",
-                "Buffs",
-                "Flags",
-                "Weight",
-                "Identified",
-            ])
+            width = max(
+                len(label)
+                for label in [
+                    "Slot",
+                    "Damage",
+                    "Buffs",
+                    "Flags",
+                    "Weight",
+                    "Identified",
+                    "Type",
+                    "Sated Boost",
+                ]
+            )
             lines.append("")
             lines.append("|Y[ ITEM INFO ]|n")
 
@@ -443,6 +448,17 @@ class CmdInspect(Command):
 
             if (weight := obj.db.weight) is not None:
                 add("Weight", weight)
+
+            if (itype := getattr(obj.db, "item_type", None) or getattr(obj.db, "type", None)):
+                add("Type", str(itype).capitalize())
+
+            boost = (
+                getattr(obj.db, "sated_boost", None)
+                if hasattr(obj.db, "sated_boost")
+                else getattr(obj.db, "sated", None)
+            )
+            if boost is not None:
+                add("Sated Boost", f"+{boost}")
 
             add("Identified", "yes" if obj.db.identified else "no")
 

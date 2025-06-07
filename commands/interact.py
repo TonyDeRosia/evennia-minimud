@@ -83,6 +83,8 @@ class CmdEat(Command):
         caller.at_emote(
             f"$conj({self.cmdstring}) the {{target}}.", mapping={"target": obj}
         )
+        if sated:
+            caller.msg(f"(Sated +{sated})")
         obj.delete()
 
 

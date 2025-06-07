@@ -27,13 +27,20 @@ class TestConsumableCommands(EvenniaTest):
         self.assertIsNotNone(food)
         self.assertTrue(food.tags.has("edible"))
         self.assertEqual(food.db.item_type, "food")
+        self.assertEqual(food.db.type, "food")
         self.assertEqual(food.db.sated, 4)
+        self.assertEqual(food.db.sated_boost, 4)
+        self.assertEqual(food.db.weight, 1)
+        self.assertTrue(food.db.identified)
         self.assertEqual(food.db.desc, "tasty")
 
         before = self.char1.db.sated or 0
+        self.char1.msg.reset_mock()
         self.char1.execute_cmd("eat apple")
         self.assertIsNone(food.pk)
         self.assertEqual(self.char1.db.sated, before + 4)
+        out = "".join(call.args[0] for call in self.char1.msg.call_args_list)
+        self.assertIn("(Sated +4)", out)
 
     def test_cdrink_create_and_drink(self):
         self.char1.execute_cmd("cdrink water 2 clear")
@@ -62,4 +69,17 @@ class TestConsumableCommands(EvenniaTest):
         self.char1.execute_cmd("quaff elixir")
         self.assertIsNone(potion.pk)
         self.assertEqual(self.char1.db.sated, before)
+
+    def test_inspect_food(self):
+        self.char1.execute_cmd("cfood cake 5 yummy")
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("inspect cake")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("[ ITEM INFO ]", out)
+        self.assertIn("Type", out)
+        self.assertIn("Food", out)
+        self.assertIn("Sated Boost", out)
+        self.assertIn("+5", out)
+        self.assertIn("Weight", out)
+        self.assertIn("Identified: yes", out)
 

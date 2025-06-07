@@ -1141,10 +1141,14 @@ class CmdCFood(Command):
             "typeclasses.objects.Object",
             name,
             desc=rest,
+            weight=1,
         )
         obj.tags.add("edible")
         obj.db.item_type = "food"
+        obj.db.type = "food"
         obj.db.sated = boost
+        obj.db.sated_boost = boost
+        obj.db.identified = True
 
 
 class CmdCDrink(Command):
@@ -1176,10 +1180,14 @@ class CmdCDrink(Command):
             "typeclasses.objects.Object",
             name,
             desc=rest,
+            weight=1,
         )
         obj.tags.add("edible")
         obj.db.item_type = "drink"
+        obj.db.type = "drink"
         obj.db.sated = boost
+        obj.db.sated_boost = boost
+        obj.db.identified = True
 
 
 class CmdCPotion(Command):
@@ -1211,10 +1219,13 @@ class CmdCPotion(Command):
             "typeclasses.objects.Object",
             name,
             desc=desc,
+            weight=1,
         )
         obj.tags.add("edible")
         obj.db.item_type = "drink"
+        obj.db.type = "drink"
         obj.db.is_potion = True
+        obj.db.identified = True
         if bonuses:
             obj.db.buffs = bonuses
 
