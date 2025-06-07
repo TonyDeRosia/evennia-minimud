@@ -41,3 +41,16 @@ class Merchant(NPC):
         super().at_object_receive(obj, source_location, **kwargs)
         if source_location and source_location.has_account:
             self.add_stock(obj)
+
+from commands.banking import BankCmdSet
+
+
+class Banker(NPC):
+    """NPC that manages player bank accounts."""
+
+    banker = AttributeProperty(True)
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.cmdset.add(BankCmdSet, persistent=True)
+
