@@ -39,6 +39,13 @@ def at_server_start():
             script.delete()
         create.script("typeclasses.scripts.GlobalTick", key="global_tick")
 
+    # Ensure all characters are marked tickable for the global ticker
+    from typeclasses.characters import Character
+
+    for char in Character.objects.all():
+        if not char.tags.has("tickable"):
+            char.tags.add("tickable")
+
 
 def at_server_stop():
     """
