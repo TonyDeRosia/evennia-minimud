@@ -590,36 +590,15 @@ class Character(ObjectParent, ClothedCharacter):
         Regenerates resources based on current status and refreshes the prompt
         to visually reflect the changes.
         """
-        statuses = self.tags.get(category="status", return_list=True) or []
+        from world.system import state_manager
 
-        if "sleeping" in statuses or "unconscious" in statuses:
-            low, high = 7, 12
-        elif any(s in statuses for s in ("sitting", "lying down")):
-            low, high = 3, 7
-        else:
-            low, high = 1, 3
-
-        healed = {}
-        for trait_key, color in (
-            ("health", "|r"),
-            ("mana", "|b"),
-            ("stamina", "|g"),
-        ):
-            trait = self.traits.get(trait_key)
-            if not trait:
-                continue
-            if trait.current >= trait.max:
-                continue
-            pct = randint(low, high)
-            amount = max(1, int(round(trait.max * pct / 100)))
-            new = min(trait.current + amount, trait.max)
-            gained = new - trait.current
-            trait.current = new
-            if gained:
-                healed[trait_key] = (gained, color)
+        healed = state_manager.apply_regen(self)
 
         if healed and self.sessions.count():
-            parts = [f"{col}+{amt} {k[:2].upper()}|n" for k, (amt, col) in healed.items()]
+            mapping = {"health": "|r", "mana": "|b", "stamina": "|g"}
+            parts = [
+                f"{mapping[k]}+{amt} {k[:2].upper()}|n" for k, amt in healed.items()
+            ]
             self.msg("You regenerate " + ", ".join(parts) + ".")
 
         if self.sessions.count():

@@ -246,40 +246,19 @@ class GlobalTick(Script):
     def at_repeat(self):
         from evennia.utils.search import search_tag
         from .characters import PlayerCharacter
-        from random import randint
+        from world.system import state_manager
 
         tickables = search_tag(key="tickable")
         for obj in tickables:
             if not hasattr(obj, "traits"):
                 continue
 
-            # Determine regeneration scale
-            statuses = obj.tags.get(category="status", return_list=True) or []
-            if "sleeping" in statuses or "unconscious" in statuses:
-                low, high = 7, 12
-            elif any(s in statuses for s in ("sitting", "lying down", "resting")):
-                low, high = 3, 7
-            else:
-                low, high = 1, 3
+            healed = state_manager.apply_regen(obj)
 
-            healed = {}
-
-            for trait_key, color in (
-                ("health", "|r"),
-                ("mana", "|b"),
-                ("stamina", "|g"),
-            ):
-                trait = obj.traits.get(trait_key)
-                if not trait or trait.current >= trait.max:
-                    continue
-
-                pct = randint(low, high)
-                amount = max(1, int(round(trait.max * pct / 100)))
-                trait.current = min(trait.current + amount, trait.max)
-                healed[trait_key] = (amount, color)
-
-            # We silently apply regeneration to avoid tick message spam
-            # when the global tick heals resources.
+            if healed and obj.sessions.count():
+                mapping = {"health": "|r", "mana": "|b", "stamina": "|g"}
+                parts = [f"{mapping[k]}+{amt} {k[:2].upper()}|n" for k, amt in healed.items()]
+                obj.msg("You regenerate " + ", ".join(parts) + ".")
 
             if hasattr(obj, "refresh_prompt"):
                 obj.refresh_prompt()

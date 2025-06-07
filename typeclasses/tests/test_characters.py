@@ -2,7 +2,7 @@
 Tests for custom character logic
 """
 
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, call
 from evennia.utils.test_resources import EvenniaTest
 from evennia.utils import create
 
@@ -203,8 +203,7 @@ class TestGlobalTick(EvenniaTest):
         pc.at_tick = MagicMock(side_effect=pc.at_tick)
         npc.at_tick = MagicMock(side_effect=npc.at_tick)
 
-        with patch("random.randint", return_value=2):
-            script.at_repeat()
+        script.at_repeat()
 
         pc.at_tick.assert_not_called()
         npc.at_tick.assert_not_called()
@@ -232,16 +231,15 @@ class TestRegeneration(EvenniaTest):
         script = GlobalTick()
         script.at_script_creation()
 
-        with patch("random.randint", return_value=2):
-            script.at_repeat()
+        script.at_repeat()
 
         for key in ("health", "mana", "stamina"):
             trait = char.traits.get(key)
             self.assertGreater(trait.current, trait.max // 2)
 
         char.refresh_prompt.assert_called_once()
-        # Healing during the global tick should not produce a message.
-        char.msg.assert_not_called()
+        char.msg.assert_called_once()
+        self.assertIn("You regenerate", char.msg.call_args[0][0])
 
 
 class TestCharacterCreationStats(EvenniaTest):
