@@ -97,17 +97,19 @@ class TestCNPC(EvenniaTest):
         npc_builder._set_skills(self.char1, "")
         npc_builder._set_ai(self.char1, "passive")
 
-        self.char1.ndb.buildnpc["triggers"] = [
+        npc_builder._add_greeting(self.char1)
+        self.char1.ndb.buildnpc["triggers"].extend([
             {"event": "on_speak", "match": "hello", "action": "say Squawk!"},
             {"event": "on_speak", "match": "hello", "action": "emote flaps"},
             {"event": "on_give_item", "match": "", "action": "say Thanks!"},
-        ]
+        ])
 
         npc_builder._create_npc(self.char1, "")
 
         npc = self._find("parrot")
         self.assertIsNotNone(npc)
         self.assertEqual(npc.db.triggers, self.char1.ndb.buildnpc["triggers"])
+        self.assertEqual(len(npc.db.triggers), 4)
 
         with patch.object(npc, "execute_cmd") as mock_exec:
             npc.at_say(self.char2, "hello there")

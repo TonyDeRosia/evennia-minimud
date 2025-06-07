@@ -2427,11 +2427,13 @@ Notes:
     - At the triggers step you will see a menu to add, delete or list
       automatic reactions. Example:
           1) Add trigger
-          2) Delete trigger
-          3) List triggers
-          4) Finish
+          2) Add greeting
+          3) Delete trigger
+          4) List triggers
+          5) Finish
       Choosing Add prompts for the event type, match text and reaction
-      command.
+      command. |wAdd greeting|n quickly sets up an |won_enter|n trigger
+      with `say "Hello there!"`.
     - |wcnpc dev_spawn|n quickly spawns prototype NPCs for testing (Developer only).
     - Example: |wcnpc dev_spawn test_blacksmith|n
     - See |whelp triggers|n for available events and reactions.
