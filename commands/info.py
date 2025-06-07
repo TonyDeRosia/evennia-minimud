@@ -42,7 +42,9 @@ EQUIPMENT_SLOTS = SLOT_ORDER
 
 def render_equipment(caller):
     """Return formatted equipment display for caller."""
-    eq = caller.db.equipment or {}
+    # use the Character.equipment property which always returns a mapping of
+    # slots to equipped items. Fallback to an empty mapping if unavailable.
+    eq = getattr(caller, "equipment", {}) or {}
     display = ["+=========================+", "| [ EQUIPMENT ]"]
 
     main = eq.get("mainhand")
