@@ -10,52 +10,109 @@ import re
 # Menu nodes for NPC creation
 
 def menunode_desc(caller, raw_string="", **kwargs):
-    text = "|wEnter a short description for the NPC:|n"
+    """Prompt for a short description."""
+    default = caller.ndb.buildnpc.get("desc", "")
+    text = (
+        "|wEnter a short description for the NPC|n "
+        "(e.g. 'A grumpy orc')"
+    )
+    if default:
+        text += f" [default: {default}]"
+    text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_desc}
     return text, options
 
 def _set_desc(caller, raw_string, **kwargs):
-    caller.ndb.buildnpc["desc"] = raw_string.strip()
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_desc"
+    if not string or string.lower() == "skip":
+        string = caller.ndb.buildnpc.get("desc", "")
+    caller.ndb.buildnpc["desc"] = string
     return "menunode_npc_type"
 
 def menunode_npc_type(caller, raw_string="", **kwargs):
-    text = "|wEnter NPC type (e.g. merchant, guard):|n"
+    default = caller.ndb.buildnpc.get("npc_type", "")
+    text = "|wEnter NPC type (e.g. merchant, guard)|n"
+    if default:
+        text += f" [default: {default}]"
+    text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_npc_type}
     return text, options
 
 def _set_npc_type(caller, raw_string, **kwargs):
-    caller.ndb.buildnpc["npc_type"] = raw_string.strip()
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_desc"
+    if not string or string.lower() == "skip":
+        string = caller.ndb.buildnpc.get("npc_type", "")
+    caller.ndb.buildnpc["npc_type"] = string
     return "menunode_creature_type"
 
 def menunode_creature_type(caller, raw_string="", **kwargs):
-    text = "|wCreature type (humanoid/quadruped/unique):|n"
+    default = caller.ndb.buildnpc.get("creature_type", "humanoid")
+    text = "|wCreature type (humanoid/quadruped/unique)|n"
+    if default:
+        text += f" [default: {default}]"
+    text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_creature_type}
     return text, options
 
 def _set_creature_type(caller, raw_string, **kwargs):
-    caller.ndb.buildnpc["creature_type"] = raw_string.strip().lower() or "humanoid"
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_npc_type"
+    if not string or string.lower() == "skip":
+        string = caller.ndb.buildnpc.get("creature_type", "humanoid")
+    caller.ndb.buildnpc["creature_type"] = string.lower() or "humanoid"
     return "menunode_level"
 
 def menunode_level(caller, raw_string="", **kwargs):
-    text = "|wLevel of NPC:|n"
+    default = caller.ndb.buildnpc.get("level", 1)
+    text = f"|wLevel of NPC (1-100)|n [default: {default}]\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_level}
     return text, options
 
 def _set_level(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_creature_type"
+    if not string or string.lower() == "skip":
+        caller.ndb.buildnpc["level"] = caller.ndb.buildnpc.get("level", 1)
+        return "menunode_resources"
     try:
-        caller.ndb.buildnpc["level"] = int(raw_string.strip())
+        val = int(string)
     except ValueError:
-        caller.msg("Enter a number.")
+        caller.msg("Enter a number between 1 and 100.")
         return "menunode_level"
+    if not 1 <= val <= 100:
+        caller.msg("Enter a number between 1 and 100.")
+        return "menunode_level"
+    caller.ndb.buildnpc["level"] = val
     return "menunode_resources"
 
 def menunode_resources(caller, raw_string="", **kwargs):
-    text = "|wEnter HP MP SP separated by spaces:|n"
+    hp = caller.ndb.buildnpc.get("hp", 0)
+    mp = caller.ndb.buildnpc.get("mp", 0)
+    sp = caller.ndb.buildnpc.get("sp", 0)
+    default = f"{hp} {mp} {sp}"
+    text = (
+        f"|wEnter HP MP SP separated by spaces|n [default: {default}]\n"
+        "(back to go back, skip for default)"
+    )
     options = {"key": "_default", "goto": _set_resources}
     return text, options
 
 def _set_resources(caller, raw_string, **kwargs):
-    parts = raw_string.split()
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_level"
+    if not string or string.lower() == "skip":
+        caller.ndb.buildnpc["hp"] = caller.ndb.buildnpc.get("hp", 0)
+        caller.ndb.buildnpc["mp"] = caller.ndb.buildnpc.get("mp", 0)
+        caller.ndb.buildnpc["sp"] = caller.ndb.buildnpc.get("sp", 0)
+        return "menunode_stats"
+    parts = string.split()
     if len(parts) != 3 or not all(p.isdigit() for p in parts):
         caller.msg("Enter three numbers separated by spaces.")
         return "menunode_resources"
@@ -65,45 +122,91 @@ def _set_resources(caller, raw_string, **kwargs):
     return "menunode_stats"
 
 def menunode_stats(caller, raw_string="", **kwargs):
-    text = "|wEnter STR CON DEX INT WIS LUCK separated by spaces:|n"
+    data = caller.ndb.buildnpc.get("primary_stats", {})
+    stats_order = ["STR", "CON", "DEX", "INT", "WIS", "LUCK"]
+    default = " ".join(str(data.get(stat, 0)) for stat in stats_order)
+    text = (
+        f"|wEnter STR CON DEX INT WIS LUCK separated by spaces|n [default: {default}]\n"
+        "(back to go back, skip for default)"
+    )
     options = {"key": "_default", "goto": _set_stats}
     return text, options
 
 def _set_stats(caller, raw_string, **kwargs):
-    parts = raw_string.split()
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_resources"
+    stats = ["STR", "CON", "DEX", "INT", "WIS", "LUCK"]
+    if not string or string.lower() == "skip":
+        caller.ndb.buildnpc["primary_stats"] = {
+            stat: caller.ndb.buildnpc.get("primary_stats", {}).get(stat, 0)
+            for stat in stats
+        }
+        return "menunode_behavior"
+    parts = string.split()
     if len(parts) != 6 or not all(p.isdigit() for p in parts):
         caller.msg("Enter six numbers separated by spaces.")
         return "menunode_stats"
-    stats = ["STR", "CON", "DEX", "INT", "WIS", "LUCK"]
-    caller.ndb.buildnpc["primary_stats"] = {stat: int(val) for stat, val in zip(stats, parts)}
+    caller.ndb.buildnpc["primary_stats"] = {
+        stat: int(val) for stat, val in zip(stats, parts)
+    }
     return "menunode_behavior"
 
 def menunode_behavior(caller, raw_string="", **kwargs):
-    text = "|wDescribe basic behavior or reactions:|n"
+    default = caller.ndb.buildnpc.get("behavior", "")
+    text = "|wDescribe basic behavior or reactions|n"
+    if default:
+        text += f" [default: {default}]"
+    text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_behavior}
     return text, options
 
 def _set_behavior(caller, raw_string, **kwargs):
-    caller.ndb.buildnpc["behavior"] = raw_string.strip()
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_stats"
+    if not string or string.lower() == "skip":
+        string = caller.ndb.buildnpc.get("behavior", "")
+    caller.ndb.buildnpc["behavior"] = string
     return "menunode_skills"
 
 def menunode_skills(caller, raw_string="", **kwargs):
-    text = "|wList any skills or attacks (comma separated):|n"
+    skills = caller.ndb.buildnpc.get("skills", [])
+    default = ", ".join(skills)
+    text = "|wList any skills or attacks (comma separated)|n"
+    if default:
+        text += f" [default: {default}]"
+    text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_skills}
     return text, options
 
 def _set_skills(caller, raw_string, **kwargs):
-    skills = [s.strip() for s in raw_string.split(",") if s.strip()]
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_behavior"
+    if not string or string.lower() == "skip":
+        skills = caller.ndb.buildnpc.get("skills", [])
+    else:
+        skills = [s.strip() for s in string.split(",") if s.strip()]
     caller.ndb.buildnpc["skills"] = skills
     return "menunode_ai"
 
 def menunode_ai(caller, raw_string="", **kwargs):
-    text = "|wAI type (e.g. passive, aggressive):|n"
+    default = caller.ndb.buildnpc.get("ai_type", "")
+    text = "|wAI type (e.g. passive, aggressive)|n"
+    if default:
+        text += f" [default: {default}]"
+    text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_ai}
     return text, options
 
 def _set_ai(caller, raw_string, **kwargs):
-    caller.ndb.buildnpc["ai_type"] = raw_string.strip()
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_skills"
+    if not string or string.lower() == "skip":
+        string = caller.ndb.buildnpc.get("ai_type", "")
+    caller.ndb.buildnpc["ai_type"] = string
     return "menunode_triggers"
 
 def menunode_triggers(caller, raw_string="", **kwargs):
@@ -120,10 +223,14 @@ def menunode_triggers(caller, raw_string="", **kwargs):
                 text += f"{event} {i}: \"{match}\" -> {react}\n"
     else:
         text += "None\n"
-    text += ("\nCommands:\n"
-             "  add trigger <event> \"<match>\" -> <reaction>\n"
-             "  del <event> <#>\n"
-             "  done - finish editing")
+    text += (
+        "\nCommands:\n"
+        "  add trigger <event> \"<match>\" -> <reaction>\n"
+        "  del <event> <#>\n"
+        "  done - finish editing\n"
+        "  back - previous step\n"
+        "  skip - no triggers"
+    )
     options = {"key": "_default", "goto": _edit_triggers}
     return text, options
 
@@ -131,7 +238,9 @@ def _edit_triggers(caller, raw_string, **kwargs):
     string = raw_string.strip()
     data = caller.ndb.buildnpc
     triggers = data.setdefault("triggers", {})
-    if string.lower() in ("done", "finish", "exit"):
+    if string.lower() in ("back",):
+        return "menunode_ai"
+    if string.lower() in ("skip", "", "done", "finish", "exit"):
         return "menunode_confirm"
     m = re.match(r'^add trigger (\w+)\s+"([^"]*)"\s*->\s*(.+)$', string)
     if m:
