@@ -12,6 +12,7 @@ from evennia.prototypes.spawner import spawn
 from utils.currency import to_copper, from_copper
 from utils import normalize_slot
 from utils.slots import SLOT_ORDER
+from collections.abc import Mapping
 import math
 
 from .objects import ObjectParent
@@ -94,7 +95,9 @@ class Character(ObjectParent, ClothedCharacter):
         eq = {slot: None for slot in SLOT_ORDER}
 
         # start from any stored equipment mapping
-        stored = self.db.equipment if isinstance(self.db.equipment, dict) else {}
+        stored = self.db.equipment
+        if not isinstance(stored, Mapping):
+            stored = {}
         for slot, item in stored.items():
             canonical = normalize_slot(slot) or slot
             eq[canonical] = item

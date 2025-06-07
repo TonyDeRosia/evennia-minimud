@@ -16,6 +16,7 @@ from evennia.prototypes import spawner, prototypes
 from evennia.objects.objects import DefaultObject
 from evennia.contrib.game_systems.clothing import ContribClothing
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
+from collections.abc import Mapping
 
 from commands.interact import GatherCmdSet
 from world.system import stat_manager
@@ -244,7 +245,7 @@ class ClothingObject(ObjectParent, ContribClothing):
                     self.tags.add(canonical, category="slot")
 
         # replace any existing item in the same slot
-        if not isinstance(wearer.db.equipment, dict):
+        if not isinstance(wearer.db.equipment, Mapping):
             wearer.db.equipment = {}
         slot = self.db.slot or self.db.clothing_type
         if slot:
@@ -267,6 +268,9 @@ class ClothingObject(ObjectParent, ContribClothing):
         wearer.update_carry_weight()
         # store equipped item in the character's equipment mapping
         slot = self.db.slot or self.db.clothing_type
+        if not slot:
+            if slots := self.tags.get(category="slot", return_list=True):
+                slot = slots[0]
         if slot:
             slot = normalize_slot(slot) or slot
             wearer.db.equipment[slot] = self
@@ -280,7 +284,10 @@ class ClothingObject(ObjectParent, ContribClothing):
         self.location = wearer
         wearer.update_carry_weight()
         slot = self.db.slot or self.db.clothing_type
-        if isinstance(wearer.db.equipment, dict) and slot:
+        if not slot:
+            if slots := self.tags.get(category="slot", return_list=True):
+                slot = slots[0]
+        if isinstance(wearer.db.equipment, Mapping) and slot:
             slot = normalize_slot(slot) or slot
             wearer.db.equipment.pop(slot, None)
         stat_manager.remove_item_bonuses(wearer, self)
