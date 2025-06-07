@@ -187,6 +187,24 @@ class TestInfoCommands(EvenniaTest):
         self.assertIn("Accessory", out)
         self.assertIn("Trinket", out)
 
+    def test_equipment_shows_ring_label(self):
+        from evennia.utils import create
+
+        ring = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="ruby ring",
+            location=self.char1,
+        )
+        ring.tags.add("equipment", category="flag")
+        ring.tags.add("identified", category="flag")
+        ring.tags.add("ring1", category="slot")
+        ring.wear(self.char1, True)
+
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("equipment")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Ring1", out)
+
     def test_equipment_twohanded(self):
         from evennia.utils import create
 
