@@ -147,3 +147,13 @@ Add `/unidentified` before the name to create the weapon unidentified.
 When a weapon is identified, `inspect` shows its damage, slot, any bonuses and
 effects, so `inspect epee-2` will display the full details of the second
 "Epee" you created.
+
+
+## Merchants and Shopping
+
+NPCs can act as merchants if they use the `Merchant` typeclass. A merchant keeps
+sale stock in an internal storage container and offers the commands `list`,
+`buy`, `sell` and `sell all` to nearby players. Selling items automatically adds
+them to the merchant's stock. Prices are based on the item's value with optional
+markups or discounts. Buying or selling adjusts both your coin pouch and the
+merchant's purse.
