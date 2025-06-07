@@ -3,6 +3,7 @@ from evennia.utils.test_resources import EvenniaTest
 from django.test import override_settings
 from commands.admin import BuilderCmdSet
 from commands import npc_builder
+from evennia.utils import create
 
 
 @override_settings(DEFAULT_HOME=None)
@@ -80,3 +81,45 @@ class TestCNPC(EvenniaTest):
         registry = get_npc_prototypes()
         self.assertIn("ogre", registry)
         self.assertEqual(registry["ogre"]["desc"], "A big ogre")
+
+    def test_triggers_and_reactions(self):
+        with patch("commands.npc_builder.EvMenu"):
+            self.char1.execute_cmd("cnpc start parrot")
+
+        npc_builder._set_desc(self.char1, "A colorful parrot")
+        npc_builder._set_npc_type(self.char1, "critter")
+        npc_builder._set_creature_type(self.char1, "humanoid")
+        npc_builder._set_level(self.char1, "1")
+        npc_builder._set_resources(self.char1, "10 0 0")
+        npc_builder._set_stats(self.char1, "1 1 1 1 1 1")
+        npc_builder._set_behavior(self.char1, "chatty")
+        npc_builder._set_skills(self.char1, "")
+        npc_builder._set_ai(self.char1, "passive")
+
+        npc_builder._edit_triggers(
+            self.char1, 'add trigger on_say "hello" -> say Squawk!'
+        )
+        npc_builder._edit_triggers(
+            self.char1, 'add trigger on_give "" -> say Thanks!'
+        )
+        npc_builder._edit_triggers(self.char1, "done")
+
+        npc_builder._create_npc(self.char1, "")
+
+        npc = self._find("parrot")
+        self.assertIsNotNone(npc)
+        self.assertEqual(
+            npc.db.triggers,
+            {
+                "on_say": [{"match": "hello", "reaction": "say Squawk!"}],
+                "on_give": [{"match": "", "reaction": "say Thanks!"}],
+            },
+        )
+
+        with patch.object(npc, "execute_cmd") as mock_exec:
+            npc.at_say(self.char2, "hello there")
+            mock_exec.assert_any_call("say Squawk!")
+
+        with patch.object(npc, "execute_cmd") as mock_exec:
+            npc.at_object_receive(self.obj1, self.char2)
+            mock_exec.assert_any_call("say Thanks!")
