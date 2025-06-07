@@ -2321,6 +2321,7 @@ Guild Honor Rank Modifiers.
     },
     {
         "key": 'cnpc',
+        "aliases": ['npc'],
         "category": 'Building',
         "text": """
 Help for cnpc
@@ -2342,10 +2343,12 @@ Examples:
     cnpc edit Bob
 
 Notes:
-    - Supported NPC types include merchant, guard, questgiver, trainer or any custom value.
-    - Behaviour and AI type are entered during the menu to define reactions.
-    - Humanoids gain all equipment slots; quadrupeds lack twohanded, mainhand and offhand slots.
-    - After reviewing the summary choose |wYes|n to confirm and create or update the NPC.
+    - The builder prompts for description, NPC type, creature type, level,
+      HP MP SP, primary stats, behavior, skills and AI type.
+    - Humanoids gain all equipment slots; quadrupeds lack twohanded,
+      mainhand and offhand slots.
+    - After reviewing the summary choose |wYes|n to confirm and create or
+      update the NPC.
     - Use |wcnpc edit <npc>|n to modify an existing NPC.
     - ANSI color codes are supported in names and descriptions.
 

@@ -106,6 +106,9 @@ def _set_ai(caller, raw_string, **kwargs):
 
 def menunode_confirm(caller, raw_string="", **kwargs):
     data = caller.ndb.buildnpc
+    if not isinstance(data, dict):
+        caller.msg("Error: NPC data missing. Restarting builder.")
+        return None
     text = "|wConfirm NPC Creation|n\n"
     for key, val in data.items():
         if key == "primary_stats":
@@ -123,6 +126,9 @@ def menunode_confirm(caller, raw_string="", **kwargs):
 
 def _create_npc(caller, raw_string, register=False, **kwargs):
     data = caller.ndb.buildnpc
+    if not isinstance(data, dict):
+        caller.msg("Error: NPC data missing. Aborting.")
+        return None
     npc = data.get("edit_obj") or create_object(NPC, key=data.get("key"), location=caller.location)
     npc.db.desc = data.get("desc")
     npc.tags.add("npc")
