@@ -34,13 +34,28 @@ def at_server_start():
     from evennia.scripts.models import ScriptDB
 
     script = ScriptDB.objects.filter(db_key="global_tick").first()
-    if script and not script.is_active:
-        script.start()
-
-    if not script or script.typeclass_path != "typeclasses.scripts.GlobalTick":
-        if script:
+    if script:
+        if script.typeclass_path != "typeclasses.scripts.GlobalTick":
+            script.stop()
             script.delete()
-        create.create_script("typeclasses.scripts.GlobalTick", key="global_tick")
+            script = None
+        else:
+            # Make sure the script is configured correctly
+            changed = False
+            if script.interval != 60:
+                script.interval = 60
+                changed = True
+            if not script.persistent:
+                script.persistent = True
+                changed = True
+            if changed:
+                script.save()
+            if not script.is_active:
+                script.start()
+
+    if not script:
+        script = create.create_script("typeclasses.scripts.GlobalTick", key="global_tick")
+        script.start()
 
     # Ensure all characters are marked tickable for the global ticker
     from typeclasses.characters import Character
