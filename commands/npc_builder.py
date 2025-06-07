@@ -1,8 +1,10 @@
 from evennia.utils.evmenu import EvMenu
+from evennia.utils import make_iter
 from evennia import create_object
 from typeclasses.characters import NPC
 from utils.slots import SLOT_ORDER
 from .command import Command
+import re
 
 
 # Menu nodes for NPC creation
@@ -102,7 +104,55 @@ def menunode_ai(caller, raw_string="", **kwargs):
 
 def _set_ai(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["ai_type"] = raw_string.strip()
-    return "menunode_confirm"
+    return "menunode_triggers"
+
+def menunode_triggers(caller, raw_string="", **kwargs):
+    data = caller.ndb.buildnpc
+    triggers = data.get("triggers") or {}
+    text = "|wCurrent Triggers|n\n"
+    if triggers:
+        for event, triglist in triggers.items():
+            for i, trig in enumerate(make_iter(triglist), 1):
+                match = trig.get("match", "")
+                react = trig.get("reaction") or trig.get("reactions")
+                if isinstance(react, (list, tuple)):
+                    react = ", ".join(str(r) for r in react)
+                text += f"{event} {i}: \"{match}\" -> {react}\n"
+    else:
+        text += "None\n"
+    text += ("\nCommands:\n"
+             "  add trigger <event> \"<match>\" -> <reaction>\n"
+             "  del <event> <#>\n"
+             "  done - finish editing")
+    options = {"key": "_default", "goto": _edit_triggers}
+    return text, options
+
+def _edit_triggers(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    data = caller.ndb.buildnpc
+    triggers = data.setdefault("triggers", {})
+    if string.lower() in ("done", "finish", "exit"):
+        return "menunode_confirm"
+    m = re.match(r'^add trigger (\w+)\s+"([^"]*)"\s*->\s*(.+)$', string)
+    if m:
+        event, match, reaction = m.groups()
+        triggers.setdefault(event, []).append({"match": match, "reaction": reaction})
+        caller.msg("Trigger added.")
+        return "menunode_triggers"
+    m = re.match(r'^del (\w+) (\d+)$', string)
+    if m:
+        event, idx = m.groups()
+        idx = int(idx) - 1
+        if event in triggers and 0 <= idx < len(triggers[event]):
+            triggers[event].pop(idx)
+            if not triggers[event]:
+                del triggers[event]
+            caller.msg("Trigger removed.")
+        else:
+            caller.msg("Invalid trigger index.")
+        return "menunode_triggers"
+    caller.msg("Unknown command.")
+    return "menunode_triggers"
 
 def menunode_confirm(caller, raw_string="", **kwargs):
     data = caller.ndb.buildnpc
@@ -114,6 +164,17 @@ def menunode_confirm(caller, raw_string="", **kwargs):
         if key == "primary_stats":
             stats = " ".join(f"{s}:{v}" for s, v in val.items())
             text += f"{key}: {stats}\n"
+        elif key == "triggers":
+            if val:
+                for event, triglist in val.items():
+                    for trig in make_iter(triglist):
+                        match = trig.get("match", "")
+                        react = trig.get("reaction") or trig.get("reactions")
+                        if isinstance(react, (list, tuple)):
+                            react = ", ".join(str(r) for r in react)
+                        text += f"trigger {event}: \"{match}\" -> {react}\n"
+            else:
+                text += "triggers: None\n"
         else:
             text += f"{key}: {val}\n"
     text += "\nCreate this NPC?"
@@ -139,6 +200,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.ai_type = data.get("ai_type")
     npc.db.behavior = data.get("behavior")
     npc.db.skills = data.get("skills")
+    npc.db.triggers = data.get("triggers") or {}
     npc.db.creature_type = data.get("creature_type")
     npc.db.level = data.get("level", 1)
     for trait, val in {
@@ -195,7 +257,7 @@ class CmdCNPC(Command):
             if not rest:
                 self.msg("Usage: cnpc start <key>")
                 return
-            self.caller.ndb.buildnpc = {"key": rest.strip()}
+            self.caller.ndb.buildnpc = {"key": rest.strip(), "triggers": {}}
             EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
             return
         if sub == "edit":
@@ -220,6 +282,7 @@ class CmdCNPC(Command):
                 "behavior": npc.db.behavior or "",
                 "skills": npc.db.skills or [],
                 "ai_type": npc.db.ai_type or "",
+                "triggers": npc.db.triggers or {},
             }
             self.caller.ndb.buildnpc = data
             EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
