@@ -37,6 +37,10 @@ class ObjectParent:
 
     """
 
+    def get_display_name(self, looker, **kwargs):
+        """Return the short description or key for display."""
+        return self.db.shortdesc or self.key
+
 
 class Object(ObjectParent, DefaultObject):
     """
@@ -189,6 +193,8 @@ class Object(ObjectParent, DefaultObject):
         super().at_object_creation()
         if getattr(self.db, "weight", None) is None:
             self.db.weight = 0
+        if getattr(self.db, "display_priority", None) is None:
+            self.db.display_priority = "item"
 
     def at_drop(self, dropper, **kwargs):
         """
