@@ -366,8 +366,8 @@ class CoinPile(Object):
         amount = int(self.db.amount or 0)
         return f"{amount} {ctype} coin{'s' if amount != 1 else ''}"
 
-    def at_after_move(self, source_location, **kwargs):
-        super().at_after_move(source_location, **kwargs)
+    def at_after_move(self, source_location, move_type="move", **kwargs):
+        super().at_after_move(source_location, move_type=move_type, **kwargs)
         dest = self.location
         if not dest:
             return
@@ -379,8 +379,20 @@ class CoinPile(Object):
             dest.msg(
                 f"You receive {self.db.amount} {ctype} coin{'s' if int(self.db.amount or 0) != 1 else ''}."
             )
-            self.delete()
+            self.db.from_pouch = False
+            # when picked up via `get`, Evennia will call `at_get` after this
+            if move_type == "get":
+                # defer deletion until pickup processing finishes
+                self.db._deposited = True
+            else:
+                # moves without `get` (like `give`) can be cleaned up immediately
+                self.delete()
 
     def at_post_move(self, source_location, **kwargs):
         """Alias for at_after_move for compatibility."""
         self.at_after_move(source_location, **kwargs)
+
+    def at_get(self, getter, **kwargs):
+        """Delete after being picked up if already deposited."""
+        if self.db._deposited:
+            self.delete()

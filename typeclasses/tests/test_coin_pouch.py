@@ -40,5 +40,13 @@ class TestCoinPouchCoins(EvenniaTest):
         self.assertEqual(to_copper(self.char1.db.coins), 5)
         self.assertEqual(to_copper(self.char2.db.coins), 5)
 
+        # coin pile object should have been cleaned up
+        piles = [
+            obj
+            for obj in self.char2.contents
+            if obj.is_typeclass("typeclasses.objects.CoinPile", exact=False)
+        ]
+        self.assertFalse(piles)
+
         self.char2.msg.assert_any_call("You receive 5 copper coins.")
 
