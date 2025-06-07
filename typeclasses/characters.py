@@ -722,28 +722,36 @@ class NPC(Character):
     # defines what color this NPC's name will display in
     name_color = AttributeProperty("w")
     # mapping of event triggers -> reactions
-    triggers = AttributeProperty({})
+    triggers = AttributeProperty([])
 
     def at_object_creation(self):
         super().at_object_creation()
         if self.db.triggers is None:
-            self.db.triggers = {}
+            self.db.triggers = []
 
     def check_triggers(self, event, **kwargs):
         """Evaluate stored triggers for a given event."""
-        triggers = (self.db.triggers or {}).get(event)
-        if not triggers:
-            return
+        triggers = self.db.triggers or []
 
-        if isinstance(triggers, tuple):
-            triglist = [{"match": triggers[0], "reaction": triggers[1]}]
-        elif isinstance(triggers, dict) and "match" in triggers:
-            triglist = [triggers]
-        else:
-            triglist = make_iter(triggers)
+        if isinstance(triggers, dict):
+            newlist = []
+            for evt, data in triggers.items():
+                if isinstance(data, tuple):
+                    match, reacts = data
+                    reacts = [reacts]
+                elif isinstance(data, dict):
+                    match = data.get("match")
+                    reacts = data.get("reactions") or data.get("reaction") or []
+                else:
+                    continue
+                for react in make_iter(reacts):
+                    newlist.append({"event": evt, "match": match, "action": react})
+            self.db.triggers = triggers = newlist
 
-        for trig in triglist:
+        for trig in make_iter(triggers):
             if not isinstance(trig, dict):
+                continue
+            if trig.get("event") != event:
                 continue
             match = trig.get("match")
             if match:
@@ -753,8 +761,8 @@ class NPC(Character):
                         continue
                 elif str(match).lower() not in text.lower():
                     continue
-            reactions = trig.get("reactions") or trig.get("reaction") or []
-            for react in make_iter(reactions):
+            actions = trig.get("action") or trig.get("actions")
+            for react in make_iter(actions):
                 if isinstance(react, str):
                     if " " in react:
                         action, arg = react.split(" ", 1)
