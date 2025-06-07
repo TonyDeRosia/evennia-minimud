@@ -427,6 +427,7 @@ class CmdCGear(Command):
     Usage:
         cgear [/unidentified] <typeclass> <name> [slot] [value] [weight]
 
+    Only Builders may use this command.
     See |whelp cgear|n for details.
     """
 
@@ -435,6 +436,11 @@ class CmdCGear(Command):
     help_category = "Building"
 
     def func(self):
+        caller = self.caller
+        if not caller.check_permstring("Builder"):
+            caller.msg("You are not authorized to use this command.")
+            return
+
         argstr = self.args.strip()
         identified = True
         for prefix in ("/unidentified", "/unid"):
@@ -512,6 +518,7 @@ class CmdOCreate(Command):
     Usage:
         ocreate <name>
 
+    Only Builders may use this command.
     See |whelp ocreate|n for details.
     """
 
@@ -520,6 +527,11 @@ class CmdOCreate(Command):
     help_category = "Building"
 
     def func(self):
+        caller = self.caller
+        if not caller.check_permstring("Builder"):
+            caller.msg("You are not authorized to use this command.")
+            return
+
         if not self.args:
             name = "object"
             weight = 0
@@ -558,6 +570,7 @@ class CmdCWeapon(Command):
     Usage:
         cweapon [/unidentified] <name> <slot> <damage> <weight> [stat_mods] <description>
 
+    Only Builders may use this command.
     See |whelp cweapon|n for details.
     """
 
@@ -566,6 +579,11 @@ class CmdCWeapon(Command):
     help_category = "Building"
 
     def func(self):
+        caller = self.caller
+        if not caller.check_permstring("Builder"):
+            caller.msg("You are not authorized to use this command.")
+            return
+
         argstr = self.args.strip()
         identified = True
         for prefix in ("/unidentified", "/unid"):
@@ -701,6 +719,7 @@ class CmdCShield(Command):
     Usage:
         cshield [/unidentified] <name> <armor_rating> <block_rate> <weight> [stat_mods] <description>
 
+    Only Builders may use this command.
     See |whelp cshield|n for details.
     """
 
@@ -709,6 +728,11 @@ class CmdCShield(Command):
     help_category = "Building"
 
     def func(self):
+        caller = self.caller
+        if not caller.check_permstring("Builder"):
+            caller.msg("You are not authorized to use this command.")
+            return
+
         argstr = self.args.strip()
         identified = True
         for prefix in ("/unidentified", "/unid"):
@@ -829,6 +853,7 @@ class CmdCArmor(Command):
     Usage:
         carmor [/unidentified] <name> <slot> <armor> <weight> <description>
 
+    Only Builders may use this command.
     See |whelp carmor|n for details.
     """
 
@@ -837,6 +862,11 @@ class CmdCArmor(Command):
     help_category = "Building"
 
     def func(self):
+        caller = self.caller
+        if not caller.check_permstring("Builder"):
+            caller.msg("You are not authorized to use this command.")
+            return
+
         argstr = self.args.strip()
         identified = True
         for prefix in ("/unidentified", "/unid"):
@@ -909,6 +939,7 @@ class CmdCTool(Command):
     Usage:
         ctool <name> [tag]
 
+    Only Builders may use this command.
     See |whelp ctool|n for details.
     """
 
@@ -917,6 +948,11 @@ class CmdCTool(Command):
     help_category = "Building"
 
     def func(self):
+        caller = self.caller
+        if not caller.check_permstring("Builder"):
+            caller.msg("You are not authorized to use this command.")
+            return
+
         if not self.args:
             self.msg("Usage: ctool <name> [tag] [weight] [stat_mods] <description>")
             return
@@ -973,6 +1009,7 @@ class CmdCRing(Command):
 
     The slot defaults to ``ring1`` if omitted. You may specify ``ring2``
     instead to create a ring for the second slot.
+    Only Builders may use this command.
     """
 
     key = "cring"
@@ -980,6 +1017,11 @@ class CmdCRing(Command):
     help_category = "Building"
 
     def func(self):
+        caller = self.caller
+        if not caller.check_permstring("Builder"):
+            caller.msg("You are not authorized to use this command.")
+            return
+
         argstr = self.args.strip()
         identified = True
         for prefix in ("/unidentified", "/unid"):
@@ -1052,6 +1094,7 @@ class CmdCTrinket(Command):
         ctrinket [/unidentified] <name> [weight]
 
     Trinkets always use the ``trinket`` slot.
+    Only Builders may use this command.
     """
 
     key = "ctrinket"
@@ -1059,6 +1102,11 @@ class CmdCTrinket(Command):
     help_category = "Building"
 
     def func(self):
+        caller = self.caller
+        if not caller.check_permstring("Builder"):
+            caller.msg("You are not authorized to use this command.")
+            return
+
         argstr = self.args.strip()
         identified = True
         for prefix in ("/unidentified", "/unid"):
@@ -1113,13 +1161,21 @@ class CmdCTrinket(Command):
 
 
 class CmdCFood(Command):
-    """Create a food item."""
+    """Create a food item.
+
+    Only Builders may use this command.
+    """
 
     key = "cfood"
     locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):
+        caller = self.caller
+        if not caller.check_permstring("Builder"):
+            caller.msg("You are not authorized to use this command.")
+            return
+
         try:
             parts = _safe_split(self.args)
         except ValueError as err:
@@ -1152,13 +1208,21 @@ class CmdCFood(Command):
 
 
 class CmdCDrink(Command):
-    """Create a drink item."""
+    """Create a drink item.
+
+    Only Builders may use this command.
+    """
 
     key = "cdrink"
     locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):
+        caller = self.caller
+        if not caller.check_permstring("Builder"):
+            caller.msg("You are not authorized to use this command.")
+            return
+
         try:
             parts = _safe_split(self.args)
         except ValueError as err:
@@ -1191,13 +1255,21 @@ class CmdCDrink(Command):
 
 
 class CmdCPotion(Command):
-    """Create a potion item."""
+    """Create a potion item.
+
+    Only Builders may use this command.
+    """
 
     key = "cpotion"
     locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):
+        caller = self.caller
+        if not caller.check_permstring("Builder"):
+            caller.msg("You are not authorized to use this command.")
+            return
+
         try:
             parts = _safe_split(self.args)
         except ValueError as err:
