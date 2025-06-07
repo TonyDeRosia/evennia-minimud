@@ -451,6 +451,15 @@ STAG_DEER = {
     "can_attack": True,
 }
 
+# Example NPC used for development testing
+TEST_BLACKSMITH = {
+    "typeclass": "typeclasses.characters.NPC",
+    "key": "test blacksmith",
+    "desc": "A sturdy blacksmith created for testing purposes.",
+    "gender": "male",
+    "can_attack": False,
+}
+
 ### Mob drops
 
 RAW_MEAT = {

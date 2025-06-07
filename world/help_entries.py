@@ -2365,7 +2365,7 @@ Create or edit an NPC using a guided menu.
 Usage:
     cnpc start <key>
     cnpc edit <npc>
-    cnpc dev_spawn <proto> [amt]
+    cnpc dev_spawn <proto>
 
 Switches:
     None
@@ -2376,7 +2376,7 @@ Arguments:
 Examples:
     cnpc start guard_01
     cnpc edit Bob
-    cnpc dev_spawn guard_01 5
+    cnpc dev_spawn test_blacksmith
 
 Notes:
     - NPC types include merchant, guard, questgiver, guildmaster,
@@ -2397,7 +2397,8 @@ Notes:
           4) Finish
       Choosing Add prompts for the event type, match text and reaction
       command.
-    - |wcnpc dev_spawn|n quickly spawns prototype NPCs for testing.
+    - |wcnpc dev_spawn|n quickly spawns prototype NPCs for testing (Developer only).
+    - Example: |wcnpc dev_spawn test_blacksmith|n
     - See |whelp triggers|n for available events and reactions.
     - ANSI color codes are supported in names and descriptions.
 
