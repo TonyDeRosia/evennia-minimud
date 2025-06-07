@@ -417,7 +417,7 @@ Help for carmor
 Create a wearable armor item.
 
 Usage:
-    carmor [/unidentified] <name> <slot> <armor> <weight> [modifiers] <description>
+    carmor [/unidentified] <name> <slot> <weight> [stat_mods] <description>
 
 Switches:
     None
@@ -426,7 +426,7 @@ Arguments:
     None
 
 Examples:
-    carmor "Gilded Chestplate" chest 5 4 STR+2, Armor+3 A brilliant golden chest.
+    carmor "Ruby Helm" head 5 hp+5,armor+10,stamina_regen+2 A red magical helmet.
 
 Notes:
     - Slot becomes the clothing type.
