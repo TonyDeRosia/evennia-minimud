@@ -559,6 +559,42 @@ class TestRemoveCommand(EvenniaTest):
         self.assertFalse(item.db.worn)
         self.assertEqual(item.location, self.char1)
 
+    def test_remove_by_slot(self):
+        """Removing by specifying the equipment slot works."""
+        from evennia.utils import create
+
+        helm = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="leather cap",
+            location=self.char1,
+        )
+        helm.tags.add("equipment", category="flag")
+        helm.tags.add("identified", category="flag")
+        helm.tags.add("head", category="slot")
+        helm.wear(self.char1, True)
+
+        self.char1.execute_cmd("remove head")
+        self.assertFalse(helm.db.worn)
+        self.assertEqual(helm.location, self.char1)
+
+    def test_remove_partial_name(self):
+        """Removing by partial item name still works."""
+        from evennia.utils import create
+
+        boots = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="tall boots",
+            location=self.char1,
+        )
+        boots.tags.add("equipment", category="flag")
+        boots.tags.add("identified", category="flag")
+        boots.tags.add("feet", category="slot")
+        boots.wear(self.char1, True)
+
+        self.char1.execute_cmd("remove boot")
+        self.assertFalse(boots.db.worn)
+        self.assertEqual(boots.location, self.char1)
+
 
 class TestRemoveAllCommand(EvenniaTest):
     def test_remove_all_removes_everything(self):

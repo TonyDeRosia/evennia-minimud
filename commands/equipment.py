@@ -1,19 +1,27 @@
 from evennia import CmdSet
 from evennia.utils.ansi import strip_ansi
+from utils import normalize_slot
 from .command import Command
 
 
 def get_equipped_item_by_name(caller, itemname):
     """Find equipped item by name."""
     eq = caller.equipment
-    candidates = [item for item in eq.values() if item]
     searchstr = strip_ansi(itemname)
+
+    # first check if the argument references a slot directly
+    slot = normalize_slot(searchstr)
+    if slot in eq:
+        return slot, eq.get(slot)
+
+    # fall back to searching by item name
+    candidates = [item for item in eq.values() if item]
     obj = caller.search(searchstr, candidates=candidates)
     if not obj:
         return None, None
-    for slot, item in eq.items():
-        if item == obj:
-            return slot, obj
+    for slt, itm in eq.items():
+        if itm == obj:
+            return slt, obj
     return None, None
 
 
@@ -35,6 +43,9 @@ class CmdRemove(Command):
         # search equipped items (worn or wielded)
         slot, obj = get_equipped_item_by_name(caller, itemname)
         if not obj:
+            if slot in caller.equipment:
+                caller.msg("You aren't wearing anything in that slot.")
+                return
             caller.msg(f"Could not find '{itemname}'.")
             return
 
