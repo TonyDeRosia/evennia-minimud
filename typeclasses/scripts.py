@@ -253,8 +253,12 @@ class GlobalTick(Script):
             if not hasattr(obj, "traits"):
                 continue
 
-            state_manager.apply_regen(obj)
             state_manager.tick_character(obj)
 
-            if hasattr(obj, "refresh_prompt"):
+            if hasattr(obj, "at_tick"):
+                obj.at_tick()
+            else:
+                state_manager.apply_regen(obj)
+
+            if hasattr(obj, "refresh_prompt") and not hasattr(obj, "at_tick"):
                 obj.refresh_prompt()
