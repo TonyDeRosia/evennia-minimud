@@ -10,6 +10,7 @@ class TestCoinPouchCoins(EvenniaTest):
     def setUp(self):
         super().setUp()
         self.char1.msg = MagicMock()
+        self.char2.msg = MagicMock()
 
     def test_pouch_coins_auto_deposit(self):
         self.char1.db.coins = from_copper(20)
@@ -29,4 +30,15 @@ class TestCoinPouchCoins(EvenniaTest):
         self.assertEqual(to_copper(self.char1.db.coins), 20)
         self.assertIsNone(coin.pk)
         self.char1.msg.assert_any_call("You receive 5 copper coins.")
+
+    def test_give_coins_auto_deposit(self):
+        self.char1.db.coins = from_copper(10)
+        self.char2.db.coins = from_copper(0)
+
+        self.char1.execute_cmd(f"give 5 copper={self.char2.key}")
+
+        self.assertEqual(to_copper(self.char1.db.coins), 5)
+        self.assertEqual(to_copper(self.char2.db.coins), 5)
+
+        self.char2.msg.assert_any_call("You receive 5 copper coins.")
 
