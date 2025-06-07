@@ -2312,6 +2312,11 @@ Health, mana and stamina are restored automatically. Each game tick you
 recover amounts equal to your |whealth_regen|n, |wmana_regen|n and
 |wstamina_regen|n stats. Passive 1-point-per-second healing has been removed.
 
+Your current status modifies regeneration:
+    - Standing: normal rates
+    - Resting: 2x rates
+    - Sleeping: 3x rates
+
 Usage:
     regeneration
 
