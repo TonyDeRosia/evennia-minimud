@@ -131,7 +131,7 @@ class CmdBuy(Command):
 
         # everything is good! do a capitalism!
         for obj in objs:
-            obj.location = self.caller
+            obj.move_to(self.caller, quiet=True, move_type="get")
 
         self.caller.db.coins = from_copper(to_copper(wallet) - total)
 

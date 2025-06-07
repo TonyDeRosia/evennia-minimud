@@ -409,7 +409,7 @@ class CmdCompleteQuest(Command):
             except Exception:
                 continue
             for obj in objs:
-                obj.location = caller
+                obj.move_to(caller, quiet=True, move_type="get")
                 rewards.append(obj.key)
 
         if quest.currency_reward:

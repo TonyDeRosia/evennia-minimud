@@ -542,7 +542,7 @@ class CmdCNPC(Command):
             except KeyError:
                 self.msg(f"Unknown prototype: {proto}")
                 return
-            obj.location = self.caller.location
+            obj.move_to(self.caller.location, quiet=True)
             self.msg(f"Spawned {obj.get_display_name(self.caller)}.")
             return
         self.msg("Usage: cnpc start <key> | cnpc edit <npc> | cnpc dev_spawn <proto>")

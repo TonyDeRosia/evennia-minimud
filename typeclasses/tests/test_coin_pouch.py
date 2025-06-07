@@ -50,3 +50,20 @@ class TestCoinPouchCoins(EvenniaTest):
 
         self.char2.msg.assert_any_call("You receive 5 copper coins.")
 
+    def test_getall_auto_deposit(self):
+        self.char1.db.coins = from_copper(30)
+        self.char1.execute_cmd("drop 10 copper")
+
+        coin = next(
+            obj
+            for obj in self.char1.location.contents
+            if obj.is_typeclass("typeclasses.objects.CoinPile", exact=False)
+        )
+
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("get all")
+
+        self.assertEqual(to_copper(self.char1.db.coins), 30)
+        self.assertIsNone(coin.pk)
+        self.char1.msg.assert_any_call("You receive 10 copper coins.")
+

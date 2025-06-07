@@ -276,7 +276,7 @@ class CmdDropAll(Command):
             caller.msg("You have nothing to drop.")
             return
         for obj in items:
-            obj.location = caller.location
+            obj.move_to(caller.location, quiet=True, move_type="drop")
             obj.at_drop(caller)
         caller.update_carry_weight()
         caller.msg("You drop everything you are carrying.")
@@ -319,7 +319,7 @@ class CmdDrop(Command):
         obj = caller.search(self.args, location=caller)
         if not obj:
             return
-        obj.location = caller.location
+        obj.move_to(caller.location, quiet=True, move_type="drop")
         obj.at_drop(caller)
         caller.update_carry_weight()
         caller.msg(f"You drop {obj.get_display_name(caller)}.")
@@ -377,8 +377,8 @@ class CmdGive(Command):
         if not obj:
             caller.msg("You aren't carrying that.")
             return
-        obj.location = target
-        obj.at_get(target)
+        if obj.move_to(target, quiet=True, move_type="give"):
+            obj.at_get(target)
         caller.update_carry_weight()
         caller.msg(f"You give {obj.get_display_name(caller)} to {target.get_display_name(caller)}.")
         target.msg(f"{caller.get_display_name(target)} gives you {obj.get_display_name(target)}.")
@@ -406,8 +406,8 @@ class CmdGetAll(Command):
             caller.msg("There is nothing here to pick up.")
             return
         for obj in items:
-            obj.location = caller
-            obj.at_get(caller)
+            if obj.move_to(caller, quiet=True, move_type="get"):
+                obj.at_get(caller)
         caller.update_carry_weight()
         caller.msg("You pick up everything you can.")
 
