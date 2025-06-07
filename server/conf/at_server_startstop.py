@@ -37,7 +37,7 @@ def at_server_start():
     if not script or script.typeclass_path != "typeclasses.scripts.GlobalTick":
         if script:
             script.delete()
-        create.script("typeclasses.scripts.GlobalTick", key="global_tick")
+        create.create_script("typeclasses.scripts.GlobalTick", key="global_tick")
 
     # Ensure all characters are marked tickable for the global ticker
     from typeclasses.characters import Character
