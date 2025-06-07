@@ -589,9 +589,6 @@ class Character(ObjectParent, ClothedCharacter):
         Regenerates resources based on current status and refreshes the prompt
         to visually reflect the changes.
         """
-        if not self.sessions.count():
-            return
-
         statuses = self.tags.get(category="status", return_list=True) or []
 
         if "sleeping" in statuses or "unconscious" in statuses:
@@ -620,11 +617,12 @@ class Character(ObjectParent, ClothedCharacter):
             if gained:
                 healed[trait_key] = (gained, color)
 
-        if healed:
+        if healed and self.sessions.count():
             parts = [f"{col}+{amt} {k[:2].upper()}|n" for k, (amt, col) in healed.items()]
             self.msg("You regenerate " + ", ".join(parts) + ".")
 
-        self.refresh_prompt()
+        if self.sessions.count():
+            self.refresh_prompt()
 
     def refresh_prompt(self):
         """Refresh the player's prompt display."""
