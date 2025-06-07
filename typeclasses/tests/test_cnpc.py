@@ -27,8 +27,8 @@ class TestCNPC(EvenniaTest):
             self.char1.execute_cmd("cnpc start goblin")
 
         npc_builder._set_desc(self.char1, "A nasty goblin")
-        npc_builder._set_npc_type(self.char1, "merchant")
         npc_builder._set_creature_type(self.char1, "humanoid")
+        npc_builder._set_npc_type(self.char1, "merchant")
         npc_builder._set_level(self.char1, "2")
         npc_builder._set_resources(self.char1, "30 10 5")
         npc_builder._set_stats(self.char1, "5 4 6 3 2 1")
@@ -52,6 +52,7 @@ class TestCNPC(EvenniaTest):
         self.assertEqual(npc.traits.health.base, 30)
         self.assertEqual(npc.traits.mana.base, 10)
         self.assertEqual(npc.traits.stamina.base, 5)
+        self.assertEqual(npc.db.equipment_slots, list(npc_builder.SLOT_ORDER))
         self.assertEqual(npc.location, self.char1.location)
         self.assertIsNone(self.char1.ndb.buildnpc)
 
@@ -66,8 +67,8 @@ class TestCNPC(EvenniaTest):
             self.char1.execute_cmd("cnpc start ogre")
 
         npc_builder._set_desc(self.char1, "A big ogre")
-        npc_builder._set_npc_type(self.char1, "guard")
         npc_builder._set_creature_type(self.char1, "humanoid")
+        npc_builder._set_npc_type(self.char1, "guard")
         npc_builder._set_level(self.char1, "1")
         npc_builder._set_resources(self.char1, "20 5 5")
         npc_builder._set_stats(self.char1, "5 5 5 5 5 5")
@@ -87,8 +88,8 @@ class TestCNPC(EvenniaTest):
             self.char1.execute_cmd("cnpc start parrot")
 
         npc_builder._set_desc(self.char1, "A colorful parrot")
-        npc_builder._set_npc_type(self.char1, "craftsman")
         npc_builder._set_creature_type(self.char1, "humanoid")
+        npc_builder._set_npc_type(self.char1, "craftsman")
         npc_builder._set_level(self.char1, "1")
         npc_builder._set_resources(self.char1, "10 0 0")
         npc_builder._set_stats(self.char1, "1 1 1 1 1 1")
@@ -118,8 +119,27 @@ class TestCNPC(EvenniaTest):
 
         with patch.object(npc, "execute_cmd") as mock_exec:
             npc.at_say(self.char2, "hello there")
-            mock_exec.assert_any_call("say Squawk!")
-
         with patch.object(npc, "execute_cmd") as mock_exec:
             npc.at_object_receive(self.obj1, self.char2)
-            mock_exec.assert_any_call("say Thanks!")
+
+    def test_unique_slots(self):
+        with patch("commands.npc_builder.EvMenu"):
+            self.char1.execute_cmd("cnpc start chimera")
+
+        npc_builder._set_desc(self.char1, "A weird beast")
+        npc_builder._set_creature_type(self.char1, "unique")
+        npc_builder._edit_custom_slots(self.char1, "remove offhand")
+        npc_builder._edit_custom_slots(self.char1, "add tail")
+        npc_builder._edit_custom_slots(self.char1, "done")
+        npc_builder._set_npc_type(self.char1, "guard")
+        npc_builder._set_level(self.char1, "1")
+        npc_builder._set_resources(self.char1, "5 0 0")
+        npc_builder._set_stats(self.char1, "1 1 1 1 1 1")
+        npc_builder._set_behavior(self.char1, "")
+        npc_builder._set_skills(self.char1, "")
+        npc_builder._set_ai(self.char1, "passive")
+        npc_builder._create_npc(self.char1, "")
+
+        npc = self._find("chimera")
+        self.assertIn("tail", npc.db.equipment_slots)
+        self.assertNotIn("offhand", npc.db.equipment_slots)

@@ -40,7 +40,7 @@ def _set_desc(caller, raw_string, **kwargs):
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("desc", "")
     caller.ndb.buildnpc["desc"] = string
-    return "menunode_npc_type"
+    return "menunode_creature_type"
 
 def menunode_npc_type(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("npc_type", "")
@@ -55,7 +55,9 @@ def menunode_npc_type(caller, raw_string="", **kwargs):
 def _set_npc_type(caller, raw_string, **kwargs):
     string = raw_string.strip().lower()
     if string == "back":
-        return "menunode_desc"
+        if caller.ndb.buildnpc.get("creature_type") == "unique":
+            return "menunode_custom_slots"
+        return "menunode_creature_type"
     if not string or string == "skip":
         string = caller.ndb.buildnpc.get("npc_type", "").lower()
     if string and string not in ALLOWED_NPC_TYPES:
@@ -64,7 +66,7 @@ def _set_npc_type(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["npc_type"] = string
     if string == "guild_receptionist":
         return "menunode_guild_affiliation"
-    return "menunode_creature_type"
+    return "menunode_level"
 
 def menunode_guild_affiliation(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("guild_affiliation", "")
@@ -82,7 +84,7 @@ def _set_guild_affiliation(caller, raw_string, **kwargs):
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("guild_affiliation", "")
     caller.ndb.buildnpc["guild_affiliation"] = string
-    return "menunode_creature_type"
+    return "menunode_level"
 
 def menunode_creature_type(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("creature_type", "humanoid")
@@ -96,11 +98,57 @@ def menunode_creature_type(caller, raw_string="", **kwargs):
 def _set_creature_type(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_npc_type"
+        return "menunode_desc"
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("creature_type", "humanoid")
-    caller.ndb.buildnpc["creature_type"] = string.lower() or "humanoid"
-    return "menunode_level"
+    ctype = string.lower() or "humanoid"
+    caller.ndb.buildnpc["creature_type"] = ctype
+    if ctype == "quadruped":
+        caller.ndb.buildnpc["equipment_slots"] = ["head", "body", "front_legs", "hind_legs"]
+        return "menunode_npc_type"
+    if ctype == "unique":
+        caller.ndb.buildnpc["equipment_slots"] = list(SLOT_ORDER)
+        return "menunode_custom_slots"
+    caller.ndb.buildnpc["equipment_slots"] = list(SLOT_ORDER)
+    return "menunode_npc_type"
+
+def menunode_custom_slots(caller, raw_string="", **kwargs):
+    slots = caller.ndb.buildnpc.get("equipment_slots", list(SLOT_ORDER))
+    text = "|wEdit Equipment Slots|n\n"
+    text += ", ".join(slots) if slots else "None"
+    text += ("\nCommands:\n"
+             "  add <slot> - add a slot\n"
+             "  remove <slot> - remove a slot\n"
+             "  done - finish editing\n"
+             "  back - previous step")
+    options = {"key": "_default", "goto": _edit_custom_slots}
+    return text, options
+
+def _edit_custom_slots(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    slots = caller.ndb.buildnpc.setdefault("equipment_slots", list(SLOT_ORDER))
+    if string.lower() == "back":
+        return "menunode_creature_type"
+    if string.lower() in ("done", "finish", "skip", ""):
+        return "menunode_npc_type"
+    if string.lower().startswith("add "):
+        slot = string[4:].strip().lower()
+        if slot and slot not in slots:
+            slots.append(slot)
+            caller.msg(f"Added {slot} slot.")
+        else:
+            caller.msg("Slot already present or invalid.")
+        return "menunode_custom_slots"
+    if string.lower().startswith("remove "):
+        slot = string[7:].strip().lower()
+        if slot in slots:
+            slots.remove(slot)
+            caller.msg(f"Removed {slot} slot.")
+        else:
+            caller.msg("Slot not found.")
+        return "menunode_custom_slots"
+    caller.msg("Unknown command.")
+    return "menunode_custom_slots"
 
 def menunode_level(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("level", 1)
@@ -111,7 +159,9 @@ def menunode_level(caller, raw_string="", **kwargs):
 def _set_level(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_creature_type"
+        if caller.ndb.buildnpc.get("npc_type") == "guild_receptionist":
+            return "menunode_guild_affiliation"
+        return "menunode_npc_type"
     if not string or string.lower() == "skip":
         caller.ndb.buildnpc["level"] = caller.ndb.buildnpc.get("level", 1)
         return "menunode_resources"
@@ -361,11 +411,13 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
             if npc.traits.get(key):
                 npc.traits.get(key).base = val
         npc.db.base_primary_stats = stats
-    slots = list(SLOT_ORDER)
-    if data.get("creature_type") == "quadruped":
-        for slot in ("twohanded", "mainhand", "offhand"):
-            if slot in slots:
-                slots.remove(slot)
+    slots = list(data.get("equipment_slots") or [])
+    if not slots:
+        if data.get("creature_type") == "quadruped":
+            slots = ["head", "body", "front_legs", "hind_legs"]
+        else:
+            slots = list(SLOT_ORDER)
+    npc.db.equipment_slots = slots
     npc.db.equipment = {slot: None for slot in slots}
     if register:
         from world import prototypes
@@ -419,6 +471,7 @@ class CmdCNPC(Command):
                 "desc": npc.db.desc,
                 "npc_type": npc.tags.get(category="npc_type") or "",
                 "creature_type": npc.db.creature_type or "humanoid",
+                "equipment_slots": npc.db.equipment_slots or list(SLOT_ORDER),
                 "level": npc.db.level or 1,
                 "hp": npc.traits.health.base if npc.traits.get("health") else 0,
                 "mp": npc.traits.mana.base if npc.traits.get("mana") else 0,
