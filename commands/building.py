@@ -75,7 +75,7 @@ class CmdDig(Command):
     """
 
     key = "dig"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):
@@ -159,7 +159,7 @@ class CmdTeleport(Command):
     """
 
     key = "@teleport"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):

@@ -431,7 +431,7 @@ class CmdCGear(Command):
     """
 
     key = "cgear"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):
@@ -516,7 +516,7 @@ class CmdOCreate(Command):
     """
 
     key = "ocreate"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):
@@ -562,7 +562,7 @@ class CmdCWeapon(Command):
     """
 
     key = "cweapon"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):
@@ -705,7 +705,7 @@ class CmdCShield(Command):
     """
 
     key = "cshield"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):
@@ -833,7 +833,7 @@ class CmdCArmor(Command):
     """
 
     key = "carmor"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):
@@ -913,7 +913,7 @@ class CmdCTool(Command):
     """
 
     key = "ctool"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):
@@ -976,7 +976,7 @@ class CmdCRing(Command):
     """
 
     key = "cring"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):
@@ -1055,7 +1055,7 @@ class CmdCTrinket(Command):
     """
 
     key = "ctrinket"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):
@@ -1116,7 +1116,7 @@ class CmdCFood(Command):
     """Create a food item."""
 
     key = "cfood"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):
@@ -1155,7 +1155,7 @@ class CmdCDrink(Command):
     """Create a drink item."""
 
     key = "cdrink"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):
@@ -1194,7 +1194,7 @@ class CmdCPotion(Command):
     """Create a potion item."""
 
     key = "cpotion"
-    locks = "cmd:perm(Builder)"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):
