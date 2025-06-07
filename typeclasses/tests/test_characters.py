@@ -225,6 +225,11 @@ class TestRegeneration(EvenniaTest):
         for key in ("health", "mana", "stamina"):
             trait = char.traits.get(key)
             trait.current = trait.max // 2
+        char.db.derived_stats = {
+            "health_regen": 2,
+            "mana_regen": 3,
+            "stamina_regen": 4,
+        }
         char.refresh_prompt = MagicMock()
         char.msg = MagicMock()
 
@@ -233,9 +238,13 @@ class TestRegeneration(EvenniaTest):
 
         script.at_repeat()
 
-        for key in ("health", "mana", "stamina"):
+        for key, regen in (
+            ("health", 2),
+            ("mana", 3),
+            ("stamina", 4),
+        ):
             trait = char.traits.get(key)
-            self.assertGreater(trait.current, trait.max // 2)
+            self.assertEqual(trait.current, trait.max // 2 + regen)
 
         char.refresh_prompt.assert_called_once()
         char.msg.assert_called_once()
