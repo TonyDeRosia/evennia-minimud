@@ -319,9 +319,14 @@ def _set_ai(caller, raw_string, **kwargs):
 
 def menunode_triggers(caller, raw_string="", **kwargs):
     """Main trigger menu."""
-    text = "|wTrigger Menu|n"
+    text = (
+        "|wTrigger Menu|n\n"
+        "Use triggers to react automatically to events.\n"
+        "Common example: greeting players when they enter."
+    )
     options = [
         {"desc": "Add trigger", "goto": "menunode_trigger_add"},
+        {"desc": "Add greeting", "goto": _add_greeting},
         {"desc": "Delete trigger", "goto": "menunode_trigger_delete"},
         {"desc": "List triggers", "goto": "menunode_trigger_list"},
         {"desc": "Finish", "goto": "menunode_confirm"},
@@ -397,6 +402,13 @@ def _save_trigger(caller, raw_string, **kwargs):
     caller.ndb.trigger_event = None
     caller.ndb.trigger_match = None
     caller.msg("Trigger added.")
+    return "menunode_triggers"
+
+def _add_greeting(caller, raw_string="", **kwargs):
+    """Add a simple greeting trigger."""
+    triggers = caller.ndb.buildnpc.setdefault("triggers", [])
+    triggers.append({"event": "on_enter", "match": "", "action": 'say "Hello there!"'})
+    caller.msg("Greeting trigger added.")
     return "menunode_triggers"
 
 def menunode_trigger_delete(caller, raw_string="", **kwargs):
