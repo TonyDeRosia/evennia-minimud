@@ -213,16 +213,11 @@ def get_display_scroll(chara):
     if show_sated:
         lines.append(f"|ySated|n {sated_disp}")
 
-    coins = {
-        "copper": _db_get(chara, "copper", 0),
-        "silver": _db_get(chara, "silver", 0),
-        "gold": _db_get(chara, "gold", 0),
-        "platinum": _db_get(chara, "platinum", 0),
-    }
-    copper = int(coins.get("copper", 0))
-    silver = int(coins.get("silver", 0))
-    gold = int(coins.get("gold", 0))
-    platinum = int(coins.get("platinum", 0))
+    wallet = chara.db.coins or {}
+    copper = int(wallet.get("copper", _db_get(chara, "copper", 0)))
+    silver = int(wallet.get("silver", _db_get(chara, "silver", 0)))
+    gold = int(wallet.get("gold", _db_get(chara, "gold", 0)))
+    platinum = int(wallet.get("platinum", _db_get(chara, "platinum", 0)))
     lines.append("")
     lines.append("|YCOIN POUCH|n")
     lines.append(
@@ -233,7 +228,7 @@ def get_display_scroll(chara):
     weight = chara.db.carry_weight or 0
     capacity = chara.db.carry_capacity or 0
     enc = chara.encumbrance_level() if hasattr(chara, "encumbrance_level") else ""
-    cw_line = f"|YCarry Weight:|n {weight} / {capacity}"
+    cw_line = f"|YCARRY WEIGHT:|n {weight} / {capacity}"
     if enc:
         cw_line += f"  {enc}"
     lines.append(cw_line)
