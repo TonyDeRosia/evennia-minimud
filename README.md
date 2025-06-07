@@ -156,4 +156,11 @@ sale stock in an internal storage container and offers the commands `list`,
 `buy`, `sell` and `sell all` to nearby players. Selling items automatically adds
 them to the merchant's stock. Prices are based on the item's value with optional
 markups or discounts. Buying or selling adjusts both your coin pouch and the
-merchant's purse.
+merchant's purse. Stand in the same room as the merchant and use these commands
+to interact with them.
+
+## Banking
+
+Banker NPCs can hold your money securely. Use `bank` to check your balance,
+`deposit <amount> <currency>` to store coins and `withdraw <amount> <currency>`
+to take them back out.

@@ -1957,7 +1957,7 @@ Related:
         "text": """
 Help for list
 
-View items a shop has for sale. Usage: list
+View items a shop has for sale.
 
 Usage:
     list
@@ -1969,7 +1969,7 @@ Arguments:
     None
 
 Examples:
-    None
+    list
 
 Notes:
     - Shows everything a nearby merchant has in stock and their prices.
@@ -1984,19 +1984,19 @@ Related:
         "text": """
 Help for buy
 
-Purchase an item from a shop. Usage: buy <item>
+Purchase an item from a shop.
 
 Usage:
-    buy
+    buy <item>
 
 Switches:
     None
 
 Arguments:
-    None
+    item - name or number of the item to purchase
 
 Examples:
-    None
+    buy sword
 
 Notes:
     - Pays the asking price to the merchant and moves the item to you.
@@ -2012,19 +2012,20 @@ Related:
         "text": """
 Help for sell
 
-Offer an item for sale to a shop. Usage: sell <item>
+Offer an item for sale to a shop.
 
 Usage:
-    sell
+    sell <item>
 
 Switches:
     None
 
 Arguments:
-    None
+    item - name or number of the item to sell
 
 Examples:
-    None
+    sell sword
+    sell all
 
 Notes:
     - Trades your item to the merchant for its value in coins.
