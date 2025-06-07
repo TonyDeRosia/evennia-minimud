@@ -851,7 +851,7 @@ class CmdCArmor(Command):
     Create a wearable armor item.
 
     Usage:
-        carmor [/unidentified] <name> <slot> <armor> <weight> <description>
+        carmor [/unidentified] <name> <slot> <weight> [stat_mods] <description>
 
     Only Builders may use this command.
     See |whelp carmor|n for details.
@@ -877,7 +877,7 @@ class CmdCArmor(Command):
 
         if not argstr:
             self.msg(
-                "Usage: carmor [/unidentified] <name> <slot> <armor> <weight> [stat_mods] <description>"
+                "Usage: carmor [/unidentified] <name> <slot> <weight> [stat_mods] <description>"
             )
             return
         try:
@@ -885,14 +885,14 @@ class CmdCArmor(Command):
         except ValueError as err:
             self.msg(str(err))
             return
-        if len(parts) < 4:
+        if len(parts) < 3:
             self.msg(
-                "Usage: carmor [/unidentified] <name> <slot> <armor> <weight> [stat_mods] <description>"
+                "Usage: carmor [/unidentified] <name> <slot> <weight> [stat_mods] <description>"
             )
             return
-        name, slot, armor_str, weight_str = parts[:4]
+        name, slot, weight_str = parts[:3]
         name = name.strip("'\"")
-        rest = " ".join(parts[4:])
+        rest = " ".join(parts[3:])
         try:
             bonuses, desc = parse_stat_mods(rest)
         except ValueError as err:
@@ -901,11 +901,6 @@ class CmdCArmor(Command):
         slot = normalize_slot(slot)
         if slot not in VALID_SLOTS:
             self.msg("Invalid slot name.")
-            return
-        try:
-            armor = int(armor_str)
-        except ValueError:
-            self.msg("Armor must be a number.")
             return
         try:
             weight = int(weight_str)
@@ -917,8 +912,6 @@ class CmdCArmor(Command):
             "typeclasses.objects.ClothingObject",
             name,
             slot,
-            armor,
-            attr="armor",
             desc=desc,
             weight=weight,
             identified=identified,
@@ -928,7 +921,7 @@ class CmdCArmor(Command):
             obj.db.stat_mods = bonuses
 
         self.caller.msg(
-            f"Slot: {slot}\nArmor: {armor}\nWeight: {weight}\nDescription: {desc}"
+            f"Slot: {slot}\nWeight: {weight}\nDescription: {desc}"
         )
 
 
