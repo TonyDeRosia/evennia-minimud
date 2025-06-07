@@ -347,7 +347,10 @@ def menunode_trigger_list(caller, raw_string="", **kwargs):
             event = trig.get("event")
             match = trig.get("match", "")
             action = trig.get("action", "")
-            text += f"{event}: \"{match}\" -> {action}\n"
+            if match:
+                text += f"{event}: \"{match}\" -> {action}\n"
+            else:
+                text += f"{event} -> {action}\n"
     else:
         text += "None\n"
     options = [{"desc": "Back", "goto": "menunode_triggers"}]
@@ -439,7 +442,13 @@ def menunode_trigger_delete(caller, raw_string="", **kwargs):
     text = "|wSelect trigger to delete|n"
     options = []
     for idx, trig in enumerate(triggers):
-        desc = f"{trig.get('event')}: \"{trig.get('match','')}\" -> {trig.get('action','')}"
+        event = trig.get("event")
+        match = trig.get("match", "")
+        action = trig.get("action", "")
+        if match:
+            desc = f"{event}: \"{match}\" -> {action}"
+        else:
+            desc = f"{event} -> {action}"
         options.append({"desc": desc, "goto": (_del_trigger, {"index": idx})})
     options.append({"desc": "Back", "goto": "menunode_triggers"})
     return text, options
@@ -466,7 +475,13 @@ def menunode_confirm(caller, raw_string="", **kwargs):
         elif key == "triggers":
             if val:
                 for trig in val:
-                    text += f"trigger {trig.get('event')}: \"{trig.get('match','')}\" -> {trig.get('action','')}\n"
+                    event = trig.get('event')
+                    match = trig.get('match', '')
+                    action = trig.get('action', '')
+                    if match:
+                        text += f"trigger {event}: \"{match}\" -> {action}\n"
+                    else:
+                        text += f"trigger {event} -> {action}\n"
             else:
                 text += "triggers: None\n"
         else:
