@@ -37,6 +37,10 @@ class ObjectParent:
 
     """
 
+    def get_display_name(self, looker, **kwargs):
+        """Return the short description or key for display."""
+        return self.db.shortdesc or self.key
+
 
 class Object(ObjectParent, DefaultObject):
     """
@@ -189,6 +193,8 @@ class Object(ObjectParent, DefaultObject):
         super().at_object_creation()
         if getattr(self.db, "weight", None) is None:
             self.db.weight = 0
+        if getattr(self.db, "display_priority", None) is None:
+            self.db.display_priority = "item"
 
     def at_drop(self, dropper, **kwargs):
         """
@@ -366,27 +372,27 @@ class CoinPile(Object):
         amount = int(self.db.amount or 0)
         return f"{amount} {ctype} coin{'s' if amount != 1 else ''}"
 
-    def at_after_move(self, source_location, move_type="move", **kwargs):
-        super().at_after_move(source_location, move_type=move_type, **kwargs)
-        dest = self.location
-        if not dest:
-            return
-        if dest.is_typeclass("typeclasses.characters.Character", exact=False) and self.db.from_pouch:
-            wallet = dest.db.coins or {}
-            ctype = self.db.coin_type
-            wallet[ctype] = int(wallet.get(ctype, 0)) + int(self.db.amount or 0)
-            dest.db.coins = wallet
-            dest.msg(
-                f"You receive {self.db.amount} {ctype} coin{'s' if int(self.db.amount or 0) != 1 else ''}."
-            )
-            self.db.from_pouch = False
-            # when picked up via `get`, Evennia will call `at_get` after this
-            if move_type == "get":
-                # defer deletion until pickup processing finishes
-                self.db._deposited = True
-            else:
-                # moves without `get` (like `give`) can be cleaned up immediately
-                self.delete()
+def at_after_move(self, source_location, move_type="move", **kwargs):
+    super().at_after_move(source_location, move_type=move_type, **kwargs)
+    dest = self.location
+    if not dest:
+        return
+    if dest.is_typeclass("typeclasses.characters.Character", exact=False) and self.db.from_pouch:
+        wallet = dest.db.coins or {}
+        ctype = self.db.coin_type
+        wallet[ctype] = int(wallet.get(ctype, 0)) + int(self.db.amount or 0)
+        dest.db.coins = wallet
+        dest.msg(
+            f"You receive {self.db.amount} {ctype} coin{'s' if int(self.db.amount or 0) != 1 else ''}."
+        )
+        self.db.from_pouch = False
+        # when picked up via `get`, Evennia will call `at_get` after this
+        if move_type == "get":
+            # defer deletion until pickup processing finishes
+            self.db._deposited = True
+        else:
+            # moves without `get` (like `give`) can be cleaned up immediately
+            self.delete()
 
     def at_post_move(self, source_location, **kwargs):
         """Alias for at_after_move for compatibility."""

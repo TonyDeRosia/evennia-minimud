@@ -1,7 +1,8 @@
 from random import randint, choice
 from string import punctuation
 from evennia import AttributeProperty
-from evennia.utils import lazy_property, iter_to_str, delay, logger
+from evennia.utils import lazy_property, iter_to_str, delay, logger, make_iter
+import importlib
 from evennia.contrib.rpg.traits import TraitHandler
 from evennia.contrib.game_systems.clothing.clothing import (
     ClothedCharacter,
@@ -172,6 +173,9 @@ class Character(ObjectParent, ClothedCharacter):
         # exist on the character, `apply_stats` will not overwrite them.
         stats.apply_stats(self)
         stat_manager.refresh_stats(self)
+
+        # Mark character as tickable so the global tick script processes it
+        self.tags.add("tickable")
 
         self.db.guild = ""
         self.db.guild_points = {}
@@ -589,42 +593,12 @@ class Character(ObjectParent, ClothedCharacter):
         Regenerates resources based on current status and refreshes the prompt
         to visually reflect the changes.
         """
-        if not self.sessions.count():
-            return
+        from world.system import state_manager
 
-        statuses = self.tags.get(category="status", return_list=True) or []
+        state_manager.apply_regen(self)
 
-        if "sleeping" in statuses or "unconscious" in statuses:
-            low, high = 7, 12
-        elif any(s in statuses for s in ("sitting", "lying down")):
-            low, high = 3, 7
-        else:
-            low, high = 1, 3
-
-        healed = {}
-        for trait_key, color in (
-            ("health", "|r"),
-            ("mana", "|b"),
-            ("stamina", "|g"),
-        ):
-            trait = self.traits.get(trait_key)
-            if not trait:
-                continue
-            if trait.current >= trait.max:
-                continue
-            pct = randint(low, high)
-            amount = max(1, int(round(trait.max * pct / 100)))
-            new = min(trait.current + amount, trait.max)
-            gained = new - trait.current
-            trait.current = new
-            if gained:
-                healed[trait_key] = (gained, color)
-
-        if healed:
-            parts = [f"{col}+{amt} {k[:2].upper()}|n" for k, (amt, col) in healed.items()]
-            self.msg("You regenerate " + ", ".join(parts) + ".")
-
-        self.refresh_prompt()
+        if self.sessions.count():
+            self.refresh_prompt()
 
     def refresh_prompt(self):
         """Refresh the player's prompt display."""
@@ -641,9 +615,13 @@ class Character(ObjectParent, ClothedCharacter):
             self.tags.remove("unconscious")
             self.tags.remove("lying down")
             # this sets the current HP to 20% of the max, a.k.a. one fifth
-            self.traits.health.current = self.traits.health.current.max // 5
+            self.traits.health.current = self.traits.health.max // 5
             self.msg(prompt=self.get_display_status(self))
-            self.traits.health.rate = 0.1
+            self.traits.health.rate = 0.0
+            if self.traits.mana:
+                self.traits.mana.rate = 0.0
+            if self.traits.stamina:
+                self.traits.stamina.rate = 0.0
 
 
 class PlayerCharacter(Character):
@@ -655,7 +633,6 @@ class PlayerCharacter(Character):
         super().at_object_creation()
         # initialize hands
         self.db._wielded = {"left": None, "right": None}
-        self.tags.add("tickable")
 
     def get_display_name(self, looker, **kwargs):
         """
@@ -726,7 +703,11 @@ class PlayerCharacter(Character):
         self.tags.remove("unconscious", category="status")
         self.tags.remove("lying down", category="status")
         self.traits.health.reset()
-        self.traits.health.rate = 0.1
+        self.traits.health.rate = 0.0
+        if self.traits.mana:
+            self.traits.mana.rate = 0.0
+        if self.traits.stamina:
+            self.traits.stamina.rate = 0.0
         self.move_to(self.home)
         self.msg(prompt=self.get_display_status(self))
 
@@ -740,6 +721,71 @@ class NPC(Character):
 
     # defines what color this NPC's name will display in
     name_color = AttributeProperty("w")
+    # mapping of event triggers -> reactions
+    triggers = AttributeProperty({})
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        if self.db.triggers is None:
+            self.db.triggers = {}
+
+    def check_triggers(self, event, **kwargs):
+        """Evaluate stored triggers for a given event."""
+        triggers = (self.db.triggers or {}).get(event)
+        if not triggers:
+            return
+        for trig in make_iter(triggers):
+            if not isinstance(trig, dict):
+                continue
+            match = trig.get("match")
+            if match:
+                text = str(kwargs.get("message") or kwargs.get("text") or "")
+                if isinstance(match, (list, tuple)):
+                    if not any(m.lower() in text.lower() for m in match):
+                        continue
+                elif str(match).lower() not in text.lower():
+                    continue
+            reactions = trig.get("reactions") or trig.get("reaction") or []
+            for react in make_iter(reactions):
+                if isinstance(react, str):
+                    if " " in react:
+                        action, arg = react.split(" ", 1)
+                    else:
+                        action, arg = react, ""
+                elif isinstance(react, dict) and len(react) == 1:
+                    action, arg = next(iter(react.items()))
+                else:
+                    continue
+                self._execute_reaction(action.lower(), arg, **kwargs)
+
+    def _execute_reaction(self, action, arg, **kwargs):
+        """Execute a single reaction action."""
+        try:
+            if action == "say":
+                self.execute_cmd(f"say {arg}")
+            elif action in ("emote", "pose"):
+                self.execute_cmd(f"{action} {arg}")
+            elif action == "move":
+                if arg:
+                    self.execute_cmd(arg)
+            elif action == "attack":
+                target = arg or kwargs.get("target")
+                if isinstance(target, str):
+                    target = self.search(target)
+                if target:
+                    if not self.in_combat:
+                        self.enter_combat(target)
+                    else:
+                        weapon = self.wielding[0] if self.wielding else self
+                        self.attack(target, weapon)
+            elif action == "script":
+                module, func = arg.rsplit(".", 1)
+                mod = importlib.import_module(module)
+                getattr(mod, func)(self, **kwargs)
+            else:
+                self.execute_cmd(f"{action} {arg}" if arg else action)
+        except Exception as err:  # pragma: no cover - log errors
+            logger.log_err(f"NPC trigger error on {self}: {err}")
 
     # property to mimic weapons
     @property
@@ -756,12 +802,18 @@ class NPC(Character):
         name = super().get_display_name(looker, **kwargs)
         return f"|{self.name_color}{name}|n"
 
+    def at_say(self, speaker, message, **kwargs):
+        """React to someone speaking in the room."""
+        if speaker != self:
+            self.check_triggers("on_say", speaker=speaker, message=message)
+
     def at_character_arrive(self, chara, **kwargs):
         """
         Respond to the arrival of a character
         """
         if "aggressive" in self.attributes.get("react_as", ""):
             delay(0.1, self.enter_combat, chara)
+        self.check_triggers("on_enter", chara=chara)
 
     def at_character_depart(self, chara, destination, **kwargs):
         """
@@ -778,11 +830,22 @@ class NPC(Character):
                 # use the exit
                 self.execute_cmd(exits[0].name)
 
+    def at_object_receive(self, obj, source_location, **kwargs):
+        super().at_object_receive(obj, source_location, **kwargs)
+        self.check_triggers("on_give", item=obj, giver=source_location)
+
+    def return_appearance(self, looker, **kwargs):
+        text = super().return_appearance(looker, **kwargs)
+        if looker != self:
+            self.check_triggers("on_look", looker=looker)
+        return text
+
     def at_damage(self, attacker, damage, damage_type=None):
         """
         Apply damage, after taking into account damage resistances.
         """
         super().at_damage(attacker, damage, damage_type=damage_type)
+        self.check_triggers("on_attack", attacker=attacker, damage=damage)
 
         if self.traits.health.value <= 0:
             # we've been defeated!
@@ -871,6 +934,7 @@ class NPC(Character):
         weapon.at_attack(self, target)
         # queue up next attack; use None for target to reference stored target on execution
         delay(weapon.speed + 1, self.attack, None, weapon, persistent=True)
+        self.check_triggers("on_attack", target=target, weapon=weapon)
 
     def at_pre_attack(self, wielder, **kwargs):
         """
@@ -918,3 +982,7 @@ class NPC(Character):
             target.at_damage(wielder, damage, weapon.get("damage_type"))
         wielder.msg(f"[ Cooldown: {speed} seconds ]")
         wielder.cooldowns.add("attack", speed)
+
+    def at_tick(self):
+        super().at_tick()
+        self.check_triggers("on_time")

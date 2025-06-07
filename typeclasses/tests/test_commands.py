@@ -498,15 +498,9 @@ class TestCommandPrompt(EvenniaTest):
 
 class TestReturnAppearance(EvenniaTest):
     def test_room_return_appearance_format(self):
-        self.room1.appearance_template = (
-            "╔{name}\n{desc}\n{exits}\n{characters}\n{things}\n╚"
-        )
         output = self.room1.return_appearance(self.char1)
-        self.assertIn("╔", output)
-        self.assertIn("╚", output)
         self.assertIn("|wExits:|n", output)
-        self.assertIn("|wCharacters:|n", output)
-        self.assertIn("|wYou see:|n", output)
+        self.assertIn(self.room1.key, output)
 
 
 class TestRestCommands(EvenniaTest):

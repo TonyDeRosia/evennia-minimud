@@ -3,6 +3,7 @@ from evennia.utils import make_iter, logger
 from evennia.scripts.scripts import DefaultScript
 from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from evennia.prototypes.spawner import spawn
+from .characters import Character
 
 
 class Script(DefaultScript):
@@ -236,7 +237,7 @@ class RestockScript(Script):
 
 
 class GlobalTick(Script):
-    """A global ticker calling ``at_tick`` on tickable objects."""
+    """A global ticker that regenerates health/mana/stamina and refreshes prompts."""
 
     def at_script_creation(self):
         self.interval = 60
@@ -247,10 +248,12 @@ class GlobalTick(Script):
         from .characters import PlayerCharacter
         from world.system import state_manager
 
-        for obj in search_tag(key="tickable"):
-            if hasattr(obj, "at_tick"):
-                obj.at_tick()
-            state_manager.tick_character(obj)
+        tickables = search_tag(key="tickable")
+        for obj in tickables:
+            if not hasattr(obj, "traits"):
+                continue
 
-        for pc in PlayerCharacter.objects.all():
-            pc.refresh_prompt()
+            state_manager.apply_regen(obj)
+
+            if hasattr(obj, "refresh_prompt"):
+                obj.refresh_prompt()

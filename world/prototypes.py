@@ -1,5 +1,8 @@
-"""
-Prototypes
+"""Game object and NPC prototypes.
+
+This module contains sample prototypes used throughout the game. It also
+provides a small registry helper for storing NPC prototypes so they can be
+spawned again later via the prototype spawner.
 """
 
 from random import randint, choice
@@ -207,6 +210,7 @@ IRON_ORE_NODE = {
     "desc": "An outcropping of rocks here appears to contain raw iron.",
     "spawn_proto": "IRON_ORE",
     "gathers": lambda: randint(2, 10),
+    "display_priority": "environment",
 }
 IRON_ORE = {
     "key": "iron ore",
@@ -222,6 +226,7 @@ COPPER_ORE_NODE = {
     "desc": "An outcropping of rocks here appears to contain raw copper.",
     "spawn_proto": "COPPER_ORE",
     "gathers": lambda: randint(2, 10),
+    "display_priority": "environment",
 }
 COPPER_ORE = {
     "key": "copper ore",
@@ -237,6 +242,7 @@ FRUIT_TREE = {
     "desc": "A tree here is full of fruit, some of which seem to be ripe.",
     "spawn_proto": lambda: choice(("APPLE_FRUIT", "PEAR_FRUIT", "PLUM_FRUIT")),
     "gathers": lambda: randint(5, 10),
+    "display_priority": "environment",
 }
 APPLE_FRUIT = {
     "key": "apple",
@@ -270,6 +276,7 @@ BERRY_BUSH = {
     "desc": "A few bushes nearby are covered in berries",
     "spawn_proto": lambda: choice(("BLACKBERRY", "BLUEBERRY", "RASPBERRY")),
     "gathers": lambda: randint(5, 10),
+    "display_priority": "environment",
 }
 BLACKBERRY = {
     "key": "blackberry",
@@ -318,6 +325,7 @@ LUMBER_TREE = {
     "desc": "This tree looks like a great source of lumber.",
     "spawn_proto": "WOOD_LOG",
     "gathers": lambda: randint(2, 10),
+    "display_priority": "environment",
 }
 WOOD_LOG = {
     "key": "log of wood",
@@ -335,6 +343,7 @@ DRIFTWOOD = {
     "desc": "Some of this wood looks like it would be useful.",
     "spawn_proto": "WOOD_LOG",
     "gathers": lambda: randint(1, 3),
+    "display_priority": "environment",
 }
 
 
@@ -466,3 +475,29 @@ DEER_ANTLER = {
         ("bone", "crafting_material"),
     ],
 }
+
+# ------------------------------------------------------------
+# NPC prototype registry utilities
+# ------------------------------------------------------------
+
+from typing import Dict
+from evennia.server.models import ServerConfig
+
+_NPC_REGISTRY_KEY = "npc_prototype_registry"
+
+
+def _load_npc_registry() -> Dict[str, dict]:
+    """Return the stored NPC prototypes."""
+    return ServerConfig.objects.conf(_NPC_REGISTRY_KEY, default={})
+
+
+def get_npc_prototypes() -> Dict[str, dict]:
+    """Expose all registered NPC prototypes."""
+    return _load_npc_registry()
+
+
+def register_npc_prototype(key: str, prototype: dict):
+    """Save ``prototype`` under ``key`` in the persistent registry."""
+    registry = _load_npc_registry()
+    registry[key] = prototype
+    ServerConfig.objects.conf(_NPC_REGISTRY_KEY, value=registry)

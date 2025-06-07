@@ -2303,6 +2303,40 @@ Related:
 """,
     },
     {
+        "key": 'regeneration',
+        "category": 'General',
+        "text": """
+Help for regeneration
+
+Health, mana and stamina are restored automatically. Each game tick you
+recover amounts equal to your |whealth_regen|n, |wmana_regen|n and
+|wstamina_regen|n stats. Passive 1-point-per-second healing has been removed.
+
+Your current status modifies regeneration:
+    - Standing: normal rates
+    - Resting: 2x rates
+    - Sleeping: 3x rates
+
+Usage:
+    regeneration
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
+    },
+    {
         "key": 'statmods',
         "aliases": ['stat mods', 'gear bonuses'],
         "category": 'Building',
@@ -2317,6 +2351,81 @@ Bonus, Accuracy, Armor Penetration, Spell Penetration, Health Regen, Mana Regen,
 Stamina Regen, Lifesteal, Leech, Cooldown Reduction, Initiative, Stealth,
 Detection, Threat, Movement Speed, Crafting Bonus, PvP Power, PvP Resilience,
 Guild Honor Rank Modifiers.
+""",
+    },
+    {
+        "key": 'cnpc',
+        "aliases": ['npc'],
+        "category": 'Building',
+        "text": """
+Help for cnpc
+
+Create or edit an NPC using a guided menu.
+
+Usage:
+    cnpc start <key>
+    cnpc edit <npc>
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    cnpc start guard_01
+    cnpc edit Bob
+
+Notes:
+    - The builder prompts for description, NPC type, creature type, level,
+      HP MP SP, primary stats, behavior, skills and AI type.
+    - Humanoids gain all equipment slots; quadrupeds lack twohanded,
+      mainhand and offhand slots.
+    - After reviewing the summary choose |wYes|n to confirm and create or
+      update the NPC.
+    - Use |wcnpc edit <npc>|n to modify an existing NPC.
+    - At the triggers step, use |wadd trigger <event> "<match>" -> <reaction>|n
+      to add an automatic response.
+    - Remove one with |wdel <event> <#>|n and enter |wdone|n when finished.
+    - See |whelp triggers|n for available events and reactions.
+    - ANSI color codes are supported in names and descriptions.
+
+Related:
+    help ansi
+    help triggers
+""",
+    },
+    {
+        "key": 'triggers',
+        "category": 'Building',
+        "text": """
+Help for triggers
+
+NPCs may react automatically to events. Each trigger defines an event,
+an optional match text and one or more reactions to perform.
+
+Events:
+    on_say     - someone speaks in the room
+    on_enter   - someone enters the room
+    on_give    - the NPC receives an item
+    on_look    - someone looks at the NPC
+    on_attack  - combat starts or damage occurs
+    on_time    - once every game tick
+
+Reactions:
+    say <text>         - speak
+    emote/pose <text>  - emote
+    move <cmd>         - perform a movement command
+    attack [target]    - attack a character
+    script <module.fn> - call a Python function
+    <command>          - run any other command string
+
+The match text only applies to some events like |won_say|n and |won_look|n.
+Multiple reactions can be listed separated by commas or by using multiple
+triggers.
+
+Related:
+    help cnpc
 """,
     },
 ]
