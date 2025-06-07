@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock, patch
 
+from utils import normalize_slot
+
 from evennia import create_object
 from evennia.utils.test_resources import EvenniaTest
 
@@ -72,11 +74,14 @@ class TestObjectFlags(EvenniaTest):
 
         first.wear(self.char1, "wear")
         self.assertTrue(first.db.worn)
+        slot = normalize_slot("head")
+        self.assertEqual(self.char1.db.equipment.get(slot), first)
 
         second.wear(self.char1, "wear")
         self.assertTrue(second.db.worn)
         self.assertFalse(first.db.worn)
         self.assertEqual(first.location, self.char1)
+        self.assertEqual(self.char1.db.equipment.get(slot), second)
 
     def test_wear_adds_canonical_slot_tag(self):
         item = create_object(
