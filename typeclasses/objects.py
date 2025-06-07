@@ -268,8 +268,9 @@ class ClothingObject(ObjectParent, ContribClothing):
         self.location = None
         wearer.update_carry_weight()
         # store equipped item in the character's equipment mapping
-        slot = self.db.slot
+        slot = self.db.slot or self.db.clothing_type
         if slot:
+            slot = normalize_slot(slot) or slot
             wearer.db.equipment[slot] = self
         stat_manager.apply_item_bonuses_once(wearer, self)
         self.db.worn = True
@@ -280,8 +281,10 @@ class ClothingObject(ObjectParent, ContribClothing):
         result = super().remove(wearer, quiet=quiet)
         self.location = wearer
         wearer.update_carry_weight()
-        if isinstance(wearer.db.equipment, dict) and self.db.slot:
-            wearer.db.equipment.pop(self.db.slot, None)
+        slot = self.db.slot or self.db.clothing_type
+        if isinstance(wearer.db.equipment, dict) and slot:
+            slot = normalize_slot(slot) or slot
+            wearer.db.equipment.pop(slot, None)
         stat_manager.remove_item_bonuses(wearer, self)
         self.db.worn = False
         return result
