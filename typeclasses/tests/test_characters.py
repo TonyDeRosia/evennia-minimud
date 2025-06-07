@@ -158,6 +158,7 @@ class TestGlobalTick(EvenniaTest):
         script = GlobalTick()
         script.at_script_creation()
 
+        self.char1.tags.add("tickable")
         self.char1.at_tick = MagicMock()
         self.char1.refresh_prompt = MagicMock()
         from world.system import state_manager
@@ -166,9 +167,9 @@ class TestGlobalTick(EvenniaTest):
 
         script.at_repeat()
 
-        self.char1.at_tick.assert_called_once()
+        self.char1.at_tick.assert_not_called()
         self.char1.refresh_prompt.assert_called()
-        state_manager.tick_character.assert_called_once_with(self.char1)
+        state_manager.tick_character.assert_not_called()
 
     def test_tick_offline_characters(self):
         from typeclasses.scripts import GlobalTick
@@ -190,6 +191,7 @@ class TestGlobalTick(EvenniaTest):
         )
 
         for char in (pc, npc):
+            char.tags.add("tickable")
             for key in ("health", "mana", "stamina"):
                 trait = char.traits.get(key)
                 trait.current = trait.max // 2
@@ -201,15 +203,13 @@ class TestGlobalTick(EvenniaTest):
         pc.at_tick = MagicMock(side_effect=pc.at_tick)
         npc.at_tick = MagicMock(side_effect=npc.at_tick)
 
-        with patch("typeclasses.characters.randint", return_value=2):
+        with patch("random.randint", return_value=2):
             script.at_repeat()
 
-        pc.at_tick.assert_called_once()
-        npc.at_tick.assert_called_once()
+        pc.at_tick.assert_not_called()
+        npc.at_tick.assert_not_called()
 
-        calls = state_manager.tick_character.call_args_list
-        self.assertIn(call(pc), calls)
-        self.assertIn(call(npc), calls)
+        state_manager.tick_character.assert_not_called()
 
         for char in (pc, npc):
             for key in ("health", "mana", "stamina"):
@@ -219,15 +219,21 @@ class TestGlobalTick(EvenniaTest):
 
 class TestRegeneration(EvenniaTest):
     def test_at_tick_heals_resources(self):
+        from typeclasses.scripts import GlobalTick
+
         char = self.char1
+        char.tags.add("tickable")
         for key in ("health", "mana", "stamina"):
             trait = char.traits.get(key)
             trait.current = trait.max // 2
         char.refresh_prompt = MagicMock()
         char.msg = MagicMock()
 
-        with patch("typeclasses.characters.randint", return_value=2):
-            char.at_tick()
+        script = GlobalTick()
+        script.at_script_creation()
+
+        with patch("random.randint", return_value=2):
+            script.at_repeat()
 
         for key in ("health", "mana", "stamina"):
             trait = char.traits.get(key)
