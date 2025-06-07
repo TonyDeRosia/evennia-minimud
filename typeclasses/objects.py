@@ -12,11 +12,14 @@ inheritance.
 """
 
 from random import randint
+from collections.abc import Mapping
+
 from evennia.prototypes import spawner, prototypes
 from evennia.objects.objects import DefaultObject
 from evennia.contrib.game_systems.clothing import ContribClothing
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
-from collections.abc import Mapping
+
+from utils.currency import COIN_VALUES
 
 from commands.interact import GatherCmdSet
 from world.system import stat_manager
@@ -346,3 +349,33 @@ class GatherNode(Object):
         else:
             chara.msg(f"You collect {obj.get_numbered_name(amt, chara)[1]}.")
             self.db.gathers -= amt
+
+
+class CoinPile(Object):
+    """A small pile of coins dropped in the world."""
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.db.coin_type = "copper"
+        self.db.amount = 0
+        self.db.weight = 0
+
+    def get_display_name(self, looker, **kwargs):
+        ctype = (self.db.coin_type or "coin").capitalize()
+        amount = int(self.db.amount or 0)
+        return f"{amount} {ctype} coin{'s' if amount != 1 else ''}"
+
+    def at_after_move(self, source_location, **kwargs):
+        super().at_after_move(source_location, **kwargs)
+        dest = self.location
+        if not dest:
+            return
+        if dest.is_typeclass("typeclasses.characters.Character", exact=False):
+            wallet = dest.db.coins or {}
+            ctype = self.db.coin_type
+            wallet[ctype] = int(wallet.get(ctype, 0)) + int(self.db.amount or 0)
+            dest.db.coins = wallet
+            dest.msg(
+                f"You receive {self.db.amount} {ctype} coin{'s' if int(self.db.amount or 0) != 1 else ''}."
+            )
+            self.delete()

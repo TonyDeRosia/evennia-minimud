@@ -1,7 +1,7 @@
-from evennia import CmdSet
+from evennia import CmdSet, create_object
 from evennia.utils.evtable import EvTable
 from evennia.utils import iter_to_str
-from utils.currency import to_copper, from_copper
+from utils.currency import to_copper, from_copper, COIN_VALUES
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 from world.stats import CORE_STAT_KEYS
 from utils.stats_utils import get_display_scroll, _strip_colors, _pad
@@ -280,6 +280,101 @@ class CmdDropAll(Command):
             obj.at_drop(caller)
         caller.update_carry_weight()
         caller.msg("You drop everything you are carrying.")
+
+
+class CmdDrop(Command):
+    """Drop an item or a number of coins."""
+
+    key = "drop"
+    aliases = ("discard", "throw")
+    help_category = "General"
+
+    def func(self):
+        caller = self.caller
+        if not self.args:
+            caller.msg("Drop what?")
+            return
+
+        parts = self.args.strip().split()
+        if len(parts) == 2 and parts[0].isdigit() and parts[1].lower() in COIN_VALUES:
+            amount = int(parts[0])
+            ctype = parts[1].lower()
+            wallet = caller.db.coins or {}
+            if amount <= 0 or wallet.get(ctype, 0) < amount:
+                caller.msg("You don't have that many coins.")
+                return
+            wallet[ctype] -= amount
+            caller.db.coins = wallet
+            coin = create_object(
+                "typeclasses.objects.CoinPile",
+                key=f"{ctype} coins",
+                location=caller.location,
+            )
+            coin.db.coin_type = ctype
+            coin.db.amount = amount
+            caller.msg(f"You drop {amount} {ctype} coin{'s' if amount != 1 else ''}.")
+            return
+
+        obj = caller.search(self.args, location=caller)
+        if not obj:
+            return
+        obj.location = caller.location
+        obj.at_drop(caller)
+        caller.update_carry_weight()
+        caller.msg(f"You drop {obj.get_display_name(caller)}.")
+
+
+class CmdGive(Command):
+    """Give an item or coins to someone."""
+
+    key = "give"
+    help_category = "General"
+
+    def parse(self):
+        lhs, rhs = self.args.split("=", 1) if "=" in self.args else (self.args, "")
+        self.lhs = lhs.strip()
+        self.rhs = rhs.strip()
+
+    def func(self):
+        caller = self.caller
+        if not self.lhs or not self.rhs:
+            caller.msg("Give <item|amount coin> = <target>")
+            return
+
+        target = caller.search(self.rhs)
+        if not target:
+            return
+
+        parts = self.lhs.split()
+        if len(parts) == 2 and parts[0].isdigit() and parts[1].lower() in COIN_VALUES:
+            amount = int(parts[0])
+            ctype = parts[1].lower()
+            wallet = caller.db.coins or {}
+            if amount <= 0 or wallet.get(ctype, 0) < amount:
+                caller.msg("You don't have that many coins.")
+                return
+            wallet[ctype] -= amount
+            caller.db.coins = wallet
+            twallet = target.db.coins or {}
+            twallet[ctype] = int(twallet.get(ctype, 0)) + amount
+            target.db.coins = twallet
+            caller.msg(
+                f"You give {amount} {ctype} coin{'s' if amount != 1 else ''} to {target.get_display_name(caller)}."
+            )
+            target.msg(
+                f"{caller.get_display_name(target)} gives you {amount} {ctype} coin{'s' if amount != 1 else ''}."
+            )
+            return
+
+        obj = caller.search(self.lhs, location=caller)
+        if not obj:
+            caller.msg("You aren't carrying that.")
+            return
+        obj.location = target
+        obj.at_get(target)
+        caller.update_carry_weight()
+        caller.msg(f"You give {obj.get_display_name(caller)} to {target.get_display_name(caller)}.")
+        target.msg(f"{caller.get_display_name(target)} gives you {obj.get_display_name(target)}.")
 
 
 class CmdGetAll(Command):
@@ -716,6 +811,8 @@ class InfoCmdSet(CmdSet):
         self.add(CmdFinger)
         self.add(CmdBounty)
         self.add(CmdInventory)
+        self.add(CmdDrop)
+        self.add(CmdGive)
         self.add(CmdGetAll)
         self.add(CmdDropAll)
         self.add(CmdInspect)
