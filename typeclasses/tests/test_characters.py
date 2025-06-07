@@ -2,7 +2,7 @@
 Tests for custom character logic
 """
 
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock
 from evennia.utils.test_resources import EvenniaTest
 from evennia.utils import create
 
@@ -163,13 +163,15 @@ class TestGlobalTick(EvenniaTest):
         self.char1.refresh_prompt = MagicMock()
         from world.system import state_manager
 
+        state_manager.tick_all = MagicMock()
         state_manager.tick_character = MagicMock()
 
         script.at_repeat()
 
         self.char1.at_tick.assert_called_once()
         self.char1.refresh_prompt.assert_not_called()
-        state_manager.tick_character.assert_called_once_with(self.char1)
+        state_manager.tick_all.assert_called_once()
+        state_manager.tick_character.assert_not_called()
 
     def test_tick_offline_characters(self):
         from typeclasses.scripts import GlobalTick
@@ -198,7 +200,8 @@ class TestGlobalTick(EvenniaTest):
 
         from world.system import state_manager
 
-        state_manager.tick_character = MagicMock()
+        for char in (pc, npc):
+            state_manager.add_status_effect(char, "stunned", 2)
 
         pc.at_tick = MagicMock(side_effect=pc.at_tick)
         npc.at_tick = MagicMock(side_effect=npc.at_tick)
@@ -208,9 +211,8 @@ class TestGlobalTick(EvenniaTest):
         pc.at_tick.assert_called_once()
         npc.at_tick.assert_called_once()
 
-        state_manager.tick_character.assert_has_calls([call(pc), call(npc)], any_order=True)
-
         for char in (pc, npc):
+            self.assertEqual(char.db.status_effects.get("stunned"), 1)
             for key in ("health", "mana", "stamina"):
                 trait = char.traits.get(key)
                 self.assertGreater(trait.current, trait.max // 2)

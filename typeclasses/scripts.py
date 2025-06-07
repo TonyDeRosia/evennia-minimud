@@ -245,12 +245,12 @@ class GlobalTick(Script):
         from evennia.utils.search import search_tag
         from world.system import state_manager
 
+        state_manager.tick_all()
+
         tickables = search_tag(key="tickable")
         for obj in tickables:
             if not hasattr(obj, "traits"):
                 continue
-
-            state_manager.tick_character(obj)
 
             if hasattr(obj, "at_tick"):
                 obj.at_tick()
