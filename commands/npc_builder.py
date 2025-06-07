@@ -115,12 +115,13 @@ def menunode_confirm(caller, raw_string="", **kwargs):
             text += f"{key}: {val}\n"
     text += "\nCreate this NPC?"
     options = [
-        {"desc": "Yes", "goto": _create_npc},
+        {"desc": "Yes", "goto": (_create_npc, {"register": False})},
+        {"desc": "Yes & Save Prototype", "goto": (_create_npc, {"register": True})},
         {"desc": "No", "goto": _cancel},
     ]
     return text, options
 
-def _create_npc(caller, raw_string, **kwargs):
+def _create_npc(caller, raw_string, register=False, **kwargs):
     data = caller.ndb.buildnpc
     npc = data.get("edit_obj") or create_object(NPC, key=data.get("key"), location=caller.location)
     npc.db.desc = data.get("desc")
@@ -153,7 +154,14 @@ def _create_npc(caller, raw_string, **kwargs):
             if slot in slots:
                 slots.remove(slot)
     npc.db.equipment = {slot: None for slot in slots}
-    caller.msg(f"NPC {npc.key} created.")
+    if register:
+        from world import prototypes
+
+        proto = {k: v for k, v in data.items() if k != "edit_obj"}
+        prototypes.register_npc_prototype(data.get("key"), proto)
+        caller.msg(f"NPC {npc.key} created and prototype saved.")
+    else:
+        caller.msg(f"NPC {npc.key} created.")
     caller.ndb.buildnpc = None
     return None
 

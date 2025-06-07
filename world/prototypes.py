@@ -1,5 +1,8 @@
-"""
-Prototypes
+"""Game object and NPC prototypes.
+
+This module contains sample prototypes used throughout the game. It also
+provides a small registry helper for storing NPC prototypes so they can be
+spawned again later via the prototype spawner.
 """
 
 from random import randint, choice
@@ -466,3 +469,29 @@ DEER_ANTLER = {
         ("bone", "crafting_material"),
     ],
 }
+
+# ------------------------------------------------------------
+# NPC prototype registry utilities
+# ------------------------------------------------------------
+
+from typing import Dict
+from evennia.server.models import ServerConfig
+
+_NPC_REGISTRY_KEY = "npc_prototype_registry"
+
+
+def _load_npc_registry() -> Dict[str, dict]:
+    """Return the stored NPC prototypes."""
+    return ServerConfig.objects.conf(_NPC_REGISTRY_KEY, default={})
+
+
+def get_npc_prototypes() -> Dict[str, dict]:
+    """Expose all registered NPC prototypes."""
+    return _load_npc_registry()
+
+
+def register_npc_prototype(key: str, prototype: dict):
+    """Save ``prototype`` under ``key`` in the persistent registry."""
+    registry = _load_npc_registry()
+    registry[key] = prototype
+    ServerConfig.objects.conf(_NPC_REGISTRY_KEY, value=registry)

@@ -59,3 +59,24 @@ class TestCNPC(EvenniaTest):
             self.char2.execute_cmd("cnpc start thief")
         self.assertIsNone(getattr(self.char2.ndb, "buildnpc", None))
         self.assertIsNone(self._find("thief", location=self.char2.location))
+
+    def test_prototype_registration(self):
+        with patch("commands.npc_builder.EvMenu"):
+            self.char1.execute_cmd("cnpc start ogre")
+
+        npc_builder._set_desc(self.char1, "A big ogre")
+        npc_builder._set_npc_type(self.char1, "monster")
+        npc_builder._set_creature_type(self.char1, "humanoid")
+        npc_builder._set_level(self.char1, "1")
+        npc_builder._set_resources(self.char1, "20 5 5")
+        npc_builder._set_stats(self.char1, "5 5 5 5 5 5")
+        npc_builder._set_behavior(self.char1, "dumb")
+        npc_builder._set_skills(self.char1, "smash")
+        npc_builder._set_ai(self.char1, "passive")
+        npc_builder._create_npc(self.char1, "", register=True)
+
+        from world.prototypes import get_npc_prototypes
+
+        registry = get_npc_prototypes()
+        self.assertIn("ogre", registry)
+        self.assertEqual(registry["ogre"]["desc"], "A big ogre")
