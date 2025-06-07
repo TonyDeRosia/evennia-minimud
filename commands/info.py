@@ -356,9 +356,15 @@ class CmdGive(Command):
                 return
             wallet[ctype] -= amount
             caller.db.coins = wallet
-            twallet = target.db.coins or {}
-            twallet[ctype] = int(twallet.get(ctype, 0)) + amount
-            target.db.coins = twallet
+            coin = create_object(
+                "typeclasses.objects.CoinPile",
+                key=f"{ctype} coins",
+                location=caller.location,
+            )
+            coin.db.coin_type = ctype
+            coin.db.amount = amount
+            coin.db.from_pouch = True
+            coin.move_to(target, quiet=True)
             caller.msg(
                 f"You give {amount} {ctype} coin{'s' if amount != 1 else ''} to {target.get_display_name(caller)}."
             )

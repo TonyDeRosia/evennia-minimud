@@ -380,3 +380,7 @@ class CoinPile(Object):
                 f"You receive {self.db.amount} {ctype} coin{'s' if int(self.db.amount or 0) != 1 else ''}."
             )
             self.delete()
+
+    def at_post_move(self, source_location, **kwargs):
+        """Alias for at_after_move for compatibility."""
+        self.at_after_move(source_location, **kwargs)
