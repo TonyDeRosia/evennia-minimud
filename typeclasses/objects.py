@@ -194,6 +194,7 @@ class Object(ObjectParent, DefaultObject):
             dropper.at_unwield(self)
         super().at_drop(dropper, **kwargs)
         from world.system import stat_manager
+
         stat_manager.recalculate_stats(dropper)
 
     def at_pre_move(self, destination, move_type="move", **kwargs):
@@ -220,6 +221,13 @@ class Object(ObjectParent, DefaultObject):
 
 
 class ClothingObject(ObjectParent, ContribClothing):
+
+    def at_object_creation(self):
+        """Ensure clothing items start identified unless specified."""
+        super().at_object_creation()
+        if getattr(self.db, "identified", None) is None:
+            self.db.identified = True
+
     def wear(self, wearer, wearstyle, quiet=False):
         """Only wearable if flagged as equipment and identified."""
         if not self.tags.has("equipment", category="flag"):
@@ -247,7 +255,9 @@ class ClothingObject(ObjectParent, ContribClothing):
             for weap in wearer.wielding:
                 is_twohanded = getattr(weap, "is_twohanded", lambda: False)()
                 if is_twohanded:
-                    wearer.msg("You cannot use a shield while wielding a two-handed weapon.")
+                    wearer.msg(
+                        "You cannot use a shield while wielding a two-handed weapon."
+                    )
                     return
 
         result = super().wear(wearer, wearstyle, quiet=quiet)
