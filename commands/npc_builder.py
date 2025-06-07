@@ -6,6 +6,17 @@ from utils.slots import SLOT_ORDER
 from .command import Command
 import re
 
+# NPC types that can be selected in the builder
+ALLOWED_NPC_TYPES = (
+    "merchant",
+    "guard",
+    "questgiver",
+    "guildmaster",
+    "banker",
+    "guild_receptionist",
+    "craftsman",
+)
+
 
 # Menu nodes for NPC creation
 
@@ -33,7 +44,8 @@ def _set_desc(caller, raw_string, **kwargs):
 
 def menunode_npc_type(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("npc_type", "")
-    text = "|wEnter NPC type (e.g. merchant, guard)|n"
+    types = "/".join(ALLOWED_NPC_TYPES)
+    text = f"|wEnter NPC type ({types})|n"
     if default:
         text += f" [default: {default}]"
     text += "\n(back to go back, skip for default)"
@@ -41,12 +53,35 @@ def menunode_npc_type(caller, raw_string="", **kwargs):
     return text, options
 
 def _set_npc_type(caller, raw_string, **kwargs):
+    string = raw_string.strip().lower()
+    if string == "back":
+        return "menunode_desc"
+    if not string or string == "skip":
+        string = caller.ndb.buildnpc.get("npc_type", "").lower()
+    if string and string not in ALLOWED_NPC_TYPES:
+        caller.msg(f"Invalid NPC type. Choose from: {', '.join(ALLOWED_NPC_TYPES)}")
+        return "menunode_npc_type"
+    caller.ndb.buildnpc["npc_type"] = string
+    if string == "guild_receptionist":
+        return "menunode_guild_affiliation"
+    return "menunode_creature_type"
+
+def menunode_guild_affiliation(caller, raw_string="", **kwargs):
+    default = caller.ndb.buildnpc.get("guild_affiliation", "")
+    text = "|wEnter guild tag for this receptionist|n"
+    if default:
+        text += f" [default: {default}]"
+    text += "\n(back to go back, skip for default)"
+    options = {"key": "_default", "goto": _set_guild_affiliation}
+    return text, options
+
+def _set_guild_affiliation(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_desc"
+        return "menunode_npc_type"
     if not string or string.lower() == "skip":
-        string = caller.ndb.buildnpc.get("npc_type", "")
-    caller.ndb.buildnpc["npc_type"] = string
+        string = caller.ndb.buildnpc.get("guild_affiliation", "")
+    caller.ndb.buildnpc["guild_affiliation"] = string
     return "menunode_creature_type"
 
 def menunode_creature_type(caller, raw_string="", **kwargs):
@@ -304,6 +339,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.tags.add("npc")
     if npc_type := data.get("npc_type"):
         npc.tags.add(npc_type, category="npc_type")
+        npc.tags.add(npc_type, category="npc_role")
     if guild := data.get("guild_affiliation"):
         npc.tags.add(guild, category="guild_affiliation")
     npc.db.ai_type = data.get("ai_type")
