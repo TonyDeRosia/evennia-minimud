@@ -332,6 +332,7 @@ def menunode_triggers(caller, raw_string="", **kwargs):
     options = [
         {"desc": "Add trigger", "goto": "menunode_trigger_add"},
         {"desc": "Add greeting", "goto": _add_greeting},
+        {"desc": "Edit trigger", "goto": "menunode_trigger_edit"},
         {"desc": "Delete trigger", "goto": "menunode_trigger_delete"},
         {"desc": "List triggers", "goto": "menunode_trigger_list"},
         {"desc": "Finish", "goto": "menunode_confirm"},
@@ -420,10 +421,17 @@ def _save_trigger(caller, raw_string, **kwargs):
     event = caller.ndb.trigger_event
     match = caller.ndb.trigger_match
     triggers = caller.ndb.buildnpc.setdefault("triggers", [])
-    triggers.append({"event": event, "match": match, "action": reaction})
+    edit_index = getattr(caller.ndb, "trigger_edit_index", None)
+    new_data = {"event": event, "match": match, "action": reaction}
+    if edit_index is not None and 0 <= edit_index < len(triggers):
+        triggers[edit_index] = new_data
+        caller.msg("Trigger updated.")
+        caller.ndb.trigger_edit_index = None
+    else:
+        triggers.append(new_data)
+        caller.msg("Trigger added.")
     caller.ndb.trigger_event = None
     caller.ndb.trigger_match = None
-    caller.msg("Trigger added.")
     return "menunode_triggers"
 
 def _add_greeting(caller, raw_string="", **kwargs):
@@ -432,6 +440,36 @@ def _add_greeting(caller, raw_string="", **kwargs):
     triggers.append({"event": "on_enter", "match": "", "action": 'say "Hello there!"'})
     caller.msg("Greeting trigger added.")
     return "menunode_triggers"
+
+def menunode_trigger_edit(caller, raw_string="", **kwargs):
+    """Select trigger to edit."""
+    triggers = caller.ndb.buildnpc.get("triggers") or []
+    if not triggers:
+        caller.msg("No triggers to edit.")
+        return "menunode_triggers"
+    text = "|wSelect trigger to edit|n"
+    options = []
+    for idx, trig in enumerate(triggers):
+        event = trig.get("event")
+        match = trig.get("match", "")
+        action = trig.get("action", "")
+        if match:
+            desc = f"{event}: \"{match}\" -> {action}"
+        else:
+            desc = f"{event} -> {action}"
+        options.append({"desc": desc, "goto": (_edit_trigger, {"index": idx})})
+    options.append({"desc": "Back", "goto": "menunode_triggers"})
+    return text, options
+
+def _edit_trigger(caller, raw_string, index=None, **kwargs):
+    triggers = caller.ndb.buildnpc.get("triggers") or []
+    if index is None or not (0 <= index < len(triggers)):
+        return "menunode_trigger_edit"
+    trig = triggers[index]
+    caller.ndb.trigger_edit_index = index
+    caller.ndb.trigger_event = trig.get("event")
+    caller.ndb.trigger_match = trig.get("match", "")
+    return "menunode_trigger_add"
 
 def menunode_trigger_delete(caller, raw_string="", **kwargs):
     """Select trigger to delete."""
