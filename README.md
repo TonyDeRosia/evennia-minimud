@@ -104,6 +104,15 @@ You want to make your own game? Awesome! The code here should help give you some
 
 If you wind up having any issues or questions working with Evennia, [the Discord community](https://discord.gg/AJJpcRUhtF) is small but active and there's almost always someone around who's happy to help newcomers.
 
+### NPC Creation Menu
+
+You can quickly set up non-player characters using `@cnpc start <key>`. This
+opens an interactive menu where you enter the description, type, level and other
+details. Follow the prompts, review the summary at the end and confirm to create
+your NPC. You can later update them with `@cnpc edit <npc>`.
+
+See the `cnpc` help entry for a full breakdown of every menu option.
+
 ## Weapon Creation and Inspection
 
 Builders can quickly create melee weapons with the `cweapon` command.
