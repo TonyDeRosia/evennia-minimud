@@ -379,8 +379,15 @@ class CoinPile(Object):
             dest.msg(
                 f"You receive {self.db.amount} {ctype} coin{'s' if int(self.db.amount or 0) != 1 else ''}."
             )
-            self.delete()
+            # mark for cleanup once any command finishes processing
+            self.db.from_pouch = False
+            self.db._deposited = True
 
     def at_post_move(self, source_location, **kwargs):
         """Alias for at_after_move for compatibility."""
         self.at_after_move(source_location, **kwargs)
+
+    def at_get(self, getter, **kwargs):
+        """Delete after being picked up if already deposited."""
+        if self.db._deposited:
+            self.delete()
