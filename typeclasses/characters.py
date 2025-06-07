@@ -653,7 +653,6 @@ class PlayerCharacter(Character):
         super().at_object_creation()
         # initialize hands
         self.db._wielded = {"left": None, "right": None}
-        self.tags.add("tickable")
 
     def get_display_name(self, looker, **kwargs):
         """
