@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock
 
 from evennia import create_object
+from evennia.utils.ansi import strip_ansi
 from commands.admin import AdminCmdSet
 from commands.default_cmdsets import CharacterCmdSet
 from evennia.utils.test_resources import EvenniaTest
@@ -436,4 +437,10 @@ class TestAdminCommands(EvenniaTest):
         self.char1.execute_cmd('ocreate "strange box" 1')
         obj = next((o for o in self.char1.contents if o.key == "strange box"), None)
         self.assertIsNotNone(obj)
+
+    def test_cweapon_color_name_capitalization(self):
+        self.char1.execute_cmd('cweapon "|BBigger Ass Sword|n" mainhand 3 1 sharp')
+        weapon = next((o for o in self.char1.contents if strip_ansi(o.key) == "Bigger Ass Sword"), None)
+        self.assertIsNotNone(weapon)
+        self.assertEqual(weapon.key, "|BBigger Ass Sword|n")
 

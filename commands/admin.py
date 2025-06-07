@@ -2,6 +2,7 @@ from evennia import CmdSet, create_object
 from evennia.objects.models import ObjectDB
 import shlex
 import re
+from evennia.utils.ansi import strip_ansi
 from .command import Command
 from .info import CmdScan
 from .building import (
@@ -390,8 +391,10 @@ def _create_gear(
     lowercase base alias matching ``name`` is always added.
     """
 
-    key = name
-    alias_base = key.lower()
+    from utils import format_ansi_title
+
+    key = format_ansi_title(name)
+    alias_base = strip_ansi(key).lower()
     count = ObjectDB.objects.filter(db_key__iexact=key).count()
 
     obj = create_object(typeclass, key=key, location=caller)
