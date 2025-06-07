@@ -109,6 +109,43 @@ class RoomParent(ObjectParent):
         else:
             return "|wExits:|n None"
 
+    def return_appearance(self, looker):
+        if not looker:
+            return ""
+
+        text = f"|c{self.key}|n\n"
+        text += f"{self.db.desc}\n"
+
+        exits = self.get_display_exits(looker)
+        if exits:
+            text += f"\n{exits}"
+
+        visible = (
+            obj for obj in self.contents if obj != looker and obj.access(looker, "view")
+        )
+
+        env_objects, npcs, items, players = [], [], [], []
+        for obj in visible:
+            name = obj.get_display_name(looker)
+            if obj.db.display_priority == "environment":
+                env_objects.append(name)
+            elif obj.is_typeclass("typeclasses.npcs.NPC", exact=False):
+                npcs.append(name)
+            elif obj.is_typeclass("typeclasses.characters.Character", exact=False):
+                players.append(name)
+            else:
+                items.append(name)
+
+        for category in (env_objects, npcs, items, players):
+            if category:
+                text += "\n" + "\n".join(category)
+
+        footer = self.get_display_footer(looker)
+        if footer:
+            text += f"\n{footer}"
+
+        return text.strip()
+
 
 class Room(RoomParent, DefaultRoom):
     """

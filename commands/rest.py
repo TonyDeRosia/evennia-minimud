@@ -85,6 +85,13 @@ class CmdLook(DefaultCmdLook):
     """
     Look around the area unless you are sleeping.
 
+    The `look` command shows your current room's description and clearly lists:
+
+    1. Environmental objects (e.g., altars, pools)
+    2. Non-player characters (e.g., guards, merchants)
+    3. Visible items and loot
+    4. Other players in the room
+
     Usage:
         look [<target>]
 
