@@ -44,7 +44,9 @@ class TestCharacterHooks(EvenniaTest):
     def test_at_wield_offhand(self):
         self.char1.attributes.add("_wielded", {"left": None, "right": None})
         self.char1.db.handedness = "right"
-        weapon = create.create_object("typeclasses.gear.MeleeWeapon", key="weap", location=self.char1)
+        weapon = create.create_object(
+            "typeclasses.gear.MeleeWeapon", key="weap", location=self.char1
+        )
         weapon.tags.add("equipment", category="flag")
         weapon.tags.add("identified", category="flag")
         weapon.tags.add("offhand", category="flag")
@@ -74,13 +76,17 @@ class TestCharacterHooks(EvenniaTest):
 
     def test_twohanded_blocked_by_shield(self):
         self.char1.attributes.add("_wielded", {"left": None, "right": None})
-        shield = create.create_object("typeclasses.objects.ClothingObject", key="shield", location=self.char1)
+        shield = create.create_object(
+            "typeclasses.objects.ClothingObject", key="shield", location=self.char1
+        )
         shield.tags.add("equipment", category="flag")
         shield.tags.add("identified", category="flag")
         shield.tags.add("shield", category="flag")
         shield.wear(self.char1, True)
         # attempt to wield two-handed weapon
-        weapon = create.create_object("typeclasses.gear.MeleeWeapon", key="great", location=self.char1)
+        weapon = create.create_object(
+            "typeclasses.gear.MeleeWeapon", key="great", location=self.char1
+        )
         weapon.tags.add("equipment", category="flag")
         weapon.tags.add("identified", category="flag")
         weapon.tags.add("twohanded", category="flag")
@@ -89,12 +95,16 @@ class TestCharacterHooks(EvenniaTest):
 
     def test_wear_shield_blocked_by_twohanded(self):
         self.char1.attributes.add("_wielded", {"left hand": None, "right hand": None})
-        weapon = create.create_object("typeclasses.gear.MeleeWeapon", key="great", location=self.char1)
+        weapon = create.create_object(
+            "typeclasses.gear.MeleeWeapon", key="great", location=self.char1
+        )
         weapon.tags.add("equipment", category="flag")
         weapon.tags.add("identified", category="flag")
         weapon.tags.add("twohanded", category="flag")
         self.char1.at_wield(weapon)
-        shield = create.create_object("typeclasses.objects.ClothingObject", key="shield", location=self.char1)
+        shield = create.create_object(
+            "typeclasses.objects.ClothingObject", key="shield", location=self.char1
+        )
         shield.tags.add("equipment", category="flag")
         shield.tags.add("identified", category="flag")
         shield.tags.add("shield", category="flag")
@@ -152,6 +162,7 @@ class TestGlobalTick(EvenniaTest):
         self.char1.at_tick = MagicMock()
         self.char1.refresh_prompt = MagicMock()
         from world.system import state_manager
+
         state_manager.tick_character = MagicMock()
 
         script.at_repeat()
@@ -159,6 +170,52 @@ class TestGlobalTick(EvenniaTest):
         self.char1.at_tick.assert_called_once()
         self.char1.refresh_prompt.assert_called()
         state_manager.tick_character.assert_called_once_with(self.char1)
+
+    def test_tick_offline_characters(self):
+        from typeclasses.scripts import GlobalTick
+
+        script = GlobalTick()
+        script.at_script_creation()
+
+        pc = create.create_object(
+            "typeclasses.characters.PlayerCharacter",
+            key="Offline PC",
+            location=self.room1,
+            home=self.room1,
+        )
+        npc = create.create_object(
+            "typeclasses.characters.NPC",
+            key="An NPC",
+            location=self.room1,
+            home=self.room1,
+        )
+
+        for char in (pc, npc):
+            for key in ("health", "mana", "stamina"):
+                trait = char.traits.get(key)
+                trait.current = trait.max // 2
+
+        from world.system import state_manager
+
+        state_manager.tick_character = MagicMock()
+
+        pc.at_tick = MagicMock(side_effect=pc.at_tick)
+        npc.at_tick = MagicMock(side_effect=npc.at_tick)
+
+        with patch("typeclasses.characters.randint", return_value=2):
+            script.at_repeat()
+
+        pc.at_tick.assert_called_once()
+        npc.at_tick.assert_called_once()
+
+        calls = state_manager.tick_character.call_args_list
+        self.assertIn(call(pc), calls)
+        self.assertIn(call(npc), calls)
+
+        for char in (pc, npc):
+            for key in ("health", "mana", "stamina"):
+                trait = char.traits.get(key)
+                self.assertGreater(trait.current, trait.max // 2)
 
 
 class TestRegeneration(EvenniaTest):
