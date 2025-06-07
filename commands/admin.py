@@ -703,7 +703,6 @@ class CmdCWeapon(Command):
             obj.attributes.add("dice_num", dice_num)
             obj.attributes.add("dice_sides", dice_sides)
         if bonuses:
-            obj.db.bonuses = bonuses
             obj.db.stat_mods = bonuses
 
         damage_display = dmg_arg
