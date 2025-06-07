@@ -247,8 +247,7 @@ class TestRegeneration(EvenniaTest):
             self.assertEqual(trait.current, trait.max // 2 + regen)
 
         char.refresh_prompt.assert_called_once()
-        char.msg.assert_called_once()
-        self.assertIn("You regenerate", char.msg.call_args[0][0])
+        char.msg.assert_not_called()
 
 
 class TestCharacterCreationStats(EvenniaTest):

@@ -592,14 +592,7 @@ class Character(ObjectParent, ClothedCharacter):
         """
         from world.system import state_manager
 
-        healed = state_manager.apply_regen(self)
-
-        if healed and self.sessions.count():
-            mapping = {"health": "|r", "mana": "|b", "stamina": "|g"}
-            parts = [
-                f"{mapping[k]}+{amt} {k[:2].upper()}|n" for k, amt in healed.items()
-            ]
-            self.msg("You regenerate " + ", ".join(parts) + ".")
+        state_manager.apply_regen(self)
 
         if self.sessions.count():
             self.refresh_prompt()

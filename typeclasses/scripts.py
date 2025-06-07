@@ -253,12 +253,7 @@ class GlobalTick(Script):
             if not hasattr(obj, "traits"):
                 continue
 
-            healed = state_manager.apply_regen(obj)
-
-            if healed and obj.sessions.count():
-                mapping = {"health": "|r", "mana": "|b", "stamina": "|g"}
-                parts = [f"{mapping[k]}+{amt} {k[:2].upper()}|n" for k, amt in healed.items()]
-                obj.msg("You regenerate " + ", ".join(parts) + ".")
+            state_manager.apply_regen(obj)
 
             if hasattr(obj, "refresh_prompt"):
                 obj.refresh_prompt()
