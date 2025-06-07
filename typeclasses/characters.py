@@ -93,6 +93,26 @@ class Character(ObjectParent, ClothedCharacter):
         # succeed even if nothing is equipped in a given location
         eq = {slot: None for slot in SLOT_ORDER}
 
+        # start from any stored equipment mapping
+        stored = self.db.equipment if isinstance(self.db.equipment, dict) else {}
+        for slot, item in stored.items():
+            canonical = normalize_slot(slot) or slot
+            eq[canonical] = item
+
+        # fall back to worn clothes for legacy items not stored in db.equipment
+        for item in get_worn_clothes(self):
+            if item in eq.values():
+                continue
+            slots = item.tags.get(category="slot", return_list=True) or []
+            if not slots and (ctype := item.db.clothing_type):
+                slots = [ctype]
+            for slot in slots:
+                if slot:
+                    canonical = normalize_slot(slot)
+                    if canonical and not eq.get(canonical):
+                        eq[canonical] = item
+
+        # merge wielded weapons
         wielded = self.attributes.get("_wielded", {})
         if wielded:
             wielded.deserialize()
@@ -102,15 +122,6 @@ class Character(ObjectParent, ClothedCharacter):
 
         eq["mainhand"] = wielded.get(main)
         eq["offhand"] = wielded.get(off)
-
-        for item in get_worn_clothes(self):
-            slots = item.tags.get(category="slot", return_list=True) or []
-            if not slots and (ctype := item.db.clothing_type):
-                slots = [ctype]
-            for slot in slots:
-                if slot:
-                    slot = normalize_slot(slot)
-                    eq[slot] = item
 
         return eq
 
