@@ -179,3 +179,15 @@ class TestRegeneration(EvenniaTest):
 
         char.refresh_prompt.assert_called_once()
         char.msg.assert_called()
+
+
+class TestCharacterCreationStats(EvenniaTest):
+    def test_armor_trait_defaults_to_zero(self):
+        char = create.create_object(
+            "typeclasses.characters.PlayerCharacter",
+            key="Newbie",
+            location=self.room1,
+            home=self.room1,
+        )
+        self.assertIsNotNone(char.traits.get("armor"))
+        self.assertEqual(char.traits.armor.base, 0)
