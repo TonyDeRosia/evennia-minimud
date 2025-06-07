@@ -158,7 +158,6 @@ class TestGlobalTick(EvenniaTest):
         script = GlobalTick()
         script.at_script_creation()
 
-        self.char1.tags.add("tickable")
         self.char1.at_tick = MagicMock()
         self.char1.refresh_prompt = MagicMock()
         from world.system import state_manager
