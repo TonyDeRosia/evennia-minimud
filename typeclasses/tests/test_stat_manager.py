@@ -169,6 +169,25 @@ class TestStatManager(EvenniaTest):
         self.assertEqual(char.db.derived_stats.get("HP"), base_hp + 25)
         self.assertEqual(char.db.derived_stats.get("ATK"), base_atk + 3)
 
+    @override_settings(DEFAULT_HOME=None)
+    def test_armor_increases_with_gear(self):
+        char = self.char1
+        stat_manager.refresh_stats(char)
+        base_armor = char.traits.armor.base
+        item = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="helmet",
+            location=char,
+            nohome=True,
+        )
+        item.tags.add("equipment", category="flag")
+        item.tags.add("identified", category="flag")
+        item.db.armor = 5
+        item.wear(char, True)
+        self.assertEqual(char.traits.armor.base, base_armor + 5)
+        item.remove(char, True)
+        self.assertEqual(char.traits.armor.base, base_armor)
+
 
 @override_settings(DEFAULT_HOME=None)
 class TestBonusPersistence(EvenniaTest):

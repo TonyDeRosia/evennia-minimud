@@ -162,6 +162,8 @@ def collect_item_mods(item) -> Dict[str, int]:  # pragma: no cover - helper
 def add_equip_bonus(chara, item) -> None:
     """Add ``item`` modifiers to ``chara.db.equip_bonuses``."""
     mods = collect_item_mods(item)
+    if getattr(item.db, "armor", 0):
+        chara.traits.armor.base += int(item.db.armor)
     if not mods:
         return
     bonuses = chara.db.equip_bonuses or {}
@@ -174,6 +176,8 @@ def add_equip_bonus(chara, item) -> None:
 def remove_equip_bonus(chara, item) -> None:
     """Remove ``item`` modifiers from ``chara.db.equip_bonuses``."""
     mods = collect_item_mods(item)
+    if getattr(item.db, "armor", 0):
+        chara.traits.armor.base -= int(item.db.armor)
     if not mods:
         return
     bonuses = chara.db.equip_bonuses or {}
