@@ -78,6 +78,19 @@ class TestObjectFlags(EvenniaTest):
         self.assertFalse(first.db.worn)
         self.assertEqual(first.location, self.char1)
 
+    def test_wear_adds_canonical_slot_tag(self):
+        item = create_object(
+            "typeclasses.objects.ClothingObject",
+            key="ring",
+            location=self.char1,
+        )
+        item.tags.add("equipment", category="flag")
+        item.tags.add("identified", category="flag")
+        item.tags.add("ring", category="slot")
+
+        item.wear(self.char1, True)
+        self.assertTrue(item.tags.has("ring1", category="slot"))
+
 
 class TestInspectFlags(EvenniaTest):
     def test_inspect_shows_flags(self):

@@ -230,6 +230,11 @@ class ClothingObject(ObjectParent, ContribClothing):
             return
         # honor slot tags by automatically replacing duplicates
         if slots := self.tags.get(category="slot", return_list=True):
+            for slot in slots:
+                canonical = normalize_slot(slot)
+                if canonical and not self.tags.has(canonical, category="slot"):
+                    self.tags.add(canonical, category="slot")
+
             worn_items = get_worn_clothes(wearer)
             for slot in slots:
                 canonical = normalize_slot(slot)
