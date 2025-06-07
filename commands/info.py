@@ -42,7 +42,7 @@ EQUIPMENT_SLOTS = SLOT_ORDER
 
 def render_equipment(caller):
     """Return formatted equipment display for caller."""
-    eq = caller.equipment
+    eq = caller.db.equipment or {}
     display = ["+=========================+", "| [ EQUIPMENT ]"]
 
     main = eq.get("mainhand")

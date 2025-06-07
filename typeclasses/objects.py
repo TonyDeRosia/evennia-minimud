@@ -260,10 +260,19 @@ class ClothingObject(ObjectParent, ContribClothing):
                     )
                     return
 
+        # ensure equipment mapping exists
+        if not isinstance(wearer.db.equipment, dict):
+            wearer.db.equipment = {}
+
         result = super().wear(wearer, wearstyle, quiet=quiet)
         self.location = None
         wearer.update_carry_weight()
+        # store equipped item in the character's equipment mapping
+        slot = self.db.slot
+        if slot:
+            wearer.db.equipment[slot] = self
         stat_manager.apply_item_bonuses_once(wearer, self)
+        self.db.worn = True
         return result
 
     def remove(self, wearer, quiet=False):
@@ -271,7 +280,10 @@ class ClothingObject(ObjectParent, ContribClothing):
         result = super().remove(wearer, quiet=quiet)
         self.location = wearer
         wearer.update_carry_weight()
+        if isinstance(wearer.db.equipment, dict) and self.db.slot:
+            wearer.db.equipment.pop(self.db.slot, None)
         stat_manager.remove_item_bonuses(wearer, self)
+        self.db.worn = False
         return result
 
 
