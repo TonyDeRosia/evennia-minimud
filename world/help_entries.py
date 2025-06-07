@@ -2303,6 +2303,35 @@ Related:
 """,
     },
     {
+        "key": 'regeneration',
+        "category": 'General',
+        "text": """
+Help for regeneration
+
+Health, mana and stamina are restored automatically. Each game tick you
+recover amounts equal to your |whealth_regen|n, |wmana_regen|n and
+|wstamina_regen|n stats. Passive 1-point-per-second healing has been removed.
+
+Usage:
+    regeneration
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - None
+
+Related:
+    help ansi
+""",
+    },
+    {
         "key": 'statmods',
         "aliases": ['stat mods', 'gear bonuses'],
         "category": 'Building',
