@@ -97,13 +97,10 @@ class TestCNPC(EvenniaTest):
         npc_builder._set_skills(self.char1, "")
         npc_builder._set_ai(self.char1, "passive")
 
-        npc_builder._edit_triggers(
-            self.char1, 'add trigger on_say "hello" -> say Squawk!'
-        )
-        npc_builder._edit_triggers(
-            self.char1, 'add trigger on_give "" -> say Thanks!'
-        )
-        npc_builder._edit_triggers(self.char1, "done")
+        self.char1.ndb.buildnpc["triggers"] = {
+            "on_speak": ("hello", "say Squawk!"),
+            "on_give_item": ("", "say Thanks!"),
+        }
 
         npc_builder._create_npc(self.char1, "")
 
@@ -112,8 +109,8 @@ class TestCNPC(EvenniaTest):
         self.assertEqual(
             npc.db.triggers,
             {
-                "on_say": [{"match": "hello", "reaction": "say Squawk!"}],
-                "on_give": [{"match": "", "reaction": "say Thanks!"}],
+                "on_speak": ("hello", "say Squawk!"),
+                "on_give_item": ("", "say Thanks!"),
             },
         )
 
