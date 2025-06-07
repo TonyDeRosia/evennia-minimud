@@ -34,6 +34,9 @@ def at_server_start():
     from evennia.scripts.models import ScriptDB
 
     script = ScriptDB.objects.filter(db_key="global_tick").first()
+    if script and not script.is_active:
+        script.start()
+
     if not script or script.typeclass_path != "typeclasses.scripts.GlobalTick":
         if script:
             script.delete()
