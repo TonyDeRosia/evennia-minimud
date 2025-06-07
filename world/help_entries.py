@@ -2319,4 +2319,21 @@ Detection, Threat, Movement Speed, Crafting Bonus, PvP Power, PvP Resilience,
 Guild Honor Rank Modifiers.
 """,
     },
+    {
+        "key": 'cnpc',
+        "category": 'Building',
+        "text": """
+Help for cnpc
+
+Create or edit an NPC using a guided menu.
+
+Usage:
+    cnpc start <key>
+    cnpc edit <npc>
+
+This command launches an interactive menu that walks you through
+setting up the NPC's description, stats and behaviour. When you
+confirm the final step the NPC object is created in your location.
+""",
+    },
 ]
