@@ -585,13 +585,27 @@ class Character(ObjectParent, ClothedCharacter):
         """
         Respond to the arrival of a character
         """
-        pass
+        if chara == self:
+            return
+
+        if self.sessions.count():
+            self.refresh_prompt()
+
+        if hasattr(self, "check_triggers"):
+            self.check_triggers("on_enter", chara=chara)
 
     def at_character_depart(self, chara, destination, **kwargs):
         """
         Respond to the departure of a character
         """
-        pass
+        if chara == self:
+            return
+
+        if self.sessions.count():
+            self.refresh_prompt()
+
+        if hasattr(self, "check_triggers"):
+            self.check_triggers("on_leave", chara=chara, destination=destination)
 
     def at_tick(self):
         """Called by the global ticker.
@@ -772,14 +786,15 @@ class NPC(Character):
         """
         Respond to the arrival of a character
         """
+        super().at_character_arrive(chara, **kwargs)
         if "aggressive" in self.attributes.get("react_as", ""):
             delay(0.1, self.enter_combat, chara)
-        self.check_triggers("on_enter", chara=chara)
 
     def at_character_depart(self, chara, destination, **kwargs):
         """
         Respond to the departure of a character
         """
+        super().at_character_depart(chara, destination, **kwargs)
         if chara == self.db.following:
             # find an exit that goes the same way
             exits = [
