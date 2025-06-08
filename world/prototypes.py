@@ -490,14 +490,27 @@ DEER_ANTLER = {
 # ------------------------------------------------------------
 
 from typing import Dict
-from evennia.server.models import ServerConfig
+import json
+from pathlib import Path
 
-_NPC_REGISTRY_KEY = "npc_prototype_registry"
+_NPC_PROTO_FILE = Path(__file__).resolve().parent / "prototypes" / "npcs.json"
 
 
 def _load_npc_registry() -> Dict[str, dict]:
-    """Return the stored NPC prototypes."""
-    return ServerConfig.objects.conf(_NPC_REGISTRY_KEY, default={})
+    """Return the stored NPC prototypes from the JSON file."""
+    try:
+        with _NPC_PROTO_FILE.open("r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+    except json.JSONDecodeError:
+        return {}
+
+
+def _save_npc_registry(registry: Dict[str, dict]):
+    _NPC_PROTO_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with _NPC_PROTO_FILE.open("w") as f:
+        json.dump(registry, f, indent=4)
 
 
 def get_npc_prototypes() -> Dict[str, dict]:
@@ -509,4 +522,4 @@ def register_npc_prototype(key: str, prototype: dict):
     """Save ``prototype`` under ``key`` in the persistent registry."""
     registry = _load_npc_registry()
     registry[key] = prototype
-    ServerConfig.objects.conf(_NPC_REGISTRY_KEY, value=registry)
+    _save_npc_registry(registry)
