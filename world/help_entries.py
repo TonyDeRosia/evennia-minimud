@@ -2471,7 +2471,7 @@ Arguments:
 Examples:
     cnpc start guard_01
     cnpc edit Bob
-    cnpc dev_spawn test_blacksmith
+    cnpc dev_spawn basic_merchant
 
 Notes:
     - Aliases:
@@ -2499,7 +2499,7 @@ Notes:
       Choosing Add prompts for the event type, match text and reaction
       command.
     - |wcnpc dev_spawn|n quickly spawns prototype NPCs for testing (Developer only).
-    - Example: |wcnpc dev_spawn test_blacksmith|n
+    - Example: |wcnpc dev_spawn basic_merchant|n
     - See |whelp triggers|n for available events and reactions.
     - ANSI color codes are supported in names and descriptions.
 
@@ -2649,7 +2649,7 @@ Arguments:
     <prototype> - key in world/prototypes/npcs.json
 
 Examples:
-    @spawnnpc test_blacksmith
+    @spawnnpc basic_merchant
 
 Notes:
     - Prototypes are saved with the cnpc builder.

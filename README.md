@@ -180,6 +180,10 @@ There are also helper commands for managing NPCs after creation:
 duplicates one, `@deletenpc <npc>` removes it (with confirmation) and
 `@spawnnpc <proto>` spawns a saved prototype from `world/prototypes/npcs.json`.
 
+Several basic NPC prototypes are included out of the box. Try `cnpc dev_spawn basic_merchant`
+or `@spawnnpc basic_merchant` to quickly create a merchant, or `basic_questgiver` for a quest
+giver.
+
 ## Weapon Creation and Inspection
 
 Builders can quickly create melee weapons with the `cweapon` command.
