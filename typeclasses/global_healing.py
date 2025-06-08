@@ -1,4 +1,8 @@
-"""Regenerate character resources on a global interval."""
+"""Regenerate character resources using the global tick.
+
+This script no longer schedules its own interval but instead reacts to
+``GlobalTickScript`` firing the global tick signal.
+"""
 
 from evennia.scripts.scripts import DefaultScript
 from typeclasses.global_tick import TICK
@@ -10,7 +14,7 @@ class GlobalHealingScript(DefaultScript):
 
     def at_script_creation(self):
         """Configure script to persist without its own interval."""
-        self.interval = None
+        self.interval = 0
         self.persistent = True
 
     def at_start(self):
