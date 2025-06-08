@@ -248,6 +248,32 @@ class TestGlobalHealing(EvenniaTest):
         char.refresh_prompt.assert_called_once()
 
 
+class TestTickRegistry(EvenniaTest):
+    def test_register_unregister(self):
+        from typeclasses.global_tick import GlobalTickScript, REGISTERED
+
+        script = GlobalTickScript()
+        script.at_script_creation()
+        script.at_start()
+
+        char = create.create_object(
+            "typeclasses.characters.PlayerCharacter",
+            key="Ticker",
+            location=self.room1,
+            home=self.room1,
+        )
+
+        self.assertIn(char.id, REGISTERED)
+        self.assertIn(char.id, script.db.registry)
+
+        char.delete()
+
+        self.assertNotIn(char.id, REGISTERED)
+        self.assertNotIn(char.id, script.db.registry)
+
+        script.at_stop()
+
+
 
 class TestRegeneration(EvenniaTest):
     def test_at_tick_heals_resources(self):
