@@ -210,7 +210,9 @@ Examples:
 Notes:
     - Use |wrflags|n to view flags on the current room.
     - Builders may add or remove them with |wrflag add <flag>|n
-    - or |wrflag remove <flag>|n. Available flags:
+    - or |wrflag remove <flag>|n.
+    - Use |wrflag list|n to show all valid flags.
+    - Available flags:
     - dark - room is dark, requiring light to see.
     - nopvp - player versus player combat is blocked.
     - sanctuary - hostile actions are prevented.
