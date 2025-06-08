@@ -209,7 +209,8 @@ class XYGridShop(XYGridRoom):
             home=self,
             location=self,
         )
-        self.scripts.add(RestockScript, key="restock", autostart=False)
+        # start the restock script immediately so the shop refills over time
+        self.scripts.add(RestockScript, key="restock", autostart=True)
 
     def add_stock(self, obj):
         """
