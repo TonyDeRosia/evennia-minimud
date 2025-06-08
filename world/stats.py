@@ -44,7 +44,6 @@ DEFENSE_STATS: List[Stat] = [
     Stat("status_resist", "Status Resist", stat="CON"),
     Stat("crit_resist", "Critical Resist", stat="CON"),
 ]
-# TODO: implement usage of status_resist and crit_resist in combat rolls
 
 # Offense-oriented stats
 OFFENSE_STATS: List[Stat] = [
