@@ -54,4 +54,13 @@ class TestNPCAIScript(EvenniaTest):
         ai.process_ai(npc)
         self.assertIs(called.get("ran"), npc)
 
+    def test_wanderer_defaults_to_wander_ai(self):
+        from typeclasses.npcs import WandererNPC
+
+        npc = create.create_object(WandererNPC, key="wander", location=self.room1)
+        npc.at_object_creation()
+
+        self.assertEqual(npc.db.ai_type, "wander")
+        self.assertTrue(npc.scripts.get("npc_ai"))
+
 

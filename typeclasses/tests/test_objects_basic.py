@@ -150,3 +150,52 @@ class TestMeleeWeaponUtility(EvenniaTest):
         )
         self.assertFalse(weapon.is_twohanded())
 
+
+class TestWearableContainer(EvenniaTest):
+    def test_wear_sets_worn_by_and_remove_clears(self):
+        bag = create_object(
+            "typeclasses.gear.WearableContainer", key="bag", location=self.char1
+        )
+        bag.tags.add("equipment", category="flag")
+        bag.tags.add("identified", category="flag")
+        bag.wear(self.char1, "wear")
+        self.assertIs(bag.db.worn_by, self.char1)
+        bag.remove(self.char1)
+        self.assertIsNone(bag.db.worn_by)
+
+    def test_capacity_blocks_extra_items(self):
+        bag = create_object(
+            "typeclasses.gear.WearableContainer", key="bag", location=self.char1
+        )
+        bag.capacity = 1
+        bag.tags.add("equipment", category="flag")
+        bag.tags.add("identified", category="flag")
+        bag.wear(self.char1, "wear")
+
+        obj1 = create_object("typeclasses.objects.Object", key="rock1")
+        obj2 = create_object("typeclasses.objects.Object", key="rock2")
+
+        self.assertTrue(bag.at_pre_put_in(self.char1, obj1))
+        obj1.move_to(bag, quiet=True)
+        self.assertFalse(bag.at_pre_put_in(self.char1, obj2))
+
+
+class TestRoomHeaders(EvenniaTest):
+    def test_room_header_displays_meta(self):
+        from typeclasses.rooms import Room
+
+        room = create_object(Room, key="testroom")
+        room.set_area("Town")
+        room.set_room_id(5)
+        header = room.get_display_header(self.char1)
+        self.assertIn("Town", header)
+        self.assertIn("#5", header)
+
+    def test_xygrid_header_shows_coordinates(self):
+        from typeclasses.rooms import XYGridRoom
+
+        room, errors = XYGridRoom.create(key="xy", xyz=(2, 3, "zone"))
+        self.assertFalse(errors)
+        header = room.get_display_header(self.char1)
+        self.assertIn("(2, 3, zone)", header)
+

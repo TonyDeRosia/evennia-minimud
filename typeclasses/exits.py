@@ -91,9 +91,3 @@ class OverworldExit(ObjectParent, wilderness.WildernessExit):
             traveller.location.at_object_receive(traveller, self.location)
 
 
-class XYGridExit(ObjectParent, XYZExit):
-    """
-    A subclass of the XYZGrid contrib's exit, applying the local ObjectParent mixin
-    """
-
-    pass

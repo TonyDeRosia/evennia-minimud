@@ -101,10 +101,3 @@ class Account(ContribChargenAccount):
         self.db.settings = {"auto attack": True, "auto prompt": False}
 
 
-class Guest(DefaultGuest):
-    """
-    This class is used for guest logins. Unlike Accounts, Guests and their
-    characters are deleted after disconnection.
-    """
-
-    pass

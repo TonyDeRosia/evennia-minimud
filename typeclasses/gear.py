@@ -141,4 +141,26 @@ class MeleeWeapon(Object):
 
 
 class WearableContainer(ContribContainer, ClothingObject):
-    pass
+    """A container that can be worn like clothing."""
+
+    def wear(self, wearer, wearstyle, quiet=False):
+        result = super().wear(wearer, wearstyle, quiet=quiet)
+        if result:
+            self.db.worn_by = wearer
+        return result
+
+    def remove(self, wearer, quiet=False):
+        result = super().remove(wearer, quiet=quiet)
+        if result:
+            self.db.worn_by = None
+        return result
+
+    def at_object_receive(self, obj, source_location, **kwargs):
+        super().at_object_receive(obj, source_location, **kwargs)
+        if wearer := self.db.worn_by:
+            wearer.update_carry_weight()
+
+    def at_object_leave(self, obj, destination, **kwargs):
+        super().at_object_leave(obj, destination, **kwargs)
+        if wearer := self.db.worn_by:
+            wearer.update_carry_weight()
