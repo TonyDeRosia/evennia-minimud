@@ -239,13 +239,13 @@ class TestGlobalHealing(EvenniaTest):
         }
         char.sessions.count = MagicMock(return_value=1)
         char.msg = MagicMock()
+        char.refresh_prompt = MagicMock()
 
         script.at_repeat()
         script.at_stop()
 
-        char.msg.assert_called_once_with(
-            "You have recovered some.", prompt=char.get_resource_prompt()
-        )
+        char.msg.assert_called_once_with("You have recovered some.")
+        char.refresh_prompt.assert_called_once()
 
 
 
@@ -263,7 +263,8 @@ class TestRegeneration(EvenniaTest):
         char.refresh_prompt = MagicMock()
         char.msg = MagicMock()
 
-        char.at_tick()
+        changed = char.at_tick()
+        self.assertTrue(changed)
 
         for key, regen in (
             ("health", 2),
@@ -273,7 +274,7 @@ class TestRegeneration(EvenniaTest):
             trait = char.traits.get(key)
             self.assertEqual(trait.current, trait.max // 2 + regen)
 
-        char.refresh_prompt.assert_called_once()
+        char.refresh_prompt.assert_not_called()
         char.msg.assert_not_called()
 
 

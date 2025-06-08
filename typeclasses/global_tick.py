@@ -32,11 +32,9 @@ class GlobalTickScript(DefaultScript):
                 continue
             seen.add(obj)
             if hasattr(obj, "at_tick"):
-                healed = obj.at_tick() or {}
-                if healed and obj.sessions.count():
-                    obj.msg(
-                        "You have recovered some.",
-                        prompt=obj.get_resource_prompt(),
-                    )
+                changed = obj.at_tick()
+                if changed and obj.sessions.count():
+                    obj.msg("You have recovered some.")
+                    obj.refresh_prompt()
 
         TICK.send(sender=self)
