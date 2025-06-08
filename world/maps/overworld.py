@@ -37,6 +37,8 @@ MAP_STR = '''
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 '''
 
+MAP_ROWS = list(reversed(MAP_STR.splitlines()))
+
 weight = 1
 _MAX_NODES = 50
 _MAX_MOBS = 50
@@ -100,15 +102,11 @@ class OverworldMapProvider(wilderness.WildernessMapProvider):
     def is_valid_coordinates(self, wilderness, coordinates):
         "Validates if these coordinates are inside the map"
         x, y = coordinates
-        # split the map into lines, i.e. rows
-        # and reverse the order, since the wilderness contrib considers row 0 to be the bottom
-        rows = MAP_STR.split("\n")
-        rows.reverse()
         # make sure that y is a valid coordinate
-        if y not in range(len(rows)):
+        if y not in range(len(MAP_ROWS)):
             return False
         # get the y-coord row
-        row = rows[y]
+        row = MAP_ROWS[y]
         # validate x as well
         if x not in range(len(row)):
             return False
@@ -122,9 +120,7 @@ class OverworldMapProvider(wilderness.WildernessMapProvider):
         x, y = coordinates
 
         # we've already passed coord validation so we can just grab the data
-        rows = MAP_STR.split("\n")
-        rows.reverse()
-        tile = rows[y][x]
+        tile = MAP_ROWS[y][x]
         tile_data = MAP_KEY.get(tile, {})
         return f"In the {tile_data.get('biome', 'wilderness')}"
 
@@ -133,16 +129,14 @@ class OverworldMapProvider(wilderness.WildernessMapProvider):
         x, y = coordinates
 
         # we've already passed coord validation so we can just grab the data
-        rows = MAP_STR.split("\n")
-        rows.reverse()
-        tile = rows[y][x]
+        tile = MAP_ROWS[y][x]
         tile_data = MAP_KEY.get(tile, {})
         room.ndb.active_desc = tile_data.get("desc")
         # build the minimap
         border = "-" * 29
         minimap = [border]
         for i in range(y + 2, y - 3, -1):
-            row = rows[i][x - 2 : x + 3]
+            row = MAP_ROWS[i][x - 2 : x + 3]
             if i == y:
                 # mark our location
                 row = row[:2] + "|g@|n" + row[3:]
