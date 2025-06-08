@@ -148,17 +148,18 @@ class RoomParent(ObjectParent):
 
 
 class Room(RoomParent, DefaultRoom):
-    """
-    Rooms are like any Object, except their location is None
-    (which is default). They also use basetype_setup() to
-    add locks so they cannot be puppeted or picked up.
-    (to change that, use at_object_creation instead)
+    """Basic indoor room with simple area metadata."""
 
-    See examples/object.py for a list of
-    properties and methods available on all Objects.
-    """
-
-    pass
+    def get_display_header(self, looker, **kwargs):
+        """Show the area name/room id if available."""
+        area = self.get_area()
+        room_id = self.get_room_id()
+        header = []
+        if area:
+            header.append(str(area))
+        if room_id is not None:
+            header.append(f"#{room_id}")
+        return " ".join(header)
 
 
 class OverworldRoom(RoomParent, WildernessRoom):
@@ -183,11 +184,12 @@ class OverworldRoom(RoomParent, WildernessRoom):
 
 
 class XYGridRoom(RoomParent, XYZRoom):
-    """
-    A subclass of the XYZGrid contrib's room, applying the local RoomParent mixin
-    """
+    """Room used inside the XYZGrid system."""
 
-    pass
+    def get_display_header(self, looker, **kwargs):
+        """Return the room's XYZ coordinates."""
+        x, y, z = self.xyz
+        return f"({x}, {y}, {z})"
 
 
 class XYGridShop(XYGridRoom):
