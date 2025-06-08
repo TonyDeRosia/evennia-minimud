@@ -1,6 +1,7 @@
 from evennia.utils.evmenu import EvMenu
 from evennia.utils import make_iter
 from evennia import create_object
+from evennia.objects.models import ObjectDB
 from evennia.prototypes import spawner
 from typeclasses.characters import NPC
 from utils.slots import SLOT_ORDER
@@ -519,6 +520,31 @@ def _cancel(caller, raw_string, **kwargs):
     return None
 
 
+def _gather_npc_data(npc):
+    """Return a dict of editable NPC attributes."""
+    return {
+        "edit_obj": npc,
+        "key": npc.key,
+        "desc": npc.db.desc,
+        "npc_type": npc.tags.get(category="npc_type") or "",
+        "npc_class": next(
+            (k for k, path in NPC_CLASS_MAP.items() if path == npc.typeclass_path),
+            "base",
+        ),
+        "creature_type": npc.db.creature_type or "humanoid",
+        "equipment_slots": npc.db.equipment_slots or list(SLOT_ORDER),
+        "level": npc.db.level or 1,
+        "hp": npc.traits.health.base if npc.traits.get("health") else 0,
+        "mp": npc.traits.mana.base if npc.traits.get("mana") else 0,
+        "sp": npc.traits.stamina.base if npc.traits.get("stamina") else 0,
+        "primary_stats": npc.db.base_primary_stats or {},
+        "behavior": npc.db.behavior or "",
+        "skills": npc.db.skills or [],
+        "ai_type": npc.db.ai_type or "",
+        "triggers": npc.db.triggers or {},
+    }
+
+
 class CmdCNPC(Command):
     """Create or edit an NPC using a guided menu."""
 
@@ -591,4 +617,98 @@ class CmdCNPC(Command):
             self.msg(f"Spawned {obj.get_display_name(self.caller)}.")
             return
         self.msg("Usage: cnpc start <key> | cnpc edit <npc> | cnpc dev_spawn <proto>")
+
+
+class CmdEditNPC(Command):
+    """Open the NPC builder to edit an existing NPC."""
+
+    key = "@editnpc"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: @editnpc <npc>")
+            return
+        npc = self.caller.search(self.args.strip(), global_search=True)
+        if not npc or not npc.is_typeclass(NPC, exact=False):
+            self.msg("Invalid NPC.")
+            return
+        self.caller.ndb.buildnpc = _gather_npc_data(npc)
+        EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
+
+
+class CmdDeleteNPC(Command):
+    """Delete an NPC after confirmation."""
+
+    key = "@deletenpc"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: @deletenpc <npc>")
+            return
+        npc = self.caller.search(self.args.strip(), global_search=True)
+        if not npc or not npc.is_typeclass(NPC, exact=False):
+            self.msg("Invalid NPC.")
+            return
+        confirm = yield (f"Delete {npc.key}? Yes/No")
+        if confirm.strip().lower() not in ("yes", "y"):
+            self.msg("Deletion cancelled.")
+            return
+        npc.delete()
+        self.msg(f"{npc.key} deleted.")
+
+
+class CmdCloneNPC(Command):
+    """Create a copy of an NPC."""
+
+    key = "@clonenpc"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def parse(self):
+        self.source, _, self.newname = self.args.partition("=")
+        self.source = self.source.strip()
+        self.newname = self.newname.strip() if self.newname else ""
+
+    def func(self):
+        if not self.source:
+            self.msg("Usage: @clonenpc <npc> [= <new_name>]")
+            return
+        npc = self.caller.search(self.source, global_search=True)
+        if not npc or not npc.is_typeclass(NPC, exact=False):
+            self.msg("Invalid NPC.")
+            return
+        new_key = self.newname or f"{npc.key}_copy"
+        clone = ObjectDB.objects.copy_object(
+            npc, new_key=new_key, new_location=self.caller.location
+        )
+        if clone:
+            self.msg(f"Cloned {npc.key} to {clone.key}.")
+        else:
+            self.msg("Error cloning NPC.")
+
+
+class CmdSpawnNPC(Command):
+    """Spawn an NPC from a saved prototype."""
+
+    key = "@spawnnpc"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: @spawnnpc <prototype>")
+            return
+        from world import prototypes
+
+        proto = prototypes.get_npc_prototypes().get(self.args.strip())
+        if not proto:
+            self.msg("Unknown NPC prototype.")
+            return
+        obj = spawner.spawn(proto)[0]
+        obj.move_to(self.caller.location, quiet=True)
+        self.msg(f"Spawned {obj.get_display_name(self.caller)}.")
 
