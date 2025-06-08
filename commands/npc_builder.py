@@ -579,7 +579,8 @@ class CmdCNPC(Command):
             if not npc or not npc.is_typeclass(NPC, exact=False):
                 self.msg("Invalid NPC.")
                 return
-            self.caller.ndb.buildnpc = _gather_npc_data(npc)
+            data = _gather_npc_data(npc)
+            self.caller.ndb.buildnpc = data
             EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
             return
         if sub == "dev_spawn":
