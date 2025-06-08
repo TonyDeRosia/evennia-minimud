@@ -2704,4 +2704,41 @@ Related:
     help cnpc
 """,
     },
+    {
+        "key": 'spells',
+        "category": 'General',
+        "text": """Help for spells
+
+Learn new spells from trainers with |wlearn|n. Once learned, cast a spell
+using |wcast <spell> [on <target>]|n. Casting costs mana according to the
+spell.
+""",
+    },
+    {
+        "key": 'cast',
+        "category": 'General',
+        "text": """Help for cast
+
+Cast a spell that you have learned.
+
+Usage:
+    cast <spell> [on <target>]
+
+Notes:
+    - Each spell consumes mana when cast.
+    - You must learn a spell before you can cast it.
+""",
+    },
+    {
+        "key": 'learn',
+        "aliases": ['trainspell'],
+        "category": 'General',
+        "text": """Help for learn
+
+Learn a spell from a trainer in your current location.
+
+Usage:
+    learn
+""",
+    },
 ]
