@@ -1,1 +1,26 @@
-{}
+{
+    "basic_merchant": {
+        "key": "merchant",
+        "desc": "A traveling merchant ready to trade goods.",
+        "npc_class": "merchant",
+        "npc_type": "merchant",
+        "ai_type": "passive",
+        "level": 1
+    },
+    "basic_questgiver": {
+        "key": "quest giver",
+        "desc": "A local seeking brave adventurers for help.",
+        "npc_class": "questgiver",
+        "npc_type": "questgiver",
+        "ai_type": "passive",
+        "level": 1
+    },
+    "basic_guard": {
+        "key": "town guard",
+        "desc": "A vigilant guard keeping watch over the streets.",
+        "npc_class": "base",
+        "npc_type": "guard",
+        "ai_type": "defensive",
+        "level": 1
+    }
+}

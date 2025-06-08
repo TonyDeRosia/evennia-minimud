@@ -718,8 +718,14 @@ class CmdCNPC(Command):
                 self.msg("Usage: cnpc dev_spawn <proto>")
                 return
             proto = rest
+            from world import prototypes
+
+            proto_dict = prototypes.get_npc_prototypes().get(proto)
             try:
-                obj = spawner.spawn(proto)[0]
+                if proto_dict:
+                    obj = spawner.spawn(proto_dict)[0]
+                else:
+                    obj = spawner.spawn(proto)[0]
             except KeyError:
                 self.msg(f"Unknown prototype: {proto}")
                 return
