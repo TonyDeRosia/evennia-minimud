@@ -579,25 +579,7 @@ class CmdCNPC(Command):
             if not npc or not npc.is_typeclass(NPC, exact=False):
                 self.msg("Invalid NPC.")
                 return
-            data = {
-                "edit_obj": npc,
-                "key": npc.key,
-                "desc": npc.db.desc,
-                "npc_type": npc.tags.get(category="npc_type") or "",
-                "npc_class": next((key for key, path in NPC_CLASS_MAP.items() if path == npc.typeclass_path), "base"),
-                "creature_type": npc.db.creature_type or "humanoid",
-                "equipment_slots": npc.db.equipment_slots or list(SLOT_ORDER),
-                "level": npc.db.level or 1,
-                "hp": npc.traits.health.base if npc.traits.get("health") else 0,
-                "mp": npc.traits.mana.base if npc.traits.get("mana") else 0,
-                "sp": npc.traits.stamina.base if npc.traits.get("stamina") else 0,
-                "primary_stats": npc.db.base_primary_stats or {},
-                "behavior": npc.db.behavior or "",
-                "skills": npc.db.skills or [],
-                "ai_type": npc.db.ai_type or "",
-                "triggers": npc.db.triggers or {},
-            }
-            self.caller.ndb.buildnpc = data
+            self.caller.ndb.buildnpc = _gather_npc_data(npc)
             EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
             return
         if sub == "dev_spawn":
