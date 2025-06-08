@@ -484,6 +484,7 @@ class CmdCNPC(Command):
     """Create or edit an NPC using a guided menu."""
 
     key = "cnpc"
+    aliases = ["createnpc"]
     locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 

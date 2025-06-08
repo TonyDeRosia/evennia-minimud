@@ -2450,7 +2450,7 @@ Guild Honor Rank Modifiers.
     },
     {
         "key": 'cnpc',
-        "aliases": ['npc'],
+        "aliases": ['npc', 'createnpc'],
         "category": 'Building',
         "text": """
 Help for cnpc
@@ -2474,6 +2474,9 @@ Examples:
     cnpc dev_spawn test_blacksmith
 
 Notes:
+    - Aliases:
+    - npc
+    - createnpc
     - NPC types include merchant, guard, questgiver, guildmaster,
       guild_receptionist, banker and craftsman.
     - The builder prompts for description, NPC type, creature type, level,
