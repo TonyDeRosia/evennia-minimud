@@ -597,10 +597,12 @@ class Character(ObjectParent, ClothedCharacter):
         state_manager.tick_character(self)
 
         # apply passive regeneration
-        state_manager.apply_regen(self)
+        healed = state_manager.apply_regen(self)
 
         if self.sessions.count():
             self.refresh_prompt()
+
+        return healed
 
     def refresh_prompt(self):
         """Refresh the player's prompt display."""
