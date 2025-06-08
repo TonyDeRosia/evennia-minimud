@@ -174,8 +174,6 @@ class Character(ObjectParent, ClothedCharacter):
         stats.apply_stats(self)
         stat_manager.refresh_stats(self)
 
-        # Mark character as tickable so the global tick script processes it
-        self.tags.add("tickable")
 
         self.db.guild = ""
         self.db.guild_points = {}
