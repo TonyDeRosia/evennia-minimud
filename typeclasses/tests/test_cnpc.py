@@ -72,7 +72,7 @@ class TestCNPC(EvenniaTest):
 
         npc_builder._set_desc(self.char1, "A big ogre")
         npc_builder._set_creature_type(self.char1, "humanoid")
-        npc_builder._set_npc_type(self.char1, "guard")
+        npc_builder._set_npc_type(self.char1, "questgiver")
         npc_builder._set_level(self.char1, "1")
         npc_builder._set_resources(self.char1, "20 5 5")
         npc_builder._set_stats(self.char1, "5 5 5 5 5 5")
@@ -93,7 +93,7 @@ class TestCNPC(EvenniaTest):
 
         npc_builder._set_desc(self.char1, "A colorful parrot")
         npc_builder._set_creature_type(self.char1, "humanoid")
-        npc_builder._set_npc_type(self.char1, "craftsman")
+        npc_builder._set_npc_type(self.char1, "trainer")
         npc_builder._set_level(self.char1, "1")
         npc_builder._set_resources(self.char1, "10 0 0")
         npc_builder._set_stats(self.char1, "1 1 1 1 1 1")
@@ -132,7 +132,7 @@ class TestCNPC(EvenniaTest):
         npc_builder._edit_custom_slots(self.char1, "remove offhand")
         npc_builder._edit_custom_slots(self.char1, "add tail")
         npc_builder._edit_custom_slots(self.char1, "done")
-        npc_builder._set_npc_type(self.char1, "guard")
+        npc_builder._set_npc_type(self.char1, "questgiver")
         npc_builder._set_level(self.char1, "1")
         npc_builder._set_resources(self.char1, "5 0 0")
         npc_builder._set_stats(self.char1, "1 1 1 1 1 1")
