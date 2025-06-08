@@ -172,12 +172,10 @@ class TestGlobalTick(EvenniaTest):
 
 class TestGlobalHealing(EvenniaTest):
     def test_tick_offline_characters(self):
-        from typeclasses.global_healing import GlobalHealing
-        from typeclasses.global_tick import TICK
+        from typeclasses.global_healing import GlobalHealingScript
 
-        script = GlobalHealing()
+        script = GlobalHealingScript()
         script.at_script_creation()
-        script.at_start()
 
         pc = create.create_object(
             "typeclasses.characters.PlayerCharacter",
@@ -193,7 +191,6 @@ class TestGlobalHealing(EvenniaTest):
         )
 
         for char in (pc, npc):
-            char.tags.add("tickable")
             for key in ("health", "mana", "stamina"):
                 trait = char.traits.get(key)
                 trait.current = trait.max // 2
@@ -206,7 +203,7 @@ class TestGlobalHealing(EvenniaTest):
             char.refresh_prompt = MagicMock(wraps=char.refresh_prompt)
             char.at_tick = MagicMock()
 
-        TICK.send(sender=self)
+        script.at_repeat()
 
         for char in (pc, npc):
             char.at_tick.assert_not_called()
@@ -215,7 +212,6 @@ class TestGlobalHealing(EvenniaTest):
                 self.assertEqual(trait.current, trait.max // 2 + 1)
             char.refresh_prompt.assert_not_called()
 
-        script.at_stop()
 
 
 class TestRegeneration(EvenniaTest):
