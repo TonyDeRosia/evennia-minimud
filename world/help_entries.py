@@ -558,6 +558,91 @@ Related:
 """,
     },
     {
+        "key": 'cfood',
+        "category": 'Building',
+        "text": """
+Help for cfood
+
+Create an edible food item.
+
+Usage:
+    cfood <name> <sated_boost> <description>
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - Items are flagged edible automatically.
+    - Weight is set to 1.
+
+Related:
+    help ansi
+""",
+    },
+    {
+        "key": 'cdrink',
+        "category": 'Building',
+        "text": """
+Help for cdrink
+
+Create a consumable drink.
+
+Usage:
+    cdrink <name> <sated_boost> <description>
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - Items are flagged edible automatically.
+    - Weight is set to 1.
+
+Related:
+    help ansi
+""",
+    },
+    {
+        "key": 'cpotion',
+        "category": 'Building',
+        "text": """
+Help for cpotion
+
+Create a drinkable potion that modifies stats.
+
+Usage:
+    cpotion <name> <stat_mods> <description>
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - Items are flagged edible automatically.
+    - Weight is set to 1.
+    - Modifiers use the form |wStat+Value|n and are comma separated.
+
+Related:
+    help ansi
+""",
+    },
+    {
         "key": 'item flags',
         "aliases": ['setflag', 'removeflag'],
         "category": 'Building',
