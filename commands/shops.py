@@ -89,11 +89,6 @@ class CmdBuy(Command):
             self.msg("This shop is not open for business.")
             return
 
-        # check if we have any money first
-        if not (wallet := self.caller.db.coins):
-            self.msg("You don't have any money!")
-            return
-
         # we want a stack of the item, matching the parsed count
         objs = self.caller.search(self.args, location=storage, stacked=self.count)
         if not objs:
@@ -111,11 +106,8 @@ class CmdBuy(Command):
         example = objs[0]
         count = len(objs)
         obj_name = example.get_numbered_name(count, self.caller)[1]
-        # calculate the total for all the objects
-        total = sum([obj.attributes.get("price", 0) for obj in objs])
-
-        # do we have enough money?
-        if to_copper(wallet) < total:
+        can_buy, total = self.obj.check_purchase(self.caller, objs)
+        if can_buy is False:
             self.msg(f"You need {total} coins to buy that.")
             return
 
@@ -129,14 +121,13 @@ class CmdBuy(Command):
             self.msg("Purchase cancelled.")
             return
 
-        # everything is good! do a capitalism!
-        for obj in objs:
-            obj.move_to(self.caller, quiet=True, move_type="get")
-
-        self.caller.db.coins = from_copper(to_copper(wallet) - total)
+        success, spent = self.obj.purchase(self.caller, objs)
+        if not success:
+            self.msg(f"You need {spent} coins to buy that.")
+            return
 
         self.msg(
-            f"You exchange {total} coin{'' if total == 1 else 's'} for {count} {obj_name}."
+            f"You exchange {spent} coin{'' if spent == 1 else 's'} for {count} {obj_name}."
         )
 
 
