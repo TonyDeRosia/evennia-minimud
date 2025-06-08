@@ -1,8 +1,7 @@
 from random import randint, choice
 from string import punctuation
 from evennia import AttributeProperty
-from evennia.utils import lazy_property, iter_to_str, delay, logger, make_iter
-import importlib
+from evennia.utils import lazy_property, iter_to_str, delay, logger
 from evennia.contrib.rpg.traits import TraitHandler
 from evennia.contrib.game_systems.clothing.clothing import (
     ClothedCharacter,
@@ -15,6 +14,7 @@ from utils import normalize_slot
 from utils.slots import SLOT_ORDER
 from collections.abc import Mapping
 import math
+from world.npc_triggers import TriggerManager
 
 from .objects import ObjectParent
 
@@ -713,16 +713,24 @@ class PlayerCharacter(Character):
 
 
 class NPC(Character):
-    """
-    The base typeclass for non-player characters, implementing behavioral AI.
+    """Base typeclass for AI-driven non-player characters.
 
     NPCs can be assigned roles with ``obj.tags.add("<role>", category="npc_role")``.
+    Triggers for reacting to game events are stored in ``db.triggers`` as a
+    mapping from event name to one or more trigger definitions. A trigger may
+    be a tuple ``(match, reaction)`` or a dictionary with optional ``match`` and
+    ``reactions`` keys. See :mod:`world.npc_triggers` for details.
     """
 
     # defines what color this NPC's name will display in
     name_color = AttributeProperty("w")
     # mapping of event triggers -> reactions
     triggers = AttributeProperty({})
+
+    @lazy_property
+    def trigger_manager(self):
+        """Access :class:`~world.npc_triggers.TriggerManager`."""
+        return TriggerManager(self)
 
     def at_object_creation(self):
         super().at_object_creation()
@@ -731,69 +739,8 @@ class NPC(Character):
 
     def check_triggers(self, event, **kwargs):
         """Evaluate stored triggers for a given event."""
-        triggers = (self.db.triggers or {}).get(event)
-        if not triggers:
-            return
+        self.trigger_manager.check(event, **kwargs)
 
-        if isinstance(triggers, tuple):
-            triglist = [{"match": triggers[0], "reaction": triggers[1]}]
-        elif isinstance(triggers, dict) and "match" in triggers:
-            triglist = [triggers]
-        else:
-            triglist = make_iter(triggers)
-
-        for trig in triglist:
-            if not isinstance(trig, dict):
-                continue
-            match = trig.get("match")
-            if match:
-                text = str(kwargs.get("message") or kwargs.get("text") or "")
-                if isinstance(match, (list, tuple)):
-                    if not any(m.lower() in text.lower() for m in match):
-                        continue
-                elif str(match).lower() not in text.lower():
-                    continue
-            reactions = trig.get("reactions") or trig.get("reaction") or []
-            for react in make_iter(reactions):
-                if isinstance(react, str):
-                    if " " in react:
-                        action, arg = react.split(" ", 1)
-                    else:
-                        action, arg = react, ""
-                elif isinstance(react, dict) and len(react) == 1:
-                    action, arg = next(iter(react.items()))
-                else:
-                    continue
-                self._execute_reaction(action.lower(), arg, **kwargs)
-
-    def _execute_reaction(self, action, arg, **kwargs):
-        """Execute a single reaction action."""
-        try:
-            if action == "say":
-                self.execute_cmd(f"say {arg}")
-            elif action in ("emote", "pose"):
-                self.execute_cmd(f"{action} {arg}")
-            elif action == "move":
-                if arg:
-                    self.execute_cmd(arg)
-            elif action == "attack":
-                target = arg or kwargs.get("target")
-                if isinstance(target, str):
-                    target = self.search(target)
-                if target:
-                    if not self.in_combat:
-                        self.enter_combat(target)
-                    else:
-                        weapon = self.wielding[0] if self.wielding else self
-                        self.attack(target, weapon)
-            elif action == "script":
-                module, func = arg.rsplit(".", 1)
-                mod = importlib.import_module(module)
-                getattr(mod, func)(self, **kwargs)
-            else:
-                self.execute_cmd(f"{action} {arg}" if arg else action)
-        except Exception as err:  # pragma: no cover - log errors
-            logger.log_err(f"NPC trigger error on {self}: {err}")
 
     # property to mimic weapons
     @property
