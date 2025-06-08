@@ -217,7 +217,6 @@ class TestGlobalHealing(EvenniaTest):
 class TestRegeneration(EvenniaTest):
     def test_at_tick_heals_resources(self):
         char = self.char1
-        char.tags.add("tickable")
         for key in ("health", "mana", "stamina"):
             trait = char.traits.get(key)
             trait.current = trait.max // 2
