@@ -51,7 +51,7 @@ class TestNPCRoleBehaviors(EvenniaTest):
         trainer.train(self.char1, "smithing")
 
         self.assertIsNotNone(self.char1.traits.get("smithing"))
-        self.assertEqual(self.char1.traits.smithing.base, 1)
+        self.assertEqual(getattr(self.char1.traits.smithing, "proficiency", 0), 25)
         self.assertEqual(self.char1.db.exp, 4)
 
     def test_guildmaster_manages_membership(self):

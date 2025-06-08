@@ -15,6 +15,7 @@ from utils.slots import SLOT_ORDER
 from collections.abc import Mapping
 import math
 from world.npc_triggers import TriggerManager
+from world.spells import Spell
 
 from .objects import ObjectParent
 
@@ -36,6 +37,7 @@ class Character(ObjectParent, ClothedCharacter):
     stat_overrides = AttributeProperty({})
     spells = AttributeProperty([])
     training_points = AttributeProperty(0)
+    practice_sessions = AttributeProperty(0)
 
     @property
     def in_combat(self):
@@ -186,6 +188,7 @@ class Character(ObjectParent, ClothedCharacter):
         self.db.equip_bonuses = {}
         self.db.spells = []
         self.db.training_points = 0
+        self.db.practice_sessions = 0
         self.db.sated = 5
 
     def at_post_puppet(self, **kwargs):
@@ -502,6 +505,9 @@ class Character(ObjectParent, ClothedCharacter):
         stat_bonus = 0
         if stat := getattr(skill_trait, "stat", None):
             stat_bonus = state_manager.get_effective_stat(self, stat)
+        prof = getattr(skill_trait, "proficiency", 0)
+        if prof < 100:
+            skill_trait.proficiency = min(100, prof + 1)
         # finally, return the skill plus stat
         return skill_trait.value + stat_bonus
 
@@ -513,7 +519,18 @@ class Character(ObjectParent, ClothedCharacter):
         if not spell:
             return False
         known = self.db.spells or []
-        if spell_key not in known:
+        srec = None
+        for entry in known:
+            if isinstance(entry, str) and entry == spell_key:
+                srec = Spell(spell.key, spell.stat, spell.mana_cost, spell.desc, 0)
+                idx = known.index(entry)
+                known[idx] = srec
+                self.db.spells = known
+                break
+            if hasattr(entry, "key") and entry.key == spell_key:
+                srec = entry
+                break
+        if not srec:
             return False
         if self.traits.mana.current < spell.mana_cost:
             return False
@@ -526,6 +543,9 @@ class Character(ObjectParent, ClothedCharacter):
             self.location.msg_contents(
                 f"{self.get_display_name(self)} casts {spell.key}!"
             )
+        if srec.proficiency < 100:
+            srec.proficiency = min(100, srec.proficiency + 1)
+            self.db.spells = known
         return True
 
     def get_display_status(self, looker, **kwargs):

@@ -48,16 +48,17 @@ class TestShopRestock(EvenniaTest):
 
 
 class TestTraining(EvenniaTest):
-    def test_train_skill_costs_xp(self):
+    def test_train_skill_uses_practice(self):
         from typeclasses.rooms import XYGridTrain
 
         trainer = create.create_object(XYGridTrain, key="dojo")
         trainer.db.skill_training = "smithing"
-        self.char1.db.exp = 10
+        self.char1.db.practice_sessions = 2
 
-        success, cost, new_level = trainer.train_skill(self.char1, 2)
+        success, spent, prof = trainer.train_skill(self.char1, 1)
 
         self.assertTrue(success)
-        self.assertEqual(cost, 3)
-        self.assertEqual(new_level, 2)
-        self.assertEqual(self.char1.db.exp, 7)
+        self.assertEqual(spent, 1)
+        self.assertEqual(self.char1.db.practice_sessions, 1)
+        self.assertEqual(getattr(self.char1.traits.smithing, "proficiency", 0), 25)
+        self.assertEqual(prof, 25)

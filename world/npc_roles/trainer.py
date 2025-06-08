@@ -26,6 +26,7 @@ class TrainerRole:
                 base=0,
                 stat=SKILL_DICT.get(skill),
             )
+            trait.proficiency = 25
 
         trainee.db.exp = xp - 1
         trait.base += 1

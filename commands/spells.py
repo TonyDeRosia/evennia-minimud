@@ -1,7 +1,7 @@
 from evennia import CmdSet
 from evennia.utils.evtable import EvTable
 from .command import Command
-from world.spells import SPELLS
+from world.spells import SPELLS, Spell
 
 
 class CmdSpellbook(Command):
@@ -14,11 +14,20 @@ class CmdSpellbook(Command):
         if not known:
             self.msg("You do not know any spells.")
             return
-        table = EvTable("Spell", "Mana")
-        for skey in known:
-            spell = SPELLS.get(skey)
+        table = EvTable("Spell", "Mana", "Proficiency")
+        for entry in known:
+            if isinstance(entry, str):
+                spell = SPELLS.get(entry)
+                if not spell:
+                    continue
+                prof = 0
+                key = entry
+            else:
+                spell = SPELLS.get(entry.key)
+                key = entry.key
+                prof = getattr(entry, "proficiency", 0)
             if spell:
-                table.add_row(spell.key, spell.mana_cost)
+                table.add_row(key, spell.mana_cost, f"{prof}%")
         self.msg(str(table))
 
 
@@ -44,7 +53,14 @@ class CmdCast(Command):
             self.msg("No such spell.")
             return
         known = self.caller.db.spells or []
-        if spell_key not in known:
+        spell_entry = None
+        for entry in known:
+            if (isinstance(entry, str) and entry == spell_key) or (
+                not isinstance(entry, str) and entry.key == spell_key
+            ):
+                spell_entry = entry
+                break
+        if spell_entry is None:
             self.msg("You have not learned that spell.")
             return
         if self.caller.traits.mana.current < spell.mana_cost:
@@ -64,6 +80,10 @@ class CmdCast(Command):
             self.caller.location.msg_contents(
                 f"{self.caller.get_display_name(self.caller)} casts {spell.key}!"
             )
+        if isinstance(spell_entry, Spell):
+            if spell_entry.proficiency < 100:
+                spell_entry.proficiency = min(100, spell_entry.proficiency + 1)
+            self.caller.db.spells = known
 
 
 class CmdLearnSpell(Command):
@@ -79,10 +99,18 @@ class CmdLearnSpell(Command):
             self.msg("You cannot learn spells here.")
             return
         known = self.caller.db.spells or []
-        if spell_key in known:
-            self.msg("You already know that spell.")
+        for entry in known:
+            if (isinstance(entry, str) and entry == spell_key) or (
+                not isinstance(entry, str) and entry.key == spell_key
+            ):
+                self.msg("You already know that spell.")
+                return
+        if (self.caller.db.practice_sessions or 0) <= 0:
+            self.msg("You have no practice sessions left.")
             return
-        known.append(spell_key)
+        self.caller.db.practice_sessions -= 1
+        new_spell = Spell(spell.key, spell.stat, spell.mana_cost, spell.desc, 25)
+        known.append(new_spell)
         self.caller.db.spells = known
         self.msg(f"You learn the {spell.key} spell.")
 

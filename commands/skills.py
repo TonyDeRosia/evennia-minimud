@@ -62,15 +62,15 @@ class CmdStatSheet(Command):
 
 class CmdTrainSkill(Command):
     """
-    Improve a skill, based on how much experience you have.
+    Spend practice sessions to improve a skill.
 
     Enter just "train" by itself to see what you can learn here.
 
     Usage:
-        train <levels>
+        train <sessions>
 
     Example:
-        train 5
+        train 2
     """
 
     key = "train"
@@ -97,7 +97,7 @@ class CmdTrainSkill(Command):
         try:
             levels = int(self.args.strip())
         except ValueError:
-            self.msg("Usage: train <levels>")
+            self.msg("Usage: train <sessions>")
             return
 
         can_train, cost = self.obj.check_training(caller, levels)
@@ -105,26 +105,22 @@ class CmdTrainSkill(Command):
             self.msg("You cannot train any skills here.")
             return
         if can_train is False:
-            self.msg(
-                f"You do not have enough experience - you need {cost} experience to increase your {to_train} by {levels} levels."
-            )
+            self.msg("You do not have enough practice sessions.")
             return
 
         confirm = yield (
-            f"It will cost you {cost} experience to improve your {to_train} by {levels} levels. Confirm? Yes/No"
+            f"Spend {levels} practice session{'s' if levels != 1 else ''} to improve your {to_train}? Yes/No"
         )
         if confirm.lower() not in ("yes", "y"):
             self.msg("Cancelled.")
             return
 
-        success, spent, new_level = self.obj.train_skill(caller, levels)
+        success, spent, new_prof = self.obj.train_skill(caller, levels)
         if not success:
-            self.msg(
-                f"You do not have enough experience - you need {spent} experience to improve your {to_train}."
-            )
+            self.msg("You do not have enough practice sessions.")
             return
 
-        self.msg(f"You practice your {to_train} and improve it to level {new_level}.")
+        self.msg(f"You practice your {to_train} and reach {new_prof}% proficiency.")
 
 
 class CmdTrainResource(Command):

@@ -2720,9 +2720,10 @@ Usage:
         "category": "General",
         "text": """Help for spells
 
-Learn new spells from trainers with |wlearn|n. Once learned, cast a spell
-using |wcast <spell> [on <target>]|n. Casting costs mana according to the
-spell.
+Learn new spells from trainers with |wlearn|n. Spells start at 25% proficiency.
+Use practice sessions with |wlearn|n to raise proficiency up to 75%. Casting
+spells will slowly increase proficiency to a maximum of 100%.
+Usage: |wcast <spell> [on <target>]|n consumes mana based on the spell.
 """,
     },
     {
@@ -2747,6 +2748,8 @@ Notes:
         "text": """Help for learn
 
 Learn a spell from a trainer in your current location.
+Each use costs one practice session and increases proficiency to 25% if the
+spell was unknown or by 25% up to 75% if already learned.
 
 Usage:
     learn
