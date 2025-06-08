@@ -595,6 +595,10 @@ class Character(ObjectParent, ClothedCharacter):
         """
         from world.system import state_manager
 
+        # advance effect and status timers
+        state_manager.tick_character(self)
+
+        # apply passive regeneration
         state_manager.apply_regen(self)
 
         if self.sessions.count():

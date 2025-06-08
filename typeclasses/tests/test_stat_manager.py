@@ -77,8 +77,8 @@ class TestStatManager(EvenniaTest):
         state_manager.add_effect(char, "STR", 2)
         self.assertEqual(char.traits.STR.base, base + 5)
         self.assertEqual(stat_manager.get_effective_stat(char, "STR"), base + 5)
-        state_manager.tick_character(char)
-        state_manager.tick_character(char)
+        char.at_tick()
+        char.at_tick()
         self.assertEqual(char.traits.STR.base, base)
 
     def test_debuff_modifiers(self):
@@ -87,7 +87,7 @@ class TestStatManager(EvenniaTest):
         base = char.traits.DEX.base
         state_manager.add_effect(char, "stunned", 1)
         self.assertEqual(char.traits.DEX.base, base - 5)
-        state_manager.tick_character(char)
+        char.at_tick()
         self.assertEqual(char.traits.DEX.base, base)
 
     def test_gear_buffs_apply(self):

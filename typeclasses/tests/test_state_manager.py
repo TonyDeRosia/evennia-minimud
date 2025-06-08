@@ -10,11 +10,11 @@ class TestStateManager(EvenniaTest):
         self.assertEqual(
             state_manager.get_effective_stat(char, "STR"), base + 5
         )
-        state_manager.tick_all()
+        char.at_tick()
         self.assertEqual(
             state_manager.get_effective_stat(char, "STR"), base + 5
         )
-        state_manager.tick_all()
+        char.at_tick()
         self.assertEqual(
             state_manager.get_effective_stat(char, "STR"), base
         )
@@ -23,7 +23,7 @@ class TestStateManager(EvenniaTest):
         char = self.char1
         state_manager.add_status_effect(char, "stunned", 1)
         self.assertTrue(char.tags.has("stunned", category="status"))
-        state_manager.tick_all()
+        char.at_tick()
         self.assertFalse(char.tags.has("stunned", category="status"))
 
     def test_cooldown_api(self):
@@ -38,7 +38,7 @@ class TestStateManager(EvenniaTest):
         state_manager.add_temp_stat_bonus(char, "STR", 5, 2, effect_key="speed")
         entry = char.db.temp_bonuses["STR"][0]
         self.assertEqual(entry["key"], "speed")
-        state_manager.tick_character(char)
+        char.at_tick()
         entry_after = char.db.temp_bonuses["STR"][0]
         self.assertEqual(entry_after["key"], "speed")
 
@@ -46,7 +46,7 @@ class TestStateManager(EvenniaTest):
         char = self.char1
         char.db.sated = 1
         hp = char.traits.health.current
-        state_manager.tick_character(char)
+        char.at_tick()
         self.assertEqual(char.db.sated, 0)
         self.assertTrue(char.tags.has("hungry_thirsty", category="status"))
         self.assertEqual(char.traits.health.current, hp - 1)
@@ -55,10 +55,10 @@ class TestStateManager(EvenniaTest):
         char = self.char1
         char.db.sated = 2
         hp = char.traits.health.current
-        state_manager.tick_character(char)
+        char.at_tick()
         self.assertEqual(char.db.sated, 1)
         self.assertEqual(char.traits.health.current, hp)
-        state_manager.tick_character(char)
+        char.at_tick()
         self.assertEqual(char.db.sated, 0)
         self.assertTrue(char.tags.has("hungry_thirsty", category="status"))
         self.assertEqual(char.traits.health.current, hp - 1)
@@ -66,7 +66,7 @@ class TestStateManager(EvenniaTest):
     def test_hunger_cap(self):
         char = self.char1
         char.db.sated = 150
-        state_manager.tick_character(char)
+        char.at_tick()
         self.assertLessEqual(char.db.sated, state_manager.MAX_SATED)
 
     def test_hunger_ignored_at_max_level(self):
@@ -74,7 +74,7 @@ class TestStateManager(EvenniaTest):
         char.db.level = state_manager.MAX_LEVEL
         char.db.sated = 1
         hp = char.traits.health.current
-        state_manager.tick_character(char)
+        char.at_tick()
         self.assertEqual(char.db.sated, 1)
         self.assertFalse(char.tags.has("hungry_thirsty", category="status"))
         self.assertEqual(char.traits.health.current, hp)
