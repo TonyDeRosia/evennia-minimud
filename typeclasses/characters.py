@@ -181,6 +181,8 @@ class Character(ObjectParent, ClothedCharacter):
         self.db.stat_overrides = {}
         self.db.equip_bonuses = {}
         self.db.sated = 5
+        from typeclasses.global_tick import register_character
+        register_character(self)
 
     def at_post_puppet(self, **kwargs):
         """Ensure stats refresh when a character is controlled."""
@@ -224,6 +226,11 @@ class Character(ObjectParent, ClothedCharacter):
 
         self.update_carry_weight()
         stat_manager.refresh_stats(self)
+
+    def at_object_delete(self):
+        from typeclasses.global_tick import unregister_character
+        unregister_character(self)
+        return super().at_object_delete()
         
     def at_pre_move(self, destination, **kwargs):
         """
