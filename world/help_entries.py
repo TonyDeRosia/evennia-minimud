@@ -1584,7 +1584,7 @@ Help for qcreate
 Create and register a new quest. Usage: qcreate <quest_key> "<title>"
 
 Usage:
-    qcreate
+    qcreate <quest_key> "<title>"
 
 Switches:
     None
@@ -1596,7 +1596,7 @@ Examples:
     None
 
 Notes:
-    - None
+    - Registers a new quest with the given key and title.
 
 Related:
     help ansi
@@ -1611,7 +1611,7 @@ Help for qset
 Change quest attributes. Usage: qset <quest_key> <attr> <value>
 
 Usage:
-    qset
+    qset <quest_key> <attribute> <value>
 
 Switches:
     None
@@ -1623,7 +1623,7 @@ Examples:
     None
 
 Notes:
-    - None
+    - Updates attributes on an existing quest.
 
 Related:
     help ansi
@@ -1638,7 +1638,7 @@ Help for qitem
 Spawn a quest item. Usage: qitem <quest_key> <item_key>
 
 Usage:
-    qitem
+    qitem <quest_key> <item_key>
 
 Switches:
     None
@@ -1650,7 +1650,7 @@ Examples:
     None
 
 Notes:
-    - None
+    - Creates and tags an item for the given quest.
 
 Related:
     help ansi
@@ -1665,7 +1665,7 @@ Help for qassign
 Assign a quest to an NPC. Usage: qassign <npc> <quest_key>
 
 Usage:
-    qassign
+    qassign <npc> <quest_key>
 
 Switches:
     None
@@ -1677,7 +1677,7 @@ Examples:
     None
 
 Notes:
-    - None
+    - Adds the quest to an NPC so they can offer it.
 
 Related:
     help ansi
@@ -1693,7 +1693,7 @@ Set guild point rewards on a quest. Usage: qtag <quest_key> guild <guild>
 <amount>
 
 Usage:
-    qtag
+    qtag <quest_key> guild <guild_name> <gp_value>
 
 Switches:
     None
@@ -1705,7 +1705,7 @@ Examples:
     None
 
 Notes:
-    - None
+    - Sets guild point rewards for completing the quest.
 
 Related:
     help ansi
