@@ -150,3 +150,43 @@ class TestMeleeWeaponUtility(EvenniaTest):
         )
         self.assertFalse(weapon.is_twohanded())
 
+
+class TestEquippedByReference(EvenniaTest):
+    def test_wear_sets_equipped_by(self):
+        item = create_object(
+            "typeclasses.objects.ClothingObject",
+            key="hat",
+            location=self.char1,
+        )
+        item.tags.add("equipment", category="flag")
+        item.tags.add("identified", category="flag")
+        item.wear(self.char1, True)
+        self.assertEqual(item.db.equipped_by, self.char1)
+
+    def test_remove_clears_equipped_by(self):
+        item = create_object(
+            "typeclasses.objects.ClothingObject",
+            key="ring",
+            location=self.char1,
+        )
+        item.tags.add("equipment", category="flag")
+        item.tags.add("identified", category="flag")
+        item.wear(self.char1, True)
+        item.remove(self.char1, True)
+        self.assertFalse(item.db.equipped_by)
+
+    @patch("evennia.search_object")
+    @patch("world.system.stat_manager.remove_bonuses")
+    def test_delete_does_not_scan(self, mock_remove, mock_search):
+        item = create_object(
+            "typeclasses.objects.ClothingObject",
+            key="cloak",
+            location=self.char1,
+        )
+        item.tags.add("equipment", category="flag")
+        item.tags.add("identified", category="flag")
+        item.wear(self.char1, True)
+        item.delete()
+        mock_search.assert_not_called()
+        mock_remove.assert_called_once_with(self.char1, item)
+

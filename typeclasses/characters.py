@@ -440,6 +440,7 @@ class Character(ObjectParent, ClothedCharacter):
         # update the character with the new wielded info and move the item out of inventory
         self.db._wielded = wielded
         weapon.location = None
+        weapon.db.equipped_by = self
         self.update_carry_weight()
         from world.system import stat_manager
         stat_manager.apply_item_bonuses_once(self, weapon)
@@ -472,6 +473,7 @@ class Character(ObjectParent, ClothedCharacter):
         # update the character with the new wielded info and return weapon to inventory
         self.db._wielded = wielded
         weapon.location = self
+        weapon.db.equipped_by = None
         self.update_carry_weight()
         from world.system import stat_manager
         stat_manager.remove_item_bonuses(self, weapon)

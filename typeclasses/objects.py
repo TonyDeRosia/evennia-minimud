@@ -218,15 +218,9 @@ class Object(ObjectParent, DefaultObject):
 
     def at_object_delete(self):
         """Clean up bonuses if this item is equipped when deleted."""
-        from evennia import search_object
-        from evennia.utils.utils import inherits_from
-
-        for char in search_object("*"):
-            if not inherits_from(char, "typeclasses.characters.Character"):
-                continue
-            if self in char.equipment.values():
-                stat_manager.remove_bonuses(char, self)
-                break
+        char = self.db.equipped_by
+        if char:
+            stat_manager.remove_bonuses(char, self)
         return True
 
 
@@ -273,6 +267,7 @@ class ClothingObject(ObjectParent, ContribClothing):
                     return
 
         result = super().wear(wearer, wearstyle, quiet=quiet)
+        self.db.equipped_by = wearer
         self.location = None
         wearer.update_carry_weight()
         # store equipped item in the character's equipment mapping
@@ -291,6 +286,7 @@ class ClothingObject(ObjectParent, ContribClothing):
         """Return to inventory when removed."""
         result = super().remove(wearer, quiet=quiet)
         self.location = wearer
+        self.db.equipped_by = None
         wearer.update_carry_weight()
         slot = self.db.slot or self.db.clothing_type
         if not slot:
