@@ -13,6 +13,10 @@ to be modified.
 """
 
 from evennia.comms.comms import DefaultChannel
+from evennia.utils.utils import make_iter
+
+
+MAX_HISTORY = 50
 
 
 class Channel(DefaultChannel):
@@ -59,4 +63,57 @@ class Channel(DefaultChannel):
 
     """
 
-    pass
+    def pre_join_channel(self, joiner, **kwargs):
+        """Block joining if joiner has a ``nojoin`` tag."""
+
+        if joiner.tags.get("nojoin", category="channel"):
+            joiner.msg(f"You may not join {self.key}.")
+            return False
+        return True
+
+    def post_join_channel(self, joiner, **kwargs):
+        """Announce the join and run parent hook."""
+
+        super().post_join_channel(joiner, **kwargs)
+        self.msg(f"{joiner.key} has joined {self.key}.")
+
+    def pre_leave_channel(self, leaver, **kwargs):
+        """Prevent leaving if the ``noleave`` tag is set."""
+
+        if leaver.tags.get("noleave", category="channel"):
+            leaver.msg(f"You may not leave {self.key}.")
+            return False
+        return True
+
+    def post_leave_channel(self, leaver, **kwargs):
+        """Announce the leave and run parent hook."""
+
+        super().post_leave_channel(leaver, **kwargs)
+        self.msg(f"{leaver.key} has left {self.key}.")
+
+    def pre_send_message(self, msg, **kwargs):
+        """Block messages from senders tagged ``muted``."""
+
+        for sender in make_iter(kwargs.get("senders", [])):
+            if sender.tags.get("muted", category="channel"):
+                sender.msg("You are muted and cannot speak here.")
+                return False
+        return msg
+
+    def post_send_message(self, msg, **kwargs):
+        """Store a simple history of recent messages."""
+
+        history = list(self.db.history or [])
+        history.append(msg)
+        self.db.history = history[-MAX_HISTORY:]
+
+    # new-style hooks calling the old-style names
+    def at_pre_msg(self, message, **kwargs):
+        message = self.pre_send_message(message, **kwargs)
+        if message in (None, False):
+            return None
+        return super().at_pre_msg(message, **kwargs)
+
+    def at_post_msg(self, message, **kwargs):
+        super().at_post_msg(message, **kwargs)
+        self.post_send_message(message, **kwargs)
