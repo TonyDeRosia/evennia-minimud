@@ -38,11 +38,17 @@ def _ai_scripted(npc: DefaultObject) -> None:
     pass
 
 
+def _ai_passive(npc: DefaultObject) -> None:
+    """Non-responsive AI that takes no actions."""
+    return
+
+
 _AI_MAP = {
     "aggressive": _ai_aggressive,
     "wander": _ai_wander,
     "defensive": _ai_defensive,
     "scripted": _ai_scripted,
+    "passive": _ai_passive,
 }
 
 
