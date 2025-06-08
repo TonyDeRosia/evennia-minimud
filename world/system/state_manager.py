@@ -190,7 +190,7 @@ def apply_regen(chara):
 
     location = getattr(chara, "location", None)
     if location and location.tags.has("rest_area", category="room_flag"):
-        multiplier += 1
+        multiplier += 10
 
     for key in ("health", "mana", "stamina"):
         trait = chara.traits.get(key)
