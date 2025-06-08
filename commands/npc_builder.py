@@ -11,12 +11,10 @@ import re
 # NPC types that can be selected in the builder
 ALLOWED_NPC_TYPES = (
     "merchant",
-    "guard",
     "questgiver",
     "guildmaster",
     "banker",
     "guild_receptionist",
-    "craftsman",
     "trainer",
     "wanderer",
 )

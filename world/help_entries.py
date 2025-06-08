@@ -2469,7 +2469,7 @@ Arguments:
     None
 
 Examples:
-    cnpc start guard_01
+    cnpc start merchant_01
     cnpc edit Bob
     cnpc dev_spawn basic_merchant
 
@@ -2477,8 +2477,8 @@ Notes:
     - Aliases:
     - npc
     - createnpc
-    - NPC types include merchant, guard, questgiver, guildmaster,
-      guild_receptionist, banker, craftsman, trainer and wanderer.
+    - NPC types include merchant, questgiver, guildmaster,
+      guild_receptionist, banker, trainer and wanderer.
     - NPC classes include base, merchant, banker, trainer, wanderer,
       guildmaster, guild_receptionist, questgiver, combat_trainer and
       event_npc.
