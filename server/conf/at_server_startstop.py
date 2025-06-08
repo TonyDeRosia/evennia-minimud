@@ -17,6 +17,9 @@ at_server_cold_stop()
 
 """
 
+# Path to the global tick script typeclass
+GLOBAL_TICK_SCRIPT_PATH = "typeclasses.global_tick.GlobalTickScript"
+
 
 def at_server_init():
     """
@@ -41,7 +44,7 @@ def at_server_start():
             extra.stop()
             extra.delete()
 
-    if script and script.typeclass_path != "typeclasses.global_tick.GlobalTickScript":
+    if script and script.typeclass_path != GLOBAL_TICK_SCRIPT_PATH:
         script.stop()
         script.delete()
         script = None
@@ -62,15 +65,9 @@ def at_server_start():
             script.start()
 
     if not script:
-        script = create.create_script("typeclasses.global_tick.GlobalTickScript", key="global_tick")
+        script = create.create_script(GLOBAL_TICK_SCRIPT_PATH, key="global_tick")
         script.start()
 
-    # Ensure all characters are marked tickable for the global ticker
-    from typeclasses.characters import Character
-
-    for char in Character.objects.all():
-        if not char.tags.has("tickable"):
-            char.tags.add("tickable")
 
 
 def at_server_stop():
