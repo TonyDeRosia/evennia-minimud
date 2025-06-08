@@ -123,8 +123,52 @@ classes include `BaseNPC`, `MerchantNPC`, `BankerNPC`, `TrainerNPC`,
 While editing, there's a step to manage triggers using a numbered menu. Choose
 `Add trigger` to create a new reaction, `Delete trigger` to remove one, `List
 triggers` to review them and `Finish` when done. Multiple trigger entries can be
-added for the same event.
-See the `triggers` help entry for the list of events and possible reactions.
+added for the same event. See the `triggers` help entry for the list of events
+and possible reactions.
+
+### NPC Roles and AI
+
+The builder now supports assigning extra roles and basic AI scripts. Roles are
+mixins found under `world.npc_roles`:
+
+- **merchant** – sells items to players.
+- **banker** – handles deposits and withdrawals.
+- **trainer** – teaches skills.
+- **guildmaster** – manages guild business.
+- **guild_receptionist** – greets visitors for a guild.
+- **questgiver** – offers quests to players.
+- **combat_trainer** – spars to improve combat ability.
+- **event_npc** – starts or manages special events.
+
+AI behaviors come from `world.npc_handlers.ai` and can be selected in the
+builder:
+
+- **passive** – take no automatic actions.
+- **aggressive** – attack the first player seen.
+- **defensive** – fight back only when in combat.
+- **wander** – roam randomly through available exits.
+- **scripted** – placeholder hook for custom Python code.
+
+### Trigger Syntax
+
+NPC triggers use a dictionary mapping events to one or more reaction entries. A
+reaction may specify a `match` text and single or multiple `responses` to run::
+
+    {
+        "on_enter": [
+            {"match": "", "responses": ["say Hello", "emote waves"]}
+        ]
+    }
+
+During the builder you can add triggers one at a time. The example above shows
+how multiple responses can be combined in your prototype file if you edit it
+manually.
+
+To spawn an NPC saved with an AI type and triggers, use:
+
+```text
+@spawnnpc my_npc_proto
+```
 
 There are also helper commands for managing NPCs after creation:
 `@editnpc <npc>` reopens the builder on an existing NPC, `@clonenpc <npc> [= <new_name>]`

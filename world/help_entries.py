@@ -2535,6 +2535,49 @@ Related:
 """,
     },
     {
+        "key": 'npc roles',
+        "aliases": ['roles'],
+        "category": 'Building',
+        "text": """Help for npc roles
+
+NPC roles grant extra behavior to an NPC. They are selected during the
+`cnpc` builder at the roles step. Available roles are:
+    merchant - sells items to players
+    banker - stores currency for players
+    trainer - teaches skills
+    guildmaster - manages a guild
+    guild_receptionist - greets guild visitors
+    questgiver - offers quests
+    combat_trainer - spars to improve combat ability
+    event_npc - starts special events
+
+Multiple roles may be assigned to the same NPC.
+
+Related:
+    help cnpc
+""",
+    },
+    {
+        "key": 'npc ai',
+        "aliases": ['ai'],
+        "category": 'Building',
+        "text": """Help for npc ai
+
+The `cnpc` builder lets you choose an AI type controlling basic behavior.
+The available AI types are stored in `world.npc_handlers.ai`:
+    passive - no automatic actions
+    aggressive - attack the first player seen
+    defensive - only fight when attacked
+    wander - move through random exits
+    scripted - custom Python hook
+
+Set the type when prompted in the builder or edit the prototype data.
+
+Related:
+    help cnpc
+""",
+    },
+    {
         "key": '@deletenpc',
         "category": 'Building',
         "text": """Help for @deletenpc
