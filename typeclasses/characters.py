@@ -35,6 +35,7 @@ class Character(ObjectParent, ClothedCharacter):
     guild_rank = AttributeProperty("")
     stat_overrides = AttributeProperty({})
     spells = AttributeProperty([])
+    training_points = AttributeProperty(0)
 
     @property
     def in_combat(self):
@@ -184,6 +185,7 @@ class Character(ObjectParent, ClothedCharacter):
         self.db.stat_overrides = {}
         self.db.equip_bonuses = {}
         self.db.spells = []
+        self.db.training_points = 0
         self.db.sated = 5
 
     def at_post_puppet(self, **kwargs):
@@ -228,7 +230,7 @@ class Character(ObjectParent, ClothedCharacter):
 
         self.update_carry_weight()
         stat_manager.refresh_stats(self)
-        
+
     def at_pre_move(self, destination, **kwargs):
         """
         Called by self.move_to when trying to move somewhere. If this returns
@@ -267,9 +269,7 @@ class Character(ObjectParent, ClothedCharacter):
         if self.tags.has("hungry_thirsty", category="status"):
             cost += 1
         if self.traits.stamina:
-            self.traits.stamina.current = max(
-                self.traits.stamina.current - cost, 0
-            )
+            self.traits.stamina.current = max(self.traits.stamina.current - cost, 0)
 
         # check if we have auto-prompt in settings
         if self.account and (settings := self.account.db.settings):
@@ -321,7 +321,7 @@ class Character(ObjectParent, ClothedCharacter):
                         f"Could not remove defeated character from combat! Character: {self.name} (#{self.id}) Location: {self.location.name} (#{self.location.id})"
                     )
                     return
-            if (bounty := self.db.bounty):
+            if bounty := self.db.bounty:
                 wallet = attacker.db.coins or {}
                 total = to_copper(wallet) + bounty
                 attacker.db.coins = from_copper(total)
@@ -414,7 +414,10 @@ class Character(ObjectParent, ClothedCharacter):
         # handle two-handed weapons
         twohanded = getattr(weapon, "is_twohanded", lambda: False)()
         if twohanded:
-            if any(obj.tags.has("shield", category="flag") for obj in get_worn_clothes(self)):
+            if any(
+                obj.tags.has("shield", category="flag")
+                for obj in get_worn_clothes(self)
+            ):
                 self.msg(
                     f"You cannot wield {weapon.get_display_name(self)} while using a shield."
                 )
@@ -445,6 +448,7 @@ class Character(ObjectParent, ClothedCharacter):
         weapon.location = None
         self.update_carry_weight()
         from world.system import stat_manager
+
         stat_manager.apply_item_bonuses_once(self, weapon)
         # return the list of hands that are now holding the weapon
         return hands
@@ -477,6 +481,7 @@ class Character(ObjectParent, ClothedCharacter):
         weapon.location = self
         self.update_carry_weight()
         from world.system import stat_manager
+
         stat_manager.remove_item_bonuses(self, weapon)
         # return the list of hands that are no longer holding the weapon
         return freed
@@ -529,6 +534,7 @@ class Character(ObjectParent, ClothedCharacter):
         """
 
         from world.system import stat_manager
+
         stat_manager.refresh_stats(self)
 
         chunks = []
@@ -540,9 +546,7 @@ class Character(ObjectParent, ClothedCharacter):
         hp = int(math.ceil(self.traits.health.percent(None)))
         mp = int(math.ceil(self.traits.mana.percent(None)))
         sp = int(math.ceil(self.traits.stamina.percent(None)))
-        chunks.append(
-            f"Health {hp}% : Mana {mp}% : Stamina {sp}%"
-        )
+        chunks.append(f"Health {hp}% : Mana {mp}% : Stamina {sp}%")
 
         # get all the current status flags for this character
         if status_tags := self.tags.get(category="status", return_list=True):
@@ -689,7 +693,6 @@ class PlayerCharacter(Character):
             return f"|c{name}|n"
         return f"|g{name}|n"
 
-
     def at_damage(self, attacker, damage, damage_type=None, critical=False):
         super().at_damage(attacker, damage, damage_type=damage_type, critical=critical)
         if self.traits.health.value < 50:
@@ -785,7 +788,6 @@ class NPC(Character):
     def check_triggers(self, event, **kwargs):
         """Evaluate stored triggers for a given event."""
         self.trigger_manager.check(event, **kwargs)
-
 
     # property to mimic weapons
     @property
@@ -959,6 +961,7 @@ class NPC(Character):
         attack with your natural weapon
         """
         from world.system import stat_manager
+
         weapon = self.db.natural_weapon
         damage = weapon.get("damage", 0)
         speed = weapon.get("speed", 10)
