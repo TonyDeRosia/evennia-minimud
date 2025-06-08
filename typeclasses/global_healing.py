@@ -1,19 +1,28 @@
 """Regenerate character resources on a global interval."""
 
 from evennia.scripts.scripts import DefaultScript
+from typeclasses.global_tick import TICK
 from typeclasses.characters import Character, NPC
 
 
 class GlobalHealingScript(DefaultScript):
-    """Apply passive regeneration to all characters periodically."""
+    """Apply passive regeneration to all characters once per global tick."""
 
     def at_script_creation(self):
-        """Set up the repeating script."""
-        self.interval = 60
+        """Configure script to persist without its own interval."""
+        self.interval = None
         self.persistent = True
 
-    def at_repeat(self):
-        """Heal all characters once per interval."""
+    def at_start(self):
+        """Connect to the global tick signal."""
+        TICK.connect(self.on_tick)
+
+    def at_stop(self):
+        """Disconnect from the global tick signal."""
+        TICK.disconnect(self.on_tick)
+
+    def on_tick(self, sender=None, **kwargs):
+        """Heal all characters when the global tick fires."""
         targets = list(Character.objects.all()) + list(NPC.objects.all())
         seen = set()
         for obj in targets:
@@ -23,6 +32,7 @@ class GlobalHealingScript(DefaultScript):
             if obj.tags.has("unconscious", category="status"):
                 continue
             derived = obj.db.derived_stats or {}
+            healed = False
             for key in ("health", "mana", "stamina"):
                 trait = obj.traits.get(key)
                 if not trait:
@@ -31,6 +41,11 @@ class GlobalHealingScript(DefaultScript):
                 if regen <= 0 or trait.current >= trait.max:
                     continue
                 trait.current = min(trait.current + regen, trait.max)
-            if obj.sessions.count():
-                obj.refresh_prompt()
+                healed = True
+            if healed and obj.sessions.count():
+                obj.msg("You have recovered some.", prompt=obj.get_resource_prompt())
+
+    def at_repeat(self):
+        """Unused; regeneration is handled via :func:`on_tick`."""
+        pass
 
