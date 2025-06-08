@@ -89,3 +89,46 @@ class TestNPCRoleBehaviors(EvenniaTest):
         npc = create.create_object(EventNPC, key="eventer", location=self.room1)
         npc.start_event(self.char1, "party")
         self.assertEqual(npc.db.active_event, "party")
+
+    def test_merchant_sell_fails_without_coins(self):
+        merchant = create.create_object(MerchantNPC, key="poor", location=self.room1)
+        item = create.create_object("typeclasses.objects.Object", key="stone", location=merchant)
+        self.char1.db.coins = from_copper(1)
+        merchant.db.coins = from_copper(0)
+
+        merchant.sell(self.char1, item, 10)
+
+        self.assertEqual(item.location, merchant)
+        self.assertEqual(to_copper(self.char1.db.coins), 1)
+        self.assertEqual(to_copper(merchant.db.coins), 0)
+
+    def test_banker_deposit_requires_funds(self):
+        banker = create.create_object(BankerNPC, key="safe", location=self.room1)
+        self.char1.db.coins = from_copper(5)
+        banker.deposit(self.char1, 10)
+        self.assertEqual(to_copper(self.char1.db.coins), 5)
+        self.assertFalse(getattr(self.char1.db, "bank", 0))
+
+    def test_banker_withdraw_requires_balance(self):
+        banker = create.create_object(BankerNPC, key="safe2", location=self.room1)
+        self.char1.db.coins = from_copper(0)
+        self.char1.db.bank = 5
+        banker.withdraw(self.char1, 10)
+        self.assertEqual(to_copper(self.char1.db.coins), 0)
+        self.assertEqual(self.char1.db.bank, 5)
+
+    def test_trainer_requires_experience(self):
+        trainer = create.create_object(TrainerNPC, key="sensei", location=self.room1)
+        self.char1.db.exp = 0
+        trainer.train(self.char1, "alchemy")
+        self.assertIsNone(self.char1.traits.get("alchemy"))
+
+    def test_questgiver_handles_missing_and_duplicate(self):
+        quest = Quest(quest_key="unique", title="U")
+        save_quest(quest)
+        giver = create.create_object(QuestGiverNPC, key="giver2", location=self.room1)
+        giver.offer_quest(self.char1, "missing")
+        self.assertNotIn("missing", self.char1.db.get("active_quests", {}))
+        giver.offer_quest(self.char1, "unique")
+        giver.offer_quest(self.char1, "unique")
+        self.assertEqual(list(self.char1.db.active_quests.keys()).count("unique"), 1)
