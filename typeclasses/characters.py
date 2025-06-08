@@ -586,23 +586,23 @@ class Character(ObjectParent, ClothedCharacter):
         pass
 
     def at_tick(self):
-        """Called by the global ticker.
+        """Handle one tick of regeneration.
 
-        Regenerates resources based on current status and refreshes the prompt
-        to visually reflect the changes.
+        The global ticker calls this once every minute. Any passive healing or
+        status effects are advanced here.
+
+        Returns:
+            bool: ``True`` if any resources were changed.
         """
         from world.system import state_manager
 
         # advance effect and status timers
         state_manager.tick_character(self)
 
-        # apply passive regeneration
+        # apply passive regeneration and report if anything changed
         healed = state_manager.apply_regen(self)
 
-        if self.sessions.count():
-            self.refresh_prompt()
-
-        return healed
+        return bool(healed)
 
     def refresh_prompt(self):
         """Refresh the player's prompt display."""
@@ -1004,5 +1004,7 @@ class NPC(Character):
         wielder.cooldowns.add("attack", speed)
 
     def at_tick(self):
-        super().at_tick()
+        """Propagate tick handling and evaluate triggers."""
+        changed = super().at_tick()
         self.check_triggers("on_timer")
+        return changed
