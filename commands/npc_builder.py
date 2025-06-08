@@ -28,6 +28,11 @@ NPC_CLASS_MAP = {
     "banker": "typeclasses.npcs.banker.BankerNPC",
     "trainer": "typeclasses.npcs.trainer.TrainerNPC",
     "wanderer": "typeclasses.npcs.wanderer.WandererNPC",
+    "guildmaster": "typeclasses.npcs.guildmaster.GuildmasterNPC",
+    "guild_receptionist": "typeclasses.npcs.guild_receptionist.GuildReceptionistNPC",
+    "questgiver": "typeclasses.npcs.questgiver.QuestGiverNPC",
+    "combat_trainer": "typeclasses.npcs.combat_trainer.CombatTrainerNPC",
+    "event_npc": "typeclasses.npcs.event_npc.EventNPC",
 }
 
 
