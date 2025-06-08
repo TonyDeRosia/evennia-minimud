@@ -125,7 +125,8 @@ GLOBAL_SCRIPTS = {
     },
     "global_healing": {
         "key": "global_healing",
-        "typeclass": "typeclasses.global_healing.GlobalHealing",
+        "typeclass": "typeclasses.global_healing.GlobalHealingScript",
+        "interval": 60,
         "persistent": True,
     },
 }
