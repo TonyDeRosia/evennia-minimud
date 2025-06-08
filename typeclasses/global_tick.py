@@ -2,7 +2,7 @@
 
 from django.dispatch import Signal
 from evennia.scripts.scripts import DefaultScript
-from typeclasses.characters import Character, NPC
+from typeclasses.characters import Character
 
 # ----------------------------------------------------------------------------
 # Tick signal
@@ -25,12 +25,8 @@ class GlobalTickScript(DefaultScript):
 
     def at_repeat(self):
         """Handle one global tick."""
-        targets = list(Character.objects.all()) + list(NPC.objects.all())
-        seen = set()
+        targets = Character.objects.all()
         for obj in targets:
-            if obj in seen:
-                continue
-            seen.add(obj)
             if hasattr(obj, "at_tick"):
                 changed = obj.at_tick()
                 if changed and obj.sessions.count():
