@@ -1,9 +1,16 @@
 from typeclasses.characters import NPC
 
+
 class BaseNPC(NPC):
     """Base NPC typeclass for specialized behaviors."""
 
-    pass
+    def at_object_creation(self):
+        super().at_object_creation()
+        if self.db.ai_type:
+            from scripts.npc_ai_script import NPCAIScript
+
+            if not self.scripts.get("npc_ai"):
+                self.scripts.add(NPCAIScript, key="npc_ai")
 
 from .merchant import MerchantNPC  # noqa: E402
 from .banker import BankerNPC  # noqa: E402
