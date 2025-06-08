@@ -1,7 +1,9 @@
-"""Regenerate character resources using the global tick.
+"""Regenerate character resources when the global tick fires.
 
-This script no longer schedules its own interval but instead reacts to
-``GlobalTickScript`` firing the global tick signal.
+Healing occurs on **every** global tick and does not rely on this script
+running its own interval. Instead, :data:`TICK` from
+:mod:`typeclasses.global_tick` broadcasts the tick signal that triggers the
+healing routine.
 """
 
 from evennia.scripts.scripts import DefaultScript
