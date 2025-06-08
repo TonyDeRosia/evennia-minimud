@@ -456,6 +456,7 @@ def menunode_trigger_add(caller, raw_string="", **kwargs):
         {"desc": "on_speak", "goto": (_set_trigger_event, {"event": "on_speak"})},
         {"desc": "on_attack", "goto": (_set_trigger_event, {"event": "on_attack"})},
         {"desc": "on_give_item", "goto": (_set_trigger_event, {"event": "on_give_item"})},
+        {"desc": "on_look", "goto": (_set_trigger_event, {"event": "on_look"})},
         {"desc": "on_timer", "goto": (_set_trigger_event, {"event": "on_timer"})},
         {"desc": "custom", "goto": "menunode_trigger_custom"},
         {"desc": "Back", "goto": "menunode_triggers"},
