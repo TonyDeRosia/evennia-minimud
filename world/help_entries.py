@@ -2619,8 +2619,11 @@ Related:
         "text": """
 Help for triggers
 
-NPCs may react automatically to events. Each trigger defines an event,
-an optional match text and one or more reactions to perform.
+NPCs may react automatically to events. Triggers are grouped by event and
+stored as lists of dictionaries with optional |wmatch|n text and one or more
+|wresponse|n commands to run. Example::
+
+    {"on_enter": [{"match": "", "response": "say Hello"}]}
 
 Events:
     on_speak   - someone speaks in the room
@@ -2639,8 +2642,8 @@ Reactions:
     <command>          - run any other command string
 
 The match text only applies to some events like |won_speak|n and |won_look|n.
-Multiple reactions can be listed separated by commas or by using multiple
-triggers.
+Multiple triggers may be defined for the same event and each trigger can have
+one or several responses.
 
 Examples:
     Trigger Menu

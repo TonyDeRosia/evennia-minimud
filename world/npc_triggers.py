@@ -12,17 +12,20 @@ class TriggerManager:
     """Simple event trigger handler for NPCs.
 
     Triggers are stored on an object's ``db.triggers`` attribute as a mapping
-    from event name to one or more trigger definitions. Each trigger definition
-    may either be a tuple ``(match, reaction)`` or a dictionary::
+    from event name to one or more trigger dictionaries.  The new format looks
+    like::
 
         {
-            "match": "text to look for",    # optional
-            "reactions": ["say Hello", {"attack": "player"}]
+            "on_enter": [
+                {"match": "", "response": "say Hello"},
+                {"match": "player", "response": "attack"},
+            ]
         }
 
     ``match`` is compared case-insensitively against ``message``/``text`` in the
-    provided kwargs. Each reaction string is split into an ``action`` and
-    ``argument`` which are executed by the handler.
+    provided kwargs. ``response`` may be a single command string or a list of
+    commands.  Each command is split into ``action`` and ``argument`` and
+    executed by the handler.
     """
 
     def __init__(self, obj: Any, attr: str = "triggers"):
@@ -71,16 +74,16 @@ class TriggerManager:
         if not triggers:
             return
 
+        # allow legacy tuple or dict formats
         if isinstance(triggers, tuple):
-            triglist = [{"match": triggers[0], "reaction": triggers[1]}]
-        elif isinstance(triggers, dict) and "match" in triggers:
-            triglist = [triggers]
+            triglist = [{"match": triggers[0], "response": triggers[1]}]
         else:
             triglist = make_iter(triggers)
 
         for trig in triglist:
             if not isinstance(trig, dict):
                 continue
+
             match = trig.get("match")
             if match:
                 text = str(kwargs.get("message") or kwargs.get("text") or "")
@@ -89,8 +92,16 @@ class TriggerManager:
                         continue
                 elif str(match).lower() not in text.lower():
                     continue
-            reactions = trig.get("reactions") or trig.get("reaction") or []
-            for react in make_iter(reactions):
+
+            responses = (
+                trig.get("responses")
+                or trig.get("response")
+                or trig.get("reactions")
+                or trig.get("reaction")
+                or []
+            )
+
+            for react in make_iter(responses):
                 if isinstance(react, str):
                     if " " in react:
                         action, arg = react.split(" ", 1)

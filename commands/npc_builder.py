@@ -350,8 +350,15 @@ def menunode_trigger_list(caller, raw_string="", **kwargs):
     triggers = caller.ndb.buildnpc.get("triggers") or {}
     text = "|wCurrent Triggers|n\n"
     if triggers:
-        for event, (match, reaction) in triggers.items():
-            text += f"{event}: \"{match}\" -> {reaction}\n"
+        for event, triglist in triggers.items():
+            for trig in make_iter(triglist):
+                if not isinstance(trig, dict):
+                    continue
+                match = trig.get("match", "")
+                resp = trig.get("response", trig.get("reactions"))
+                if isinstance(resp, list):
+                    resp = ", ".join(resp)
+                text += f"{event}: \"{match}\" -> {resp}\n"
     else:
         text += "None\n"
     options = [{"desc": "Back", "goto": "menunode_triggers"}]
@@ -407,7 +414,8 @@ def _save_trigger(caller, raw_string, **kwargs):
     event = caller.ndb.trigger_event
     match = caller.ndb.trigger_match
     triggers = caller.ndb.buildnpc.setdefault("triggers", {})
-    triggers[event] = (match, reaction)
+    triglist = triggers.setdefault(event, [])
+    triglist.append({"match": match, "response": reaction})
     caller.ndb.trigger_event = None
     caller.ndb.trigger_match = None
     caller.msg("Trigger added.")
@@ -421,16 +429,28 @@ def menunode_trigger_delete(caller, raw_string="", **kwargs):
         return "menunode_triggers"
     text = "|wSelect trigger to delete|n"
     options = []
-    for event, (match, reaction) in triggers.items():
-        desc = f"{event}: \"{match}\" -> {reaction}"
-        options.append({"desc": desc, "goto": (_del_trigger, {"event": event})})
+    for event, triglist in triggers.items():
+        for idx, trig in enumerate(make_iter(triglist)):
+            if not isinstance(trig, dict):
+                continue
+            match = trig.get("match", "")
+            resp = trig.get("response", trig.get("reactions"))
+            if isinstance(resp, list):
+                resp = ", ".join(resp)
+            desc = f"{event}: \"{match}\" -> {resp}"
+            options.append(
+                {"desc": desc, "goto": (_del_trigger, {"event": event, "index": idx})}
+            )
     options.append({"desc": "Back", "goto": "menunode_triggers"})
     return text, options
 
-def _del_trigger(caller, raw_string, event=None, **kwargs):
+def _del_trigger(caller, raw_string, event=None, index=None, **kwargs):
     triggers = caller.ndb.buildnpc.get("triggers") or {}
-    if event in triggers:
-        del triggers[event]
+    triglist = triggers.get(event)
+    if triglist and index is not None and 0 <= index < len(triglist):
+        triglist.pop(index)
+        if not triglist:
+            del triggers[event]
         caller.msg("Trigger removed.")
     return "menunode_triggers"
 
@@ -448,8 +468,15 @@ def menunode_confirm(caller, raw_string="", **kwargs):
             text += f"{key}: {stats}\n"
         elif key == "triggers":
             if val:
-                for event, (match, reaction) in val.items():
-                    text += f"trigger {event}: \"{match}\" -> {reaction}\n"
+                for event, triglist in val.items():
+                    for trig in make_iter(triglist):
+                        if not isinstance(trig, dict):
+                            continue
+                        match = trig.get("match", "")
+                        resp = trig.get("response", trig.get("reactions"))
+                        if isinstance(resp, list):
+                            resp = ", ".join(resp)
+                        text += f"trigger {event}: \"{match}\" -> {resp}\n"
             else:
                 text += "triggers: None\n"
         else:
