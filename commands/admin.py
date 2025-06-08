@@ -34,8 +34,12 @@ def _safe_split(text):
         raise ValueError("No closing quotation found; enclose multiword names in quotes.")
 
 
+
 # Valid stats that can be modified by gear bonuses
 VALID_STATS = {normalize_stat_key(stat.key) for stat in ALL_STATS}
+
+# Regular expression for matching stat modifiers like "hp+5" or "Armor Pen+3"
+STAT_MOD_RE = re.compile(r"([A-Za-z][A-Za-z _]*?)\+(-?\d+)")
 
 
 def parse_stat_mods(text):
@@ -53,7 +57,7 @@ def parse_stat_mods(text):
         return bonuses, desc
 
     pieces = [p.strip() for p in text.split(",")]
-    pattern = re.compile(r"([A-Za-z][A-Za-z _]*?)\+(-?\d+)")
+    pattern = STAT_MOD_RE
     desc_parts = []
 
     for i, piece in enumerate(pieces):
