@@ -2316,6 +2316,8 @@ Your current status modifies regeneration:
     - Standing: normal rates
     - Resting: 2x rates
     - Sleeping: 3x rates
+Rooms flagged with |wrest_area|n grant an additional +1 multiplier on top of
+your current status.
 
 Usage:
     regeneration
