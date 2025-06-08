@@ -2641,6 +2641,7 @@ Spawn a saved NPC prototype.
 
 Usage:
     @spawnnpc <prototype>
+    @spawnnpc <area>/<prototype>
 
 Switches:
     None
@@ -2650,9 +2651,58 @@ Arguments:
 
 Examples:
     @spawnnpc basic_merchant
+    @spawnnpc town/basic_merchant
 
 Notes:
     - Prototypes are saved with the cnpc builder.
+
+Related:
+    help cnpc
+""",
+    },
+    {
+        "key": "@listnpcs",
+        "category": "Building",
+        "text": """Help for @listnpcs
+
+List NPC prototypes assigned to an area.
+
+Usage:
+    @listnpcs <area>
+
+Switches:
+    None
+
+Arguments:
+    <area> - registered area name
+
+Examples:
+    @listnpcs town
+
+Related:
+    help cnpc
+""",
+    },
+    {
+        "key": "@dupnpc",
+        "category": "Building",
+        "text": """Help for @dupnpc
+
+Duplicate an NPC prototype from an area's list.
+
+Usage:
+    @dupnpc <area>/<proto> [= <new_name>]
+
+Switches:
+    None
+
+Arguments:
+    <area> - area containing the prototype
+    <proto> - prototype key to copy
+    <new_name> - optional new key for the copy
+
+Examples:
+    @dupnpc town/basic_merchant = special_merchant
 
 Related:
     help cnpc

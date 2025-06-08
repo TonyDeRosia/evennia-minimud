@@ -25,6 +25,8 @@ from .npc_builder import (
     CmdDeleteNPC,
     CmdCloneNPC,
     CmdSpawnNPC,
+    CmdListNPCs,
+    CmdDupNPC,
 )
 
 
@@ -1359,3 +1361,5 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdDeleteNPC)
         self.add(CmdCloneNPC)
         self.add(CmdSpawnNPC)
+        self.add(CmdListNPCs)
+        self.add(CmdDupNPC)

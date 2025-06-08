@@ -814,15 +814,89 @@ class CmdSpawnNPC(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: @spawnnpc <prototype>")
+            self.msg("Usage: @spawnnpc <prototype> or @spawnnpc <area>/<proto>")
             return
+        arg = self.args.strip()
         from world import prototypes
+        proto = None
+        if "/" in arg:
+            area, key = arg.split("/", 1)
+            from world import area_npcs
 
-        proto = prototypes.get_npc_prototypes().get(self.args.strip())
+            if key not in area_npcs.get_area_npc_list(area):
+                self.msg("Prototype not in that area's list.")
+                return
+            proto = prototypes.get_npc_prototypes().get(key)
+        else:
+            proto = prototypes.get_npc_prototypes().get(arg)
         if not proto:
             self.msg("Unknown NPC prototype.")
             return
         obj = spawner.spawn(proto)[0]
         obj.move_to(self.caller.location, quiet=True)
         self.msg(f"Spawned {obj.get_display_name(self.caller)}.")
+
+
+class CmdListNPCs(Command):
+    """List NPC prototypes available for an area."""
+
+    key = "@listnpcs"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: @listnpcs <area>")
+            return
+        area = self.args.strip()
+        from world import area_npcs, prototypes
+
+        keys = area_npcs.get_area_npc_list(area)
+        if not keys:
+            self.msg("No prototypes registered for that area.")
+            return
+        registry = prototypes.get_npc_prototypes()
+        lines = []
+        for key in keys:
+            desc = registry.get(key, {}).get("desc", "")
+            lines.append(f"{key} - {desc}" if desc else key)
+        self.msg("\n".join(lines))
+
+
+class CmdDupNPC(Command):
+    """Duplicate an NPC prototype from an area's list."""
+
+    key = "@dupnpc"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def parse(self):
+        path, _, newname = self.args.partition("=")
+        self.path = path.strip()
+        self.newname = newname.strip() if newname else ""
+
+    def func(self):
+        if not self.path or "/" not in self.path:
+            self.msg("Usage: @dupnpc <area>/<proto> [= <new_name>]")
+            return
+        area, key = self.path.split("/", 1)
+        from world import area_npcs, prototypes
+
+        if key not in area_npcs.get_area_npc_list(area):
+            self.msg("Prototype not in that area's list.")
+            return
+        registry = prototypes.get_npc_prototypes()
+        proto = registry.get(key)
+        if not proto:
+            self.msg("Unknown NPC prototype.")
+            return
+        new_key = self.newname or f"{key}_copy"
+        if new_key in registry:
+            self.msg("Prototype with that key already exists.")
+            return
+        new_proto = dict(proto)
+        new_proto["key"] = new_key
+        prototypes.register_npc_prototype(new_key, new_proto)
+        area_npcs.add_area_npc(area, new_key)
+        self.msg(f"Prototype {key} duplicated to {new_key} in area {area}.")
 
