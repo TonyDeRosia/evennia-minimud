@@ -26,9 +26,23 @@ def _ai_wander(npc: DefaultObject) -> None:
         exit_obj.at_traverse(npc, exit_obj.destination)
 
 
+def _ai_defensive(npc: DefaultObject) -> None:
+    """Attack only when already in combat."""
+    if npc.in_combat and npc.db.combat_target:
+        weapon = npc.wielding[0] if npc.wielding else npc
+        npc.attack(npc.db.combat_target, weapon)
+
+
+def _ai_scripted(npc: DefaultObject) -> None:
+    """Placeholder scripted behavior hook."""
+    pass
+
+
 _AI_MAP = {
     "aggressive": _ai_aggressive,
     "wander": _ai_wander,
+    "defensive": _ai_defensive,
+    "scripted": _ai_scripted,
 }
 
 

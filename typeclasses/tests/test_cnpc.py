@@ -29,6 +29,9 @@ class TestCNPC(EvenniaTest):
         npc_builder._set_desc(self.char1, "A nasty goblin")
         npc_builder._set_creature_type(self.char1, "humanoid")
         npc_builder._set_npc_type(self.char1, "merchant")
+        npc_builder._edit_roles(self.char1, "add merchant")
+        npc_builder._edit_roles(self.char1, "done")
+        npc_builder._set_merchant_pricing(self.char1, "1.5")
         npc_builder._set_level(self.char1, "2")
         npc_builder._set_resources(self.char1, "30 10 5")
         npc_builder._set_stats(self.char1, "5 4 6 3 2 1")
@@ -53,6 +56,7 @@ class TestCNPC(EvenniaTest):
         self.assertEqual(npc.traits.mana.base, 10)
         self.assertEqual(npc.traits.stamina.base, 5)
         self.assertEqual(npc.db.equipment_slots, list(npc_builder.SLOT_ORDER))
+        self.assertEqual(npc.db.merchant_markup, 1.5)
         self.assertEqual(npc.location, self.char1.location)
         self.assertIsNone(self.char1.ndb.buildnpc)
 
@@ -74,7 +78,7 @@ class TestCNPC(EvenniaTest):
         npc_builder._set_stats(self.char1, "5 5 5 5 5 5")
         npc_builder._set_behavior(self.char1, "dumb")
         npc_builder._set_skills(self.char1, "smash")
-        npc_builder._set_ai(self.char1, "passive")
+        npc_builder._set_ai(self.char1, "defensive")
         npc_builder._create_npc(self.char1, "", register=True)
 
         from world.prototypes import get_npc_prototypes
@@ -140,6 +144,29 @@ class TestCNPC(EvenniaTest):
         npc = self._find("chimera")
         self.assertIn("tail", npc.db.equipment_slots)
         self.assertNotIn("offhand", npc.db.equipment_slots)
+
+    def test_role_details(self):
+        with patch("commands.npc_builder.EvMenu"):
+            self.char1.execute_cmd("cnpc start clerk")
+
+        npc_builder._set_desc(self.char1, "A helpful clerk")
+        npc_builder._set_creature_type(self.char1, "humanoid")
+        npc_builder._set_npc_type(self.char1, "wanderer")
+        npc_builder._edit_roles(self.char1, "add guild_receptionist")
+        npc_builder._edit_roles(self.char1, "done")
+        npc_builder._set_guild_affiliation(self.char1, "myguild")
+        npc_builder._set_level(self.char1, "1")
+        npc_builder._set_resources(self.char1, "5 0 0")
+        npc_builder._set_stats(self.char1, "1 1 1 1 1 1")
+        npc_builder._set_behavior(self.char1, "")
+        npc_builder._set_skills(self.char1, "")
+        npc_builder._set_ai(self.char1, "scripted")
+        npc_builder._create_npc(self.char1, "")
+
+        npc = self._find("clerk")
+        self.assertTrue(npc.tags.has("myguild", category="guild_affiliation"))
+        self.assertTrue(npc.tags.has("guild_receptionist", category="npc_role"))
+        self.assertEqual(npc.db.ai_type, "scripted")
 
     def test_confirm_incomplete_data(self):
         """menunode_confirm should handle missing data gracefully."""
