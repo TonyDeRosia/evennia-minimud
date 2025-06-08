@@ -1,36 +1,36 @@
-"""Regeneration handler subscribed to the global tick signal."""
+"""Regenerate character resources on a global interval."""
 
 from evennia.scripts.scripts import DefaultScript
-from evennia.utils.search import search_tag
-from typeclasses.global_tick import TICK
-from world.system import state_manager
+from typeclasses.characters import Character, NPC
 
-# ---------------------------------------------------------------------------
-# This script listens for the :data:`TICK` signal defined in ``global_tick``.
-# Whenever the signal is fired, it applies passive regeneration to all
-# characters tagged ``tickable``.  Other modules may subscribe to the same
-# signal to perform additional per-minute processing.
-# ---------------------------------------------------------------------------
 
-class GlobalHealing(DefaultScript):
-    """Apply regeneration to tickable characters each time ``TICK`` fires."""
+class GlobalHealingScript(DefaultScript):
+    """Apply passive regeneration to all characters periodically."""
 
     def at_script_creation(self):
+        """Set up the repeating script."""
+        self.interval = 60
         self.persistent = True
 
-    def at_start(self):
-        TICK.connect(self.on_tick)
-
-    def at_stop(self):
-        TICK.disconnect(self.on_tick)
-
-    def on_tick(self, sender, **kwargs):
-        tickables = search_tag(key="tickable")
-        for obj in tickables:
-            state_manager.tick_character(obj)
+    def at_repeat(self):
+        """Heal all characters once per interval."""
+        targets = list(Character.objects.all()) + list(NPC.objects.all())
+        seen = set()
+        for obj in targets:
+            if obj in seen:
+                continue
+            seen.add(obj)
             if obj.tags.has("unconscious", category="status"):
                 continue
-            state_manager.apply_regen(obj)
+            derived = obj.db.derived_stats or {}
+            for key in ("health", "mana", "stamina"):
+                trait = obj.traits.get(key)
+                if not trait:
+                    continue
+                regen = int(derived.get(f"{key}_regen", 0))
+                if regen <= 0 or trait.current >= trait.max:
+                    continue
+                trait.current = min(trait.current + regen, trait.max)
             if obj.sessions.count():
                 obj.refresh_prompt()
 
