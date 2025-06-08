@@ -2479,7 +2479,9 @@ Notes:
     - createnpc
     - NPC types include merchant, guard, questgiver, guildmaster,
       guild_receptionist, banker, craftsman, trainer and wanderer.
-    - NPC classes include base, merchant, banker, trainer and wanderer.
+    - NPC classes include base, merchant, banker, trainer, wanderer,
+      guildmaster, guild_receptionist, questgiver, combat_trainer and
+      event_npc.
     - The builder prompts for description, NPC type, creature type, level,
       HP MP SP, primary stats, behavior, skills and AI type.
     - Humanoid body type grants the standard equipment slots automatically.
