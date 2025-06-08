@@ -41,7 +41,7 @@ class CmdStatSheet(Command):
             trait = caller.traits.get(key)
             value = trait.value if trait else 0
             stats.append([key, value])
-        if (per := caller.traits.get("perception")):
+        if per := caller.traits.get("perception"):
             stats.append(["PER", per.value])
         rows = list(zip(*stats))
         table = EvTable(table=rows, border="none")
@@ -127,6 +127,52 @@ class CmdTrainSkill(Command):
         self.msg(f"You practice your {to_train} and improve it to level {new_level}.")
 
 
+class CmdTrainResource(Command):
+    """Spend training points to raise max HP, MP or SP."""
+
+    key = "trainres"
+
+    def func(self):
+        if not self.args or len(self.args.split()) != 2:
+            self.msg("Usage: trainres <hp|mp|sp> <amount>")
+            return
+
+        stat_key, amt_str = self.args.split()
+        stat_key = stat_key.lower()
+        alias = {"hp": "health", "mp": "mana", "sp": "stamina"}
+        if stat_key not in alias:
+            self.msg("Specify hp, mp or sp.")
+            return
+
+        try:
+            amount = int(amt_str)
+        except ValueError:
+            self.msg("Amount must be a number.")
+            return
+
+        if amount <= 0:
+            self.msg("Amount must be positive.")
+            return
+
+        caller = self.caller
+        points = caller.db.training_points or 0
+        if points < amount:
+            self.msg("You do not have enough training points.")
+            return
+
+        trait = caller.traits.get(alias[stat_key])
+        trait.base += amount
+        caller.db.training_points = points - amount
+
+        from world.system import stat_manager
+
+        stat_manager.refresh_stats(caller)
+
+        self.msg(
+            f"You spend {amount} training point{'s' if amount != 1 else ''} to increase your {trait.key}."
+        )
+
+
 class TrainCmdSet(CmdSet):
     key = "Train CmdSet"
 
@@ -141,3 +187,4 @@ class SkillCmdSet(CmdSet):
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
         self.add(CmdStatSheet)
+        self.add(CmdTrainResource)

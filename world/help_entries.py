@@ -26,10 +26,10 @@ Each dict is on the form
 
 HELP_ENTRY_DICTS = [
     {
-        "key": 'evennia',
-        "aliases": ['ev'],
-        "category": 'General',
-        "locks": 'read:perm(Developer)',
+        "key": "evennia",
+        "aliases": ["ev"],
+        "category": "General",
+        "locks": "read:perm(Developer)",
         "text": """
 Help for evennia
 
@@ -66,8 +66,8 @@ Related:
 """,
     },
     {
-        "key": 'building',
-        "category": 'Building',
+        "key": "building",
+        "category": "Building",
         "text": """
 Help for building
 
@@ -94,8 +94,8 @@ Related:
 """,
     },
     {
-        "key": 'prompt',
-        "category": 'General',
+        "key": "prompt",
+        "category": "General",
         "text": """
 Help for prompt
 
@@ -131,8 +131,8 @@ Related:
 """,
     },
     {
-        "key": 'affects',
-        "category": 'General',
+        "key": "affects",
+        "category": "General",
         "text": """
 Help for affects
 
@@ -158,8 +158,8 @@ Related:
 """,
     },
     {
-        "key": 'inspect',
-        "category": 'General',
+        "key": "inspect",
+        "category": "General",
         "text": """
 Help for inspect
 
@@ -187,9 +187,9 @@ Related:
 """,
     },
     {
-        "key": 'room flags',
-        "aliases": ['rflags', 'rflag'],
-        "category": 'Building',
+        "key": "room flags",
+        "aliases": ["rflags", "rflag"],
+        "category": "Building",
         "text": """
 Help for room flags
 
@@ -228,9 +228,9 @@ Related:
 """,
     },
     {
-        "key": 'rrename',
-        "aliases": ['roomrename', 'renameroom', 'rname'],
-        "category": 'Building',
+        "key": "rrename",
+        "aliases": ["roomrename", "renameroom", "rname"],
+        "category": "Building",
         "text": """
 Help for rrename
 
@@ -256,9 +256,9 @@ Related:
 """,
     },
     {
-        "key": 'rdesc',
-        "aliases": ['roomdesc'],
-        "category": 'Building',
+        "key": "rdesc",
+        "aliases": ["roomdesc"],
+        "category": "Building",
         "text": """
 Help for rdesc
 
@@ -285,8 +285,8 @@ Related:
 """,
     },
     {
-        "key": 'rset',
-        "category": 'Building',
+        "key": "rset",
+        "category": "Building",
         "text": """
 Help for rset
 
@@ -313,8 +313,8 @@ Related:
 """,
     },
     {
-        "key": 'ocreate',
-        "category": 'Building',
+        "key": "ocreate",
+        "category": "Building",
         "text": """
 Help for ocreate
 
@@ -340,8 +340,8 @@ Related:
 """,
     },
     {
-        "key": 'cweapon',
-        "category": 'Building',
+        "key": "cweapon",
+        "category": "Building",
         "text": """
 Help for cweapon
 
@@ -378,8 +378,8 @@ Related:
 """,
     },
     {
-        "key": 'cshield',
-        "category": 'Building',
+        "key": "cshield",
+        "category": "Building",
         "text": """
 Help for cshield
 
@@ -411,8 +411,8 @@ Related:
 """,
     },
     {
-        "key": 'carmor',
-        "category": 'Building',
+        "key": "carmor",
+        "category": "Building",
         "text": """
 Help for carmor
 
@@ -441,8 +441,8 @@ Related:
 """,
     },
     {
-        "key": 'ctool',
-        "category": 'Building',
+        "key": "ctool",
+        "category": "Building",
         "text": """
 Help for ctool
 
@@ -470,8 +470,8 @@ Related:
 """,
     },
     {
-        "key": 'cgear',
-        "category": 'Building',
+        "key": "cgear",
+        "category": "Building",
         "text": """
 Help for cgear
 
@@ -500,8 +500,8 @@ Related:
 """,
     },
     {
-        "key": 'cring',
-        "category": 'Building',
+        "key": "cring",
+        "category": "Building",
         "text": """
 Help for cring
 
@@ -530,8 +530,8 @@ Related:
 """,
     },
     {
-        "key": 'ctrinket',
-        "category": 'Building',
+        "key": "ctrinket",
+        "category": "Building",
         "text": """
 Help for ctrinket
 
@@ -560,8 +560,8 @@ Related:
 """,
     },
     {
-        "key": 'cfood',
-        "category": 'Building',
+        "key": "cfood",
+        "category": "Building",
         "text": """
 Help for cfood
 
@@ -588,8 +588,8 @@ Related:
 """,
     },
     {
-        "key": 'cdrink',
-        "category": 'Building',
+        "key": "cdrink",
+        "category": "Building",
         "text": """
 Help for cdrink
 
@@ -616,8 +616,8 @@ Related:
 """,
     },
     {
-        "key": 'cpotion',
-        "category": 'Building',
+        "key": "cpotion",
+        "category": "Building",
         "text": """
 Help for cpotion
 
@@ -645,9 +645,9 @@ Related:
 """,
     },
     {
-        "key": 'item flags',
-        "aliases": ['setflag', 'removeflag'],
-        "category": 'Building',
+        "key": "item flags",
+        "aliases": ["setflag", "removeflag"],
+        "category": "Building",
         "text": """
 Help for item flags
 
@@ -685,8 +685,8 @@ Related:
 """,
     },
     {
-        "key": 'admin',
-        "category": 'Admin',
+        "key": "admin",
+        "category": "Admin",
         "text": """
 Help for admin
 
@@ -713,9 +713,9 @@ Related:
 """,
     },
     {
-        "key": 'setstat',
-        "aliases": ['set'],
-        "category": 'Admin',
+        "key": "setstat",
+        "aliases": ["set"],
+        "category": "Admin",
         "text": """
 Help for setstat
 
@@ -750,8 +750,8 @@ Related:
 """,
     },
     {
-        "key": 'setattr',
-        "category": 'Admin',
+        "key": "setattr",
+        "category": "Admin",
         "text": """
 Help for setattr
 
@@ -779,8 +779,8 @@ Related:
 """,
     },
     {
-        "key": 'setbounty',
-        "category": 'Admin',
+        "key": "setbounty",
+        "category": "Admin",
         "text": """
 Help for setbounty
 
@@ -808,8 +808,8 @@ Related:
 """,
     },
     {
-        "key": 'slay',
-        "category": 'Admin',
+        "key": "slay",
+        "category": "Admin",
         "text": """
 Help for slay
 
@@ -837,8 +837,8 @@ Related:
 """,
     },
     {
-        "key": 'smite',
-        "category": 'Admin',
+        "key": "smite",
+        "category": "Admin",
         "text": """
 Help for smite
 
@@ -866,8 +866,8 @@ Related:
 """,
     },
     {
-        "key": 'scan',
-        "category": 'Admin',
+        "key": "scan",
+        "category": "Admin",
         "text": """
 Help for scan
 
@@ -895,8 +895,8 @@ Related:
 """,
     },
     {
-        "key": 'restoreall',
-        "category": 'Admin',
+        "key": "restoreall",
+        "category": "Admin",
         "text": """
 Help for restoreall
 
@@ -922,8 +922,8 @@ Related:
 """,
     },
     {
-        "key": 'purge',
-        "category": 'Admin',
+        "key": "purge",
+        "category": "Admin",
         "text": """
 Help for purge
 
@@ -952,9 +952,9 @@ Related:
 """,
     },
     {
-        "key": 'revive',
-        "aliases": ['resurrect'],
-        "category": 'Combat',
+        "key": "revive",
+        "aliases": ["resurrect"],
+        "category": "Combat",
         "text": """
 Help for revive
 
@@ -981,8 +981,8 @@ Related:
 """,
     },
     {
-        "key": 'gcreate',
-        "category": 'Building',
+        "key": "gcreate",
+        "category": "Building",
         "text": """
 Help for gcreate
 
@@ -1008,8 +1008,8 @@ Related:
 """,
     },
     {
-        "key": 'grank',
-        "category": 'Building',
+        "key": "grank",
+        "category": "Building",
         "text": """
 Help for grank
 
@@ -1037,8 +1037,8 @@ Related:
 """,
     },
     {
-        "key": 'gsethome',
-        "category": 'Building',
+        "key": "gsethome",
+        "category": "Building",
         "text": """
 Help for gsethome
 
@@ -1064,8 +1064,8 @@ Related:
 """,
     },
     {
-        "key": 'gdesc',
-        "category": 'Building',
+        "key": "gdesc",
+        "category": "Building",
         "text": """
 Help for gdesc
 
@@ -1092,8 +1092,8 @@ Related:
 """,
     },
     {
-        "key": 'gjoin',
-        "category": 'General',
+        "key": "gjoin",
+        "category": "General",
         "text": """
 Help for gjoin
 
@@ -1119,8 +1119,8 @@ Related:
 """,
     },
     {
-        "key": 'gaccept',
-        "category": 'General',
+        "key": "gaccept",
+        "category": "General",
         "text": """
 Help for gaccept
 
@@ -1146,8 +1146,8 @@ Related:
 """,
     },
     {
-        "key": 'gpromote',
-        "category": 'General',
+        "key": "gpromote",
+        "category": "General",
         "text": """
 Help for gpromote
 
@@ -1173,8 +1173,8 @@ Related:
 """,
     },
     {
-        "key": 'gdemote',
-        "category": 'General',
+        "key": "gdemote",
+        "category": "General",
         "text": """
 Help for gdemote
 
@@ -1200,8 +1200,8 @@ Related:
 """,
     },
     {
-        "key": 'gkick',
-        "category": 'General',
+        "key": "gkick",
+        "category": "General",
         "text": """
 Help for gkick
 
@@ -1227,9 +1227,9 @@ Related:
 """,
     },
     {
-        "key": 'gwho',
-        "aliases": ['guildwho'],
-        "category": 'General',
+        "key": "gwho",
+        "aliases": ["guildwho"],
+        "category": "General",
         "text": """
 Help for gwho
 
@@ -1255,8 +1255,8 @@ Related:
 """,
     },
     {
-        "key": 'quest rewards',
-        "category": 'General',
+        "key": "quest rewards",
+        "category": "General",
         "text": """
 Help for quest rewards
 
@@ -1286,8 +1286,8 @@ Related:
 """,
     },
     {
-        "key": 'alist',
-        "category": 'Building',
+        "key": "alist",
+        "category": "Building",
         "text": """
 Help for alist
 
@@ -1313,8 +1313,8 @@ Related:
 """,
     },
     {
-        "key": 'amake',
-        "category": 'Building',
+        "key": "amake",
+        "category": "Building",
         "text": """
 Help for amake
 
@@ -1340,8 +1340,8 @@ Related:
 """,
     },
     {
-        "key": 'aset',
-        "category": 'Building',
+        "key": "aset",
+        "category": "Building",
         "text": """
 Help for aset
 
@@ -1367,8 +1367,8 @@ Related:
 """,
     },
     {
-        "key": 'rooms',
-        "category": 'Building',
+        "key": "rooms",
+        "category": "Building",
         "text": """
 Help for rooms
 
@@ -1394,8 +1394,8 @@ Related:
 """,
     },
     {
-        "key": 'dig',
-        "category": 'Building',
+        "key": "dig",
+        "category": "Building",
         "text": """
 Help for dig
 
@@ -1421,8 +1421,8 @@ Related:
 """,
     },
     {
-        "key": '@teleport',
-        "category": 'Building',
+        "key": "@teleport",
+        "category": "Building",
         "text": """
 Help for @teleport
 
@@ -1448,8 +1448,8 @@ Related:
 """,
     },
     {
-        "key": 'setdesc',
-        "category": 'Building',
+        "key": "setdesc",
+        "category": "Building",
         "text": """
 Help for setdesc
 
@@ -1476,8 +1476,8 @@ Related:
 """,
     },
     {
-        "key": 'setweight',
-        "category": 'Building',
+        "key": "setweight",
+        "category": "Building",
         "text": """
 Help for setweight
 
@@ -1503,8 +1503,8 @@ Related:
 """,
     },
     {
-        "key": 'setslot',
-        "category": 'Building',
+        "key": "setslot",
+        "category": "Building",
         "text": """
 Help for setslot
 
@@ -1530,8 +1530,8 @@ Related:
 """,
     },
     {
-        "key": 'setdamage',
-        "category": 'Building',
+        "key": "setdamage",
+        "category": "Building",
         "text": """
 Help for setdamage
 
@@ -1557,8 +1557,8 @@ Related:
 """,
     },
     {
-        "key": 'setbuff',
-        "category": 'Building',
+        "key": "setbuff",
+        "category": "Building",
         "text": """
 Help for setbuff
 
@@ -1584,8 +1584,8 @@ Related:
 """,
     },
     {
-        "key": 'qcreate',
-        "category": 'Building',
+        "key": "qcreate",
+        "category": "Building",
         "text": """
 Help for qcreate
 
@@ -1611,8 +1611,8 @@ Related:
 """,
     },
     {
-        "key": 'qset',
-        "category": 'Building',
+        "key": "qset",
+        "category": "Building",
         "text": """
 Help for qset
 
@@ -1638,8 +1638,8 @@ Related:
 """,
     },
     {
-        "key": 'qitem',
-        "category": 'Building',
+        "key": "qitem",
+        "category": "Building",
         "text": """
 Help for qitem
 
@@ -1665,8 +1665,8 @@ Related:
 """,
     },
     {
-        "key": 'qassign',
-        "category": 'Building',
+        "key": "qassign",
+        "category": "Building",
         "text": """
 Help for qassign
 
@@ -1692,8 +1692,8 @@ Related:
 """,
     },
     {
-        "key": 'qtag',
-        "category": 'Building',
+        "key": "qtag",
+        "category": "Building",
         "text": """
 Help for qtag
 
@@ -1720,8 +1720,8 @@ Related:
 """,
     },
     {
-        "key": 'score',
-        "category": 'General',
+        "key": "score",
+        "category": "General",
         "text": """
 Help for score
 
@@ -1747,8 +1747,8 @@ Related:
 """,
     },
     {
-        "key": 'desc',
-        "category": 'General',
+        "key": "desc",
+        "category": "General",
         "text": """
 Help for desc
 
@@ -1775,8 +1775,8 @@ Related:
 """,
     },
     {
-        "key": 'finger',
-        "category": 'General',
+        "key": "finger",
+        "category": "General",
         "text": """
 Help for finger
 
@@ -1802,8 +1802,8 @@ Related:
 """,
     },
     {
-        "key": 'bounty',
-        "category": 'General',
+        "key": "bounty",
+        "category": "General",
         "text": """
 Help for bounty
 
@@ -1829,8 +1829,8 @@ Related:
 """,
     },
     {
-        "key": 'inventory',
-        "category": 'General',
+        "key": "inventory",
+        "category": "General",
         "text": """
 Help for inventory
 
@@ -1856,8 +1856,8 @@ Related:
 """,
     },
     {
-        "key": 'equipment',
-        "category": 'General',
+        "key": "equipment",
+        "category": "General",
         "text": """
 Help for equipment
 
@@ -1883,8 +1883,8 @@ Related:
 """,
     },
     {
-        "key": 'buffs',
-        "category": 'General',
+        "key": "buffs",
+        "category": "General",
         "text": """
 Help for buffs
 
@@ -1910,8 +1910,8 @@ Related:
 """,
     },
     {
-        "key": 'title',
-        "category": 'General',
+        "key": "title",
+        "category": "General",
         "text": """
 Help for title
 
@@ -1937,8 +1937,8 @@ Related:
 """,
     },
     {
-        "key": 'questlist',
-        "category": 'General',
+        "key": "questlist",
+        "category": "General",
         "text": """
 Help for questlist
 
@@ -1964,8 +1964,8 @@ Related:
 """,
     },
     {
-        "key": 'accept',
-        "category": 'General',
+        "key": "accept",
+        "category": "General",
         "text": """
 Help for accept
 
@@ -1991,8 +1991,8 @@ Related:
 """,
     },
     {
-        "key": 'progress',
-        "category": 'General',
+        "key": "progress",
+        "category": "General",
         "text": """
 Help for progress
 
@@ -2018,8 +2018,8 @@ Related:
 """,
     },
     {
-        "key": 'complete',
-        "category": 'General',
+        "key": "complete",
+        "category": "General",
         "text": """
 Help for complete
 
@@ -2045,8 +2045,8 @@ Related:
 """,
     },
     {
-        "key": 'list',
-        "category": 'Here',
+        "key": "list",
+        "category": "Here",
         "text": """
 Help for list
 
@@ -2072,8 +2072,8 @@ Related:
 """,
     },
     {
-        "key": 'buy',
-        "category": 'Here',
+        "key": "buy",
+        "category": "Here",
         "text": """
 Help for buy
 
@@ -2099,8 +2099,8 @@ Related:
 """,
     },
     {
-        "key": 'sell',
-        "category": 'Here',
+        "key": "sell",
+        "category": "Here",
         "text": """
 Help for sell
 
@@ -2126,8 +2126,8 @@ Related:
 """,
     },
     {
-        "key": 'guild',
-        "category": 'General',
+        "key": "guild",
+        "category": "General",
         "text": """
 Help for guild
 
@@ -2153,8 +2153,8 @@ Related:
 """,
     },
     {
-        "key": 'gather',
-        "category": 'Here',
+        "key": "gather",
+        "category": "Here",
         "text": """
 Help for gather
 
@@ -2180,8 +2180,8 @@ Related:
 """,
     },
     {
-        "key": 'attack',
-        "category": 'Combat',
+        "key": "attack",
+        "category": "Combat",
         "text": """
 Help for attack
 
@@ -2207,8 +2207,8 @@ Related:
 """,
     },
     {
-        "key": 'wield',
-        "category": 'Combat',
+        "key": "wield",
+        "category": "Combat",
         "text": """
 Help for wield
 
@@ -2234,8 +2234,8 @@ Related:
 """,
     },
     {
-        "key": 'unwield',
-        "category": 'Combat',
+        "key": "unwield",
+        "category": "Combat",
         "text": """
 Help for unwield
 
@@ -2261,8 +2261,8 @@ Related:
 """,
     },
     {
-        "key": 'flee',
-        "category": 'Combat',
+        "key": "flee",
+        "category": "Combat",
         "text": """
 Help for flee
 
@@ -2288,8 +2288,8 @@ Related:
 """,
     },
     {
-        "key": 'respawn',
-        "category": 'Combat',
+        "key": "respawn",
+        "category": "Combat",
         "text": """
 Help for respawn
 
@@ -2315,8 +2315,8 @@ Related:
 """,
     },
     {
-        "key": 'rest',
-        "category": 'General',
+        "key": "rest",
+        "category": "General",
         "text": """
 Help for rest
 
@@ -2342,8 +2342,8 @@ Related:
 """,
     },
     {
-        "key": 'sleep',
-        "category": 'General',
+        "key": "sleep",
+        "category": "General",
         "text": """
 Help for sleep
 
@@ -2369,8 +2369,8 @@ Related:
 """,
     },
     {
-        "key": 'wake',
-        "category": 'General',
+        "key": "wake",
+        "category": "General",
         "text": """
 Help for wake
 
@@ -2396,8 +2396,8 @@ Related:
 """,
     },
     {
-        "key": 'regeneration',
-        "category": 'General',
+        "key": "regeneration",
+        "category": "General",
         "text": """
 Help for regeneration
 
@@ -2432,9 +2432,9 @@ Related:
 """,
     },
     {
-        "key": 'statmods',
-        "aliases": ['stat mods', 'gear bonuses'],
-        "category": 'Building',
+        "key": "statmods",
+        "aliases": ["stat mods", "gear bonuses"],
+        "category": "Building",
         "text": """
 Help for statmods
 
@@ -2449,9 +2449,9 @@ Guild Honor Rank Modifiers.
 """,
     },
     {
-        "key": 'cnpc',
-        "aliases": ['npc', 'createnpc'],
-        "category": 'Building',
+        "key": "cnpc",
+        "aliases": ["npc", "createnpc"],
+        "category": "Building",
         "text": """
 Help for cnpc
 
@@ -2509,8 +2509,8 @@ Related:
 """,
     },
     {
-        "key": '@editnpc',
-        "category": 'Building',
+        "key": "@editnpc",
+        "category": "Building",
         "text": """Help for @editnpc
 
 Open the NPC builder for an existing NPC.
@@ -2535,9 +2535,9 @@ Related:
 """,
     },
     {
-        "key": 'npc roles',
-        "aliases": ['roles'],
-        "category": 'Building',
+        "key": "npc roles",
+        "aliases": ["roles"],
+        "category": "Building",
         "text": """Help for npc roles
 
 NPC roles grant extra behavior to an NPC. They are selected during the
@@ -2558,9 +2558,9 @@ Related:
 """,
     },
     {
-        "key": 'npc ai',
-        "aliases": ['ai'],
-        "category": 'Building',
+        "key": "npc ai",
+        "aliases": ["ai"],
+        "category": "Building",
         "text": """Help for npc ai
 
 The `cnpc` builder lets you choose an AI type controlling basic behavior.
@@ -2580,8 +2580,8 @@ Related:
 """,
     },
     {
-        "key": '@deletenpc',
-        "category": 'Building',
+        "key": "@deletenpc",
+        "category": "Building",
         "text": """Help for @deletenpc
 
 Remove an NPC from the world.
@@ -2606,8 +2606,8 @@ Related:
 """,
     },
     {
-        "key": '@clonenpc',
-        "category": 'Building',
+        "key": "@clonenpc",
+        "category": "Building",
         "text": """Help for @clonenpc
 
 Create a duplicate of an existing NPC.
@@ -2633,8 +2633,8 @@ Related:
 """,
     },
     {
-        "key": '@spawnnpc',
-        "category": 'Building',
+        "key": "@spawnnpc",
+        "category": "Building",
         "text": """Help for @spawnnpc
 
 Spawn a saved NPC prototype.
@@ -2659,8 +2659,8 @@ Related:
 """,
     },
     {
-        "key": 'triggers',
-        "category": 'Building',
+        "key": "triggers",
+        "category": "Building",
         "text": """
 Help for triggers
 
@@ -2705,8 +2705,19 @@ Related:
 """,
     },
     {
-        "key": 'spells',
-        "category": 'General',
+        "key": "trainres",
+        "category": "General",
+        "text": """Help for trainres
+
+Spend training points to permanently increase your health, mana or stamina.
+
+Usage:
+    trainres <hp|mp|sp> <amount>
+""",
+    },
+    {
+        "key": "spells",
+        "category": "General",
         "text": """Help for spells
 
 Learn new spells from trainers with |wlearn|n. Once learned, cast a spell
@@ -2715,8 +2726,8 @@ spell.
 """,
     },
     {
-        "key": 'cast',
-        "category": 'General',
+        "key": "cast",
+        "category": "General",
         "text": """Help for cast
 
 Cast a spell that you have learned.
@@ -2730,9 +2741,9 @@ Notes:
 """,
     },
     {
-        "key": 'learn',
-        "aliases": ['trainspell'],
-        "category": 'General',
+        "key": "learn",
+        "aliases": ["trainspell"],
+        "category": "General",
         "text": """Help for learn
 
 Learn a spell from a trainer in your current location.
