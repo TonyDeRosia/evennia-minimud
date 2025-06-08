@@ -248,9 +248,10 @@ class TestGlobalHealing(EvenniaTest):
         char.refresh_prompt.assert_called_once()
 
 
-class TestTickRegistry(EvenniaTest):
-    def test_register_unregister(self):
-        from typeclasses.global_tick import GlobalTickScript, REGISTERED
+class TestTickableTag(EvenniaTest):
+    def test_character_searchable_by_tick_tag(self):
+        from typeclasses.global_tick import GlobalTickScript
+        from evennia.utils.search import search_tag
 
         script = GlobalTickScript()
         script.at_script_creation()
@@ -263,13 +264,12 @@ class TestTickRegistry(EvenniaTest):
             home=self.room1,
         )
 
-        self.assertIn(char.id, REGISTERED)
-        self.assertIn(char.id, script.db.registry)
+        self.assertTrue(char.tags.has("tickable"))
+        self.assertIn(char, search_tag("tickable"))
 
         char.delete()
 
-        self.assertNotIn(char.id, REGISTERED)
-        self.assertNotIn(char.id, script.db.registry)
+        self.assertNotIn(char, search_tag("tickable"))
 
         script.at_stop()
 
