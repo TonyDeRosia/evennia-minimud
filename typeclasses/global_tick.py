@@ -8,13 +8,14 @@ from evennia.scripts.scripts import DefaultScript
 # ----------------------------------------------------------------------------
 #
 # Other modules can subscribe to this signal to run code once per minute.
+# Other systems should subscribe to this tick via their own repeating scripts.
 # Import ``TICK`` from this module and ``connect`` a handler. Handlers will
 # receive ``sender`` as this script instance and any keyword arguments passed
 # to :func:`Signal.send`.
 
 TICK = Signal()
 
-class GlobalTick(DefaultScript):
+class GlobalTickScript(DefaultScript):
     """Script emitting the :data:`TICK` signal every minute."""
 
     def at_script_creation(self):

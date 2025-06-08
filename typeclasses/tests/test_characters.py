@@ -145,17 +145,17 @@ class TestCharacterProperties(EvenniaTest):
 
 class TestGlobalTick(EvenniaTest):
     def test_interval(self):
-        from typeclasses.global_tick import GlobalTick
+        from typeclasses.global_tick import GlobalTickScript
 
-        script = GlobalTick()
+        script = GlobalTickScript()
         script.at_script_creation()
         self.assertEqual(script.interval, 60)
         self.assertTrue(script.persistent)
 
     def test_emits_tick_signal(self):
-        from typeclasses.global_tick import GlobalTick, TICK
+        from typeclasses.global_tick import GlobalTickScript, TICK
 
-        script = GlobalTick()
+        script = GlobalTickScript()
         script.at_script_creation()
 
         called = []
