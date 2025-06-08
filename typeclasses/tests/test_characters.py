@@ -152,25 +152,32 @@ class TestGlobalTick(EvenniaTest):
         self.assertEqual(script.interval, 60)
         self.assertTrue(script.persistent)
 
-    def test_triggers_at_tick_online(self):
-        from typeclasses.global_tick import GlobalTick
+    def test_emits_tick_signal(self):
+        from typeclasses.global_tick import GlobalTick, TICK
 
         script = GlobalTick()
         script.at_script_creation()
 
-        self.char1.tags.add("tickable")
-        self.char1.at_tick = MagicMock()
-        self.char1.sessions.count = MagicMock(return_value=1)
+        called = []
 
+        def handler(sender, **kwargs):
+            called.append(sender)
+
+        TICK.connect(handler)
         script.at_repeat()
+        TICK.disconnect(handler)
 
-        self.char1.at_tick.assert_called_once()
+        self.assertEqual(called, [script])
 
+
+class TestGlobalHealing(EvenniaTest):
     def test_tick_offline_characters(self):
-        from typeclasses.global_tick import GlobalTick
+        from typeclasses.global_healing import GlobalHealing
+        from typeclasses.global_tick import TICK
 
-        script = GlobalTick()
+        script = GlobalHealing()
         script.at_script_creation()
+        script.at_start()
 
         pc = create.create_object(
             "typeclasses.characters.PlayerCharacter",
@@ -197,17 +204,18 @@ class TestGlobalTick(EvenniaTest):
             }
             char.sessions.count = MagicMock(return_value=0)
             char.refresh_prompt = MagicMock(wraps=char.refresh_prompt)
-            orig = char.at_tick
-            char.at_tick = MagicMock(wraps=orig)
+            char.at_tick = MagicMock()
 
-        script.at_repeat()
+        TICK.send(sender=self)
 
         for char in (pc, npc):
-            char.at_tick.assert_called_once()
+            char.at_tick.assert_not_called()
             for key in ("health", "mana", "stamina"):
                 trait = char.traits.get(key)
                 self.assertEqual(trait.current, trait.max // 2 + 1)
             char.refresh_prompt.assert_not_called()
+
+        script.at_stop()
 
 
 class TestRegeneration(EvenniaTest):
