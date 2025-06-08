@@ -1394,7 +1394,7 @@ Help for dig
 Create a new room in a direction. Usage: dig <direction> [<area>:<number>]
 
 Usage:
-    dig
+    dig <direction> [<area>:<number>]
 
 Switches:
     None
@@ -1421,7 +1421,7 @@ Help for @teleport
 Teleport directly to a room. Usage: @teleport <area>:<number>
 
 Usage:
-    @teleport
+    @teleport <area>:<number>
 
 Switches:
     None
@@ -1448,7 +1448,7 @@ Help for setdesc
 Set an object's description. Usage: setdesc <target> <description>
 
 Usage:
-    setdesc
+    setdesc <target> <description>
 
 Switches:
     None
@@ -1476,7 +1476,7 @@ Help for setweight
 Set an object's weight. Usage: setweight <target> <value>
 
 Usage:
-    setweight
+    setweight <target> <value>
 
 Switches:
     None
@@ -1503,7 +1503,7 @@ Help for setslot
 Define the slot or clothing type on an item. Usage: setslot <target> <slot>
 
 Usage:
-    setslot
+    setslot <target> <slot>
 
 Switches:
     None
@@ -1530,7 +1530,7 @@ Help for setdamage
 Assign a damage value to a weapon. Usage: setdamage <target> <amount>
 
 Usage:
-    setdamage
+    setdamage <target> <amount>
 
 Switches:
     None
@@ -1557,7 +1557,7 @@ Help for setbuff
 Add a buff identifier to an object. Usage: setbuff <target> <buff>
 
 Usage:
-    setbuff
+    setbuff <target> <buff>
 
 Switches:
     None
