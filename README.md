@@ -122,7 +122,8 @@ classes include `BaseNPC`, `MerchantNPC`, `BankerNPC`, `TrainerNPC`,
 
 While editing, there's a step to manage triggers using a numbered menu. Choose
 `Add trigger` to create a new reaction, `Delete trigger` to remove one, `List
-triggers` to review them and `Finish` when done.
+triggers` to review them and `Finish` when done. Multiple trigger entries can be
+added for the same event.
 See the `triggers` help entry for the list of events and possible reactions.
 
 There are also helper commands for managing NPCs after creation:
