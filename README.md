@@ -1,6 +1,5 @@
 # Evennia: The RPG
 
-**Play Here** https://example.com
 
 ### What is this?
 
