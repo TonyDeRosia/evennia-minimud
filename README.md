@@ -114,6 +114,10 @@ and confirm to create your NPC. You can later update them with `@cnpc edit
 
 See the `cnpc` help entry for a full breakdown of every menu option.
 
+The builder also lets you choose which NPC class to use. Available
+classes include `BaseNPC`, `MerchantNPC`, `BankerNPC`, `TrainerNPC`
+and `WandererNPC` defined under `typeclasses.npcs`.
+
 While editing, there's a step to manage triggers using a numbered menu. Choose
 `Add trigger` to create a new reaction, `Delete trigger` to remove one, `List
 triggers` to review them and `Finish` when done.

@@ -16,7 +16,18 @@ ALLOWED_NPC_TYPES = (
     "banker",
     "guild_receptionist",
     "craftsman",
+    "trainer",
+    "wanderer",
 )
+
+# Mapping of simple keys to NPC typeclass paths
+NPC_CLASS_MAP = {
+    "base": "typeclasses.npcs.BaseNPC",
+    "merchant": "typeclasses.npcs.merchant.MerchantNPC",
+    "banker": "typeclasses.npcs.banker.BankerNPC",
+    "trainer": "typeclasses.npcs.trainer.TrainerNPC",
+    "wanderer": "typeclasses.npcs.wanderer.WandererNPC",
+}
 
 
 # Menu nodes for NPC creation
@@ -67,7 +78,7 @@ def _set_npc_type(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["npc_type"] = string
     if string == "guild_receptionist":
         return "menunode_guild_affiliation"
-    return "menunode_level"
+    return "menunode_npc_class"
 
 def menunode_guild_affiliation(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("guild_affiliation", "")
@@ -85,7 +96,7 @@ def _set_guild_affiliation(caller, raw_string, **kwargs):
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("guild_affiliation", "")
     caller.ndb.buildnpc["guild_affiliation"] = string
-    return "menunode_level"
+    return "menunode_npc_class"
 
 def menunode_creature_type(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("creature_type", "humanoid")
@@ -151,6 +162,30 @@ def _edit_custom_slots(caller, raw_string, **kwargs):
     caller.msg("Unknown command.")
     return "menunode_custom_slots"
 
+def menunode_npc_class(caller, raw_string="", **kwargs):
+    default = caller.ndb.buildnpc.get("npc_class", "base")
+    classes = "/".join(NPC_CLASS_MAP)
+    text = f"|wChoose NPC class ({classes})|n"
+    if default:
+        text += f" [default: {default}]"
+    text += "\n(back to go back, skip for default)"
+    options = {"key": "_default", "goto": _set_npc_class}
+    return text, options
+
+def _set_npc_class(caller, raw_string, **kwargs):
+    string = raw_string.strip().lower()
+    if string == "back":
+        if caller.ndb.buildnpc.get("npc_type") == "guild_receptionist":
+            return "menunode_guild_affiliation"
+        return "menunode_npc_type"
+    if not string or string == "skip":
+        string = caller.ndb.buildnpc.get("npc_class", "base")
+    if string not in NPC_CLASS_MAP:
+        caller.msg(f"Invalid class. Choose from: {', '.join(NPC_CLASS_MAP)}")
+        return "menunode_npc_class"
+    caller.ndb.buildnpc["npc_class"] = string
+    return "menunode_level"
+
 def menunode_level(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("level", 1)
     text = f"|wLevel of NPC (1-100)|n [default: {default}]\n(back to go back, skip for default)"
@@ -160,9 +195,7 @@ def menunode_level(caller, raw_string="", **kwargs):
 def _set_level(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        if caller.ndb.buildnpc.get("npc_type") == "guild_receptionist":
-            return "menunode_guild_affiliation"
-        return "menunode_npc_type"
+        return "menunode_npc_class"
     if not string or string.lower() == "skip":
         caller.ndb.buildnpc["level"] = caller.ndb.buildnpc.get("level", 1)
         return "menunode_resources"
@@ -428,7 +461,13 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     if not isinstance(data, dict):
         caller.msg("Error: NPC data missing. Aborting.")
         return None
-    npc = data.get("edit_obj") or create_object(NPC, key=data.get("key"), location=caller.location)
+    tclass_path = NPC_CLASS_MAP.get(data.get("npc_class", "base"), "typeclasses.npcs.BaseNPC")
+    if data.get("edit_obj"):
+        npc = data.get("edit_obj")
+        if npc.typeclass_path != tclass_path:
+            npc.swap_typeclass(tclass_path, clean_attributes=False)
+    else:
+        npc = create_object(tclass_path, key=data.get("key"), location=caller.location)
     npc.db.desc = data.get("desc")
     npc.tags.add("npc")
     if npc_type := data.get("npc_type"):
@@ -499,7 +538,11 @@ class CmdCNPC(Command):
             if not rest:
                 self.msg("Usage: cnpc start <key>")
                 return
-            self.caller.ndb.buildnpc = {"key": rest.strip(), "triggers": {}}
+            self.caller.ndb.buildnpc = {
+                "key": rest.strip(),
+                "triggers": {},
+                "npc_class": "base",
+            }
             EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
             return
         if sub == "edit":
@@ -515,6 +558,7 @@ class CmdCNPC(Command):
                 "key": npc.key,
                 "desc": npc.db.desc,
                 "npc_type": npc.tags.get(category="npc_type") or "",
+                "npc_class": next((key for key, path in NPC_CLASS_MAP.items() if path == npc.typeclass_path), "base"),
                 "creature_type": npc.db.creature_type or "humanoid",
                 "equipment_slots": npc.db.equipment_slots or list(SLOT_ORDER),
                 "level": npc.db.level or 1,
