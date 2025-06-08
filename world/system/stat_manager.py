@@ -69,6 +69,10 @@ STAT_SCALING: Dict[str, Dict[str, float]] = {
     "evasion": {"DEX": 0.5, "perception": 0.2},
 }
 
+# Convenience constants for bonus collection
+STAT_KEY_SET = set(PRIMARY_STATS) | set(STAT_SCALING.keys())
+TAG_BONUS_RE = re.compile(r"([A-Z_]+)\+(\-?\d+)$")
+
 
 # -------------------------------------------------------------
 # Bonus collection helpers (stubs for future expansion)
@@ -102,7 +106,7 @@ def collect_item_mods(item) -> Dict[str, int]:  # pragma: no cover - helper
 
     bonus: Dict[str, int] = {}
 
-    stat_keys = set(PRIMARY_STATS) | set(STAT_SCALING.keys())
+    stat_keys = STAT_KEY_SET
 
     if hasattr(item, "attributes"):
         for key in stat_keys:
@@ -149,7 +153,7 @@ def collect_item_mods(item) -> Dict[str, int]:  # pragma: no cover - helper
         for tag in tags:
             if not isinstance(tag, str):
                 continue
-            m = re.match(r"([A-Z_]+)\+(\-?\d+)$", tag)
+            m = TAG_BONUS_RE.match(tag)
             if m:
                 stat, amt = m.groups()
                 stat = normalize_stat_key(stat)
