@@ -2569,9 +2569,11 @@ The available AI types are stored in `world.npc_handlers.ai`:
     aggressive - attack the first player seen
     defensive - only fight when attacked
     wander - move through random exits
-    scripted - custom Python hook
+    scripted - run npc.db.ai_script callback
 
 Set the type when prompted in the builder or edit the prototype data.
+For scripted AI, store a callable path on ``npc.db.ai_script`` such as
+``scripts.example_ai.patrol_ai``.
 
 Related:
     help cnpc

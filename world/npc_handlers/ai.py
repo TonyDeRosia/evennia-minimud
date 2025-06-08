@@ -34,8 +34,21 @@ def _ai_defensive(npc: DefaultObject) -> None:
 
 
 def _ai_scripted(npc: DefaultObject) -> None:
-    """Placeholder scripted behavior hook."""
-    pass
+    """Run a custom callback stored on the NPC."""
+    callback = npc.db.ai_script
+    if not callback:
+        return
+    try:
+        if callable(callback):
+            callback(npc)
+        elif isinstance(callback, str):
+            module, func = callback.rsplit(".", 1)
+            mod = __import__(module, fromlist=[func])
+            getattr(mod, func)(npc)
+    except Exception as err:  # pragma: no cover - log errors
+        from evennia.utils import logger
+
+        logger.log_err(f"Scripted AI error on {npc}: {err}")
 
 
 def _ai_passive(npc: DefaultObject) -> None:

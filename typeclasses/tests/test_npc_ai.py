@@ -26,4 +26,32 @@ class TestNPCAIScript(EvenniaTest):
         npc.at_object_creation()
         self.assertTrue(npc.scripts.get("npc_ai"))
 
+    def test_scripted_ai_string_callback(self):
+        from world.npc_handlers import ai
+        from typeclasses.npcs import BaseNPC
+
+        npc = create.create_object(BaseNPC, key="mob3", location=self.room1)
+        npc.db.ai_type = "scripted"
+        npc.db.ai_script = "scripts.example_ai.patrol_ai"
+
+        with patch("scripts.example_ai.patrol_ai") as mock_call:
+            ai.process_ai(npc)
+            mock_call.assert_called_with(npc)
+
+    def test_scripted_ai_direct_callable(self):
+        from world.npc_handlers import ai
+        from typeclasses.npcs import BaseNPC
+
+        called = {}
+
+        def callback(obj):
+            called["ran"] = obj
+
+        npc = create.create_object(BaseNPC, key="mob4", location=self.room1)
+        npc.db.ai_type = "scripted"
+        npc.db.ai_script = callback
+
+        ai.process_ai(npc)
+        self.assertIs(called.get("ran"), npc)
+
 
