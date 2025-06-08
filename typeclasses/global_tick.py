@@ -12,5 +12,9 @@ class GlobalTick(DefaultScript):
 
         tickables = search_tag(key="tickable")
         for obj in tickables:
-            if hasattr(obj, "refresh_prompt"):
+            if not obj.sessions.count():
+                continue
+            if hasattr(obj, "at_tick"):
+                obj.at_tick()
+            elif hasattr(obj, "refresh_prompt"):
                 obj.refresh_prompt()

@@ -152,18 +152,19 @@ class TestGlobalTick(EvenniaTest):
         self.assertEqual(script.interval, 60)
         self.assertTrue(script.persistent)
 
-    def test_refresh_prompt(self):
+    def test_triggers_at_tick_online(self):
         from typeclasses.global_tick import GlobalTick
 
         script = GlobalTick()
         script.at_script_creation()
 
         self.char1.tags.add("tickable")
-        self.char1.refresh_prompt = MagicMock()
+        self.char1.at_tick = MagicMock()
+        self.char1.sessions.count = MagicMock(return_value=1)
 
         script.at_repeat()
 
-        self.char1.refresh_prompt.assert_called_once()
+        self.char1.at_tick.assert_called_once()
 
     def test_tick_offline_characters(self):
         from typeclasses.global_tick import GlobalTick
@@ -192,6 +193,8 @@ class TestGlobalTick(EvenniaTest):
 
         pc.at_tick = MagicMock()
         npc.at_tick = MagicMock()
+        pc.sessions.count = MagicMock(return_value=0)
+        npc.sessions.count = MagicMock(return_value=0)
 
         script.at_repeat()
 
