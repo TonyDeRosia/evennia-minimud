@@ -21,6 +21,7 @@ ALIAS_MAP = {
     "critical_damage_bonus": "crit_bonus",
     "crit_dmg_bonus": "crit_bonus",
     "critical_resist": "crit_resist",
+    "status_resistance": "status_resist",
     "armor_penetration": "piercing",
     "armor_pen": "piercing",
     "spell_pen": "spell_penetration",

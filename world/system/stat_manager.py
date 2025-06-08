@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Dict
 import re
+from random import randint
 
 from utils.stats_utils import normalize_stat_key
 
@@ -389,6 +390,35 @@ def get_effective_stat(obj, key: str) -> int:
     base += state_manager.get_temp_bonus(obj, key)
     base += state_manager.get_effect_mods(obj).get(key, 0)
     return int(base)
+
+
+def check_hit(attacker, target, base: int = 75) -> bool:
+    """Return True if an attack hits based on accuracy vs dodge."""
+    acc = get_effective_stat(attacker, "accuracy")
+    dodge = get_effective_stat(target, "dodge")
+    chance = max(5, min(95, base + acc - dodge))
+    return randint(1, 100) <= chance
+
+
+def roll_crit(attacker, target) -> bool:
+    """Return True if attacker scores a critical hit against target."""
+    chance = get_effective_stat(attacker, "crit_chance")
+    chance -= get_effective_stat(target, "crit_resist")
+    chance = max(0, chance)
+    return randint(1, 100) <= chance
+
+
+def crit_damage(attacker, damage: int) -> int:
+    """Return damage after applying attacker's crit bonus."""
+    bonus = get_effective_stat(attacker, "crit_bonus")
+    return int(round(damage * (1 + bonus / 100)))
+
+
+def roll_status(attacker, target, base_chance: int) -> bool:
+    """Return True if a status effect should apply to target."""
+    chance = base_chance - get_effective_stat(target, "status_resist")
+    chance = max(0, chance)
+    return randint(1, 100) <= chance
 
 
 def get_secondary_stat(obj, key: str) -> int:

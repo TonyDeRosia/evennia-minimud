@@ -4,6 +4,7 @@ from evennia.utils import logger
 from evennia.contrib.game_systems.containers import ContribContainer
 
 from .objects import Object, ClothingObject
+from world.system import stat_manager, state_manager
 
 
 class BareHand:
@@ -39,19 +40,25 @@ class BareHand:
         damage = self.damage
         # subtract the stamina required to use this
         wielder.traits.stamina.current -= self.stamina_cost
-        if not damage:
-            # the attack failed
+
+        if not stat_manager.check_hit(wielder, target):
             wielder.at_emote(
                 f"$conj(swings) $pron(your) {self.name} at $you(target), but $conj(misses).",
                 mapping={"target": target},
             )
         else:
+            crit = stat_manager.roll_crit(wielder, target)
+            if crit:
+                damage = stat_manager.crit_damage(wielder, damage)
             wielder.at_emote(
                 f"$conj(hits) $you(target) with $pron(your) {self.name}.",
                 mapping={"target": target},
             )
-            # the attack succeeded! apply the damage
-            target.at_damage(wielder, damage, "bludgeon")
+            target.at_damage(wielder, damage, "bludgeon", critical=crit)
+            if status := getattr(self, "status_effect", None):
+                effect, chance = status
+                if stat_manager.roll_status(wielder, target, int(chance)):
+                    state_manager.add_status_effect(target, effect, 1)
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)
 
@@ -111,19 +118,24 @@ class MeleeWeapon(Object):
 
         # subtract the stamina required to use this
         wielder.traits.stamina.current -= self.attributes.get("stamina_cost", 0)
-        if not damage:
-            # the attack failed
+        if not stat_manager.check_hit(wielder, target):
             wielder.at_emote(
                 "$conj(swings) {weapon} at $you(target), but $conj(misses).",
                 mapping={"target": target, "weapon": self},
             )
         else:
+            crit = stat_manager.roll_crit(wielder, target)
+            if crit:
+                damage = stat_manager.crit_damage(wielder, damage)
             wielder.at_emote(
                 f"$conj({damage_type or 'swings'}) $you(target) with $pron(their) {{weapon}}.",
                 mapping={"target": target, "weapon": self},
             )
-            # the attack succeeded! apply the damage
-            target.at_damage(wielder, damage, damage_type)
+            target.at_damage(wielder, damage, damage_type, critical=crit)
+            if status := getattr(self.db, "status_effect", None):
+                effect, chance = status
+                if stat_manager.roll_status(wielder, target, int(chance)):
+                    state_manager.add_status_effect(target, effect, 1)
         wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)
 

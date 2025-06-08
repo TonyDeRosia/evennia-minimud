@@ -275,7 +275,7 @@ class Character(ObjectParent, ClothedCharacter):
                 status = self.get_display_status(self)
                 self.msg(prompt=status)
 
-    def at_damage(self, attacker, damage, damage_type=None):
+    def at_damage(self, attacker, damage, damage_type=None, critical=False):
         """
         Apply damage, after taking into account damage resistances.
         """
@@ -283,8 +283,14 @@ class Character(ObjectParent, ClothedCharacter):
         damage -= self.defense(damage_type)
         damage = max(0, damage)
         self.traits.health.current -= damage
-        self.msg(f"You take {damage} damage from {attacker.get_display_name(self)}.")
-        attacker.msg(f"You deal {damage} damage to {self.get_display_name(attacker)}.")
+        crit_prefix = "|rCritical!|n " if critical else ""
+        self.msg(
+            f"{crit_prefix}You take {damage} damage from {attacker.get_display_name(self)}."
+        )
+        attacker.msg(
+            f"You deal {damage} damage to {self.get_display_name(attacker)}"
+            + ("!" if critical else ".")
+        )
         if self.traits.health.value <= 0:
             self.tags.add("unconscious", category="status")
             self.tags.add("lying down", category="status")
@@ -645,8 +651,8 @@ class PlayerCharacter(Character):
         return f"|g{name}|n"
 
 
-    def at_damage(self, attacker, damage, damage_type=None):
-        super().at_damage(attacker, damage, damage_type=damage_type)
+    def at_damage(self, attacker, damage, damage_type=None, critical=False):
+        super().at_damage(attacker, damage, damage_type=damage_type, critical=critical)
         if self.traits.health.value < 50:
             status = self.get_display_status(self)
             self.msg(prompt=status)
@@ -795,11 +801,11 @@ class NPC(Character):
             self.check_triggers("on_look", looker=looker)
         return text
 
-    def at_damage(self, attacker, damage, damage_type=None):
+    def at_damage(self, attacker, damage, damage_type=None, critical=False):
         """
         Apply damage, after taking into account damage resistances.
         """
-        super().at_damage(attacker, damage, damage_type=damage_type)
+        super().at_damage(attacker, damage, damage_type=damage_type, critical=critical)
         self.check_triggers("on_attack", attacker=attacker, damage=damage)
 
         if self.traits.health.value <= 0:
@@ -912,29 +918,29 @@ class NPC(Character):
         """
         attack with your natural weapon
         """
+        from world.system import stat_manager
         weapon = self.db.natural_weapon
         damage = weapon.get("damage", 0)
         speed = weapon.get("speed", 10)
         # attack with your natural attack skill - whatever that is
         result = self.use_skill(weapon.get("skill"), speed=speed)
-        # apply the weapon damage as a modifier to skill
         damage = damage * result
-        # subtract the stamina required to use this
         self.traits.stamina.current -= weapon.get("stamina_cost", 5)
-        if not damage:
-            # the attack failed
+        if not stat_manager.check_hit(wielder, target):
             self.at_emote(
                 f"$conj(swings) $pron(your) {weapon.get('name')} at $you(target), but $conj(misses).",
                 mapping={"target": target},
             )
         else:
             verb = weapon.get("damage_type", "hits")
+            crit = stat_manager.roll_crit(wielder, target)
+            if crit:
+                damage = stat_manager.crit_damage(wielder, damage)
             wielder.at_emote(
                 f"$conj({verb}) $you(target) with $pron(your) {weapon.get('name')}.",
                 mapping={"target": target},
             )
-            # the attack succeeded! apply the damage
-            target.at_damage(wielder, damage, weapon.get("damage_type"))
+            target.at_damage(wielder, damage, weapon.get("damage_type"), critical=crit)
         wielder.msg(f"[ Cooldown: {speed} seconds ]")
         wielder.cooldowns.add("attack", speed)
 
