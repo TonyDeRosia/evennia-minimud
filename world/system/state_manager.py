@@ -274,3 +274,36 @@ def tick_all():
 
     for chara in Character.objects.all():
         tick_character(chara)
+
+
+def check_level_up(chara) -> bool:
+    """Increase character level based on experience.
+
+    Grants +3 practice sessions and +1 training point per level gained and
+    notifies the character when a level up occurs.
+
+    Args:
+        chara: The character to check for leveling.
+
+    Returns:
+        bool: True if the character gained at least one level.
+    """
+
+    exp = int(chara.db.exp or 0)
+    level = int(chara.db.level or 1)
+    leveled = False
+
+    while level < MAX_LEVEL and exp >= level * 100:
+        level += 1
+        leveled = True
+        chara.db.practice_sessions = (chara.db.practice_sessions or 0) + 3
+        chara.db.training_points = (chara.db.training_points or 0) + 1
+
+    if leveled:
+        chara.db.level = level
+        chara.msg(
+            f"You advance to level {level}! +3 practice sessions and +1 training point awarded."
+        )
+        stat_manager.refresh_stats(chara)
+
+    return leveled

@@ -291,6 +291,8 @@ class CmdDonate(Command):
 
         exp = self.caller.db.exp or 0
         self.caller.db.exp = exp + total
+        from world.system import state_manager
+        state_manager.check_level_up(self.caller)
 
         self.msg(f"You exchange {obj_name} for {total} experience.")
 

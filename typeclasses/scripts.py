@@ -128,9 +128,12 @@ class CombatScript(Script):
 
         # grant exp to the other team, if relevant
         if exp := combatant.db.exp_reward:
+            from world.system import state_manager
+
             for obj in self.db.teams[team - 1]:
                 obj.msg(f"You gain {exp} experience.")
                 obj.db.exp = (obj.db.exp or 0) + exp
+                state_manager.check_level_up(obj)
         self.check_victory()
         # remove their combat target if they have one
         del combatant.db.combat_target
