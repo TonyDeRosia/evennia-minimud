@@ -50,6 +50,8 @@ class SkillRecipe(CraftingRecipe):
         if self.exp_gain:
             exp = crafter.attributes.get("exp", 0)
             crafter.db.exp = self.exp_gain + exp
+            from world.system import state_manager
+            state_manager.check_level_up(crafter)
         # implement some randomness - the higher the difference, the lower the chance of failure
         if not randint(0, success_rate):
             self.msg("It doesn't seem to work out. Maybe you should try again?")
