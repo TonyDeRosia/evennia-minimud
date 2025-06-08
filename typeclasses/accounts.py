@@ -101,3 +101,8 @@ class Account(ContribChargenAccount):
         self.db.settings = {"auto attack": True, "auto prompt": False}
 
 
+class Guest(DefaultGuest):
+    """Guest account typeclass."""
+    pass
+
+
