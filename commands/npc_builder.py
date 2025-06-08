@@ -36,6 +36,26 @@ NPC_CLASS_MAP = {
 }
 
 
+# Additional configuration options
+ALLOWED_ROLES = (
+    "merchant",
+    "banker",
+    "trainer",
+    "guildmaster",
+    "guild_receptionist",
+    "questgiver",
+    "combat_trainer",
+    "event_npc",
+)
+
+ALLOWED_AI_TYPES = (
+    "passive",
+    "aggressive",
+    "defensive",
+    "wander",
+    "scripted",
+)
+
 # Menu nodes for NPC creation
 
 def menunode_desc(caller, raw_string="", **kwargs):
@@ -82,8 +102,6 @@ def _set_npc_type(caller, raw_string, **kwargs):
         caller.msg(f"Invalid NPC type. Choose from: {', '.join(ALLOWED_NPC_TYPES)}")
         return "menunode_npc_type"
     caller.ndb.buildnpc["npc_type"] = string
-    if string == "guild_receptionist":
-        return "menunode_guild_affiliation"
     return "menunode_npc_class"
 
 def menunode_guild_affiliation(caller, raw_string="", **kwargs):
@@ -98,11 +116,11 @@ def menunode_guild_affiliation(caller, raw_string="", **kwargs):
 def _set_guild_affiliation(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_npc_type"
+        return "menunode_roles"
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("guild_affiliation", "")
     caller.ndb.buildnpc["guild_affiliation"] = string
-    return "menunode_npc_class"
+    return "menunode_role_details"
 
 def menunode_creature_type(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("creature_type", "humanoid")
@@ -181,8 +199,6 @@ def menunode_npc_class(caller, raw_string="", **kwargs):
 def _set_npc_class(caller, raw_string, **kwargs):
     string = raw_string.strip().lower()
     if string == "back":
-        if caller.ndb.buildnpc.get("npc_type") == "guild_receptionist":
-            return "menunode_guild_affiliation"
         return "menunode_npc_type"
     if not string or string == "skip":
         string = caller.ndb.buildnpc.get("npc_class", "base")
@@ -190,7 +206,71 @@ def _set_npc_class(caller, raw_string, **kwargs):
         caller.msg(f"Invalid class. Choose from: {', '.join(NPC_CLASS_MAP)}")
         return "menunode_npc_class"
     caller.ndb.buildnpc["npc_class"] = string
+
+    return "menunode_roles"
+
+def menunode_roles(caller, raw_string="", **kwargs):
+    roles = caller.ndb.buildnpc.get("roles", [])
+    text = "|wEdit NPC Roles|n\n"
+    text += ", ".join(roles) if roles else "None"
+    text += "\nCommands:\n  add <role>\n  remove <role>\n  done - finish\n  back - previous step"
+    options = {"key": "_default", "goto": _edit_roles}
+    return text, options
+
+def _edit_roles(caller, raw_string, **kwargs):
+    string = raw_string.strip().lower()
+    roles = caller.ndb.buildnpc.setdefault("roles", [])
+    if string == "back":
+        return "menunode_npc_class"
+    if string in ("done", "finish", "skip", ""):
+        return "menunode_role_details"
+    if string.startswith("add "):
+        role = string[4:].strip()
+        if role in ALLOWED_ROLES and role not in roles:
+            roles.append(role)
+            caller.msg(f"Added role {role}.")
+        else:
+            caller.msg("Invalid or duplicate role.")
+        return "menunode_roles"
+    if string.startswith("remove "):
+        role = string[7:].strip()
+        if role in roles:
+            roles.remove(role)
+            caller.msg(f"Removed role {role}.")
+        else:
+            caller.msg("Role not found.")
+        return "menunode_roles"
+    caller.msg("Unknown command.")
+    return "menunode_roles"
+
+def menunode_role_details(caller, raw_string="", **kwargs):
+    roles = caller.ndb.buildnpc.get("roles", [])
+    if "merchant" in roles and "merchant_markup" not in caller.ndb.buildnpc:
+        return "menunode_merchant_pricing"
+    if any(r in roles for r in ("guildmaster", "guild_receptionist")) and not caller.ndb.buildnpc.get("guild_affiliation"):
+        return "menunode_guild_affiliation"
     return "menunode_level"
+
+def menunode_merchant_pricing(caller, raw_string="", **kwargs):
+    default = caller.ndb.buildnpc.get("merchant_markup", 1.0)
+    text = f"|wMerchant price multiplier|n [default: {default}]\n(back to go back, skip for default)"
+    options = {"key": "_default", "goto": _set_merchant_pricing}
+    return text, options
+
+def _set_merchant_pricing(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_roles"
+    if not string or string.lower() == "skip":
+        val = caller.ndb.buildnpc.get("merchant_markup", 1.0)
+    else:
+        try:
+            val = float(string)
+        except ValueError:
+            caller.msg("Enter a number.")
+            return "menunode_merchant_pricing"
+    caller.ndb.buildnpc["merchant_markup"] = val
+    return "menunode_role_details"
 
 def menunode_level(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("level", 1)
@@ -201,7 +281,7 @@ def menunode_level(caller, raw_string="", **kwargs):
 def _set_level(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_npc_class"
+        return "menunode_roles"
     if not string or string.lower() == "skip":
         caller.ndb.buildnpc["level"] = caller.ndb.buildnpc.get("level", 1)
         return "menunode_resources"
@@ -318,7 +398,8 @@ def _set_skills(caller, raw_string, **kwargs):
 
 def menunode_ai(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("ai_type", "")
-    text = "|wAI type (e.g. passive, aggressive)|n"
+    types = "/".join(ALLOWED_AI_TYPES)
+    text = f"|wAI type ({types})|n"
     if default:
         text += f" [default: {default}]"
     text += "\n(back to go back, skip for default)"
@@ -331,6 +412,9 @@ def _set_ai(caller, raw_string, **kwargs):
         return "menunode_skills"
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("ai_type", "")
+    if string and string not in ALLOWED_AI_TYPES:
+        caller.msg(f"Invalid AI type. Choose from: {', '.join(ALLOWED_AI_TYPES)}")
+        return "menunode_ai"
     caller.ndb.buildnpc["ai_type"] = string
     return "menunode_triggers"
 
@@ -506,8 +590,13 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     if npc_type := data.get("npc_type"):
         npc.tags.add(npc_type, category="npc_type")
         npc.tags.add(npc_type, category="npc_role")
+    for role in data.get("roles", []):
+        if role and not npc.tags.has(role, category="npc_role"):
+            npc.tags.add(role, category="npc_role")
     if guild := data.get("guild_affiliation"):
         npc.tags.add(guild, category="guild_affiliation")
+    if markup := data.get("merchant_markup"):
+        npc.db.merchant_markup = markup
     npc.db.ai_type = data.get("ai_type")
     npc.db.behavior = data.get("behavior")
     npc.db.skills = data.get("skills")
@@ -559,6 +648,7 @@ def _gather_npc_data(npc):
         "key": npc.key,
         "desc": npc.db.desc,
         "npc_type": npc.tags.get(category="npc_type") or "",
+        "roles": [t for t in npc.tags.get(category="npc_role", return_list=True) or [] if t != npc.tags.get(category="npc_type")],
         "npc_class": next(
             (k for k, path in NPC_CLASS_MAP.items() if path == npc.typeclass_path),
             "base",
@@ -573,6 +663,8 @@ def _gather_npc_data(npc):
         "behavior": npc.db.behavior or "",
         "skills": npc.db.skills or [],
         "ai_type": npc.db.ai_type or "",
+        "merchant_markup": npc.db.merchant_markup or 1.0,
+        "guild_affiliation": npc.tags.get(category="guild_affiliation") or "",
         "triggers": npc.db.triggers or {},
     }
 
@@ -600,6 +692,8 @@ class CmdCNPC(Command):
                 "key": rest.strip(),
                 "triggers": {},
                 "npc_class": "base",
+                "roles": [],
+                "merchant_markup": 1.0,
             }
             EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
             return
