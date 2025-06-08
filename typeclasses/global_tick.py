@@ -9,12 +9,11 @@ class GlobalTick(DefaultScript):
 
     def at_repeat(self):
         from evennia.utils.search import search_tag
+        from world.system import state_manager
 
         tickables = search_tag(key="tickable")
         for obj in tickables:
-            if not obj.sessions.count():
-                continue
             if hasattr(obj, "at_tick"):
                 obj.at_tick()
-            elif hasattr(obj, "refresh_prompt"):
-                obj.refresh_prompt()
+            else:
+                state_manager.tick_character(obj)

@@ -190,16 +190,24 @@ class TestGlobalTick(EvenniaTest):
             for key in ("health", "mana", "stamina"):
                 trait = char.traits.get(key)
                 trait.current = trait.max // 2
-
-        pc.at_tick = MagicMock()
-        npc.at_tick = MagicMock()
-        pc.sessions.count = MagicMock(return_value=0)
-        npc.sessions.count = MagicMock(return_value=0)
+            char.db.derived_stats = {
+                "health_regen": 1,
+                "mana_regen": 1,
+                "stamina_regen": 1,
+            }
+            char.sessions.count = MagicMock(return_value=0)
+            char.refresh_prompt = MagicMock(wraps=char.refresh_prompt)
+            orig = char.at_tick
+            char.at_tick = MagicMock(wraps=orig)
 
         script.at_repeat()
 
-        pc.at_tick.assert_not_called()
-        npc.at_tick.assert_not_called()
+        for char in (pc, npc):
+            char.at_tick.assert_called_once()
+            for key in ("health", "mana", "stamina"):
+                trait = char.traits.get(key)
+                self.assertEqual(trait.current, trait.max // 2 + 1)
+            char.refresh_prompt.assert_not_called()
 
 
 class TestRegeneration(EvenniaTest):
