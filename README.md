@@ -147,7 +147,12 @@ builder:
 - **aggressive** – attack the first player seen.
 - **defensive** – fight back only when in combat.
 - **wander** – roam randomly through available exits.
-- **scripted** – placeholder hook for custom Python code.
+- **scripted** – runs the callback stored in ``npc.db.ai_script``.
+
+For scripted AI you must assign a callable to ``npc.db.ai_script``. This can be
+either a Python import path or a direct function reference. Example::
+
+    npc.db.ai_script = "scripts.example_ai.patrol_ai"
 
 ### Trigger Syntax
 
