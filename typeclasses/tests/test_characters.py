@@ -164,8 +164,10 @@ class TestGlobalTick(EvenniaTest):
             called.append(sender)
 
         TICK.connect(handler)
-        script.at_repeat()
+        script.at_start()
+        TICK.send(sender=script)
         TICK.disconnect(handler)
+        script.at_stop()
 
         self.assertEqual(called, [script])
 
@@ -173,9 +175,11 @@ class TestGlobalTick(EvenniaTest):
 class TestGlobalHealing(EvenniaTest):
     def test_tick_offline_characters(self):
         from typeclasses.global_healing import GlobalHealingScript
+        from typeclasses.global_tick import TICK
 
         script = GlobalHealingScript()
         script.at_script_creation()
+        script.at_start()
 
         pc = create.create_object(
             "typeclasses.characters.PlayerCharacter",
@@ -200,17 +204,45 @@ class TestGlobalHealing(EvenniaTest):
                 "stamina_regen": 1,
             }
             char.sessions.count = MagicMock(return_value=0)
-            char.refresh_prompt = MagicMock(wraps=char.refresh_prompt)
+            char.msg = MagicMock()
             char.at_tick = MagicMock()
 
-        script.at_repeat()
+        TICK.send(sender=self)
+        script.at_stop()
 
         for char in (pc, npc):
             char.at_tick.assert_not_called()
             for key in ("health", "mana", "stamina"):
                 trait = char.traits.get(key)
                 self.assertEqual(trait.current, trait.max // 2 + 1)
-            char.refresh_prompt.assert_not_called()
+            char.msg.assert_not_called()
+
+    def test_tick_online_character_sends_prompt(self):
+        from typeclasses.global_healing import GlobalHealingScript
+        from typeclasses.global_tick import TICK
+
+        script = GlobalHealingScript()
+        script.at_script_creation()
+        script.at_start()
+
+        char = self.char1
+        for key in ("health", "mana", "stamina"):
+            trait = char.traits.get(key)
+            trait.current = trait.max // 2
+        char.db.derived_stats = {
+            "health_regen": 1,
+            "mana_regen": 1,
+            "stamina_regen": 1,
+        }
+        char.sessions.count = MagicMock(return_value=1)
+        char.msg = MagicMock()
+
+        TICK.send(sender=self)
+        script.at_stop()
+
+        char.msg.assert_called_once_with(
+            "You have recovered some.", prompt=char.get_resource_prompt()
+        )
 
 
 
