@@ -75,12 +75,6 @@ class CmdTrainSkill(Command):
 
     key = "train"
 
-    def _calc_exp(self, start, increase):
-        """
-        Calculates the experience cost for increasing your skill from the start level.
-        """
-        return int((start + (start + increase)) * (increase + 1) / 2.0)
-
     def func(self):
         if not self.obj:
             self.msg("You cannot train skills here.")
@@ -106,58 +100,31 @@ class CmdTrainSkill(Command):
             self.msg("Usage: train <levels>")
             return
 
-        if not (caller_xp := caller.db.exp):
-            self.msg("You do not have any experience.")
+        can_train, cost = self.obj.check_training(caller, levels)
+        if can_train is None:
+            self.msg("You cannot train any skills here.")
+            return
+        if can_train is False:
+            self.msg(
+                f"You do not have enough experience - you need {cost} experience to increase your {to_train} by {levels} levels."
+            )
             return
 
-        if not (skill := caller.traits.get(to_train)):
-            exp_cost = self._calc_exp(0, levels)
-            if caller_xp < exp_cost:
-                self.msg(
-                    f"You do not have enough experience - you need {exp_cost} to learn {levels} levels of {to_train}."
-                )
-                return
+        confirm = yield (
+            f"It will cost you {cost} experience to improve your {to_train} by {levels} levels. Confirm? Yes/No"
+        )
+        if confirm.lower() not in ("yes", "y"):
+            self.msg("Cancelled.")
+            return
 
-            confirm = yield (
-                f"It will cost you {exp_cost} experience to learn {to_train} up to level {levels}. Confirm? Yes/No"
+        success, spent, new_level = self.obj.train_skill(caller, levels)
+        if not success:
+            self.msg(
+                f"You do not have enough experience - you need {spent} experience to improve your {to_train}."
             )
-            if confirm.lower() not in (
-                "yes",
-                "y",
-            ):
-                self.msg("Cancelled.")
-                return
-            caller.traits.add(
-                to_train,
-                trait_type="counter",
-                min=0,
-                max=100,
-                base=0,
-                stat=SKILL_DICT.get(to_train),
-            )
-            skill = caller.traits.get(to_train)
-        else:
-            exp_cost = self._calc_exp(skill.base, levels)
-            if caller_xp < exp_cost:
-                self.msg(
-                    f"You do not have enough experience - you need {exp_cost} experience to increase your {to_train} by {levels} levels."
-                )
-                return
-            confirm = yield (
-                f"It will cost you {exp_cost} experience to improve your {to_train} by {levels} levels. Confirm? Yes/No"
-            )
-            if confirm.lower() not in (
-                "yes",
-                "y",
-            ):
-                self.msg("Cancelled.")
-                return
+            return
 
-        caller.db.exp -= exp_cost
-        skill.base += levels
-        self.msg(f"You practice your {to_train} and improve it to level {skill.base}.")
-        from world.system import stat_manager
-        stat_manager.refresh_stats(caller)
+        self.msg(f"You practice your {to_train} and improve it to level {new_level}.")
 
 
 class TrainCmdSet(CmdSet):

@@ -211,7 +211,46 @@ class XYGridShop(XYGridRoom):
             home=self,
             location=self,
         )
+        # attach restocking script if we have an inventory defined
         self.scripts.add(RestockScript, key="restock", autostart=False)
+        if self.db.inventory:
+            script = self.scripts.get("restock")[0]
+            script.start()
+
+    def at_init(self):
+        """Ensure restocking runs when the room is loaded."""
+        super().at_init()
+        if self.db.inventory and (script := self.scripts.get("restock")):
+            script = script[0]
+            if not script.is_active:
+                script.start()
+
+    def check_purchase(self, buyer, items):
+        """Validate ``buyer`` can afford ``items``.
+
+        Returns a tuple ``(can_buy, total_cost)``.
+        """
+        from utils.currency import to_copper
+
+        total = sum(obj.db.price or 0 for obj in items)
+        wallet = buyer.db.coins or {}
+        if total <= 0 or to_copper(wallet) < total:
+            return False, total
+        return True, total
+
+    def purchase(self, buyer, items):
+        """Handle purchase transaction of ``items`` by ``buyer``."""
+        from utils.currency import to_copper, from_copper
+
+        valid, total = self.check_purchase(buyer, items)
+        if not valid:
+            return False, total
+
+        wallet = buyer.db.coins or {}
+        buyer.db.coins = from_copper(to_copper(wallet) - total)
+        for obj in items:
+            obj.move_to(buyer, quiet=True, move_type="get")
+        return True, total
 
     def add_stock(self, obj):
         """
@@ -240,6 +279,55 @@ class XYGridTrain(XYGridRoom):
         super().at_object_creation()
         # add the shopping commands to the room
         self.cmdset.add(TrainCmdSet, persistent=True)
+
+    def _calc_cost(self, start, increase):
+        """Return EXP cost for raising a skill."""
+        return int((start + (start + increase)) * (increase + 1) / 2.0)
+
+    def check_training(self, char, levels):
+        """Validate training request.
+
+        Returns ``(can_train, cost)`` or ``(None, 0)`` if invalid skill.
+        """
+        from commands.skills import SKILL_DICT
+
+        skill_key = self.db.skill_training
+        if not skill_key or skill_key not in SKILL_DICT:
+            return None, 0
+
+        skill = char.traits.get(skill_key)
+        start = skill.base if skill else 0
+        cost = self._calc_cost(start, levels)
+        if (char.db.exp or 0) < cost:
+            return False, cost
+        return True, cost
+
+    def train_skill(self, char, levels):
+        """Apply training cost and raise skill."""
+        from commands.skills import SKILL_DICT
+        from world.system import stat_manager
+
+        valid, cost = self.check_training(char, levels)
+        if valid is None or valid is False:
+            return False, cost
+
+        skill_key = self.db.skill_training
+        skill = char.traits.get(skill_key)
+        if not skill:
+            char.traits.add(
+                skill_key,
+                trait_type="counter",
+                min=0,
+                max=100,
+                base=0,
+                stat=SKILL_DICT.get(skill_key),
+            )
+            skill = char.traits.get(skill_key)
+
+        char.db.exp -= cost
+        skill.base += levels
+        stat_manager.refresh_stats(char)
+        return True, cost, skill.base
 
 
 class XYZShopNTrain(XYGridTrain, XYGridShop):
