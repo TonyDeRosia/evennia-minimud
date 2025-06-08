@@ -34,6 +34,7 @@ class Character(ObjectParent, ClothedCharacter):
     guild_points = AttributeProperty({})
     guild_rank = AttributeProperty("")
     stat_overrides = AttributeProperty({})
+    spells = AttributeProperty([])
 
     @property
     def in_combat(self):
@@ -182,6 +183,7 @@ class Character(ObjectParent, ClothedCharacter):
         self.db.guild_rank = ""
         self.db.stat_overrides = {}
         self.db.equip_bonuses = {}
+        self.db.spells = []
         self.db.sated = 5
 
     def at_post_puppet(self, **kwargs):
@@ -497,6 +499,29 @@ class Character(ObjectParent, ClothedCharacter):
             stat_bonus = state_manager.get_effective_stat(self, stat)
         # finally, return the skill plus stat
         return skill_trait.value + stat_bonus
+
+    def cast_spell(self, spell_key, target=None):
+        """Cast a known spell, spending mana."""
+        from world.spells import SPELLS
+
+        spell = SPELLS.get(spell_key)
+        if not spell:
+            return False
+        known = self.db.spells or []
+        if spell_key not in known:
+            return False
+        if self.traits.mana.current < spell.mana_cost:
+            return False
+        self.traits.mana.current -= spell.mana_cost
+        if target:
+            self.location.msg_contents(
+                f"{self.get_display_name(self)} casts {spell.key} at {target.get_display_name(self)}!"
+            )
+        else:
+            self.location.msg_contents(
+                f"{self.get_display_name(self)} casts {spell.key}!"
+            )
+        return True
 
     def get_display_status(self, looker, **kwargs):
         """
