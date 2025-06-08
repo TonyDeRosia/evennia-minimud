@@ -173,6 +173,13 @@ class TestGlobalTick(EvenniaTest):
 
 
 class TestGlobalHealing(EvenniaTest):
+    def test_interval(self):
+        from typeclasses.global_healing import GlobalHealingScript
+
+        script = GlobalHealingScript()
+        script.at_script_creation()
+        self.assertEqual(script.interval, 0)
+
     def test_tick_offline_characters(self):
         from typeclasses.global_healing import GlobalHealingScript
         from typeclasses.global_tick import TICK

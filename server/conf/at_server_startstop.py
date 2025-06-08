@@ -88,8 +88,8 @@ def at_server_start():
 
     if script:
         changed = False
-        if script.interval:
-            script.interval = None
+        if script.interval != 0:
+            script.interval = 0
             changed = True
         if not script.persistent:
             script.persistent = True
