@@ -112,6 +112,28 @@ class TestCharacterHooks(EvenniaTest):
         shield.wear(self.char1, True)
         self.assertFalse(shield.db.worn)
 
+    def test_arrive_depart_hooks(self):
+        npc = create.create_object("typeclasses.characters.NPC", key="mob", location=self.room1)
+
+        self.char1.refresh_prompt = MagicMock()
+        npc.check_triggers = MagicMock()
+
+        # character enters the room
+        self.char2.location = self.room2
+        self.char2.move_to(self.room1)
+
+        self.char1.refresh_prompt.assert_called()
+        npc.check_triggers.assert_called_with("on_enter", chara=self.char2)
+
+        self.char1.refresh_prompt.reset_mock()
+        npc.check_triggers.reset_mock()
+
+        # character leaves the room
+        self.char2.move_to(self.room2)
+
+        self.char1.refresh_prompt.assert_called()
+        npc.check_triggers.assert_called_with("on_leave", chara=self.char2, destination=self.room2)
+
 
 class TestCharacterDisplays(EvenniaTest):
     def test_get_display_status(self):

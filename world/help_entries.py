@@ -2671,6 +2671,7 @@ stored as lists of dictionaries with optional |wmatch|n text and one or more
 Events:
     on_speak   - someone speaks in the room
     on_enter   - someone enters the room
+    on_leave   - someone leaves the room
     on_give_item - the NPC receives an item
     on_look    - someone looks at the NPC
     on_attack  - combat starts or damage occurs
