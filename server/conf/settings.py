@@ -122,5 +122,10 @@ GLOBAL_SCRIPTS = {
         "typeclass": "typeclasses.global_tick.GlobalTick",
         "interval": 60,
         "persistent": True,
-    }
+    },
+    "global_healing": {
+        "key": "global_healing",
+        "typeclass": "typeclasses.global_healing.GlobalHealing",
+        "persistent": True,
+    },
 }
