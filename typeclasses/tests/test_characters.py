@@ -2,8 +2,9 @@
 Tests for custom character logic
 """
 
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock, call, patch
 from evennia.utils.test_resources import EvenniaTest
+from django.test import override_settings
 from evennia.utils import create
 
 
@@ -274,6 +275,68 @@ class TestReviveRespawn(EvenniaTest):
         self.assertEqual(char.traits.health.current, char.traits.health.max // 5)
         self.assertEqual(char.traits.health.rate, 0.0)
         self.assertFalse(char.tags.has("unconscious", category="status"))
+
+
+@override_settings(DEFAULT_HOME=None)
+class TestCombatResists(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        from world import stats
+        from world.system import stat_manager
+
+        stats.apply_stats(self.char1)
+        stats.apply_stats(self.char2)
+        stat_manager.refresh_stats(self.char1)
+        stat_manager.refresh_stats(self.char2)
+
+        self.weapon = create.create_object(
+            "typeclasses.gear.MeleeWeapon", key="sword", location=self.char1
+        )
+        self.weapon.tags.add("equipment", category="flag")
+        self.weapon.tags.add("identified", category="flag")
+        self.weapon.db.dmg = 10
+        self.weapon.db.status_effect = ("stunned", 50)
+
+    def test_status_resist_prevents_effect(self):
+        from world.system import stat_manager
+        self.char1.db.stat_overrides = {"accuracy": 100}
+        self.char2.db.stat_overrides = {"status_resist": 60}
+        stat_manager.refresh_stats(self.char1)
+        stat_manager.refresh_stats(self.char2)
+        with patch("world.system.stat_manager.randint", return_value=1):
+            self.weapon.at_attack(self.char1, self.char2)
+        self.assertFalse(self.char2.tags.has("stunned", category="status"))
+
+        self.char2.db.stat_overrides = {"status_resist": 0}
+        stat_manager.refresh_stats(self.char2)
+        with patch("world.system.stat_manager.randint", return_value=1):
+            self.weapon.at_attack(self.char1, self.char2)
+        self.assertTrue(self.char2.tags.has("stunned", category="status"))
+
+    def test_crit_resist_reduces_crit_damage(self):
+        from world.system import stat_manager
+        self.char1.db.stat_overrides = {
+            "accuracy": 100,
+            "crit_chance": 50,
+            "crit_bonus": 100,
+        }
+        base_hp = self.char2.traits.health.current
+        stat_manager.refresh_stats(self.char1)
+
+        # No crit resist
+        self.char2.db.stat_overrides = {"crit_resist": 0}
+        stat_manager.refresh_stats(self.char2)
+        with patch("world.system.stat_manager.randint", return_value=1):
+            self.weapon.at_attack(self.char1, self.char2)
+        self.assertEqual(self.char2.traits.health.current, base_hp - 20)
+
+        # With high crit resist
+        self.char2.traits.health.current = base_hp
+        self.char2.db.stat_overrides = {"crit_resist": 60}
+        stat_manager.refresh_stats(self.char2)
+        with patch("world.system.stat_manager.randint", return_value=1):
+            self.weapon.at_attack(self.char1, self.char2)
+        self.assertEqual(self.char2.traits.health.current, base_hp - 10)
 
     def test_respawn_restores_full_health_without_regen(self):
         char = self.char1
