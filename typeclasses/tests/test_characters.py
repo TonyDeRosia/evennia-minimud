@@ -174,17 +174,16 @@ class TestGlobalTick(EvenniaTest):
 
 class TestGlobalHealing(EvenniaTest):
     def test_interval(self):
-        from typeclasses.global_healing import GlobalHealingScript
+        from typeclasses.global_tick import GlobalTickScript
 
-        script = GlobalHealingScript()
+        script = GlobalTickScript()
         script.at_script_creation()
-        self.assertEqual(script.interval, 0)
+        self.assertEqual(script.interval, 60)
 
     def test_tick_offline_characters(self):
-        from typeclasses.global_healing import GlobalHealingScript
-        from typeclasses.global_tick import TICK
+        from typeclasses.global_tick import GlobalTickScript, TICK
 
-        script = GlobalHealingScript()
+        script = GlobalTickScript()
         script.at_script_creation()
         script.at_start()
 
@@ -212,23 +211,20 @@ class TestGlobalHealing(EvenniaTest):
             }
             char.sessions.count = MagicMock(return_value=0)
             char.msg = MagicMock()
-            char.at_tick = MagicMock()
 
-        TICK.send(sender=self)
+        script.at_repeat()
         script.at_stop()
 
         for char in (pc, npc):
-            char.at_tick.assert_not_called()
             for key in ("health", "mana", "stamina"):
                 trait = char.traits.get(key)
                 self.assertEqual(trait.current, trait.max // 2 + 1)
             char.msg.assert_not_called()
 
     def test_tick_online_character_sends_prompt(self):
-        from typeclasses.global_healing import GlobalHealingScript
-        from typeclasses.global_tick import TICK
+        from typeclasses.global_tick import GlobalTickScript, TICK
 
-        script = GlobalHealingScript()
+        script = GlobalTickScript()
         script.at_script_creation()
         script.at_start()
 
@@ -244,7 +240,7 @@ class TestGlobalHealing(EvenniaTest):
         char.sessions.count = MagicMock(return_value=1)
         char.msg = MagicMock()
 
-        TICK.send(sender=self)
+        script.at_repeat()
         script.at_stop()
 
         char.msg.assert_called_once_with(

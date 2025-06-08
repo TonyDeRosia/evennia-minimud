@@ -2,6 +2,7 @@
 
 from django.dispatch import Signal
 from evennia.scripts.scripts import DefaultScript
+from typeclasses.characters import Character, NPC
 
 # ----------------------------------------------------------------------------
 # Tick signal
@@ -23,5 +24,19 @@ class GlobalTickScript(DefaultScript):
         self.persistent = True
 
     def at_repeat(self):
-        """Broadcast the global tick."""
+        """Handle one global tick."""
+        targets = list(Character.objects.all()) + list(NPC.objects.all())
+        seen = set()
+        for obj in targets:
+            if obj in seen:
+                continue
+            seen.add(obj)
+            if hasattr(obj, "at_tick"):
+                healed = obj.at_tick() or {}
+                if healed and obj.sessions.count():
+                    obj.msg(
+                        "You have recovered some.",
+                        prompt=obj.get_resource_prompt(),
+                    )
+
         TICK.send(sender=self)
