@@ -664,13 +664,19 @@ Examples:
     None
 
 Notes:
+    - Flags are stored as tags in the |wflag|n category.
     - Use |wsetflag <item> <flag>|n to add a flag and
     - |wremoveflag <item> <flag>|n to remove it.
-    - Some example flags:
-    - identified - item can be equipped or wielded
-    - equipment  - marks the object as equipable
-    - stationary - item cannot be moved
-    - mainhand   - must be wielded in your main hand
+    - Common flags:
+    - identified   - item is identified and can be used
+    - equipment    - marks the object as equipable
+    - stationary   - item cannot be moved
+    - mainhand     - must be wielded in your main hand
+    - offhand      - must be wielded in your off hand
+    - shield       - occupies your shield slot
+    - twohanded    - requires both hands free
+    - unidentified - item is not yet identified
+    - rare         - indicates special rarity
 
 Related:
     help ansi
