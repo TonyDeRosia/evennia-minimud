@@ -7,6 +7,7 @@ class Spell:
     stat: str
     mana_cost: int
     desc: str = ""
+    proficiency: int = 0
 
 
 SPELLS: Dict[str, Spell] = {

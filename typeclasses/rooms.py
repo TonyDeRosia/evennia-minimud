@@ -295,15 +295,13 @@ class XYGridTrain(XYGridRoom):
         if not skill_key or skill_key not in SKILL_DICT:
             return None, 0
 
-        skill = char.traits.get(skill_key)
-        start = skill.base if skill else 0
-        cost = self._calc_cost(start, levels)
-        if (char.db.exp or 0) < cost:
-            return False, cost
-        return True, cost
+        sessions = char.db.practice_sessions or 0
+        if sessions < levels:
+            return False, levels
+        return True, levels
 
     def train_skill(self, char, levels):
-        """Apply training cost and raise skill."""
+        """Apply practice sessions and raise proficiency."""
         from commands.skills import SKILL_DICT
         from world.system import stat_manager
 
@@ -323,11 +321,19 @@ class XYGridTrain(XYGridRoom):
                 stat=SKILL_DICT.get(skill_key),
             )
             skill = char.traits.get(skill_key)
-
-        char.db.exp -= cost
-        skill.base += levels
+            skill.proficiency = 25
+            char.db.practice_sessions -= 1
+            stat_manager.refresh_stats(char)
+            return True, 1, skill.proficiency
+        prof = getattr(skill, "proficiency", 0)
+        spent = 0
+        while spent < levels and prof < 75 and char.db.practice_sessions > 0:
+            prof = min(75, prof + 25)
+            spent += 1
+            char.db.practice_sessions -= 1
+        skill.proficiency = prof
         stat_manager.refresh_stats(char)
-        return True, cost, skill.base
+        return True, spent, prof
 
 
 class XYZShopNTrain(XYGridTrain, XYGridShop):
