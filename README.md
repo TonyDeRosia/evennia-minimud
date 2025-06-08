@@ -123,6 +123,11 @@ While editing, there's a step to manage triggers using a numbered menu. Choose
 triggers` to review them and `Finish` when done.
 See the `triggers` help entry for the list of events and possible reactions.
 
+There are also helper commands for managing NPCs after creation:
+`@editnpc <npc>` reopens the builder on an existing NPC, `@clonenpc <npc> [= <new_name>]`
+duplicates one, `@deletenpc <npc>` removes it (with confirmation) and
+`@spawnnpc <proto>` spawns a saved prototype from `world/prototypes/npcs.json`.
+
 ## Weapon Creation and Inspection
 
 Builders can quickly create melee weapons with the `cweapon` command.

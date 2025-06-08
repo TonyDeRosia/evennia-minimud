@@ -2507,6 +2507,111 @@ Related:
 """,
     },
     {
+        "key": '@editnpc',
+        "category": 'Building',
+        "text": """Help for @editnpc
+
+Open the NPC builder for an existing NPC.
+
+Usage:
+    @editnpc <npc>
+
+Switches:
+    None
+
+Arguments:
+    <npc> - the NPC to edit
+
+Examples:
+    @editnpc Bob
+
+Notes:
+    - Same as |wcnpc edit <npc>|n.
+
+Related:
+    help cnpc
+""",
+    },
+    {
+        "key": '@deletenpc',
+        "category": 'Building',
+        "text": """Help for @deletenpc
+
+Remove an NPC from the world.
+
+Usage:
+    @deletenpc <npc>
+
+Switches:
+    None
+
+Arguments:
+    <npc> - the NPC to delete
+
+Examples:
+    @deletenpc Bob
+
+Notes:
+    - Prompts for confirmation before deleting.
+
+Related:
+    help cnpc
+""",
+    },
+    {
+        "key": '@clonenpc',
+        "category": 'Building',
+        "text": """Help for @clonenpc
+
+Create a duplicate of an existing NPC.
+
+Usage:
+    @clonenpc <npc> [= <new_name>]
+
+Switches:
+    None
+
+Arguments:
+    <npc> - NPC to clone
+    <new_name> - optional new key
+
+Examples:
+    @clonenpc Bob = Bob2
+
+Notes:
+    - The copy is placed in your current room.
+
+Related:
+    help cnpc
+""",
+    },
+    {
+        "key": '@spawnnpc',
+        "category": 'Building',
+        "text": """Help for @spawnnpc
+
+Spawn a saved NPC prototype.
+
+Usage:
+    @spawnnpc <prototype>
+
+Switches:
+    None
+
+Arguments:
+    <prototype> - key in world/prototypes/npcs.json
+
+Examples:
+    @spawnnpc test_blacksmith
+
+Notes:
+    - Prototypes are saved with the cnpc builder.
+
+Related:
+    help cnpc
+""",
+    },
+    {
         "key": 'triggers',
         "category": 'Building',
         "text": """
