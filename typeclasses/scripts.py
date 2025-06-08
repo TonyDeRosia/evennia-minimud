@@ -234,28 +234,3 @@ class RestockScript(Script):
                     self.obj.add_stock(obj)
 
 
-class GlobalTick(Script):
-    """A global ticker that regenerates health/mana/stamina and refreshes prompts."""
-
-    def at_script_creation(self):
-        self.interval = 60
-        self.persistent = True
-
-    def at_repeat(self):
-        from evennia.utils.search import search_tag
-        from world.system import state_manager
-
-        state_manager.tick_all()
-
-        tickables = search_tag(key="tickable")
-        for obj in tickables:
-            if not hasattr(obj, "traits"):
-                continue
-
-            if hasattr(obj, "at_tick"):
-                obj.at_tick()
-            else:
-                state_manager.apply_regen(obj)
-
-            if hasattr(obj, "refresh_prompt") and not hasattr(obj, "at_tick"):
-                obj.refresh_prompt()

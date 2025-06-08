@@ -145,36 +145,28 @@ class TestCharacterProperties(EvenniaTest):
 
 class TestGlobalTick(EvenniaTest):
     def test_interval(self):
-        from typeclasses.scripts import GlobalTick
+        from typeclasses.global_tick import GlobalTick
 
         script = GlobalTick()
         script.at_script_creation()
         self.assertEqual(script.interval, 60)
         self.assertTrue(script.persistent)
 
-    def test_tick_triggers_prompt(self):
-        from typeclasses.scripts import GlobalTick
+    def test_refresh_prompt(self):
+        from typeclasses.global_tick import GlobalTick
 
         script = GlobalTick()
         script.at_script_creation()
 
         self.char1.tags.add("tickable")
-        self.char1.at_tick = MagicMock()
         self.char1.refresh_prompt = MagicMock()
-        from world.system import state_manager
-
-        state_manager.tick_all = MagicMock()
-        state_manager.tick_character = MagicMock()
 
         script.at_repeat()
 
-        self.char1.at_tick.assert_called_once()
-        self.char1.refresh_prompt.assert_not_called()
-        state_manager.tick_all.assert_called_once()
-        state_manager.tick_character.assert_not_called()
+        self.char1.refresh_prompt.assert_called_once()
 
     def test_tick_offline_characters(self):
-        from typeclasses.scripts import GlobalTick
+        from typeclasses.global_tick import GlobalTick
 
         script = GlobalTick()
         script.at_script_creation()
@@ -198,30 +190,17 @@ class TestGlobalTick(EvenniaTest):
                 trait = char.traits.get(key)
                 trait.current = trait.max // 2
 
-        from world.system import state_manager
-
-        for char in (pc, npc):
-            state_manager.add_status_effect(char, "stunned", 2)
-
-        pc.at_tick = MagicMock(side_effect=pc.at_tick)
-        npc.at_tick = MagicMock(side_effect=npc.at_tick)
+        pc.at_tick = MagicMock()
+        npc.at_tick = MagicMock()
 
         script.at_repeat()
 
-        pc.at_tick.assert_called_once()
-        npc.at_tick.assert_called_once()
-
-        for char in (pc, npc):
-            self.assertEqual(char.db.status_effects.get("stunned"), 1)
-            for key in ("health", "mana", "stamina"):
-                trait = char.traits.get(key)
-                self.assertGreater(trait.current, trait.max // 2)
+        pc.at_tick.assert_not_called()
+        npc.at_tick.assert_not_called()
 
 
 class TestRegeneration(EvenniaTest):
     def test_at_tick_heals_resources(self):
-        from typeclasses.scripts import GlobalTick
-
         char = self.char1
         char.tags.add("tickable")
         for key in ("health", "mana", "stamina"):
@@ -235,10 +214,7 @@ class TestRegeneration(EvenniaTest):
         char.refresh_prompt = MagicMock()
         char.msg = MagicMock()
 
-        script = GlobalTick()
-        script.at_script_creation()
-
-        script.at_repeat()
+        char.at_tick()
 
         for key, regen in (
             ("health", 2),

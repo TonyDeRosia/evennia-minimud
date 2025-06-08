@@ -119,7 +119,7 @@ except ImportError:
 GLOBAL_SCRIPTS = {
     "global_tick": {
         "key": "global_tick",
-        "typeclass": "typeclasses.scripts.GlobalTick",
+        "typeclass": "typeclasses.global_tick.GlobalTick",
         "interval": 60,
         "persistent": True,
     }
