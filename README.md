@@ -204,6 +204,18 @@ Several basic NPC prototypes are included out of the box. Try `cnpc dev_spawn ba
 or `@spawnnpc basic_merchant` to quickly create a merchant, or `basic_questgiver` for a quest
 giver.
 
+### NPC Prototypes
+
+A prototype is a JSON record stored in `world/prototypes/npcs.json` describing
+all of an NPC's settings such as stats, roles, triggers and AI. When you finish
+the builder and choose **Yes & Save Prototype**, these details are written to
+that file so you can recreate the NPC later. The same step also spawns the NPC
+immediately.
+
+You can spawn a saved prototype at any time with `@spawnnpc <key>`. Prototypes
+made with `mobbuilder` are automatically given the `mob_` prefix. Use
+`@mspawn mob_<key>` to create additional copies of those mobs.
+
 ### Mob Builder
 
 Run `mobbuilder` to open the same menu driven builder used by `cnpc`. The
