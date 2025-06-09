@@ -44,15 +44,63 @@ class CmdMStat(Command):
                 self.msg("NPC or prototype not found.")
                 return
             data = npc_builder._gather_npc_data(target)
-        table = evtable.EvTable("Attribute", "Value")
+        table = evtable.EvTable("|cAttribute|n", "|cValue|n", border="cells")
+
+        highlight = {"key", "level", "npc_class"}
+        special = {
+            "actflags",
+            "affected_by",
+            "saving_throws",
+            "attack_types",
+            "defense_types",
+            "ris",
+            "languages",
+        }
+
         for field, value in data.items():
-            if field == "edit_obj":
+            if field == "edit_obj" or field in special:
                 continue
             if isinstance(value, list):
                 valstr = ", ".join(str(v) for v in value)
             else:
                 valstr = str(value)
-            table.add_row(field, valstr)
+            if field in highlight:
+                valstr = f"|w{valstr}|n"
+            table.add_row(f"|c{field.replace('_', ' ').title()}|n", valstr)
+
+        flags = []
+        flags.extend(data.get("actflags", []))
+        flags.extend(data.get("affected_by", []))
+        table.add_row("|cFlags|n", ", ".join(flags) if flags else "--")
+        table.add_row(
+            "|cSaves|n",
+            ", ".join(data.get("saving_throws", []))
+            if data.get("saving_throws")
+            else "--",
+        )
+        table.add_row(
+            "|cAttacks|n",
+            ", ".join(data.get("attack_types", []))
+            if data.get("attack_types")
+            else "--",
+        )
+        table.add_row(
+            "|cDefenses|n",
+            ", ".join(data.get("defense_types", []))
+            if data.get("defense_types")
+            else "--",
+        )
+        table.add_row(
+            "|cResists|n",
+            ", ".join(data.get("ris", [])) if data.get("ris") else "--",
+        )
+        table.add_row(
+            "|cLanguages|n",
+            ", ".join(data.get("languages", [])) if data.get("languages") else "--",
+        )
+
+        header = f"|Y[ NPC STATS: {data.get('key', 'Unknown')} ]|n"
+        self.msg(header)
         self.msg(str(table))
 
 
