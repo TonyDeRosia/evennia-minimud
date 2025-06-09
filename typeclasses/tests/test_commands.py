@@ -710,6 +710,17 @@ class TestExtendedDigTeleport(EvenniaTest):
         self.assertEqual(self.char1.location, start)
 
 
+class TestDelDirCommand(EvenniaTest):
+    def test_deldir_removes_exits(self):
+        start = self.char1.location
+        self.char1.execute_cmd("dig north")
+        new_room = start.db.exits.get("north")
+        self.assertIsNotNone(new_room)
+        self.char1.execute_cmd("deldir north")
+        self.assertNotIn("north", start.db.exits)
+        self.assertNotIn("south", new_room.db.exits)
+
+
 class TestRoomFlagCommands(EvenniaTest):
     def setUp(self):
         super().setUp()

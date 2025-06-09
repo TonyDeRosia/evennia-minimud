@@ -1454,6 +1454,34 @@ Related:
 """,
     },
     {
+        "key": "deldir",
+        "category": "Building",
+        "text": """
+Help for deldir
+
+Delete an exit from the current room.
+
+Usage:
+    deldir <direction>
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - Removes the exit in the given direction. If the adjoining room
+    - links back here, that exit is removed as well.
+
+Related:
+    help ansi
+""",
+    },
+    {
         "key": "@teleport",
         "category": "Building",
         "text": """
