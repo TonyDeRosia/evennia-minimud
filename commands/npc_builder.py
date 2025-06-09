@@ -16,6 +16,7 @@ ALLOWED_NPC_TYPES = (
     "banker",
     "guild_receptionist",
     "trainer",
+    "guard",
     "wanderer",
 )
 
