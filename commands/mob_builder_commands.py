@@ -249,7 +249,9 @@ class CmdMList(Command):
             if not area:
                 area = part
 
-        registry = prototypes.get_npc_prototypes(filter_by)
+        all_reg = prototypes.get_npc_prototypes()
+        registry_list = prototypes.filter_npc_prototypes(all_reg, filter_by)
+        registry = dict(registry_list)
 
         if show_room or show_area:
             if show_room:

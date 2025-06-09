@@ -588,3 +588,47 @@ def register_npc_prototype(key: str, prototype: dict):
     registry = _load_npc_registry()
     registry[key] = prototype
     _save_npc_registry(registry)
+
+
+def filter_npc_prototypes(protos: dict, filters: dict) -> list[tuple[str, dict]]:
+    """Return ``protos`` entries matching ``filters``.
+
+    Args:
+        protos (dict): Mapping of key -> prototype data.
+        filters (dict): Filters to apply. Supported keys are ``"class"``,
+            ``"race"``, ``"role"`` and ``"tag"``.
+
+    Returns:
+        list[tuple[str, dict]]: Sequence of ``(key, prototype)`` pairs that
+        matched all filters.
+    """
+
+    if not filters:
+        return list(protos.items())
+
+    result: list[tuple[str, dict]] = []
+    for key, proto in protos.items():
+        if "class" in filters and proto.get("npc_class") != filters["class"]:
+            continue
+        if "race" in filters and proto.get("race") != filters["race"]:
+            continue
+        if "role" in filters:
+            roles = proto.get("roles") or []
+            if isinstance(roles, str):
+                roles = [roles]
+            if filters["role"] not in roles:
+                continue
+        if "tag" in filters:
+            tag = filters["tag"]
+            tags = proto.get("tags") or []
+
+            def _tag_match(entry):
+                if isinstance(entry, (list, tuple)):
+                    return entry and entry[0] == tag
+                return entry == tag
+
+            if not any(_tag_match(t) for t in tags):
+                continue
+        result.append((key, proto))
+
+    return result
