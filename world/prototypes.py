@@ -485,6 +485,15 @@ DEER_ANTLER = {
     ],
 }
 
+# Example loot table entry structure. A loot table is stored on
+# ``npc.db.loot_table`` as a list of mappings with the prototype key and the
+# percent chance to drop that prototype when the NPC dies.
+# Example::
+#
+#     [{"proto": "RAW_MEAT", "chance": 50}, {"proto": "ANIMAL_HIDE", "chance": 25}]
+
+EXAMPLE_LOOT_TABLE = [{"proto": "RAW_MEAT", "chance": 50}]
+
 # ------------------------------------------------------------
 # NPC prototype registry utilities
 # ------------------------------------------------------------

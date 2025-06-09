@@ -872,8 +872,15 @@ class NPC(Character):
 
         if self.traits.health.value <= 0:
             # we've been defeated!
-            # create loot drops
-            objs = spawn(*list(self.db.drops))
+            drops = list(self.db.drops)
+            if loot_table := self.db.loot_table:
+                for entry in loot_table:
+                    proto = entry.get("proto")
+                    chance = int(entry.get("chance", 100))
+                    if proto and randint(1, 100) <= chance:
+                        drops.append(proto)
+
+            objs = spawn(*drops)
             for obj in objs:
                 obj.location = self.location
             # delete ourself
