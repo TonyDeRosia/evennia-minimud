@@ -207,12 +207,20 @@ giver.
 ### Mob Builder
 
 Run `mobbuilder` to open the same menu driven builder used by `cnpc`. The
-workflow now supports optional mob specific fields like act flags and
-resistances. Confirming the menu saves the data to
+workflow supports mob‑specific fields like act flags and resistances. At the
+end of the menu you may choose **Yes** to spawn the NPC or **Yes & Save
+Prototype** to spawn it and also store the prototype in
 `world/prototypes/npcs.json` with `mob_` prefixed to the key. Use
-`@mspawn <prototype>` to create the NPC from the stored prototype and
-`@mstat <key>` to inspect the result or any existing NPC. Prototype entries can
-be adjusted with `@mcreate`, `@mset` and viewed with `@mlist`.
+`@mspawn <prototype>` to create additional copies and `@mstat <key>` to inspect
+them. Prototype entries can be adjusted with `@mcreate`, `@mset` and viewed with
+`@mlist`.
+
+Example::
+
+    mobbuilder
+    (fill in the prompts for a goblin)
+    [choose **Yes & Save Prototype**]
+    @mspawn mob_goblin
 
 ## Weapon Creation and Inspection
 
