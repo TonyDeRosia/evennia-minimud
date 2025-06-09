@@ -72,4 +72,16 @@ EFFECTS: Dict[str, Effect] = {
         type="buff",
         mods={"STR": 3, "armor": -2},
     ),
+    "defending": Effect(
+        key="defending",
+        name="Defending",
+        desc="You brace yourself against incoming attacks.",
+        type="status",
+    ),
+    "bleeding": Effect(
+        key="bleeding",
+        name="Bleeding",
+        desc="You are slowly losing health.",
+        type="status",
+    ),
 }
