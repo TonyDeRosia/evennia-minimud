@@ -243,6 +243,12 @@ Add `/unidentified` before the name to create the weapon unidentified.
 When a weapon is identified, `inspect` shows its damage, slot, any bonuses and
 effects, so `inspect epee-2` will display the full details of the second
 "Epee" you created.
+## Combat System
+
+A modular combat engine is provided under the `combat/` package. It implements
+round-based processing, action queues and a sample `ShieldBash` skill. The
+system is designed to plug into Evennia characters and rooms for dynamic fights.
+
 
 ## Running the Tests
 
