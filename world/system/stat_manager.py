@@ -253,13 +253,25 @@ def recalculate_stats(chara) -> None:
 
 
 def _gear_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
-    """Return cached stat bonuses from equipped gear."""
+    """Return cached stat bonuses from equipped gear.
+
+    This helper currently only exposes the precomputed values stored on
+    ``obj.db.equip_bonuses``.  It exists so projects can override it with a
+    more involved implementation that pulls live modifiers from equipment if
+    desired.
+    """
 
     return getattr(obj.db, "equip_bonuses", {}) or {}
 
 
 def _buff_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
-    """Collect stat modifiers from active effects."""
+    """Collect stat modifiers from active effects.
+
+    The default implementation simply returns the aggregated modifiers from
+    :func:`state_manager.get_effect_mods`.  It serves as an extension point
+    for games that wish to incorporate additional buff logic.
+    """
+
     return state_manager.get_effect_mods(obj)
 
 
