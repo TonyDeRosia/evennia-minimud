@@ -16,6 +16,7 @@ from collections.abc import Mapping
 import math
 from world.triggers import TriggerManager
 from world.spells import Spell
+from combat.combat_actions import CombatResult
 
 from .objects import ObjectParent
 
@@ -525,30 +526,51 @@ class Character(ObjectParent, ClothedCharacter):
         """
         Attempt to use a skill, applying any stat bonus as necessary.
         """
-        # handle cases where this was called but there's no skill being used
+        from world.system import state_manager
+        target = kwargs.get("target")
+
+        # using an active combat skill if a target is provided
+        if target is not None:
+            from combat.combat_skills import SKILL_CLASSES
+
+            skill_cls = SKILL_CLASSES.get(skill_name)
+            if not skill_cls:
+                return CombatResult(actor=self, target=target, message="Nothing happens.")
+            skill = skill_cls()
+            if not self.cooldowns.ready(skill.name):
+                return CombatResult(actor=self, target=self, message="Still recovering.")
+            if self.traits.stamina.current < skill.stamina_cost:
+                return CombatResult(actor=self, target=self, message="Too exhausted.")
+            self.traits.stamina.current -= skill.stamina_cost
+            state_manager.add_cooldown(self, skill.name, skill.cooldown)
+            result = skill.resolve(self, target)
+            for eff in skill.effects:
+                state_manager.add_status_effect(target, eff.key, eff.duration)
+            return result
+
+        # passive skill usage
         if not skill_name:
             return 1
-        # if we don't have the skill, we can't use it
         if not (skill_trait := self.traits.get(skill_name)):
             return 0
-        from world.system import state_manager
 
-        # check if this skill has a related base stat
         stat_bonus = 0
         if stat := getattr(skill_trait, "stat", None):
             stat_bonus = state_manager.get_effective_stat(self, stat)
         prof = getattr(skill_trait, "proficiency", 0)
         if prof < 100:
             skill_trait.proficiency = min(100, prof + 1)
-        # finally, return the skill plus stat
         return skill_trait.value + stat_bonus
 
     def cast_spell(self, spell_key, target=None):
         """Cast a known spell, spending mana."""
         from world.spells import SPELLS
+        from world.system import state_manager
 
         spell = SPELLS.get(spell_key)
         if not spell:
+            return False
+        if not self.cooldowns.ready(spell.key):
             return False
         known = self.db.spells or []
         srec = None
@@ -567,6 +589,7 @@ class Character(ObjectParent, ClothedCharacter):
         if self.traits.mana.current < spell.mana_cost:
             return False
         self.traits.mana.current -= spell.mana_cost
+        state_manager.add_cooldown(self, spell.key, spell.cooldown)
         if target:
             self.location.msg_contents(
                 f"{self.get_display_name(self)} casts {spell.key} at {target.get_display_name(self)}!"

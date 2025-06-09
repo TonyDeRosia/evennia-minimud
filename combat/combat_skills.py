@@ -3,7 +3,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List
+from enum import Enum
+from typing import List, Dict
+
+
+class SkillCategory(str, Enum):
+    """Categories for skills."""
+
+    MELEE = "melee"
+    RANGED = "ranged"
+    MAGIC = "magic"
 
 from .combat_actions import CombatResult
 from .combat_utils import roll_damage, check_hit
@@ -15,6 +24,7 @@ class Skill:
     """Base skill definition."""
 
     name: str
+    category: SkillCategory = SkillCategory.MELEE
     damage: tuple[int, int] | None = None
     stamina_cost: int = 0
     cooldown: int = 0
@@ -26,6 +36,7 @@ class Skill:
 
 class ShieldBash(Skill):
     name = "shield bash"
+    category = SkillCategory.MELEE
     damage = (2, 6)
     cooldown = 6
     stamina_cost = 15
@@ -49,3 +60,31 @@ class ShieldBash(Skill):
                 target=target,
                 message=f"{user.key}'s shield bash misses {target.key}.",
             )
+
+
+class Cleave(Skill):
+    """Powerful swing hitting a single foe."""
+
+    name = "cleave"
+    category = SkillCategory.MELEE
+    damage = (3, 6)
+    stamina_cost = 20
+    cooldown = 8
+
+    def resolve(self, user, target):
+        if not getattr(target, "is_alive", lambda: True)():
+            return CombatResult(actor=user, target=target, message="They are already down.")
+        if check_hit(user, target):
+            dmg = roll_damage(self.damage)
+            target.hp = max(target.hp - dmg, 0)
+            msg = f"{user.key} cleaves {target.key} for {dmg} damage!"
+        else:
+            msg = f"{user.key}'s cleave misses {target.key}."
+        return CombatResult(actor=user, target=target, message=msg)
+
+
+# Mapping of available skill classes by key
+SKILL_CLASSES: Dict[str, type[Skill]] = {
+    "shield bash": ShieldBash,
+    "cleave": Cleave,
+}

@@ -10,7 +10,7 @@ from .combat_actions import (
     CombatResult,
 )
 from .combat_states import CombatState, StateManager
-from .combat_skills import Skill, ShieldBash
+from .combat_skills import Skill, ShieldBash, Cleave, SKILL_CLASSES
 from .damage_types import DamageType
 
 __all__ = [
@@ -25,5 +25,7 @@ __all__ = [
     "StateManager",
     "Skill",
     "ShieldBash",
+    "Cleave",
+    "SKILL_CLASSES",
     "DamageType",
 ]
