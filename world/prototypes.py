@@ -492,14 +492,18 @@ DEER_ANTLER = {
 from typing import Dict
 import json
 from pathlib import Path
+from django.conf import settings
 
-_NPC_PROTO_FILE = Path(__file__).resolve().parent / "prototypes" / "npcs.json"
+
+def _npc_proto_file() -> Path:
+    """Return the path to the NPC prototype JSON file."""
+    return Path(settings.PROTOTYPE_NPC_FILE)
 
 
 def _load_npc_registry() -> Dict[str, dict]:
     """Return the stored NPC prototypes from the JSON file."""
     try:
-        with _NPC_PROTO_FILE.open("r") as f:
+        with _npc_proto_file().open("r") as f:
             return json.load(f)
     except FileNotFoundError:
         return {}
@@ -508,8 +512,9 @@ def _load_npc_registry() -> Dict[str, dict]:
 
 
 def _save_npc_registry(registry: Dict[str, dict]):
-    _NPC_PROTO_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with _NPC_PROTO_FILE.open("w") as f:
+    path = _npc_proto_file()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w") as f:
         json.dump(registry, f, indent=4)
 
 

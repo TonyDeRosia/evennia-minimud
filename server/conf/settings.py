@@ -21,6 +21,7 @@ put secret game- or server-specific settings in secret_settings.py.
 
 # Use the defaults from Evennia unless explicitly overridden
 from evennia.settings_default import *
+from pathlib import Path
 
 ######################################################################
 # Evennia base server config
@@ -47,6 +48,9 @@ EXTRA_LAUNCHER_COMMANDS["xyzgrid"] = "evennia.contrib.grid.xyzgrid.launchcmd.xyz
 PROTOTYPE_MODULES += ["evennia.contrib.grid.xyzgrid.prototypes"]
 XYZROOM_PROTOTYPE_OVERRIDE = {"typeclass": "typeclasses.rooms.XYGridRoom"}
 # exits are stored as room.db.exits mappings
+
+# File used for storing NPC prototypes
+PROTOTYPE_NPC_FILE = Path(GAME_DIR) / "world" / "prototypes" / "npcs.json"
 
 
 # Clothing - https://www.evennia.com/docs/latest/Contribs/Contrib-Clothing.html#configuration

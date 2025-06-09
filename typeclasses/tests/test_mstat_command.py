@@ -4,6 +4,7 @@ from pathlib import Path
 from unittest import mock
 
 from django.test import override_settings
+from django.conf import settings
 from evennia.utils.test_resources import EvenniaTest
 
 from commands.admin import BuilderCmdSet
@@ -18,8 +19,8 @@ class TestMStatCommand(EvenniaTest):
         self.char1.cmdset.add_default(BuilderCmdSet)
         self.tmp = TemporaryDirectory()
         patcher = mock.patch.object(
-            prototypes,
-            "_NPC_PROTO_FILE",
+            settings,
+            "PROTOTYPE_NPC_FILE",
             Path(self.tmp.name) / "npcs.json",
         )
         self.addCleanup(self.tmp.cleanup)

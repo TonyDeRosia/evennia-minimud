@@ -3,6 +3,7 @@ from tempfile import TemporaryDirectory
 from pathlib import Path
 from evennia.utils.test_resources import EvenniaTest
 from django.test import override_settings
+from django.conf import settings
 from unittest import mock
 
 from commands.admin import BuilderCmdSet
@@ -17,8 +18,8 @@ class TestMobPrototypeCommands(EvenniaTest):
         self.char1.cmdset.add_default(BuilderCmdSet)
         self.tmp = TemporaryDirectory()
         patcher = mock.patch.object(
-            prototypes,
-            "_NPC_PROTO_FILE",
+            settings,
+            "PROTOTYPE_NPC_FILE",
             Path(self.tmp.name) / "npcs.json",
         )
         self.addCleanup(self.tmp.cleanup)
