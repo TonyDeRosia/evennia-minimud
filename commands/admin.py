@@ -38,7 +38,7 @@ from .mob_builder_commands import (
     CmdRepairSet,
     CmdRepairStat,
 )
-from .mob_builder import CmdMobBuilder, CmdMSpawn, CmdMStat, CmdMList
+from .mob_builder import CmdMobBuilder, CmdMSpawn, CmdMStat, CmdMList, CmdMedit
 
 
 def _safe_split(text):
@@ -1381,6 +1381,7 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdRemoveFlag)
         self.add(CmdCNPC)
         self.add(CmdEditNPC)
+        self.add(CmdMedit)
         self.add(CmdDeleteNPC)
         self.add(CmdCloneNPC)
         self.add(CmdSpawnNPC)
