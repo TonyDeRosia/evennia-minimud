@@ -2754,6 +2754,120 @@ Examples:
 
 Related:
     help cnpc
+    help mptriggers
+    help optriggers
+    help rptriggers
+    help mpcommands
+    help ifchecks
+""",
+    },
+    {
+        "key": "mptriggers",
+        "category": "Building",
+        "text": """Help for mptriggers
+
+Mob programs use MPTRIGGERS to react to events around an NPC.
+
+Common examples:
+    act_prog <text>      - something nearby contains <text>
+    greet_prog           - a player enters the room
+    random_prog <pct>    - fires randomly by percent
+    fight_prog <pct>     - during combat rounds
+    death_prog           - the mob dies
+    bribe_prog <amt>     - given coins worth <amt>
+    give_prog <item>     - given a matching item
+    speech_prog <text>   - hears someone speak <text>
+
+Programs are added on the prototype using #MOBPROGS.
+
+Related:
+    help mpcommands
+    help ifchecks
+""",
+    },
+    {
+        "key": "optriggers",
+        "category": "Building",
+        "text": """Help for optriggers
+
+OPTRIGGERS fire when objects are interacted with.
+
+Common triggers:
+    get_prog           - item is picked up
+    drop_prog          - item is dropped
+    wear_prog          - worn by a character
+    remove_prog        - removed from a slot
+    sac_prog           - sacrificed or destroyed
+    timer_prog         - when a set timer expires
+    speech_prog <txt>  - words spoken near the item
+
+Related:
+    help mpcommands
+    help ifchecks
+""",
+    },
+    {
+        "key": "rptriggers",
+        "category": "Building",
+        "text": """Help for rptriggers
+
+RPTRIGGERS belong to rooms and run when players or NPCs act there.
+
+Examples:
+    enter_prog         - someone enters
+    leave_prog         - someone leaves
+    sleep_prog         - someone sleeps here
+    time_prog <hour>   - at a specific game hour
+    rand_prog <pct>    - random chance
+    speech_prog <txt>  - hears someone speak <txt>
+
+Related:
+    help mpcommands
+    help ifchecks
+""",
+    },
+    {
+        "key": "mpcommands",
+        "category": "Building",
+        "text": """Help for mpcommands
+
+MPCOMMANDS are used inside mob, object and room programs.
+
+Some useful commands:
+    mob echo <msg>          - message the room
+    mob goto <room>        - move the mob
+    mob oload <vnum>       - load an object
+    mob mload <vnum>       - load another mob
+    mob purge <target>     - delete target
+    mob transfer <vict> <room> - move a character
+    mob force <vict> <cmd> - force a command
+    mob delay <ticks>      - wait before continuing
+
+See also |whelp ifchecks|n for conditional logic.
+""",
+    },
+    {
+        "key": "ifchecks",
+        "category": "Building",
+        "text": """Help for ifchecks
+
+IFCHECKS provide conditions for MPCOMMANDS.
+
+Format:
+    if <check>
+        <commands>
+    else
+        <commands>
+    endif
+
+Common checks:
+    rand(<pct>)       - random chance
+    ispc($n)          - actor is a player
+    carries($n,obj)   - actor carries object
+    level($n) > num   - compare level
+    roomvnum() == id  - check current room
+
+Checks may examine $n (actor), $i (object) and other variables.
 """,
     },
     {
