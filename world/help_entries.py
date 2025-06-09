@@ -2730,6 +2730,8 @@ Events:
     on_look    - someone looks at the NPC
     on_attack  - combat starts or damage occurs
     on_timer   - once every game tick
+    hour       - fires at a specific game hour
+    time       - fires at an exact HH:MM time
 
 Reactions:
     say <text>         - speak
@@ -2738,6 +2740,12 @@ Reactions:
     attack [target]    - attack a character
     script <module.fn> - call a Python function
     <command>          - run any other command string
+
+Conditions:
+    percent <pct>   - only run if a random roll succeeds
+    combat <0|1>    - requires the NPC be in or out of combat
+    bribe <amount>  - minimum coin value given
+    hp_pct <pct>    - fires below this health percent
 
 The match text only applies to some events like |won_speak|n and |won_look|n.
 Multiple triggers may be defined for the same event and each trigger can have
@@ -2751,6 +2759,9 @@ Examples:
         4) Finish
     Adding a trigger asks for event type, optional match text and the
     command that should run when the event occurs.
+
+Example:
+    {"on_attack": [{"hp_pct": 50, "response": "say I'm badly hurt!"}]}
 
 Related:
     help cnpc
