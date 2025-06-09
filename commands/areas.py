@@ -3,6 +3,7 @@ from evennia.utils.evtable import EvTable
 from evennia import CmdSet
 
 from .command import Command
+from scripts.area_spawner import AreaSpawner
 from world.areas import Area, get_areas, save_area, update_area, find_area
 
 
@@ -305,3 +306,67 @@ class AreaCmdSet(CmdSet):
         self.add(CmdRName)
         self.add(CmdRDesc)
         self.add(CmdRSet)
+        self.add(CmdRSpawner)
+
+
+
+class CmdRSpawner(Command):
+    """Configure NPC respawning for the current room."""
+
+    key = "@rspawner"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        room = self.caller.location
+        if not room:
+            self.msg("You have no location.")
+            return
+        if not self.args:
+            script = room.scripts.get("area_spawner")
+            if not script:
+                self.msg("No AreaSpawner on this room.")
+                return
+            script = script[0]
+            self.msg(
+                f"Interval: {script.db.respawn_interval}s, Max: {script.db.max_population}, Chance: {script.db.spawn_chance}%"
+            )
+            return
+        parts = self.args.split(None, 1)
+        if len(parts) != 2:
+            self.msg("Usage: @rspawner <interval|max|chance> <value>")
+            return
+        field, value = parts
+        script = room.scripts.get("area_spawner")
+        if not script:
+            script = room.scripts.add(AreaSpawner, key="area_spawner")
+        else:
+            script = script[0]
+        field = field.lower()
+        if field in ("interval", "respawn_interval"):
+            try:
+                val = int(value)
+            except ValueError:
+                self.msg("Interval must be an integer.")
+                return
+            script.db.respawn_interval = val
+            script.interval = val
+        elif field in ("max", "max_population"):
+            try:
+                val = int(value)
+            except ValueError:
+                self.msg("Max population must be an integer.")
+                return
+            script.db.max_population = val
+        elif field in ("chance", "spawn_chance"):
+            try:
+                val = int(value)
+            except ValueError:
+                self.msg("Chance must be an integer.")
+                return
+            val = max(0, min(val, 100))
+            script.db.spawn_chance = val
+        else:
+            self.msg("Usage: @rspawner <interval|max|chance> <value>")
+            return
+        self.msg(f"Spawner {field} set to {val}.")
