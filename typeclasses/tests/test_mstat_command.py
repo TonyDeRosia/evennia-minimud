@@ -33,3 +33,9 @@ class TestMStatCommand(EvenniaTest):
         out = self.char1.msg.call_args[0][0]
         assert "orc" in out
         assert "mean" in out
+        assert "Flags" in out
+        assert "Saves" in out
+        assert "Attacks" in out
+        assert "Defenses" in out
+        assert "Resists" in out
+        assert "Languages" in out
