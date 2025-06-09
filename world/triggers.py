@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from importlib import import_module
 from typing import Any
+from random import randint
 
 from evennia.utils import make_iter, logger
 
@@ -93,6 +94,37 @@ class TriggerManager:
                         continue
                 elif str(match).lower() not in text.lower():
                     continue
+
+            # additional conditional checks
+            percent = trig.get("percent")
+            if percent is not None and randint(1, 100) > int(percent):
+                continue
+
+            combat = trig.get("combat")
+            if combat is not None and bool(getattr(self.obj, "in_combat", False)) != bool(combat):
+                continue
+
+            bribe = trig.get("bribe")
+            if bribe is not None and kwargs.get("amount", kwargs.get("bribe_amount", 0)) < bribe:
+                continue
+
+            hp_pct = trig.get("hp_pct")
+            if hp_pct is not None:
+                try:
+                    cur = self.obj.traits.health.value
+                    maxhp = self.obj.traits.health.max or 1
+                    if (cur / maxhp) * 100 > float(hp_pct):
+                        continue
+                except Exception:
+                    continue
+
+            hour = trig.get("hour")
+            if hour is not None and kwargs.get("hour") != hour:
+                continue
+
+            time_val = trig.get("time")
+            if time_val is not None and kwargs.get("time") != time_val:
+                continue
 
             responses = (
                 trig.get("responses")
