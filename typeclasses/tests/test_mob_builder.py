@@ -8,7 +8,7 @@ from django.conf import settings
 from evennia.utils.test_resources import EvenniaTest
 
 from commands.admin import BuilderCmdSet
-from commands import mob_builder
+from commands import mob_builder, npc_builder
 from world import prototypes
 
 
@@ -35,27 +35,28 @@ class TestMobBuilder(EvenniaTest):
         return None
 
     def test_builder_flow_and_spawn(self):
-        with patch("commands.mob_builder.EvMenu"):
+        with patch("commands.npc_builder.EvMenu"):
             self.char1.execute_cmd("mobbuilder")
-        mob_builder._set_key(self.char1, "goblin")
-        mob_builder._set_desc(self.char1, "A small goblin")
-        mob_builder._set_level(self.char1, "1")
-        mob_builder._set_class(self.char1, "warrior")
-        mob_builder._set_race(self.char1, "orc")
-        mob_builder._set_sex(self.char1, "male")
-        mob_builder._set_hp(self.char1, "10")
-        mob_builder._set_damage(self.char1, "2")
-        mob_builder._set_armor(self.char1, "1")
-        mob_builder._set_align(self.char1, "0")
-        mob_builder._set_flags(self.char1, "")
-        mob_builder._set_affects(self.char1, "")
-        mob_builder._set_resists(self.char1, "")
-        mob_builder._set_bodyparts(self.char1, "head arms")
-        mob_builder._set_attack(self.char1, "punch")
-        mob_builder._set_defense(self.char1, "parry")
-        mob_builder._set_languages(self.char1, "common")
-        mob_builder._set_role(self.char1, "")
-        mob_builder._do_confirm(self.char1, "yes")
+        npc_builder._set_key(self.char1, "goblin")
+        npc_builder._set_desc(self.char1, "A small goblin")
+        npc_builder._set_creature_type(self.char1, "humanoid")
+        npc_builder._set_npc_type(self.char1, "")
+        npc_builder._set_npc_class(self.char1, "base")
+        npc_builder._edit_roles(self.char1, "done")
+        npc_builder._set_level(self.char1, "1")
+        npc_builder._set_resources(self.char1, "10 0 0")
+        npc_builder._set_stats(self.char1, "1 1 1 1 1 1")
+        npc_builder._set_behavior(self.char1, "")
+        npc_builder._set_skills(self.char1, "")
+        npc_builder._set_ai(self.char1, "passive")
+        npc_builder._set_actflags(self.char1, "")
+        npc_builder._set_affects(self.char1, "")
+        npc_builder._set_resists(self.char1, "")
+        npc_builder._set_bodyparts(self.char1, "head arms")
+        npc_builder._set_attack(self.char1, "punch")
+        npc_builder._set_defense(self.char1, "parry")
+        npc_builder._set_languages(self.char1, "common")
+        npc_builder._create_npc(self.char1, "", register=True)
 
         reg = prototypes.get_npc_prototypes()
         assert "mob_goblin" in reg
@@ -69,7 +70,6 @@ class TestMobBuilder(EvenniaTest):
         assert "goblin" in out
 
     def test_cancel_then_back(self):
-        """Cancelling confirm and then going back should not error."""
-        mob_builder._do_confirm(self.char1, "no")
-        result = mob_builder._do_confirm(self.char1, "back")
-        assert result == "menunode_role"
+        """Cancellation should clear build data."""
+        npc_builder._cancel(self.char1, "")
+        assert self.char1.ndb.buildnpc is None

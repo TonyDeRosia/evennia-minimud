@@ -2764,27 +2764,17 @@ Related:
         "category": "Building",
         "text": """Help for mobbuilder
 
-Start the basic NPC prototype builder. The menu asks for a key,
-description and stats and saves the prototype to
-`world/prototypes/npcs.json` with a `mob_` prefix.
+Launches the same menu driven builder as |wcnpc|n but automatically saves
+the result as a prototype prefixed with ``mob_``. Additional mob specific
+fields like act flags and resistances may be set during the flow.
 
 Usage:
-    mobbuilder
-
-Switches:
-    None
-
-Arguments:
-    None
-
-Examples:
     mobbuilder
 
 Notes:
     - Spawn a saved prototype with |w@mspawn <prototype>|n.
     - Inspect prototypes or NPCs with |w@mstat <key>|n.
-    - Edit entries using |w@mcreate|n, |w@mset|n, |w@mlist|n and the
-      shop/repair helpers.
+    - Edit entries using |w@mcreate|n, |w@mset|n and |w@mlist|n.
 
 Related:
     help @mspawn
