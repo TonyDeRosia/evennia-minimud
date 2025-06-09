@@ -18,6 +18,8 @@ from evennia.prototypes import spawner, prototypes
 from evennia.objects.objects import DefaultObject
 from evennia.contrib.game_systems.clothing import ContribClothing
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
+from evennia.utils import lazy_property
+from world.triggers import TriggerManager
 
 from utils.currency import COIN_VALUES
 
@@ -195,6 +197,26 @@ class Object(ObjectParent, DefaultObject):
             self.db.weight = 0
         if getattr(self.db, "display_priority", None) is None:
             self.db.display_priority = "item"
+        if self.db.obj_triggers is None:
+            self.db.obj_triggers = {}
+
+    @lazy_property
+    def trigger_manager(self):
+        """Access :class:`~world.triggers.TriggerManager`."""
+        return TriggerManager(self, attr="obj_triggers")
+
+    def check_triggers(self, event, **kwargs):
+        self.trigger_manager.check(event, **kwargs)
+
+    def return_appearance(self, looker, **kwargs):
+        text = super().return_appearance(looker, **kwargs)
+        if looker != self:
+            self.check_triggers("on_look", looker=looker)
+        return text
+
+    def at_use(self, user, **kwargs):
+        """Generic hook for using an object."""
+        self.check_triggers("on_use", user=user)
 
     def at_drop(self, dropper, **kwargs):
         """

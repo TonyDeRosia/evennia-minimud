@@ -5,13 +5,14 @@ Rooms are simple containers that has no location of their own.
 
 """
 
-from evennia.utils import create, iter_to_str, logger
+from evennia.utils import create, iter_to_str, logger, lazy_property
 from evennia.objects.objects import DefaultRoom
 from evennia.contrib.grid.xyzgrid.xyzroom import XYZRoom
 from evennia.contrib.grid.wilderness.wilderness import WildernessRoom
 
 from .objects import ObjectParent
 from .scripts import RestockScript
+from world.triggers import TriggerManager
 
 from commands.shops import ShopCmdSet
 from commands.skills import TrainCmdSet
@@ -28,6 +29,16 @@ class RoomParent(ObjectParent):
     def at_object_creation(self):
         super().at_object_creation()
         self.db.exits = self.db.exits or {}
+        if self.db.room_triggers is None:
+            self.db.room_triggers = {}
+
+    @lazy_property
+    def trigger_manager(self):
+        """Access :class:`~world.triggers.TriggerManager`."""
+        return TriggerManager(self, attr="room_triggers")
+
+    def check_triggers(self, event, **kwargs):
+        self.trigger_manager.check(event, **kwargs)
 
     def at_object_receive(self, mover, source_location, move_type=None, **kwargs):
         """
@@ -41,6 +52,7 @@ class RoomParent(ObjectParent):
                     # don't react to ourself
                     continue
                 obj.at_character_arrive(mover, **kwargs)
+        self.check_triggers("on_enter", obj=mover, source=source_location)
 
     def at_object_leave(self, mover, destination, **kwargs):
         """
@@ -57,6 +69,7 @@ class RoomParent(ObjectParent):
                     # don't react to ourself
                     continue
                 obj.at_character_depart(mover, destination, **kwargs)
+        self.check_triggers("on_leave", obj=mover, destination=destination)
 
     # metadata helpers --------------------------------------------------
 
@@ -143,7 +156,8 @@ class RoomParent(ObjectParent):
         footer = self.get_display_footer(looker)
         if footer:
             text += f"\n{footer}"
-
+        if looker != self:
+            self.check_triggers("on_look", looker=looker)
         return text.strip()
 
 
