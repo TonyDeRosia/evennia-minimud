@@ -61,3 +61,49 @@ Use `inspect <item>` to view an object's details. The command accepts the
 numbered aliases created for duplicates, so you can inspect a specific item
 even when many share the same key. For instance, `inspect epee-2` will show the
 stats, slot and any effects of the second "Epee" you made.
+
+## NPC Prototype Commands
+
+NPCs are saved as prototypes in `world/prototypes/npcs.json` and can be
+spawned later with `@spawnnpc`. These commands help you manage the prototypes:
+
+* `@mcreate <key> [copy_key]` – make a new prototype, optionally copying an
+  existing one.
+* `@mset <key> <field> <value>` – update a field on a prototype. Valid races,
+  classes and flag names can be found in `world/mob_constants.py`.
+* `@mstat <key>` – view the details of a prototype or an existing NPC.
+* `@mlist [area] [range]` – list prototype keys, optionally limited to an area
+  or a numeric/letter range.
+
+Example:
+
+```text
+@mcreate goblin
+@mset goblin desc "A sneaky goblin"
+@mset goblin level 2
+@mstat goblin
+```
+
+## Shop and Repair Setup
+
+Merchants and smiths use extra data stored on their prototypes. Create the
+sections with `@makeshop` and `@makerepair` and then configure them with
+`@shopset` and `@repairset`.
+
+```text
+@mcreate trader
+@makeshop trader
+@shopset trader buy 150
+@shopset trader sell 50
+@shopset trader hours 8-18
+@shopset trader types weapon,armor
+
+@mcreate smith
+@makerepair smith
+@repairset smith cost 200
+@repairset smith hours 9-21
+@repairset smith types weapon
+```
+
+Use `@shopstat <proto>` or `@repairstat <proto>` to review the settings.
+
