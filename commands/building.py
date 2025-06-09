@@ -236,6 +236,75 @@ class CmdDelDir(Command):
         self.msg(f"Exit {direction} removed.")
 
 
+class CmdDelRoom(Command):
+    """Delete a room and clean up linking exits."""
+
+    key = "delroom"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def unlink_room(self, room):
+        """Remove any exits pointing to or from the room."""
+        for other in ObjectDB.objects.filter(db_attributes__db_key="exits"):
+            if not other.is_typeclass(Room, exact=False):
+                continue
+            exits = other.db.exits or {}
+            changed = False
+            for direc, target in list(exits.items()):
+                if target == room:
+                    exits.pop(direc, None)
+                    changed = True
+            if changed:
+                other.db.exits = exits
+        room.db.exits = {}
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: delroom <direction>|<area> <number>")
+            return
+
+        parts = self.args.split()
+        target_room = None
+
+        if len(parts) == 1:
+            direction = DIR_FULL.get(parts[0].lower())
+            if not direction:
+                self.msg("Unknown direction.")
+                return
+            current = self.caller.location
+            if not current:
+                self.msg("You have no location.")
+                return
+            target_room = (current.db.exits or {}).get(direction)
+            if not target_room:
+                self.msg("No room in that direction.")
+                return
+        else:
+            if len(parts) != 2 or not parts[1].isdigit():
+                self.msg("Usage: delroom <direction>|<area> <number>")
+                return
+            area, num = parts[0], int(parts[1])
+            _, area_data = find_area(area)
+            if area_data and not (area_data.start <= num <= area_data.end):
+                self.msg("Number outside area range.")
+                return
+            objs = ObjectDB.objects.filter(
+                db_attributes__db_key="area",
+                db_attributes__db_strvalue__iexact=area,
+            )
+            for obj in objs:
+                if obj.db.room_id == num and obj.is_typeclass(Room, exact=False):
+                    target_room = obj
+                    break
+            if not target_room:
+                self.msg("That room does not exist.")
+                return
+
+        self.unlink_room(target_room)
+        target_room.delete()
+        self.msg("Room deleted.")
+
+
 class CmdSetDesc(Command):
     """
     Set an object's description. Usage: setdesc <target> <description>
