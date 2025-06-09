@@ -8,7 +8,7 @@ import random
 from evennia.utils import delay
 from world.system import state_manager
 
-from .combat_actions import Action, AttackAction
+from .combat_actions import Action, AttackAction, CombatResult
 
 
 @dataclass
@@ -99,12 +99,30 @@ class CombatEngine:
     def process_round(self) -> None:
         """Process a single combat round."""
         self.start_round()
+        actions: list[tuple[int, int, CombatParticipant, Action]] = []
         for participant in list(self.queue):
             actor = participant.actor
             if not hasattr(actor, "hp") or actor.hp <= 0:
                 continue
             action = participant.next_action or AttackAction(actor, None)
-            result = action.resolve()
+            actions.append(
+                (
+                    participant.initiative,
+                    getattr(action, "priority", 0),
+                    participant,
+                    action,
+                )
+            )
+
+        actions.sort(key=lambda t: (t[0], t[1]), reverse=True)
+
+        for _, _, participant, action in actions:
+            actor = participant.actor
+            valid, err = action.validate()
+            if not valid:
+                result = CombatResult(actor=actor, target=actor, message=err)
+            else:
+                result = action.resolve()
             participant.next_action = None
             if actor.location:
                 actor.location.msg_contents(result.message)
