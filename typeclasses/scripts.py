@@ -1,3 +1,5 @@
+"""Custom script typeclasses used by the game."""
+
 from random import randint, choice
 from evennia.utils import make_iter, logger
 from evennia.scripts.scripts import DefaultScript
@@ -7,8 +9,11 @@ from .characters import Character
 
 
 class Script(DefaultScript):
-    """
-    The basic, default script typeclass for the game.
+    """Base script typeclass.
+
+    This lightweight subclass mirrors Evennia's ``DefaultScript`` but is
+    defined for clarity and future customization.  Having a project-specific
+    script parent makes it easy to tag or extend all in-game scripts later on.
     """
 
     pass

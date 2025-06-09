@@ -102,7 +102,13 @@ class Account(ContribChargenAccount):
 
 
 class Guest(DefaultGuest):
-    """Guest account typeclass."""
+    """Guest account typeclass used for quick logins.
+
+    This subclass currently adds no new behavior but allows for
+    future expansion of guest-specific features and provides a
+    clear hook for tagging guest accounts in the database.
+    """
+
     pass
 
 

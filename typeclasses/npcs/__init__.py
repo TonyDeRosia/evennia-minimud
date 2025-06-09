@@ -1,3 +1,5 @@
+"""NPC subclasses with mixins for specialized roles."""
+
 from typeclasses.characters import NPC
 
 
