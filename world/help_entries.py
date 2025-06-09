@@ -315,6 +315,34 @@ Notes:
     - The id must be unique within the area's range.
 
 Related:
+        help ansi
+""",
+    },
+    {
+        "key": "rmake",
+        "category": "Building",
+        "text": """
+Help for rmake
+
+Create an unlinked room in a registered area.
+
+Usage:
+    rmake <area> <number>
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    rmake dungeon 1
+
+Notes:
+    - The number must fall within the area's range.
+    - The room is not automatically linked to any others.
+
+Related:
     help ansi
 """,
     },
