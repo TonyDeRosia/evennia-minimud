@@ -1,11 +1,28 @@
-"""Banking command for managing stored coins."""
+"""Banking command for managing stored coins.
+
+Usage:
+    bank balance
+    bank deposit <amount [coin]>
+    bank withdraw <amount [coin]>
+    bank transfer <amount [coin]> <target>
+
+Example:
+    bank deposit 10 gold
+"""
 
 from .command import Command
 from utils.currency import to_copper, from_copper, COIN_VALUES, format_wallet
 
 
 class CmdBank(Command):
-    """Handle deposits, withdrawals and transfers."""
+    """Handle deposits, withdrawals and transfers.
+
+    Usage:
+        bank <balance|deposit|withdraw|transfer>
+
+    Example:
+        bank transfer 50 silver bob
+    """
 
     key = "bank"
     help_category = "General"

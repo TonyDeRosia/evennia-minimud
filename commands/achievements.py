@@ -11,6 +11,9 @@ class CmdAchievements(Command):
 
     Usage:
         achievements
+
+    Example:
+        achievements
     """
 
     key = "achievements"
@@ -40,6 +43,9 @@ class CmdAwardAchievement(Command):
 
     Usage:
         awardach <player> <achievement>
+
+    Example:
+        awardach Bob first_blood
     """
 
     key = "awardach"

@@ -5,7 +5,15 @@ from world.spells import SPELLS, Spell
 
 
 class CmdSpellbook(Command):
-    """View known spells or details about one spell."""
+    """View known spells or details about one spell.
+
+    Usage:
+        spells
+        spells <spell>
+
+    Example:
+        spells fireball
+    """
 
     key = "spells"
     aliases = ("spellbook",)
@@ -57,7 +65,14 @@ class CmdSpellbook(Command):
 
 
 class CmdCast(Command):
-    """Cast a learned spell."""
+    """Cast a learned spell.
+
+    Usage:
+        cast <spell> [on <target>]
+
+    Example:
+        cast fireball on goblin
+    """
     key = "cast"
 
     def parse(self):
