@@ -502,6 +502,19 @@ class TestReturnAppearance(EvenniaTest):
         self.assertIn("|wExits:|n", output)
         self.assertIn(self.room1.key, output)
 
+    def test_invisible_objects_hidden(self):
+        from evennia.utils import create
+
+        obj = create.create_object("typeclasses.objects.Object", key="ghost", location=self.room1)
+        obj.tags.add("invisible", category="status")
+
+        out = self.room1.return_appearance(self.char1)
+        self.assertNotIn("ghost", out)
+
+        self.char1.tags.add("detect_invis", category="status")
+        out = self.room1.return_appearance(self.char1)
+        self.assertIn("ghost", out)
+
 
 class TestRestCommands(EvenniaTest):
     def setUp(self):

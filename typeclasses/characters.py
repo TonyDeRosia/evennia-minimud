@@ -159,6 +159,38 @@ class Character(ObjectParent, ClothedCharacter):
             return "Encumbered (Moderate)"
         return "Encumbered (Severe)"
 
+    # -------------------------------------------------------------
+    # Visibility helpers
+    # -------------------------------------------------------------
+
+    def can_see(self, target) -> bool:
+        """Return ``True`` if ``self`` can see ``target``."""
+
+        if target == self:
+            return True
+
+        # blindness overrides everything
+        if self.tags.get("blind", category="status"):
+            return False
+
+        # check room darkness
+        location = getattr(self, "location", None)
+        if location and location.tags.get("dark", category="status"):
+            if not self.tags.get("infrared", category="status"):
+                return False
+
+        # invisible targets require detect_invis
+        if target.tags.get("invisible", category="status"):
+            if not self.tags.get("detect_invis", category="status"):
+                return False
+
+        # hidden targets require detect_hidden
+        if target.tags.get("hidden", category="status"):
+            if not self.tags.get("detect_hidden", category="status"):
+                return False
+
+        return True
+
     def defense(self, damage_type=None):
         """
         Get the total armor defense from equipped items and natural defenses
