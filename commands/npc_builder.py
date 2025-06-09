@@ -5,6 +5,7 @@ from evennia.objects.models import ObjectDB
 from evennia.prototypes import spawner
 from typeclasses.characters import NPC
 from utils.slots import SLOT_ORDER
+from utils.menu_utils import add_back_skip
 from .command import Command
 import re
 from world.mob_constants import (
@@ -75,7 +76,7 @@ def menunode_key(caller, raw_string="", **kwargs):
     if default:
         text += f" [default: {default}]"
     text += "\nExample: |wmerchant_01|n"
-    options = {"key": "_default", "goto": _set_key}
+    options = add_back_skip({"key": "_default", "goto": _set_key}, _set_key)
     return text, options
 
 
@@ -102,7 +103,7 @@ def menunode_desc(caller, raw_string="", **kwargs):
     if default:
         text += f" [default: {default}]"
     text += "\n(back to go back, skip for default)"
-    options = {"key": "_default", "goto": _set_desc}
+    options = add_back_skip({"key": "_default", "goto": _set_desc}, _set_desc)
     return text, options
 
 def _set_desc(caller, raw_string, **kwargs):
@@ -126,7 +127,7 @@ def menunode_npc_type(caller, raw_string="", **kwargs):
     )
     if default:
         text += f" [default: {default}]"
-    options = {"key": "_default", "goto": _set_npc_type}
+    options = add_back_skip({"key": "_default", "goto": _set_npc_type}, _set_npc_type)
     return text, options
 
 def _set_npc_type(caller, raw_string, **kwargs):
@@ -150,7 +151,7 @@ def menunode_guild_affiliation(caller, raw_string="", **kwargs):
         text += f" [default: {default}]"
     text += "\nExample: |wthieves_guild|n"
     text += "\n(back to go back, skip for default)"
-    options = {"key": "_default", "goto": _set_guild_affiliation}
+    options = add_back_skip({"key": "_default", "goto": _set_guild_affiliation}, _set_guild_affiliation)
     return text, options
 
 def _set_guild_affiliation(caller, raw_string, **kwargs):
@@ -174,7 +175,7 @@ def menunode_creature_type(caller, raw_string="", **kwargs):
     if default:
         text += f" [default: {default}]"
     text += "\n(back to go back, skip for default)"  # keep existing note for clarity
-    options = {"key": "_default", "goto": _set_creature_type}
+    options = add_back_skip({"key": "_default", "goto": _set_creature_type}, _set_creature_type)
     return text, options
 
 def _set_creature_type(caller, raw_string, **kwargs):
@@ -204,7 +205,7 @@ def menunode_custom_slots(caller, raw_string="", **kwargs):
              "  done - finish editing\n"
              "  back - previous step\n"
              "Example: |wadd tail|n")
-    options = {"key": "_default", "goto": _edit_custom_slots}
+    options = add_back_skip({"key": "_default", "goto": _edit_custom_slots}, _edit_custom_slots)
     return text, options
 
 def _edit_custom_slots(caller, raw_string, **kwargs):
@@ -240,7 +241,7 @@ def menunode_npc_class(caller, raw_string="", **kwargs):
     if default:
         text += f" [default: {default}]"
     text += "\n(back to go back, skip for default)"
-    options = {"key": "_default", "goto": _set_npc_class}
+    options = add_back_skip({"key": "_default", "goto": _set_npc_class}, _set_npc_class)
     return text, options
 
 def _set_npc_class(caller, raw_string, **kwargs):
@@ -266,7 +267,7 @@ def menunode_roles(caller, raw_string="", **kwargs):
         "Commands:\n  add <role>\n  remove <role>\n  done - finish\n  back - previous step\n"
         "Example: |wadd merchant|n"
     )
-    options = {"key": "_default", "goto": _edit_roles}
+    options = add_back_skip({"key": "_default", "goto": _edit_roles}, _edit_roles)
     return text, options
 
 def _edit_roles(caller, raw_string, **kwargs):
@@ -312,7 +313,7 @@ def menunode_merchant_pricing(caller, raw_string="", **kwargs):
         (back to go back, skip for default)
         """
     )
-    options = {"key": "_default", "goto": _set_merchant_pricing}
+    options = add_back_skip({"key": "_default", "goto": _set_merchant_pricing}, _set_merchant_pricing)
     return text, options
 
 def _set_merchant_pricing(caller, raw_string, **kwargs):
@@ -339,7 +340,7 @@ def menunode_level(caller, raw_string="", **kwargs):
         (back to go back, skip for default)
         """
     )
-    options = {"key": "_default", "goto": _set_level}
+    options = add_back_skip({"key": "_default", "goto": _set_level}, _set_level)
     return text, options
 
 def _set_level(caller, raw_string, **kwargs):
@@ -372,7 +373,7 @@ def menunode_resources(caller, raw_string="", **kwargs):
         (back to go back, skip for default)
         """
     )
-    options = {"key": "_default", "goto": _set_resources}
+    options = add_back_skip({"key": "_default", "goto": _set_resources}, _set_resources)
     return text, options
 
 def _set_resources(caller, raw_string, **kwargs):
@@ -404,7 +405,7 @@ def menunode_stats(caller, raw_string="", **kwargs):
         (back to go back, skip for default)
         """
     )
-    options = {"key": "_default", "goto": _set_stats}
+    options = add_back_skip({"key": "_default", "goto": _set_stats}, _set_stats)
     return text, options
 
 def _set_stats(caller, raw_string, **kwargs):
@@ -434,7 +435,7 @@ def menunode_behavior(caller, raw_string="", **kwargs):
         text += f" [default: {default}]"
     text += "\nExample: |wSells potions and greets players|n"
     text += "\n(back to go back, skip for default)"
-    options = {"key": "_default", "goto": _set_behavior}
+    options = add_back_skip({"key": "_default", "goto": _set_behavior}, _set_behavior)
     return text, options
 
 def _set_behavior(caller, raw_string, **kwargs):
@@ -454,7 +455,7 @@ def menunode_skills(caller, raw_string="", **kwargs):
         text += f" [default: {default}]"
     text += "\nExample: |wfireball, slash, heal|n"
     text += "\n(back to go back, skip for default)"
-    options = {"key": "_default", "goto": _set_skills}
+    options = add_back_skip({"key": "_default", "goto": _set_skills}, _set_skills)
     return text, options
 
 def _set_skills(caller, raw_string, **kwargs):
@@ -480,7 +481,7 @@ def menunode_ai(caller, raw_string="", **kwargs):
     )
     if default:
         text += f" [default: {default}]"
-    options = {"key": "_default", "goto": _set_ai}
+    options = add_back_skip({"key": "_default", "goto": _set_ai}, _set_ai)
     return text, options
 
 def _set_ai(caller, raw_string, **kwargs):
@@ -507,7 +508,7 @@ def menunode_actflags(caller, raw_string="", **kwargs):
     text += f"\nAvailable: {flags}"
     text += "\nExample: |wsentinel aggressive|n"
     text += "\n(back to go back, skip for default)"
-    options = {"key": "_default", "goto": _set_actflags}
+    options = add_back_skip({"key": "_default", "goto": _set_actflags}, _set_actflags)
     return text, options
 
 
@@ -536,7 +537,7 @@ def menunode_affects(caller, raw_string="", **kwargs):
     text += f"\nAvailable: {choices}"
     text += "\nExample: |winvisible detect_magic|n"
     text += "\n(back to go back, skip for default)"
-    options = {"key": "_default", "goto": _set_affects}
+    options = add_back_skip({"key": "_default", "goto": _set_affects}, _set_affects)
     return text, options
 
 
@@ -565,7 +566,7 @@ def menunode_resists(caller, raw_string="", **kwargs):
     text += f"\nAvailable: {choices}"
     text += "\nExample: |wfire cold energy|n"
     text += "\n(back to go back, skip for default)"
-    options = {"key": "_default", "goto": _set_resists}
+    options = add_back_skip({"key": "_default", "goto": _set_resists}, _set_resists)
     return text, options
 
 
@@ -594,7 +595,7 @@ def menunode_bodyparts(caller, raw_string="", **kwargs):
     text += f"\nAvailable: {parts}"
     text += "\nExample: |whead arms legs|n"
     text += "\n(back to go back, skip for default)"
-    options = {"key": "_default", "goto": _set_bodyparts}
+    options = add_back_skip({"key": "_default", "goto": _set_bodyparts}, _set_bodyparts)
     return text, options
 
 
@@ -623,7 +624,7 @@ def menunode_attack(caller, raw_string="", **kwargs):
     text += f"\nAvailable: {choices}"
     text += "\nExample: |wbite claw|n"
     text += "\n(back to go back, skip for default)"
-    options = {"key": "_default", "goto": _set_attack}
+    options = add_back_skip({"key": "_default", "goto": _set_attack}, _set_attack)
     return text, options
 
 
@@ -652,7 +653,7 @@ def menunode_defense(caller, raw_string="", **kwargs):
     text += f"\nAvailable: {choices}"
     text += "\nExample: |wparry dodge|n"
     text += "\n(back to go back, skip for default)"
-    options = {"key": "_default", "goto": _set_defense}
+    options = add_back_skip({"key": "_default", "goto": _set_defense}, _set_defense)
     return text, options
 
 
@@ -681,7 +682,7 @@ def menunode_languages(caller, raw_string="", **kwargs):
     text += f"\nAvailable: {choices}"
     text += "\nExample: |wcommon elvish|n"
     text += "\n(back to go back, skip for default)"
-    options = {"key": "_default", "goto": _set_languages}
+    options = add_back_skip({"key": "_default", "goto": _set_languages}, _set_languages)
     return text, options
 
 
@@ -748,7 +749,7 @@ def menunode_trigger_add(caller, raw_string="", **kwargs):
 def menunode_trigger_custom(caller, raw_string="", **kwargs):
     """Prompt for custom event name."""
     text = "|wEnter custom event name|n"
-    options = {"key": "_default", "goto": _set_custom_event}
+    options = add_back_skip({"key": "_default", "goto": _set_custom_event}, _set_custom_event)
     return text, options
 
 def _set_custom_event(caller, raw_string, **kwargs):
@@ -764,7 +765,7 @@ def _set_trigger_event(caller, raw_string, event=None, **kwargs):
 
 def menunode_trigger_match(caller, raw_string="", **kwargs):
     text = "|wEnter match text (blank for none)|n"
-    options = {"key": "_default", "goto": _set_trigger_match}
+    options = add_back_skip({"key": "_default", "goto": _set_trigger_match}, _set_trigger_match)
     return text, options
 
 def _set_trigger_match(caller, raw_string, **kwargs):
@@ -773,7 +774,7 @@ def _set_trigger_match(caller, raw_string, **kwargs):
 
 def menunode_trigger_react(caller, raw_string="", **kwargs):
     text = "|wEnter reaction command(s) (comma or semicolon separated)|n"
-    options = {"key": "_default", "goto": _save_trigger}
+    options = add_back_skip({"key": "_default", "goto": _save_trigger}, _save_trigger)
     return text, options
 
 def _save_trigger(caller, raw_string, **kwargs):
