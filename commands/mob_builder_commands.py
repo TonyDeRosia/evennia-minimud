@@ -6,6 +6,20 @@ from evennia.utils import evtable
 from .command import Command
 from . import npc_builder
 from world import prototypes, area_npcs
+from world.mob_constants import (
+    NPC_RACES,
+    NPC_CLASSES,
+    ACTFLAGS,
+    AFFECTED_BY,
+    LANGUAGES,
+    BODYPARTS,
+    SAVING_THROWS,
+    RIS_TYPES,
+    ATTACK_TYPES,
+    DEFENSE_TYPES,
+    SPECIAL_FUNCS,
+    parse_flag_list,
+)
 
 class CmdMStat(Command):
     """Inspect an NPC or prototype."""
@@ -82,6 +96,17 @@ class CmdMSet(Command):
 
     _FIELD_CASTS = {
         "level": int,
+        "race": lambda s: NPC_RACES.from_str(s).value,
+        "npc_class": lambda s: NPC_CLASSES.from_str(s).value,
+        "actflags": lambda s: [f.value for f in parse_flag_list(s, ACTFLAGS)],
+        "affected_by": lambda s: [f.value for f in parse_flag_list(s, AFFECTED_BY)],
+        "languages": lambda s: [f.value for f in parse_flag_list(s, LANGUAGES)],
+        "bodyparts": lambda s: [f.value for f in parse_flag_list(s, BODYPARTS)],
+        "saving_throws": lambda s: [f.value for f in parse_flag_list(s, SAVING_THROWS)],
+        "ris": lambda s: [f.value for f in parse_flag_list(s, RIS_TYPES)],
+        "attack_types": lambda s: [f.value for f in parse_flag_list(s, ATTACK_TYPES)],
+        "defense_types": lambda s: [f.value for f in parse_flag_list(s, DEFENSE_TYPES)],
+        "special_funcs": lambda s: [f.value for f in parse_flag_list(s, SPECIAL_FUNCS)],
     }
 
     def parse(self):
@@ -111,6 +136,12 @@ class CmdMSet(Command):
                 val = int(self.value)
             except (TypeError, ValueError):
                 self.msg("Value must be an integer.")
+                return
+        elif callable(cast):
+            try:
+                val = cast(self.value)
+            except ValueError:
+                self.msg("Invalid value for field.")
                 return
         else:
             val = self.value
