@@ -1165,12 +1165,16 @@ class CmdSpawnNPC(Command):
                 return
             proto = prototypes.get_npc_prototypes().get(key)
         else:
+            key = arg
             proto = prototypes.get_npc_prototypes().get(arg)
         if not proto:
             self.msg("Unknown NPC prototype.")
             return
         obj = spawner.spawn(proto)[0]
         obj.move_to(self.caller.location, quiet=True)
+        obj.db.prototype_key = key
+        obj.db.area_tag = self.caller.location.db.area
+        obj.db.spawn_room = self.caller.location
         self.msg(f"Spawned {obj.get_display_name(self.caller)}.")
 
 

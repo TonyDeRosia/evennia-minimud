@@ -3,6 +3,7 @@ import json
 
 from typeclasses.npcs import BaseNPC
 from evennia.utils import evtable
+from evennia.objects.models import ObjectDB
 
 from .command import Command
 from . import npc_builder
@@ -203,7 +204,7 @@ class CmdMSet(Command):
 
 
 class CmdMList(Command):
-    """List NPC prototypes optionally filtered by area and range."""
+    """List NPC prototypes or spawned NPCs."""
 
     key = "@mlist"
     locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
@@ -220,47 +221,112 @@ class CmdMList(Command):
         return None
 
     def func(self):
+        args = self.args.strip().split()
+
         area = None
         rangestr = None
-        parts = self.args.strip().split()
-        if parts:
-            if len(parts) == 2:
-                area, rangestr = parts
+        filter_by: dict = {}
+        show_room = False
+        show_area = False
+
+        for part in args:
+            low = part.lower()
+            if low.startswith("/"):
+                if low == "/room":
+                    show_room = True
+                elif low == "/area":
+                    show_area = True
+                continue
+            if "=" in part:
+                k, v = part.split("=", 1)
+                k = k.lower()
+                if k in {"class", "race", "role", "tag", "zone"}:
+                    filter_by[k] = v
+                continue
+            if "-" in part and not rangestr:
+                rangestr = part
+                continue
+            if not area:
+                area = part
+
+        registry = prototypes.get_npc_prototypes(filter_by)
+
+        if show_room or show_area:
+            if show_room:
+                npcs = [
+                    obj
+                    for obj in self.caller.location.contents
+                    if obj.is_typeclass(BaseNPC, exact=False)
+                ]
             else:
-                part = parts[0]
-                if "-" in part:
-                    rangestr = part
+                area_name = self.caller.location.db.area
+                if not area_name:
+                    self.msg("This room has no area set.")
+                    return
+                npcs = [
+                    obj
+                    for obj in ObjectDB.objects.get_by_attribute(
+                        key="area_tag", value=area_name
+                    )
+                    if obj.is_typeclass(BaseNPC, exact=False)
+                ]
+
+            counts = {}
+            for npc in npcs:
+                key = npc.db.prototype_key
+                if not key or key not in registry:
+                    continue
+                counts[key] = counts.get(key, 0) + 1
+            keys = sorted(counts)
+        else:
+            if area:
+                keys = area_npcs.get_area_npc_list(area)
+                if not keys:
+                    self.msg("No prototypes registered for that area.")
+                    return
+            else:
+                keys = list(registry.keys())
+            keys = sorted(keys)
+            if rangestr:
+                rdata = self._parse_range(rangestr)
+                if not rdata:
+                    self.msg("Invalid range specification.")
+                    return
+                rtype, a, b = rdata
+                if rtype == "num":
+                    a = max(1, a)
+                    b = min(len(keys), b)
+                    keys = keys[a - 1 : b]
                 else:
-                    area = part
-        registry = prototypes.get_npc_prototypes()
-        if area:
-            keys = area_npcs.get_area_npc_list(area)
-            if not keys:
-                self.msg("No prototypes registered for that area.")
-                return
-        else:
-            keys = list(registry.keys())
-        keys = sorted(keys)
-        if rangestr:
-            rdata = self._parse_range(rangestr)
-            if not rdata:
-                self.msg("Invalid range specification.")
-                return
-            rtype, a, b = rdata
-            if rtype == "num":
-                a = max(1, a)
-                b = min(len(keys), b)
-                keys = keys[a - 1 : b]
-            else:
-                keys = [k for k in keys if a <= k[0].lower() <= b]
-        lines = []
-        for key in keys:
-            desc = registry.get(key, {}).get("desc", "")
-            lines.append(f"{key} - {desc}" if desc else key)
-        if not lines:
+                    keys = [k for k in keys if a <= k[0].lower() <= b]
+            counts = {
+                key: ObjectDB.objects.get_by_attribute(
+                    key="prototype_key", value=key
+                ).count()
+                for key in keys
+            }
+
+        if not keys:
             self.msg("No prototypes found.")
-        else:
-            self.msg("\n".join(lines))
+            return
+
+        table = evtable.EvTable("Key", "Lvl", "Class", "Roles", "Count", border="cells")
+        for key in keys:
+            proto = registry.get(key)
+            if not proto:
+                continue
+            roles = proto.get("roles") or []
+            if isinstance(roles, str):
+                roles = [roles]
+            table.add_row(
+                key,
+                str(proto.get("level", "-")),
+                proto.get("npc_class", "-"),
+                ", ".join(roles) if roles else "-",
+                str(counts.get(key, 0)),
+            )
+
+        self.msg(str(table))
 
 
 class CmdMakeShop(Command):
