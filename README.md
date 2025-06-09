@@ -264,6 +264,23 @@ print(mult)  # 0.5
 
 Resistances can be assigned via the mob builder menu when creating NPCs.
 
+### Status Effects
+
+Many combat abilities apply temporary status conditions. Effects like
+`stunned` or `defending` last a set number of combat ticks and may alter
+stats or restrict actions. Use the `affects` command or `status` to view
+your current buffs and conditions. Effects expire automatically when
+their duration reaches zero.
+
+### AI Settings
+
+NPC behavior is configured by an AI type during `cnpc` or `mobbuilder`.
+Choose from `passive`, `aggressive`, `defensive`, `wander` or
+`scripted`. Scripted AI runs the callable stored on `npc.db.ai_script`.
+These options let builders quickly create enemies that fight or roam on
+their own. The combat command set includes `attack`, `wield`, `unwield`,
+`flee`, `berserk`, `respawn`, `revive` and `status`.
+
 
 ## Running the Tests
 

@@ -140,6 +140,10 @@ Help for affects
 
 View your active buffs and status effects.
 
+Status effects include temporary conditions like |wstunned|n or
+|wdefending|n applied during combat. They modify your stats or actions
+until their duration expires.
+
 Usage:
     affects
 
@@ -2655,8 +2659,9 @@ The available AI types are stored in `world.npc_handlers.ai`:
     scripted - run npc.db.ai_script callback
 
 Set the type when prompted in the builder or edit the prototype data.
-For scripted AI, store a callable path on ``npc.db.ai_script`` such as
-``scripts.example_ai.patrol_ai``.
+The mob builder offers the same AI step for prototypes saved with
+`@mcreate` or `@mset`. For scripted AI, store a callable path on
+``npc.db.ai_script`` such as ``scripts.example_ai.patrol_ai``.
 
 Related:
     help cnpc
@@ -3065,6 +3070,36 @@ Notes:
 
 Related:
     help cnpc
+""",
+    },
+    {
+        "key": "damage types",
+        "aliases": ["damage", "elemental damage"],
+        "category": "Combat",
+        "text": """Help for damage types
+
+Attacks are categorized as slashing, piercing, bludgeoning and elemental
+types like fire or shadow. NPCs may gain resistances during the builder.
+When damage is applied the engine checks these resistances and multiplies
+the amount accordingly. Values below 1.0 mean the target resists that
+type while values above 1.0 indicate vulnerability.
+""",
+    },
+    {
+        "key": "combat system",
+        "aliases": ["combat"],
+        "category": "Combat",
+        "text": """Help for combat system
+
+Combat is round based. Use |wattack <target>|n to begin a fight then
+queue actions like attacks or skills each round. Status effects such as
+|wstunned|n come from abilities and expire after a few ticks. Check them
+with |waffects|n or |wstatus|n.
+
+NPC behavior is controlled by an AI type set in the |wcnpc|n builder or
+|wmobbuilder|n. Available types are passive, aggressive, defensive,
+wander and scripted. Scripted AI runs the callback stored on
+|wnpc.db.ai_script|n.
 """,
     },
 ]
