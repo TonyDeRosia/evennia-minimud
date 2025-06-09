@@ -133,8 +133,12 @@ def auto_promote(player, guild: Guild):
     """Update player's guild rank based on their points in the guild."""
     if not guild.rank_thresholds:
         return
+    from world.system import state_manager
+
     gp_map = player.db.guild_points or {}
     points = gp_map.get(guild.name, 0)
+    mod = state_manager.get_effective_stat(player, "guild_honor_mod")
+    points = int(points * (1 + mod / 100))
     new_rank = ""
     for title, threshold in sorted(guild.rank_thresholds.items(), key=lambda it: it[1]):
         if points >= threshold:

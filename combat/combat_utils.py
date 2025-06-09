@@ -74,6 +74,65 @@ def roll_evade(attacker, target, base: int = 50) -> bool:
     return result
 
 
+def roll_block(attacker, target, base: int = 0) -> bool:
+    """Return ``True`` if ``target`` blocks an attack from ``attacker``."""
+
+    block = state_manager.get_effective_stat(target, "block_rate")
+    acc = state_manager.get_effective_stat(attacker, "accuracy")
+    chance = max(0, min(95, base + block - acc))
+    roll = random.randint(1, 100)
+    result = roll <= chance
+    logger.debug("block roll=%s chance=%s result=%s", roll, chance, result)
+    return result
+
+
+def roll_parry(attacker, target, base: int = 0) -> bool:
+    """Return ``True`` if ``target`` parries an attack from ``attacker``."""
+
+    parry = state_manager.get_effective_stat(target, "parry_rate")
+    acc = state_manager.get_effective_stat(attacker, "accuracy")
+    chance = max(0, min(95, base + parry - acc))
+    roll = random.randint(1, 100)
+    result = roll <= chance
+    logger.debug("parry roll=%s chance=%s result=%s", roll, chance, result)
+    return result
+
+
+def apply_attack_power(attacker, damage: int) -> int:
+    """Scale ``damage`` using ``attacker``'s attack power."""
+
+    ap = state_manager.get_effective_stat(attacker, "attack_power")
+    result = int(round(damage * (1 + ap / 100)))
+    logger.debug("atk power=%s dmg=%s result=%s", ap, damage, result)
+    return result
+
+
+def apply_spell_power(caster, damage: int) -> int:
+    """Scale ``damage`` using ``caster``'s spell power."""
+
+    sp = state_manager.get_effective_stat(caster, "spell_power")
+    result = int(round(damage * (1 + sp / 100)))
+    logger.debug("spell power=%s dmg=%s result=%s", sp, damage, result)
+    return result
+
+
+def apply_lifesteal(attacker, damage: int) -> None:
+    """Heal attacker based on damage dealt."""
+
+    if not damage:
+        return
+    hp = getattr(attacker.traits, "health", None)
+    mp = getattr(attacker.traits, "mana", None)
+    ls = state_manager.get_effective_stat(attacker, "lifesteal")
+    leech = state_manager.get_effective_stat(attacker, "leech")
+    if hp and ls:
+        heal = int(damage * ls / 100)
+        hp.current = min(hp.current + heal, hp.max)
+    if mp and leech:
+        gain = int(damage * leech / 100)
+        mp.current = min(mp.current + gain, mp.max)
+
+
 def get_distance(a, b) -> int:
     """Return the Manhattan distance between ``a`` and ``b`` if possible."""
 

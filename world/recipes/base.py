@@ -42,7 +42,10 @@ class SkillRecipe(CraftingRecipe):
             )
             return
 
+        from world.system import state_manager
+
         success_rate = int(crafting_skill.value - difficulty)
+        success_rate += state_manager.get_effective_stat(crafter, "craft_bonus")
 
         # at this point the crafting attempt is considered happening, so subtract mana
         crafter.traits.mana.current -= 5
