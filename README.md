@@ -216,3 +216,19 @@ Add `/unidentified` before the name to create the weapon unidentified.
 When a weapon is identified, `inspect` shows its damage, slot, any bonuses and
 effects, so `inspect epee-2` will display the full details of the second
 "Epee" you created.
+
+## Running the Tests
+
+To run the automated test suite you need Evennia, Django and pytest installed. You can install these dependencies using the provided requirements file:
+
+```bash
+python -m pip install --upgrade pip
+pip install -r requirements-test.txt
+```
+
+Once installed, execute the tests with:
+
+```bash
+pytest -q
+```
+
