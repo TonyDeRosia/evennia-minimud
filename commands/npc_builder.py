@@ -721,7 +721,7 @@ def menunode_trigger_list(caller, raw_string="", **kwargs):
                 if not isinstance(trig, dict):
                     continue
                 match = trig.get("match", "")
-                resp = trig.get("response", trig.get("reactions"))
+                resp = trig.get("responses", trig.get("response", trig.get("reactions")))
                 if isinstance(resp, list):
                     resp = ", ".join(resp)
                 text += f"{event}: \"{match}\" -> {resp}\n"
@@ -772,7 +772,7 @@ def _set_trigger_match(caller, raw_string, **kwargs):
     return "menunode_trigger_react"
 
 def menunode_trigger_react(caller, raw_string="", **kwargs):
-    text = "|wEnter reaction command|n"
+    text = "|wEnter reaction command(s) (comma or semicolon separated)|n"
     options = {"key": "_default", "goto": _save_trigger}
     return text, options
 
@@ -782,7 +782,9 @@ def _save_trigger(caller, raw_string, **kwargs):
     match = caller.ndb.trigger_match
     triggers = caller.ndb.buildnpc.setdefault("triggers", {})
     triglist = triggers.setdefault(event, [])
-    triglist.append({"match": match, "response": reaction})
+
+    responses = [part.strip() for part in re.split(r"[;,]", reaction) if part.strip()]
+    triglist.append({"match": match, "responses": responses})
     caller.ndb.trigger_event = None
     caller.ndb.trigger_match = None
     caller.msg("Trigger added.")
@@ -801,7 +803,7 @@ def menunode_trigger_delete(caller, raw_string="", **kwargs):
             if not isinstance(trig, dict):
                 continue
             match = trig.get("match", "")
-            resp = trig.get("response", trig.get("reactions"))
+            resp = trig.get("responses", trig.get("response", trig.get("reactions")))
             if isinstance(resp, list):
                 resp = ", ".join(resp)
             desc = f"{event}: \"{match}\" -> {resp}"
@@ -840,7 +842,7 @@ def menunode_confirm(caller, raw_string="", **kwargs):
                         if not isinstance(trig, dict):
                             continue
                         match = trig.get("match", "")
-                        resp = trig.get("response", trig.get("reactions"))
+                        resp = trig.get("responses", trig.get("response", trig.get("reactions")))
                         if isinstance(resp, list):
                             resp = ", ".join(resp)
                         text += f"trigger {event}: \"{match}\" -> {resp}\n"
