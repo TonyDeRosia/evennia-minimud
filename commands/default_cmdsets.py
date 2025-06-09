@@ -42,6 +42,7 @@ from commands.room_flags import RoomFlagCmdSet
 from commands.admin import AdminCmdSet, BuilderCmdSet
 from commands.quests import QuestCmdSet
 from commands.achievements import AchievementCmdSet
+from commands.rod import RoDCmdSet
 from commands.spells import SpellCmdSet
 
 
@@ -75,6 +76,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(SpellCmdSet)
         self.add(InteractCmdSet)
         self.add(InfoCmdSet)
+        self.add(RoDCmdSet)
         self.add(RestCmdSet)
         self.add(GuildCmdSet)
         self.add(EquipmentCmdSet)
