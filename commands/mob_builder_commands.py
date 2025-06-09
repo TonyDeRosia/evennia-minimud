@@ -1,4 +1,5 @@
 import shlex
+import json
 
 from typeclasses.npcs import BaseNPC
 from evennia.utils import evtable
@@ -156,6 +157,7 @@ class CmdMSet(Command):
         "attack_types": lambda s: [f.value for f in parse_flag_list(s, ATTACK_TYPES)],
         "defense_types": lambda s: [f.value for f in parse_flag_list(s, DEFENSE_TYPES)],
         "special_funcs": lambda s: [f.value for f in parse_flag_list(s, SPECIAL_FUNCS)],
+        "loot_table": json.loads,
     }
 
     def parse(self):

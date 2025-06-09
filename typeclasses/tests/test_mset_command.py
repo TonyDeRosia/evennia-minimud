@@ -32,3 +32,11 @@ class TestMSetCommand(EvenniaTest):
         self.char1.execute_cmd('@mset orc desc "Fierce orc"')
         reg = prototypes.get_npc_prototypes()
         assert reg["orc"]["desc"] == "Fierce orc"
+
+    def test_mset_loot_table(self):
+        prototypes.register_npc_prototype("wolf", {"key": "wolf"})
+        self.char1.execute_cmd('@mset wolf loot_table "[{\\"proto\\": \\"RAW_MEAT\\", \\"chance\\": 80}]"')
+        reg = prototypes.get_npc_prototypes()
+        table = reg["wolf"]["loot_table"]
+        assert table[0]["proto"] == "RAW_MEAT"
+        assert table[0]["chance"] == 80

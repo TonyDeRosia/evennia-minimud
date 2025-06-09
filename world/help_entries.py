@@ -3010,4 +3010,32 @@ Usage:
     learn
 """,
     },
+    {
+        "key": "loot tables",
+        "aliases": ["loottable", "loot"],
+        "category": "Building",
+        "text": """Help for loot tables
+
+Loot tables control random item drops from NPCs. Each entry is a mapping with
+the prototype key and drop chance::
+
+    [{"proto": "RAW_MEAT", "chance": 50}]
+
+Set ``loot_table`` on an NPC prototype with |w@mset|n using JSON syntax.
+
+Usage:
+    @mset <proto> loot_table <json>
+
+Examples:
+    @mset wolf loot_table "[{\"proto\": \"RAW_MEAT\", \"chance\": 75}]"
+    @mset bandit loot_table "[{\"proto\": \"IRON_SWORD\", \"chance\": 25}]"
+
+Notes:
+    - ``chance`` is a percent from 1-100.
+    - Items with 100% chance always drop.
+
+Related:
+    help cnpc
+""",
+    },
 ]
