@@ -2801,10 +2801,11 @@ Related:
         "category": "Building",
         "text": """Help for mobbuilder
 
-Invokes the same menu-driven builder as |wcnpc|n but instead of creating the
-NPC immediately it stores the result as a prototype prefixed with ``mob_``.
-Additional mob-specific fields such as act flags, skills, spells and
-resistances may be set while stepping through the menu.
+Invokes the same menu-driven builder as |wcnpc|n but the NPC is spawned
+immediately. Choosing |wYes & Save Prototype|n at the end also stores the
+result as a prototype prefixed with ``mob_``. Additional mob specific fields
+such as act flags, skills, spells and resistances may be set while stepping
+through the menu.
 You can also specify a Script typeclass to attach after the languages step.
 
 Usage:
@@ -2815,6 +2816,10 @@ Notes:
       using |w@mlist|n. See |whelp @mlist|n for filtering options.
     - Spawn a stored prototype with |w@mspawn <prototype>|n.
     - Inspect prototypes or NPCs with |w@mstat <key>|n.
+    - Example workflow:
+        1) run |wmobbuilder|n and fill in the prompts
+        2) choose |wYes & Save Prototype|n
+        3) use |w@mspawn mob_<key>|n to spawn more copies
 
 Related:
     help cnpc

@@ -976,6 +976,10 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
         from world import prototypes
 
         proto_key = data.get("proto_key", data.get("key"))
+        # automatically prefix mob prototypes when using mobbuilder
+        if data.get("use_mob") and not proto_key.startswith("mob_"):
+            proto_key = f"mob_{proto_key}"
+            data["proto_key"] = proto_key
         proto = {k: v for k, v in data.items() if k not in ("edit_obj", "proto_key")}
         if data.get("script"):
             proto["scripts"] = [data["script"]]
