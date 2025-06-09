@@ -88,6 +88,8 @@ Examples:
 
 Notes:
     - Primary stats cap at 999.
+    - Use @mcreate and @mset to manage NPC prototypes.
+    - Shops and repairs use @makeshop/@shopset and @makerepair/@repairset.
 
 Related:
     help ansi
