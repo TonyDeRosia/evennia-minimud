@@ -48,6 +48,7 @@ class TestMobBuilder(EvenniaTest):
         npc_builder._set_stats(self.char1, "1 1 1 1 1 1")
         npc_builder._set_behavior(self.char1, "")
         npc_builder._set_skills(self.char1, "")
+        npc_builder._set_spells(self.char1, "")
         npc_builder._set_ai(self.char1, "passive")
         npc_builder._set_actflags(self.char1, "")
         npc_builder._set_affects(self.char1, "")

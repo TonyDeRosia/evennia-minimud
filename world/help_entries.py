@@ -2561,7 +2561,8 @@ Notes:
       guildmaster, guild_receptionist, questgiver, combat_trainer and
       event_npc.
     - The builder prompts for description, NPC type, creature type, level,
-      HP MP SP, primary stats, behavior, skills and AI type.
+      HP MP SP, primary stats, behavior, skills, spells, resistances and
+      AI type.
     - Humanoid body type grants the standard equipment slots automatically.
       Quadrupeds receive head, body, front_legs and hind_legs and lack weapon
       slots. Unique lets you add or remove any slots in the next step.
@@ -2797,8 +2798,8 @@ Related:
 
 Invokes the same menu-driven builder as |wcnpc|n but instead of creating the
 NPC immediately it stores the result as a prototype prefixed with ``mob_``.
-Additional mob-specific fields such as act flags and resistances may be set
-while stepping through the menu.
+Additional mob-specific fields such as act flags, skills, spells and
+resistances may be set while stepping through the menu.
 You can also specify a Script typeclass to attach after the languages step.
 
 Usage:

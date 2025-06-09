@@ -468,6 +468,30 @@ def _set_skills(caller, raw_string, **kwargs):
     else:
         skills = [s.strip() for s in string.split(",") if s.strip()]
     caller.ndb.buildnpc["skills"] = skills
+    return "menunode_spells"
+
+
+def menunode_spells(caller, raw_string="", **kwargs):
+    spells = caller.ndb.buildnpc.get("spells", [])
+    default = ", ".join(spells)
+    text = "|wList any spells (comma separated)|n"
+    if default:
+        text += f" [default: {default}]"
+    text += "\nExample: |wfireball, heal|n"
+    text += "\n(back to go back, skip for default)"
+    options = add_back_skip({"key": "_default", "goto": _set_spells}, _set_spells)
+    return text, options
+
+
+def _set_spells(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_skills"
+    if not string or string.lower() == "skip":
+        spells = caller.ndb.buildnpc.get("spells", [])
+    else:
+        spells = [s.strip() for s in string.split(",") if s.strip()]
+    caller.ndb.buildnpc["spells"] = spells
     return "menunode_ai"
 
 def menunode_ai(caller, raw_string="", **kwargs):
@@ -908,6 +932,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.ai_type = data.get("ai_type")
     npc.db.behavior = data.get("behavior")
     npc.db.skills = data.get("skills")
+    npc.db.spells = data.get("spells")
     npc.db.actflags = data.get("actflags")
     npc.db.affected_by = data.get("affected_by")
     npc.db.ris = data.get("ris")
@@ -989,6 +1014,7 @@ def _gather_npc_data(npc):
         "primary_stats": npc.db.base_primary_stats or {},
         "behavior": npc.db.behavior or "",
         "skills": npc.db.skills or [],
+        "spells": npc.db.spells or [],
         "ai_type": npc.db.ai_type or "",
         "actflags": npc.db.actflags or [],
         "affected_by": npc.db.affected_by or [],
@@ -1028,6 +1054,9 @@ class CmdCNPC(Command):
                 "triggers": {},
                 "npc_class": "base",
                 "roles": [],
+                "skills": [],
+                "spells": [],
+                "ris": [],
                 "merchant_markup": 1.0,
                 "script": "",
             }
