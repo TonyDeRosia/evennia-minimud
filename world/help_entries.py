@@ -2768,19 +2768,22 @@ Related:
         "category": "Building",
         "text": """Help for mobbuilder
 
-Launches the same menu driven builder as |wcnpc|n but automatically saves
-the result as a prototype prefixed with ``mob_``. Additional mob specific
-fields like act flags and resistances may be set during the flow.
+Invokes the same menu-driven builder as |wcnpc|n but instead of creating the
+NPC immediately it stores the result as a prototype prefixed with ``mob_``.
+Additional mob-specific fields such as act flags and resistances may be set
+while stepping through the menu.
 
 Usage:
     mobbuilder
 
 Notes:
-    - Spawn a saved prototype with |w@mspawn <prototype>|n.
+    - Edit saved prototypes with |w@mcreate|n or |w@mset|n and review them
+      using |w@mlist|n.
+    - Spawn a stored prototype with |w@mspawn <prototype>|n.
     - Inspect prototypes or NPCs with |w@mstat <key>|n.
-    - Edit entries using |w@mcreate|n, |w@mset|n and |w@mlist|n.
 
 Related:
+    help cnpc
     help @mspawn
     help @mstat
 """,
