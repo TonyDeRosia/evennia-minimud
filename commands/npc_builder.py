@@ -950,6 +950,16 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
         except Exception as err:  # pragma: no cover - log errors
             caller.msg(f"Could not attach script {script_path}: {err}")
     npc.db.creature_type = data.get("creature_type")
+    if data.get("use_mob"):
+        npc.db.can_attack = True
+        if not npc.db.natural_weapon:
+            npc.db.natural_weapon = {
+                "name": "fists",
+                "damage_type": "bash",
+                "damage": 1,
+                "speed": 10,
+                "stamina_cost": 5,
+            }
     npc.db.level = data.get("level", 1)
     for trait, val in {
         "health": data.get("hp"),
@@ -981,6 +991,18 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
             proto_key = f"mob_{proto_key}"
             data["proto_key"] = proto_key
         proto = {k: v for k, v in data.items() if k not in ("edit_obj", "proto_key")}
+        if data.get("use_mob"):
+            proto["can_attack"] = True
+            proto.setdefault(
+                "natural_weapon",
+                {
+                    "name": "fists",
+                    "damage_type": "bash",
+                    "damage": 1,
+                    "speed": 10,
+                    "stamina_cost": 5,
+                },
+            )
         if data.get("script"):
             proto["scripts"] = [data["script"]]
         prototypes.register_npc_prototype(proto_key, proto)

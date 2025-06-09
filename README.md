@@ -225,7 +225,8 @@ Prototype** to spawn it and also store the prototype in
 `world/prototypes/npcs.json` with `mob_` prefixed to the key. Use
 `@mspawn <prototype>` to create additional copies and `@mstat <key>` to inspect
 them. Prototype entries can be adjusted with `@mcreate`, `@mset` and viewed with
-`@mlist`.
+`@mlist`. Mobs created this way are flagged with `can_attack` and are given a
+simple punch attack so they can fight back without equipment.
 
 Example::
 
