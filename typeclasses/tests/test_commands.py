@@ -842,6 +842,26 @@ class TestRoomSetCommand(EvenniaTest):
         self.char1.msg.assert_called_with("Number outside area range.")
 
 
+class TestRoomRegCommand(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.msg = MagicMock()
+        self.char1.execute_cmd("amake zone 1-10")
+
+    def test_rreg_current_room(self):
+        self.char1.execute_cmd("rreg zone 3")
+        self.assertEqual(self.char1.location.db.area, "zone")
+        self.assertEqual(self.char1.location.db.room_id, 3)
+
+    def test_rreg_other_room(self):
+        start = self.char1.location
+        self.char1.execute_cmd("dig north")
+        target = start.db.exits.get("north")
+        self.char1.execute_cmd(f"rreg #{target.id} zone 4")
+        self.assertEqual(target.db.area, "zone")
+        self.assertEqual(target.db.room_id, 4)
+
+
 class TestAdminCommands(EvenniaTest):
     def setUp(self):
         super().setUp()

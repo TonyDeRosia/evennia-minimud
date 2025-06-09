@@ -347,6 +347,35 @@ Related:
 """,
     },
     {
+        "key": "rreg",
+        "category": "Building",
+        "text": """
+Help for rreg
+
+Assign the current room or a specified room to an area and number.
+
+Usage:
+    rreg <area> <number>
+    rreg <room> <area> <number>
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    rreg test 2
+    rreg #10 test 3
+
+Notes:
+    - The number must fall within the area's range and be unique.
+
+Related:
+    help ansi
+""",
+    },
+    {
         "key": "ocreate",
         "category": "Building",
         "text": """

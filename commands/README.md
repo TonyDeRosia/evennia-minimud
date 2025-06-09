@@ -35,6 +35,8 @@ Builders can tweak the current room with a few simple commands:
   argument it will show the current description.
 * `rset area <area>` or `rset id <number>` - assign the room to an
   area or change its id within that area.
+* `rreg <area> <number>` or `rreg <room> <area> <number>` - register a
+  room to an area and numeric id.
 
 ## Object Editing Commands
 
