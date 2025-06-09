@@ -5,6 +5,7 @@ from evennia.contrib.game_systems.containers import ContribContainer
 
 from .objects import Object, ClothingObject
 from world.system import stat_manager, state_manager
+from combat import combat_utils
 
 
 class BareHand:
@@ -47,14 +48,34 @@ class BareHand:
                 mapping={"target": target},
             )
         else:
+            if combat_utils.roll_evade(wielder, target):
+                wielder.at_emote(
+                    f"$conj(swings) $pron(your) {self.name} at $you(target), but they evade.",
+                    mapping={"target": target},
+                )
+                return
+            if combat_utils.roll_parry(wielder, target):
+                wielder.at_emote(
+                    f"$conj(swings) $pron(your) {self.name}, but $you(target) parry.",
+                    mapping={"target": target},
+                )
+                return
+            if combat_utils.roll_block(wielder, target):
+                wielder.at_emote(
+                    f"$conj(swings) $pron(your) {self.name}, but $you(target) block.",
+                    mapping={"target": target},
+                )
+                return
             crit = stat_manager.roll_crit(wielder, target)
             if crit:
                 damage = stat_manager.crit_damage(wielder, damage)
+            damage = combat_utils.apply_attack_power(wielder, damage)
             wielder.at_emote(
                 f"$conj(hits) $you(target) with $pron(your) {self.name}.",
                 mapping={"target": target},
             )
-            target.at_damage(wielder, damage, "bludgeon", critical=crit)
+            dealt = target.at_damage(wielder, damage, "bludgeon", critical=crit)
+            combat_utils.apply_lifesteal(wielder, dealt)
             if status := getattr(self, "status_effect", None):
                 effect, chance = status
                 if stat_manager.roll_status(wielder, target, int(chance)):
@@ -124,14 +145,34 @@ class MeleeWeapon(Object):
                 mapping={"target": target, "weapon": self},
             )
         else:
+            if combat_utils.roll_evade(wielder, target):
+                wielder.at_emote(
+                    "$conj(swings) {weapon} at $you(target), but they evade.",
+                    mapping={"target": target, "weapon": self},
+                )
+                return
+            if combat_utils.roll_parry(wielder, target):
+                wielder.at_emote(
+                    "$conj(swings) {weapon}, but $you(target) parry.",
+                    mapping={"target": target, "weapon": self},
+                )
+                return
+            if combat_utils.roll_block(wielder, target):
+                wielder.at_emote(
+                    "$conj(swings) {weapon}, but $you(target) block.",
+                    mapping={"target": target, "weapon": self},
+                )
+                return
             crit = stat_manager.roll_crit(wielder, target)
             if crit:
                 damage = stat_manager.crit_damage(wielder, damage)
+            damage = combat_utils.apply_attack_power(wielder, damage)
             wielder.at_emote(
                 f"$conj({damage_type or 'swings'}) $you(target) with $pron(their) {{weapon}}.",
                 mapping={"target": target, "weapon": self},
             )
-            target.at_damage(wielder, damage, damage_type, critical=crit)
+            dealt = target.at_damage(wielder, damage, damage_type, critical=crit)
+            combat_utils.apply_lifesteal(wielder, dealt)
             if status := getattr(self.db, "status_effect", None):
                 effect, chance = status
                 if stat_manager.roll_status(wielder, target, int(chance)):

@@ -298,7 +298,11 @@ class Character(ObjectParent, ClothedCharacter):
 
         carry_capacity = self.db.carry_capacity or 0
         carry_weight = self.db.carry_weight or 0
+        from world.system import state_manager
+
         cost = _MOVE_SP_BASE
+        ms = state_manager.get_effective_stat(self, "movement_speed") or 1
+        cost = max(1, int(round(cost / ms)))
         if carry_weight > carry_capacity and carry_capacity > 0:
             excess = carry_weight - carry_capacity
             cost += excess // 10
@@ -323,8 +327,14 @@ class Character(ObjectParent, ClothedCharacter):
             get_damage_multiplier,
         )
 
-        # apply armor damage reduction
-        damage -= self.defense(damage_type)
+        from world.system import state_manager
+        from evennia.utils import utils
+
+        # apply armor damage reduction with piercing
+        reduction = self.defense(damage_type)
+        if attacker:
+            reduction = max(0, reduction - state_manager.get_effective_stat(attacker, "piercing"))
+        damage -= reduction
         damage = max(0, damage)
 
         dt = None
@@ -342,6 +352,20 @@ class Character(ObjectParent, ClothedCharacter):
                 if r in ResistanceType._value2member_map_
             ]
             damage = int(damage * get_damage_multiplier(resistances, dt))
+
+        # magic resist mitigation
+        if dt and dt not in (DamageType.SLASHING, DamageType.PIERCING, DamageType.BLUDGEONING):
+            mres = state_manager.get_effective_stat(self, "magic_resist")
+            if attacker:
+                mres -= state_manager.get_effective_stat(attacker, "spell_penetration")
+            if mres > 0:
+                damage = max(0, damage - mres)
+
+        # PvP modifiers
+        if utils.inherits_from(attacker, PlayerCharacter) and utils.inherits_from(self, PlayerCharacter):
+            pvp_pow = state_manager.get_effective_stat(attacker, "pvp_power")
+            pvp_res = state_manager.get_effective_stat(self, "pvp_resilience")
+            damage = int(round(damage * (1 + pvp_pow / 100 - pvp_res / 100)))
 
         self.traits.health.current -= damage
         crit_prefix = "|rCritical!|n " if critical else ""

@@ -100,6 +100,9 @@ def has_status(chara, status: str) -> bool:
 
 def add_cooldown(chara, key: str, duration: int):
     """Wrapper to add a cooldown to ``chara``."""
+    reduction = get_effective_stat(chara, "cooldown_reduction")
+    if reduction:
+        duration = max(0, int(round(duration * (1 - reduction / 100))))
     chara.cooldowns.add(key, duration)
 
 

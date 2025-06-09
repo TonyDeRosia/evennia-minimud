@@ -81,8 +81,11 @@ class CombatEngine:
     def track_aggro(self, target, attacker) -> None:
         if not target or target is attacker:
             return
+        from world.system import state_manager
+
         data = self.aggro.setdefault(target, {})
-        data[attacker] = data.get(attacker, 0) + 1
+        threat = 1 + state_manager.get_effective_stat(attacker, "threat")
+        data[attacker] = data.get(attacker, 0) + threat
 
     def handle_defeat(self, target, attacker) -> None:
         if hasattr(target, "on_exit_combat"):
