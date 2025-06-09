@@ -733,11 +733,11 @@ class TestExtendedDigTeleport(EvenniaTest):
         start = self.char1.location
         self.char1.execute_cmd("dig east=test:3")
         target = start.db.exits.get("east")
-        self.char1.execute_cmd("@teleport test:3")
+        self.char1.execute_cmd("tp test:3")
         self.assertEqual(self.char1.location, target)
         # out of range should not move
         self.char1.location = start
-        self.char1.execute_cmd("@teleport test:6")
+        self.char1.execute_cmd("tp test:6")
         self.assertEqual(self.char1.location, start)
 
 

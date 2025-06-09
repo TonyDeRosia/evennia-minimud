@@ -1540,14 +1540,16 @@ Related:
     },
     {
         "key": "@teleport",
+        "aliases": ["tp"],
         "category": "Building",
         "text": """
-Help for @teleport
+Help for @teleport (tp)
 
 Teleport directly to a room. Usage: @teleport <area>:<number>
 
 Usage:
     @teleport <area>:<number>
+    tp <area>:<number>
 
 Switches:
     None

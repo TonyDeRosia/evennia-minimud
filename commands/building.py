@@ -154,11 +154,13 @@ class CmdTeleport(Command):
 
     Usage:
         @teleport
+        tp
 
     See |whelp @teleport|n for details.
     """
 
     key = "@teleport"
+    aliases = ["tp"]
     locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
