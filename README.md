@@ -200,10 +200,11 @@ giver.
 
 ### Mob Builder
 
-Run `mobbuilder` to launch a simplified prototype builder. The prompt walks
-through entering a key, description and stats. When confirmed, the data is
-saved to `world/prototypes/npcs.json` with `mob_` prefixed to the key.
-Use `@mspawn <prototype>` to create the NPC from the stored prototype and
+Run `mobbuilder` to open the same menu driven builder used by `cnpc`. The
+workflow now supports optional mob specific fields like act flags and
+resistances. Confirming the menu saves the data to
+`world/prototypes/npcs.json` with `mob_` prefixed to the key. Use
+`@mspawn <prototype>` to create the NPC from the stored prototype and
 `@mstat <key>` to inspect the result or any existing NPC. Prototype entries can
 be adjusted with `@mcreate`, `@mset` and viewed with `@mlist`.
 

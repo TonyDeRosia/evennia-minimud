@@ -7,6 +7,16 @@ from typeclasses.characters import NPC
 from utils.slots import SLOT_ORDER
 from .command import Command
 import re
+from world.mob_constants import (
+    ACTFLAGS,
+    AFFECTED_BY,
+    LANGUAGES,
+    BODYPARTS,
+    RIS_TYPES,
+    ATTACK_TYPES,
+    DEFENSE_TYPES,
+    parse_flag_list,
+)
 
 # NPC types that can be selected in the builder
 ALLOWED_NPC_TYPES = (
@@ -55,7 +65,30 @@ ALLOWED_AI_TYPES = (
     "scripted",
 )
 
+
 # Menu nodes for NPC creation
+
+def menunode_key(caller, raw_string="", **kwargs):
+    """Prompt for the NPC key."""
+    default = caller.ndb.buildnpc.get("key", "")
+    text = "|wEnter NPC key|n"
+    if default:
+        text += f" [default: {default}]"
+    options = {"key": "_default", "goto": _set_key}
+    return text, options
+
+
+def _set_key(caller, raw_string, **kwargs):
+    val = raw_string.strip()
+    if not val or val.lower() == "skip":
+        val = caller.ndb.buildnpc.get("key", "")
+    if not val:
+        caller.msg("Key is required.")
+        return "menunode_key"
+    caller.ndb.buildnpc = caller.ndb.buildnpc or {}
+    caller.ndb.buildnpc["key"] = val
+    return "menunode_desc"
+
 
 def menunode_desc(caller, raw_string="", **kwargs):
     """Prompt for a short description."""
@@ -415,6 +448,190 @@ def _set_ai(caller, raw_string, **kwargs):
         caller.msg(f"Invalid AI type. Choose from: {', '.join(ALLOWED_AI_TYPES)}")
         return "menunode_ai"
     caller.ndb.buildnpc["ai_type"] = string
+    if caller.ndb.buildnpc.get("use_mob"):
+        return "menunode_actflags"
+    return "menunode_triggers"
+
+
+def menunode_actflags(caller, raw_string="", **kwargs):
+    default = caller.ndb.buildnpc.get("actflags", [])
+    text = "|wAct Flags|n (space separated)"
+    if default:
+        text += f" [default: {' '.join(default)}]"
+    text += "\n(back to go back, skip for default)"
+    options = {"key": "_default", "goto": _set_actflags}
+    return text, options
+
+
+def _set_actflags(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_ai"
+    if not string or string.lower() == "skip":
+        flags = caller.ndb.buildnpc.get("actflags", [])
+    else:
+        try:
+            flags = [f.value for f in parse_flag_list(string, ACTFLAGS)]
+        except Exception:
+            caller.msg("Invalid flag.")
+            return "menunode_actflags"
+    caller.ndb.buildnpc["actflags"] = flags
+    return "menunode_affects"
+
+
+def menunode_affects(caller, raw_string="", **kwargs):
+    default = caller.ndb.buildnpc.get("affected_by", [])
+    text = "|wAffects|n (space separated)"
+    if default:
+        text += f" [default: {' '.join(default)}]"
+    text += "\n(back to go back, skip for default)"
+    options = {"key": "_default", "goto": _set_affects}
+    return text, options
+
+
+def _set_affects(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_actflags"
+    if not string or string.lower() == "skip":
+        val = caller.ndb.buildnpc.get("affected_by", [])
+    else:
+        try:
+            val = [f.value for f in parse_flag_list(string, AFFECTED_BY)]
+        except Exception:
+            caller.msg("Invalid affect.")
+            return "menunode_affects"
+    caller.ndb.buildnpc["affected_by"] = val
+    return "menunode_resists"
+
+
+def menunode_resists(caller, raw_string="", **kwargs):
+    default = caller.ndb.buildnpc.get("ris", [])
+    text = "|wResistances|n (space separated)"
+    if default:
+        text += f" [default: {' '.join(default)}]"
+    text += "\n(back to go back, skip for default)"
+    options = {"key": "_default", "goto": _set_resists}
+    return text, options
+
+
+def _set_resists(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_affects"
+    if not string or string.lower() == "skip":
+        val = caller.ndb.buildnpc.get("ris", [])
+    else:
+        try:
+            val = [f.value for f in parse_flag_list(string, RIS_TYPES)]
+        except Exception:
+            caller.msg("Invalid type.")
+            return "menunode_resists"
+    caller.ndb.buildnpc["ris"] = val
+    return "menunode_bodyparts"
+
+
+def menunode_bodyparts(caller, raw_string="", **kwargs):
+    default = caller.ndb.buildnpc.get("bodyparts", [])
+    text = "|wBodyparts|n (space separated)"
+    if default:
+        text += f" [default: {' '.join(default)}]"
+    text += "\n(back to go back, skip for default)"
+    options = {"key": "_default", "goto": _set_bodyparts}
+    return text, options
+
+
+def _set_bodyparts(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_resists"
+    if not string or string.lower() == "skip":
+        val = caller.ndb.buildnpc.get("bodyparts", [])
+    else:
+        try:
+            val = [f.value for f in parse_flag_list(string, BODYPARTS)]
+        except Exception:
+            caller.msg("Invalid bodypart.")
+            return "menunode_bodyparts"
+    caller.ndb.buildnpc["bodyparts"] = val
+    return "menunode_attack"
+
+
+def menunode_attack(caller, raw_string="", **kwargs):
+    default = caller.ndb.buildnpc.get("attack_types", [])
+    text = "|wAttack types|n (space separated)"
+    if default:
+        text += f" [default: {' '.join(default)}]"
+    text += "\n(back to go back, skip for default)"
+    options = {"key": "_default", "goto": _set_attack}
+    return text, options
+
+
+def _set_attack(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_bodyparts"
+    if not string or string.lower() == "skip":
+        val = caller.ndb.buildnpc.get("attack_types", [])
+    else:
+        try:
+            val = [f.value for f in parse_flag_list(string, ATTACK_TYPES)]
+        except Exception:
+            caller.msg("Invalid attack type.")
+            return "menunode_attack"
+    caller.ndb.buildnpc["attack_types"] = val
+    return "menunode_defense"
+
+
+def menunode_defense(caller, raw_string="", **kwargs):
+    default = caller.ndb.buildnpc.get("defense_types", [])
+    text = "|wDefense types|n (space separated)"
+    if default:
+        text += f" [default: {' '.join(default)}]"
+    text += "\n(back to go back, skip for default)"
+    options = {"key": "_default", "goto": _set_defense}
+    return text, options
+
+
+def _set_defense(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_attack"
+    if not string or string.lower() == "skip":
+        val = caller.ndb.buildnpc.get("defense_types", [])
+    else:
+        try:
+            val = [f.value for f in parse_flag_list(string, DEFENSE_TYPES)]
+        except Exception:
+            caller.msg("Invalid defense type.")
+            return "menunode_defense"
+    caller.ndb.buildnpc["defense_types"] = val
+    return "menunode_languages"
+
+
+def menunode_languages(caller, raw_string="", **kwargs):
+    default = caller.ndb.buildnpc.get("languages", [])
+    text = "|wLanguages|n (space separated)"
+    if default:
+        text += f" [default: {' '.join(default)}]"
+    text += "\n(back to go back, skip for default)"
+    options = {"key": "_default", "goto": _set_languages}
+    return text, options
+
+
+def _set_languages(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_defense"
+    if not string or string.lower() == "skip":
+        val = caller.ndb.buildnpc.get("languages", [])
+    else:
+        try:
+            val = [f.value for f in parse_flag_list(string, LANGUAGES)]
+        except Exception:
+            caller.msg("Invalid language.")
+            return "menunode_languages"
+    caller.ndb.buildnpc["languages"] = val
     return "menunode_triggers"
 
 def menunode_triggers(caller, raw_string="", **kwargs):
@@ -600,6 +817,13 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.ai_type = data.get("ai_type")
     npc.db.behavior = data.get("behavior")
     npc.db.skills = data.get("skills")
+    npc.db.actflags = data.get("actflags")
+    npc.db.affected_by = data.get("affected_by")
+    npc.db.ris = data.get("ris")
+    npc.db.bodyparts = data.get("bodyparts")
+    npc.db.attack_types = data.get("attack_types")
+    npc.db.defense_types = data.get("defense_types")
+    npc.db.languages = data.get("languages")
     npc.db.triggers = data.get("triggers") or {}
     npc.db.creature_type = data.get("creature_type")
     npc.db.level = data.get("level", 1)
@@ -663,6 +887,13 @@ def _gather_npc_data(npc):
         "behavior": npc.db.behavior or "",
         "skills": npc.db.skills or [],
         "ai_type": npc.db.ai_type or "",
+        "actflags": npc.db.actflags or [],
+        "affected_by": npc.db.affected_by or [],
+        "ris": npc.db.ris or [],
+        "bodyparts": npc.db.bodyparts or [],
+        "attack_types": npc.db.attack_types or [],
+        "defense_types": npc.db.defense_types or [],
+        "languages": npc.db.languages or [],
         "merchant_markup": npc.db.merchant_markup or 1.0,
         "guild_affiliation": npc.tags.get(category="guild_affiliation") or "",
         "triggers": npc.db.triggers or {},
