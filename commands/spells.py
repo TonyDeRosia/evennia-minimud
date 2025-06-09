@@ -5,7 +5,8 @@ from world.spells import SPELLS, Spell
 
 
 class CmdSpellbook(Command):
-    """View known spells."""
+    """View known spells or details about one spell."""
+
     key = "spells"
     aliases = ("spellbook",)
 
@@ -14,6 +15,30 @@ class CmdSpellbook(Command):
         if not known:
             self.msg("You do not know any spells.")
             return
+
+        # if an argument was given, try to show details about that spell
+        if self.args:
+            spell_key = self.args.strip().lower()
+            for entry in known:
+                if (isinstance(entry, str) and entry == spell_key) or (
+                    not isinstance(entry, str) and entry.key == spell_key
+                ):
+                    spell = SPELLS.get(spell_key)
+                    if not spell:
+                        continue
+                    prof = 0 if isinstance(entry, str) else getattr(entry, "proficiency", 0)
+                    msg = (
+                        f"|w{spell.key.capitalize()}|n\n"
+                        f"  Mana Cost: |w{spell.mana_cost}|n\n"
+                        f"  Proficiency: |w{prof}%|n"
+                    )
+                    if spell.desc:
+                        msg += f"\n  {spell.desc}"
+                    self.msg(msg)
+                    return
+            self.msg("You have not learned that spell.")
+            return
+
         table = EvTable("Spell", "Mana", "Proficiency")
         for entry in known:
             if isinstance(entry, str):
