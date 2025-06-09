@@ -166,6 +166,11 @@ either a Python import path or a direct function reference. Example::
 
     npc.db.ai_script = "scripts.example_ai.patrol_ai"
 
+You can also attach full Script typeclasses to mobs. After selecting languages in
+the mob builder you will be prompted for a script path such as
+``scripts.bandit_ai.BanditAI``. When saved as a prototype this is stored under
+``scripts`` and automatically started when the mob spawns.
+
 ### Trigger Syntax
 
 NPC triggers use a dictionary mapping events to one or more reaction entries. A

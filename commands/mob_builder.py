@@ -23,6 +23,7 @@ class CmdMobBuilder(Command):
             "npc_class": "base",
             "roles": [],
             "merchant_markup": 1.0,
+            "script": "",
             "use_mob": True,
         }
         EvMenu(self.caller, "commands.npc_builder", startnode="menunode_key")
