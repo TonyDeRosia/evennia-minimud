@@ -28,7 +28,18 @@ from .npc_builder import (
     CmdListNPCs,
     CmdDupNPC,
 )
-from .mob_builder_commands import CmdMStat, CmdMList, CmdMCreate, CmdMSet
+from .mob_builder_commands import (
+    CmdMStat,
+    CmdMList,
+    CmdMCreate,
+    CmdMSet,
+    CmdMakeShop,
+    CmdShopSet,
+    CmdShopStat,
+    CmdMakeRepair,
+    CmdRepairSet,
+    CmdRepairStat,
+)
 
 
 def _safe_split(text):
@@ -40,7 +51,9 @@ def _safe_split(text):
     try:
         return shlex.split(text)
     except ValueError:
-        raise ValueError("No closing quotation found; enclose multiword names in quotes.")
+        raise ValueError(
+            "No closing quotation found; enclose multiword names in quotes."
+        )
 
 
 # Valid stats that can be modified by gear bonuses
@@ -506,7 +519,9 @@ class CmdCGear(Command):
         try:
             bonuses, desc = parse_stat_mods(rest)
         except ValueError as err:
-            self.msg(f"Invalid stat modifier: {err}. See 'help statmods' for valid stats.")
+            self.msg(
+                f"Invalid stat modifier: {err}. See 'help statmods' for valid stats."
+            )
             return
         if slot and slot not in VALID_SLOTS:
             self.msg("Invalid slot name.")
@@ -914,7 +929,9 @@ class CmdCArmor(Command):
         try:
             bonuses, desc = parse_stat_mods(rest)
         except ValueError as err:
-            self.msg(f"Invalid stat modifier: {err}. See 'help statmods' for valid stats.")
+            self.msg(
+                f"Invalid stat modifier: {err}. See 'help statmods' for valid stats."
+            )
             return
         slot = normalize_slot(slot)
         if slot not in VALID_SLOTS:
@@ -938,9 +955,7 @@ class CmdCArmor(Command):
         if bonuses:
             obj.db.stat_mods = bonuses
 
-        self.caller.msg(
-            f"Slot: {slot}\nWeight: {weight}\nDescription: {desc}"
-        )
+        self.caller.msg(f"Slot: {slot}\nWeight: {weight}\nDescription: {desc}")
 
 
 class CmdCTool(Command):
@@ -996,7 +1011,9 @@ class CmdCTool(Command):
         try:
             bonuses, desc = parse_stat_mods(rest)
         except ValueError as err:
-            self.msg(f"Invalid stat modifier: {err}. See 'help statmods' for valid stats.")
+            self.msg(
+                f"Invalid stat modifier: {err}. See 'help statmods' for valid stats."
+            )
             return
         obj = _create_gear(
             self.caller,
@@ -1077,7 +1094,9 @@ class CmdCRing(Command):
         try:
             bonuses, desc = parse_stat_mods(rest)
         except ValueError as err:
-            self.msg(f"Invalid stat modifier: {err}. See 'help statmods' for valid stats.")
+            self.msg(
+                f"Invalid stat modifier: {err}. See 'help statmods' for valid stats."
+            )
             return
 
         if slot not in VALID_SLOTS:
@@ -1155,7 +1174,9 @@ class CmdCTrinket(Command):
         try:
             bonuses, desc = parse_stat_mods(rest)
         except ValueError as err:
-            self.msg(f"Invalid stat modifier: {err}. See 'help statmods' for valid stats.")
+            self.msg(
+                f"Invalid stat modifier: {err}. See 'help statmods' for valid stats."
+            )
             return
 
         obj = _create_gear(
@@ -1294,7 +1315,9 @@ class CmdCPotion(Command):
         try:
             bonuses, desc = parse_stat_mods(rest)
         except ValueError as err:
-            self.msg(f"Invalid stat modifier: {err}. See 'help statmods' for valid stats.")
+            self.msg(
+                f"Invalid stat modifier: {err}. See 'help statmods' for valid stats."
+            )
             return
 
         obj = _create_gear(
@@ -1368,3 +1391,9 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdMSet)
         self.add(CmdMStat)
         self.add(CmdMList)
+        self.add(CmdMakeShop)
+        self.add(CmdShopSet)
+        self.add(CmdShopStat)
+        self.add(CmdMakeRepair)
+        self.add(CmdRepairSet)
+        self.add(CmdRepairStat)
