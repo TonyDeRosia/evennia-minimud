@@ -21,6 +21,7 @@ from world.mob_constants import (
     parse_flag_list,
 )
 
+
 class CmdMStat(Command):
     """Inspect an NPC or prototype."""
 
@@ -150,6 +151,7 @@ class CmdMSet(Command):
         prototypes.register_npc_prototype(self.proto_key, proto)
         self.msg(f"{self.field} updated on {self.proto_key}.")
 
+
 class CmdMList(Command):
     """List NPC prototypes optionally filtered by area and range."""
 
@@ -209,3 +211,219 @@ class CmdMList(Command):
             self.msg("No prototypes found.")
         else:
             self.msg("\n".join(lines))
+
+
+class CmdMakeShop(Command):
+    """Add basic shop data to an NPC prototype."""
+
+    key = "@makeshop"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def func(self):
+        proto_key = self.args.strip()
+        if not proto_key:
+            self.msg("Usage: @makeshop <prototype>")
+            return
+        registry = prototypes.get_npc_prototypes()
+        proto = registry.get(proto_key)
+        if not proto:
+            self.msg("Prototype not found.")
+            return
+        proto = dict(proto)
+        if proto.get("shop"):
+            self.msg("Shop data already exists on that prototype.")
+            return
+        proto["shop"] = {
+            "buy_percent": 100,
+            "sell_percent": 100,
+            "hours": "0-24",
+            "item_types": [],
+        }
+        prototypes.register_npc_prototype(proto_key, proto)
+        self.msg(f"Shop created for {proto_key}.")
+
+
+class CmdShopSet(Command):
+    """Edit shop fields on an NPC prototype."""
+
+    key = "@shopset"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def parse(self):
+        try:
+            parts = shlex.split(self.args)
+        except ValueError:
+            parts = []
+        if len(parts) >= 3:
+            self.proto_key = parts[0]
+            self.field = parts[1].lower()
+            self.value = " ".join(parts[2:])
+        else:
+            self.proto_key = self.field = self.value = None
+
+    def func(self):
+        if not self.proto_key:
+            self.msg("Usage: @shopset <proto> <buy|sell|hours|types> <value>")
+            return
+        registry = prototypes.get_npc_prototypes()
+        proto = registry.get(self.proto_key)
+        if not proto or "shop" not in proto:
+            self.msg("Prototype not found or has no shop data.")
+            return
+        shop = dict(proto.get("shop", {}))
+        if self.field == "buy":
+            try:
+                shop["buy_percent"] = int(self.value)
+            except (TypeError, ValueError):
+                self.msg("Buy percent must be an integer.")
+                return
+        elif self.field == "sell":
+            try:
+                shop["sell_percent"] = int(self.value)
+            except (TypeError, ValueError):
+                self.msg("Sell percent must be an integer.")
+                return
+        elif self.field == "hours":
+            shop["hours"] = self.value
+        elif self.field == "types":
+            shop["item_types"] = [t.strip() for t in self.value.split(",") if t.strip()]
+        else:
+            self.msg("Unknown field. Use buy, sell, hours or types.")
+            return
+        proto = dict(proto)
+        proto["shop"] = shop
+        prototypes.register_npc_prototype(self.proto_key, proto)
+        self.msg(f"{self.field} updated on {self.proto_key}.")
+
+
+class CmdShopStat(Command):
+    """Display shop data for an NPC prototype."""
+
+    key = "@shopstat"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def func(self):
+        proto_key = self.args.strip()
+        if not proto_key:
+            self.msg("Usage: @shopstat <prototype>")
+            return
+        proto = prototypes.get_npc_prototypes().get(proto_key)
+        if not proto or "shop" not in proto:
+            self.msg("No shop data for that prototype.")
+            return
+        shop = proto["shop"]
+        lines = [
+            f"Buy Percent: {shop.get('buy_percent', 0)}",
+            f"Sell Percent: {shop.get('sell_percent', 0)}",
+            f"Hours: {shop.get('hours', '')}",
+            f"Item Types: {', '.join(shop.get('item_types', []))}",
+        ]
+        self.msg("\n".join(lines))
+
+
+class CmdMakeRepair(Command):
+    """Add repair shop data to an NPC prototype."""
+
+    key = "@makerepair"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def func(self):
+        proto_key = self.args.strip()
+        if not proto_key:
+            self.msg("Usage: @makerepair <prototype>")
+            return
+        registry = prototypes.get_npc_prototypes()
+        proto = registry.get(proto_key)
+        if not proto:
+            self.msg("Prototype not found.")
+            return
+        proto = dict(proto)
+        if proto.get("repair"):
+            self.msg("Repair data already exists on that prototype.")
+            return
+        proto["repair"] = {
+            "cost_percent": 100,
+            "hours": "0-24",
+            "item_types": [],
+        }
+        prototypes.register_npc_prototype(proto_key, proto)
+        self.msg(f"Repair shop created for {proto_key}.")
+
+
+class CmdRepairSet(Command):
+    """Edit repair shop data on an NPC prototype."""
+
+    key = "@repairset"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def parse(self):
+        try:
+            parts = shlex.split(self.args)
+        except ValueError:
+            parts = []
+        if len(parts) >= 3:
+            self.proto_key = parts[0]
+            self.field = parts[1].lower()
+            self.value = " ".join(parts[2:])
+        else:
+            self.proto_key = self.field = self.value = None
+
+    def func(self):
+        if not self.proto_key:
+            self.msg("Usage: @repairset <proto> <cost|hours|types> <value>")
+            return
+        registry = prototypes.get_npc_prototypes()
+        proto = registry.get(self.proto_key)
+        if not proto or "repair" not in proto:
+            self.msg("Prototype not found or has no repair data.")
+            return
+        repair = dict(proto.get("repair", {}))
+        if self.field == "cost":
+            try:
+                repair["cost_percent"] = int(self.value)
+            except (TypeError, ValueError):
+                self.msg("Cost percent must be an integer.")
+                return
+        elif self.field == "hours":
+            repair["hours"] = self.value
+        elif self.field == "types":
+            repair["item_types"] = [
+                t.strip() for t in self.value.split(",") if t.strip()
+            ]
+        else:
+            self.msg("Unknown field. Use cost, hours or types.")
+            return
+        proto = dict(proto)
+        proto["repair"] = repair
+        prototypes.register_npc_prototype(self.proto_key, proto)
+        self.msg(f"{self.field} updated on {self.proto_key}.")
+
+
+class CmdRepairStat(Command):
+    """Display repair shop data for an NPC prototype."""
+
+    key = "@repairstat"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def func(self):
+        proto_key = self.args.strip()
+        if not proto_key:
+            self.msg("Usage: @repairstat <prototype>")
+            return
+        proto = prototypes.get_npc_prototypes().get(proto_key)
+        if not proto or "repair" not in proto:
+            self.msg("No repair data for that prototype.")
+            return
+        repair = proto["repair"]
+        lines = [
+            f"Cost Percent: {repair.get('cost_percent', 0)}",
+            f"Hours: {repair.get('hours', '')}",
+            f"Item Types: {', '.join(repair.get('item_types', []))}",
+        ]
+        self.msg("\n".join(lines))

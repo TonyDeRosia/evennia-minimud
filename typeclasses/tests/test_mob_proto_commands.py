@@ -53,3 +53,35 @@ class TestMobPrototypeCommands(EvenniaTest):
         self.assertIn("btwo", out)
         self.assertNotIn("cthree", out)
 
+    def test_shop_and_repair_commands(self):
+        self.char1.execute_cmd("@mcreate shopkeep")
+        self.char1.execute_cmd("@makeshop shopkeep")
+        reg = prototypes.get_npc_prototypes()
+        self.assertIn("shop", reg["shopkeep"])
+        self.char1.execute_cmd("@shopset shopkeep buy 150")
+        self.char1.execute_cmd("@shopset shopkeep sell 50")
+        self.char1.execute_cmd("@shopset shopkeep hours 9-17")
+        self.char1.execute_cmd("@shopset shopkeep types weapon,armor")
+        reg = prototypes.get_npc_prototypes()
+        shop = reg["shopkeep"]["shop"]
+        self.assertEqual(shop["buy_percent"], 150)
+        self.assertEqual(shop["sell_percent"], 50)
+        self.assertEqual(shop["hours"], "9-17")
+        self.assertEqual(shop["item_types"], ["weapon", "armor"])
+        self.char1.execute_cmd("@shopstat shopkeep")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Buy Percent", out)
+        self.char1.msg.reset_mock()
+
+        self.char1.execute_cmd("@makerepair shopkeep")
+        self.char1.execute_cmd("@repairset shopkeep cost 200")
+        self.char1.execute_cmd("@repairset shopkeep hours 10-20")
+        self.char1.execute_cmd("@repairset shopkeep types weapon")
+        reg = prototypes.get_npc_prototypes()
+        repair = reg["shopkeep"]["repair"]
+        self.assertEqual(repair["cost_percent"], 200)
+        self.assertEqual(repair["hours"], "10-20")
+        self.assertEqual(repair["item_types"], ["weapon"])
+        self.char1.execute_cmd("@repairstat shopkeep")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Cost Percent", out)
