@@ -1,4 +1,5 @@
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+from django.test import override_settings
 
 from evennia.utils import create
 from evennia.utils.test_resources import EvenniaTest
@@ -65,6 +66,7 @@ class TestNPCAIScript(EvenniaTest):
 
 
 
+@override_settings(DEFAULT_HOME=None)
 class TestAIBehaviors(EvenniaTest):
     def test_aggressive_ai_enters_combat(self):
         from world.npc_handlers import ai
@@ -115,3 +117,45 @@ class TestAIBehaviors(EvenniaTest):
         with patch.object(npc, "attack") as mock:
             ai.process_ai(npc)
             mock.assert_not_called()
+
+    def test_assist_flag_attacks_leader_target(self):
+        from world.npc_handlers import ai
+        from typeclasses.npcs import BaseNPC
+
+        npc = create.create_object(BaseNPC, key="helper", location=self.room1)
+        npc.db.ai_type = "passive"
+        npc.db.actflags = ["assist"]
+        npc.db.following = self.char1
+
+        self.char1.location = self.room1
+        from typeclasses.scripts import CombatScript
+        self.room1.scripts.add(CombatScript, key="combat")
+        combat_script = self.room1.scripts.get("combat")[0]
+        combat_script.add_combatant(self.char1, enemy=self.char2)
+
+        with patch.object(npc, "enter_combat") as mock:
+            ai.process_ai(npc)
+            mock.assert_called_with(self.char2)
+
+    def test_call_for_help_summons_allies(self):
+        from world.npc_handlers import ai
+        from typeclasses.npcs import BaseNPC
+
+        caller = create.create_object(BaseNPC, key="caller", location=self.room1)
+        caller.db.ai_type = "defensive"
+        caller.db.actflags = ["call_for_help"]
+        from typeclasses.scripts import CombatScript
+        self.room1.scripts.add(CombatScript, key="combat")
+        combat_script = self.room1.scripts.get("combat")[0]
+        combat_script.add_combatant(caller, enemy=self.char1)
+
+        ally = create.create_object(BaseNPC, key="ally", location=self.room1)
+        ally.db.ai_type = "passive"
+        ally.db.actflags = ["assist"]
+
+        self.room1.msg_contents = MagicMock()
+
+        with patch.object(ally, "enter_combat") as mock:
+            ai.process_ai(caller)
+            mock.assert_called_with(self.char1)
+        self.assertTrue(self.room1.msg_contents.called)
