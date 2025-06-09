@@ -17,6 +17,7 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 from evennia import default_cmds
 from evennia.contrib.game_systems.clothing import ClothedCharacterCmdSet
 from commands.equip import CmdWear
+from commands.help import CmdHelp
 
 from evennia.contrib.game_systems.containers.containers import ContainerCmdSet
 from evennia.contrib.grid.xyzgrid.commands import XYZGridCmdSet
@@ -62,6 +63,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
+        self.add(CmdHelp())
         self.add(ClothedCharacterCmdSet)
         self.add(CmdWear())
         self.add(CmdMoney)
@@ -87,6 +89,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(BuilderCmdSet)
         self.add(QuestCmdSet)
         self.add(AchievementCmdSet)
+        # Override the default help command to sort the index alphabetically
+        self.add(CmdHelp())
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
@@ -110,6 +114,8 @@ class AccountCmdSet(default_cmds.AccountCmdSet):
         self.add(ContribCmdCharCreate)
         self.add(AccountOptsCmdSet)
         self.add(CmdWho)
+        # Override the default help command to sort the index alphabetically
+        self.add(CmdHelp())
 
 
 class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
@@ -128,6 +134,7 @@ class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
+        self.add(CmdHelp())
 
 
 class SessionCmdSet(default_cmds.SessionCmdSet):
@@ -150,3 +157,4 @@ class SessionCmdSet(default_cmds.SessionCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
+        self.add(CmdHelp())
