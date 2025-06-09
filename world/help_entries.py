@@ -1831,6 +1831,41 @@ Related:
 """,
     },
     {
+        "key": "bank",
+        "category": "General",
+        "text": """Help for bank
+
+Handle your stored coins with a banker.
+
+Usage:
+    bank balance
+    bank deposit <amount [coin]>
+    bank withdraw <amount [coin]>
+    bank transfer <amount [coin]> <target>
+
+Switches:
+    None
+
+Arguments:
+    <amount> - number of coins
+    <coin> - copper, silver, gold or platinum
+    <target> - player to receive a transfer
+
+Examples:
+    bank deposit 50 silver
+    bank withdraw 10 gold
+    bank transfer 20 gold Bob
+
+Notes:
+    - Use while in the same room as a banker NPC.
+    - Deposits convert coins upward automatically.
+    - Withdrawals use higher denominations if necessary.
+
+Related:
+    help npc roles
+""",
+    },
+    {
         "key": "inventory",
         "category": "General",
         "text": """
