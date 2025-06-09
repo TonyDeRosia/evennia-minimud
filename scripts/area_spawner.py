@@ -43,3 +43,6 @@ class AreaSpawner(Script):
             return
         npc = spawner.spawn(proto)[0]
         npc.location = room
+        npc.db.prototype_key = proto_key
+        npc.db.area_tag = area
+        npc.db.spawn_room = room

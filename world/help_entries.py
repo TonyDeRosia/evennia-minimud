@@ -2779,7 +2779,7 @@ Usage:
 
 Notes:
     - Edit saved prototypes with |w@mcreate|n or |w@mset|n and review them
-      using |w@mlist|n.
+      using |w@mlist|n. See |whelp @mlist|n for filtering options.
     - Spawn a stored prototype with |w@mspawn <prototype>|n.
     - Inspect prototypes or NPCs with |w@mstat <key>|n.
 

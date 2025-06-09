@@ -498,7 +498,7 @@ EXAMPLE_LOOT_TABLE = [{"proto": "RAW_MEAT", "chance": 50}]
 # NPC prototype registry utilities
 # ------------------------------------------------------------
 
-from typing import Dict
+from typing import Dict, Optional
 import json
 from pathlib import Path
 from django.conf import settings
@@ -527,9 +527,60 @@ def _save_npc_registry(registry: Dict[str, dict]):
         json.dump(registry, f, indent=4)
 
 
-def get_npc_prototypes() -> Dict[str, dict]:
-    """Expose all registered NPC prototypes."""
-    return _load_npc_registry()
+def get_npc_prototypes(filter_by: Optional[dict] = None) -> Dict[str, dict]:
+    """Return registered NPC prototypes optionally filtered by criteria.
+
+    Args:
+        filter_by (dict, optional): Mapping of filters. Supported keys are
+            ``"class"``, ``"race"``, ``"role"``, ``"tag"`` and ``"zone"``.
+
+    Returns:
+        dict: Mapping of prototype key -> prototype data.
+    """
+
+    registry = _load_npc_registry()
+    if not filter_by:
+        return registry
+
+    result: Dict[str, dict] = {}
+    for key, proto in registry.items():
+        if "class" in filter_by and proto.get("npc_class") != filter_by["class"]:
+            continue
+        if "race" in filter_by and proto.get("race") != filter_by["race"]:
+            continue
+        if "role" in filter_by:
+            roles = proto.get("roles") or []
+            if isinstance(roles, str):
+                roles = [roles]
+            if filter_by["role"] not in roles:
+                continue
+        if "tag" in filter_by:
+            tag = filter_by["tag"]
+            tags = proto.get("tags") or []
+
+            def _tag_match(entry):
+                if isinstance(entry, (list, tuple)):
+                    return entry and entry[0] == tag
+                return entry == tag
+
+            if not any(_tag_match(t) for t in tags):
+                continue
+        if "zone" in filter_by:
+            zone = filter_by["zone"]
+            tags = proto.get("tags") or []
+
+            def _zone_match(entry):
+                if isinstance(entry, (list, tuple)):
+                    return entry and entry[0] == zone and (
+                        len(entry) == 1 or entry[1] in {"zone", "area"}
+                    )
+                return False
+
+            if not any(_zone_match(t) for t in tags):
+                continue
+        result[key] = proto
+
+    return result
 
 
 def register_npc_prototype(key: str, prototype: dict):
