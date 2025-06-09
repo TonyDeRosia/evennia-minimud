@@ -31,6 +31,7 @@ from commands.interact import InteractCmdSet
 from commands.equipment import EquipmentCmdSet
 from commands.account import AccountOptsCmdSet
 from commands.shops import CmdMoney
+from commands.bank import CmdBank
 from commands.info import InfoCmdSet
 from commands.guilds import GuildCmdSet
 from commands.rest import RestCmdSet
@@ -64,6 +65,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(ClothedCharacterCmdSet)
         self.add(CmdWear())
         self.add(CmdMoney)
+        self.add(CmdBank)
         self.add(ContainerCmdSet)
         self.add(MovementCmdSet)
         self.add(XYZGridCmdSet)
