@@ -193,6 +193,49 @@ class CmdTeleport(Command):
         self.msg(f"Teleported to {room.get_display_name(self.caller)}.")
 
 
+class CmdDelDir(Command):
+    """Delete an exit from the current room."""
+
+    key = "deldir"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: deldir <direction>")
+            return
+        direction = DIR_FULL.get(self.args.strip().lower())
+        if not direction:
+            self.msg("Unknown direction.")
+            return
+
+        room = self.caller.location
+        if not room:
+            self.msg("You have no location.")
+            return
+
+        exits = room.db.exits or {}
+        target = exits.get(direction)
+        if not target:
+            self.msg("No exit in that direction.")
+            return
+
+        # remove exit from current room
+        exits.pop(direction, None)
+        room.db.exits = exits
+
+        # also remove the reverse exit if it points back here
+        opposite = OPPOSITE.get(direction)
+        if opposite and target.db.exits:
+            back = target.db.exits.get(opposite)
+            if back == room:
+                other_exits = target.db.exits
+                other_exits.pop(opposite, None)
+                target.db.exits = other_exits
+
+        self.msg(f"Exit {direction} removed.")
+
+
 class CmdSetDesc(Command):
     """
     Set an object's description. Usage: setdesc <target> <description>
