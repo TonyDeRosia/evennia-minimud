@@ -63,7 +63,14 @@ def menunode_welcome(caller):
 # ---------------- Race ----------------
 
 def menunode_choose_race(caller):
-    text = "|wChoose Your Race|n\n"
+    names = ", ".join(r["name"] for r in races.RACE_LIST)
+    text = dedent(
+        f"""
+        |wChoose Your Race|n
+        Available races: {names}
+        Example: |wHuman|n
+        """
+    )
     options = []
     for entry in races.RACE_LIST:
         options.append({
@@ -84,7 +91,15 @@ def _set_race(caller, raw_string, race, **kwargs):
 # ---------------- Class ----------------
 
 def menunode_choose_class(caller):
-    text = "|wChoose Your Class|n\n"
+    names = ", ".join(c["name"] for c in classes.CLASS_LIST)
+    text = dedent(
+        f"""
+        |wChoose Your Class|n
+        Available classes: {names}
+        Example: |wWarrior|n
+        Enter |wback|n to choose another race.
+        """
+    )
     options = []
     for entry in classes.CLASS_LIST:
         options.append({
@@ -111,7 +126,13 @@ def _apply_base_stats(caller):
 # ---------------- Gender ----------------
 
 def menunode_choose_gender(caller):
-    text = "|wChoose Your Gender|n"
+    text = dedent(
+        """
+        |wChoose Your Gender|n
+        Options: male or female
+        Enter |wback|n to change class.
+        """
+    )
     options = [
         {"desc": "Male", "goto": (_set_gender, {"gender": "male"})},
         {"desc": "Female", "goto": (_set_gender, {"gender": "female"})},
@@ -137,9 +158,12 @@ def menunode_stat_alloc(caller):
     spent = sum(max(current[s] - base_stats[s], 0) for s in STAT_LIST)
     remaining = STAT_POINTS - spent
 
-    text = (
-        f"|wDistribute {STAT_POINTS} Points|n (Remaining: {remaining})\n"
-        "Enter '<stat> <amount>' to add points directly.\n"
+    text = dedent(
+        f"""
+        |wDistribute {STAT_POINTS} Points|n (Remaining: {remaining})
+        Enter '<stat> <amount>' to add points directly. Example: |wSTR 5|n
+        Enter |wback|n to return to gender selection.
+        """
     )
     for s in STAT_LIST:
         text += f"{s}: {current[s]} (base: {base_stats[s]})\n"

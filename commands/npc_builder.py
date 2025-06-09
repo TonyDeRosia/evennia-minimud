@@ -74,6 +74,7 @@ def menunode_key(caller, raw_string="", **kwargs):
     text = "|wEnter NPC key|n"
     if default:
         text += f" [default: {default}]"
+    text += "\nExample: |wmerchant_01|n"
     options = {"key": "_default", "goto": _set_key}
     return text, options
 
@@ -95,7 +96,8 @@ def menunode_desc(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("desc", "")
     text = (
         "|wEnter a short description for the NPC|n "
-        "(e.g. 'A grumpy orc')"
+        "(e.g. 'A grumpy orc')\n"
+        "Type |wback|n to return or |wskip|n to keep the current value."
     )
     if default:
         text += f" [default: {default}]"
@@ -115,10 +117,15 @@ def _set_desc(caller, raw_string, **kwargs):
 def menunode_npc_type(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("npc_type", "")
     types = "/".join(ALLOWED_NPC_TYPES)
-    text = f"|wEnter NPC type ({types})|n"
+    text = dedent(
+        f"""
+        |wEnter NPC type|n ({types})
+        Example: |wmerchant|n
+        Type |wback|n to return or |wskip|n to keep the default.
+        """
+    )
     if default:
         text += f" [default: {default}]"
-    text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_npc_type}
     return text, options
 
@@ -141,6 +148,7 @@ def menunode_guild_affiliation(caller, raw_string="", **kwargs):
     text = "|wEnter guild tag for this receptionist|n"
     if default:
         text += f" [default: {default}]"
+    text += "\nExample: |wthieves_guild|n"
     text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_guild_affiliation}
     return text, options
@@ -156,10 +164,16 @@ def _set_guild_affiliation(caller, raw_string, **kwargs):
 
 def menunode_creature_type(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("creature_type", "humanoid")
-    text = "|wCreature type (humanoid/quadruped/unique)|n"
+    text = dedent(
+        """
+        |wCreature type|n (humanoid/quadruped/unique)
+        Example: |wquadruped|n
+        Type |wback|n to return or |wskip|n to keep the default.
+        """
+    )
     if default:
         text += f" [default: {default}]"
-    text += "\n(back to go back, skip for default)"
+    text += "\n(back to go back, skip for default)"  # keep existing note for clarity
     options = {"key": "_default", "goto": _set_creature_type}
     return text, options
 
@@ -188,7 +202,8 @@ def menunode_custom_slots(caller, raw_string="", **kwargs):
              "  add <slot> - add a slot\n"
              "  remove <slot> - remove a slot\n"
              "  done - finish editing\n"
-             "  back - previous step")
+             "  back - previous step\n"
+             "Example: |wadd tail|n")
     options = {"key": "_default", "goto": _edit_custom_slots}
     return text, options
 
@@ -243,9 +258,14 @@ def _set_npc_class(caller, raw_string, **kwargs):
 
 def menunode_roles(caller, raw_string="", **kwargs):
     roles = caller.ndb.buildnpc.get("roles", [])
+    available = ", ".join(ALLOWED_ROLES)
     text = "|wEdit NPC Roles|n\n"
     text += ", ".join(roles) if roles else "None"
-    text += "\nCommands:\n  add <role>\n  remove <role>\n  done - finish\n  back - previous step"
+    text += (
+        f"\nAvailable roles: {available}\n"
+        "Commands:\n  add <role>\n  remove <role>\n  done - finish\n  back - previous step\n"
+        "Example: |wadd merchant|n"
+    )
     options = {"key": "_default", "goto": _edit_roles}
     return text, options
 
@@ -285,7 +305,13 @@ def menunode_role_details(caller, raw_string="", **kwargs):
 
 def menunode_merchant_pricing(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("merchant_markup", 1.0)
-    text = f"|wMerchant price multiplier|n [default: {default}]\n(back to go back, skip for default)"
+    text = dedent(
+        f"""
+        |wMerchant price multiplier|n [default: {default}]
+        Example: |w1.5|n
+        (back to go back, skip for default)
+        """
+    )
     options = {"key": "_default", "goto": _set_merchant_pricing}
     return text, options
 
@@ -306,7 +332,13 @@ def _set_merchant_pricing(caller, raw_string, **kwargs):
 
 def menunode_level(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("level", 1)
-    text = f"|wLevel of NPC (1-100)|n [default: {default}]\n(back to go back, skip for default)"
+    text = dedent(
+        f"""
+        |wLevel of NPC (1-100)|n [default: {default}]
+        Example: |w10|n
+        (back to go back, skip for default)
+        """
+    )
     options = {"key": "_default", "goto": _set_level}
     return text, options
 
@@ -333,9 +365,12 @@ def menunode_resources(caller, raw_string="", **kwargs):
     mp = caller.ndb.buildnpc.get("mp", 0)
     sp = caller.ndb.buildnpc.get("sp", 0)
     default = f"{hp} {mp} {sp}"
-    text = (
-        f"|wEnter HP MP SP separated by spaces|n [default: {default}]\n"
-        "(back to go back, skip for default)"
+    text = dedent(
+        f"""
+        |wEnter HP MP SP separated by spaces|n [default: {default}]
+        Example: |w100 50 30|n
+        (back to go back, skip for default)
+        """
     )
     options = {"key": "_default", "goto": _set_resources}
     return text, options
@@ -362,9 +397,12 @@ def menunode_stats(caller, raw_string="", **kwargs):
     data = caller.ndb.buildnpc.get("primary_stats", {})
     stats_order = ["STR", "CON", "DEX", "INT", "WIS", "LUCK"]
     default = " ".join(str(data.get(stat, 0)) for stat in stats_order)
-    text = (
-        f"|wEnter STR CON DEX INT WIS LUCK separated by spaces|n [default: {default}]\n"
-        "(back to go back, skip for default)"
+    text = dedent(
+        f"""
+        |wEnter STR CON DEX INT WIS LUCK separated by spaces|n [default: {default}]
+        Example: |w10 10 10 10 10 10|n
+        (back to go back, skip for default)
+        """
     )
     options = {"key": "_default", "goto": _set_stats}
     return text, options
@@ -394,6 +432,7 @@ def menunode_behavior(caller, raw_string="", **kwargs):
     text = "|wDescribe basic behavior or reactions|n"
     if default:
         text += f" [default: {default}]"
+    text += "\nExample: |wSells potions and greets players|n"
     text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_behavior}
     return text, options
@@ -413,6 +452,7 @@ def menunode_skills(caller, raw_string="", **kwargs):
     text = "|wList any skills or attacks (comma separated)|n"
     if default:
         text += f" [default: {default}]"
+    text += "\nExample: |wfireball, slash, heal|n"
     text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_skills}
     return text, options
@@ -431,10 +471,15 @@ def _set_skills(caller, raw_string, **kwargs):
 def menunode_ai(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("ai_type", "")
     types = "/".join(ALLOWED_AI_TYPES)
-    text = f"|wAI type ({types})|n"
+    text = dedent(
+        f"""
+        |wAI type|n ({types})
+        Example: |waggressive|n
+        (back to go back, skip for default)
+        """
+    )
     if default:
         text += f" [default: {default}]"
-    text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_ai}
     return text, options
 
@@ -455,9 +500,12 @@ def _set_ai(caller, raw_string, **kwargs):
 
 def menunode_actflags(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("actflags", [])
+    flags = ", ".join(a.value for a in ACTFLAGS)
     text = "|wAct Flags|n (space separated)"
     if default:
         text += f" [default: {' '.join(default)}]"
+    text += f"\nAvailable: {flags}"
+    text += "\nExample: |wsentinel aggressive|n"
     text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_actflags}
     return text, options
@@ -481,9 +529,12 @@ def _set_actflags(caller, raw_string, **kwargs):
 
 def menunode_affects(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("affected_by", [])
+    choices = ", ".join(a.value for a in AFFECTED_BY)
     text = "|wAffects|n (space separated)"
     if default:
         text += f" [default: {' '.join(default)}]"
+    text += f"\nAvailable: {choices}"
+    text += "\nExample: |winvisible detect_magic|n"
     text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_affects}
     return text, options
@@ -507,9 +558,12 @@ def _set_affects(caller, raw_string, **kwargs):
 
 def menunode_resists(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("ris", [])
+    choices = ", ".join(r.value for r in RIS_TYPES)
     text = "|wResistances|n (space separated)"
     if default:
         text += f" [default: {' '.join(default)}]"
+    text += f"\nAvailable: {choices}"
+    text += "\nExample: |wfire cold energy|n"
     text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_resists}
     return text, options
@@ -533,9 +587,12 @@ def _set_resists(caller, raw_string, **kwargs):
 
 def menunode_bodyparts(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("bodyparts", [])
+    parts = ", ".join(b.value for b in BODYPARTS)
     text = "|wBodyparts|n (space separated)"
     if default:
         text += f" [default: {' '.join(default)}]"
+    text += f"\nAvailable: {parts}"
+    text += "\nExample: |whead arms legs|n"
     text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_bodyparts}
     return text, options
@@ -559,9 +616,12 @@ def _set_bodyparts(caller, raw_string, **kwargs):
 
 def menunode_attack(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("attack_types", [])
+    choices = ", ".join(a.value for a in ATTACK_TYPES)
     text = "|wAttack types|n (space separated)"
     if default:
         text += f" [default: {' '.join(default)}]"
+    text += f"\nAvailable: {choices}"
+    text += "\nExample: |wbite claw|n"
     text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_attack}
     return text, options
@@ -585,9 +645,12 @@ def _set_attack(caller, raw_string, **kwargs):
 
 def menunode_defense(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("defense_types", [])
+    choices = ", ".join(d.value for d in DEFENSE_TYPES)
     text = "|wDefense types|n (space separated)"
     if default:
         text += f" [default: {' '.join(default)}]"
+    text += f"\nAvailable: {choices}"
+    text += "\nExample: |wparry dodge|n"
     text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_defense}
     return text, options
@@ -611,9 +674,12 @@ def _set_defense(caller, raw_string, **kwargs):
 
 def menunode_languages(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("languages", [])
+    choices = ", ".join(l.value for l in LANGUAGES)
     text = "|wLanguages|n (space separated)"
     if default:
         text += f" [default: {' '.join(default)}]"
+    text += f"\nAvailable: {choices}"
+    text += "\nExample: |wcommon elvish|n"
     text += "\n(back to go back, skip for default)"
     options = {"key": "_default", "goto": _set_languages}
     return text, options

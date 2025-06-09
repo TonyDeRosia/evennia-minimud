@@ -2538,6 +2538,9 @@ Notes:
     - Humanoid body type grants the standard equipment slots automatically.
       Quadrupeds receive head, body, front_legs and hind_legs and lack weapon
       slots. Unique lets you add or remove any slots in the next step.
+    - Prompts accept |wback|n to return or |wskip|n to keep defaults.
+    - When multiple values are allowed, use comma or space separated lists as
+      shown in each example.
     - After reviewing the summary choose |wYes|n to confirm and create or
       update the NPC.
     - Use |wcnpc edit <npc>|n to modify an existing NPC.
@@ -2603,6 +2606,7 @@ NPC roles grant extra behavior to an NPC. They are selected during the
     event_npc - starts special events
 
 Multiple roles may be assigned to the same NPC.
+Use |wadd <role>|n or |wremove <role>|n when prompted.
 
 Related:
     help cnpc
