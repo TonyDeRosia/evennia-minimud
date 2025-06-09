@@ -1,5 +1,5 @@
 from evennia.utils.evmenu import EvMenu
-from evennia.utils import make_iter
+from evennia.utils import make_iter, dedent
 from evennia import create_object
 from evennia.objects.models import ObjectDB
 from evennia.prototypes import spawner
