@@ -54,6 +54,17 @@ class TestNPCRoleBehaviors(EvenniaTest):
 
         self.char1.msg.assert_called_with("You have 50 Copper on hand and 25 coins in the bank.")
 
+    def test_banker_balance_amounts(self):
+        banker = create.create_object(BankerNPC, key="teller", location=self.room1)
+        self.char1.db.coins = {"gold": 1, "silver": 5}
+        self.char1.db.bank = 99
+
+        banker.balance(self.char1)
+
+        self.char1.msg.assert_called_with(
+            "You have 1 Gold, 5 Silver on hand and 99 coins in the bank."
+        )
+
     def test_banker_transfer_moves_funds(self):
         banker = create.create_object(BankerNPC, key="clerk", location=self.room1)
         self.char1.db.bank = 30
@@ -63,6 +74,33 @@ class TestNPCRoleBehaviors(EvenniaTest):
 
         self.assertEqual(self.char1.db.bank, 10)
         self.assertEqual(self.char2.db.bank, 30)
+
+    def test_banker_transfer_fails_without_funds(self):
+        banker = create.create_object(BankerNPC, key="clerk", location=self.room1)
+        self.char1.db.bank = 10
+        self.char2.db.bank = 5
+
+        banker.transfer(self.char1, self.char2, 20)
+
+        self.assertEqual(self.char1.db.bank, 10)
+        self.assertEqual(self.char2.db.bank, 5)
+        self.char1.msg.assert_called_with("You do not have that much saved.")
+
+    def test_banker_transfer_messages(self):
+        banker = create.create_object(BankerNPC, key="clerk", location=self.room1)
+        self.char1.db.bank = 25
+        self.char2.db.bank = 0
+
+        banker.transfer(self.char1, self.char2, 15)
+
+        self.assertEqual(self.char1.db.bank, 10)
+        self.assertEqual(self.char2.db.bank, 15)
+        self.char1.msg.assert_called_with(
+            f"You transfer 15 coins to {self.char2.get_display_name(self.char1)} through clerk."
+        )
+        self.char2.msg.assert_called_with(
+            f"clerk transfers 15 coins to your account from {self.char1.get_display_name(self.char2)}."
+        )
 
     def test_trainer_trains_skill_and_consumes_xp(self):
         trainer = create.create_object(TrainerNPC, key="trainer", location=self.room1)
