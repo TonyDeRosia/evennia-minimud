@@ -2933,6 +2933,8 @@ Notes:
       using |w@mlist|n. See |whelp @mlist|n for filtering options.
     - Spawn a stored prototype with |w@mspawn <prototype>|n.
     - Inspect prototypes or NPCs with |w@mstat <key>|n.
+    - Use |w@makeshop|n or |w@makerepair|n to add vendor data after
+      saving the prototype.
     - Example workflow:
         1) run |wmobbuilder|n and fill in the prompts
         2) choose |wYes & Save Prototype|n
@@ -2951,7 +2953,12 @@ Related:
 
 Create a new NPC prototype. The prototype data is stored in
 ``world/prototypes/npcs.json`` and does not affect any existing NPCs
-until you update them with |w@medit|n.
+until you update them with |w@medit|n. If ``copy_key`` is supplied the
+new prototype will start as a duplicate of that entry.
+
+After creating a prototype use |w@mset|n to edit additional fields like
+stats, actflags or spells. View all stored prototypes with
+|w@mlist|n.
 
 Usage:
     @mcreate <key> [copy_key]
@@ -2970,6 +2977,9 @@ Edit a field on an NPC prototype stored in
 ``world/prototypes/npcs.json``. Existing NPCs remain unchanged unless
 you later apply the prototype with |w@medit|n.
 
+Values containing spaces should be quoted. Some fields accept a comma
+separated list which will replace the old values.
+
 Usage:
     @mset <proto> <field> <value>
 
@@ -2985,7 +2995,9 @@ Examples:
 
 Display stats for an NPC or prototype. Prototype information is read
 from ``world/prototypes/npcs.json`` and this command never changes an
-NPC. Use |w@medit|n for modifications.
+NPC. Use |w@medit|n for modifications. The output lists common combat
+attributes along with any flags, resistances and languages defined on
+the target.
 
 Usage:
     @mstat <npc or proto>
@@ -3003,6 +3015,10 @@ Examples:
 List NPC prototypes or counts of spawned NPCs. Prototypes are read from
 ``world/prototypes/npcs.json``. Listing does not modify any NPCs; use
 |w@medit|n if you need to update them.
+
+You may filter results with ``class=<name>``, ``race=<name>``,
+``role=<name>``, ``tag=<tag>`` or ``zone=<area>``. Use ``/room`` to count
+NPCs present in your current room or ``/area`` for the entire area.
 
 Usage:
     @mlist [area] [/room|/area] [filters]
@@ -3022,12 +3038,105 @@ Spawn an NPC from a prototype defined in
 ``world/prototypes/npcs.json``. Spawning creates a new NPC and leaves
 existing ones untouched. Modify live NPCs with |w@medit|n.
 
+Prototypes made with |wmobbuilder|n are prefixed with ``mob_``. Use the
+full key when spawning those NPCs.
+
 Usage:
     @mspawn <prototype>
 
 Examples:
     @mspawn bandit
     @mspawn mob_guard
+""",
+    },
+    {
+        "key": "@makeshop",
+        "category": "Building",
+        "text": """Help for @makeshop
+
+Add shop data to an NPC prototype. If the prototype already has a shop
+no changes are made.
+
+Usage:
+    @makeshop <prototype>
+
+Example:
+    @makeshop merchant
+""",
+    },
+    {
+        "key": "@shopset",
+        "category": "Building",
+        "text": """Help for @shopset
+
+Modify fields on a prototype's shop entry. Valid fields are buy, sell,
+hours and types. Item types should be a comma separated list.
+
+Usage:
+    @shopset <proto> <buy|sell|hours|types> <value>
+
+Examples:
+    @shopset merchant buy 120
+    @shopset merchant types weapon,armor
+""",
+    },
+    {
+        "key": "@shopstat",
+        "category": "Building",
+        "text": """Help for @shopstat
+
+Show the shop configuration for a prototype.
+
+Usage:
+    @shopstat <prototype>
+
+Example:
+    @shopstat merchant
+""",
+    },
+    {
+        "key": "@makerepair",
+        "category": "Building",
+        "text": """Help for @makerepair
+
+Create repair shop data on a prototype. Does nothing if repair info
+already exists.
+
+Usage:
+    @makerepair <prototype>
+
+Example:
+    @makerepair smith
+""",
+    },
+    {
+        "key": "@repairset",
+        "category": "Building",
+        "text": """Help for @repairset
+
+Edit fields on a prototype's repair data. Fields are cost, hours and
+types. Types is a comma separated list of allowed item types.
+
+Usage:
+    @repairset <proto> <cost|hours|types> <value>
+
+Examples:
+    @repairset smith cost 150
+    @repairset smith types weapon,armor
+""",
+    },
+    {
+        "key": "@repairstat",
+        "category": "Building",
+        "text": """Help for @repairstat
+
+Display repair shop settings stored on a prototype.
+
+Usage:
+    @repairstat <prototype>
+
+Example:
+    @repairstat smith
 """,
     },
     {
