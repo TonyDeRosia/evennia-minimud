@@ -41,6 +41,17 @@ Typical uses for each coin are roughly:
 - **Gold** – quality equipment or costly services such as a house or mount.
 - **Platinum** – rare, high value purchases or very large transactions.
 
+Bankers can hold your coins for safekeeping. When near one, use the `bank`
+command to check your balance, deposit or withdraw funds, or transfer money to
+another player:
+
+```
+bank balance
+bank deposit <amount [coin]>
+bank withdraw <amount [coin]>
+bank transfer <amount [coin]> <player>
+```
+
 
 ## Installation and Setup
 
