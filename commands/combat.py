@@ -19,7 +19,7 @@ class CmdAttack(Command):
     """
 
     key = "attack"
-    aliases = ("att", "hit", "shoot")
+    aliases = ("att", "hit", "shoot", "kill", "k")
     help_category = "Combat"
 
     def parse(self):
