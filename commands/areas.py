@@ -332,6 +332,63 @@ class CmdRSet(Command):
             self.msg("Usage: rset <area|id> <value>")
 
 
+class CmdRReg(Command):
+    """Assign a room to an area and number."""
+
+    key = "rreg"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: rreg <area> <number> | rreg <room> <area> <number>")
+            return
+
+        parts = self.args.split()
+        if len(parts) == 2:
+            area_name, num_str = parts
+            room = self.caller.location
+        elif len(parts) == 3:
+            room_name, area_name, num_str = parts
+            room = self.caller.search(room_name, global_search=True)
+            if not room:
+                return
+            if not room.is_typeclass(Room, exact=False):
+                self.msg("Target must be a room.")
+                return
+        else:
+            self.msg("Usage: rreg <area> <number> | rreg <room> <area> <number>")
+            return
+
+        if not num_str.isdigit():
+            self.msg("Number must be numeric.")
+            return
+        room_id = int(num_str)
+
+        _, area = find_area(area_name)
+        if area is None:
+            self.msg("Unknown area.")
+            return
+        if not (area.start <= room_id <= area.end):
+            self.msg("Number outside area range.")
+            return
+
+        objs = ObjectDB.objects.filter(
+            db_attributes__db_key="area",
+            db_attributes__db_strvalue__iexact=area_name,
+        )
+        for obj in objs:
+            if obj == room:
+                continue
+            if obj.db.room_id == room_id and obj.is_typeclass(Room, exact=False):
+                self.msg("Room already exists.")
+                return
+
+        room.set_area(area_name, room_id)
+        name = room.key if room != self.caller.location else "Room"
+        self.msg(f"{name} registered as {area_name} #{room_id}.")
+
+
 class AreaCmdSet(CmdSet):
     key = "Area CmdSet"
 
@@ -345,6 +402,7 @@ class AreaCmdSet(CmdSet):
         self.add(CmdRName)
         self.add(CmdRDesc)
         self.add(CmdRSet)
+        self.add(CmdRReg)
         self.add(CmdRSpawner)
 
 
