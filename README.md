@@ -136,6 +136,7 @@ mixins found under `world.npc_roles`:
 - **guildmaster** – manages guild business.
 - **guild_receptionist** – greets visitors for a guild.
 - **questgiver** – offers quests to players.
+- **guard** – protects areas or important figures.
 - **combat_trainer** – spars to improve combat ability.
 - **event_npc** – starts or manages special events.
 
