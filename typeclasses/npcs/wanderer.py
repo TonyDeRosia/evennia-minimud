@@ -1,3 +1,5 @@
+"""Wandering NPC typeclass."""
+
 from . import BaseNPC
 
 
