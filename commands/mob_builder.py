@@ -33,7 +33,19 @@ class CmdMobBuilder(Command):
 
 
 class CmdMSpawn(Command):
-    """Spawn a mob prototype."""
+    """
+    Spawn a mob prototype.
+
+    Prototypes are loaded from ``world/prototypes/npcs.json``. Spawning creates
+    a new NPC and leaves any existing ones unchanged. Use ``@medit`` to modify
+    a live NPC.
+
+    Usage:
+        @mspawn <prototype>
+
+    Example:
+        @mspawn bandit
+    """
 
     key = "@mspawn"
     locks = "cmd:perm(Builder)"

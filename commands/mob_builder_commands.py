@@ -25,7 +25,19 @@ from world.mob_constants import (
 
 
 class CmdMStat(Command):
-    """Inspect an NPC or prototype."""
+    """
+    Inspect an NPC or stored prototype.
+
+    Prototype data is read from ``world/prototypes/npcs.json``. This is a
+    read-only command and will not change any existing NPCs. Use ``@medit`` if
+    you need to update a live NPC from a prototype.
+
+    Usage:
+        @mstat <npc or proto>
+
+    Example:
+        @mstat bandit
+    """
 
     key = "@mstat"
     locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
@@ -107,7 +119,19 @@ class CmdMStat(Command):
 
 
 class CmdMCreate(Command):
-    """Create a new NPC prototype."""
+    """
+    Create a new NPC prototype.
+
+    The prototype is stored in ``world/prototypes/npcs.json`` and does not
+    affect any already spawned NPCs. Use ``@medit`` later if you need to update
+    a live NPC from the saved prototype.
+
+    Usage:
+        @mcreate <key> [copy_key]
+
+    Example:
+        @mcreate guard_02 basic_guard
+    """
 
     key = "@mcreate"
     locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
@@ -139,7 +163,18 @@ class CmdMCreate(Command):
 
 
 class CmdMSet(Command):
-    """Edit a field on an NPC prototype."""
+    """
+    Edit a field on an NPC prototype.
+
+    Changes are written to ``world/prototypes/npcs.json``. Existing NPCs are
+    unaffected until you apply the prototype with ``@medit``.
+
+    Usage:
+        @mset <key> <field> <value>
+
+    Example:
+        @mset bandit level 5
+    """
 
     key = "@mset"
     locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
@@ -207,7 +242,19 @@ class CmdMSet(Command):
 
 
 class CmdMList(Command):
-    """List NPC prototypes or spawned NPCs."""
+    """
+    List stored NPC prototypes or spawned NPCs.
+
+    Prototype information is read from ``world/prototypes/npcs.json``. Listing
+    does not alter any existing NPCs. Use ``@medit`` if you want to modify a
+    spawned NPC.
+
+    Usage:
+        @mlist [area] [/room|/area] [filters]
+
+    Example:
+        @mlist /room
+    """
 
     key = "@mlist"
     locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"

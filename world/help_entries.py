@@ -2828,6 +2828,92 @@ Related:
 """,
     },
     {
+        "key": "@mcreate",
+        "category": "Building",
+        "text": """Help for @mcreate
+
+Create a new NPC prototype. The prototype data is stored in
+``world/prototypes/npcs.json`` and does not affect any existing NPCs
+until you update them with |w@medit|n.
+
+Usage:
+    @mcreate <key> [copy_key]
+
+Examples:
+    @mcreate merchant_02
+    @mcreate elite_guard basic_guard
+""",
+    },
+    {
+        "key": "@mset",
+        "category": "Building",
+        "text": """Help for @mset
+
+Edit a field on an NPC prototype stored in
+``world/prototypes/npcs.json``. Existing NPCs remain unchanged unless
+you later apply the prototype with |w@medit|n.
+
+Usage:
+    @mset <proto> <field> <value>
+
+Examples:
+    @mset merchant level 10
+    @mset merchant actflags aggressive,stay_area
+""",
+    },
+    {
+        "key": "@mstat",
+        "category": "Building",
+        "text": """Help for @mstat
+
+Display stats for an NPC or prototype. Prototype information is read
+from ``world/prototypes/npcs.json`` and this command never changes an
+NPC. Use |w@medit|n for modifications.
+
+Usage:
+    @mstat <npc or proto>
+
+Examples:
+    @mstat bandit
+    @mstat Bob
+""",
+    },
+    {
+        "key": "@mlist",
+        "category": "Building",
+        "text": """Help for @mlist
+
+List NPC prototypes or counts of spawned NPCs. Prototypes are read from
+``world/prototypes/npcs.json``. Listing does not modify any NPCs; use
+|w@medit|n if you need to update them.
+
+Usage:
+    @mlist [area] [/room|/area] [filters]
+
+Examples:
+    @mlist
+    @mlist town
+    @mlist /room
+""",
+    },
+    {
+        "key": "@mspawn",
+        "category": "Building",
+        "text": """Help for @mspawn
+
+Spawn an NPC from a prototype defined in
+``world/prototypes/npcs.json``. Spawning creates a new NPC and leaves
+existing ones untouched. Modify live NPCs with |w@medit|n.
+
+Usage:
+    @mspawn <prototype>
+
+Examples:
+    @mspawn bandit
+    @mspawn mob_guard
+""",
+    },
+    {
         "key": "triggers",
         "category": "Building",
         "text": """
