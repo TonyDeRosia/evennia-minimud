@@ -1482,6 +1482,35 @@ Related:
 """,
     },
     {
+        "key": "delroom",
+        "category": "Building",
+        "text": """
+Help for delroom
+
+Delete a room by direction or by area and number.
+
+Usage:
+    delroom <direction>
+    delroom <area> <number>
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    delroom north
+    delroom test 2
+
+Notes:
+    - Removes any exits to or from the deleted room.
+
+Related:
+    help ansi
+""",
+    },
+    {
         "key": "@teleport",
         "category": "Building",
         "text": """

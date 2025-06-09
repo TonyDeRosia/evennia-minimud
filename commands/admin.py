@@ -14,6 +14,7 @@ from .building import (
     CmdSetFlag,
     CmdRemoveFlag,
     CmdDelDir,
+    CmdDelRoom,
 )
 from world.stats import CORE_STAT_KEYS, ALL_STATS
 from world.system import stat_manager
@@ -1417,6 +1418,7 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdSetFlag)
         self.add(CmdRemoveFlag)
         self.add(CmdDelDir)
+        self.add(CmdDelRoom)
         self.add(CmdCNPC)
         self.add(CmdEditNPC)
         self.add(CmdMedit)

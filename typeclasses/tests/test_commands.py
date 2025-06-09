@@ -721,6 +721,27 @@ class TestDelDirCommand(EvenniaTest):
         self.assertNotIn("south", new_room.db.exits)
 
 
+class TestDelRoomCommand(EvenniaTest):
+    def test_delroom_by_direction(self):
+        start = self.char1.location
+        self.char1.execute_cmd("dig north")
+        target = start.db.exits.get("north")
+        self.assertIsNotNone(target)
+        self.char1.execute_cmd("delroom north")
+        self.assertIsNone(target.pk)
+        self.assertNotIn("north", start.db.exits)
+
+    def test_delroom_area_number(self):
+        self.char1.execute_cmd("amake test 1-5")
+        start = self.char1.location
+        self.char1.execute_cmd("dig east test 2")
+        target = start.db.exits.get("east")
+        self.assertIsNotNone(target)
+        self.char1.execute_cmd("delroom test 2")
+        self.assertIsNone(target.pk)
+        self.assertNotIn("east", start.db.exits)
+
+
 class TestRoomFlagCommands(EvenniaTest):
     def setUp(self):
         super().setUp()
