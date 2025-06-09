@@ -395,6 +395,32 @@ class CmdPurge(Command):
         caller.msg(f"Purged {target.key}.")
 
 
+class CmdPeace(Command):
+    """End all combat in the current room."""
+
+    key = "peace"
+    locks = "cmd:perm(Admin)"
+    help_category = "Admin"
+
+    def func(self):
+        caller = self.caller
+        location = caller.location
+        if not location:
+            caller.msg("You have no location.")
+            return
+
+        combat_script = location.scripts.get("combat")
+        if not combat_script:
+            caller.msg("There is no fighting here.")
+            return
+
+        combat_script = combat_script[0]
+        for fighter in list(combat_script.fighters):
+            combat_script.remove_combatant(fighter)
+        combat_script.delete()
+        location.msg_contents("Peace falls over the area.")
+
+
 def _create_gear(
     caller,
     typeclass,
@@ -1349,6 +1375,7 @@ class AdminCmdSet(CmdSet):
         self.add(CmdSmite)
         self.add(CmdRestoreAll)
         self.add(CmdPurge)
+        self.add(CmdPeace)
         self.add(CmdScan)
 
 
