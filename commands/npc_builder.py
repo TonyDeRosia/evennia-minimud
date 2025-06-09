@@ -3,6 +3,7 @@ from evennia.utils import make_iter, dedent
 from evennia import create_object
 from evennia.objects.models import ObjectDB
 from evennia.prototypes import spawner
+from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from typeclasses.characters import NPC
 from utils.slots import SLOT_ORDER
 from utils.menu_utils import add_back_skip
@@ -920,8 +921,9 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     if register:
         from world import prototypes
 
-        proto = {k: v for k, v in data.items() if k != "edit_obj"}
-        prototypes.register_npc_prototype(data.get("key"), proto)
+        proto_key = data.get("proto_key", data.get("key"))
+        proto = {k: v for k, v in data.items() if k not in ("edit_obj", "proto_key")}
+        prototypes.register_npc_prototype(proto_key, proto)
         caller.msg(f"NPC {npc.key} created and prototype saved.")
     else:
         caller.msg(f"NPC {npc.key} created.")
@@ -938,6 +940,7 @@ def _gather_npc_data(npc):
     """Return a dict of editable NPC attributes."""
     return {
         "edit_obj": npc,
+        "proto_key": npc.tags.get(category=PROTOTYPE_TAG_CATEGORY),
         "key": npc.key,
         "desc": npc.db.desc,
         "npc_type": npc.tags.get(category="npc_type") or "",
