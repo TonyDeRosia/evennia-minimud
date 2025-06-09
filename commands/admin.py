@@ -114,6 +114,9 @@ class CmdSetStat(Command):
     Usage:
         setstat <target> <stat> <value>
 
+    Example:
+        setstat Bob strength 10
+
     See |whelp setstat|n for details.
     """
 
@@ -200,6 +203,9 @@ class CmdSetAttr(Command):
     Usage:
         setattr <target> <attr> <value>
 
+    Example:
+        setattr sword desc "A fine blade"
+
     See |whelp setattr|n for details.
     """
 
@@ -230,6 +236,9 @@ class CmdSetBounty(Command):
 
     Usage:
         setbounty <target> <amount>
+
+    Example:
+        setbounty Goblin 50
 
     See |whelp setbounty|n for details.
     """

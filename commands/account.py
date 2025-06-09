@@ -10,6 +10,9 @@ class CmdSettings(MuxCommand):
     Usage:
         settings
         settings <option> = <on/off>
+
+    Example:
+        settings ansi = on
     """
 
     key = "settings"
