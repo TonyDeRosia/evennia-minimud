@@ -133,8 +133,9 @@ classes include `BaseNPC`, `MerchantNPC`, `BankerNPC`, `TrainerNPC`,
 While editing, there's a step to manage triggers using a numbered menu. Choose
 `Add trigger` to create a new reaction, `Delete trigger` to remove one, `List
 triggers` to review them and `Finish` when done. Multiple trigger entries can be
-added for the same event. See the `triggers` help entry for the list of events
-and possible reactions.
+added for the same event. When entering a reaction you may separate several
+commands with commas or semicolons to store them as multiple responses. See the
+`triggers` help entry for the list of events and possible reactions.
 
 ### NPC Roles and AI
 
@@ -177,8 +178,8 @@ reaction may specify a `match` text and single or multiple `responses` to run::
     }
 
 During the builder you can add triggers one at a time. The example above shows
-how multiple responses can be combined in your prototype file if you edit it
-manually.
+how multiple responses can be combined in your prototype file or entered during
+the builder by separating commands with commas or semicolons.
 
 To spawn an NPC saved with an AI type and triggers, use:
 

@@ -181,3 +181,16 @@ class TestCNPC(EvenniaTest):
         """Entering 'back' at description should return to key prompt."""
         result = npc_builder._set_desc(self.char1, "back")
         self.assertEqual(result, "menunode_key")
+
+    def test_save_trigger_multiple_responses(self):
+        self.char1.ndb.trigger_event = "on_test"
+        self.char1.ndb.trigger_match = "hello"
+        self.char1.ndb.buildnpc = {}
+
+        npc_builder._save_trigger(self.char1, "say hi, emote waves;jump")
+
+        triggers = self.char1.ndb.buildnpc.get("triggers")
+        self.assertIn("on_test", triggers)
+        trig = triggers["on_test"][0]
+        self.assertEqual(trig["match"], "hello")
+        self.assertEqual(trig["responses"], ["say hi", "emote waves", "jump"])
