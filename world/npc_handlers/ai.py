@@ -5,11 +5,15 @@ from __future__ import annotations
 from random import choice
 from evennia import DefaultObject
 from typeclasses.npcs import BaseNPC
+from combat.ai_combat import npc_take_turn
 
 
 def _ai_aggressive(npc: DefaultObject) -> None:
-    """Very simple aggressive behavior: attack the first player here."""
-    if not npc.location or npc.in_combat:
+    """Aggressive behavior: enter combat or act if already fighting."""
+    if npc.in_combat and npc.db.combat_target:
+        npc_take_turn(None, npc, npc.db.combat_target)
+        return
+    if not npc.location:
         return
     for obj in npc.location.contents:
         if obj.has_account:
@@ -30,8 +34,7 @@ def _ai_wander(npc: DefaultObject) -> None:
 def _ai_defensive(npc: DefaultObject) -> None:
     """Attack only when already in combat."""
     if npc.in_combat and npc.db.combat_target:
-        weapon = npc.wielding[0] if npc.wielding else npc
-        npc.attack(npc.db.combat_target, weapon)
+        npc_take_turn(None, npc, npc.db.combat_target)
 
 
 def _ai_scripted(npc: DefaultObject) -> None:

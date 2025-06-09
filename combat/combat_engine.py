@@ -90,6 +90,14 @@ class CombatEngine:
         if hasattr(target, "at_defeat"):
             target.at_defeat(attacker)
         self.remove_participant(target)
+        for participant in list(self.participants):
+            ally = participant.actor
+            if ally is target:
+                continue
+            if ally.location == getattr(target, "location", None):
+                hook = getattr(ally, "on_ally_down", None)
+                if callable(hook):
+                    hook(target, attacker)
 
     def apply_damage(self, attacker, target, amount: int, damage_type: DamageType | None) -> int:
         """Apply ``amount`` of damage to ``target`` using its hooks."""

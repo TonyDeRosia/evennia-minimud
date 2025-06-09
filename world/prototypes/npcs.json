@@ -24,6 +24,8 @@
         "npc_type": "guard",
         "ai_type": "defensive",
         "level": 1,
-        "actflags": ["assist", "call_for_help"]
+        "actflags": ["assist", "call_for_help"],
+        "skills": ["shield bash"],
+        "spells": ["heal"]
     }
 }
