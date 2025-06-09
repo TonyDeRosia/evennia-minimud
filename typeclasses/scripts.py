@@ -256,6 +256,9 @@ class GlobalTick(Script):
         from .characters import PlayerCharacter
         from world.system import state_manager
 
+        # Advance timers on all characters before applying regen
+        state_manager.tick_all()
+
         tickables = search_tag(key="tickable")
         for obj in tickables:
             if not hasattr(obj, "traits"):
