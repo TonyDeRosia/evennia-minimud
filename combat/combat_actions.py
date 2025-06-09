@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Optional, Iterable
 
+from .damage_types import DamageType
+
 from evennia.utils import utils
 from world.system import state_manager
 
@@ -16,6 +18,8 @@ class CombatResult:
     actor: object
     target: object
     message: str
+    damage: int = 0
+    damage_type: object | None = None
 
 
 class Action:
@@ -91,13 +95,16 @@ class AttackAction(Action):
             weapon = self.actor.wielding[0] if self.actor.wielding else self.actor
             weapon.at_attack(self.actor, target)
         dmg = 0
+        dtype = DamageType.BLUDGEONING
         if hasattr(target, "hp"):
             dmg = getattr(weapon, "damage", 0)
-            target.hp = max(target.hp - dmg, 0)
+            dtype = getattr(weapon, "damage_type", DamageType.BLUDGEONING)
         return CombatResult(
             actor=self.actor,
             target=target,
             message=f"{self.actor.key} strikes {target.key} for {dmg} damage!",
+            damage=dmg,
+            damage_type=dtype,
         )
 
 

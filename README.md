@@ -249,6 +249,21 @@ A modular combat engine is provided under the `combat/` package. It implements
 round-based processing, action queues and a sample `ShieldBash` skill. The
 system is designed to plug into Evennia characters and rooms for dynamic fights.
 
+### Damage Types and Resistances
+
+Damage dealt in combat is categorized by `DamageType`. Characters may hold
+resistance flags in their `db.ris` attribute. During damage resolution the
+engine consults a resistance matrix to modify incoming damage. For example:
+
+```python
+from combat.damage_types import DamageType, ResistanceType, get_damage_multiplier
+
+mult = get_damage_multiplier([ResistanceType.FIRE], DamageType.FIRE)
+print(mult)  # 0.5
+```
+
+Resistances can be assigned via the mob builder menu when creating NPCs.
+
 
 ## Running the Tests
 
