@@ -33,3 +33,12 @@ class TestSkillAndSpellUsage(EvenniaTest):
             mock_add.assert_called_with(self.char2, "stunned", 1)
             self.assertEqual(self.char2.hp, 6)
 
+    def test_skill_evade_prevents_damage(self):
+        self.char2.hp = 10
+        with patch("combat.combat_skills.check_hit", return_value=True), \
+             patch("combat.combat_skills.roll_evade", return_value=True), \
+             patch("combat.combat_skills.roll_damage", return_value=4):
+            result = self.char1.use_skill("cleave", target=self.char2)
+        self.assertEqual(self.char2.hp, 10)
+        self.assertIn("misses", result.message)
+

@@ -205,6 +205,7 @@ class Character(ObjectParent, ClothedCharacter):
     def at_object_creation(self):
         from world import stats
         from world.system import stat_manager
+        from combat import combat_utils
 
         # Apply all default stats in a single modular step. If stats already
         # exist on the character, `apply_stats` will not overwrite them.
@@ -1105,6 +1106,14 @@ class NPC(Character):
                 mapping={"target": target},
             )
         else:
+            if combat_utils.roll_evade(wielder, target):
+                self.at_emote(
+                    f"$conj(swings) $pron(your) {weapon.get('name')} at $you(target), but they evade.",
+                    mapping={"target": target},
+                )
+                wielder.msg(f"[ Cooldown: {speed} seconds ]")
+                wielder.cooldowns.add("attack", speed)
+                return
             verb = weapon.get("damage_type", "hits")
             crit = stat_manager.roll_crit(wielder, target)
             if crit:

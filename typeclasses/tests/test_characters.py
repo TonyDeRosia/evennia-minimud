@@ -397,3 +397,12 @@ class TestCombatResists(EvenniaTest):
         base = self.char2.traits.health.current
         self.char2.at_damage(self.char1, 10)
         self.assertEqual(self.char2.traits.health.current, base - 5)
+
+    def test_evasion_prevents_weapon_damage(self):
+        self.char2.traits.evasion.base = 100
+        with patch("world.system.stat_manager.check_hit", return_value=True), patch(
+            "combat.combat_utils.random.randint", return_value=1
+        ):
+            before = self.char2.traits.health.current
+            self.weapon.at_attack(self.char1, self.char2)
+            self.assertEqual(self.char2.traits.health.current, before)
