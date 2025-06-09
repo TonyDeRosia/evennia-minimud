@@ -97,7 +97,7 @@ def menunode_desc(caller, raw_string="", **kwargs):
     text = (
         "|wEnter a short description for the NPC|n "
         "(e.g. 'A grumpy orc')\n"
-        "Type |wback|n to return or |wskip|n to keep the current value."
+        "Type |wback|n to edit the key or |wskip|n to keep the current value."
     )
     if default:
         text += f" [default: {default}]"
@@ -108,7 +108,7 @@ def menunode_desc(caller, raw_string="", **kwargs):
 def _set_desc(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_desc"
+        return "menunode_key"
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("desc", "")
     caller.ndb.buildnpc["desc"] = string
