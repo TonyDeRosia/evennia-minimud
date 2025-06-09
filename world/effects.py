@@ -65,4 +65,11 @@ EFFECTS: Dict[str, Effect] = {
         desc="You are weakened from hunger and thirst.",
         type="status",
     ),
+    "berserk": Effect(
+        key="berserk",
+        name="Berserk Rage",
+        desc="You have given in to fury, gaining strength at the cost of defense.",
+        type="buff",
+        mods={"STR": 3, "armor": -2},
+    ),
 }
