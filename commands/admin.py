@@ -28,6 +28,7 @@ from .npc_builder import (
     CmdListNPCs,
     CmdDupNPC,
 )
+from .mob_builder_commands import CmdMStat, CmdMList
 
 
 def _safe_split(text):
@@ -1363,3 +1364,5 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdSpawnNPC)
         self.add(CmdListNPCs)
         self.add(CmdDupNPC)
+        self.add(CmdMStat)
+        self.add(CmdMList)
