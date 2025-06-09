@@ -176,3 +176,8 @@ class TestCNPC(EvenniaTest):
         self.char1.msg.assert_called()
         msg = self.char1.msg.call_args[0][0]
         self.assertIn("Error", msg)
+
+    def test_set_desc_back_returns_key(self):
+        """Entering 'back' at description should return to key prompt."""
+        result = npc_builder._set_desc(self.char1, "back")
+        self.assertEqual(result, "menunode_key")
