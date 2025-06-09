@@ -9,6 +9,7 @@ from evennia.utils import delay
 from world.system import state_manager
 
 from .combat_actions import Action, AttackAction, CombatResult
+from .damage_types import DamageType
 
 
 @dataclass
@@ -90,6 +91,28 @@ class CombatEngine:
             target.at_defeat(attacker)
         self.remove_participant(target)
 
+    def apply_damage(self, attacker, target, amount: int, damage_type: DamageType | None) -> int:
+        """Apply ``amount`` of damage to ``target`` using its hooks."""
+
+        if hasattr(target, "at_damage"):
+            before = getattr(getattr(target, "traits", None), "health", None)
+            if before:
+                start = before.value
+            else:
+                start = getattr(target, "hp", 0)
+            dealt = target.at_damage(attacker, amount, damage_type)
+            if dealt is None:
+                after = getattr(getattr(target, "traits", None), "health", None)
+                if after:
+                    dealt = start - after.value
+                else:
+                    dealt = start - getattr(target, "hp", start)
+            return dealt
+        elif hasattr(target, "hp"):
+            target.hp = max(target.hp - amount, 0)
+            return amount
+        return 0
+
     def cleanup_environment(self) -> None:
         for participant in list(self.participants):
             actor = participant.actor
@@ -123,7 +146,20 @@ class CombatEngine:
                 result = CombatResult(actor=actor, target=actor, message=err)
             else:
                 result = action.resolve()
+
             participant.next_action = None
+
+            damage_done = 0
+            if result.damage and result.target:
+                dt = result.damage_type
+                if isinstance(dt, str):
+                    try:
+                        dt = DamageType(dt)
+                    except ValueError:
+                        dt = None
+                damage_done = self.apply_damage(actor, result.target, result.damage, dt)
+                result.message = f"{actor.key} strikes {result.target.key} for {damage_done} damage!"
+
             if actor.location:
                 actor.location.msg_contents(result.message)
             if getattr(result.target, "hp", 1) <= 0:

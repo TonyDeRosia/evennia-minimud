@@ -317,9 +317,32 @@ class Character(ObjectParent, ClothedCharacter):
         """
         Apply damage, after taking into account damage resistances.
         """
+        from combat.damage_types import (
+            DamageType,
+            ResistanceType,
+            get_damage_multiplier,
+        )
+
         # apply armor damage reduction
         damage -= self.defense(damage_type)
         damage = max(0, damage)
+
+        dt = None
+        if damage_type:
+            try:
+                dt = DamageType(damage_type)
+            except ValueError:
+                dt = None
+
+        if dt:
+            resist_values = getattr(self.db, "ris", []) or []
+            resistances = [
+                ResistanceType(r)
+                for r in resist_values
+                if r in ResistanceType._value2member_map_
+            ]
+            damage = int(damage * get_damage_multiplier(resistances, dt))
+
         self.traits.health.current -= damage
         crit_prefix = "|rCritical!|n " if critical else ""
         self.msg(
@@ -363,7 +386,7 @@ class Character(ObjectParent, ClothedCharacter):
                 attacker.db.coins = from_copper(total)
                 attacker.msg(f"You claim {bounty} coins for defeating {self.key}.")
                 self.db.bounty = 0
-
+        return damage
     def at_emote(self, message, **kwargs):
         """
         Execute a room emote as ourself.
@@ -769,10 +792,11 @@ class PlayerCharacter(Character):
         return f"|g{name}|n"
 
     def at_damage(self, attacker, damage, damage_type=None, critical=False):
-        super().at_damage(attacker, damage, damage_type=damage_type, critical=critical)
+        dmg = super().at_damage(attacker, damage, damage_type=damage_type, critical=critical)
         if self.traits.health.value < 50:
             status = self.get_display_status(self)
             self.msg(prompt=status)
+        return dmg
 
     def attack(self, target, weapon, **kwargs):
         """
@@ -922,8 +946,8 @@ class NPC(Character):
         """
         Apply damage, after taking into account damage resistances.
         """
-        super().at_damage(attacker, damage, damage_type=damage_type, critical=critical)
-        self.check_triggers("on_attack", attacker=attacker, damage=damage)
+        dmg = super().at_damage(attacker, damage, damage_type=damage_type, critical=critical)
+        self.check_triggers("on_attack", attacker=attacker, damage=dmg)
 
         if self.traits.health.value <= 0:
             # we've been defeated!
@@ -940,7 +964,7 @@ class NPC(Character):
                 obj.location = self.location
             # delete ourself
             self.delete()
-            return
+            return dmg
 
         if "timid" in self.attributes.get("react_as", ""):
             self.at_emote("flees!")
@@ -948,7 +972,7 @@ class NPC(Character):
             if combat_script := self.location.scripts.get("combat"):
                 combat_script = combat_script[0]
                 if not combat_script.remove_combatant(self):
-                    return
+                    return dmg
             # there's a 50/50 chance the object will escape forever
             if randint(0, 1):
                 self.move_to(None)
@@ -956,7 +980,7 @@ class NPC(Character):
             else:
                 flee_dir = choice(self.location.contents_get(content_type="exit"))
                 flee_dir.at_traverse(self, flee_dir.destination)
-            return
+            return dmg
 
         threshold = self.attributes.get("flee_at", 25)
         if self.traits.health.value <= threshold:
@@ -967,7 +991,7 @@ class NPC(Character):
             self.enter_combat(attacker)
         else:
             self.db.combat_target = attacker
-
+        return dmg
     def enter_combat(self, target, **kwargs):
         """
         initiate combat against another character
