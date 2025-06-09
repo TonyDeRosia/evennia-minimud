@@ -67,3 +67,9 @@ class TestMobBuilder(EvenniaTest):
         self.char1.execute_cmd("@mstat mob_goblin")
         out = self.char1.msg.call_args[0][0]
         assert "goblin" in out
+
+    def test_cancel_then_back(self):
+        """Cancelling confirm and then going back should not error."""
+        mob_builder._do_confirm(self.char1, "no")
+        result = mob_builder._do_confirm(self.char1, "back")
+        assert result == "menunode_role"
