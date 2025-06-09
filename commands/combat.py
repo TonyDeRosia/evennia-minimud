@@ -244,6 +244,33 @@ class CmdFlee(Command):
         flee_dir = choice(exits)
         self.execute_cmd(flee_dir.name)
 
+class CmdBerserk(Command):
+    """Enter a furious rage, increasing your strength temporarily."""
+
+    key = "berserk"
+    help_category = "Combat"
+
+    def func(self):
+        caller = self.caller
+        from world.system import state_manager
+
+        if state_manager.has_effect(caller, "berserk"):
+            self.msg("You are already consumed by rage!")
+            return
+
+        stamina = caller.traits.get("stamina")
+        if stamina and stamina.current < 10:
+            self.msg("You are far too tired to work yourself into a rage.")
+            return
+
+        if stamina:
+            stamina.current -= 10
+
+        state_manager.add_effect(caller, "berserk", 5)
+        caller.location.msg_contents(
+            f"{caller.get_display_name(caller)} flies into a berserk rage!"
+        )
+
     def at_post_cmd(self):
         """
         optional post-command auto prompt
@@ -353,6 +380,7 @@ class CombatCmdSet(CmdSet):
 
         self.add(CmdAttack)
         self.add(CmdFlee)
+        self.add(CmdBerserk)
         self.add(CmdWield)
         self.add(CmdUnwield)
         self.add(CmdRevive)

@@ -2352,6 +2352,20 @@ Related:
 """,
     },
     {
+        "key": "berserk",
+        "category": "Combat",
+        "text": """Help for berserk
+
+Enter a furious rage to temporarily increase your Strength at the cost of some stamina.
+
+Usage:
+    berserk
+
+Notes:
+    - Grants a short Strength buff but reduces your armor slightly.
+""",
+    },
+    {
         "key": "rest",
         "category": "General",
         "text": """
