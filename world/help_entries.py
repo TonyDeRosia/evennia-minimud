@@ -2760,6 +2760,38 @@ Related:
 """,
     },
     {
+        "key": "mobbuilder",
+        "category": "Building",
+        "text": """Help for mobbuilder
+
+Start the basic NPC prototype builder. The menu asks for a key,
+description and stats and saves the prototype to
+`world/prototypes/npcs.json` with a `mob_` prefix.
+
+Usage:
+    mobbuilder
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    mobbuilder
+
+Notes:
+    - Spawn a saved prototype with |w@mspawn <prototype>|n.
+    - Inspect prototypes or NPCs with |w@mstat <key>|n.
+    - Edit entries using |w@mcreate|n, |w@mset|n, |w@mlist|n and the
+      shop/repair helpers.
+
+Related:
+    help @mspawn
+    help @mstat
+""",
+    },
+    {
         "key": "triggers",
         "category": "Building",
         "text": """

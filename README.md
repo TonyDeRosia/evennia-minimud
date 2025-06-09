@@ -198,6 +198,15 @@ Several basic NPC prototypes are included out of the box. Try `cnpc dev_spawn ba
 or `@spawnnpc basic_merchant` to quickly create a merchant, or `basic_questgiver` for a quest
 giver.
 
+### Mob Builder
+
+Run `mobbuilder` to launch a simplified prototype builder. The prompt walks
+through entering a key, description and stats. When confirmed, the data is
+saved to `world/prototypes/npcs.json` with `mob_` prefixed to the key.
+Use `@mspawn <prototype>` to create the NPC from the stored prototype and
+`@mstat <key>` to inspect the result or any existing NPC. Prototype entries can
+be adjusted with `@mcreate`, `@mset` and viewed with `@mlist`.
+
 ## Weapon Creation and Inspection
 
 Builders can quickly create melee weapons with the `cweapon` command.
