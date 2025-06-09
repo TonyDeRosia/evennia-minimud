@@ -1,0 +1,5 @@
+# Packages required to run the test suite
+# Evennia brings in Django but we list it explicitly to avoid missing deps
+"evennia[extra] >= 4.2, <5.0"
+Django>=4.2,<5.0
+pytest
