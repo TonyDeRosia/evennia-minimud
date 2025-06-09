@@ -59,6 +59,8 @@ class ACTFLAGS(_StrEnum):
     AGGRESSIVE = "aggressive"
     STAY_AREA = "stay_area"
     WIMPY = "wimpy"
+    ASSIST = "assist"
+    CALL_FOR_HELP = "call_for_help"
 
 
 class AFFECTED_BY(_StrEnum):
