@@ -160,12 +160,12 @@ from world.system import state_manager
 
 
 def check_stealth_detection(attacker, target) -> bool:
-    """Compare attacker stealth vs target perception."""
+    """Compare attacker stealth vs target detection."""
     attacker_stealth = state_manager.get_effective_stat(attacker, "stealth")
-    target_perception = state_manager.get_effective_stat(target, "perception")
-    if target_perception >= attacker_stealth:
+    target_detection = state_manager.get_effective_stat(target, "detection")
+    if target_detection >= attacker_stealth:
         attacker.msg(
-            "|rYour stealth attempt fails. The target's perception is too high – they notice you!|n"
+            "|rYour stealth attempt fails. The target's detection is too high – they notice you!|n"
         )
         target.msg(
             "|gYou sense movement nearby and spot the incoming attack before it lands!|n"

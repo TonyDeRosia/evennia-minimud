@@ -1,3 +1,4 @@
+from unittest.mock import MagicMock
 from evennia.utils.test_resources import EvenniaTest
 from world import stats
 
@@ -49,3 +50,21 @@ class TestStats(EvenniaTest):
         initial_block = stats.sum_bonus(char, "block_rate")
         char.traits.STR.base += 5
         self.assertGreater(stats.sum_bonus(char, "block_rate"), initial_block)
+
+    def test_stealth_fails_against_high_detection(self):
+        attacker = self.char1
+        target = self.char2
+        stats.apply_stats(attacker)
+        stats.apply_stats(target)
+        attacker.traits.stealth.base = 5
+        target.traits.detection.base = 10
+        attacker.db.is_stealthed = True
+        attacker.msg = MagicMock()
+        target.msg = MagicMock()
+
+        failed = stats.check_stealth_detection(attacker, target)
+
+        self.assertTrue(failed)
+        self.assertFalse(attacker.db.is_stealthed)
+        attacker.msg.assert_called()
+        target.msg.assert_called()
