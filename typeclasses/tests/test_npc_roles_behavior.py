@@ -19,6 +19,7 @@ class TestNPCRoleBehaviors(EvenniaTest):
     def setUp(self):
         super().setUp()
         self.char1.msg = MagicMock()
+        self.char2.msg = MagicMock()
 
     def test_merchant_sell_transfers_item_and_coins(self):
         merchant = create.create_object(MerchantNPC, key="shopkeep", location=self.room1)
@@ -43,6 +44,25 @@ class TestNPCRoleBehaviors(EvenniaTest):
         banker.withdraw(self.char1, 5)
         self.assertEqual(to_copper(self.char1.db.coins), 15)
         self.assertEqual(self.char1.db.bank, 15)
+
+    def test_banker_balance_reports_funds(self):
+        banker = create.create_object(BankerNPC, key="teller", location=self.room1)
+        self.char1.db.coins = from_copper(50)
+        self.char1.db.bank = 25
+
+        banker.balance(self.char1)
+
+        self.char1.msg.assert_called_with("You have 50 Copper on hand and 25 coins in the bank.")
+
+    def test_banker_transfer_moves_funds(self):
+        banker = create.create_object(BankerNPC, key="clerk", location=self.room1)
+        self.char1.db.bank = 30
+        self.char2.db.bank = 10
+
+        banker.transfer(self.char1, self.char2, 20)
+
+        self.assertEqual(self.char1.db.bank, 10)
+        self.assertEqual(self.char2.db.bank, 30)
 
     def test_trainer_trains_skill_and_consumes_xp(self):
         trainer = create.create_object(TrainerNPC, key="trainer", location=self.room1)

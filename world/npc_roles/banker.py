@@ -35,3 +35,37 @@ class BankerRole:
         wallet = withdrawer.db.coins or {}
         withdrawer.db.coins = from_copper(to_copper(wallet) + amount)
         withdrawer.msg(f"{self.key} gives you {amount} coins from your account.")
+
+    def balance(self, player) -> None:
+        """Report ``player``'s wallet and bank balance."""
+        if not player:
+            return
+
+        from utils.currency import format_wallet
+
+        wallet = player.db.coins or {}
+        bank = int(player.db.bank or 0)
+        player.msg(
+            f"You have {format_wallet(wallet)} on hand and {bank} coins in the bank."
+        )
+
+    def transfer(self, sender, receiver, amount: int) -> None:
+        """Move ``amount`` coins from ``sender`` to ``receiver``'s bank accounts."""
+        if not sender or not receiver or amount <= 0:
+            return
+
+        balance = int(sender.db.bank or 0)
+        if balance < amount:
+            sender.msg("You do not have that much saved.")
+            return
+
+        sender.db.bank = balance - amount
+        receiver.db.bank = int(receiver.db.bank or 0) + amount
+
+        sender.msg(
+            f"You transfer {amount} coins to {receiver.get_display_name(sender)} through {self.key}."
+        )
+        if receiver != sender:
+            receiver.msg(
+                f"{self.key} transfers {amount} coins to your account from {sender.get_display_name(receiver)}."
+            )
