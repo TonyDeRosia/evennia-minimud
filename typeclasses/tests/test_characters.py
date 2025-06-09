@@ -186,13 +186,14 @@ class TestGlobalTick(EvenniaTest):
         self.char1.refresh_prompt = MagicMock()
         from world.system import state_manager
 
-        state_manager.tick_character = MagicMock()
+        original_tick_all = state_manager.tick_all
+        state_manager.tick_all = MagicMock(side_effect=original_tick_all)
 
         script.at_repeat()
 
         self.char1.at_tick.assert_not_called()
         self.char1.refresh_prompt.assert_called()
-        state_manager.tick_character.assert_not_called()
+        state_manager.tick_all.assert_called_once()
 
     def test_tick_offline_characters(self):
         from typeclasses.scripts import GlobalTick
@@ -221,7 +222,8 @@ class TestGlobalTick(EvenniaTest):
 
         from world.system import state_manager
 
-        state_manager.tick_character = MagicMock()
+        original_tick_all = state_manager.tick_all
+        state_manager.tick_all = MagicMock(side_effect=original_tick_all)
 
         pc.at_tick = MagicMock(side_effect=pc.at_tick)
         npc.at_tick = MagicMock(side_effect=npc.at_tick)
@@ -231,12 +233,31 @@ class TestGlobalTick(EvenniaTest):
         pc.at_tick.assert_not_called()
         npc.at_tick.assert_not_called()
 
-        state_manager.tick_character.assert_not_called()
+        state_manager.tick_all.assert_called_once()
 
         for char in (pc, npc):
             for key in ("health", "mana", "stamina"):
                 trait = char.traits.get(key)
                 self.assertGreater(trait.current, trait.max // 2)
+
+    def test_effects_expire_on_tick(self):
+        from typeclasses.scripts import GlobalTick
+
+        script = GlobalTick()
+        script.at_script_creation()
+
+        self.char1.tags.add("tickable")
+        from world.system import state_manager
+
+        original_tick_all = state_manager.tick_all
+        state_manager.tick_all = MagicMock(side_effect=original_tick_all)
+
+        state_manager.add_status_effect(self.char1, "stunned", 1)
+
+        script.at_repeat()
+
+        state_manager.tick_all.assert_called_once()
+        self.assertFalse(self.char1.tags.has("stunned", category="status"))
 
 
 class TestRegeneration(EvenniaTest):
