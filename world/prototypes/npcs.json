@@ -6,7 +6,9 @@
         "npc_type": "merchant",
         "ai_type": "passive",
         "level": 1,
-        "actflags": ["call_for_help"]
+        "actflags": ["call_for_help"],
+        "skills": ["appraise"],
+        "resistances": ["cold"]
     },
     "basic_questgiver": {
         "key": "quest giver",
@@ -15,7 +17,9 @@
         "npc_type": "questgiver",
         "ai_type": "passive",
         "level": 1,
-        "actflags": ["call_for_help"]
+        "actflags": ["call_for_help"],
+        "spells": ["cure light"],
+        "resistances": []
     },
     "basic_guard": {
         "key": "town guard",
@@ -26,6 +30,7 @@
         "level": 1,
         "actflags": ["assist", "call_for_help"],
         "skills": ["shield bash"],
-        "spells": ["heal"]
+        "spells": ["heal"],
+        "resistances": ["fire"]
     }
 }

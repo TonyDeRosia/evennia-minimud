@@ -155,8 +155,11 @@ class CmdMSet(Command):
         "bodyparts": lambda s: [f.value for f in parse_flag_list(s, BODYPARTS)],
         "saving_throws": lambda s: [f.value for f in parse_flag_list(s, SAVING_THROWS)],
         "ris": lambda s: [f.value for f in parse_flag_list(s, RIS_TYPES)],
+        "resistances": lambda s: [f.value for f in parse_flag_list(s, RIS_TYPES)],
         "attack_types": lambda s: [f.value for f in parse_flag_list(s, ATTACK_TYPES)],
         "defense_types": lambda s: [f.value for f in parse_flag_list(s, DEFENSE_TYPES)],
+        "skills": lambda s: [p.strip() for p in s.split(',') if p.strip()],
+        "spells": lambda s: [p.strip() for p in s.split(',') if p.strip()],
         "special_funcs": lambda s: [f.value for f in parse_flag_list(s, SPECIAL_FUNCS)],
         "loot_table": json.loads,
     }
