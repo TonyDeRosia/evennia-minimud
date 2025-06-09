@@ -954,6 +954,33 @@ Related:
 """,
     },
     {
+        "key": "peace",
+        "category": "Admin",
+        "text": """
+Help for peace
+
+Stop all fighting in the current room.
+
+Usage:
+    peace
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - Ends combat for everyone present.
+
+Related:
+    help ansi
+""",
+    },
+    {
         "key": "revive",
         "aliases": ["resurrect"],
         "category": "Combat",
