@@ -2772,6 +2772,7 @@ Invokes the same menu-driven builder as |wcnpc|n but instead of creating the
 NPC immediately it stores the result as a prototype prefixed with ``mob_``.
 Additional mob-specific fields such as act flags and resistances may be set
 while stepping through the menu.
+You can also specify a Script typeclass to attach after the languages step.
 
 Usage:
     mobbuilder

@@ -700,6 +700,27 @@ def _set_languages(caller, raw_string, **kwargs):
             caller.msg("Invalid language.")
             return "menunode_languages"
     caller.ndb.buildnpc["languages"] = val
+    return "menunode_script"
+
+def menunode_script(caller, raw_string="", **kwargs):
+    default = caller.ndb.buildnpc.get("script", "")
+    text = "|wScript to attach to NPC (e.g. bandit_ai.BanditAI)|n"
+    if default:
+        text += f" [default: {default}]"
+    text += "\n(back to go back, skip for default)"
+    options = add_back_skip({"key": "_default", "goto": _set_script}, _set_script)
+    return text, options
+
+
+def _set_script(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_languages"
+    if not string or string.lower() == "skip":
+        val = caller.ndb.buildnpc.get("script", "")
+    else:
+        val = string
+    caller.ndb.buildnpc["script"] = val
     return "menunode_triggers"
 
 def menunode_triggers(caller, raw_string="", **kwargs):
@@ -895,6 +916,14 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.defense_types = data.get("defense_types")
     npc.db.languages = data.get("languages")
     npc.db.triggers = data.get("triggers") or {}
+    if script_path := data.get("script"):
+        try:
+            module, cls = script_path.rsplit(".", 1)
+            mod = __import__(module, fromlist=[cls])
+            script_cls = getattr(mod, cls)
+            npc.scripts.add(script_cls, key=cls)
+        except Exception as err:  # pragma: no cover - log errors
+            caller.msg(f"Could not attach script {script_path}: {err}")
     npc.db.creature_type = data.get("creature_type")
     npc.db.level = data.get("level", 1)
     for trait, val in {
@@ -923,6 +952,8 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
 
         proto_key = data.get("proto_key", data.get("key"))
         proto = {k: v for k, v in data.items() if k not in ("edit_obj", "proto_key")}
+        if data.get("script"):
+            proto["scripts"] = [data["script"]]
         prototypes.register_npc_prototype(proto_key, proto)
         caller.msg(f"NPC {npc.key} created and prototype saved.")
     else:
@@ -969,6 +1000,7 @@ def _gather_npc_data(npc):
         "merchant_markup": npc.db.merchant_markup or 1.0,
         "guild_affiliation": npc.tags.get(category="guild_affiliation") or "",
         "triggers": npc.db.triggers or {},
+        "script": next((scr.typeclass_path for scr in npc.scripts.all() if scr.key != "npc_ai"), ""),
     }
 
 
@@ -997,6 +1029,7 @@ class CmdCNPC(Command):
                 "npc_class": "base",
                 "roles": [],
                 "merchant_markup": 1.0,
+                "script": "",
             }
             EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
             return
