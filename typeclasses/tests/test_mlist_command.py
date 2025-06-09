@@ -44,14 +44,23 @@ class TestMListCommand(EvenniaTest):
         )
         prototypes.register_npc_prototype(
             "elf_mage",
-            {"key": "elf mage", "npc_class": "mage", "race": "elf", "roles": ["questgiver"]},
+            {
+                "key": "elf mage",
+                "npc_class": "mage",
+                "race": "elf",
+                "roles": ["questgiver"],
+                "tags": ["caster"],
+            },
         )
-        res = prototypes.get_npc_prototypes({"class": "warrior"})
-        assert list(res.keys()) == ["orc_warrior"]
-        res = prototypes.get_npc_prototypes({"race": "elf"})
-        assert list(res.keys()) == ["elf_mage"]
-        res = prototypes.get_npc_prototypes({"role": "guard"})
-        assert list(res.keys()) == ["orc_warrior"]
+        reg = prototypes.get_npc_prototypes()
+        res = prototypes.filter_npc_prototypes(reg, {"class": "warrior"})
+        assert [k for k, _ in res] == ["orc_warrior"]
+        res = prototypes.filter_npc_prototypes(reg, {"race": "elf"})
+        assert [k for k, _ in res] == ["elf_mage"]
+        res = prototypes.filter_npc_prototypes(reg, {"role": "guard"})
+        assert [k for k, _ in res] == ["orc_warrior"]
+        res = prototypes.filter_npc_prototypes(reg, {"tag": "caster"})
+        assert [k for k, _ in res] == ["elf_mage"]
 
     def test_mlist_room_and_area(self):
         proto = {
