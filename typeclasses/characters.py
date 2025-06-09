@@ -14,7 +14,7 @@ from utils import normalize_slot
 from utils.slots import SLOT_ORDER
 from collections.abc import Mapping
 import math
-from world.npc_triggers import TriggerManager
+from world.triggers import TriggerManager
 from world.spells import Spell
 
 from .objects import ObjectParent
@@ -787,7 +787,7 @@ class NPC(Character):
     Triggers for reacting to game events are stored in ``db.triggers`` as a
     mapping from event name to one or more trigger definitions. A trigger may
     be a tuple ``(match, reaction)`` or a dictionary with optional ``match`` and
-    ``reactions`` keys. See :mod:`world.npc_triggers` for details.
+    ``reactions`` keys. See :mod:`world.triggers` for details.
     """
 
     # defines what color this NPC's name will display in
@@ -797,7 +797,7 @@ class NPC(Character):
 
     @lazy_property
     def trigger_manager(self):
-        """Access :class:`~world.npc_triggers.TriggerManager`."""
+        """Access :class:`~world.triggers.TriggerManager`."""
         return TriggerManager(self)
 
     def at_object_creation(self):
