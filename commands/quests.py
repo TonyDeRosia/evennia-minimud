@@ -21,11 +21,11 @@ class CmdQCreate(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: qcreate <quest_key> \"<title>\"")
+            self.msg('Usage: qcreate <quest_key> "<title>"')
             return
         parts = self.args.split(None, 1)
         quest_key = normalize_quest_key(parts[0])
-        title = parts[1].strip("\"") if len(parts) > 1 else ""
+        title = parts[1].strip('"') if len(parts) > 1 else ""
         _, quest = QuestManager.find(quest_key)
         if quest:
             self.msg("Quest already exists.")
@@ -123,7 +123,9 @@ class CmdQItem(Command):
         if quest is None:
             self.msg("Unknown quest.")
             return
-        obj = create_object("typeclasses.objects.Object", key=item_key, location=self.caller)
+        obj = create_object(
+            "typeclasses.objects.Object", key=item_key, location=self.caller
+        )
         obj.tags.add("quest_item", category="quest")
         obj.db.quest = quest_key
         self.msg(f"Created {obj.key} for quest {quest_key}.")
@@ -340,9 +342,7 @@ class CmdQuestProgress(Command):
                 continue
             progress = data.get("progress", 0)
             if quest.goal_type == "collect":
-                progress = len(
-                    [obj for obj in caller.contents if obj.db.quest == qkey]
-                )
+                progress = len([obj for obj in caller.contents if obj.db.quest == qkey])
             title = quest.title or qkey
             lines.append(f"{title}: {progress}/{quest.amount}")
 
@@ -398,6 +398,7 @@ class CmdCompleteQuest(Command):
         if quest.xp_reward:
             caller.db.exp = (caller.db.exp or 0) + quest.xp_reward
             from world.system import state_manager
+
             state_manager.check_level_up(caller)
             rewards.append(f"{quest.xp_reward} XP")
 
@@ -452,6 +453,75 @@ class CmdCompleteQuest(Command):
             self.msg(quest.complete_dialogue)
 
 
+class CmdTalk(Command):
+    """
+    Speak with an NPC about quests.
+
+    Usage:
+        talk <npc>
+
+    When used on a quest giver you will either see your progress on any
+    quests they assigned to you or hear the introductory dialogue for a
+    quest they offer.
+    """
+
+    key = "talk"
+    help_category = "General"
+
+    def func(self):
+        caller = self.caller
+
+        if not self.args:
+            self.msg("Usage: talk <npc>")
+            return
+
+        npc = caller.search(self.args.strip())
+        if not npc:
+            return
+
+        if not npc.tags.has("quest_giver", category="role"):
+            self.msg(
+                f"{npc.get_display_name(caller)} doesn't seem interested in conversation."
+            )
+            return
+
+        npc_quests = npc.attributes.get("quests", default=[])
+        if not npc_quests:
+            self.msg(f"{npc.get_display_name(caller)} has nothing for you.")
+            return
+
+        active = caller.db.active_quests or {}
+        completed = caller.db.completed_quests or []
+
+        progress_lines = []
+        next_dialogue = None
+        for qkey in npc_quests:
+            idx, quest = QuestManager.find(qkey)
+            if not quest:
+                continue
+            if qkey in active:
+                prog = active[qkey].get("progress", 0)
+                if quest.goal_type == "collect":
+                    prog = len([obj for obj in caller.contents if obj.db.quest == qkey])
+                title = quest.title or qkey
+                line = f"{title}: {prog}/{quest.amount}"
+                if quest.hint:
+                    line += f" - {quest.hint}"
+                progress_lines.append(line)
+            elif next_dialogue is None and (quest.repeatable or qkey not in completed):
+                next_dialogue = quest.start_dialogue or quest.desc
+
+        if progress_lines:
+            self.msg("\n".join(progress_lines))
+            return
+
+        if next_dialogue:
+            self.msg(next_dialogue)
+            return
+
+        self.msg(f"{npc.get_display_name(caller)} has nothing to discuss with you.")
+
+
 class QuestCmdSet(CmdSet):
     """CmdSet for quest builder commands."""
 
@@ -468,3 +538,4 @@ class QuestCmdSet(CmdSet):
         self.add(CmdAcceptQuest)
         self.add(CmdQuestProgress)
         self.add(CmdCompleteQuest)
+        self.add(CmdTalk)
