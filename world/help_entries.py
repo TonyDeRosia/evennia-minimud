@@ -2365,6 +2365,7 @@ Related:
     },
     {
         "key": "attack",
+        "aliases": ["att", "hit", "shoot", "kill", "k"],
         "category": "Combat",
         "text": """
 Help for attack
