@@ -5,6 +5,8 @@ from unittest.mock import MagicMock
 from evennia.utils.test_resources import EvenniaTest
 from django.test import override_settings
 from utils.currency import from_copper, to_copper
+from evennia.objects.models import ObjectDB
+from typeclasses.rooms import Room
 
 
 @override_settings(DEFAULT_HOME=None)
@@ -684,6 +686,35 @@ class TestAreaMakeCommand(EvenniaTest):
         self.char1.execute_cmd("amake foo 1-5")
         self.assertEqual(self.char1.location.db.area, "foo")
         self.assertEqual(self.char1.location.db.room_id, 1)
+
+
+class TestRoomMakeCommand(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.msg = MagicMock()
+
+    def test_rmake_creates_room(self):
+        self.char1.execute_cmd("amake zone 10-15")
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("rmake zone 10")
+        objs = ObjectDB.objects.filter(
+            db_attributes__db_key="area",
+            db_attributes__db_strvalue__iexact="zone",
+        )
+        room = None
+        for obj in objs:
+            if obj.is_typeclass(Room, exact=False) and obj.db.room_id == 10:
+                room = obj
+                break
+        self.assertIsNotNone(room)
+        self.assertEqual(room.db.area, "zone")
+        self.assertEqual(room.db.room_id, 10)
+
+    def test_rmake_range_check(self):
+        self.char1.execute_cmd("amake demo 1-3")
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("rmake demo 5")
+        self.char1.msg.assert_called_with("Number outside area range.")
 
 
 class TestExtendedDigTeleport(EvenniaTest):

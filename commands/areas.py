@@ -1,10 +1,11 @@
 from evennia.objects.models import ObjectDB
 from evennia.utils.evtable import EvTable
-from evennia import CmdSet
+from evennia import CmdSet, create_object
 
 from .command import Command
 from scripts.area_spawner import AreaSpawner
 from world.areas import Area, get_areas, save_area, update_area, find_area
+from typeclasses.rooms import Room
 
 
 class CmdAreas(Command):
@@ -176,6 +177,43 @@ class CmdRooms(Command):
         self.msg("\n".join([header] + lines))
 
 
+class CmdRMake(Command):
+    """Create an unlinked room in a registered area."""
+
+    key = "rmake"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: rmake <area> <number>")
+            return
+        parts = self.args.split()
+        if len(parts) != 2 or not parts[1].isdigit():
+            self.msg("Usage: rmake <area> <number>")
+            return
+        area_name, num_str = parts
+        room_id = int(num_str)
+        _, area = find_area(area_name)
+        if area is None:
+            self.msg("Unknown area.")
+            return
+        if not (area.start <= room_id <= area.end):
+            self.msg("Number outside area range.")
+            return
+        objs = ObjectDB.objects.filter(
+            db_attributes__db_key="area",
+            db_attributes__db_strvalue__iexact=area_name,
+        )
+        for obj in objs:
+            if obj.db.room_id == room_id and obj.is_typeclass(Room, exact=False):
+                self.msg("Room already exists.")
+                return
+        new_room = create_object(Room, key="Room")
+        new_room.set_area(area_name, room_id)
+        self.msg(f"Room {room_id} created in area {area_name}.")
+
+
 class CmdRName(Command):
     """
     Rename the room you are currently in.
@@ -303,6 +341,7 @@ class AreaCmdSet(CmdSet):
         self.add(CmdAMake)
         self.add(CmdASet)
         self.add(CmdRooms)
+        self.add(CmdRMake)
         self.add(CmdRName)
         self.add(CmdRDesc)
         self.add(CmdRSet)
