@@ -1,19 +1,21 @@
-"""
-At_initial_setup module template
+"""One time initial setup hooks.
 
-Custom at_initial_setup method. This allows you to hook special
-modifications to the initial server startup process. Note that this
-will only be run once - when the server starts up for the very first
-time! It is called last in the startup process and can thus be used to
-overload things that happened before it.
-
-The module must contain a global function at_initial_setup().  This
-will be called without arguments. Note that tracebacks in this module
-will be QUIETLY ignored, so make sure to check it well to make sure it
-does what you expect it to.
-
+``at_initial_setup`` is only executed once—the very first time the
+game's database is created.  Common actions include generating starting
+rooms, populating default game objects or creating an administrator
+account.  Because it only fires once, mistakes made here require a
+database reset to run again, so test carefully.
 """
 
 
 def at_initial_setup():
+    """Hook for custom game setup on first launch."""
+
+    # Example: ensure a starting room exists.
+    # from evennia.utils import create
+    # if not search_object("Limbo"):  # only run on brand new database
+    #     create.create_object("typeclasses.rooms.Room", key="Limbo")
+    #
+    # Add other game-specific one time setup here.
+
     pass

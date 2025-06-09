@@ -16,9 +16,24 @@ services are started last in the Server startup process.
 
 
 def start_plugin_services(server):
-    """
-    This hook is called by Evennia, last in the Server startup process.
+    """Hook for attaching additional Twisted services to the Server."""
 
-    server - a reference to the main server application.
-    """
+    # The core game requires no extra services.  If you wish to run your
+    # own Twisted ``IService`` alongside the Evennia Server, create and
+    # start it here.
+
+    # Example (broadcast time every minute):
+    #
+    #   from twisted.internet import task
+    #   from evennia.utils import logger
+    #
+    #   def announce():
+    #       logger.log_info("Tick ", time.time())
+    #
+    #   t = task.LoopingCall(announce)
+    #   t.start(60)
+    #   server.services.addService(t)
+    #
+    # Remove or replace with your own service implementations.
+
     pass

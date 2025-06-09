@@ -19,9 +19,15 @@ at_server_cold_stop()
 
 
 def at_server_init():
-    """
-    This is called first as the server is starting up, regardless of how.
-    """
+    """Called as the service layer initializes."""
+
+    from evennia.utils.logger import log_info
+
+    # Example custom behavior: populate in-memory caches or pre-load data.
+    log_info("at_server_init: building caches")
+
+    # add initialization code here
+
     pass
 
 
@@ -52,6 +58,12 @@ def at_server_stop():
     This is called just before the server is shut down, regardless
     of it is for a reload, reset or shutdown.
     """
+    from evennia.utils.logger import log_info
+
+    log_info("at_server_stop: cleaning up")
+
+    # add shutdown logic here
+
     pass
 
 
@@ -59,6 +71,12 @@ def at_server_reload_start():
     """
     This is called only when server starts back up after a reload.
     """
+    from evennia.utils.logger import log_info
+
+    log_info("at_server_reload_start: preparing reload")
+
+    # add reload-start logic here
+
     pass
 
 
@@ -66,6 +84,12 @@ def at_server_reload_stop():
     """
     This is called only time the server stops before a reload.
     """
+    from evennia.utils.logger import log_info
+
+    log_info("at_server_reload_stop: reload complete")
+
+    # add reload-stop logic here
+
     pass
 
 
@@ -74,6 +98,12 @@ def at_server_cold_start():
     This is called only when the server starts "cold", i.e. after a
     shutdown or a reset.
     """
+    from evennia.utils.logger import log_info
+
+    log_info("at_server_cold_start: cold boot")
+
+    # add cold-start logic here
+
     pass
 
 
@@ -82,4 +112,10 @@ def at_server_cold_stop():
     This is called only when the server goes down due to a shutdown or
     reset.
     """
+    from evennia.utils.logger import log_info
+
+    log_info("at_server_cold_stop: shutting down")
+
+    # add cold-stop logic here
+
     pass
