@@ -1,5 +1,7 @@
 from typing import Dict, List
 from evennia.server.models import ServerConfig
+from evennia.objects.models import ObjectDB
+from typeclasses.npcs import BaseNPC
 
 _REGISTRY_KEY = "area_npc_registry"
 
@@ -39,3 +41,15 @@ def remove_area_npc(area: str, proto_key: str):
         else:
             reg.pop(key, None)
         _save_registry(reg)
+
+
+def find_npcs_by_prototype(proto_key: str):
+    """Return live NPCs spawned from ``proto_key``."""
+    objs = ObjectDB.objects.get_by_attribute(key="prototype_key", value=proto_key)
+    return [obj for obj in objs if obj.is_typeclass(BaseNPC, exact=False)]
+
+
+def find_npcs_by_area(area_tag: str):
+    """Return live NPCs with ``db.area_tag`` matching ``area_tag``."""
+    objs = ObjectDB.objects.get_by_attribute(key="area_tag", value=area_tag)
+    return [obj for obj in objs if obj.is_typeclass(BaseNPC, exact=False)]
