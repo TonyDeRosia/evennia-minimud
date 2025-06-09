@@ -531,7 +531,11 @@ def menunode_confirm(caller, raw_string="", **kwargs):
 def _do_confirm(caller, raw_string, **kwargs):
     string = raw_string.strip().lower()
     if string == "back":
-        if caller.ndb.mob_build.get("role") in ("merchant", "shop", "repair"):
+        if caller.ndb.mob_build and caller.ndb.mob_build.get("role") in (
+            "merchant",
+            "shop",
+            "repair",
+        ):
             return "menunode_shop"
         return "menunode_role"
     if string not in ("yes", "y", "done", ""):
