@@ -252,7 +252,7 @@ def _set_key(caller, raw_string, **kwargs):
         return "menunode_key"
     caller.ndb.buildnpc = caller.ndb.buildnpc or {}
     caller.ndb.buildnpc["key"] = val
-    return "menunode_race"
+    return "menunode_desc"
 
 
 def menunode_race(caller, raw_string="", **kwargs):
@@ -274,7 +274,7 @@ def _set_race(caller, raw_string, **kwargs):
 
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_key"
+        return "menunode_desc"
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("race", "")
     else:
@@ -286,7 +286,7 @@ def _set_race(caller, raw_string, **kwargs):
             )
             return "menunode_race"
     caller.ndb.buildnpc["race"] = string
-    return "menunode_sex"
+    return "menunode_npc_class"
 
 
 def menunode_sex(caller, raw_string="", **kwargs):
@@ -308,7 +308,7 @@ def _set_sex(caller, raw_string, **kwargs):
 
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_race"
+        return "menunode_npc_class"
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("sex", "")
     else:
@@ -354,7 +354,7 @@ def _set_weight(caller, raw_string, **kwargs):
             )
             return "menunode_weight"
     caller.ndb.buildnpc["weight"] = string
-    return "menunode_desc"
+    return "menunode_level"
 
 
 def menunode_desc(caller, raw_string="", **kwargs):
@@ -379,7 +379,7 @@ def _set_desc(caller, raw_string, **kwargs):
         caller.msg("Description is required.")
         return "menunode_desc"
     caller.ndb.buildnpc["desc"] = string
-    return "menunode_vnum"
+    return "menunode_race"
 
 
 def menunode_vnum(caller, raw_string="", **kwargs):
@@ -463,7 +463,7 @@ def _set_role(caller, raw_string, **kwargs):
         caller.msg(f"Invalid role. Choose from: {', '.join(ALLOWED_ROLES_PRIMARY)}")
         return "menunode_role"
     caller.ndb.buildnpc["role"] = string
-    return "menunode_npc_class"
+    return "menunode_combat_class"
 
 
 def menunode_guild_affiliation(caller, raw_string="", **kwargs):
@@ -482,6 +482,8 @@ def menunode_guild_affiliation(caller, raw_string="", **kwargs):
 def _set_guild_affiliation(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
+        if not caller.ndb.buildnpc.get("role") and not caller.ndb.buildnpc.get("roles"):
+            return "menunode_weight"
         return "menunode_roles"
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("guild_affiliation", "")
@@ -590,7 +592,10 @@ def menunode_npc_class(caller, raw_string="", **kwargs):
 def _set_npc_class(caller, raw_string, **kwargs):
     string = raw_string.strip().lower()
     if string == "back":
-        return "menunode_role"
+        # if a role has been set, we came here from role selection
+        if caller.ndb.buildnpc.get("role"):
+            return "menunode_role"
+        return "menunode_race"
     if not string or string in ("skip", "next"):
         string = caller.ndb.buildnpc.get("npc_class", "base")
     if string not in NPC_CLASS_MAP:
@@ -598,7 +603,7 @@ def _set_npc_class(caller, raw_string, **kwargs):
         return "menunode_npc_class"
     caller.ndb.buildnpc["npc_class"] = string
 
-    return "menunode_combat_class"
+    return "menunode_sex"
 
 
 def menunode_combat_class(caller, raw_string="", **kwargs):
@@ -655,7 +660,7 @@ def _edit_roles(caller, raw_string, **kwargs):
     string = raw_string.strip().lower()
     roles = caller.ndb.buildnpc.setdefault("roles", [])
     if string == "back":
-        return "menunode_npc_class"
+        return "menunode_combat_class"
     if string in ("done", "finish", "skip", ""):
         return "menunode_role_details"
     if string.startswith("add "):
@@ -686,7 +691,7 @@ def menunode_role_details(caller, raw_string="", **kwargs):
         r in roles for r in ("guildmaster", "guild_receptionist")
     ) and not caller.ndb.buildnpc.get("guild_affiliation"):
         return "menunode_guild_affiliation"
-    return "menunode_level"
+    return "menunode_exp_reward"
 
 
 def menunode_merchant_pricing(caller, raw_string="", **kwargs):
@@ -749,7 +754,7 @@ def _set_level(caller, raw_string, **kwargs):
         caller.msg("Enter a number between 1 and 100.")
         return "menunode_level"
     caller.ndb.buildnpc["level"] = val
-    return "menunode_exp_reward"
+    return "menunode_vnum"
 
 
 def menunode_exp_reward(caller, raw_string="", **kwargs):
@@ -774,7 +779,7 @@ def menunode_exp_reward(caller, raw_string="", **kwargs):
 def _set_exp_reward(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_level"
+        return "menunode_role_details"
     if not string or string.lower() == "skip":
         level = caller.ndb.buildnpc.get("level", 1)
         val = caller.ndb.buildnpc.get(
