@@ -8,6 +8,7 @@ from django.conf import settings
 from evennia.utils.test_resources import EvenniaTest
 
 from commands.admin import BuilderCmdSet
+from commands import npc_builder
 from utils.mob_proto import register_prototype, spawn_from_vnum, get_prototype
 from utils import vnum_registry
 from world.scripts.mob_db import get_mobdb
@@ -114,3 +115,22 @@ class TestVnumMobs(EvenniaTest):
         ) as mock_spawn:
             self.char1.execute_cmd("@mspawn orc")
         mock_spawn.assert_called_with(vnum, location=self.char1.location)
+
+    def test_builder_sets_vnum_on_npc_and_proto(self):
+        """Creating an NPC with a VNUM should store it on the NPC and prototype."""
+        from world import prototypes
+
+        self.char1.ndb.buildnpc = {
+            "key": "ogre",
+            "npc_class": "base",
+            "vnum": 12,
+            "creature_type": "humanoid",
+        }
+        npc_builder._create_npc(self.char1, "", register=True)
+
+        npc = [o for o in self.char1.location.contents if o.key == "ogre"][0]
+        self.assertEqual(npc.db.vnum, 12)
+        self.assertTrue(npc.tags.has("M12", category="vnum"))
+
+        registry = prototypes.get_npc_prototypes()
+        self.assertEqual(registry["ogre"]["vnum"], 12)

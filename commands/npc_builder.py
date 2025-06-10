@@ -1444,6 +1444,9 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.race = data.get("race")
     npc.db.sex = data.get("sex")
     npc.db.size = data.get("size")
+    if vnum := data.get("vnum"):
+        npc.db.vnum = vnum
+        npc.tags.add(f"M{vnum}", category="vnum")
     npc.tags.add("npc")
     role = data.get("role") or data.get("npc_type")
     if role:
@@ -1524,6 +1527,8 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
         proto = {k: v for k, v in data.items() if k not in ("edit_obj", "proto_key")}
         proto["typeclass"] = tclass_path
         proto["exp_reward"] = data.get("exp_reward", 0)
+        if data.get("vnum") is not None:
+            proto["vnum"] = data.get("vnum")
         if data.get("coin_drop"):
             proto["coin_drop"] = data.get("coin_drop")
         if data.get("loot_table"):
