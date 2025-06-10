@@ -22,6 +22,7 @@ class CmdMobBuilder(Command):
     help_category = "Building"
 
     def func(self):
+        """Ask if the interactive builder should be launched."""
         self.caller.ndb.buildnpc = {
             "triggers": {},
             "npc_class": "base",
@@ -33,7 +34,18 @@ class CmdMobBuilder(Command):
             "script": "",
             "use_mob": True,
         }
-        EvMenu(self.caller, "commands.npc_builder", startnode="menunode_key")
+
+        key = self.caller.ndb.buildnpc.get("key", "<unset>")
+        vnum = self.caller.ndb.buildnpc.get("vnum", "auto")
+        confirm = yield (
+            f"Prototype key: {key} | VNUM: {vnum}.\nRun mobbuilder interactively? Yes/No"
+        )
+        if confirm.strip().lower() not in ("y", "yes"):
+            self.caller.msg("Aborted.")
+            self.caller.ndb.buildnpc = None
+            return
+
+        EvMenu(self.caller, "commands.npc_builder", startnode="menunode_summary")
 
 
 class CmdMSpawn(Command):

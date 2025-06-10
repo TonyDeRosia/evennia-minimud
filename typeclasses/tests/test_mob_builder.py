@@ -35,8 +35,13 @@ class TestMobBuilder(EvenniaTest):
         return None
 
     def test_builder_flow_and_spawn(self):
-        with patch("commands.npc_builder.EvMenu"):
+        with patch("commands.npc_builder.EvMenu") as mock_menu:
             self.char1.execute_cmd("mobbuilder")
+            prompt = self.char1.msg.call_args[0][0]
+            self.assertIn("Run", prompt)
+            self.char1.msg.reset_mock()
+            self.char1.execute_cmd("yes")
+        mock_menu.assert_called()
         npc_builder._set_key(self.char1, "goblin")
         npc_builder._set_desc(self.char1, "A small goblin")
         npc_builder._set_creature_type(self.char1, "humanoid")
