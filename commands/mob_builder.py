@@ -15,37 +15,16 @@ from .mob_builder_commands import CmdMStat as _OldMStat, CmdMList as _OldMList
 
 
 class CmdMobBuilder(Command):
-    """Launch the unified NPC builder for mob prototypes."""
+    """Launch the CNPC builder pre-configured for mobs."""
 
     key = "mobbuilder"
     locks = "cmd:perm(Builder)"
     help_category = "Building"
 
     def func(self):
-        """Ask if the interactive builder should be launched."""
-        self.caller.ndb.buildnpc = {
-            "triggers": {},
-            "npc_class": "base",
-            "roles": [],
-            "skills": [],
-            "spells": [],
-            "ris": [],
-            "merchant_markup": 1.0,
-            "script": "",
-            "use_mob": True,
-        }
-
-        key = self.caller.ndb.buildnpc.get("key", "<unset>")
-        vnum = self.caller.ndb.buildnpc.get("vnum", "auto")
-        confirm = yield (
-            f"Prototype key: {key} | VNUM: {vnum}.\nRun mobbuilder interactively? Yes/No"
-        )
-        if confirm.strip().lower() not in ("y", "yes"):
-            self.caller.msg("Aborted.")
-            self.caller.ndb.buildnpc = None
-            return
-
-        EvMenu(self.caller, "commands.npc_builder", startnode="menunode_summary")
+        """Start the new NPC builder using mob defaults."""
+        self.caller.ndb.buildnpc = {"use_mob": True}
+        EvMenu(self.caller, "commands.npc_builder", startnode="menunode_key")
 
 
 class CmdMSpawn(Command):
