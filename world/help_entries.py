@@ -3110,6 +3110,32 @@ Example:
 """,
     },
     {
+        "key": "@mobproto",
+        "category": "Building",
+        "text": """Help for @mobproto
+
+Manage VNUM-based NPC prototypes. Creating or editing a prototype
+registers it in the mob database so it appears in ``@mlist`` automatically.
+
+Usage:
+    @mobproto create <vnum> <name>
+    @mobproto set <vnum> <field> <value>
+    @mobproto list
+    @mobproto spawn <vnum> [room]
+    @mobproto edit <vnum>
+    @mobproto delete <vnum>
+    @mobproto diff <vnum1> <vnum2>
+
+Examples:
+    @mobproto create 1 goblin
+    @mobproto set 1 level 5
+    @mobproto spawn 1
+
+Notes:
+    - Deleting fails if live NPCs exist for the VNUM.
+""",
+    },
+    {
         "key": "@makeshop",
         "category": "Building",
         "text": """Help for @makeshop
