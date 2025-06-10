@@ -2682,7 +2682,7 @@ Notes:
       guildmaster, guild_receptionist, questgiver, combat_trainer and
       event_npc.
     - The builder prompts for description, NPC type, creature type, level,
-      HP MP SP, primary stats, behavior, skills, spells, resistances and
+      experience reward, HP MP SP, primary stats, behavior, skills, spells, resistances and
       AI type.
     - Humanoid body type grants the standard equipment slots automatically.
       Quadrupeds receive head, body, front_legs and hind_legs and lack weapon

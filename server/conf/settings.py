@@ -39,6 +39,9 @@ CMD_IGNORE_INVALID_ABBREVIATIONS = False
 # Use the project MuxCommand so prompts refresh after every command
 COMMAND_DEFAULT_CLASS = "commands.command.MuxCommand"
 
+# Default experience reward given per NPC level when creating mobs
+DEFAULT_XP_PER_LEVEL = 10
+
 ######################################################################
 # Config for contrib packages
 ######################################################################

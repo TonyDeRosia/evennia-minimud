@@ -8,6 +8,7 @@ from typeclasses.characters import NPC
 from utils.slots import SLOT_ORDER
 from utils.menu_utils import add_back_skip
 from .command import Command
+from django.conf import settings
 import re
 from world.mob_constants import (
     ACTFLAGS,
@@ -350,7 +351,7 @@ def _set_level(caller, raw_string, **kwargs):
         return "menunode_roles"
     if not string or string.lower() == "skip":
         caller.ndb.buildnpc["level"] = caller.ndb.buildnpc.get("level", 1)
-        return "menunode_resources"
+        return "menunode_exp_reward"
     try:
         val = int(string)
     except ValueError:
@@ -360,6 +361,41 @@ def _set_level(caller, raw_string, **kwargs):
         caller.msg("Enter a number between 1 and 100.")
         return "menunode_level"
     caller.ndb.buildnpc["level"] = val
+    return "menunode_exp_reward"
+
+def menunode_exp_reward(caller, raw_string="", **kwargs):
+    """Prompt for experience reward given when this NPC is defeated."""
+    level = caller.ndb.buildnpc.get("level", 1)
+    default = caller.ndb.buildnpc.get(
+        "exp_reward", level * settings.DEFAULT_XP_PER_LEVEL
+    )
+    text = dedent(
+        f"""
+        |wEXP reward|n [default: {default}]
+        Example: |w{level * settings.DEFAULT_XP_PER_LEVEL}|n
+        (back to go back, skip for default)
+        """
+    )
+    options = add_back_skip({"key": "_default", "goto": _set_exp_reward}, _set_exp_reward)
+    return text, options
+
+
+def _set_exp_reward(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_level"
+    if not string or string.lower() == "skip":
+        level = caller.ndb.buildnpc.get("level", 1)
+        val = caller.ndb.buildnpc.get(
+            "exp_reward", level * settings.DEFAULT_XP_PER_LEVEL
+        )
+    else:
+        try:
+            val = int(string)
+        except ValueError:
+            caller.msg("Enter a number.")
+            return "menunode_exp_reward"
+    caller.ndb.buildnpc["exp_reward"] = val
     return "menunode_resources"
 
 def menunode_resources(caller, raw_string="", **kwargs):
@@ -941,6 +977,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.defense_types = data.get("defense_types")
     npc.db.languages = data.get("languages")
     npc.db.triggers = data.get("triggers") or {}
+    npc.db.exp_reward = data.get("exp_reward", 0)
     if script_path := data.get("script"):
         try:
             module, cls = script_path.rsplit(".", 1)
@@ -992,6 +1029,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
             data["proto_key"] = proto_key
         proto = {k: v for k, v in data.items() if k not in ("edit_obj", "proto_key")}
         proto["typeclass"] = tclass_path
+        proto["exp_reward"] = data.get("exp_reward", 0)
         if data.get("use_mob"):
             proto["can_attack"] = True
             proto.setdefault(
@@ -1050,6 +1088,7 @@ def _gather_npc_data(npc):
         "attack_types": npc.db.attack_types or [],
         "defense_types": npc.db.defense_types or [],
         "languages": npc.db.languages or [],
+        "exp_reward": npc.db.exp_reward or 0,
         "merchant_markup": npc.db.merchant_markup or 1.0,
         "guild_affiliation": npc.tags.get(category="guild_affiliation") or "",
         "triggers": npc.db.triggers or {},
@@ -1084,6 +1123,7 @@ class CmdCNPC(Command):
                 "skills": [],
                 "spells": [],
                 "ris": [],
+                "exp_reward": 0,
                 "merchant_markup": 1.0,
                 "script": "",
             }
