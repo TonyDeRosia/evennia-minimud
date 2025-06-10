@@ -192,9 +192,12 @@ def format_mob_summary(data: dict) -> str:
     rewards = EvTable(border="cells")
     rewards.add_row("|cXP Reward|n", fmt(data.get("exp_reward")))
     if "coin_drop" in data or "coins" in data:
-        rewards.add_row(
-            "|cCoin Drop|n", fmt(data.get("coin_drop") or data.get("coins"))
-        )
+        coins = data.get("coin_drop") or data.get("coins")
+        if isinstance(coins, dict):
+            from utils.currency import format_wallet
+
+            coins = format_wallet(coins)
+        rewards.add_row("|cCoin Drop|n", fmt(coins))
     if data.get("loot_table"):
         loot = [
             f"{e.get('proto')}({e.get('chance', 100)}%)" for e in data.get("loot_table")
@@ -726,7 +729,99 @@ def _set_exp_reward(caller, raw_string, **kwargs):
             caller.msg("Enter a number.")
             return "menunode_exp_reward"
     caller.ndb.buildnpc["exp_reward"] = val
-    return "menunode_resources"
+    return "menunode_coin_drop"
+
+
+def menunode_coin_drop(caller, raw_string="", **kwargs):
+    """Prompt for coin drop amounts."""
+    from utils.currency import format_wallet, COIN_VALUES
+
+    default = caller.ndb.buildnpc.get("coin_drop", {})
+    text = "|wCoin drop|n (amount type pairs)"
+    if default:
+        text += f" [default: {format_wallet(default)}]"
+    text += "\nExample: |w10 gold 5 silver|n"
+    text += "\n(back to go back, skip for default)"
+    options = add_back_skip({"key": "_default", "goto": _set_coin_drop}, _set_coin_drop)
+    return text, options
+
+
+def _set_coin_drop(caller, raw_string, **kwargs):
+    from utils.currency import COIN_VALUES
+
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_exp_reward"
+    if not string or string.lower() == "skip":
+        val = caller.ndb.buildnpc.get("coin_drop", {})
+    else:
+        parts = string.split()
+        if len(parts) % 2 != 0:
+            caller.msg("Enter pairs like '10 gold 5 silver'.")
+            return "menunode_coin_drop"
+        val: dict[str, int] = {}
+        for amt, coin in zip(parts[::2], parts[1::2]):
+            if not amt.isdigit() or coin.lower() not in COIN_VALUES:
+                caller.msg("Enter pairs like '10 gold 5 silver'.")
+                return "menunode_coin_drop"
+            val[coin.lower()] = val.get(coin.lower(), 0) + int(amt)
+    caller.ndb.buildnpc["coin_drop"] = val
+    return "menunode_loot_table"
+
+
+def menunode_loot_table(caller, raw_string="", **kwargs):
+    """Menu for editing loot table entries."""
+    loot = caller.ndb.buildnpc.get("loot_table", [])
+    text = "|wEdit Loot Table|n\n"
+    if loot:
+        for entry in loot:
+            proto = entry.get("proto")
+            chance = entry.get("chance", 100)
+            text += f" - {proto} ({chance}%)\n"
+    else:
+        text += "None\n"
+    text += (
+        "Commands:\n  add <proto> [chance]\n  remove <proto>\n  done - finish\n  back - previous step\n"
+        "Example: |wadd RAW_MEAT 50|n"
+    )
+    options = add_back_skip({"key": "_default", "goto": _edit_loot_table}, _edit_loot_table)
+    return text, options
+
+
+def _edit_loot_table(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    table = caller.ndb.buildnpc.setdefault("loot_table", [])
+    if string.lower() == "back":
+        return "menunode_coin_drop"
+    if string.lower() in ("done", "finish", "skip", ""):
+        return "menunode_resources"
+    if string.lower().startswith("add "):
+        parts = string[4:].split()
+        if not parts:
+            caller.msg("Usage: add <proto> [chance]")
+            return "menunode_loot_table"
+        proto = parts[0]
+        chance = 100
+        if len(parts) > 1:
+            if not parts[1].isdigit():
+                caller.msg("Chance must be a number.")
+                return "menunode_loot_table"
+            chance = int(parts[1])
+        table.append({"proto": proto, "chance": chance})
+        caller.msg(f"Added {proto} ({chance}%).")
+        return "menunode_loot_table"
+    if string.lower().startswith("remove "):
+        proto = string[7:].strip()
+        for entry in list(table):
+            if entry.get("proto") == proto:
+                table.remove(entry)
+                caller.msg(f"Removed {proto}.")
+                break
+        else:
+            caller.msg("Entry not found.")
+        return "menunode_loot_table"
+    caller.msg("Unknown command.")
+    return "menunode_loot_table"
 
 
 def menunode_resources(caller, raw_string="", **kwargs):
@@ -1336,6 +1431,8 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.defense_types = data.get("defense_types")
     npc.db.languages = data.get("languages")
     npc.db.triggers = data.get("triggers") or {}
+    npc.db.coin_drop = data.get("coin_drop") or {}
+    npc.db.loot_table = data.get("loot_table") or []
     npc.db.exp_reward = data.get("exp_reward", 0)
     if script_path := data.get("script"):
         try:
@@ -1390,6 +1487,10 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
         proto = {k: v for k, v in data.items() if k not in ("edit_obj", "proto_key")}
         proto["typeclass"] = tclass_path
         proto["exp_reward"] = data.get("exp_reward", 0)
+        if data.get("coin_drop"):
+            proto["coin_drop"] = data.get("coin_drop")
+        if data.get("loot_table"):
+            proto["loot_table"] = data.get("loot_table")
         if data.get("use_mob"):
             proto["can_attack"] = True
             proto.setdefault(
@@ -1457,6 +1558,8 @@ def _gather_npc_data(npc):
         "defense_types": npc.db.defense_types or [],
         "languages": npc.db.languages or [],
         "exp_reward": npc.db.exp_reward or 0,
+        "coin_drop": npc.db.coin_drop or {},
+        "loot_table": npc.db.loot_table or [],
         "merchant_markup": npc.db.merchant_markup or 1.0,
         "guild_affiliation": npc.tags.get(category="guild_affiliation") or "",
         "triggers": npc.db.triggers or {},
@@ -1498,6 +1601,8 @@ class CmdCNPC(Command):
                 "skills": [],
                 "spells": [],
                 "ris": [],
+                "coin_drop": {},
+                "loot_table": [],
                 "exp_reward": 0,
                 "merchant_markup": 1.0,
                 "script": "",
