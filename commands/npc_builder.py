@@ -1548,6 +1548,10 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
         if data.get("script"):
             proto["scripts"] = [data["script"]]
         prototypes.register_npc_prototype(proto_key, proto)
+        area = caller.location.db.area
+        if area:
+            from world import area_npcs
+            area_npcs.add_area_npc(area, proto_key)
         caller.msg(f"NPC {npc.key} created and prototype saved.")
     else:
         caller.msg(f"NPC {npc.key} created.")

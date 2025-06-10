@@ -79,13 +79,16 @@ class TestCNPC(EvenniaTest):
         npc_builder._set_behavior(self.char1, "dumb")
         npc_builder._set_skills(self.char1, "smash")
         npc_builder._set_ai(self.char1, "defensive")
+        self.char1.location.db.area = "town"
         npc_builder._create_npc(self.char1, "", register=True)
 
         from world.prototypes import get_npc_prototypes
+        from world import area_npcs
 
         registry = get_npc_prototypes()
         self.assertIn("ogre", registry)
         self.assertEqual(registry["ogre"]["desc"], "A big ogre")
+        self.assertIn("ogre", area_npcs.get_area_npc_list("town"))
 
     def test_triggers_and_reactions(self):
         with patch("commands.npc_builder.EvMenu"):
