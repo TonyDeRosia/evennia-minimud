@@ -129,7 +129,7 @@ def format_mob_summary(data: dict) -> str:
             return ", ".join(str(v) for v in value)
         return str(value)
 
-    lines = [f"|wMob Prototype:|n {data.get('key', '--')}"]
+    lines = [f"|cMob Prototype:|n {data.get('key', '--')}"]
 
     basic = EvTable(border="cells")
     basic.add_row("|cShort Desc|n", fmt(data.get("desc")))
@@ -145,7 +145,7 @@ def format_mob_summary(data: dict) -> str:
         basic.add_row("|cCreature|n", fmt(data.get("creature_type")))
     if data.get("guild_affiliation"):
         basic.add_row("|cGuild|n", fmt(data.get("guild_affiliation")))
-    lines.append("\n|wBasic Info|n")
+    lines.append("\n|cBasic Info|n")
     lines.append(str(basic))
 
     stats = EvTable(border="cells")
@@ -154,7 +154,7 @@ def format_mob_summary(data: dict) -> str:
     stats.add_row("|cSP|n", fmt(data.get("sp")))
     if data.get("primary_stats"):
         stats.add_row("|cStats|n", fmt(data.get("primary_stats")))
-    lines.append("\n|wCombat Stats|n")
+    lines.append("\n|cCombat Stats|n")
     lines.append(str(stats))
 
     flags = EvTable(border="cells")
@@ -165,7 +165,7 @@ def format_mob_summary(data: dict) -> str:
         flags.add_row("|cAttacks|n", fmt(data.get("attack_types")))
     if data.get("defense_types"):
         flags.add_row("|cDefenses|n", fmt(data.get("defense_types")))
-    lines.append("\n|wCombat Flags|n")
+    lines.append("\n|cCombat Flags|n")
     lines.append(str(flags))
 
     rewards = EvTable(border="cells")
@@ -179,13 +179,13 @@ def format_mob_summary(data: dict) -> str:
             f"{e.get('proto')}({e.get('chance', 100)}%)" for e in data.get("loot_table")
         ]
         rewards.add_row("|cLoot Table|n", fmt(loot))
-    lines.append("\n|wRewards|n")
+    lines.append("\n|cRewards|n")
     lines.append(str(rewards))
 
     skills = EvTable(border="cells")
     skills.add_row("|cSkills|n", fmt(data.get("skills")))
     skills.add_row("|cSpells|n", fmt(data.get("spells")))
-    lines.append("\n|wSkills|n")
+    lines.append("\n|cSkills|n")
     lines.append(str(skills))
 
     return "\n".join(lines)
