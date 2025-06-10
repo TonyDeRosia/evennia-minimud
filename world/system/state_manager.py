@@ -269,6 +269,9 @@ def tick_character(chara):
             add_effect(chara, "hungry_thirsty", 1)
             if (hp := chara.traits.get("health")):
                 hp.current = max(hp.current - 1, 0)
+            for res in ("mana", "stamina"):
+                if (trait := chara.traits.get(res)):
+                    trait.current = max(trait.current - 1, 0)
 
 
 def tick_all():
