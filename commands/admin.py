@@ -52,6 +52,7 @@ from .mob_builder import (
 )
 from .cmdmobbuilder import CmdMobProto
 from .nextvnum import CmdNextVnum
+from .builder_types import CmdBuilderTypes
 
 
 def _safe_split(text):
@@ -1437,6 +1438,7 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdSpawnNPC)
         self.add(CmdListNPCs)
         self.add(CmdDupNPC)
+        self.add(CmdBuilderTypes)
         self.add(CmdMobTemplate)
         self.add(CmdMSpawn)
         self.add(CmdMobPreview)
