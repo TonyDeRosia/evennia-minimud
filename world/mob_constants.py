@@ -33,6 +33,22 @@ class NPC_RACES(_StrEnum):
     SATYR = "satyr"
 
 
+class NPC_SEXES(_StrEnum):
+    """Biological sex options for NPCs."""
+
+    MALE = "male"
+    FEMALE = "female"
+    NEUTRAL = "neutral"
+
+
+class NPC_SIZES(_StrEnum):
+    """Size categories for NPCs."""
+
+    SMALL = "small"
+    MEDIUM = "medium"
+    LARGE = "large"
+
+
 class NPC_CLASSES(_StrEnum):
     WARRIOR = "warrior"
     MYSTIC = "mystic"
@@ -174,6 +190,8 @@ def flags_to_string(flags: Iterable[_StrEnum]) -> str:
 
 __all__ = [
     "NPC_RACES",
+    "NPC_SEXES",
+    "NPC_SIZES",
     "NPC_CLASSES",
     "ACTFLAGS",
     "AFFECTED_BY",

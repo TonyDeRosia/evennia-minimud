@@ -41,6 +41,9 @@ class TestMobBuilder(EvenniaTest):
             self.char1, "commands.npc_builder", startnode="menunode_desc"
         )
         npc_builder._set_key(self.char1, "goblin")
+        npc_builder._set_race(self.char1, "human")
+        npc_builder._set_sex(self.char1, "male")
+        npc_builder._set_size(self.char1, "medium")
         npc_builder._set_desc(self.char1, "A small goblin")
         npc_builder._set_creature_type(self.char1, "humanoid")
         npc_builder._set_role(self.char1, "")
@@ -85,6 +88,9 @@ class TestMobBuilder(EvenniaTest):
         data = {
             "key": "goblin",
             "desc": "A nasty goblin",
+            "race": "orc",
+            "sex": "male",
+            "size": "small",
             "level": 2,
             "hp": 10,
             "mp": 0,
