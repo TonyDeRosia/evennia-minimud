@@ -60,9 +60,9 @@ class TestCombatUtils(EvenniaTest):
         self.char2.db.stat_overrides = {"crit_resist": 0}
         stat_manager.refresh_stats(self.char1)
         stat_manager.refresh_stats(self.char2)
-        with patch("combat.combat_utils.random.randint", return_value=10):
-            self.assertTrue(combat_utils.roll_crit(self.char1, self.char2))
-        self.assertEqual(combat_utils.crit_damage(self.char1, 10), 15)
+        with patch("world.system.stat_manager.randint", return_value=10):
+            self.assertTrue(stat_manager.roll_crit(self.char1, self.char2))
+        self.assertEqual(stat_manager.crit_damage(self.char1, 10), 15)
 
     def test_roll_evade(self):
         from combat import combat_utils
