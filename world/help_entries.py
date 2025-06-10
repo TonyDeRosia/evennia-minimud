@@ -3482,6 +3482,18 @@ wander and scripted. Scripted AI runs the callback stored on
 """,
     },
     {
+        "key": "builder types cnpc",
+        "category": "Building",
+        "text": """Help for builder types cnpc
+
+Launch a quick NPC creation prompt. Follow the questions and a new
+NPC will appear in your location.
+
+Usage:
+    builder types cnpc <name>
+""",
+    },
+    {
         "key": "vnums",
         "category": "Building",
         "text": """Help for vnums
