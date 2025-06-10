@@ -19,14 +19,21 @@ class TestVnumMobs(EvenniaTest):
         self.char1.msg = MagicMock()
         self.char1.cmdset.add_default(BuilderCmdSet)
         self.tmp = TemporaryDirectory()
-        patcher = mock.patch.object(
+        patcher1 = mock.patch.object(
             settings,
             "PROTOTYPE_NPC_FILE",
             Path(self.tmp.name) / "npcs.json",
         )
+        patcher2 = mock.patch.object(
+            settings,
+            "VNUM_REGISTRY_FILE",
+            Path(self.tmp.name) / "vnums.json",
+        )
         self.addCleanup(self.tmp.cleanup)
-        self.addCleanup(patcher.stop)
-        patcher.start()
+        self.addCleanup(patcher1.stop)
+        self.addCleanup(patcher2.stop)
+        patcher1.start()
+        patcher2.start()
 
     def test_register_and_spawn_vnum(self):
         proto = {"key": "goblin", "typeclass": "typeclasses.npcs.BaseNPC"}
@@ -74,3 +81,4 @@ class TestVnumMobs(EvenniaTest):
         self.assertIsNone(get_prototype(1))
         del_msg = self.char1.msg.call_args[0][0]
         self.assertIn("deleted", del_msg.lower())
+
