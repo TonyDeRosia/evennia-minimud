@@ -182,6 +182,8 @@ def get_display_scroll(chara):
     level = _db_get(chara, "level", 1)
     xp = _db_get(chara, "exp", 0)
     tnl = max(level * 100 - xp, 0)
+    practice_sessions = _db_get(chara, "practice_sessions", 0) or 0
+    training_points = _db_get(chara, "training_points", 0) or 0
 
     hp = chara.traits.get("health")
     mp = chara.traits.get("mana")
@@ -209,7 +211,7 @@ def get_display_scroll(chara):
             sated_disp = f"|g{sated_val}|n"
 
     lines.append(
-        f"|YLvl {level}|n  |CXP|n {xp}  |yTNL|n {tnl}  |rHP|n {hp_disp}  |cMP|n {mp_disp}  |gSP|n {sp_disp}"
+        f"|YLvl {level}|n  |CXP|n {xp}  |yTNL|n {tnl}  |rHP|n {hp_disp}  |cMP|n {mp_disp}  |gSP|n {sp_disp}  Prac {practice_sessions}  TP {training_points}"
     )
     if show_sated:
         lines.append(f"|ySated|n {sated_disp}")

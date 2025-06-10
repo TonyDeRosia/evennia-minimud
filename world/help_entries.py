@@ -1874,7 +1874,7 @@ Related:
         "text": """
 Help for score
 
-View your character sheet. Usage: score
+View your character sheet, including remaining practice sessions and training points. Usage: score
 
 Usage:
     score
