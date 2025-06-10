@@ -117,4 +117,5 @@ CONNECTION_SCREEN_MODULE = "evennia.contrib.base_systems.menu_login.connection_s
 try:
     from server.conf.secret_settings import *
 except ImportError:
-    print("secret_settings.py file not found or failed to import.")
+    from evennia.utils.logger import log_warn
+    log_warn("secret_settings.py file not found or failed to import.")
