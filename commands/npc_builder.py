@@ -51,8 +51,8 @@ def validate_prototype(data: dict) -> list[str]:
 
     return warnings
 
-# NPC types that can be selected in the builder
-ALLOWED_NPC_TYPES = (
+# Primary roles that can be selected in the builder
+ALLOWED_ROLES_PRIMARY = (
     "merchant",
     "questgiver",
     "guildmaster",
@@ -202,33 +202,33 @@ def _set_vnum(caller, raw_string, **kwargs):
     vnum_registry.register_vnum(val)
     return "menunode_creature_type"
 
-def menunode_npc_type(caller, raw_string="", **kwargs):
-    default = caller.ndb.buildnpc.get("npc_type", "")
-    types = "/".join(ALLOWED_NPC_TYPES)
+def menunode_role(caller, raw_string="", **kwargs):
+    default = caller.ndb.buildnpc.get("role", "")
+    types = "/".join(ALLOWED_ROLES_PRIMARY)
     text = dedent(
         f"""
-        |wEnter NPC type|n ({types})
+        |wRole (merchant, questgiver...)|n ({types})
         Example: |wmerchant|n
         Type |wback|n to return or |wskip|n to keep the default.
         """
     )
     if default:
         text += f" [default: {default}]"
-    options = add_back_skip({"key": "_default", "goto": _set_npc_type}, _set_npc_type)
+    options = add_back_skip({"key": "_default", "goto": _set_role}, _set_role)
     return text, options
 
-def _set_npc_type(caller, raw_string, **kwargs):
+def _set_role(caller, raw_string, **kwargs):
     string = raw_string.strip().lower()
     if string == "back":
         if caller.ndb.buildnpc.get("creature_type") == "unique":
             return "menunode_custom_slots"
         return "menunode_creature_type"
     if not string or string == "skip":
-        string = caller.ndb.buildnpc.get("npc_type", "").lower()
-    if string and string not in ALLOWED_NPC_TYPES:
-        caller.msg(f"Invalid NPC type. Choose from: {', '.join(ALLOWED_NPC_TYPES)}")
-        return "menunode_npc_type"
-    caller.ndb.buildnpc["npc_type"] = string
+        string = caller.ndb.buildnpc.get("role", "").lower()
+    if string and string not in ALLOWED_ROLES_PRIMARY:
+        caller.msg(f"Invalid role. Choose from: {', '.join(ALLOWED_ROLES_PRIMARY)}")
+        return "menunode_role"
+    caller.ndb.buildnpc["role"] = string
     return "menunode_npc_class"
 
 def menunode_guild_affiliation(caller, raw_string="", **kwargs):
@@ -275,12 +275,12 @@ def _set_creature_type(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["creature_type"] = ctype
     if ctype == "quadruped":
         caller.ndb.buildnpc["equipment_slots"] = ["head", "body", "front_legs", "hind_legs"]
-        return "menunode_npc_type"
+        return "menunode_role"
     if ctype == "unique":
         caller.ndb.buildnpc["equipment_slots"] = list(SLOT_ORDER)
         return "menunode_custom_slots"
     caller.ndb.buildnpc["equipment_slots"] = list(SLOT_ORDER)
-    return "menunode_npc_type"
+    return "menunode_role"
 
 def menunode_custom_slots(caller, raw_string="", **kwargs):
     slots = caller.ndb.buildnpc.get("equipment_slots", list(SLOT_ORDER))
@@ -301,7 +301,7 @@ def _edit_custom_slots(caller, raw_string, **kwargs):
     if string.lower() == "back":
         return "menunode_creature_type"
     if string.lower() in ("done", "finish", "skip", ""):
-        return "menunode_npc_type"
+        return "menunode_role"
     if string.lower().startswith("add "):
         slot = string[4:].strip().lower()
         if slot and slot not in slots:
@@ -324,7 +324,7 @@ def _edit_custom_slots(caller, raw_string, **kwargs):
 def menunode_npc_class(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("npc_class", "base")
     classes = "/".join(NPC_CLASS_MAP)
-    text = f"|wChoose NPC class ({classes})|n"
+    text = f"|wClass (warrior, wizard...)|n ({classes})"
     if default:
         text += f" [default: {default}]"
     text += "\n(back to go back, skip for default)"
@@ -334,7 +334,7 @@ def menunode_npc_class(caller, raw_string="", **kwargs):
 def _set_npc_class(caller, raw_string, **kwargs):
     string = raw_string.strip().lower()
     if string == "back":
-        return "menunode_npc_type"
+        return "menunode_role"
     if not string or string == "skip":
         string = caller.ndb.buildnpc.get("npc_class", "base")
     if string not in NPC_CLASS_MAP:
@@ -1045,9 +1045,10 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
         npc = create_object(tclass_path, key=data.get("key"), location=caller.location)
     npc.db.desc = data.get("desc")
     npc.tags.add("npc")
-    if npc_type := data.get("npc_type"):
-        npc.tags.add(npc_type, category="npc_type")
-        npc.tags.add(npc_type, category="npc_role")
+    role = data.get("role") or data.get("npc_type")
+    if role:
+        npc.tags.add(role, category="npc_type")
+        npc.tags.add(role, category="npc_role")
     for role in data.get("roles", []):
         if role and not npc.tags.has(role, category="npc_role"):
             npc.tags.add(role, category="npc_role")
@@ -1155,7 +1156,7 @@ def _gather_npc_data(npc):
         "proto_key": npc.tags.get(category=PROTOTYPE_TAG_CATEGORY),
         "key": npc.key,
         "desc": npc.db.desc,
-        "npc_type": npc.tags.get(category="npc_type") or "",
+        "role": npc.tags.get(category="npc_type") or "",
         "roles": [t for t in npc.tags.get(category="npc_role", return_list=True) or [] if t != npc.tags.get(category="npc_type")],
         "npc_class": next(
             (k for k, path in NPC_CLASS_MAP.items() if path == npc.typeclass_path),

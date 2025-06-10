@@ -2676,12 +2676,12 @@ Notes:
     - Aliases:
     - npc
     - createnpc
-    - NPC types include merchant, questgiver, guildmaster,
+    - NPC roles include merchant, questgiver, guildmaster,
       guild_receptionist, banker, trainer and wanderer.
     - NPC classes include base, merchant, banker, trainer, wanderer,
       guildmaster, guild_receptionist, questgiver, combat_trainer and
       event_npc.
-    - The builder prompts for description, NPC type, creature type, level,
+    - The builder prompts for description, role, creature type, level,
       experience reward, HP MP SP, primary stats, behavior, skills, spells, resistances and
       AI type.
     - Humanoid body type grants the standard equipment slots automatically.
