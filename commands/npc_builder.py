@@ -7,7 +7,7 @@ from utils.mob_proto import spawn_from_vnum
 from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from typeclasses.characters import NPC
 from utils.slots import SLOT_ORDER
-from utils.menu_utils import add_back_skip
+from utils.menu_utils import add_back_skip, add_back_next
 from utils import vnum_registry
 from .command import Command
 from django.conf import settings
@@ -570,8 +570,8 @@ def menunode_npc_class(caller, raw_string="", **kwargs):
     text = f"|wNPC class ({example}...)|n ({classes})"
     if default:
         text += f" [default: {default}]"
-    text += "\n(back to go back, skip for default)"
-    options = add_back_skip({"key": "_default", "goto": _set_npc_class}, _set_npc_class)
+    text += "\n(back to go back, next for default)"
+    options = add_back_next({"key": "_default", "goto": _set_npc_class}, _set_npc_class)
     return with_summary(caller, text), options
 
 
@@ -579,7 +579,7 @@ def _set_npc_class(caller, raw_string, **kwargs):
     string = raw_string.strip().lower()
     if string == "back":
         return "menunode_role"
-    if not string or string == "skip":
+    if not string or string in ("skip", "next"):
         string = caller.ndb.buildnpc.get("npc_class", "base")
     if string not in NPC_CLASS_MAP:
         caller.msg(f"Invalid class. Choose from: {', '.join(NPC_CLASS_MAP)}")
