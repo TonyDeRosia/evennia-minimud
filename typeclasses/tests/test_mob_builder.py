@@ -50,6 +50,10 @@ class TestMobBuilder(EvenniaTest):
         npc_builder._set_npc_class(self.char1, "base")
         npc_builder._edit_roles(self.char1, "done")
         npc_builder._set_level(self.char1, "1")
+        npc_builder._set_exp_reward(self.char1, "5")
+        npc_builder._set_coin_drop(self.char1, "1 gold")
+        npc_builder._edit_loot_table(self.char1, "add RAW_MEAT 50")
+        npc_builder._edit_loot_table(self.char1, "done")
         npc_builder._set_resources(self.char1, "10 0 0")
         npc_builder._set_stats(self.char1, "1 1 1 1 1 1")
         npc_builder._set_behavior(self.char1, "")
@@ -116,6 +120,8 @@ class TestMobBuilder(EvenniaTest):
         ]:
             assert text in out
         assert "slash" in out
+        assert "gold" in out
+        assert "RAW_MEAT" in out
 
     def test_vnum_menu_without_existing(self):
         """When no VNUM is set, Skip should not appear and Auto option is shown."""
@@ -147,3 +153,27 @@ class TestMobBuilder(EvenniaTest):
         text, _ = npc_builder.menunode_skills(self.char1)
         for skill in npc_builder.DEFAULT_SKILLS:
             assert skill in text
+
+    def test_set_coin_drop(self):
+        self.char1.ndb.buildnpc = {}
+        result = npc_builder._set_coin_drop(self.char1, "1 gold 2 silver")
+        assert self.char1.ndb.buildnpc["coin_drop"] == {"gold": 1, "silver": 2}
+        assert result == "menunode_loot_table"
+
+    def test_edit_loot_table(self):
+        self.char1.ndb.buildnpc = {}
+        npc_builder._edit_loot_table(self.char1, "add RAW_MEAT 75")
+        assert self.char1.ndb.buildnpc["loot_table"] == [{"proto": "RAW_MEAT", "chance": 75}]
+        result = npc_builder._edit_loot_table(self.char1, "done")
+        assert result == "menunode_resources"
+
+    def test_summary_shows_coin_and_loot(self):
+        data = {
+            "key": "orc",
+            "coin_drop": {"gold": 2},
+            "loot_table": [{"proto": "RAW_MEAT", "chance": 50}],
+        }
+        out = npc_builder.format_mob_summary(data)
+        assert "gold" in out
+        assert "RAW_MEAT" in out
+
