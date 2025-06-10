@@ -43,6 +43,7 @@ from .mob_builder_commands import (
 from .mob_builder import (
     CmdMobBuilder,
     CmdMSpawn,
+    CmdMobPreview,
     CmdMStat,
     CmdMList,
     CmdMedit,
@@ -1437,6 +1438,7 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdMobBuilder)
         self.add(CmdMobTemplate)
         self.add(CmdMSpawn)
+        self.add(CmdMobPreview)
         self.add(CmdMCreate)
         self.add(CmdMSet)
         self.add(CmdMList)
