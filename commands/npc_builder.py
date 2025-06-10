@@ -213,23 +213,6 @@ def format_mob_summary(data: dict) -> str:
 
 
 # Menu nodes for NPC creation
-
-
-def menunode_summary(caller, raw_string="", **kwargs):
-    """Show current values before editing."""
-    data = caller.ndb.buildnpc or {}
-    text = "|wCurrent NPC Values|n\n"
-    for field in ("key", "desc", "vnum", "npc_class", "level"):
-        if field in data:
-            text += f"{field}: {data.get(field)}\n"
-    text += "\nChoose an option:"
-    options = [
-        {"desc": "Edit", "goto": "menunode_key"},
-        {"desc": "Continue", "goto": "menunode_confirm"},
-    ]
-    return text, options
-
-
 def menunode_key(caller, raw_string="", **kwargs):
     """Prompt for the NPC key."""
     default = caller.ndb.buildnpc.get("key", "")
