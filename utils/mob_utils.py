@@ -14,6 +14,7 @@ __all__ = [
     "auto_calc_secondary",
     "assign_next_vnum",
     "add_to_mlist",
+    "calculate_combat_stats",
 ]
 
 
@@ -25,6 +26,24 @@ def assign_next_vnum(category: str) -> int:
 def add_to_mlist(vnum: int, prototype: Dict) -> None:
     """Insert ``prototype`` into the mob database under ``vnum``."""
     get_mobdb().add_proto(int(vnum), dict(prototype))
+
+
+def calculate_combat_stats(combat_class: str, level: int) -> Dict[str, int]:
+    """Return base combat stats for ``combat_class`` at ``level``."""
+    base = int(level) * 10
+    return {
+        "hp": base,
+        "mp": base // 2
+        if combat_class.lower() in ("wizard", "sorcerer", "mage", "necromancer")
+        else base // 4,
+        "sp": base // 2
+        if combat_class.lower() in ("warrior", "rogue", "swashbuckler")
+        else base // 3,
+        "armor": level * 2
+        if combat_class.lower() in ("warrior", "paladin")
+        else level,
+        "initiative": 10 + level // 2,
+    }
 
 
 def auto_calc(primary_stats: Dict[str, int]) -> Dict[str, int]:
