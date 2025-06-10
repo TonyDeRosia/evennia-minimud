@@ -57,6 +57,7 @@ class TestMobBuilder(EvenniaTest):
         npc_builder._edit_loot_table(self.char1, "add RAW_MEAT 50")
         npc_builder._edit_loot_table(self.char1, "done")
         npc_builder._set_resources(self.char1, "10 0 0")
+        npc_builder._set_combat_values(self.char1, "1 0 0")
         npc_builder._set_modifiers(self.char1, "skip")
         npc_builder._set_stats(self.char1, "1 1 1 1 1 1")
         npc_builder._set_behavior(self.char1, "")
@@ -103,6 +104,9 @@ class TestMobBuilder(EvenniaTest):
             "hp": 10,
             "mp": 0,
             "sp": 0,
+            "damage": 1,
+            "armor": 0,
+            "initiative": 0,
             "primary_stats": {"STR": 1, "CON": 1},
             "actflags": ["aggressive"],
             "affected_by": ["invisible"],
@@ -123,6 +127,8 @@ class TestMobBuilder(EvenniaTest):
             "|cSkills|n",
         ]:
             assert text in out
+        for stat in ["Damage", "Armor", "Initiative"]:
+            assert stat in out
         assert "slash" in out
         assert "gold" in out
         assert "RAW_MEAT" in out
