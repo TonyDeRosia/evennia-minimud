@@ -8,7 +8,7 @@ from django.conf import settings
 from evennia.utils.test_resources import EvenniaTest
 
 from commands.admin import BuilderCmdSet
-from commands import mob_builder, npc_builder
+from commands import npc_builder
 from world import prototypes
 
 
@@ -36,12 +36,10 @@ class TestMobBuilder(EvenniaTest):
 
     def test_builder_flow_and_spawn(self):
         with patch("commands.npc_builder.EvMenu") as mock_menu:
-            self.char1.execute_cmd("mobbuilder")
-            prompt = self.char1.msg.call_args[0][0]
-            self.assertIn("Run", prompt)
-            self.char1.msg.reset_mock()
-            self.char1.execute_cmd("yes")
-        mock_menu.assert_called()
+            self.char1.execute_cmd("mobbuilder start goblin")
+        mock_menu.assert_called_with(
+            self.char1, "commands.npc_builder", startnode="menunode_desc"
+        )
         npc_builder._set_key(self.char1, "goblin")
         npc_builder._set_desc(self.char1, "A small goblin")
         npc_builder._set_creature_type(self.char1, "humanoid")

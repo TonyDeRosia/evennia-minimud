@@ -14,19 +14,6 @@ from .command import Command
 from .mob_builder_commands import CmdMStat as _OldMStat, CmdMList as _OldMList
 
 
-class CmdMobBuilder(Command):
-    """Launch the CNPC builder pre-configured for mobs."""
-
-    key = "mobbuilder"
-    locks = "cmd:perm(Builder)"
-    help_category = "Building"
-
-    def func(self):
-        """Start the new NPC builder using mob defaults."""
-        self.caller.ndb.buildnpc = {"use_mob": True}
-        EvMenu(self.caller, "commands.npc_builder", startnode="menunode_key")
-
-
 class CmdMSpawn(Command):
     """
     Spawn a mob prototype.

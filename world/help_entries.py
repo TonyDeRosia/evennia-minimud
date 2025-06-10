@@ -2922,20 +2922,9 @@ Related:
         "category": "Building",
         "text": """Help for mobbuilder
 
-This command is an alias for |wcnpc|n and launches the same menu driven
-builder with mob defaults. When you finish the prompts the mob is spawned
-immediately. Choosing |wYes & Save Prototype|n stores the prototype with the
-``mob_`` prefix so it can be reused with |w@mspawn|n.
-
-Usage:
-    mobbuilder
-
-Notes:
-    - Equivalent to |wcnpc start <key>|n.
-    - See |whelp cnpc|n for a full explanation of the builder options.
-
-Related:
-    help cnpc
+The |wmobbuilder|n command is now just an alias for |wcnpc|n. All of the
+functionality lives in that command, so use either |wcnpc|n or |wmobbuilder|n
+interchangeably. See |whelp cnpc|n for a complete overview of the builder.
 """,
     },
     {
