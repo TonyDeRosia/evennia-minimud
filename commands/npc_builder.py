@@ -115,70 +115,75 @@ def _import_script(path: str):
 
 
 def format_mob_summary(data: dict) -> str:
-    """Return a formatted summary table of NPC data."""
-    from evennia.utils import evtable
+    """Return a formatted summary of NPC prototype data."""
 
-    table = evtable.EvTable("|cField|n", "|cValue|n", border="cells")
+    from evennia.utils.evtable import EvTable
 
-    order = [
-        "key",
-        "desc",
-        "vnum",
-        "npc_class",
-        "role",
-        "roles",
-        "guild_affiliation",
-        "level",
-        "exp_reward",
-        "creature_type",
-        "hp",
-        "mp",
-        "sp",
-        "primary_stats",
-        "behavior",
-        "skills",
-        "spells",
-        "ai_type",
-        "actflags",
-        "affected_by",
-        "ris",
-        "bodyparts",
-        "attack_types",
-        "defense_types",
-        "languages",
-        "merchant_markup",
-        "script",
-        "triggers",
-    ]
-
-    hints = {
-        "desc": "short description",
-        "behavior": "optional",
-        "skills": "comma separated",
-        "spells": "comma separated",
-        "triggers": "use trigger menu",
-        "guild_affiliation": "guild tag",
-        "script": "module.path.Class",
-    }
-
-    for field in order:
-        if field not in data:
-            continue
-        value = data.get(field)
-        label = field.replace("_", " ").title()
+    def fmt(value):
         if not value:
-            hint = hints.get(field, "--")
-            table.add_row(label, f"-- ({hint})")
-            continue
-        if isinstance(value, list):
-            value = ", ".join(str(v) for v in value)
-        elif isinstance(value, dict):
-            value = " ".join(f"{k}:{v}" for k, v in value.items())
-        elif isinstance(value, tuple):
-            value = ", ".join(str(v) for v in value)
-        table.add_row(label, str(value))
+            return "--"
+        if isinstance(value, dict):
+            return ", ".join(f"{k}:{v}" for k, v in value.items())
+        if isinstance(value, (list, tuple)):
+            return ", ".join(str(v) for v in value)
+        return str(value)
 
-    return str(table)
+    lines = [f"|wMob Prototype:|n {data.get('key', '--')}"]
+
+    basic = EvTable(border="cells")
+    basic.add_row("|cShort Desc|n", fmt(data.get("desc")))
+    basic.add_row("|cLevel|n", fmt(data.get("level")))
+    if "vnum" in data:
+        basic.add_row("|cVNUM|n", fmt(data.get("vnum")))
+    basic.add_row("|cClass|n", fmt(data.get("npc_class")))
+    if data.get("role"):
+        basic.add_row("|cRole|n", fmt(data.get("role")))
+    if data.get("roles"):
+        basic.add_row("|cExtra Roles|n", fmt(data.get("roles")))
+    if data.get("creature_type"):
+        basic.add_row("|cCreature|n", fmt(data.get("creature_type")))
+    if data.get("guild_affiliation"):
+        basic.add_row("|cGuild|n", fmt(data.get("guild_affiliation")))
+    lines.append("\n|wBasic Info|n")
+    lines.append(str(basic))
+
+    stats = EvTable(border="cells")
+    stats.add_row("|cHP|n", fmt(data.get("hp")))
+    stats.add_row("|cMP|n", fmt(data.get("mp")))
+    stats.add_row("|cSP|n", fmt(data.get("sp")))
+    if data.get("primary_stats"):
+        stats.add_row("|cStats|n", fmt(data.get("primary_stats")))
+    lines.append("\n|wCombat Stats|n")
+    lines.append(str(stats))
+
+    flags = EvTable(border="cells")
+    flags.add_row("|cAct Flags|n", fmt(data.get("actflags")))
+    flags.add_row("|cAffects|n", fmt(data.get("affected_by")))
+    flags.add_row("|cResists|n", fmt(data.get("ris")))
+    if data.get("attack_types"):
+        flags.add_row("|cAttacks|n", fmt(data.get("attack_types")))
+    if data.get("defense_types"):
+        flags.add_row("|cDefenses|n", fmt(data.get("defense_types")))
+    lines.append("\n|wCombat Flags|n")
+    lines.append(str(flags))
+
+    rewards = EvTable(border="cells")
+    rewards.add_row("|cXP Reward|n", fmt(data.get("exp_reward")))
+    if "coin_drop" in data or "coins" in data:
+        rewards.add_row("|cCoin Drop|n", fmt(data.get("coin_drop") or data.get("coins")))
+    if data.get("loot_table"):
+        loot = [f"{e.get('proto')}({e.get('chance', 100)}%)" for e in data.get("loot_table")]
+        rewards.add_row("|cLoot Table|n", fmt(loot))
+    lines.append("\n|wRewards|n")
+    lines.append(str(rewards))
+
+    skills = EvTable(border="cells")
+    skills.add_row("|cSkills|n", fmt(data.get("skills")))
+    skills.add_row("|cSpells|n", fmt(data.get("spells")))
+    lines.append("\n|wSkills|n")
+    lines.append(str(skills))
+
+    return "\n".join(lines)
 
 
 

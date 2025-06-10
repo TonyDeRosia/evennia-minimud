@@ -79,3 +79,35 @@ class TestMobBuilder(EvenniaTest):
         """Cancellation should clear build data."""
         npc_builder._cancel(self.char1, "")
         assert self.char1.ndb.buildnpc is None
+
+    def test_summary_contains_sections(self):
+        """format_mob_summary should include key headings and data."""
+        data = {
+            "key": "goblin",
+            "desc": "A nasty goblin",
+            "level": 2,
+            "hp": 10,
+            "mp": 0,
+            "sp": 0,
+            "primary_stats": {"STR": 1, "CON": 1},
+            "actflags": ["aggressive"],
+            "affected_by": ["invisible"],
+            "ris": ["fire"],
+            "exp_reward": 5,
+            "coin_drop": {"gold": 1},
+            "loot_table": [{"proto": "RAW_MEAT", "chance": 50}],
+            "skills": ["slash"],
+            "spells": ["heal"],
+        }
+        out = npc_builder.format_mob_summary(data)
+        for text in [
+            "Mob Prototype:",
+            "Basic Info",
+            "Combat Stats",
+            "Combat Flags",
+            "Rewards",
+            "Skills",
+        ]:
+            assert text in out
+        assert "slash" in out
+
