@@ -7,7 +7,7 @@ from utils.mob_proto import spawn_from_vnum
 from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from typeclasses.characters import NPC
 from utils.slots import SLOT_ORDER
-from utils.menu_utils import add_back_skip, add_back_next
+from utils.menu_utils import add_back_skip, add_back_next, add_back_only
 from world.scripts import classes
 from utils import vnum_registry
 from .command import Command
@@ -359,12 +359,11 @@ def menunode_desc(caller, raw_string="", **kwargs):
     text = (
         "|wEnter a short description for the NPC|n "
         "(e.g. 'A grumpy orc')\n"
-        "Type |wback|n to edit the key or |wskip|n to keep the current value."
+        "Type |wback|n to edit the key."
     )
     if default:
-        text += f" [default: {default}]"
-    text += "\n(back to go back, skip for default)"
-    options = add_back_skip({"key": "_default", "goto": _set_desc}, _set_desc)
+        text += f" [current: {default}]"
+    options = add_back_only({"key": "_default", "goto": _set_desc}, _set_desc)
     return with_summary(caller, text), options
 
 
@@ -372,8 +371,9 @@ def _set_desc(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
         return "menunode_key"
-    if not string or string.lower() == "skip":
-        string = caller.ndb.buildnpc.get("desc", "")
+    if not string:
+        caller.msg("Description is required.")
+        return "menunode_desc"
     caller.ndb.buildnpc["desc"] = string
     return "menunode_vnum"
 
@@ -388,13 +388,13 @@ def menunode_vnum(caller, raw_string="", **kwargs):
     """
     )
     if default is not None:
-        text += "(back to go back, skip for default)"
-        text += f" [default: {default}]"
+        text += "(back to go back)"
+        text += f" [current: {default}]"
     else:
         text += "(back to go back)"
-    options = add_back_skip({"key": "_default", "goto": _set_vnum}, _set_vnum)
+    options = add_back_only({"key": "_default", "goto": _set_vnum}, _set_vnum)
     if default is None:
-        options = [opt for opt in options if opt.get("desc") != "Skip"]
+        options = list(options)
 
         def _auto(caller, raw_string=None, **kwargs):
             return _set_vnum(caller, "auto", **kwargs)
@@ -410,12 +410,10 @@ def _set_vnum(caller, raw_string, **kwargs):
 
     data = caller.ndb.buildnpc or {}
 
-    if not string or string.lower() == "skip":
-        if "vnum" not in data:
-            caller.msg("VNUM is required.")
-            return "menunode_vnum"
-        val = data["vnum"]
-    elif string.lower() == "auto":
+    if not string:
+        caller.msg("VNUM is required.")
+        return "menunode_vnum"
+    if string.lower() == "auto":
         val = vnum_registry.get_next_vnum("npc")
     else:
         if not string.isdigit():
@@ -439,12 +437,12 @@ def menunode_role(caller, raw_string="", **kwargs):
         f"""
         |wRole (merchant, questgiver...)|n ({types})
         Example: |wmerchant|n
-        Type |wback|n to return or |wskip|n to keep the default.
+        Type |wback|n to return.
         """
     )
     if default:
-        text += f" [default: {default}]"
-    options = add_back_skip({"key": "_default", "goto": _set_role}, _set_role)
+        text += f" [current: {default}]"
+    options = add_back_only({"key": "_default", "goto": _set_role}, _set_role)
     return with_summary(caller, text), options
 
 
@@ -454,8 +452,9 @@ def _set_role(caller, raw_string, **kwargs):
         if caller.ndb.buildnpc.get("creature_type") == "unique":
             return "menunode_custom_slots"
         return "menunode_creature_type"
-    if not string or string == "skip":
-        string = caller.ndb.buildnpc.get("role", "").lower()
+    if not string:
+        caller.msg("Role is required.")
+        return "menunode_role"
     if string and string not in ALLOWED_ROLES_PRIMARY:
         caller.msg(f"Invalid role. Choose from: {', '.join(ALLOWED_ROLES_PRIMARY)}")
         return "menunode_role"
@@ -492,13 +491,12 @@ def menunode_creature_type(caller, raw_string="", **kwargs):
         """
         |wCreature type|n (humanoid/quadruped/unique)
         Example: |wquadruped|n
-        Type |wback|n to return or |wskip|n to keep the default.
+        Type |wback|n to return.
         """
     )
     if default:
-        text += f" [default: {default}]"
-    text += "\n(back to go back, skip for default)"  # keep existing note for clarity
-    options = add_back_skip(
+        text += f" [current: {default}]"
+    options = add_back_only(
         {"key": "_default", "goto": _set_creature_type}, _set_creature_type
     )
     return with_summary(caller, text), options
@@ -508,9 +506,10 @@ def _set_creature_type(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
         return "menunode_vnum"
-    if not string or string.lower() == "skip":
-        string = caller.ndb.buildnpc.get("creature_type", "humanoid")
-    ctype = string.lower() or "humanoid"
+    if not string:
+        caller.msg("Creature type is required.")
+        return "menunode_creature_type"
+    ctype = string.lower()
     caller.ndb.buildnpc["creature_type"] = ctype
     if ctype == "quadruped":
         caller.ndb.buildnpc["equipment_slots"] = [
@@ -721,12 +720,12 @@ def menunode_level(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("level", 1)
     text = dedent(
         f"""
-        |wLevel of NPC (1-100)|n [default: {default}]
+        |wLevel of NPC (1-100)|n [current: {default}]
         Example: |w10|n
-        (back to go back, skip for default)
+        (back to go back)
         """
     )
-    options = add_back_skip({"key": "_default", "goto": _set_level}, _set_level)
+    options = add_back_only({"key": "_default", "goto": _set_level}, _set_level)
     return with_summary(caller, text), options
 
 
@@ -734,9 +733,9 @@ def _set_level(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
         return "menunode_roles"
-    if not string or string.lower() == "skip":
-        caller.ndb.buildnpc["level"] = caller.ndb.buildnpc.get("level", 1)
-        return "menunode_exp_reward"
+    if not string:
+        caller.msg("Level is required.")
+        return "menunode_level"
     try:
         val = int(string)
     except ValueError:
@@ -1426,29 +1425,27 @@ def _del_trigger(caller, raw_string, event=None, index=None, **kwargs):
 
 def menunode_confirm(caller, raw_string="", **kwargs):
     data = caller.ndb.buildnpc
-    required = {"key"}
-    if not isinstance(data, dict) or not required.issubset(data):
+    required_key = {"key"}
+    if not isinstance(data, dict) or not required_key.issubset(data):
         caller.msg("Error: NPC data incomplete. Restarting builder.")
         return None
 
-    # fill in any missing fields with defaults
-    filled = {}
-    if not data.get("desc"):
-        filled["desc"] = data["key"].capitalize()
-        data["desc"] = filled["desc"]
-    if not data.get("level"):
-        filled["level"] = 1
-        data["level"] = 1
-    if data.get("vnum") is None:
-        filled["vnum"] = vnum_registry.get_next_vnum("npc")
-        data["vnum"] = filled["vnum"]
+    required_fields = {
+        "desc": "menunode_desc",
+        "vnum": "menunode_vnum",
+        "creature_type": "menunode_creature_type",
+        "role": "menunode_role",
+        "level": "menunode_level",
+    }
+
+    for field, node in required_fields.items():
+        val = data.get(field)
+        if val is None or (isinstance(val, str) and not val):
+            caller.msg(f"{field.replace('_', ' ').capitalize()} is required.")
+            return node
 
     text = "|wConfirm NPC Creation|n\n"
     text += format_mob_summary(data) + "\n"
-    if filled:
-        text += "|yMissing fields were filled automatically:|n\n"
-        for field, val in filled.items():
-            text += f" - {field}: {val}\n"
 
     warnings = validate_prototype(data)
     if warnings:
@@ -1456,23 +1453,16 @@ def menunode_confirm(caller, raw_string="", **kwargs):
         for warn in warnings:
             text += f" - {warn}\n"
 
-    if filled:
-        text += "\nProceed with these values?"
-        options = [
-            {"desc": "Back", "goto": "menunode_triggers"},
-            {"desc": "Confirm", "goto": (_create_npc, {"register": False})},
-        ]
-    else:
-        text += (
-            "\nCreate this NPC?\n"
-            "Selecting |wYes|n spawns the NPC in your current location.\n"
-            "Selecting |wYes & Save Prototype|n spawns the NPC and saves the prototype for later use."
-        )
-        options = [
-            {"desc": "Yes", "goto": (_create_npc, {"register": False})},
-            {"desc": "Yes & Save Prototype", "goto": (_create_npc, {"register": True})},
-            {"desc": "No", "goto": _cancel},
-        ]
+    text += (
+        "\nCreate this NPC?\n"
+        "Selecting |wYes|n spawns the NPC in your current location.\n"
+        "Selecting |wYes & Save Prototype|n spawns the NPC and saves the prototype for later use."
+    )
+    options = [
+        {"desc": "Yes", "goto": (_create_npc, {"register": False})},
+        {"desc": "Yes & Save Prototype", "goto": (_create_npc, {"register": True})},
+        {"desc": "No", "goto": _cancel},
+    ]
 
     return text, options
 
