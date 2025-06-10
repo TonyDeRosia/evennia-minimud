@@ -2681,9 +2681,11 @@ Notes:
     - NPC classes include base, merchant, banker, trainer, wanderer,
       guildmaster, guild_receptionist, questgiver, combat_trainer and
       event_npc.
+    - After choosing the NPC class you may select a combat class like
+      Warrior or Mage.
     - The builder prompts for description, role, creature type, level,
-      experience reward, HP MP SP, primary stats, behavior, skills, spells,
-      resistances and AI type.
+      experience reward, HP MP SP, primary stats, combat class, behavior,
+      skills, spells, resistances and AI type.
     - Mob specific fields such as act flags, resistances, skills and spells can
       now be configured directly in this menu along with an optional Script
       typeclass to run when the mob spawns.
