@@ -220,21 +220,17 @@ mobs when a VNUM has been assigned.
 
 ### Mob Builder
 
-Run `mobbuilder` to open the same menu driven builder used by `cnpc`. The
-workflow supports mob‑specific fields like act flags and resistances. At the
-end of the menu you may choose **Yes** to spawn the NPC or **Yes & Save
-Prototype** to spawn it and also store the prototype in
-`world/prototypes/npcs.json` with `mob_` prefixed to the key. Use
-`@mspawn <prototype>` or the ``M<number>`` form to create additional copies and
-`@mstat <key>` to inspect
-them. Prototype entries can be adjusted with `@mcreate`, `@mset` and viewed with
-`@mlist`. Mobs created this way are flagged with `can_attack` and are given a
-simple punch attack so they can fight back without equipment.
+`mobbuilder` is now an alias for the unified `cnpc` command. It launches the
+same menu with mob defaults and immediately spawns the NPC once you confirm.
+Choosing **Yes & Save Prototype** will also store the entry in
+`world/prototypes/npcs.json` with the `mob_` prefix so you can reuse it with
+`@mspawn <prototype>` or ``M<number>``. The final summary now shows any mob
+specific fields such as act flags and resistances.
 
 Example::
 
-    mobbuilder
-    (fill in the prompts for a goblin)
+    cnpc start goblin
+    [follow the prompts]
     [choose **Yes & Save Prototype**]
     @mspawn mob_goblin
     @mspawn M200001
