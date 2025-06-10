@@ -32,6 +32,38 @@ def add_back_skip(options: Union[Dict[str, Any], Iterable[Dict[str, Any]], None]
     return opts
 
 
+def add_back_only(
+    options: Union[Dict[str, Any], Iterable[Dict[str, Any]], None], setter: Callable
+) -> List[Dict[str, Any]]:
+    """Return ``options`` with only a Back entry.
+
+    Parameters
+    ----------
+    options
+        Base option or list of options for the menu node.
+    setter
+        Callback to execute for the back selection. It will be called
+        with ``raw_string`` set to ``"back"``.
+    """
+
+    opts: List[Dict[str, Any]]
+    if options is None:
+        opts = []
+    elif isinstance(options, dict):
+        opts = [options]
+    else:
+        opts = list(options)
+
+    def _run(value: str):
+        def _inner(caller, raw_string=None, **kwargs):
+            return setter(caller, value, **kwargs)
+
+        return _inner
+
+    opts.append({"desc": "Back", "goto": _run("back")})
+    return opts
+
+
 def add_back_next(
     options: Union[Dict[str, Any], Iterable[Dict[str, Any]], None], setter: Callable
 ) -> List[Dict[str, Any]]:
