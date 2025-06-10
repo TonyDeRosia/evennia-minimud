@@ -83,3 +83,15 @@ class TestMListCommand(EvenniaTest):
         self.char1.execute_cmd("@mlist /area")
         out = self.char1.msg.call_args[0][0]
         assert "gob" in out
+
+    def test_mlist_shows_vnum(self):
+        from world.scripts.mob_db import get_mobdb
+
+        prototypes.register_npc_prototype("orc", {"key": "orc"})
+        mob_db = get_mobdb()
+        mob_db.add_proto(5, {"proto_key": "orc"})
+
+        self.char1.execute_cmd("@mlist")
+        out = self.char1.msg.call_args[0][0]
+        assert "VNUM" in out
+        assert "5" in out
