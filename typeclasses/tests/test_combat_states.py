@@ -1,5 +1,5 @@
 import unittest
-from combat.combat_states import CombatState, StateManager
+from combat.combat_states import CombatState, CombatStateManager
 
 
 class Dummy:
@@ -8,7 +8,7 @@ class Dummy:
 
 class TestCombatStates(unittest.TestCase):
     def test_stacking_and_diminish(self):
-        mgr = StateManager()
+        mgr = CombatStateManager()
         obj = Dummy()
         base = CombatState(key="bleeding", duration=4, max_stacks=3, diminish=0.5)
         mgr.add_state(obj, base)
@@ -39,7 +39,7 @@ class TestCombatStates(unittest.TestCase):
         def on_expire(o, s):
             events.append("expire")
 
-        mgr = StateManager()
+        mgr = CombatStateManager()
         obj = Dummy()
         state = CombatState(
             key="bleeding",
