@@ -38,6 +38,8 @@ from .mob_builder_commands import (
     CmdShopStat,
     CmdMakeRepair,
     CmdRepairSet,
+    CmdMobExport,
+    CmdMobImport,
     CmdRepairStat,
     CmdMobValidate,
 )
@@ -1446,6 +1448,8 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdMStat)
         self.add(CmdMakeShop)
         self.add(CmdShopSet)
+        self.add(CmdMobExport)
+        self.add(CmdMobImport)
         self.add(CmdShopStat)
         self.add(CmdMakeRepair)
         self.add(CmdRepairSet)

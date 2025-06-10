@@ -3084,6 +3084,34 @@ Example:
 """,
     },
     {
+        "key": "@mobexport",
+        "category": "Building",
+        "text": """Help for @mobexport
+
+Write a stored prototype to a JSON file in the directory defined by ``PROTOTYPE_NPC_EXPORT_DIR``. The filename may omit the ``.json`` extension. Existing files will be overwritten.
+
+Usage:
+    @mobexport <proto> <file>
+
+Example:
+    @mobexport goblin goblin.json
+""",
+    },
+    {
+        "key": "@mobimport",
+        "category": "Building",
+        "text": """Help for @mobimport
+
+Load prototype data from a JSON file previously exported with ``@mobexport``. The loaded prototype will be registered and replace any existing entry with the same key.
+
+Usage:
+    @mobimport <file>
+
+Example:
+    @mobimport goblin.json
+""",
+    },
+    {
         "key": "@makeshop",
         "category": "Building",
         "text": """Help for @makeshop
