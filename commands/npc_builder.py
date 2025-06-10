@@ -905,10 +905,18 @@ def menunode_resources_prompt(caller, raw_string="", **kwargs):
     return with_summary(caller, text), options
 
 
+def _preview(caller):
+    """Send a summary preview of current build data."""
+    data = getattr(caller.ndb, "buildnpc", None)
+    if data:
+        caller.msg(format_mob_summary(data))
+
+
 def _use_default_resources(caller, raw_string, **kwargs):
     caller.ndb.buildnpc.pop("hp", None)
     caller.ndb.buildnpc.pop("mp", None)
     caller.ndb.buildnpc.pop("sp", None)
+    _preview(caller)
     return "menunode_modifiers"
 
 
@@ -936,6 +944,7 @@ def _set_resources(caller, raw_string, **kwargs):
         caller.ndb.buildnpc["hp"] = caller.ndb.buildnpc.get("hp", 0)
         caller.ndb.buildnpc["mp"] = caller.ndb.buildnpc.get("mp", 0)
         caller.ndb.buildnpc["sp"] = caller.ndb.buildnpc.get("sp", 0)
+        _preview(caller)
         return "menunode_modifiers"
     parts = string.split()
     if len(parts) != 3 or not all(p.isdigit() for p in parts):
@@ -944,6 +953,7 @@ def _set_resources(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["hp"] = int(parts[0])
     caller.ndb.buildnpc["mp"] = int(parts[1])
     caller.ndb.buildnpc["sp"] = int(parts[2])
+    _preview(caller)
     return "menunode_modifiers"
 
 
@@ -972,7 +982,8 @@ def _set_modifiers(caller, raw_string, **kwargs):
     if not string or string.lower() == "skip":
         caller.ndb.buildnpc["modifiers"] = caller.ndb.buildnpc.get("modifiers", {})
         caller.ndb.buildnpc["buffs"] = caller.ndb.buildnpc.get("buffs", [])
-        return "menunode_stats"
+        _preview(caller)
+        return "menunode_secondary_stats_prompt"
     try:
         mods, remainder = parse_stat_mods(string)
     except ValueError as err:
@@ -983,7 +994,35 @@ def _set_modifiers(caller, raw_string, **kwargs):
         buffs = [p.strip() for p in remainder.split(",") if p.strip()]
     caller.ndb.buildnpc["modifiers"] = mods
     caller.ndb.buildnpc["buffs"] = buffs
-    return "menunode_stats"
+    _preview(caller)
+    return "menunode_secondary_stats_prompt"
+
+
+def menunode_secondary_stats_prompt(caller, raw_string="", **kwargs):
+    """Ask if custom primary stats should be entered."""
+
+    text = dedent(
+        """
+        |wUse default STR/CON/etc or enter custom values?|n
+        Type |w1|n for defaults or |w2|n to enter values.
+        """
+    )
+    options = [
+        {"key": ("1", "default"), "goto": _use_default_stats},
+        {"key": ("2", "custom"), "goto": "menunode_stats"},
+        {"desc": "Back", "goto": "menunode_modifiers"},
+    ]
+    return with_summary(caller, text), options
+
+
+def _use_default_stats(caller, raw_string, **kwargs):
+    stats = ["STR", "CON", "DEX", "INT", "WIS", "LUCK"]
+    caller.ndb.buildnpc["primary_stats"] = {
+        stat: caller.ndb.buildnpc.get("primary_stats", {}).get(stat, 0)
+        for stat in stats
+    }
+    _preview(caller)
+    return "menunode_behavior"
 
 
 def menunode_stats(caller, raw_string="", **kwargs):
@@ -1011,6 +1050,7 @@ def _set_stats(caller, raw_string, **kwargs):
             stat: caller.ndb.buildnpc.get("primary_stats", {}).get(stat, 0)
             for stat in stats
         }
+        _preview(caller)
         return "menunode_behavior"
     parts = string.split()
     if len(parts) != 6 or not all(p.isdigit() for p in parts):
@@ -1019,6 +1059,7 @@ def _set_stats(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["primary_stats"] = {
         stat: int(val) for stat, val in zip(stats, parts)
     }
+    _preview(caller)
     return "menunode_behavior"
 
 

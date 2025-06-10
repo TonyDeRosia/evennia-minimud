@@ -207,6 +207,26 @@ class TestMobBuilder(EvenniaTest):
         result = npc_builder._set_resources(self.char1, "back")
         assert result == "menunode_resources_prompt"
 
+    def test_secondary_stats_prompt_options(self):
+        self.char1.ndb.buildnpc = {}
+        _text, opts = npc_builder.menunode_secondary_stats_prompt(self.char1)
+        gotos = [o.get("goto") for o in opts]
+        assert "menunode_stats" in gotos
+        assert "menunode_modifiers" in gotos
+
+    def test_use_default_stats_skips_stat_entry(self):
+        self.char1.ndb.buildnpc = {}
+        result = npc_builder._use_default_stats(self.char1, "")
+        assert result == "menunode_behavior"
+        assert self.char1.ndb.buildnpc["primary_stats"] == {
+            stat: 0 for stat in ["STR", "CON", "DEX", "INT", "WIS", "LUCK"]
+        }
+
+    def test_modifiers_skip_leads_to_secondary_prompt(self):
+        self.char1.ndb.buildnpc = {}
+        result = npc_builder._set_modifiers(self.char1, "skip")
+        assert result == "menunode_secondary_stats_prompt"
+
     def test_summary_shows_coin_and_loot(self):
         data = {
             "key": "orc",
