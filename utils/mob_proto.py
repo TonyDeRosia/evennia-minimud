@@ -28,12 +28,11 @@ def spawn_from_vnum(vnum: int, location=None):
     proto = mob_db.get_proto(vnum)
     if not proto:
         return None
-    proto = dict(proto)
-    npc = spawner.spawn(proto)[0]
+    proto_data = dict(proto)
+    npc = spawner.spawn(proto_data)[0]
     if location:
         npc.location = location
     npc.db.vnum = vnum
     # track how often this prototype has spawned
-    proto["spawn_count"] = int(proto.get("spawn_count", 0)) + 1
-    mob_db.add_proto(vnum, proto)
+    mob_db.increment_spawn_count(vnum)
     return npc

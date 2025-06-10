@@ -99,10 +99,11 @@ class CmdMobProto(Command):
         if not mob_db.db.vnums:
             caller.msg("No mob prototypes registered.")
             return
-        lines = ["|wVNUM|n |wName|n"]
+        lines = ["|wVNUM|n |wName|n |wSpawns|n"]
         for vnum, proto in sorted(mob_db.db.vnums.items()):
             name = proto.get("key", "--")
-            lines.append(f"{vnum:>5} {name}")
+            count = proto.get("spawn_count", 0)
+            lines.append(f"{vnum:>5} {name} {count}")
         caller.msg("\n".join(lines))
 
     def _sub_spawn(self, rest: str):
