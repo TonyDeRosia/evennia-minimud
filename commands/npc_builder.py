@@ -1383,19 +1383,46 @@ def menunode_confirm(caller, raw_string="", **kwargs):
     if not isinstance(data, dict) or not required.issubset(data):
         caller.msg("Error: NPC data incomplete. Restarting builder.")
         return None
+
+    # fill in any missing fields with defaults
+    filled = {}
+    if not data.get("desc"):
+        filled["desc"] = data["key"].capitalize()
+        data["desc"] = filled["desc"]
+    if not data.get("level"):
+        filled["level"] = 1
+        data["level"] = 1
+    if data.get("vnum") is None:
+        filled["vnum"] = vnum_registry.get_next_vnum("npc")
+        data["vnum"] = filled["vnum"]
+
     text = "|wConfirm NPC Creation|n\n"
     text += format_mob_summary(data) + "\n"
+    if filled:
+        text += "|yMissing fields were filled automatically:|n\n"
+        for field, val in filled.items():
+            text += f" - {field}: {val}\n"
+
     warnings = validate_prototype(data)
     if warnings:
         text += "|yWarnings:|n\n"
         for warn in warnings:
             text += f" - {warn}\n"
-    text += "\nCreate this NPC?"
-    options = [
-        {"desc": "Yes", "goto": (_create_npc, {"register": False})},
-        {"desc": "Yes & Save Prototype", "goto": (_create_npc, {"register": True})},
-        {"desc": "No", "goto": _cancel},
-    ]
+
+    if filled:
+        text += "\nProceed with these values?"
+        options = [
+            {"desc": "Back", "goto": "menunode_triggers"},
+            {"desc": "Confirm", "goto": (_create_npc, {"register": False})},
+        ]
+    else:
+        text += "\nCreate this NPC?"
+        options = [
+            {"desc": "Yes", "goto": (_create_npc, {"register": False})},
+            {"desc": "Yes & Save Prototype", "goto": (_create_npc, {"register": True})},
+            {"desc": "No", "goto": _cancel},
+        ]
+
     return text, options
 
 
