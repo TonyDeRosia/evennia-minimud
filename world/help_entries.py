@@ -3068,6 +3068,22 @@ Example:
 """,
     },
     {
+        "key": "@mobvalidate",
+        "category": "Building",
+        "text": """Help for @mobvalidate
+
+Check a stored prototype for common problems like zero HP or conflicting
+act flags. Displays a list of warnings or confirms that no issues were
+found.
+
+Usage:
+    @mobvalidate <prototype>
+
+Example:
+    @mobvalidate goblin
+""",
+    },
+    {
         "key": "@makeshop",
         "category": "Building",
         "text": """Help for @makeshop

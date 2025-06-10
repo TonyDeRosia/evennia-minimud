@@ -595,3 +595,27 @@ class CmdRepairStat(Command):
             f"Item Types: {', '.join(repair.get('item_types', []))}",
         ]
         self.msg("\n".join(lines))
+
+
+class CmdMobValidate(Command):
+    """Validate a stored NPC prototype for common issues."""
+
+    key = "@mobvalidate"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def func(self):
+        proto_key = self.args.strip()
+        if not proto_key:
+            self.msg("Usage: @mobvalidate <prototype>")
+            return
+        proto = prototypes.get_npc_prototypes().get(proto_key)
+        if not proto:
+            self.msg("Prototype not found.")
+            return
+        warnings = npc_builder.validate_prototype(proto)
+        if warnings:
+            lines = ["Warnings:"] + [f" - {w}" for w in warnings]
+            self.msg("\n".join(lines))
+        else:
+            self.msg("No issues found.")

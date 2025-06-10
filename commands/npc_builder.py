@@ -21,6 +21,32 @@ from world.mob_constants import (
     parse_flag_list,
 )
 
+
+def validate_prototype(data: dict) -> list[str]:
+    """Return a list of warnings for common prototype issues."""
+
+    warnings: list[str] = []
+
+    hp = data.get("hp")
+    try:
+        hp_val = int(hp) if hp is not None else None
+    except (TypeError, ValueError):
+        hp_val = None
+
+    if not hp_val or hp_val <= 0:
+        warnings.append("HP is set to zero.")
+
+    actflags = {f.lower() for f in data.get("actflags", []) if isinstance(f, str)}
+    ai_type = str(data.get("ai_type", "")).lower()
+
+    if "aggressive" in actflags and "wimpy" in actflags:
+        warnings.append("Aggressive and wimpy flags are both set.")
+
+    if "sentinel" in actflags and ai_type == "wander":
+        warnings.append("Sentinel flag conflicts with wander AI type.")
+
+    return warnings
+
 # NPC types that can be selected in the builder
 ALLOWED_NPC_TYPES = (
     "merchant",
@@ -933,6 +959,11 @@ def menunode_confirm(caller, raw_string="", **kwargs):
                 text += "triggers: None\n"
         else:
             text += f"{key}: {val}\n"
+    warnings = validate_prototype(data)
+    if warnings:
+        text += "|yWarnings:|n\n"
+        for warn in warnings:
+            text += f" - {warn}\n"
     text += "\nCreate this NPC?"
     options = [
         {"desc": "Yes", "goto": (_create_npc, {"register": False})},
