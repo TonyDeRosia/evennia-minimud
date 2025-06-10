@@ -134,3 +134,10 @@ class TestMobBuilder(EvenniaTest):
         result = npc_builder._set_vnum(self.char1, "skip")
         assert self.char1.ndb.buildnpc["vnum"] == 5
         assert result == "menunode_creature_type"
+
+    def test_skills_menu_shows_suggestions(self):
+        """menunode_skills should list suggested skills for the class."""
+        self.char1.ndb.buildnpc = {"npc_class": "combat_trainer"}
+        text, _ = npc_builder.menunode_skills(self.char1)
+        for skill in npc_builder.DEFAULT_SKILLS:
+            assert skill in text

@@ -24,6 +24,7 @@ from world.mob_constants import (
     DEFENSE_TYPES,
     parse_flag_list,
 )
+from combat.combat_skills import SKILL_CLASSES
 
 
 def validate_prototype(data: dict) -> list[str]:
@@ -77,6 +78,20 @@ NPC_CLASS_MAP = {
     "combat_trainer": "typeclasses.npcs.combat_trainer.CombatTrainerNPC",
     "event_npc": "typeclasses.npcs.event_npc.EventNPC",
 }
+
+
+# Suggested skill lists for each NPC class
+DEFAULT_SKILLS = list(SKILL_CLASSES.keys())
+SKILLS_BY_CLASS = {
+    "merchant": ["appraise"],
+    "combat_trainer": DEFAULT_SKILLS,
+    "base": DEFAULT_SKILLS,
+}
+
+
+def get_skills_for_class(npc_class: str) -> list[str]:
+    """Return list of suggested skills for ``npc_class``."""
+    return SKILLS_BY_CLASS.get(npc_class, DEFAULT_SKILLS)
 
 
 # Additional configuration options
@@ -724,9 +739,12 @@ def _set_behavior(caller, raw_string, **kwargs):
 def menunode_skills(caller, raw_string="", **kwargs):
     skills = caller.ndb.buildnpc.get("skills", [])
     default = ", ".join(skills)
+    npc_class = caller.ndb.buildnpc.get("npc_class", "base")
+    suggested = ", ".join(get_skills_for_class(npc_class))
     text = "|wList any skills or attacks (comma separated)|n"
     if default:
         text += f" [default: {default}]"
+    text += f"\nSuggested for {npc_class}: {suggested}"
     text += "\nExample: |wfireball, slash, heal|n"
     text += "\n(back to go back, skip for default)"
     options = add_back_skip({"key": "_default", "goto": _set_skills}, _set_skills)
