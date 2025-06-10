@@ -2959,7 +2959,7 @@ Related:
 
 Create a new NPC prototype. The prototype data is stored in
 ``world/prototypes/npcs.json`` and does not affect any existing NPCs
-until you update them with |w@medit|n. If ``copy_key`` is supplied the
+until you update them with |w@editnpc|n. If ``copy_key`` is supplied the
 new prototype will start as a duplicate of that entry.
 
 After creating a prototype use |w@mset|n to edit additional fields like
@@ -2981,7 +2981,7 @@ Examples:
 
 Edit a field on an NPC prototype stored in
 ``world/prototypes/npcs.json``. Existing NPCs remain unchanged unless
-you later apply the prototype with |w@medit|n.
+you later apply the prototype with |w@editnpc|n.
 
 Values containing spaces should be quoted. Some fields accept a comma
 separated list which will replace the old values.
@@ -3001,7 +3001,7 @@ Examples:
 
 Display stats for an NPC or prototype. Prototype information is read
 from ``world/prototypes/npcs.json`` and this command never changes an
-NPC. Use |w@medit|n for modifications. The output lists common combat
+NPC. Use |w@editnpc|n for modifications. The output lists common combat
 attributes along with any flags, resistances and languages defined on
 the target.
 
@@ -3020,7 +3020,7 @@ Examples:
 
 List NPC prototypes or counts of spawned NPCs. Prototypes are read from
 ``world/prototypes/npcs.json``. Listing does not modify any NPCs; use
-|w@medit|n if you need to update them.
+|w@editnpc|n if you need to update them.
 
 You may filter results with ``class=<name>``, ``race=<name>``,
 ``role=<name>``, ``tag=<tag>`` or ``zone=<area>``. Use ``/room`` to count
@@ -3042,7 +3042,7 @@ Examples:
 
 Spawn an NPC from a prototype defined in
 ``world/prototypes/npcs.json``. Spawning creates a new NPC and leaves
-existing ones untouched. Modify live NPCs with |w@medit|n.
+existing ones untouched. Modify live NPCs with |w@editnpc|n.
 
 Prototypes made with |wmobbuilder|n are prefixed with ``mob_``. Use the
 full key when spawning those NPCs.

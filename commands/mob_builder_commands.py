@@ -31,7 +31,7 @@ class CmdMStat(Command):
     Inspect an NPC or stored prototype.
 
     Prototype data is read from ``world/prototypes/npcs.json``. This is a
-    read-only command and will not change any existing NPCs. Use ``@medit`` if
+    read-only command and will not change any existing NPCs. Use ``@editnpc`` if
     you need to update a live NPC from a prototype.
 
     Usage:
@@ -125,8 +125,8 @@ class CmdMCreate(Command):
     Create a new NPC prototype.
 
     The prototype is stored in ``world/prototypes/npcs.json`` and does not
-    affect any already spawned NPCs. Use ``@medit`` later if you need to update
-    a live NPC from the saved prototype.
+    affect any already spawned NPCs. Use ``@editnpc`` later if you need to
+    update a live NPC from the saved prototype.
 
     Usage:
         @mcreate <key> [copy_key]
@@ -169,7 +169,7 @@ class CmdMSet(Command):
     Edit a field on an NPC prototype.
 
     Changes are written to ``world/prototypes/npcs.json``. Existing NPCs are
-    unaffected until you apply the prototype with ``@medit``.
+    unaffected until you apply the prototype with ``@editnpc``.
 
     Usage:
         @mset <key> <field> <value>
@@ -248,7 +248,7 @@ class CmdMList(Command):
     List stored NPC prototypes or spawned NPCs.
 
     Prototype information is read from ``world/prototypes/npcs.json``. Listing
-    does not alter any existing NPCs. Use ``@medit`` if you want to modify a
+    does not alter any existing NPCs. Use ``@editnpc`` if you want to modify a
     spawned NPC.
 
     Usage:
