@@ -2691,6 +2691,7 @@ Notes:
       Quadrupeds receive head, body, front_legs and hind_legs and lack weapon
       slots. Unique lets you add or remove any slots in the next step.
     - Prompts accept |wback|n to return or |wskip|n to keep defaults.
+    - The skills prompt lists suggested abilities for the chosen class.
     - When multiple values are allowed, use comma or space separated lists as
       shown in each example.
     - After reviewing the summary choose |wYes|n to confirm and create or
