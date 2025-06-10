@@ -8,6 +8,7 @@ from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from typeclasses.characters import NPC
 from utils.slots import SLOT_ORDER
 from utils.menu_utils import add_back_skip
+from utils import vnum_registry
 from .command import Command
 from django.conf import settings
 from importlib import import_module
@@ -159,6 +160,46 @@ def _set_desc(caller, raw_string, **kwargs):
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("desc", "")
     caller.ndb.buildnpc["desc"] = string
+    return "menunode_vnum"
+
+
+def menunode_vnum(caller, raw_string="", **kwargs):
+    """Prompt for the NPC VNUM."""
+    default = caller.ndb.buildnpc.get("vnum", "")
+    text = dedent(
+        """
+        |wEnter VNUM or 'auto' to generate|n
+        Example: |w123|n
+        (back to go back, skip for default)
+        """
+    )
+    if default:
+        text += f" [default: {default}]"
+    options = add_back_skip({"key": "_default", "goto": _set_vnum}, _set_vnum)
+    return text, options
+
+
+def _set_vnum(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_desc"
+    if not string or string.lower() == "skip":
+        if "vnum" not in caller.ndb.buildnpc:
+            caller.msg("VNUM is required.")
+            return "menunode_vnum"
+        val = caller.ndb.buildnpc["vnum"]
+    elif string.lower() == "auto":
+        val = vnum_registry.get_next_vnum("npc")
+    else:
+        if not string.isdigit():
+            caller.msg("Enter a number or 'auto'.")
+            return "menunode_vnum"
+        val = int(string)
+        if not vnum_registry.validate_vnum(val, "npc"):
+            caller.msg("Invalid or already used VNUM.")
+            return "menunode_vnum"
+    caller.ndb.buildnpc["vnum"] = val
+    vnum_registry.register_vnum(val)
     return "menunode_creature_type"
 
 def menunode_npc_type(caller, raw_string="", **kwargs):
@@ -227,7 +268,7 @@ def menunode_creature_type(caller, raw_string="", **kwargs):
 def _set_creature_type(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_desc"
+        return "menunode_vnum"
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("creature_type", "humanoid")
     ctype = string.lower() or "humanoid"
