@@ -10,6 +10,8 @@ from utils.slots import SLOT_ORDER
 from utils.menu_utils import add_back_skip
 from .command import Command
 from django.conf import settings
+from importlib import import_module
+from evennia.utils import logger
 import re
 from world.mob_constants import (
     ACTFLAGS,
@@ -94,6 +96,21 @@ ALLOWED_AI_TYPES = (
     "wander",
     "scripted",
 )
+
+# Modules allowed when importing scripted AI callbacks or Scripts
+ALLOWED_SCRIPT_MODULES = ("scripts",)
+
+
+def _import_script(path: str):
+    """Safely import a script or callable from an allowed module."""
+    module, attr = path.rsplit(".", 1)
+    if not any(
+        module == allowed or module.startswith(f"{allowed}.")
+        for allowed in ALLOWED_SCRIPT_MODULES
+    ):
+        raise ImportError(f"Module '{module}' is not allowed")
+    mod = import_module(module)
+    return getattr(mod, attr)
 
 
 # Menu nodes for NPC creation
@@ -1012,10 +1029,11 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.exp_reward = data.get("exp_reward", 0)
     if script_path := data.get("script"):
         try:
-            module, cls = script_path.rsplit(".", 1)
-            mod = __import__(module, fromlist=[cls])
-            script_cls = getattr(mod, cls)
-            npc.scripts.add(script_cls, key=cls)
+            script_cls = _import_script(script_path)
+            npc.scripts.add(script_cls, key=script_cls.__name__)
+        except ImportError as err:
+            logger.log_err(f"Script import rejected in npc builder: {err}")
+            caller.msg(f"Module not allowed for script: {script_path}")
         except Exception as err:  # pragma: no cover - log errors
             caller.msg(f"Could not attach script {script_path}: {err}")
     npc.db.creature_type = data.get("creature_type")

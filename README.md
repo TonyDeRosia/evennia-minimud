@@ -162,7 +162,8 @@ builder:
 - **scripted** – runs the callback stored in ``npc.db.ai_script``.
 
 For scripted AI you must assign a callable to ``npc.db.ai_script``. This can be
-either a Python import path or a direct function reference. Example::
+either a Python import path or a direct function reference. Callbacks must live
+under the ``scripts`` package. Example::
 
     npc.db.ai_script = "scripts.example_ai.patrol_ai"
 

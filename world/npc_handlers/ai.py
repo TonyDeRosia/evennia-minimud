@@ -3,9 +3,26 @@
 from __future__ import annotations
 
 from random import choice
+from importlib import import_module
 from evennia import DefaultObject
+from evennia.utils import logger
 from typeclasses.npcs import BaseNPC
 from combat.ai_combat import npc_take_turn
+
+
+ALLOWED_CALLBACK_MODULES = ("scripts",)
+
+
+def _import_ai_callback(path: str):
+    """Import the AI callback if within allowed modules."""
+    module, func = path.rsplit(".", 1)
+    if not any(
+        module == allowed or module.startswith(f"{allowed}.")
+        for allowed in ALLOWED_CALLBACK_MODULES
+    ):
+        raise ImportError(f"Module '{module}' is not allowed")
+    mod = import_module(module)
+    return getattr(mod, func)
 
 
 def _ai_aggressive(npc: DefaultObject) -> None:
@@ -46,12 +63,13 @@ def _ai_scripted(npc: DefaultObject) -> None:
         if callable(callback):
             callback(npc)
         elif isinstance(callback, str):
-            module, func = callback.rsplit(".", 1)
-            mod = __import__(module, fromlist=[func])
-            getattr(mod, func)(npc)
+            try:
+                func = _import_ai_callback(callback)
+            except Exception as err:
+                logger.log_err(f"Scripted AI import rejected on {npc}: {err}")
+                return
+            func(npc)
     except Exception as err:  # pragma: no cover - log errors
-        from evennia.utils import logger
-
         logger.log_err(f"Scripted AI error on {npc}: {err}")
 
 
