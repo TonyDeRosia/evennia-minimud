@@ -57,6 +57,9 @@ PROTOTYPE_NPC_FILE = Path(GAME_DIR) / "world" / "prototypes" / "npcs.json"
 
 PROTOTYPE_NPC_EXPORT_DIR = Path(GAME_DIR) / "exports" / "npc_prototypes"
 
+# File tracking used VNUMs
+VNUM_REGISTRY_FILE = Path(GAME_DIR) / "world" / "vnum_registry.json"
+
 # Clothing - https://www.evennia.com/docs/latest/Contribs/Contrib-Clothing.html#configuration
 CLOTHING_WEARSTYLE_MAXLENGTH = 40
 CLOTHING_TYPE_ORDERED = [

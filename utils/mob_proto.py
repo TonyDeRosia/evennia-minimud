@@ -6,13 +6,18 @@ from typing import Optional
 
 from evennia.prototypes import spawner
 from world.scripts.mob_db import get_mobdb
+from .vnum_registry import get_next_vnum, register_vnum, validate_vnum
 
 
 def register_prototype(data: dict, vnum: int | None = None) -> int:
     """Register ``data`` in the mob database under ``vnum``."""
     mob_db = get_mobdb()
     if vnum is None:
-        vnum = mob_db.next_vnum()
+        vnum = get_next_vnum("npc")
+    else:
+        if not validate_vnum(vnum, "npc"):
+            raise ValueError("Invalid or already used VNUM")
+        register_vnum(vnum)
     mob_db.add_proto(vnum, data)
     return vnum
 
