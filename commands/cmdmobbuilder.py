@@ -5,6 +5,7 @@ import shlex
 from evennia.utils.evmenu import EvMenu
 from evennia import DefaultRoom
 from evennia.utils import evtable
+from evennia.objects.models import ObjectDB
 
 from .command import Command
 from utils.mob_proto import (
@@ -13,6 +14,7 @@ from utils.mob_proto import (
     spawn_from_vnum,
 )
 from world.scripts.mob_db import get_mobdb
+from typeclasses.npcs import BaseNPC
 
 
 class CmdMobProto(Command):
@@ -137,6 +139,14 @@ class CmdMobProto(Command):
         mob_db = get_mobdb()
         if not mob_db.get_proto(vnum):
             caller.msg("Prototype not found.")
+            return
+        npcs = [
+            obj
+            for obj in ObjectDB.objects.get_by_attribute(key="vnum", value=vnum)
+            if obj.is_typeclass(BaseNPC, exact=False)
+        ]
+        if npcs:
+            caller.msg("Cannot delete - live NPCs exist for that vnum.")
             return
         mob_db.delete_proto(vnum)
         caller.msg(f"Prototype {vnum} deleted.")
