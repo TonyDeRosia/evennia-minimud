@@ -176,6 +176,12 @@ def format_mob_summary(data: dict) -> str:
     stats.add_row("|cHP|n", fmt(data.get("hp")))
     stats.add_row("|cMP|n", fmt(data.get("mp")))
     stats.add_row("|cSP|n", fmt(data.get("sp")))
+    if data.get("damage") is not None:
+        stats.add_row("|cDamage|n", fmt(data.get("damage")))
+    if data.get("armor") is not None:
+        stats.add_row("|cArmor|n", fmt(data.get("armor")))
+    if data.get("initiative") is not None:
+        stats.add_row("|cInitiative|n", fmt(data.get("initiative")))
     if data.get("primary_stats"):
         stats.add_row("|cStats|n", fmt(data.get("primary_stats")))
     if data.get("modifiers"):
@@ -917,7 +923,7 @@ def _use_default_resources(caller, raw_string, **kwargs):
     caller.ndb.buildnpc.pop("mp", None)
     caller.ndb.buildnpc.pop("sp", None)
     _preview(caller)
-    return "menunode_modifiers"
+    return "menunode_combat_values"
 
 
 def menunode_resources(caller, raw_string="", **kwargs):
@@ -945,7 +951,7 @@ def _set_resources(caller, raw_string, **kwargs):
         caller.ndb.buildnpc["mp"] = caller.ndb.buildnpc.get("mp", 0)
         caller.ndb.buildnpc["sp"] = caller.ndb.buildnpc.get("sp", 0)
         _preview(caller)
-        return "menunode_modifiers"
+        return "menunode_combat_values"
     parts = string.split()
     if len(parts) != 3 or not all(p.isdigit() for p in parts):
         caller.msg("Enter three numbers separated by spaces.")
@@ -953,6 +959,44 @@ def _set_resources(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["hp"] = int(parts[0])
     caller.ndb.buildnpc["mp"] = int(parts[1])
     caller.ndb.buildnpc["sp"] = int(parts[2])
+    _preview(caller)
+    return "menunode_combat_values"
+
+
+def menunode_combat_values(caller, raw_string="", **kwargs):
+    """Prompt for base damage, armor and initiative."""
+    dmg = caller.ndb.buildnpc.get("damage", 1)
+    armor = caller.ndb.buildnpc.get("armor", 0)
+    init = caller.ndb.buildnpc.get("initiative", 0)
+    default = f"{dmg} {armor} {init}"
+    text = dedent(
+        f"""
+        |wEnter Damage Armor Initiative|n [default: {default}]
+        Example: |w5 2 10|n
+        (back to go back, skip for default)
+        """
+    )
+    options = add_back_skip({"key": "_default", "goto": _set_combat_values}, _set_combat_values)
+    return with_summary(caller, text), options
+
+
+def _set_combat_values(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_resources_prompt"
+    if not string or string.lower() == "skip":
+        caller.ndb.buildnpc["damage"] = caller.ndb.buildnpc.get("damage", 1)
+        caller.ndb.buildnpc["armor"] = caller.ndb.buildnpc.get("armor", 0)
+        caller.ndb.buildnpc["initiative"] = caller.ndb.buildnpc.get("initiative", 0)
+        _preview(caller)
+        return "menunode_modifiers"
+    parts = string.split()
+    if len(parts) != 3 or not all(p.lstrip("-+").isdigit() for p in parts):
+        caller.msg("Enter three numbers separated by spaces.")
+        return "menunode_combat_values"
+    caller.ndb.buildnpc["damage"] = int(parts[0])
+    caller.ndb.buildnpc["armor"] = int(parts[1])
+    caller.ndb.buildnpc["initiative"] = int(parts[2])
     _preview(caller)
     return "menunode_modifiers"
 
@@ -978,7 +1022,7 @@ def _set_modifiers(caller, raw_string, **kwargs):
 
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_resources_prompt"
+        return "menunode_combat_values"
     if not string or string.lower() == "skip":
         caller.ndb.buildnpc["modifiers"] = caller.ndb.buildnpc.get("modifiers", {})
         caller.ndb.buildnpc["buffs"] = caller.ndb.buildnpc.get("buffs", [])
@@ -1647,10 +1691,26 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
             npc.db.natural_weapon = {
                 "name": "fists",
                 "damage_type": "bash",
-                "damage": 1,
+                "damage": data.get("damage", 1),
                 "speed": 10,
                 "stamina_cost": 5,
             }
+        else:
+            npc.db.natural_weapon["damage"] = data.get("damage", npc.db.natural_weapon.get("damage", 1))
+    else:
+        if data.get("damage") is not None:
+            npc.db.natural_weapon = npc.db.natural_weapon or {
+                "name": "fists",
+                "damage_type": "bash",
+                "speed": 10,
+                "stamina_cost": 5,
+            }
+            npc.db.natural_weapon["damage"] = data.get("damage")
+    npc.db.armor = data.get("armor", 0)
+    if npc.traits.get("armor"):
+        npc.traits.armor.base = data.get("armor", 0)
+    if npc.traits.get("initiative"):
+        npc.traits.initiative.base = data.get("initiative", 0)
     npc.db.level = data.get("level", 1)
     for trait, val in {
         "health": data.get("hp"),
@@ -1690,6 +1750,9 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
             proto["coin_drop"] = data.get("coin_drop")
         if data.get("loot_table"):
             proto["loot_table"] = data.get("loot_table")
+        proto["damage"] = data.get("damage", 1)
+        proto["armor"] = data.get("armor", 0)
+        proto["initiative"] = data.get("initiative", 0)
         if data.get("use_mob"):
             proto["can_attack"] = True
             proto.setdefault(
@@ -1697,7 +1760,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
                 {
                     "name": "fists",
                     "damage_type": "bash",
-                    "damage": 1,
+                    "damage": data.get("damage", 1),
                     "speed": 10,
                     "stamina_cost": 5,
                 },
@@ -1754,6 +1817,9 @@ def _gather_npc_data(npc):
         "hp": npc.traits.health.base if npc.traits.get("health") else 0,
         "mp": npc.traits.mana.base if npc.traits.get("mana") else 0,
         "sp": npc.traits.stamina.base if npc.traits.get("stamina") else 0,
+        "damage": npc.db.natural_weapon.get("damage", 1) if npc.db.natural_weapon else 1,
+        "armor": npc.db.armor or 0,
+        "initiative": getattr(npc.traits.get("initiative"), "base", 0),
         "primary_stats": npc.db.base_primary_stats or {},
         "behavior": npc.db.behavior or "",
         "skills": npc.db.skills or [],
@@ -1816,6 +1882,9 @@ class CmdCNPC(Command):
                 "coin_drop": {},
                 "loot_table": [],
                 "exp_reward": 0,
+                "damage": 1,
+                "armor": 0,
+                "initiative": 0,
                 "merchant_markup": 1.0,
                 "script": "",
                 "modifiers": {},
