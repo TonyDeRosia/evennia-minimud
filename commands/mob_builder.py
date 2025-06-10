@@ -97,3 +97,27 @@ class CmdMedit(Command):
         data = npc_builder._gather_npc_data(npc)
         self.caller.ndb.buildnpc = data
         EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
+
+
+class CmdMobTemplate(Command):
+    """Load a predefined mob template into the current build."""
+
+    key = "@mobtemplate"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        from world.templates.mob_templates import MOB_TEMPLATES, get_template
+
+        arg = self.args.strip().lower()
+        if not arg or arg == "list":
+            names = ", ".join(sorted(MOB_TEMPLATES))
+            self.msg(f"Available templates: {names}")
+            return
+        data = get_template(arg)
+        if not data:
+            self.msg("Unknown template.")
+            return
+        self.caller.ndb.buildnpc = self.caller.ndb.buildnpc or {}
+        self.caller.ndb.buildnpc.update(data)
+        self.msg(f"Template '{arg}' loaded into builder.")
