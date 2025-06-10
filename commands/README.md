@@ -70,7 +70,7 @@ NPCs are saved as prototypes in `world/prototypes/npcs.json` and can be
 spawned later with `@spawnnpc`. These commands help you manage the prototypes:
 
 *A role describes what the NPC does (merchant, questgiver...),*
-*while the class determines combat style (warrior, wizard...).*
+*while the class selects the NPC typeclass (base, merchant, banker...).*
 
 * `@mcreate <key> [copy_key]` – make a new prototype, optionally copying an
   existing one.

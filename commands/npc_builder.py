@@ -566,7 +566,8 @@ def _edit_custom_slots(caller, raw_string, **kwargs):
 def menunode_npc_class(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("npc_class", "base")
     classes = "/".join(NPC_CLASS_MAP)
-    text = f"|wClass (warrior, wizard...)|n ({classes})"
+    example = ", ".join(list(NPC_CLASS_MAP)[:3])
+    text = f"|wNPC class ({example}...)|n ({classes})"
     if default:
         text += f" [default: {default}]"
     text += "\n(back to go back, skip for default)"
