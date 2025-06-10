@@ -490,7 +490,7 @@ DEER_ANTLER = {
 # percent chance to drop that prototype when the NPC dies.
 # Example::
 #
-#     [{"proto": "RAW_MEAT", "chance": 50}, {"proto": "ANIMAL_HIDE", "chance": 25}]
+#     [{"proto": "RAW_MEAT", "chance": 50}, {"proto": "ANIMAL_HIDE", "chance": 25, "guaranteed_after": 5}]
 
 EXAMPLE_LOOT_TABLE = [{"proto": "RAW_MEAT", "chance": 50}]
 
