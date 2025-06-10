@@ -1416,7 +1416,11 @@ def menunode_confirm(caller, raw_string="", **kwargs):
             {"desc": "Confirm", "goto": (_create_npc, {"register": False})},
         ]
     else:
-        text += "\nCreate this NPC?"
+        text += (
+            "\nCreate this NPC?\n"
+            "Selecting |wYes|n spawns the NPC in your current location.\n"
+            "Selecting |wYes & Save Prototype|n spawns the NPC and saves the prototype for later use."
+        )
         options = [
             {"desc": "Yes", "goto": (_create_npc, {"register": False})},
             {"desc": "Yes & Save Prototype", "goto": (_create_npc, {"register": True})},
