@@ -111,3 +111,26 @@ class TestMobBuilder(EvenniaTest):
             assert text in out
         assert "slash" in out
 
+    def test_vnum_menu_without_existing(self):
+        """When no VNUM is set, Skip should not appear and Auto option is shown."""
+        self.char1.ndb.buildnpc = {}
+        _text, opts = npc_builder.menunode_vnum(self.char1)
+        labels = [o.get("desc") or o.get("key") for o in opts]
+        assert "Skip" not in labels
+        assert any(o.get("desc") == "Auto" for o in opts)
+
+    def test_set_vnum_auto(self):
+        """Selecting auto should store the generated VNUM."""
+        self.char1.ndb.buildnpc = {}
+        with patch("utils.vnum_registry.get_next_vnum", return_value=42) as mock:
+            result = npc_builder._set_vnum(self.char1, "auto")
+        mock.assert_called_with("npc")
+        assert self.char1.ndb.buildnpc["vnum"] == 42
+        assert result == "menunode_creature_type"
+
+    def test_set_vnum_skip_existing(self):
+        """Skipping with an existing VNUM keeps the value."""
+        self.char1.ndb.buildnpc = {"vnum": 5}
+        result = npc_builder._set_vnum(self.char1, "skip")
+        assert self.char1.ndb.buildnpc["vnum"] == 5
+        assert result == "menunode_creature_type"

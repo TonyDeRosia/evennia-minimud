@@ -51,6 +51,7 @@ def validate_prototype(data: dict) -> list[str]:
 
     return warnings
 
+
 # Primary roles that can be selected in the builder
 ALLOWED_ROLES_PRIMARY = (
     "merchant",
@@ -170,9 +171,13 @@ def format_mob_summary(data: dict) -> str:
     rewards = EvTable(border="cells")
     rewards.add_row("|cXP Reward|n", fmt(data.get("exp_reward")))
     if "coin_drop" in data or "coins" in data:
-        rewards.add_row("|cCoin Drop|n", fmt(data.get("coin_drop") or data.get("coins")))
+        rewards.add_row(
+            "|cCoin Drop|n", fmt(data.get("coin_drop") or data.get("coins"))
+        )
     if data.get("loot_table"):
-        loot = [f"{e.get('proto')}({e.get('chance', 100)}%)" for e in data.get("loot_table")]
+        loot = [
+            f"{e.get('proto')}({e.get('chance', 100)}%)" for e in data.get("loot_table")
+        ]
         rewards.add_row("|cLoot Table|n", fmt(loot))
     lines.append("\n|wRewards|n")
     lines.append(str(rewards))
@@ -186,8 +191,8 @@ def format_mob_summary(data: dict) -> str:
     return "\n".join(lines)
 
 
-
 # Menu nodes for NPC creation
+
 
 def menunode_summary(caller, raw_string="", **kwargs):
     """Show current values before editing."""
@@ -241,6 +246,7 @@ def menunode_desc(caller, raw_string="", **kwargs):
     options = add_back_skip({"key": "_default", "goto": _set_desc}, _set_desc)
     return text, options
 
+
 def _set_desc(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
@@ -253,29 +259,41 @@ def _set_desc(caller, raw_string, **kwargs):
 
 def menunode_vnum(caller, raw_string="", **kwargs):
     """Prompt for the NPC VNUM."""
-    default = caller.ndb.buildnpc.get("vnum", "")
+    default = caller.ndb.buildnpc.get("vnum")
     text = dedent(
         """
         |wEnter VNUM or 'auto' to generate|n
         Example: |w123|n
-        (back to go back, skip for default)
-        """
+    """
     )
-    if default:
+    if default is not None:
+        text += "(back to go back, skip for default)"
         text += f" [default: {default}]"
+    else:
+        text += "(back to go back)"
     options = add_back_skip({"key": "_default", "goto": _set_vnum}, _set_vnum)
+    if default is None:
+        options = [opt for opt in options if opt.get("desc") != "Skip"]
+
+        def _auto(caller, raw_string=None, **kwargs):
+            return _set_vnum(caller, "auto", **kwargs)
+
+        options.insert(0, {"desc": "Auto", "goto": _auto})
     return text, options
 
 
 def _set_vnum(caller, raw_string, **kwargs):
-    string = raw_string.strip()
+    string = str(raw_string).strip()
     if string.lower() == "back":
         return "menunode_desc"
+
+    data = caller.ndb.buildnpc or {}
+
     if not string or string.lower() == "skip":
-        if "vnum" not in caller.ndb.buildnpc:
+        if "vnum" not in data:
             caller.msg("VNUM is required.")
             return "menunode_vnum"
-        val = caller.ndb.buildnpc["vnum"]
+        val = data["vnum"]
     elif string.lower() == "auto":
         val = vnum_registry.get_next_vnum("npc")
     else:
@@ -286,9 +304,12 @@ def _set_vnum(caller, raw_string, **kwargs):
         if not vnum_registry.validate_vnum(val, "npc"):
             caller.msg("Invalid or already used VNUM.")
             return "menunode_vnum"
-    caller.ndb.buildnpc["vnum"] = val
-    vnum_registry.register_vnum(val)
+        vnum_registry.register_vnum(val)
+
+    data["vnum"] = val
+    caller.ndb.buildnpc = data
     return "menunode_creature_type"
+
 
 def menunode_role(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("role", "")
@@ -305,6 +326,7 @@ def menunode_role(caller, raw_string="", **kwargs):
     options = add_back_skip({"key": "_default", "goto": _set_role}, _set_role)
     return text, options
 
+
 def _set_role(caller, raw_string, **kwargs):
     string = raw_string.strip().lower()
     if string == "back":
@@ -319,6 +341,7 @@ def _set_role(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["role"] = string
     return "menunode_npc_class"
 
+
 def menunode_guild_affiliation(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("guild_affiliation", "")
     text = "|wEnter guild tag for this receptionist|n"
@@ -326,8 +349,11 @@ def menunode_guild_affiliation(caller, raw_string="", **kwargs):
         text += f" [default: {default}]"
     text += "\nExample: |wthieves_guild|n"
     text += "\n(back to go back, skip for default)"
-    options = add_back_skip({"key": "_default", "goto": _set_guild_affiliation}, _set_guild_affiliation)
+    options = add_back_skip(
+        {"key": "_default", "goto": _set_guild_affiliation}, _set_guild_affiliation
+    )
     return text, options
+
 
 def _set_guild_affiliation(caller, raw_string, **kwargs):
     string = raw_string.strip()
@@ -337,6 +363,7 @@ def _set_guild_affiliation(caller, raw_string, **kwargs):
         string = caller.ndb.buildnpc.get("guild_affiliation", "")
     caller.ndb.buildnpc["guild_affiliation"] = string
     return "menunode_role_details"
+
 
 def menunode_creature_type(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("creature_type", "humanoid")
@@ -350,8 +377,11 @@ def menunode_creature_type(caller, raw_string="", **kwargs):
     if default:
         text += f" [default: {default}]"
     text += "\n(back to go back, skip for default)"  # keep existing note for clarity
-    options = add_back_skip({"key": "_default", "goto": _set_creature_type}, _set_creature_type)
+    options = add_back_skip(
+        {"key": "_default", "goto": _set_creature_type}, _set_creature_type
+    )
     return text, options
+
 
 def _set_creature_type(caller, raw_string, **kwargs):
     string = raw_string.strip()
@@ -362,7 +392,12 @@ def _set_creature_type(caller, raw_string, **kwargs):
     ctype = string.lower() or "humanoid"
     caller.ndb.buildnpc["creature_type"] = ctype
     if ctype == "quadruped":
-        caller.ndb.buildnpc["equipment_slots"] = ["head", "body", "front_legs", "hind_legs"]
+        caller.ndb.buildnpc["equipment_slots"] = [
+            "head",
+            "body",
+            "front_legs",
+            "hind_legs",
+        ]
         return "menunode_role"
     if ctype == "unique":
         caller.ndb.buildnpc["equipment_slots"] = list(SLOT_ORDER)
@@ -370,18 +405,24 @@ def _set_creature_type(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["equipment_slots"] = list(SLOT_ORDER)
     return "menunode_role"
 
+
 def menunode_custom_slots(caller, raw_string="", **kwargs):
     slots = caller.ndb.buildnpc.get("equipment_slots", list(SLOT_ORDER))
     text = "|wEdit Equipment Slots|n\n"
     text += ", ".join(slots) if slots else "None"
-    text += ("\nCommands:\n"
-             "  add <slot> - add a slot\n"
-             "  remove <slot> - remove a slot\n"
-             "  done - finish editing\n"
-             "  back - previous step\n"
-             "Example: |wadd tail|n")
-    options = add_back_skip({"key": "_default", "goto": _edit_custom_slots}, _edit_custom_slots)
+    text += (
+        "\nCommands:\n"
+        "  add <slot> - add a slot\n"
+        "  remove <slot> - remove a slot\n"
+        "  done - finish editing\n"
+        "  back - previous step\n"
+        "Example: |wadd tail|n"
+    )
+    options = add_back_skip(
+        {"key": "_default", "goto": _edit_custom_slots}, _edit_custom_slots
+    )
     return text, options
+
 
 def _edit_custom_slots(caller, raw_string, **kwargs):
     string = raw_string.strip()
@@ -409,6 +450,7 @@ def _edit_custom_slots(caller, raw_string, **kwargs):
     caller.msg("Unknown command.")
     return "menunode_custom_slots"
 
+
 def menunode_npc_class(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("npc_class", "base")
     classes = "/".join(NPC_CLASS_MAP)
@@ -418,6 +460,7 @@ def menunode_npc_class(caller, raw_string="", **kwargs):
     text += "\n(back to go back, skip for default)"
     options = add_back_skip({"key": "_default", "goto": _set_npc_class}, _set_npc_class)
     return text, options
+
 
 def _set_npc_class(caller, raw_string, **kwargs):
     string = raw_string.strip().lower()
@@ -432,6 +475,7 @@ def _set_npc_class(caller, raw_string, **kwargs):
 
     return "menunode_roles"
 
+
 def menunode_roles(caller, raw_string="", **kwargs):
     roles = caller.ndb.buildnpc.get("roles", [])
     available = ", ".join(ALLOWED_ROLES)
@@ -444,6 +488,7 @@ def menunode_roles(caller, raw_string="", **kwargs):
     )
     options = add_back_skip({"key": "_default", "goto": _edit_roles}, _edit_roles)
     return text, options
+
 
 def _edit_roles(caller, raw_string, **kwargs):
     string = raw_string.strip().lower()
@@ -471,13 +516,17 @@ def _edit_roles(caller, raw_string, **kwargs):
     caller.msg("Unknown command.")
     return "menunode_roles"
 
+
 def menunode_role_details(caller, raw_string="", **kwargs):
     roles = caller.ndb.buildnpc.get("roles", [])
     if "merchant" in roles and "merchant_markup" not in caller.ndb.buildnpc:
         return "menunode_merchant_pricing"
-    if any(r in roles for r in ("guildmaster", "guild_receptionist")) and not caller.ndb.buildnpc.get("guild_affiliation"):
+    if any(
+        r in roles for r in ("guildmaster", "guild_receptionist")
+    ) and not caller.ndb.buildnpc.get("guild_affiliation"):
         return "menunode_guild_affiliation"
     return "menunode_level"
+
 
 def menunode_merchant_pricing(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("merchant_markup", 1.0)
@@ -488,8 +537,11 @@ def menunode_merchant_pricing(caller, raw_string="", **kwargs):
         (back to go back, skip for default)
         """
     )
-    options = add_back_skip({"key": "_default", "goto": _set_merchant_pricing}, _set_merchant_pricing)
+    options = add_back_skip(
+        {"key": "_default", "goto": _set_merchant_pricing}, _set_merchant_pricing
+    )
     return text, options
+
 
 def _set_merchant_pricing(caller, raw_string, **kwargs):
     string = raw_string.strip()
@@ -506,6 +558,7 @@ def _set_merchant_pricing(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["merchant_markup"] = val
     return "menunode_role_details"
 
+
 def menunode_level(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("level", 1)
     text = dedent(
@@ -517,6 +570,7 @@ def menunode_level(caller, raw_string="", **kwargs):
     )
     options = add_back_skip({"key": "_default", "goto": _set_level}, _set_level)
     return text, options
+
 
 def _set_level(caller, raw_string, **kwargs):
     string = raw_string.strip()
@@ -536,6 +590,7 @@ def _set_level(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["level"] = val
     return "menunode_exp_reward"
 
+
 def menunode_exp_reward(caller, raw_string="", **kwargs):
     """Prompt for experience reward given when this NPC is defeated."""
     level = caller.ndb.buildnpc.get("level", 1)
@@ -549,7 +604,9 @@ def menunode_exp_reward(caller, raw_string="", **kwargs):
         (back to go back, skip for default)
         """
     )
-    options = add_back_skip({"key": "_default", "goto": _set_exp_reward}, _set_exp_reward)
+    options = add_back_skip(
+        {"key": "_default", "goto": _set_exp_reward}, _set_exp_reward
+    )
     return text, options
 
 
@@ -571,6 +628,7 @@ def _set_exp_reward(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["exp_reward"] = val
     return "menunode_resources"
 
+
 def menunode_resources(caller, raw_string="", **kwargs):
     hp = caller.ndb.buildnpc.get("hp", 0)
     mp = caller.ndb.buildnpc.get("mp", 0)
@@ -585,6 +643,7 @@ def menunode_resources(caller, raw_string="", **kwargs):
     )
     options = add_back_skip({"key": "_default", "goto": _set_resources}, _set_resources)
     return text, options
+
 
 def _set_resources(caller, raw_string, **kwargs):
     string = raw_string.strip()
@@ -604,6 +663,7 @@ def _set_resources(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["sp"] = int(parts[2])
     return "menunode_stats"
 
+
 def menunode_stats(caller, raw_string="", **kwargs):
     data = caller.ndb.buildnpc.get("primary_stats", {})
     stats_order = ["STR", "CON", "DEX", "INT", "WIS", "LUCK"]
@@ -617,6 +677,7 @@ def menunode_stats(caller, raw_string="", **kwargs):
     )
     options = add_back_skip({"key": "_default", "goto": _set_stats}, _set_stats)
     return text, options
+
 
 def _set_stats(caller, raw_string, **kwargs):
     string = raw_string.strip()
@@ -638,6 +699,7 @@ def _set_stats(caller, raw_string, **kwargs):
     }
     return "menunode_behavior"
 
+
 def menunode_behavior(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("behavior", "")
     text = "|wDescribe basic behavior or reactions|n"
@@ -648,6 +710,7 @@ def menunode_behavior(caller, raw_string="", **kwargs):
     options = add_back_skip({"key": "_default", "goto": _set_behavior}, _set_behavior)
     return text, options
 
+
 def _set_behavior(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
@@ -656,6 +719,7 @@ def _set_behavior(caller, raw_string, **kwargs):
         string = caller.ndb.buildnpc.get("behavior", "")
     caller.ndb.buildnpc["behavior"] = string
     return "menunode_skills"
+
 
 def menunode_skills(caller, raw_string="", **kwargs):
     skills = caller.ndb.buildnpc.get("skills", [])
@@ -667,6 +731,7 @@ def menunode_skills(caller, raw_string="", **kwargs):
     text += "\n(back to go back, skip for default)"
     options = add_back_skip({"key": "_default", "goto": _set_skills}, _set_skills)
     return text, options
+
 
 def _set_skills(caller, raw_string, **kwargs):
     string = raw_string.strip()
@@ -703,6 +768,7 @@ def _set_spells(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["spells"] = spells
     return "menunode_ai"
 
+
 def menunode_ai(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("ai_type", "")
     types = "/".join(ALLOWED_AI_TYPES)
@@ -717,6 +783,7 @@ def menunode_ai(caller, raw_string="", **kwargs):
         text += f" [default: {default}]"
     options = add_back_skip({"key": "_default", "goto": _set_ai}, _set_ai)
     return text, options
+
 
 def _set_ai(caller, raw_string, **kwargs):
     string = raw_string.strip()
@@ -935,6 +1002,7 @@ def _set_languages(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["languages"] = val
     return "menunode_script"
 
+
 def menunode_script(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("script", "")
     text = "|wScript to attach to NPC (e.g. bandit_ai.BanditAI)|n"
@@ -956,6 +1024,7 @@ def _set_script(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["script"] = val
     return "menunode_triggers"
 
+
 def menunode_triggers(caller, raw_string="", **kwargs):
     """Main trigger menu."""
     text = "|wTrigger Menu|n"
@@ -967,6 +1036,7 @@ def menunode_triggers(caller, raw_string="", **kwargs):
     ]
     return text, options
 
+
 def menunode_trigger_list(caller, raw_string="", **kwargs):
     """Show all triggers."""
     triggers = caller.ndb.buildnpc.get("triggers") or {}
@@ -977,14 +1047,17 @@ def menunode_trigger_list(caller, raw_string="", **kwargs):
                 if not isinstance(trig, dict):
                     continue
                 match = trig.get("match", "")
-                resp = trig.get("responses", trig.get("response", trig.get("reactions")))
+                resp = trig.get(
+                    "responses", trig.get("response", trig.get("reactions"))
+                )
                 if isinstance(resp, list):
                     resp = ", ".join(resp)
-                text += f"{event}: \"{match}\" -> {resp}\n"
+                text += f'{event}: "{match}" -> {resp}\n'
     else:
         text += "None\n"
     options = [{"desc": "Back", "goto": "menunode_triggers"}]
     return text, options
+
 
 def menunode_trigger_add(caller, raw_string="", **kwargs):
     """Choose trigger event type."""
@@ -993,7 +1066,10 @@ def menunode_trigger_add(caller, raw_string="", **kwargs):
         {"desc": "on_enter", "goto": (_set_trigger_event, {"event": "on_enter"})},
         {"desc": "on_speak", "goto": (_set_trigger_event, {"event": "on_speak"})},
         {"desc": "on_attack", "goto": (_set_trigger_event, {"event": "on_attack"})},
-        {"desc": "on_give_item", "goto": (_set_trigger_event, {"event": "on_give_item"})},
+        {
+            "desc": "on_give_item",
+            "goto": (_set_trigger_event, {"event": "on_give_item"}),
+        },
         {"desc": "on_look", "goto": (_set_trigger_event, {"event": "on_look"})},
         {"desc": "on_timer", "goto": (_set_trigger_event, {"event": "on_timer"})},
         {"desc": "custom", "goto": "menunode_trigger_custom"},
@@ -1001,11 +1077,15 @@ def menunode_trigger_add(caller, raw_string="", **kwargs):
     ]
     return text, options
 
+
 def menunode_trigger_custom(caller, raw_string="", **kwargs):
     """Prompt for custom event name."""
     text = "|wEnter custom event name|n"
-    options = add_back_skip({"key": "_default", "goto": _set_custom_event}, _set_custom_event)
+    options = add_back_skip(
+        {"key": "_default", "goto": _set_custom_event}, _set_custom_event
+    )
     return text, options
+
 
 def _set_custom_event(caller, raw_string, **kwargs):
     event = raw_string.strip()
@@ -1014,23 +1094,30 @@ def _set_custom_event(caller, raw_string, **kwargs):
         return "menunode_trigger_custom"
     return _set_trigger_event(caller, None, event=event)
 
+
 def _set_trigger_event(caller, raw_string, event=None, **kwargs):
     caller.ndb.trigger_event = event
     return "menunode_trigger_match"
 
+
 def menunode_trigger_match(caller, raw_string="", **kwargs):
     text = "|wEnter match text (blank for none)|n"
-    options = add_back_skip({"key": "_default", "goto": _set_trigger_match}, _set_trigger_match)
+    options = add_back_skip(
+        {"key": "_default", "goto": _set_trigger_match}, _set_trigger_match
+    )
     return text, options
+
 
 def _set_trigger_match(caller, raw_string, **kwargs):
     caller.ndb.trigger_match = raw_string.strip()
     return "menunode_trigger_react"
 
+
 def menunode_trigger_react(caller, raw_string="", **kwargs):
     text = "|wEnter reaction command(s) (comma or semicolon separated)|n"
     options = add_back_skip({"key": "_default", "goto": _save_trigger}, _save_trigger)
     return text, options
+
 
 def _save_trigger(caller, raw_string, **kwargs):
     reaction = raw_string.strip()
@@ -1045,6 +1132,7 @@ def _save_trigger(caller, raw_string, **kwargs):
     caller.ndb.trigger_match = None
     caller.msg("Trigger added.")
     return "menunode_triggers"
+
 
 def menunode_trigger_delete(caller, raw_string="", **kwargs):
     """Select trigger to delete."""
@@ -1062,12 +1150,13 @@ def menunode_trigger_delete(caller, raw_string="", **kwargs):
             resp = trig.get("responses", trig.get("response", trig.get("reactions")))
             if isinstance(resp, list):
                 resp = ", ".join(resp)
-            desc = f"{event}: \"{match}\" -> {resp}"
+            desc = f'{event}: "{match}" -> {resp}'
             options.append(
                 {"desc": desc, "goto": (_del_trigger, {"event": event, "index": idx})}
             )
     options.append({"desc": "Back", "goto": "menunode_triggers"})
     return text, options
+
 
 def _del_trigger(caller, raw_string, event=None, index=None, **kwargs):
     triggers = caller.ndb.buildnpc.get("triggers") or {}
@@ -1101,12 +1190,15 @@ def menunode_confirm(caller, raw_string="", **kwargs):
     ]
     return text, options
 
+
 def _create_npc(caller, raw_string, register=False, **kwargs):
     data = caller.ndb.buildnpc
     if not isinstance(data, dict):
         caller.msg("Error: NPC data missing. Aborting.")
         return None
-    tclass_path = NPC_CLASS_MAP.get(data.get("npc_class", "base"), "typeclasses.npcs.BaseNPC")
+    tclass_path = NPC_CLASS_MAP.get(
+        data.get("npc_class", "base"), "typeclasses.npcs.BaseNPC"
+    )
     if data.get("edit_obj"):
         npc = data.get("edit_obj")
         if npc.typeclass_path != tclass_path:
@@ -1213,6 +1305,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     caller.ndb.buildnpc = None
     return None
 
+
 def _cancel(caller, raw_string, **kwargs):
     caller.msg("NPC creation cancelled.")
     caller.ndb.buildnpc = None
@@ -1227,7 +1320,11 @@ def _gather_npc_data(npc):
         "key": npc.key,
         "desc": npc.db.desc,
         "role": npc.tags.get(category="npc_type") or "",
-        "roles": [t for t in npc.tags.get(category="npc_role", return_list=True) or [] if t != npc.tags.get(category="npc_type")],
+        "roles": [
+            t
+            for t in npc.tags.get(category="npc_role", return_list=True) or []
+            if t != npc.tags.get(category="npc_type")
+        ],
         "npc_class": next(
             (k for k, path in NPC_CLASS_MAP.items() if path == npc.typeclass_path),
             "base",
@@ -1254,7 +1351,9 @@ def _gather_npc_data(npc):
         "merchant_markup": npc.db.merchant_markup or 1.0,
         "guild_affiliation": npc.tags.get(category="guild_affiliation") or "",
         "triggers": npc.db.triggers or {},
-        "script": next((scr.typeclass_path for scr in npc.scripts.all() if scr.key != "npc_ai"), ""),
+        "script": next(
+            (scr.typeclass_path for scr in npc.scripts.all() if scr.key != "npc_ai"), ""
+        ),
     }
 
 
@@ -1268,7 +1367,9 @@ class CmdCNPC(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: cnpc start <key> | cnpc edit <npc> | cnpc dev_spawn <proto>")
+            self.msg(
+                "Usage: cnpc start <key> | cnpc edit <npc> | cnpc dev_spawn <proto>"
+            )
             return
         parts = self.args.split(None, 1)
         sub = parts[0].lower()
@@ -1413,6 +1514,7 @@ class CmdSpawnNPC(Command):
             return
         arg = self.args.strip()
         from world import prototypes
+
         proto = None
         if arg.isdigit():
             obj = spawn_from_vnum(int(arg), location=self.caller.location)
@@ -1510,4 +1612,3 @@ class CmdDupNPC(Command):
         prototypes.register_npc_prototype(new_key, new_proto)
         area_npcs.add_area_npc(area, new_key)
         self.msg(f"Prototype {key} duplicated to {new_key} in area {area}.")
-
