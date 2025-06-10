@@ -57,7 +57,7 @@ bank transfer <amount [coin]> <player>
 
 I set this up to make it reasonably easy to install and set up, but I had to make a decision between "write a bunch more code" and "add a couple more steps" and since my goal was to write *less* code.... Well, you've got a couple more steps.
 
-First, you need to install Python 3.11 and have git in your command line. Then, cd to your programming folder (or make one and cd in) and follow these steps to download and install:
+First, you need to install Python 3.12 and have git in your command line. Then, cd to your programming folder (or make one and cd in) and follow these steps to download and install:
 
 *(If you know what any of the steps do and want to do them differently, feel free.)*
 
