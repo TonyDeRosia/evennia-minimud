@@ -9,7 +9,7 @@ from .combat_actions import (
     SpellAction,
     CombatResult,
 )
-from .combat_states import CombatState, StateManager
+from .combat_states import CombatState, CombatStateManager
 from .combat_skills import Skill, ShieldBash, Cleave, SKILL_CLASSES
 from .damage_types import DamageType
 
@@ -22,7 +22,7 @@ __all__ = [
     "SpellAction",
     "CombatResult",
     "CombatState",
-    "StateManager",
+    "CombatStateManager",
     "Skill",
     "ShieldBash",
     "Cleave",

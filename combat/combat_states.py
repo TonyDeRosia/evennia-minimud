@@ -19,7 +19,7 @@ class CombatState:
     on_tick: Optional[Callable[[object, "CombatState"], None]] = None
 
 
-class StateManager:
+class CombatStateManager:
     """Track active combat states on characters."""
 
     def __init__(self):
