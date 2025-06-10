@@ -2932,6 +2932,7 @@ Notes:
     - Edit saved prototypes with |w@mcreate|n or |w@mset|n and review them
       using |w@mlist|n. See |whelp @mlist|n for filtering options.
     - Spawn a stored prototype with |w@mspawn <prototype>|n.
+    - Quickly preview a prototype with |w@mobpreview <prototype>|n.
     - Inspect prototypes or NPCs with |w@mstat <key>|n.
     - Use |w@makeshop|n or |w@makerepair|n to add vendor data after
       saving the prototype.
@@ -3049,6 +3050,21 @@ Usage:
 Examples:
     @mspawn bandit
     @mspawn mob_guard
+""",
+    },
+    {
+        "key": "@mobpreview",
+        "category": "Building",
+        "text": """Help for @mobpreview
+
+Spawn a prototype temporarily in your room. The NPC
+disappears automatically after a short delay.
+
+Usage:
+    @mobpreview <prototype>
+
+Example:
+    @mobpreview goblin
 """,
     },
     {
