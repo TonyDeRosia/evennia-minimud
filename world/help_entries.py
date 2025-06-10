@@ -2696,6 +2696,9 @@ Notes:
       shown in each example.
     - After reviewing the summary choose |wYes|n to confirm and create or
       update the NPC.
+    - Selecting |wYes|n spawns the NPC in your current location. Choosing
+      |wYes & Save Prototype|n spawns the NPC and saves the prototype for
+      later use.
     - Use |wcnpc edit <npc>|n to modify an existing NPC.
     - At the triggers step you will see a menu to add, delete or list
       automatic reactions. Example:
