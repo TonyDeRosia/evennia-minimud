@@ -165,6 +165,14 @@ class TestMobBuilder(EvenniaTest):
         assert "Next" in labels
         assert "Skip" not in labels
 
+    def test_custom_slots_menu_shows_next(self):
+        """menunode_custom_slots should offer a Next option."""
+        self.char1.ndb.buildnpc = {}
+        _text, opts = npc_builder.menunode_custom_slots(self.char1)
+        labels = [o.get("desc") or o.get("key") for o in opts]
+        assert "Next" in labels
+        assert "Skip" not in labels
+
     def test_skills_menu_shows_suggestions(self):
         """menunode_skills should list suggested skills for the class."""
         self.char1.ndb.buildnpc = {"npc_class": "combat_trainer"}
