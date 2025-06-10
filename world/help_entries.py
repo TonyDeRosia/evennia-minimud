@@ -2935,6 +2935,8 @@ Notes:
     - Inspect prototypes or NPCs with |w@mstat <key>|n.
     - Use |w@makeshop|n or |w@makerepair|n to add vendor data after
       saving the prototype.
+    - Load default stats with |w@mobtemplate list|n then
+      |w@mobtemplate <name>|n while in the builder.
     - Example workflow:
         1) run |wmobbuilder|n and fill in the prompts
         2) choose |wYes & Save Prototype|n
