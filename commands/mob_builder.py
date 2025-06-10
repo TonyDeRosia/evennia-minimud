@@ -61,6 +61,11 @@ class CmdMSpawn(Command):
         if not proto:
             self.msg("Prototype not found.")
             return
+        tclass_path = npc_builder.NPC_CLASS_MAP.get(
+            proto.get("npc_class", "base"), "typeclasses.npcs.BaseNPC"
+        )
+        proto = dict(proto)
+        proto.setdefault("typeclass", tclass_path)
         obj = spawner.spawn(proto)[0]
         obj.move_to(self.caller.location, quiet=True)
         self.msg(f"Spawned {obj.key}.")

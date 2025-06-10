@@ -61,10 +61,12 @@ class TestMobBuilder(EvenniaTest):
 
         reg = prototypes.get_npc_prototypes()
         assert "mob_goblin" in reg
+        assert reg["mob_goblin"]["typeclass"] == "typeclasses.npcs.BaseNPC"
 
         self.char1.execute_cmd("@mspawn mob_goblin")
         npc = self._find("goblin")
         assert npc is not None
+        assert npc.is_typeclass(BaseNPC, exact=False)
 
         self.char1.execute_cmd("@mstat mob_goblin")
         out = self.char1.msg.call_args[0][0]
