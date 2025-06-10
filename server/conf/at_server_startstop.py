@@ -38,12 +38,16 @@ def at_server_start():
     """
     from evennia.utils import create
     from evennia.scripts.models import ScriptDB
+    from world.scripts.mob_db import get_mobdb
 
     script = ScriptDB.objects.filter(db_key="global_tick").first()
     if not script or script.typeclass_path != "typeclasses.scripts.GlobalTick":
         if script:
             script.delete()
         create.create_script("typeclasses.scripts.GlobalTick", key="global_tick")
+
+    # Ensure mob database script exists
+    get_mobdb()
 
     # Ensure all characters are marked tickable for the global ticker
     from typeclasses.characters import Character
