@@ -306,14 +306,17 @@ their own. The combat command set includes `attack`, `wield`, `unwield`,
 
 ## Running the Tests
 
-To run the automated test suite you need Evennia, Django and pytest installed. You can install these dependencies using the provided requirements file:
+The test suite requires Evennia and Django in addition to `pytest`. Make sure
+these packages are installed before invoking the test runner. The easiest way is
+to use the provided requirements file which installs compatible versions of all
+three:
 
 ```bash
 python -m pip install --upgrade pip
 pip install -r requirements-test.txt
 ```
 
-Once installed, execute the tests with:
+After installing the dependencies, execute the tests with:
 
 ```bash
 pytest -q
