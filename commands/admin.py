@@ -52,6 +52,7 @@ from .mob_builder import (
     CmdMedit,
     CmdMobTemplate,
 )
+from .cmdmobbuilder import CmdMobProto
 
 
 def _safe_split(text):
@@ -1455,3 +1456,4 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdRepairSet)
         self.add(CmdRepairStat)
         self.add(CmdMobValidate)
+        self.add(CmdMobProto)
