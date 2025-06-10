@@ -240,6 +240,27 @@ Example::
     @mspawn mob_goblin
     @mspawn M200001
 
+## Mob Prototype Manager
+
+`@mobproto` works with numeric VNUMs to store and spawn NPCs. Newly
+created entries are added to `@mlist` automatically so you can see them
+alongside area prototypes. Common subcommands are:
+
+```text
+@mobproto create <vnum> <name>
+@mobproto set <vnum> <field> <value>
+@mobproto list
+@mobproto spawn <vnum>
+```
+
+Example:
+
+```text
+@mobproto create 1 goblin
+@mobproto set 1 level 3
+@mobproto spawn 1
+```
+
 ## Weapon Creation and Inspection
 
 Builders can quickly create melee weapons with the `cweapon` command.
