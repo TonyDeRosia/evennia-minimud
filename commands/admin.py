@@ -44,7 +44,6 @@ from .mob_builder_commands import (
     CmdMobValidate,
 )
 from .mob_builder import (
-    CmdMobBuilder,
     CmdMSpawn,
     CmdMobPreview,
     CmdMStat,
@@ -1438,7 +1437,6 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdSpawnNPC)
         self.add(CmdListNPCs)
         self.add(CmdDupNPC)
-        self.add(CmdMobBuilder)
         self.add(CmdMobTemplate)
         self.add(CmdMSpawn)
         self.add(CmdMobPreview)
