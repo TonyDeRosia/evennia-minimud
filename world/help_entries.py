@@ -3042,6 +3042,8 @@ Notes:
     - ``M<number>`` spawns a prototype by its VNUM.
     - NPCs spawned this way are tagged ``M<number>`` for easy lookup
       with ``search_tag``.
+    - Saving a prototype with a VNUM automatically registers it for
+      ``@mspawn M<number>``.
 """,
     },
     {

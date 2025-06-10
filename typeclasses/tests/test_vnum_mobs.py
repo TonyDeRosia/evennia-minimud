@@ -134,3 +134,28 @@ class TestVnumMobs(EvenniaTest):
 
         registry = prototypes.get_npc_prototypes()
         self.assertEqual(registry["ogre"]["vnum"], 12)
+
+    def test_builder_registers_vnum_for_mspawn(self):
+        """NPCs built with a VNUM should be spawnable via @mspawn M<number>."""
+        vnum = 22
+        self.char1.ndb.buildnpc = {
+            "key": "bugbear",
+            "npc_class": "base",
+            "vnum": vnum,
+            "creature_type": "humanoid",
+        }
+        npc_builder._create_npc(self.char1, "", register=True)
+
+        mob_db = get_mobdb()
+        self.assertIsNotNone(mob_db.get_proto(vnum))
+
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd(f"@mspawn M{vnum}")
+        msg = self.char1.msg.call_args[0][0]
+        self.assertIn("Spawned", msg)
+        npcs = [
+            o
+            for o in self.char1.location.contents
+            if o.is_typeclass(BaseNPC, exact=False)
+        ]
+        self.assertGreaterEqual(len(npcs), 2)
