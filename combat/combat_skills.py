@@ -15,8 +15,9 @@ class SkillCategory(str, Enum):
     MAGIC = "magic"
 
 from .combat_actions import CombatResult
-from .combat_utils import roll_damage, check_hit, roll_evade
+from .combat_utils import roll_damage, roll_evade
 from .combat_states import CombatState
+from world.system import stat_manager
 
 
 @dataclass
@@ -45,7 +46,7 @@ class ShieldBash(Skill):
     def resolve(self, user, target):
         if not getattr(target, "is_alive", lambda: True)():
             return CombatResult(actor=user, target=target, message="They are already down.")
-        hit = check_hit(user, target)
+        hit = stat_manager.check_hit(user, target)
         if hit:
             if roll_evade(user, target):
                 return CombatResult(
@@ -80,7 +81,7 @@ class Cleave(Skill):
     def resolve(self, user, target):
         if not getattr(target, "is_alive", lambda: True)():
             return CombatResult(actor=user, target=target, message="They are already down.")
-        if check_hit(user, target):
+        if stat_manager.check_hit(user, target):
             if roll_evade(user, target):
                 msg = f"{user.key}'s cleave misses {target.key}."
             else:

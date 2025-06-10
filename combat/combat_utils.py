@@ -5,6 +5,7 @@ import random
 from typing import Tuple
 
 from world.system import state_manager
+from world.system.stat_manager import check_hit, roll_crit, crit_damage
 
 logger = logging.getLogger(__name__)
 
@@ -13,48 +14,6 @@ def roll_damage(dice: Tuple[int, int]) -> int:
     """Roll NdN style damage."""
     count, sides = dice
     return sum(random.randint(1, sides) for _ in range(count))
-
-
-def check_hit(attacker, target, bonus: int = 0) -> bool:
-    """Determine if attacker hits target."""
-    attack = state_manager.get_effective_stat(attacker, "accuracy") + bonus
-    defense = state_manager.get_effective_stat(target, "dodge")
-    roll = random.randint(1, 20)
-    result = roll + attack >= 10 + defense
-    logger.debug(
-        "hit roll=%s att=%s def=%s result=%s",
-        roll,
-        attack,
-        defense,
-        result,
-    )
-    return result
-
-
-def roll_crit(attacker, target) -> bool:
-    """Return ``True`` if ``attacker`` scores a critical hit."""
-
-    chance = state_manager.get_effective_stat(attacker, "crit_chance")
-    chance -= state_manager.get_effective_stat(target, "crit_resist")
-    chance = max(0, chance)
-    roll = random.randint(1, 100)
-    result = roll <= chance
-    logger.debug(
-        "crit roll=%s chance=%s result=%s",
-        roll,
-        chance,
-        result,
-    )
-    return result
-
-
-def crit_damage(attacker, damage: int) -> int:
-    """Return ``damage`` adjusted by ``attacker``'s crit bonus."""
-
-    bonus = state_manager.get_effective_stat(attacker, "crit_bonus")
-    result = int(round(damage * (1 + bonus / 100)))
-    logger.debug("crit damage=%s bonus=%s result=%s", damage, bonus, result)
-    return result
 
 
 def roll_evade(attacker, target, base: int = 50) -> bool:
