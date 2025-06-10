@@ -215,7 +215,8 @@ immediately.
 
 You can spawn a saved prototype at any time with `@spawnnpc <key>`. Prototypes
 made with `mobbuilder` are automatically given the `mob_` prefix. Use
-`@mspawn mob_<key>` to create additional copies of those mobs.
+`@mspawn mob_<key>` or `@mspawn M<vn>` to create additional copies of those
+mobs when a VNUM has been assigned.
 
 ### Mob Builder
 
@@ -224,7 +225,8 @@ workflow supports mob‑specific fields like act flags and resistances. At the
 end of the menu you may choose **Yes** to spawn the NPC or **Yes & Save
 Prototype** to spawn it and also store the prototype in
 `world/prototypes/npcs.json` with `mob_` prefixed to the key. Use
-`@mspawn <prototype>` to create additional copies and `@mstat <key>` to inspect
+`@mspawn <prototype>` or the ``M<number>`` form to create additional copies and
+`@mstat <key>` to inspect
 them. Prototype entries can be adjusted with `@mcreate`, `@mset` and viewed with
 `@mlist`. Mobs created this way are flagged with `can_attack` and are given a
 simple punch attack so they can fight back without equipment.
@@ -235,6 +237,7 @@ Example::
     (fill in the prompts for a goblin)
     [choose **Yes & Save Prototype**]
     @mspawn mob_goblin
+    @mspawn M200001
 
 ## Weapon Creation and Inspection
 

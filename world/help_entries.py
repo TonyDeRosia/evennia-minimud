@@ -2932,7 +2932,7 @@ Usage:
 Notes:
     - Edit saved prototypes with |w@mcreate|n or |w@mset|n and review them
       using |w@mlist|n. See |whelp @mlist|n for filtering options.
-    - Spawn a stored prototype with |w@mspawn <prototype>|n.
+    - Spawn a stored prototype with |w@mspawn <prototype>|n or |w@mspawn M<number>|n.
     - Quickly preview a prototype with |w@mobpreview <prototype>|n.
     - Inspect prototypes or NPCs with |w@mstat <key>|n.
     - Use |w@makeshop|n or |w@makerepair|n to add vendor data after
@@ -2942,7 +2942,7 @@ Notes:
     - Example workflow:
         1) run |wmobbuilder|n and fill in the prompts
         2) choose |wYes & Save Prototype|n
-        3) use |w@mspawn mob_<key>|n to spawn more copies
+        3) use |w@mspawn mob_<key>|n or |w@mspawn M<number>|n to spawn more copies
 
 Related:
     help cnpc
@@ -3046,11 +3046,12 @@ Prototypes made with |wmobbuilder|n are prefixed with ``mob_``. Use the
 full key when spawning those NPCs.
 
 Usage:
-    @mspawn <prototype>
+    @mspawn <prototype|M<number>>
 
 Examples:
     @mspawn bandit
     @mspawn mob_guard
+    @mspawn M200001
 """,
     },
     {
