@@ -2939,6 +2939,8 @@ Notes:
       saving the prototype.
     - Load default stats with |w@mobtemplate list|n then
       |w@mobtemplate <name>|n while in the builder.
+    - Type |wauto|n at the VNUM prompt to automatically reserve the next
+      available number.
     - Example workflow:
         1) run |wmobbuilder|n and fill in the prompts
         2) choose |wYes & Save Prototype|n
@@ -3052,6 +3054,11 @@ Examples:
     @mspawn bandit
     @mspawn mob_guard
     @mspawn M200001
+
+Notes:
+    - ``M<number>`` spawns a prototype by its VNUM.
+    - NPCs spawned this way are tagged ``M<number>`` for easy lookup
+      with ``search_tag``.
 """,
     },
     {
@@ -3481,6 +3488,24 @@ NPC behavior is controlled by an AI type set in the |wcnpc|n builder or
 |wmobbuilder|n. Available types are passive, aggressive, defensive,
 wander and scripted. Scripted AI runs the callback stored on
 |wnpc.db.ai_script|n.
+""",
+    },
+    {
+        "key": "vnums",
+        "category": "Building",
+        "text": """Help for vnums
+
+VNUMs are numeric identifiers reserved in a registry. Each category has a
+dedicated range:
+
+    NPCs: 1-99999
+    Objects: 100000-199999
+    Rooms: 200000-299999
+
+Use |w@nextvnum <I|M|R|O|Q|S>|n to fetch the next free number. Prefix the
+value with its letter, like |wM5|n, when spawning or referencing by VNUM.
+NPCs spawned from a VNUM automatically gain a |wM<number>|n tag so you can
+find them later with |wsearch_tag(key="M<number>", category="vnum")|n.
 """,
     },
     {
