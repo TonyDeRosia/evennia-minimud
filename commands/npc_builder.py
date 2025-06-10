@@ -774,7 +774,7 @@ def menunode_exp_reward(caller, raw_string="", **kwargs):
 def _set_exp_reward(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_resources_prompt"
+        return "menunode_level"
     if not string or string.lower() == "skip":
         level = caller.ndb.buildnpc.get("level", 1)
         val = caller.ndb.buildnpc.get(

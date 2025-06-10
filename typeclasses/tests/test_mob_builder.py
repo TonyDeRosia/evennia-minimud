@@ -194,6 +194,12 @@ class TestMobBuilder(EvenniaTest):
         result = npc_builder._edit_loot_table(self.char1, "done")
         assert result == "menunode_resources_prompt"
 
+    def test_exp_reward_back_returns_to_level(self):
+        """Entering back at exp reward should return to level menu."""
+        self.char1.ndb.buildnpc = {"level": 1}
+        result = npc_builder._set_exp_reward(self.char1, "back")
+        assert result == "menunode_level"
+
     def test_summary_shows_coin_and_loot(self):
         data = {
             "key": "orc",
