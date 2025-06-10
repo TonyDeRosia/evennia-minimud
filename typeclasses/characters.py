@@ -980,9 +980,20 @@ class NPC(Character):
             if loot_table := self.db.loot_table:
                 for entry in loot_table:
                     proto = entry.get("proto")
+                    if not proto:
+                        continue
                     chance = int(entry.get("chance", 100))
-                    if proto and randint(1, 100) <= chance:
+                    guaranteed = entry.get("guaranteed_after")
+                    count = entry.get("_count", 0)
+
+                    roll = randint(1, 100)
+                    if roll <= chance or (
+                        guaranteed is not None and count >= int(guaranteed)
+                    ):
                         drops.append(proto)
+                        entry["_count"] = 0
+                    else:
+                        entry["_count"] = count + 1
 
             objs = spawn(*drops)
             for obj in objs:

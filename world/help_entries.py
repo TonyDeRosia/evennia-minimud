@@ -3444,6 +3444,8 @@ Examples:
 Notes:
     - ``chance`` is a percent from 1-100.
     - Items with 100% chance always drop.
+    - ``guaranteed_after`` optionally guarantees the item will drop after the
+      given number of failed attempts.
 
 Related:
     help cnpc

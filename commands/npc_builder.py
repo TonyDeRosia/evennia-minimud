@@ -212,9 +212,12 @@ def format_mob_summary(data: dict) -> str:
             coins = format_wallet(coins)
         rewards.add_row("|cCoin Drop|n", fmt(coins))
     if data.get("loot_table"):
-        loot = [
-            f"{e.get('proto')}({e.get('chance', 100)}%)" for e in data.get("loot_table")
-        ]
+        loot = []
+        for e in data.get("loot_table"):
+            part = f"{e.get('proto')}({e.get('chance', 100)}%)"
+            if "guaranteed_after" in e:
+                part += f" g:{e['guaranteed_after']}"
+            loot.append(part)
         rewards.add_row("|cLoot Table|n", fmt(loot))
     lines.append("\n|cRewards|n")
     lines.append(str(rewards))
@@ -846,12 +849,16 @@ def menunode_loot_table(caller, raw_string="", **kwargs):
         for entry in loot:
             proto = entry.get("proto")
             chance = entry.get("chance", 100)
-            text += f" - {proto} ({chance}%)\n"
+            guaranteed = entry.get("guaranteed_after")
+            line = f" - {proto} ({chance}%)"
+            if guaranteed is not None:
+                line += f" g:{guaranteed}"
+            text += line + "\n"
     else:
         text += "None\n"
     text += (
-        "Commands:\n  add <proto> [chance]\n  remove <proto>\n  done - finish\n  back - previous step\n"
-        "Example: |wadd RAW_MEAT 50|n"
+        "Commands:\n  add <proto> [chance] [guaranteed]\n  remove <proto>\n  done - finish\n  back - previous step\n"
+        "Example: |wadd RAW_MEAT 50 3|n"
     )
     options = add_back_skip(
         {"key": "_default", "goto": _edit_loot_table}, _edit_loot_table
@@ -869,17 +876,37 @@ def _edit_loot_table(caller, raw_string, **kwargs):
     if string.lower().startswith("add "):
         parts = string[4:].split()
         if not parts:
-            caller.msg("Usage: add <proto> [chance]")
+            caller.msg("Usage: add <proto> [chance] [guaranteed]")
             return "menunode_loot_table"
         proto = parts[0]
         chance = 100
+        guaranteed = None
         if len(parts) > 1:
             if not parts[1].isdigit():
                 caller.msg("Chance must be a number.")
                 return "menunode_loot_table"
             chance = int(parts[1])
-        table.append({"proto": proto, "chance": chance})
-        caller.msg(f"Added {proto} ({chance}%).")
+        if len(parts) > 2:
+            if not parts[2].isdigit():
+                caller.msg("Guaranteed count must be a number.")
+                return "menunode_loot_table"
+            guaranteed = int(parts[2])
+        # check if entry exists
+        for entry in table:
+            if entry.get("proto") == proto:
+                entry["chance"] = chance
+                if guaranteed is not None:
+                    entry["guaranteed_after"] = guaranteed
+                else:
+                    entry.pop("guaranteed_after", None)
+                caller.msg(f"Updated {proto} ({chance}%).")
+                break
+        else:
+            entry = {"proto": proto, "chance": chance}
+            if guaranteed is not None:
+                entry["guaranteed_after"] = guaranteed
+            table.append(entry)
+            caller.msg(f"Added {proto} ({chance}%).")
         return "menunode_loot_table"
     if string.lower().startswith("remove "):
         proto = string[7:].strip()
