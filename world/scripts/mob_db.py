@@ -21,8 +21,22 @@ class MobDB(DefaultScript):
         return self.db.vnums.get(int(vnum))
 
     def add_proto(self, vnum, data):
-        """Store ``data`` for ``vnum``."""
-        self.db.vnums[int(vnum)] = data
+        """Store ``data`` for ``vnum``. Ensure ``spawn_count`` key exists."""
+        vnum = int(vnum)
+        proto = dict(data)
+        # preserve existing spawn counter if re-adding
+        if "spawn_count" not in proto:
+            proto["spawn_count"] = self.db.vnums.get(vnum, {}).get("spawn_count", 0)
+        self.db.vnums[vnum] = proto
+
+    def increment_spawn_count(self, vnum):
+        """Increase the stored spawn counter for ``vnum``."""
+        vnum = int(vnum)
+        proto = self.db.vnums.get(vnum)
+        if not proto:
+            return
+        proto["spawn_count"] = int(proto.get("spawn_count", 0)) + 1
+        self.db.vnums[vnum] = proto
 
     def delete_proto(self, vnum):
         """Remove ``vnum`` from the database."""
