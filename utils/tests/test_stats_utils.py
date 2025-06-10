@@ -29,3 +29,11 @@ class TestDisplayScroll(EvenniaTest):
         char.db.sated = 50
         sheet = get_display_scroll(char)
         self.assertNotIn("Sated", sheet)
+
+    def test_practice_and_training_display(self):
+        char = self.char1
+        char.db.practice_sessions = 2
+        char.db.training_points = 1
+        sheet = get_display_scroll(char)
+        self.assertIn("Prac 2", sheet)
+        self.assertIn("TP 1", sheet)
