@@ -177,3 +177,21 @@ class TestMobBuilder(EvenniaTest):
         assert "gold" in out
         assert "RAW_MEAT" in out
 
+    def test_confirm_fills_missing_fields(self):
+        self.char1.ndb.buildnpc = {"key": "orc"}
+        with patch("utils.vnum_registry.get_next_vnum", return_value=99):
+            text, opts = npc_builder.menunode_confirm(self.char1)
+        data = self.char1.ndb.buildnpc
+        assert data["desc"] == "Orc"
+        assert data["level"] == 1
+        assert data["vnum"] == 99
+        labels = [o.get("desc") or o.get("key") for o in opts]
+        assert "Confirm" in labels
+        assert "Back" in labels
+
+    def test_confirm_full_data_options(self):
+        self.char1.ndb.buildnpc = {"key": "orc", "desc": "mean orc", "level": 2, "vnum": 7}
+        text, opts = npc_builder.menunode_confirm(self.char1)
+        labels = [o.get("desc") or o.get("key") for o in opts]
+        assert set(labels) == {"Yes", "Yes & Save Prototype", "No"}
+
