@@ -44,3 +44,16 @@ class TestSpawnNPCPrototype(EvenniaTest):
         self.assertEqual(npc.db.prototype_key, "basic_merchant")
         self.assertIs(npc.db.spawn_room, self.char1.location)
         self.assertEqual(npc.db.area_tag, "testarea")
+
+    def test_old_prototype_fallback(self):
+        from world import prototypes
+
+        prototypes.register_npc_prototype(
+            "legacy_proto",
+            {"key": "legacy", "npc_type": "merchant", "npc_class": "merchant"},
+        )
+
+        self.char1.execute_cmd("@spawnnpc legacy_proto")
+        npc = self._find("legacy")
+        self.assertIsNotNone(npc)
+        self.assertTrue(npc.tags.has("merchant", category="npc_type"))

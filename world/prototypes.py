@@ -539,6 +539,9 @@ def get_npc_prototypes(filter_by: Optional[dict] = None) -> Dict[str, dict]:
     """
 
     registry = _load_npc_registry()
+    for proto in registry.values():
+        if "role" not in proto and proto.get("npc_type"):
+            proto["role"] = proto["npc_type"]
     if not filter_by:
         return registry
 
@@ -552,6 +555,8 @@ def get_npc_prototypes(filter_by: Optional[dict] = None) -> Dict[str, dict]:
             roles = proto.get("roles") or []
             if isinstance(roles, str):
                 roles = [roles]
+            if not roles and proto.get("npc_type"):
+                roles = [proto.get("npc_type")]
             if filter_by["role"] not in roles:
                 continue
         if "tag" in filter_by:
@@ -616,6 +621,8 @@ def filter_npc_prototypes(protos: dict, filters: dict) -> list[tuple[str, dict]]
             roles = proto.get("roles") or []
             if isinstance(roles, str):
                 roles = [roles]
+            if not roles and proto.get("npc_type"):
+                roles = [proto.get("npc_type")]
             if filters["role"] not in roles:
                 continue
         if "tag" in filters:

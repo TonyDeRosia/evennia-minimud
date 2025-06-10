@@ -40,7 +40,7 @@ class TestMobBuilder(EvenniaTest):
         npc_builder._set_key(self.char1, "goblin")
         npc_builder._set_desc(self.char1, "A small goblin")
         npc_builder._set_creature_type(self.char1, "humanoid")
-        npc_builder._set_npc_type(self.char1, "")
+        npc_builder._set_role(self.char1, "")
         npc_builder._set_npc_class(self.char1, "base")
         npc_builder._edit_roles(self.char1, "done")
         npc_builder._set_level(self.char1, "1")
