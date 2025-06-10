@@ -926,7 +926,7 @@ def menunode_resources(caller, raw_string="", **kwargs):
 def _set_resources(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_level"
+        return "menunode_resources_prompt"
     if not string or string.lower() == "skip":
         caller.ndb.buildnpc["hp"] = caller.ndb.buildnpc.get("hp", 0)
         caller.ndb.buildnpc["mp"] = caller.ndb.buildnpc.get("mp", 0)
