@@ -121,3 +121,16 @@ Use `@mobexport <proto> <file>` to write a prototype to JSON in the
 @mobexport goblin goblin.json
 @mobimport goblin.json
 ```
+
+## Prototype Diffing
+
+The `Builder` command set also includes `@mobproto` for managing
+numbered mob prototypes. Use the `diff` subcommand to compare any two
+entries:
+
+```text
+@mobproto diff 1 2
+```
+
+This shows a table of key/value pairs from each prototype with differing
+fields highlighted.

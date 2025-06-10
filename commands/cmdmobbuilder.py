@@ -4,6 +4,7 @@ from typing import Any
 import shlex
 from evennia.utils.evmenu import EvMenu
 from evennia import DefaultRoom
+from evennia.utils import evtable
 
 from .command import Command
 from utils.mob_proto import (
@@ -160,19 +161,37 @@ class CmdMobProto(Command):
         if len(parts) != 2 or not parts[0].isdigit() or not parts[1].isdigit():
             caller.msg("Usage: @mobproto/diff <vnum1> <vnum2>")
             return
+
         v1, v2 = int(parts[0]), int(parts[1])
-        p1 = get_prototype(v1)
-        p2 = get_prototype(v2)
+        mob_db = get_mobdb()
+        p1 = mob_db.get_proto(v1)
+        p2 = mob_db.get_proto(v2)
         if not p1 or not p2:
             caller.msg("Prototype not found.")
             return
-        fields = set(p1) | set(p2)
-        diff_lines = [f"|wField|n : {v1} -> {v2}"]
-        for field in sorted(fields):
-            if p1.get(field) != p2.get(field):
-                diff_lines.append(f"{field}: {p1.get(field, '--')} -> {p2.get(field, '--')}")
-        if len(diff_lines) == 1:
+
+        table = evtable.EvTable("Field", str(v1), str(v2), border="cells")
+        has_diff = False
+        fields = sorted(set(p1) | set(p2))
+        for field in fields:
+            v1_val = p1.get(field, "--")
+            v2_val = p2.get(field, "--")
+            if isinstance(v1_val, list):
+                v1_str = ", ".join(str(v) for v in v1_val)
+            else:
+                v1_str = str(v1_val)
+            if isinstance(v2_val, list):
+                v2_str = ", ".join(str(v) for v in v2_val)
+            else:
+                v2_str = str(v2_val)
+            if v1_val != v2_val:
+                v1_str = f"|y{v1_str}|n"
+                v2_str = f"|y{v2_str}|n"
+                has_diff = True
+            table.add_row(field, v1_str, v2_str)
+
+        if not has_diff:
             caller.msg("No differences.")
         else:
-            caller.msg("\n".join(diff_lines))
+            caller.msg(str(table))
 
