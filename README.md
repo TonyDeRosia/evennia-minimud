@@ -229,6 +229,8 @@ Choosing **Yes & Save Prototype** will also store the entry in
 `world/prototypes/npcs.json` with the `mob_` prefix so you can reuse it with
 `@mspawn <prototype>` or ``M<number>``. The final summary now shows any mob
 specific fields such as act flags and resistances.
+If you assign a VNUM when saving, the prototype is automatically registered
+for use with ``@mspawn M<number>``.
 
 Example::
 

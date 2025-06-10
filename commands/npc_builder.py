@@ -277,7 +277,9 @@ def _set_race(caller, raw_string, **kwargs):
         try:
             NPC_RACES.from_str(string)
         except ValueError:
-            caller.msg(f"Invalid race. Choose from: {', '.join(r.value for r in NPC_RACES)}")
+            caller.msg(
+                f"Invalid race. Choose from: {', '.join(r.value for r in NPC_RACES)}"
+            )
             return "menunode_race"
     caller.ndb.buildnpc["race"] = string
     return "menunode_sex"
@@ -309,7 +311,9 @@ def _set_sex(caller, raw_string, **kwargs):
         try:
             NPC_SEXES.from_str(string)
         except ValueError:
-            caller.msg(f"Invalid sex. Choose from: {', '.join(s.value for s in NPC_SEXES)}")
+            caller.msg(
+                f"Invalid sex. Choose from: {', '.join(s.value for s in NPC_SEXES)}"
+            )
             return "menunode_sex"
     caller.ndb.buildnpc["sex"] = string
     return "menunode_size"
@@ -341,7 +345,9 @@ def _set_size(caller, raw_string, **kwargs):
         try:
             NPC_SIZES.from_str(string)
         except ValueError:
-            caller.msg(f"Invalid size. Choose from: {', '.join(s.value for s in NPC_SIZES)}")
+            caller.msg(
+                f"Invalid size. Choose from: {', '.join(s.value for s in NPC_SIZES)}"
+            )
             return "menunode_size"
     caller.ndb.buildnpc["size"] = string
     return "menunode_desc"
@@ -600,7 +606,9 @@ def menunode_combat_class(caller, raw_string="", **kwargs):
         text += f" [default: {default}]"
     text += "\nExample: |wWarrior|n"
     text += "\n(back to go back, next for default)"
-    options = add_back_next({"key": "_default", "goto": _set_combat_class}, _set_combat_class)
+    options = add_back_next(
+        {"key": "_default", "goto": _set_combat_class}, _set_combat_class
+    )
     return with_summary(caller, text), options
 
 
@@ -831,7 +839,9 @@ def menunode_loot_table(caller, raw_string="", **kwargs):
         "Commands:\n  add <proto> [chance]\n  remove <proto>\n  done - finish\n  back - previous step\n"
         "Example: |wadd RAW_MEAT 50|n"
     )
-    options = add_back_skip({"key": "_default", "goto": _edit_loot_table}, _edit_loot_table)
+    options = add_back_skip(
+        {"key": "_default", "goto": _edit_loot_table}, _edit_loot_table
+    )
     return with_summary(caller, text), options
 
 
@@ -1591,9 +1601,14 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
         if data.get("script"):
             proto["scripts"] = [data["script"]]
         prototypes.register_npc_prototype(proto_key, proto)
+        if data.get("vnum") is not None:
+            from world.scripts.mob_db import get_mobdb
+
+            get_mobdb().add_proto(data["vnum"], proto)
         area = caller.location.db.area
         if area:
             from world import area_npcs
+
             area_npcs.add_area_npc(area, proto_key)
         caller.msg(f"NPC {npc.key} created and prototype saved.")
     else:
