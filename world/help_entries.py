@@ -2778,7 +2778,8 @@ The available AI types are stored in `world.npc_handlers.ai`:
 Set the type when prompted in the builder or edit the prototype data.
 The mob builder offers the same AI step for prototypes saved with
 `@mcreate` or `@mset`. For scripted AI, store a callable path on
-``npc.db.ai_script`` such as ``scripts.example_ai.patrol_ai``.
+``npc.db.ai_script`` such as ``scripts.example_ai.patrol_ai``. Only modules
+within the ``scripts`` package can be used.
 
 Related:
     help cnpc
