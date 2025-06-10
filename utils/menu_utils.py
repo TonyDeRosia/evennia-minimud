@@ -30,3 +30,27 @@ def add_back_skip(options: Union[Dict[str, Any], Iterable[Dict[str, Any]], None]
     opts.append({"desc": "Back", "goto": _run("back")})
     opts.append({"desc": "Skip", "goto": _run("skip")})
     return opts
+
+
+def add_back_next(
+    options: Union[Dict[str, Any], Iterable[Dict[str, Any]], None], setter: Callable
+) -> List[Dict[str, Any]]:
+    """Return ``options`` with standard Back/Next entries."""
+
+    opts: List[Dict[str, Any]]
+    if options is None:
+        opts = []
+    elif isinstance(options, dict):
+        opts = [options]
+    else:
+        opts = list(options)
+
+    def _run(value: str):
+        def _inner(caller, raw_string=None, **kwargs):
+            return setter(caller, value, **kwargs)
+
+        return _inner
+
+    opts.append({"desc": "Back", "goto": _run("back")})
+    opts.append({"desc": "Next", "goto": _run("skip")})
+    return opts
