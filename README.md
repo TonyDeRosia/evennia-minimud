@@ -129,6 +129,8 @@ classes include `BaseNPC`, `MerchantNPC`, `BankerNPC`, `TrainerNPC`,
 `WandererNPC`, `GuildmasterNPC`, `GuildReceptionistNPC`,
 `QuestGiverNPC`, `CombatTrainerNPC` and `EventNPC` defined under
 `typeclasses.npcs`.
+After choosing the NPC class you can also assign a combat class from
+`world.scripts.classes`. This sets `npc.db.charclass` on the spawned NPC.
 
 While editing, there's a step to manage triggers using a numbered menu. Choose
 `Add trigger` to create a new reaction, `Delete trigger` to remove one, `List

@@ -8,6 +8,7 @@ from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from typeclasses.characters import NPC
 from utils.slots import SLOT_ORDER
 from utils.menu_utils import add_back_skip, add_back_next
+from world.scripts import classes
 from utils import vnum_registry
 from .command import Command
 from django.conf import settings
@@ -152,6 +153,8 @@ def format_mob_summary(data: dict) -> str:
     if "vnum" in data:
         basic.add_row("|cVNUM|n", fmt(data.get("vnum")))
     basic.add_row("|cClass|n", fmt(data.get("npc_class")))
+    if data.get("combat_class"):
+        basic.add_row("|cCombat Class|n", fmt(data.get("combat_class")))
     if data.get("race"):
         basic.add_row("|cRace|n", fmt(data.get("race")))
     if data.get("sex"):
@@ -586,6 +589,40 @@ def _set_npc_class(caller, raw_string, **kwargs):
         return "menunode_npc_class"
     caller.ndb.buildnpc["npc_class"] = string
 
+    return "menunode_combat_class"
+
+
+def menunode_combat_class(caller, raw_string="", **kwargs):
+    default = caller.ndb.buildnpc.get("combat_class", "")
+    names = ", ".join(entry["name"] for entry in classes.CLASS_LIST)
+    text = f"|wCombat class|n ({names})"
+    if default:
+        text += f" [default: {default}]"
+    text += "\nExample: |wWarrior|n"
+    text += "\n(back to go back, next for default)"
+    options = add_back_next({"key": "_default", "goto": _set_combat_class}, _set_combat_class)
+    return with_summary(caller, text), options
+
+
+def _set_combat_class(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_npc_class"
+    if not string or string.lower() in ("skip", "next"):
+        string = caller.ndb.buildnpc.get("combat_class", "")
+    else:
+        names = [entry["name"].lower() for entry in classes.CLASS_LIST]
+        if string.lower() not in names:
+            caller.msg(
+                "Invalid class. Choose from: "
+                + ", ".join(entry["name"] for entry in classes.CLASS_LIST)
+            )
+            return "menunode_combat_class"
+        for entry in classes.CLASS_LIST:
+            if entry["name"].lower() == string.lower():
+                string = entry["name"]
+                break
+    caller.ndb.buildnpc["combat_class"] = string
     return "menunode_roles"
 
 
@@ -1448,6 +1485,8 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.race = data.get("race")
     npc.db.sex = data.get("sex")
     npc.db.size = data.get("size")
+    if cc := data.get("combat_class"):
+        npc.db.charclass = cc
     if vnum := data.get("vnum"):
         npc.db.vnum = vnum
         npc.tags.add(f"M{vnum}", category="vnum")
@@ -1589,6 +1628,7 @@ def _gather_npc_data(npc):
             (k for k, path in NPC_CLASS_MAP.items() if path == npc.typeclass_path),
             "base",
         ),
+        "combat_class": npc.db.charclass or "",
         "creature_type": npc.db.creature_type or "humanoid",
         "equipment_slots": npc.db.equipment_slots or list(SLOT_ORDER),
         "level": npc.db.level or 1,
@@ -1647,6 +1687,7 @@ class CmdCNPC(Command):
                 "size": "",
                 "triggers": {},
                 "npc_class": "base",
+                "combat_class": "",
                 "roles": [],
                 "skills": [],
                 "spells": [],

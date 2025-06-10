@@ -71,6 +71,8 @@ spawned later with `@spawnnpc`. These commands help you manage the prototypes:
 
 *A role describes what the NPC does (merchant, questgiver...),*
 *while the class selects the NPC typeclass (base, merchant, banker...).*
+*After picking the NPC class, the mob builder also lets you choose a*
+*combat class like Warrior or Mage which sets `npc.db.charclass`.*
 
 * `@mcreate <key> [copy_key]` – make a new prototype, optionally copying an
   existing one.

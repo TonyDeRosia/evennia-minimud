@@ -48,6 +48,7 @@ class TestMobBuilder(EvenniaTest):
         npc_builder._set_creature_type(self.char1, "humanoid")
         npc_builder._set_role(self.char1, "")
         npc_builder._set_npc_class(self.char1, "base")
+        npc_builder._set_combat_class(self.char1, "Warrior")
         npc_builder._edit_roles(self.char1, "done")
         npc_builder._set_level(self.char1, "1")
         npc_builder._set_exp_reward(self.char1, "5")
@@ -77,6 +78,7 @@ class TestMobBuilder(EvenniaTest):
         npc = self._find("goblin")
         assert npc is not None
         assert npc.is_typeclass(BaseNPC, exact=False)
+        assert npc.db.charclass == "Warrior"
 
         self.char1.execute_cmd("@mstat mob_goblin")
         out = self.char1.msg.call_args[0][0]
@@ -151,6 +153,14 @@ class TestMobBuilder(EvenniaTest):
         """menunode_npc_class should offer a Next option."""
         self.char1.ndb.buildnpc = {}
         _text, opts = npc_builder.menunode_npc_class(self.char1)
+        labels = [o.get("desc") or o.get("key") for o in opts]
+        assert "Next" in labels
+        assert "Skip" not in labels
+
+    def test_combat_class_menu_shows_next(self):
+        """menunode_combat_class should offer a Next option."""
+        self.char1.ndb.buildnpc = {}
+        _text, opts = npc_builder.menunode_combat_class(self.char1)
         labels = [o.get("desc") or o.get("key") for o in opts]
         assert "Next" in labels
         assert "Skip" not in labels
