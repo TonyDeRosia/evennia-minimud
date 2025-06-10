@@ -32,7 +32,7 @@ class CmdMSpawn(Command):
     Spawn a mob prototype.
 
     Prototypes are loaded from ``world/prototypes/npcs.json``. Spawning creates
-    a new NPC and leaves any existing ones unchanged. Use ``@medit`` to modify
+    a new NPC and leaves any existing ones unchanged. Use ``@editnpc`` to modify
     a live NPC.
 
     Usage:
@@ -147,25 +147,6 @@ class CmdMStat(_OldMStat):
 class CmdMList(_OldMList):
     pass
 
-
-class CmdMedit(Command):
-    """Edit an NPC and optionally update its prototype."""
-
-    key = "@medit"
-    locks = "cmd:perm(Builder)"
-    help_category = "Building"
-
-    def func(self):
-        if not self.args:
-            self.msg("Usage: @medit <npc>")
-            return
-        npc = self.caller.search(self.args.strip(), global_search=True)
-        if not npc or not npc.is_typeclass(NPC, exact=False):
-            self.msg("Invalid NPC.")
-            return
-        data = npc_builder._gather_npc_data(npc)
-        self.caller.ndb.buildnpc = data
-        EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
 
 
 class CmdMobTemplate(Command):

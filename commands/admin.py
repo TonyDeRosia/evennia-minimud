@@ -49,7 +49,6 @@ from .mob_builder import (
     CmdMobPreview,
     CmdMStat,
     CmdMList,
-    CmdMedit,
     CmdMobTemplate,
 )
 from .cmdmobbuilder import CmdMobProto
@@ -1434,7 +1433,6 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdDelRoom)
         self.add(CmdCNPC)
         self.add(CmdEditNPC)
-        self.add(CmdMedit)
         self.add(CmdDeleteNPC)
         self.add(CmdCloneNPC)
         self.add(CmdSpawnNPC)
