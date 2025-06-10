@@ -8,6 +8,8 @@ from unittest import mock
 
 from commands.admin import BuilderCmdSet
 from world import prototypes
+from utils.mob_proto import register_prototype, spawn_from_vnum, get_prototype
+from world.scripts.mob_db import get_mobdb
 
 
 @override_settings(DEFAULT_HOME=None)
@@ -86,3 +88,19 @@ class TestMobPrototypeCommands(EvenniaTest):
         self.char1.execute_cmd("@repairstat shopkeep")
         out = self.char1.msg.call_args[0][0]
         self.assertIn("Cost Percent", out)
+
+    def test_delete_checks_live_npcs(self):
+        get_mobdb()
+        vnum = register_prototype(
+            {"key": "orc", "typeclass": "typeclasses.npcs.BaseNPC"}, vnum=1
+        )
+        npc = spawn_from_vnum(vnum, location=self.char1.location)
+        self.char1.execute_cmd(f"@mobproto delete {vnum}")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("live NPCs", out)
+        npc.delete()
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd(f"@mobproto delete {vnum}")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("deleted", out)
+        self.assertIsNone(get_prototype(vnum))

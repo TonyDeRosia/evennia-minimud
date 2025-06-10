@@ -134,3 +134,6 @@ entries:
 
 This shows a table of key/value pairs from each prototype with differing
 fields highlighted.
+
+Delete a prototype with `@mobproto delete <vnum>`. Deletion will fail if any
+live NPCs spawned from that VNUM still exist.
