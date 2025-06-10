@@ -2,6 +2,7 @@
 
 from evennia.utils.evmenu import EvMenu
 from evennia.prototypes import spawner
+from utils.mob_proto import spawn_from_vnum
 from evennia.utils import delay
 from world import prototypes
 from typeclasses.characters import NPC
@@ -57,18 +58,24 @@ class CmdMSpawn(Command):
         if not key:
             self.msg("Usage: @mspawn <prototype>")
             return
-        registry = prototypes.get_npc_prototypes()
-        proto = registry.get(key) or registry.get(f"mob_{key}")
-        if not proto:
-            self.msg("Prototype not found.")
-            return
-        tclass_path = npc_builder.NPC_CLASS_MAP.get(
-            proto.get("npc_class", "base"), "typeclasses.npcs.BaseNPC"
-        )
-        proto = dict(proto)
-        proto.setdefault("typeclass", tclass_path)
-        obj = spawner.spawn(proto)[0]
-        obj.move_to(self.caller.location, quiet=True)
+        if key.isdigit():
+            obj = spawn_from_vnum(int(key), location=self.caller.location)
+            if not obj:
+                self.msg("Prototype not found.")
+                return
+        else:
+            registry = prototypes.get_npc_prototypes()
+            proto = registry.get(key) or registry.get(f"mob_{key}")
+            if not proto:
+                self.msg("Prototype not found.")
+                return
+            tclass_path = npc_builder.NPC_CLASS_MAP.get(
+                proto.get("npc_class", "base"), "typeclasses.npcs.BaseNPC"
+            )
+            proto = dict(proto)
+            proto.setdefault("typeclass", tclass_path)
+            obj = spawner.spawn(proto)[0]
+            obj.move_to(self.caller.location, quiet=True)
         self.msg(f"Spawned {obj.key}.")
 
 
@@ -95,18 +102,24 @@ class CmdMobPreview(Command):
         if not key:
             self.msg("Usage: @mobpreview <prototype>")
             return
-        registry = prototypes.get_npc_prototypes()
-        proto = registry.get(key) or registry.get(f"mob_{key}")
-        if not proto:
-            self.msg("Prototype not found.")
-            return
-        tclass_path = npc_builder.NPC_CLASS_MAP.get(
-            proto.get("npc_class", "base"), "typeclasses.npcs.BaseNPC"
-        )
-        proto = dict(proto)
-        proto.setdefault("typeclass", tclass_path)
-        obj = spawner.spawn(proto)[0]
-        obj.move_to(self.caller.location, quiet=True)
+        if key.isdigit():
+            obj = spawn_from_vnum(int(key), location=self.caller.location)
+            if not obj:
+                self.msg("Prototype not found.")
+                return
+        else:
+            registry = prototypes.get_npc_prototypes()
+            proto = registry.get(key) or registry.get(f"mob_{key}")
+            if not proto:
+                self.msg("Prototype not found.")
+                return
+            tclass_path = npc_builder.NPC_CLASS_MAP.get(
+                proto.get("npc_class", "base"), "typeclasses.npcs.BaseNPC"
+            )
+            proto = dict(proto)
+            proto.setdefault("typeclass", tclass_path)
+            obj = spawner.spawn(proto)[0]
+            obj.move_to(self.caller.location, quiet=True)
         delay(30, obj.delete)
         self.msg(f"Previewing {obj.key}. It will vanish soon.")
 

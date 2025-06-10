@@ -3,6 +3,7 @@ from evennia.utils import make_iter, dedent
 from evennia import create_object
 from evennia.objects.models import ObjectDB
 from evennia.prototypes import spawner
+from utils.mob_proto import spawn_from_vnum
 from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from typeclasses.characters import NPC
 from utils.slots import SLOT_ORDER
@@ -1283,26 +1284,35 @@ class CmdSpawnNPC(Command):
         arg = self.args.strip()
         from world import prototypes
         proto = None
-        if "/" in arg:
-            area, key = arg.split("/", 1)
-            from world import area_npcs
-
-            if key not in area_npcs.get_area_npc_list(area):
-                self.msg("Prototype not in that area's list.")
+        if arg.isdigit():
+            obj = spawn_from_vnum(int(arg), location=self.caller.location)
+            if not obj:
+                self.msg("Unknown NPC prototype.")
                 return
-            proto = prototypes.get_npc_prototypes().get(key)
+            key = None
         else:
-            key = arg
-            proto = prototypes.get_npc_prototypes().get(arg)
-        if not proto:
-            self.msg("Unknown NPC prototype.")
-            return
-        tclass_path = NPC_CLASS_MAP.get(proto.get("npc_class", "base"), "typeclasses.npcs.BaseNPC")
-        proto = dict(proto)
-        proto.setdefault("typeclass", tclass_path)
-        obj = spawner.spawn(proto)[0]
-        obj.move_to(self.caller.location, quiet=True)
-        obj.db.prototype_key = key
+            if "/" in arg:
+                area, key = arg.split("/", 1)
+                from world import area_npcs
+
+                if key not in area_npcs.get_area_npc_list(area):
+                    self.msg("Prototype not in that area's list.")
+                    return
+                proto = prototypes.get_npc_prototypes().get(key)
+            else:
+                key = arg
+                proto = prototypes.get_npc_prototypes().get(arg)
+            if not proto:
+                self.msg("Unknown NPC prototype.")
+                return
+            tclass_path = NPC_CLASS_MAP.get(
+                proto.get("npc_class", "base"), "typeclasses.npcs.BaseNPC"
+            )
+            proto = dict(proto)
+            proto.setdefault("typeclass", tclass_path)
+            obj = spawner.spawn(proto)[0]
+            obj.move_to(self.caller.location, quiet=True)
+            obj.db.prototype_key = key
         obj.db.area_tag = self.caller.location.db.area
         obj.db.spawn_room = self.caller.location
         self.msg(f"Spawned {obj.get_display_name(self.caller)}.")
