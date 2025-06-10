@@ -48,15 +48,21 @@ class TestStateManager(EvenniaTest):
         char = self.char1
         char.db.sated = 1
         hp = char.traits.health.current
+        mp = char.traits.mana.current
+        sp = char.traits.stamina.current
         state_manager.tick_character(char)
         self.assertEqual(char.db.sated, 0)
         self.assertTrue(char.tags.has("hungry_thirsty", category="status"))
         self.assertEqual(char.traits.health.current, hp - 1)
+        self.assertEqual(char.traits.mana.current, mp - 1)
+        self.assertEqual(char.traits.stamina.current, sp - 1)
 
     def test_hunger_ticks_reduce_sated(self):
         char = self.char1
         char.db.sated = 2
         hp = char.traits.health.current
+        mp = char.traits.mana.current
+        sp = char.traits.stamina.current
         state_manager.tick_character(char)
         self.assertEqual(char.db.sated, 1)
         self.assertEqual(char.traits.health.current, hp)
@@ -64,6 +70,8 @@ class TestStateManager(EvenniaTest):
         self.assertEqual(char.db.sated, 0)
         self.assertTrue(char.tags.has("hungry_thirsty", category="status"))
         self.assertEqual(char.traits.health.current, hp - 1)
+        self.assertEqual(char.traits.mana.current, mp - 1)
+        self.assertEqual(char.traits.stamina.current, sp - 1)
 
     def test_hunger_cap(self):
         char = self.char1
