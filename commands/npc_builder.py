@@ -114,6 +114,73 @@ def _import_script(path: str):
     return getattr(mod, attr)
 
 
+def format_mob_summary(data: dict) -> str:
+    """Return a formatted summary table of NPC data."""
+    from evennia.utils import evtable
+
+    table = evtable.EvTable("|cField|n", "|cValue|n", border="cells")
+
+    order = [
+        "key",
+        "desc",
+        "vnum",
+        "npc_class",
+        "role",
+        "roles",
+        "guild_affiliation",
+        "level",
+        "exp_reward",
+        "creature_type",
+        "hp",
+        "mp",
+        "sp",
+        "primary_stats",
+        "behavior",
+        "skills",
+        "spells",
+        "ai_type",
+        "actflags",
+        "affected_by",
+        "ris",
+        "bodyparts",
+        "attack_types",
+        "defense_types",
+        "languages",
+        "merchant_markup",
+        "script",
+        "triggers",
+    ]
+
+    hints = {
+        "desc": "short description",
+        "behavior": "optional",
+        "skills": "comma separated",
+        "spells": "comma separated",
+        "triggers": "use trigger menu",
+        "guild_affiliation": "guild tag",
+        "script": "module.path.Class",
+    }
+
+    for field in order:
+        if field not in data:
+            continue
+        value = data.get(field)
+        label = field.replace("_", " ").title()
+        if not value:
+            hint = hints.get(field, "--")
+            table.add_row(label, f"-- ({hint})")
+            continue
+        if isinstance(value, list):
+            value = ", ".join(str(v) for v in value)
+        elif isinstance(value, dict):
+            value = " ".join(f"{k}:{v}" for k, v in value.items())
+        elif isinstance(value, tuple):
+            value = ", ".join(str(v) for v in value)
+        table.add_row(label, str(value))
+
+    return str(table)
+
+
 
 # Menu nodes for NPC creation
 
@@ -1015,25 +1082,7 @@ def menunode_confirm(caller, raw_string="", **kwargs):
         caller.msg("Error: NPC data incomplete. Restarting builder.")
         return None
     text = "|wConfirm NPC Creation|n\n"
-    for key, val in data.items():
-        if key == "primary_stats":
-            stats = " ".join(f"{s}:{v}" for s, v in val.items())
-            text += f"{key}: {stats}\n"
-        elif key == "triggers":
-            if val:
-                for event, triglist in val.items():
-                    for trig in make_iter(triglist):
-                        if not isinstance(trig, dict):
-                            continue
-                        match = trig.get("match", "")
-                        resp = trig.get("responses", trig.get("response", trig.get("reactions")))
-                        if isinstance(resp, list):
-                            resp = ", ".join(resp)
-                        text += f"trigger {event}: \"{match}\" -> {resp}\n"
-            else:
-                text += "triggers: None\n"
-        else:
-            text += f"{key}: {val}\n"
+    text += format_mob_summary(data) + "\n"
     warnings = validate_prototype(data)
     if warnings:
         text += "|yWarnings:|n\n"
