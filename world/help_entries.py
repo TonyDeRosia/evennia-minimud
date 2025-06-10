@@ -2682,8 +2682,11 @@ Notes:
       guildmaster, guild_receptionist, questgiver, combat_trainer and
       event_npc.
     - The builder prompts for description, role, creature type, level,
-      experience reward, HP MP SP, primary stats, behavior, skills, spells, resistances and
-      AI type.
+      experience reward, HP MP SP, primary stats, behavior, skills, spells,
+      resistances and AI type.
+    - Mob specific fields such as act flags, resistances, skills and spells can
+      now be configured directly in this menu along with an optional Script
+      typeclass to run when the mob spawns.
     - Humanoid body type grants the standard equipment slots automatically.
       Quadrupeds receive head, body, front_legs and hind_legs and lack weapon
       slots. Unique lets you add or remove any slots in the next step.
@@ -2919,37 +2922,20 @@ Related:
         "category": "Building",
         "text": """Help for mobbuilder
 
-Invokes the same menu-driven builder as |wcnpc|n but the NPC is spawned
-immediately. Choosing |wYes & Save Prototype|n at the end also stores the
-result as a prototype prefixed with ``mob_``. Additional mob specific fields
-such as act flags, skills, spells and resistances may be set while stepping
-through the menu.
-You can also specify a Script typeclass to attach after the languages step.
+This command is an alias for |wcnpc|n and launches the same menu driven
+builder with mob defaults. When you finish the prompts the mob is spawned
+immediately. Choosing |wYes & Save Prototype|n stores the prototype with the
+``mob_`` prefix so it can be reused with |w@mspawn|n.
 
 Usage:
     mobbuilder
 
 Notes:
-    - Edit saved prototypes with |w@mcreate|n or |w@mset|n and review them
-      using |w@mlist|n. See |whelp @mlist|n for filtering options.
-    - Spawn a stored prototype with |w@mspawn <prototype>|n or |w@mspawn M<number>|n.
-    - Quickly preview a prototype with |w@mobpreview <prototype>|n.
-    - Inspect prototypes or NPCs with |w@mstat <key>|n.
-    - Use |w@makeshop|n or |w@makerepair|n to add vendor data after
-      saving the prototype.
-    - Load default stats with |w@mobtemplate list|n then
-      |w@mobtemplate <name>|n while in the builder.
-    - Type |wauto|n at the VNUM prompt to automatically reserve the next
-      available number.
-    - Example workflow:
-        1) run |wmobbuilder|n and fill in the prompts
-        2) choose |wYes & Save Prototype|n
-        3) use |w@mspawn mob_<key>|n or |w@mspawn M<number>|n to spawn more copies
+    - Equivalent to |wcnpc start <key>|n.
+    - See |whelp cnpc|n for a full explanation of the builder options.
 
 Related:
     help cnpc
-    help @mspawn
-    help @mstat
 """,
     },
     {
