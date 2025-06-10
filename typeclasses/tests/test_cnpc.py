@@ -194,3 +194,18 @@ class TestCNPC(EvenniaTest):
         trig = triggers["on_test"][0]
         self.assertEqual(trig["match"], "hello")
         self.assertEqual(trig["responses"], ["say hi", "emote waves", "jump"])
+
+    def test_confirm_formatting(self):
+        """menunode_confirm should return a formatted table."""
+        self.char1.ndb.buildnpc = {
+            "key": "goblin",
+            "desc": "",
+            "npc_class": "base",
+            "level": 1,
+            "primary_stats": {"STR": 1},
+        }
+
+        text, _ = npc_builder.menunode_confirm(self.char1)
+        self.assertIn("Goblin", text)
+        self.assertIn("Field", text)
+        self.assertIn("Primary Stats", text)
