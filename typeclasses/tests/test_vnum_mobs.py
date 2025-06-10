@@ -39,12 +39,15 @@ class TestVnumMobs(EvenniaTest):
         proto = {"key": "goblin", "typeclass": "typeclasses.npcs.BaseNPC"}
         vnum = register_prototype(proto, vnum=1)
         npc_mock = MagicMock()
-        with patch("evennia.prototypes.spawner.spawn", return_value=[npc_mock]) as mock_spawn:
+        with patch(
+            "evennia.prototypes.spawner.spawn", return_value=[npc_mock]
+        ) as mock_spawn:
             npc = spawn_from_vnum(vnum, location=self.char1.location)
         mock_spawn.assert_called()
         self.assertIs(npc, npc_mock)
         self.assertEqual(npc.location, self.char1.location)
         self.assertEqual(npc.db.vnum, vnum)
+        self.assertEqual(npc.tags.get(category="vnum"), f"M{vnum}")
         mob_db = get_mobdb()
         self.assertEqual(mob_db.get_proto(vnum)["spawn_count"], 1)
 
@@ -59,7 +62,9 @@ class TestVnumMobs(EvenniaTest):
 
         with patch("commands.cmdmobbuilder.EvMenu") as mock_menu:
             self.char1.execute_cmd("@mobproto edit 1")
-        mock_menu.assert_called_with(self.char1, "commands.npc_builder", startnode="menunode_desc")
+        mock_menu.assert_called_with(
+            self.char1, "commands.npc_builder", startnode="menunode_desc"
+        )
         self.assertEqual(self.char1.ndb.mob_vnum, 1)
         self.assertEqual(self.char1.ndb.buildnpc["key"], "gob")
 
@@ -81,4 +86,3 @@ class TestVnumMobs(EvenniaTest):
         self.assertIsNone(get_prototype(1))
         del_msg = self.char1.msg.call_args[0][0]
         self.assertIn("deleted", del_msg.lower())
-

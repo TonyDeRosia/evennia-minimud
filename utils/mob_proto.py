@@ -38,6 +38,7 @@ def spawn_from_vnum(vnum: int, location=None):
     if location:
         npc.location = location
     npc.db.vnum = vnum
+    npc.tags.add(f"M{vnum}", category="vnum")
     # track how often this prototype has spawned
     mob_db.increment_spawn_count(vnum)
     return npc

@@ -5,7 +5,7 @@ import shlex
 from evennia.utils.evmenu import EvMenu
 from evennia import DefaultRoom
 from evennia.utils import evtable
-from evennia.objects.models import ObjectDB
+from evennia.utils.search import search_tag
 
 from .command import Command
 from utils.mob_proto import (
@@ -142,7 +142,7 @@ class CmdMobProto(Command):
             return
         npcs = [
             obj
-            for obj in ObjectDB.objects.get_by_attribute(key="vnum", value=vnum)
+            for obj in search_tag(key=f"M{vnum}", category="vnum")
             if obj.is_typeclass(BaseNPC, exact=False)
         ]
         if npcs:
@@ -204,4 +204,3 @@ class CmdMobProto(Command):
             caller.msg("No differences.")
         else:
             caller.msg(str(table))
-
