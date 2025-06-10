@@ -101,12 +101,12 @@ class TestMobBuilder(EvenniaTest):
         }
         out = npc_builder.format_mob_summary(data)
         for text in [
-            "Mob Prototype:",
-            "Basic Info",
-            "Combat Stats",
-            "Combat Flags",
-            "Rewards",
-            "Skills",
+            "|cMob Prototype:",
+            "|cBasic Info|n",
+            "|cCombat Stats|n",
+            "|cCombat Flags|n",
+            "|cRewards|n",
+            "|cSkills|n",
         ]:
             assert text in out
         assert "slash" in out
