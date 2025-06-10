@@ -152,6 +152,12 @@ def format_mob_summary(data: dict) -> str:
     if "vnum" in data:
         basic.add_row("|cVNUM|n", fmt(data.get("vnum")))
     basic.add_row("|cClass|n", fmt(data.get("npc_class")))
+    if data.get("race"):
+        basic.add_row("|cRace|n", fmt(data.get("race")))
+    if data.get("sex"):
+        basic.add_row("|cSex|n", fmt(data.get("sex")))
+    if data.get("size"):
+        basic.add_row("|cSize|n", fmt(data.get("size")))
     if data.get("role"):
         basic.add_row("|cRole|n", fmt(data.get("role")))
     if data.get("roles"):
@@ -244,6 +250,102 @@ def _set_key(caller, raw_string, **kwargs):
         return "menunode_key"
     caller.ndb.buildnpc = caller.ndb.buildnpc or {}
     caller.ndb.buildnpc["key"] = val
+    return "menunode_race"
+
+
+def menunode_race(caller, raw_string="", **kwargs):
+    """Prompt for the NPC race."""
+    from world.mob_constants import NPC_RACES
+
+    default = caller.ndb.buildnpc.get("race", "")
+    options = add_back_skip({"key": "_default", "goto": _set_race}, _set_race)
+    races = "/".join(r.value for r in NPC_RACES)
+    text = f"|wRace|n ({races})"
+    if default:
+        text += f" [default: {default}]"
+    text += "\nExample: |whuman|n"
+    return text, options
+
+
+def _set_race(caller, raw_string, **kwargs):
+    from world.mob_constants import NPC_RACES
+
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_key"
+    if not string or string.lower() == "skip":
+        string = caller.ndb.buildnpc.get("race", "")
+    else:
+        try:
+            NPC_RACES.from_str(string)
+        except ValueError:
+            caller.msg(f"Invalid race. Choose from: {', '.join(r.value for r in NPC_RACES)}")
+            return "menunode_race"
+    caller.ndb.buildnpc["race"] = string
+    return "menunode_sex"
+
+
+def menunode_sex(caller, raw_string="", **kwargs):
+    """Prompt for the NPC sex."""
+    from world.mob_constants import NPC_SEXES
+
+    default = caller.ndb.buildnpc.get("sex", "")
+    options = add_back_skip({"key": "_default", "goto": _set_sex}, _set_sex)
+    sexes = "/".join(s.value for s in NPC_SEXES)
+    text = f"|wSex|n ({sexes})"
+    if default:
+        text += f" [default: {default}]"
+    text += "\nExample: |wmale|n"
+    return text, options
+
+
+def _set_sex(caller, raw_string, **kwargs):
+    from world.mob_constants import NPC_SEXES
+
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_race"
+    if not string or string.lower() == "skip":
+        string = caller.ndb.buildnpc.get("sex", "")
+    else:
+        try:
+            NPC_SEXES.from_str(string)
+        except ValueError:
+            caller.msg(f"Invalid sex. Choose from: {', '.join(s.value for s in NPC_SEXES)}")
+            return "menunode_sex"
+    caller.ndb.buildnpc["sex"] = string
+    return "menunode_size"
+
+
+def menunode_size(caller, raw_string="", **kwargs):
+    """Prompt for the NPC size."""
+    from world.mob_constants import NPC_SIZES
+
+    default = caller.ndb.buildnpc.get("size", "")
+    options = add_back_skip({"key": "_default", "goto": _set_size}, _set_size)
+    sizes = "/".join(s.value for s in NPC_SIZES)
+    text = f"|wSize|n ({sizes})"
+    if default:
+        text += f" [default: {default}]"
+    text += "\nExample: |wmedium|n"
+    return text, options
+
+
+def _set_size(caller, raw_string, **kwargs):
+    from world.mob_constants import NPC_SIZES
+
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_sex"
+    if not string or string.lower() == "skip":
+        string = caller.ndb.buildnpc.get("size", "")
+    else:
+        try:
+            NPC_SIZES.from_str(string)
+        except ValueError:
+            caller.msg(f"Invalid size. Choose from: {', '.join(s.value for s in NPC_SIZES)}")
+            return "menunode_size"
+    caller.ndb.buildnpc["size"] = string
     return "menunode_desc"
 
 
@@ -1224,6 +1326,9 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     else:
         npc = create_object(tclass_path, key=data.get("key"), location=caller.location)
     npc.db.desc = data.get("desc")
+    npc.db.race = data.get("race")
+    npc.db.sex = data.get("sex")
+    npc.db.size = data.get("size")
     npc.tags.add("npc")
     role = data.get("role") or data.get("npc_type")
     if role:
@@ -1337,6 +1442,9 @@ def _gather_npc_data(npc):
         "proto_key": npc.tags.get(category=PROTOTYPE_TAG_CATEGORY),
         "key": npc.key,
         "desc": npc.db.desc,
+        "race": npc.db.race or "",
+        "sex": npc.db.sex or "",
+        "size": npc.db.size or "",
         "role": npc.tags.get(category="npc_type") or "",
         "roles": [
             t
@@ -1398,6 +1506,9 @@ class CmdCNPC(Command):
                 return
             self.caller.ndb.buildnpc = {
                 "key": rest.strip(),
+                "race": "",
+                "sex": "",
+                "size": "",
                 "triggers": {},
                 "npc_class": "base",
                 "roles": [],
