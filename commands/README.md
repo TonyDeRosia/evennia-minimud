@@ -154,3 +154,19 @@ argument selects the category:
 * **S** – script VNUM
 
 The returned number is automatically marked as used in the registry.
+
+## VNUM Prefixes
+
+Numbers may be referenced with a single letter prefix indicating the
+category.  ``M`` is used for mobs, ``O`` or ``I`` for objects, ``R`` for rooms,
+``Q`` for quests and ``S`` for scripts.  For example ``M200001`` refers to the
+mob prototype with VNUM ``200001``.  The prefix form works anywhere a command
+expects a prototype key and avoids confusion with other numeric arguments.
+
+## Automatic Assignment in the Mob Builder
+
+When using the menu driven mob builder you may enter ``auto`` at the VNUM
+prompt. This calls ``@nextvnum M`` behind the scenes and registers the number
+immediately.  Prototypes saved from the builder use the ``mob_`` prefix and any
+NPC spawned from a VNUM prototype receives a ``M<number>`` tag.  You can search
+for live NPCs with ``search_tag(key="M<number>", category="vnum")``.
