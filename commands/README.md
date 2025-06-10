@@ -137,3 +137,20 @@ fields highlighted.
 
 Delete a prototype with `@mobproto delete <vnum>`. Deletion will fail if any
 live NPCs spawned from that VNUM still exist.
+
+## VNUM Utility
+
+Use `@nextvnum` to reserve the next available VNUM for a type of object. The
+argument selects the category:
+
+```
+@nextvnum <I|M|R|O|Q|S>
+```
+
+* **I** or **O** – object/item VNUM
+* **M** – mob/NPC VNUM
+* **R** – room VNUM
+* **Q** – quest VNUM
+* **S** – script VNUM
+
+The returned number is automatically marked as used in the registry.

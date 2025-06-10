@@ -3482,4 +3482,31 @@ wander and scripted. Scripted AI runs the callback stored on
 |wnpc.db.ai_script|n.
 """,
     },
+    {
+        "key": "nextvnum",
+        "category": "Building",
+        "text": """Help for nextvnum
+
+Fetch the next unused VNUM for a category.
+
+Usage:
+    @nextvnum <I|M|R|O|Q|S>
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    @nextvnum M
+
+Notes:
+    - I and O return an object VNUM.
+    - The number is reserved immediately.
+
+Related:
+    help ansi
+""",
+    },
 ]
