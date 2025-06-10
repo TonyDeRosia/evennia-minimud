@@ -41,16 +41,17 @@ class TestMobBuilder(EvenniaTest):
             self.char1, "commands.npc_builder", startnode="menunode_desc"
         )
         npc_builder._set_key(self.char1, "goblin")
+        npc_builder._set_desc(self.char1, "A small goblin")
         npc_builder._set_race(self.char1, "human")
+        npc_builder._set_npc_class(self.char1, "base")
         npc_builder._set_sex(self.char1, "male")
         npc_builder._set_weight(self.char1, "medium")
-        npc_builder._set_desc(self.char1, "A small goblin")
+        npc_builder._set_level(self.char1, "1")
+        npc_builder._set_vnum(self.char1, "auto")
         npc_builder._set_creature_type(self.char1, "humanoid")
         npc_builder._set_role(self.char1, "")
-        npc_builder._set_npc_class(self.char1, "base")
         npc_builder._set_combat_class(self.char1, "Warrior")
         npc_builder._edit_roles(self.char1, "done")
-        npc_builder._set_level(self.char1, "1")
         npc_builder._set_exp_reward(self.char1, "5")
         npc_builder._set_coin_drop(self.char1, "1 gold")
         npc_builder._edit_loot_table(self.char1, "add RAW_MEAT 50")
@@ -198,7 +199,7 @@ class TestMobBuilder(EvenniaTest):
         """Entering back at exp reward should return to level menu."""
         self.char1.ndb.buildnpc = {"level": 1}
         result = npc_builder._set_exp_reward(self.char1, "back")
-        assert result == "menunode_level"
+        assert result == "menunode_role_details"
 
     def test_resources_back_returns_to_prompt(self):
         """Entering back at resources should return to resources prompt."""
