@@ -159,8 +159,8 @@ def format_mob_summary(data: dict) -> str:
         basic.add_row("|cRace|n", fmt(data.get("race")))
     if data.get("sex"):
         basic.add_row("|cSex|n", fmt(data.get("sex")))
-    if data.get("size"):
-        basic.add_row("|cSize|n", fmt(data.get("size")))
+    if data.get("weight"):
+        basic.add_row("|cWeight|n", fmt(data.get("weight")))
     if data.get("role"):
         basic.add_row("|cRole|n", fmt(data.get("role")))
     if data.get("roles"):
@@ -178,6 +178,10 @@ def format_mob_summary(data: dict) -> str:
     stats.add_row("|cSP|n", fmt(data.get("sp")))
     if data.get("primary_stats"):
         stats.add_row("|cStats|n", fmt(data.get("primary_stats")))
+    if data.get("modifiers"):
+        stats.add_row("|cModifiers|n", fmt(data.get("modifiers")))
+    if data.get("buffs"):
+        stats.add_row("|cBuffs|n", fmt(data.get("buffs")))
     lines.append("\n|cCombat Stats|n")
     lines.append(str(stats))
 
@@ -316,40 +320,40 @@ def _set_sex(caller, raw_string, **kwargs):
             )
             return "menunode_sex"
     caller.ndb.buildnpc["sex"] = string
-    return "menunode_size"
+    return "menunode_weight"
 
 
-def menunode_size(caller, raw_string="", **kwargs):
-    """Prompt for the NPC size."""
+def menunode_weight(caller, raw_string="", **kwargs):
+    """Prompt for the NPC weight category."""
     from world.mob_constants import NPC_SIZES
 
-    default = caller.ndb.buildnpc.get("size", "")
-    options = add_back_skip({"key": "_default", "goto": _set_size}, _set_size)
+    default = caller.ndb.buildnpc.get("weight", "")
+    options = add_back_skip({"key": "_default", "goto": _set_weight}, _set_weight)
     sizes = "/".join(s.value for s in NPC_SIZES)
-    text = f"|wSize|n ({sizes})"
+    text = f"|wWeight|n ({sizes})"
     if default:
         text += f" [default: {default}]"
     text += "\nExample: |wmedium|n"
     return with_summary(caller, text), options
 
 
-def _set_size(caller, raw_string, **kwargs):
+def _set_weight(caller, raw_string, **kwargs):
     from world.mob_constants import NPC_SIZES
 
     string = raw_string.strip()
     if string.lower() == "back":
         return "menunode_sex"
     if not string or string.lower() == "skip":
-        string = caller.ndb.buildnpc.get("size", "")
+        string = caller.ndb.buildnpc.get("weight", "")
     else:
         try:
             NPC_SIZES.from_str(string)
         except ValueError:
             caller.msg(
-                f"Invalid size. Choose from: {', '.join(s.value for s in NPC_SIZES)}"
+                f"Invalid weight. Choose from: {', '.join(s.value for s in NPC_SIZES)}"
             )
-            return "menunode_size"
-    caller.ndb.buildnpc["size"] = string
+            return "menunode_weight"
+    caller.ndb.buildnpc["weight"] = string
     return "menunode_desc"
 
 
@@ -770,7 +774,7 @@ def menunode_exp_reward(caller, raw_string="", **kwargs):
 def _set_exp_reward(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_level"
+        return "menunode_resources_prompt"
     if not string or string.lower() == "skip":
         level = caller.ndb.buildnpc.get("level", 1)
         val = caller.ndb.buildnpc.get(
@@ -850,7 +854,7 @@ def _edit_loot_table(caller, raw_string, **kwargs):
     if string.lower() == "back":
         return "menunode_coin_drop"
     if string.lower() in ("done", "finish", "skip", ""):
-        return "menunode_resources"
+        return "menunode_resources_prompt"
     if string.lower().startswith("add "):
         parts = string[4:].split()
         if not parts:
@@ -880,6 +884,29 @@ def _edit_loot_table(caller, raw_string, **kwargs):
     return "menunode_loot_table"
 
 
+def menunode_resources_prompt(caller, raw_string="", **kwargs):
+    """Ask if custom HP/MP/SP should be entered."""
+    text = dedent(
+        """
+        |wWould you like to enter specific HP/MP/SP or use default?|n
+        Type |w1|n for default or |w2|n to enter values.
+        """
+    )
+    options = [
+        {"key": ("1", "default"), "goto": _use_default_resources},
+        {"key": ("2", "custom"), "goto": "menunode_resources"},
+        {"desc": "Back", "goto": "menunode_loot_table"},
+    ]
+    return with_summary(caller, text), options
+
+
+def _use_default_resources(caller, raw_string, **kwargs):
+    caller.ndb.buildnpc.pop("hp", None)
+    caller.ndb.buildnpc.pop("mp", None)
+    caller.ndb.buildnpc.pop("sp", None)
+    return "menunode_modifiers"
+
+
 def menunode_resources(caller, raw_string="", **kwargs):
     hp = caller.ndb.buildnpc.get("hp", 0)
     mp = caller.ndb.buildnpc.get("mp", 0)
@@ -904,7 +931,7 @@ def _set_resources(caller, raw_string, **kwargs):
         caller.ndb.buildnpc["hp"] = caller.ndb.buildnpc.get("hp", 0)
         caller.ndb.buildnpc["mp"] = caller.ndb.buildnpc.get("mp", 0)
         caller.ndb.buildnpc["sp"] = caller.ndb.buildnpc.get("sp", 0)
-        return "menunode_stats"
+        return "menunode_modifiers"
     parts = string.split()
     if len(parts) != 3 or not all(p.isdigit() for p in parts):
         caller.msg("Enter three numbers separated by spaces.")
@@ -912,6 +939,45 @@ def _set_resources(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["hp"] = int(parts[0])
     caller.ndb.buildnpc["mp"] = int(parts[1])
     caller.ndb.buildnpc["sp"] = int(parts[2])
+    return "menunode_modifiers"
+
+
+def menunode_modifiers(caller, raw_string="", **kwargs):
+    """Prompt for stat modifiers and buffs."""
+    mods = caller.ndb.buildnpc.get("modifiers", {})
+    buffs = caller.ndb.buildnpc.get("buffs", [])
+    mod_text = ", ".join(f"{k}+{v}" for k, v in mods.items()) if mods else ""
+    buff_text = ", ".join(buffs)
+    default = ", ".join(filter(None, [mod_text, buff_text]))
+    text = "|wEnter modifiers and buffs/debuffs|n"
+    if default:
+        text += f" [default: {default}]"
+    text += "\nUse form 'STR+1, DEX-2, haste, slow'"
+    text += "\n(back to go back, skip for none)"
+    options = add_back_skip({"key": "_default", "goto": _set_modifiers}, _set_modifiers)
+    return with_summary(caller, text), options
+
+
+def _set_modifiers(caller, raw_string, **kwargs):
+    from commands.admin import parse_stat_mods
+
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_resources_prompt"
+    if not string or string.lower() == "skip":
+        caller.ndb.buildnpc["modifiers"] = caller.ndb.buildnpc.get("modifiers", {})
+        caller.ndb.buildnpc["buffs"] = caller.ndb.buildnpc.get("buffs", [])
+        return "menunode_stats"
+    try:
+        mods, remainder = parse_stat_mods(string)
+    except ValueError as err:
+        caller.msg(f"Invalid modifier: {err}")
+        return "menunode_modifiers"
+    buffs = []
+    if remainder:
+        buffs = [p.strip() for p in remainder.split(",") if p.strip()]
+    caller.ndb.buildnpc["modifiers"] = mods
+    caller.ndb.buildnpc["buffs"] = buffs
     return "menunode_stats"
 
 
@@ -933,7 +999,7 @@ def menunode_stats(caller, raw_string="", **kwargs):
 def _set_stats(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_resources"
+        return "menunode_modifiers"
     stats = ["STR", "CON", "DEX", "INT", "WIS", "LUCK"]
     if not string or string.lower() == "skip":
         caller.ndb.buildnpc["primary_stats"] = {
@@ -1484,7 +1550,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.desc = data.get("desc")
     npc.db.race = data.get("race")
     npc.db.sex = data.get("sex")
-    npc.db.size = data.get("size")
+    npc.db.weight = data.get("weight")
     if cc := data.get("combat_class"):
         npc.db.charclass = cc
     if vnum := data.get("vnum"):
@@ -1513,6 +1579,8 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.attack_types = data.get("attack_types")
     npc.db.defense_types = data.get("defense_types")
     npc.db.languages = data.get("languages")
+    npc.db.modifiers = data.get("modifiers") or {}
+    npc.db.buffs = data.get("buffs") or []
     npc.db.triggers = data.get("triggers") or {}
     npc.db.coin_drop = data.get("coin_drop") or {}
     npc.db.loot_table = data.get("loot_table") or []
@@ -1622,7 +1690,7 @@ def _gather_npc_data(npc):
         "desc": npc.db.desc,
         "race": npc.db.race or "",
         "sex": npc.db.sex or "",
-        "size": npc.db.size or "",
+        "weight": npc.db.weight or "",
         "role": npc.tags.get(category="npc_type") or "",
         "roles": [
             t
@@ -1661,6 +1729,8 @@ def _gather_npc_data(npc):
         "script": next(
             (scr.typeclass_path for scr in npc.scripts.all() if scr.key != "npc_ai"), ""
         ),
+        "modifiers": npc.db.modifiers or {},
+        "buffs": npc.db.buffs or [],
     }
 
 
@@ -1689,7 +1759,7 @@ class CmdCNPC(Command):
                 "key": rest.strip(),
                 "race": "",
                 "sex": "",
-                "size": "",
+                "weight": "",
                 "triggers": {},
                 "npc_class": "base",
                 "combat_class": "",
@@ -1702,6 +1772,8 @@ class CmdCNPC(Command):
                 "exp_reward": 0,
                 "merchant_markup": 1.0,
                 "script": "",
+                "modifiers": {},
+                "buffs": [],
             }
             EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
             return

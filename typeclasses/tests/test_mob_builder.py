@@ -43,7 +43,7 @@ class TestMobBuilder(EvenniaTest):
         npc_builder._set_key(self.char1, "goblin")
         npc_builder._set_race(self.char1, "human")
         npc_builder._set_sex(self.char1, "male")
-        npc_builder._set_size(self.char1, "medium")
+        npc_builder._set_weight(self.char1, "medium")
         npc_builder._set_desc(self.char1, "A small goblin")
         npc_builder._set_creature_type(self.char1, "humanoid")
         npc_builder._set_role(self.char1, "")
@@ -56,6 +56,7 @@ class TestMobBuilder(EvenniaTest):
         npc_builder._edit_loot_table(self.char1, "add RAW_MEAT 50")
         npc_builder._edit_loot_table(self.char1, "done")
         npc_builder._set_resources(self.char1, "10 0 0")
+        npc_builder._set_modifiers(self.char1, "skip")
         npc_builder._set_stats(self.char1, "1 1 1 1 1 1")
         npc_builder._set_behavior(self.char1, "")
         npc_builder._set_skills(self.char1, "")
@@ -96,7 +97,7 @@ class TestMobBuilder(EvenniaTest):
             "desc": "A nasty goblin",
             "race": "orc",
             "sex": "male",
-            "size": "small",
+            "weight": "small",
             "level": 2,
             "hp": 10,
             "mp": 0,
@@ -191,7 +192,7 @@ class TestMobBuilder(EvenniaTest):
         npc_builder._edit_loot_table(self.char1, "add RAW_MEAT 75")
         assert self.char1.ndb.buildnpc["loot_table"] == [{"proto": "RAW_MEAT", "chance": 75}]
         result = npc_builder._edit_loot_table(self.char1, "done")
-        assert result == "menunode_resources"
+        assert result == "menunode_resources_prompt"
 
     def test_summary_shows_coin_and_loot(self):
         data = {
