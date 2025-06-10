@@ -199,7 +199,8 @@ duplicates one, `@deletenpc <npc>` removes it (with confirmation) and
 `@spawnnpc <proto>` spawns a saved prototype from `world/prototypes/npcs.json`.
 You can organize prototypes by area with `@listnpcs <area>`, spawn them with
 `@spawnnpc <area>/<proto>` and duplicate them using
-`@dupnpc <area>/<proto> [= <new_key>]`.
+`@dupnpc <area>/<proto> [= <new_key>]`. Saving a prototype while standing in a
+room that has an `area` set automatically adds it to that area's list.
 
 Several basic NPC prototypes are included out of the box. Try `cnpc dev_spawn basic_merchant`
 or `@spawnnpc basic_merchant` to quickly create a merchant, or `basic_questgiver` for a quest

@@ -2875,7 +2875,8 @@ Related:
         "category": "Building",
         "text": """Help for @listnpcs
 
-List NPC prototypes assigned to an area.
+List NPC prototypes assigned to an area. Prototypes saved with |wcnpc|n while
+standing in a room belonging to that area are added automatically.
 
 Usage:
     @listnpcs <area>
