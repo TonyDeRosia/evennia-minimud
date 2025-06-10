@@ -2683,16 +2683,18 @@ Notes:
       event_npc.
     - After choosing the NPC class you may select a combat class like
       Warrior or Mage.
-    - The builder prompts for description, role, creature type, level,
-      experience reward, HP MP SP, primary stats, combat class, behavior,
-      skills, spells, resistances and AI type.
+    - The builder prompts for description, weight category, role,
+      creature type, level, experience reward, optional HP MP SP values,
+      primary stats, modifiers or buffs, combat class, behavior, skills,
+      spells, resistances and AI type.
     - Mob specific fields such as act flags, resistances, skills and spells can
       now be configured directly in this menu along with an optional Script
       typeclass to run when the mob spawns.
     - Humanoid body type grants the standard equipment slots automatically.
       Quadrupeds receive head, body, front_legs and hind_legs and lack weapon
       slots. Unique lets you add or remove any slots in the next step.
-    - Prompts accept |wback|n to return to the previous step.
+    - Prompts accept |wback|n to return to the previous step or |wskip|n to
+      keep the current value.
     - The skills prompt lists suggested abilities for the chosen class.
     - When multiple values are allowed, use comma or space separated lists as
       shown in each example.
@@ -2932,6 +2934,8 @@ Related:
 The |wmobbuilder|n command is now just an alias for |wcnpc|n. All of the
 functionality lives in that command, so use either |wcnpc|n or |wmobbuilder|n
 interchangeably. See |whelp cnpc|n for a complete overview of the builder.
+The menu now includes prompts for weight category, choosing HP/MP/SP values,
+adding modifiers or buffs and uses |wskip|n to keep defaults.
 """,
     },
     {
