@@ -6,6 +6,7 @@ from django.conf import settings
 from typeclasses.npcs import BaseNPC
 from evennia.utils import evtable
 from evennia.objects.models import ObjectDB
+from world.scripts.mob_db import get_mobdb
 
 from .command import Command
 from . import npc_builder
@@ -364,7 +365,14 @@ class CmdMList(Command):
             self.msg("No prototypes found.")
             return
 
-        table = evtable.EvTable("Key", "Lvl", "Class", "Roles", "Count", border="cells")
+        mob_db = get_mobdb()
+        vnum_lookup = {}
+        for vnum, data in mob_db.db.vnums.items():
+            pkey = data.get("proto_key") or data.get("prototype_key") or data.get("key")
+            if pkey:
+                vnum_lookup[pkey] = vnum
+
+        table = evtable.EvTable("VNUM", "Key", "Lvl", "Class", "Roles", "Count", border="cells")
         for key in keys:
             proto = registry.get(key)
             if not proto:
@@ -372,7 +380,9 @@ class CmdMList(Command):
             roles = proto.get("roles") or []
             if isinstance(roles, str):
                 roles = [roles]
+            vnum = vnum_lookup.get(key) or vnum_lookup.get(proto.get("key"))
             table.add_row(
+                str(vnum) if vnum is not None else "-",
                 key,
                 str(proto.get("level", "-")),
                 proto.get("npc_class", "-"),
