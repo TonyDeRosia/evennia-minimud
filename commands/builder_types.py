@@ -2,7 +2,6 @@ from evennia import create_object
 from .command import Command
 from utils import vnum_registry, mob_proto
 from world import prototypes, area_npcs
-from typeclasses.npcs import BaseNPC
 
 
 def builder_cnpc_prompt(caller, name):
@@ -20,7 +19,7 @@ def builder_cnpc_prompt(caller, name):
         caller.msg("Cancelled.")
         return
     vnum = vnum_registry.get_next_vnum("npc")
-    npc = create_object(BaseNPC, key=name, location=caller.location)
+    npc = create_object("typeclasses.npcs.BaseNPC", key=name, location=caller.location)
     npc.db.desc = desc
     npc.db.race = race
     npc.db.charclass = combat_class
