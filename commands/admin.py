@@ -39,6 +39,7 @@ from .mob_builder_commands import (
     CmdMakeRepair,
     CmdRepairSet,
     CmdRepairStat,
+    CmdMobValidate,
 )
 from .mob_builder import (
     CmdMobBuilder,
@@ -1449,3 +1450,4 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdMakeRepair)
         self.add(CmdRepairSet)
         self.add(CmdRepairStat)
+        self.add(CmdMobValidate)
