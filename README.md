@@ -313,6 +313,17 @@ These options let builders quickly create enemies that fight or roam on
 their own. The combat command set includes `attack`, `wield`, `unwield`,
 `flee`, `berserk`, `respawn`, `revive` and `status`.
 
+### Helper Utilities
+
+Convenience functions in `utils.mob_utils` provide building blocks for working
+with VNUM-based NPCs.
+
+- `assign_next_vnum(category)` – fetches and reserves the next free VNUM.
+- `add_to_mlist(vnum, proto)` – records a prototype in the mob database so it
+  appears in `@mlist`.
+- `auto_calc(stats)` and `auto_calc_secondary(stats)` – derive combat stats from
+  primary values using `world.system.stat_manager`.
+
 
 ## Running the Tests
 
