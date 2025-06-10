@@ -9,7 +9,9 @@ from evennia.utils.test_resources import EvenniaTest
 
 from commands.admin import BuilderCmdSet
 from utils.mob_proto import register_prototype, spawn_from_vnum, get_prototype
+from utils import vnum_registry
 from world.scripts.mob_db import get_mobdb
+from typeclasses.npcs import BaseNPC
 
 
 @override_settings(DEFAULT_HOME=None)
@@ -86,3 +88,29 @@ class TestVnumMobs(EvenniaTest):
         self.assertIsNone(get_prototype(1))
         del_msg = self.char1.msg.call_args[0][0]
         self.assertIn("deleted", del_msg.lower())
+
+    def test_mspawn_prefixed_vnum(self):
+        proto = {"key": "orc", "typeclass": "typeclasses.npcs.BaseNPC"}
+        vnum = register_prototype(proto, vnum=5)
+        with mock.patch(
+            "utils.vnum_registry.validate_vnum",
+            wraps=vnum_registry.validate_vnum,
+        ) as mock_validate:
+            self.char1.execute_cmd(f"@mspawn M{vnum}")
+        mock_validate.assert_called_with(vnum, "npc")
+        npc = [
+            o
+            for o in self.char1.location.contents
+            if o.is_typeclass(BaseNPC, exact=False)
+        ][0]
+        self.assertEqual(npc.db.vnum, vnum)
+        self.assertTrue(npc.tags.has(f"M{vnum}", category="vnum"))
+
+    def test_mspawn_key_resolves_vnum(self):
+        proto = {"key": "orc", "typeclass": "typeclasses.npcs.BaseNPC"}
+        vnum = register_prototype(proto, vnum=7)
+        with mock.patch(
+            "utils.mob_proto.spawn_from_vnum", wraps=spawn_from_vnum
+        ) as mock_spawn:
+            self.char1.execute_cmd("@mspawn orc")
+        mock_spawn.assert_called_with(vnum, location=self.char1.location)
