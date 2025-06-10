@@ -991,6 +991,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
             proto_key = f"mob_{proto_key}"
             data["proto_key"] = proto_key
         proto = {k: v for k, v in data.items() if k not in ("edit_obj", "proto_key")}
+        proto["typeclass"] = tclass_path
         if data.get("use_mob"):
             proto["can_attack"] = True
             proto.setdefault(
@@ -1225,6 +1226,9 @@ class CmdSpawnNPC(Command):
         if not proto:
             self.msg("Unknown NPC prototype.")
             return
+        tclass_path = NPC_CLASS_MAP.get(proto.get("npc_class", "base"), "typeclasses.npcs.BaseNPC")
+        proto = dict(proto)
+        proto.setdefault("typeclass", tclass_path)
         obj = spawner.spawn(proto)[0]
         obj.move_to(self.caller.location, quiet=True)
         obj.db.prototype_key = key
