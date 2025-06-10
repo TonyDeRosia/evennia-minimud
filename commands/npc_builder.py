@@ -533,7 +533,7 @@ def menunode_custom_slots(caller, raw_string="", **kwargs):
         "  back - previous step\n"
         "Example: |wadd tail|n"
     )
-    options = add_back_skip(
+    options = add_back_next(
         {"key": "_default", "goto": _edit_custom_slots}, _edit_custom_slots
     )
     return with_summary(caller, text), options
