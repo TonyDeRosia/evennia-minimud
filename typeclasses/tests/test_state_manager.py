@@ -53,9 +53,10 @@ class TestStateManager(EvenniaTest):
         state_manager.tick_character(char)
         self.assertEqual(char.db.sated, 0)
         self.assertTrue(char.tags.has("hungry_thirsty", category="status"))
-        self.assertEqual(char.traits.health.current, hp - 1)
-        self.assertEqual(char.traits.mana.current, mp - 1)
-        self.assertEqual(char.traits.stamina.current, sp - 1)
+        loss = int(round(char.traits.health.max * 0.05))
+        self.assertEqual(char.traits.health.current, hp - loss)
+        self.assertEqual(char.traits.mana.current, mp - loss)
+        self.assertEqual(char.traits.stamina.current, sp - loss)
 
     def test_hunger_ticks_reduce_sated(self):
         char = self.char1
@@ -69,9 +70,10 @@ class TestStateManager(EvenniaTest):
         state_manager.tick_character(char)
         self.assertEqual(char.db.sated, 0)
         self.assertTrue(char.tags.has("hungry_thirsty", category="status"))
-        self.assertEqual(char.traits.health.current, hp - 1)
-        self.assertEqual(char.traits.mana.current, mp - 1)
-        self.assertEqual(char.traits.stamina.current, sp - 1)
+        loss = int(round(char.traits.health.max * 0.05))
+        self.assertEqual(char.traits.health.current, hp - loss)
+        self.assertEqual(char.traits.mana.current, mp - loss)
+        self.assertEqual(char.traits.stamina.current, sp - loss)
 
     def test_hunger_cap(self):
         char = self.char1
@@ -96,9 +98,10 @@ class TestStateManager(EvenniaTest):
         mp = char.traits.mana.current
         sp = char.traits.stamina.current
         state_manager.tick_character(char)
-        self.assertEqual(char.traits.health.current, hp - 1)
-        self.assertEqual(char.traits.mana.current, mp - 1)
-        self.assertEqual(char.traits.stamina.current, sp - 1)
+        loss = int(round(char.traits.health.max * 0.05))
+        self.assertEqual(char.traits.health.current, hp - loss)
+        self.assertEqual(char.traits.mana.current, mp - loss)
+        self.assertEqual(char.traits.stamina.current, sp - loss)
 
     def test_apply_regen_uses_derived_stats(self):
         char = self.char1

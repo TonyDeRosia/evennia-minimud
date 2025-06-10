@@ -267,11 +267,13 @@ def tick_character(chara):
         if chara.db.sated <= 0:
             chara.db.sated = 0
             add_effect(chara, "hungry_thirsty", 1)
-            if (hp := chara.traits.get("health")):
-                hp.current = max(hp.current - 1, 0)
-            for res in ("mana", "stamina"):
-                if (trait := chara.traits.get(res)):
-                    trait.current = max(trait.current - 1, 0)
+            drain_pct = 5  # percent of each resource to lose
+            for key in ("health", "mana", "stamina"):
+                if not (trait := chara.traits.get(key)):
+                    continue
+                max_val = trait.max or trait.current
+                loss = max(1, int(round(max_val * drain_pct / 100)))
+                trait.current = max(trait.current - loss, 0)
 
 
 def tick_all():

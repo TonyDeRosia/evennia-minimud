@@ -294,6 +294,12 @@ stats or restrict actions. Use the `affects` command or `status` to view
 your current buffs and conditions. Effects expire automatically when
 their duration reaches zero.
 
+### Hunger & Thirst
+
+If a character's `sated` value reaches zero they gain the `hungry_thirsty`
+status effect. Each tick removes 5% of their maximum health, mana and stamina
+while this status is active, rather than a single point from each resource.
+
 ### AI Settings
 
 NPC behavior is configured by an AI type during `cnpc` or `mobbuilder`.
