@@ -110,3 +110,14 @@ sections with `@makeshop` and `@makerepair` and then configure them with
 
 Use `@shopstat <proto>` or `@repairstat <proto>` to review the settings.
 
+
+## Importing and Exporting
+
+Use `@mobexport <proto> <file>` to write a prototype to JSON in the
+`PROTOTYPE_NPC_EXPORT_DIR` directory. Load a file with
+`@mobimport <file>` which will register or replace that prototype.
+
+```text
+@mobexport goblin goblin.json
+@mobimport goblin.json
+```

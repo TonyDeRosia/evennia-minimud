@@ -1,5 +1,7 @@
 import shlex
 import json
+from pathlib import Path
+from django.conf import settings
 
 from typeclasses.npcs import BaseNPC
 from evennia.utils import evtable
@@ -619,3 +621,77 @@ class CmdMobValidate(Command):
             self.msg("\n".join(lines))
         else:
             self.msg("No issues found.")
+
+
+class CmdMobExport(Command):
+    """Export an NPC prototype to a JSON file."""
+
+    key = "@mobexport"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def parse(self):
+        parts = self.args.strip().split(None, 1)
+        if len(parts) == 2:
+            self.proto_key, self.filename = parts
+        else:
+            self.proto_key = self.filename = None
+
+    def func(self):
+        if not self.proto_key or not self.filename:
+            self.msg("Usage: @mobexport <proto> <file>")
+            return
+        proto = prototypes.get_npc_prototypes().get(self.proto_key)
+        if not proto:
+            self.msg("Prototype not found.")
+            return
+        export_dir = Path(settings.PROTOTYPE_NPC_EXPORT_DIR).resolve()
+        export_dir.mkdir(parents=True, exist_ok=True)
+        fname = Path(self.filename).name
+        if not fname.endswith(".json"):
+            fname += ".json"
+        path = (export_dir / fname).resolve()
+        if export_dir != path.parent:
+            self.msg("Invalid file path.")
+            return
+        try:
+            with path.open("w") as f:
+                json.dump(proto, f, indent=4)
+        except OSError:
+            self.msg("Unable to write file.")
+            return
+        self.msg(f"Prototype {self.proto_key} exported to {fname}.")
+
+
+class CmdMobImport(Command):
+    """Import an NPC prototype from a JSON file."""
+
+    key = "@mobimport"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def func(self):
+        filename = self.args.strip()
+        if not filename:
+            self.msg("Usage: @mobimport <file>")
+            return
+        export_dir = Path(settings.PROTOTYPE_NPC_EXPORT_DIR).resolve()
+        fname = Path(filename).name
+        if not fname.endswith(".json"):
+            fname += ".json"
+        path = (export_dir / fname).resolve()
+        if export_dir != path.parent or not path.exists():
+            self.msg("File not found.")
+            return
+        try:
+            with path.open("r") as f:
+                data = json.load(f)
+        except json.JSONDecodeError:
+            self.msg("Invalid JSON data.")
+            return
+        key = data.get("key")
+        if not key:
+            self.msg("Prototype missing 'key' field.")
+            return
+        prototypes.register_npc_prototype(key, data)
+        self.msg(f"Prototype {key} imported.")

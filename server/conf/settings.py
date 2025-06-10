@@ -55,6 +55,7 @@ XYZROOM_PROTOTYPE_OVERRIDE = {"typeclass": "typeclasses.rooms.XYGridRoom"}
 # File used for storing NPC prototypes
 PROTOTYPE_NPC_FILE = Path(GAME_DIR) / "world" / "prototypes" / "npcs.json"
 
+PROTOTYPE_NPC_EXPORT_DIR = Path(GAME_DIR) / "exports" / "npc_prototypes"
 
 # Clothing - https://www.evennia.com/docs/latest/Contribs/Contrib-Clothing.html#configuration
 CLOTHING_WEARSTYLE_MAXLENGTH = 40
