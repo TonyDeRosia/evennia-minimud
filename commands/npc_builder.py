@@ -10,6 +10,7 @@ from utils.slots import SLOT_ORDER
 from utils.menu_utils import add_back_skip, add_back_next, add_back_only
 from world.scripts import classes
 from utils import vnum_registry
+from utils.mob_utils import calculate_combat_stats
 from .command import Command
 from django.conf import settings
 from importlib import import_module
@@ -52,6 +53,17 @@ def validate_prototype(data: dict) -> list[str]:
         warnings.append("Sentinel flag conflicts with wander AI type.")
 
     return warnings
+
+
+def _auto_fill_combat_stats(data: dict) -> None:
+    """Populate missing combat stats if class and level are set."""
+    combat_class = data.get("combat_class")
+    level = data.get("level")
+    if not combat_class or not level:
+        return
+    stats = calculate_combat_stats(combat_class, level)
+    for field in ("hp", "mp", "sp", "armor", "initiative"):
+        data.setdefault(field, stats[field])
 
 
 # Primary roles that can be selected in the builder
@@ -648,6 +660,7 @@ def _set_combat_class(caller, raw_string, **kwargs):
                 string = entry["name"]
                 break
     caller.ndb.buildnpc["combat_class"] = string
+    _auto_fill_combat_stats(caller.ndb.buildnpc)
     return "menunode_roles"
 
 
@@ -763,6 +776,7 @@ def _set_level(caller, raw_string, **kwargs):
         caller.msg("Enter a number between 1 and 100.")
         return "menunode_level"
     caller.ndb.buildnpc["level"] = val
+    _auto_fill_combat_stats(caller.ndb.buildnpc)
     return "menunode_vnum"
 
 
@@ -1670,6 +1684,8 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.weight = data.get("weight")
     if cc := data.get("combat_class"):
         npc.db.charclass = cc
+        npc.db.class = cc
+        npc.db.combat_class = cc
     if vnum := data.get("vnum"):
         npc.db.vnum = vnum
         npc.tags.add(f"M{vnum}", category="vnum")
@@ -1807,6 +1823,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
         caller.msg(f"NPC {npc.key} created and prototype saved.")
     else:
         caller.msg(f"NPC {npc.key} created.")
+    finalize_mob_prototype(caller, npc)
     caller.ndb.buildnpc = None
     return None
 
@@ -1871,6 +1888,30 @@ def _gather_npc_data(npc):
         "modifiers": npc.db.modifiers or {},
         "buffs": npc.db.buffs or [],
     }
+
+
+def finalize_mob_prototype(caller, npc):
+    """Finalize ``npc`` with default combat stats and register it."""
+    if not npc.db.level or not npc.db.combat_class:
+        caller.msg("|rCannot finalize mob. Missing level or class.|n")
+        return
+
+    npc.db.class = npc.db.combat_class
+    stats = calculate_combat_stats(npc.db.combat_class, npc.db.level)
+    npc.db.hp = stats["hp"]
+    npc.db.mp = stats["mp"]
+    npc.db.sp = stats["sp"]
+    npc.db.armor = stats["armor"]
+    npc.db.initiative = stats["initiative"]
+
+    from world.mobregistry import register_mob_vnum
+
+    if npc.db.vnum:
+        register_mob_vnum(vnum=npc.db.vnum, prototype=npc)
+
+    caller.msg(
+        f"|gMob '{npc.key}' finalized with VNUM {npc.db.vnum} and added to mob list.|n"
+    )
 
 
 class CmdCNPC(Command):
