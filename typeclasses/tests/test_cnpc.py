@@ -104,22 +104,16 @@ class TestCNPC(EvenniaTest):
         npc_builder._set_skills(self.char1, "")
         npc_builder._set_ai(self.char1, "passive")
 
-        self.char1.ndb.buildnpc["triggers"] = {
-            "on_speak": ("hello", "say Squawk!"),
-            "on_give_item": ("", "say Thanks!"),
-        }
+        self.char1.ndb.buildnpc["mobprogs"] = [
+            {"type": "on_speak", "conditions": {"match": "hello"}, "commands": ["say Squawk!"]},
+            {"type": "on_give_item", "conditions": {}, "commands": ["say Thanks!"]},
+        ]
 
         npc_builder._create_npc(self.char1, "")
 
         npc = self._find("parrot")
         self.assertIsNotNone(npc)
-        self.assertEqual(
-            npc.db.triggers,
-            {
-                "on_speak": ("hello", "say Squawk!"),
-                "on_give_item": ("", "say Thanks!"),
-            },
-        )
+        self.assertEqual(len(npc.db.mobprogs), 2)
 
         with patch.object(npc, "execute_cmd") as mock_exec:
             npc.at_say(self.char2, "hello there")
@@ -192,11 +186,12 @@ class TestCNPC(EvenniaTest):
 
         npc_builder._save_trigger(self.char1, "say hi, emote waves;jump")
 
-        triggers = self.char1.ndb.buildnpc.get("triggers")
-        self.assertIn("on_test", triggers)
-        trig = triggers["on_test"][0]
-        self.assertEqual(trig["match"], "hello")
-        self.assertEqual(trig["responses"], ["say hi", "emote waves", "jump"])
+        progs = self.char1.ndb.buildnpc.get("mobprogs")
+        self.assertEqual(len(progs), 1)
+        prog = progs[0]
+        self.assertEqual(prog["type"], "on_test")
+        self.assertEqual(prog["conditions"]["match"], "hello")
+        self.assertEqual(prog["commands"], ["say hi", "emote waves", "jump"])
 
     def test_confirm_formatting(self):
         """menunode_confirm should return a formatted table."""

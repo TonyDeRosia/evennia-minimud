@@ -55,6 +55,8 @@ def _summary(caller) -> str:
             lines.append("Special: " + ", ".join(special))
         else:
             lines.append(f"Special: {special}")
+    if proto.get("mobprogs"):
+        lines.append(f"Mobprogs: {len(proto.get('mobprogs'))}")
     return "\n".join(lines)
 
 

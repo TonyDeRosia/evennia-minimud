@@ -15,6 +15,7 @@ __all__ = [
     "assign_next_vnum",
     "add_to_mlist",
     "calculate_combat_stats",
+    "mobprogs_to_triggers",
 ]
 
 
@@ -64,3 +65,17 @@ def auto_calc_secondary(primary_stats: Dict[str, int]) -> Dict[str, int]:
     for key in ("HP", "MP", "SP"):
         derived.pop(key, None)
     return derived
+
+
+def mobprogs_to_triggers(mobprogs: list[dict]) -> Dict[str, list[dict]]:
+    """Convert mobprogs to trigger format used by :class:`TriggerManager`."""
+
+    result: Dict[str, list[dict]] = {}
+    for prog in mobprogs or []:
+        event = prog.get("type")
+        if not event:
+            continue
+        entry = dict(prog.get("conditions") or {})
+        entry["responses"] = prog.get("commands") or []
+        result.setdefault(event, []).append(entry)
+    return result
