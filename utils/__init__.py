@@ -10,3 +10,4 @@ from .mob_utils import (
     auto_calc,
     auto_calc_secondary,
 )
+from .eval_utils import eval_safe
