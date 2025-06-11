@@ -158,3 +158,36 @@ class CmdMobTemplate(Command):
         self.caller.ndb.buildnpc = self.caller.ndb.buildnpc or {}
         self.caller.ndb.buildnpc.update(data)
         self.msg(f"Template '{arg}' loaded into builder.")
+
+
+class CmdQuickMob(Command):
+    """Spawn and register a mob from a template in one step."""
+
+    key = "@quickmob"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        from world.templates.mob_templates import get_template
+        from utils.mob_utils import assign_next_vnum
+
+        args = self.args.strip()
+        if not args:
+            self.msg("Usage: @quickmob <key> [template]")
+            return
+
+        parts = args.split(None, 1)
+        key = parts[0]
+        template = parts[1] if len(parts) > 1 else "warrior"
+
+        data = get_template(template)
+        if not data:
+            self.msg("Unknown template.")
+            return
+
+        vnum = assign_next_vnum("npc")
+
+        data = dict(data)
+        data.update({"key": key, "vnum": vnum, "use_mob": True})
+        self.caller.ndb.buildnpc = data
+        npc_builder._create_npc(self.caller, "", register=True)

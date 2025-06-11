@@ -3049,6 +3049,25 @@ Notes:
 """,
     },
     {
+        "key": "@quickmob",
+        "category": "Building",
+        "text": """Help for @quickmob
+
+Create and register a simple mob using a predefined template. The mob is
+assigned the next free VNUM so it can be respawned later with
+``@mspawn M<number>``.
+
+Usage:
+    @quickmob <key> [template]
+
+Example:
+    @quickmob goblin warrior
+
+Notes:
+    - Templates are defined in ``world.templates.mob_templates``.
+""",
+    },
+    {
         "key": "@mobpreview",
         "category": "Building",
         "text": """Help for @mobpreview
