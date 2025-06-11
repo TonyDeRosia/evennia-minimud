@@ -103,7 +103,7 @@ class TestMobBuilder(EvenniaTest):
         self.char1.ndb.buildnpc = {}
         npc_builder._on_menu_exit(self.char1, None)
         self.char1.msg.assert_called_with(
-            "\u26A0\uFE0F You must choose ‘Yes & Save Prototype’ to make this NPC spawnable with @mspawn."
+            "\u26a0\ufe0f You must choose ‘Yes & Save Prototype’ to make this NPC spawnable with @mspawn."
         )
         assert self.char1.ndb.buildnpc is None
 
@@ -147,7 +147,7 @@ class TestMobBuilder(EvenniaTest):
             assert text in out
         for stat in ["Damage", "Armor", "Initiative"]:
             assert stat in out
-        for field in ["NPC Type:", "Combat Class:", "Race:", "VNUM:"]:
+        for field in ["NPC Archetype:", "Combat Class:", "Race:", "VNUM:"]:
             assert field in out
         assert out.count("fighter") == 1
         assert "trainer" in out
@@ -189,7 +189,7 @@ class TestMobBuilder(EvenniaTest):
 
     def test_combat_class_menu_shows_next(self):
         """menunode_combat_class should offer a Next option."""
-        self.char1.ndb.buildnpc = {}
+        self.char1.ndb.buildnpc = {"npc_type": "combatant"}
         _text, opts = npc_builder.menunode_combat_class(self.char1)
         labels = [o.get("desc") or o.get("key") for o in opts]
         assert "Next" in labels
@@ -219,7 +219,9 @@ class TestMobBuilder(EvenniaTest):
     def test_edit_loot_table(self):
         self.char1.ndb.buildnpc = {}
         npc_builder._edit_loot_table(self.char1, "add RAW_MEAT 75")
-        assert self.char1.ndb.buildnpc["loot_table"] == [{"proto": "RAW_MEAT", "chance": 75}]
+        assert self.char1.ndb.buildnpc["loot_table"] == [
+            {"proto": "RAW_MEAT", "chance": 75}
+        ]
         result = npc_builder._edit_loot_table(self.char1, "done")
         assert result == "menunode_resources_prompt"
 
@@ -355,4 +357,3 @@ class TestMobBuilder(EvenniaTest):
         npc_builder._set_desc(self.char1, "A scary goblin")
         text, _ = npc_builder.menunode_review(self.char1)
         assert "scary goblin" in text
-
