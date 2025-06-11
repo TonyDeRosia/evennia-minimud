@@ -7,6 +7,8 @@ from typing import Optional, Iterable
 import logging
 
 from .damage_types import DamageType
+from .combat_utils import roll_evade
+from world.system import stat_manager
 
 from evennia.utils import utils
 from world.system import state_manager
@@ -118,7 +120,7 @@ class AttackAction(Action):
         target = self.target
         if not target:
             return CombatResult(self.actor, self.actor, "No target.")
-    
+
         weapon = self.actor
         if utils.inherits_from(self.actor, "typeclasses.characters.Character"):
             if self.actor.wielding:
@@ -130,6 +132,26 @@ class AttackAction(Action):
                 weapon = self.actor
 
         logger.debug("AttackAction weapon=%s", getattr(weapon, "key", weapon))
+
+        wname = getattr(weapon, "key", None)
+        if not wname and isinstance(weapon, dict):
+            wname = weapon.get("name", "fists")
+        attempt = f"{self.actor.key} swings {wname or 'fists'} at {target.key}."
+
+        # Determine hit/miss
+        if not stat_manager.check_hit(self.actor, target):
+            return CombatResult(
+                actor=self.actor,
+                target=target,
+                message=f"{attempt}\n{self.actor.key} misses.",
+            )
+
+        if roll_evade(self.actor, target):
+            return CombatResult(
+                actor=self.actor,
+                target=target,
+                message=f"{attempt}\n{target.key} evades the attack!",
+            )
 
         dmg = 0
         dtype = DamageType.BLUDGEONING
@@ -147,10 +169,15 @@ class AttackAction(Action):
             dex_val = state_manager.get_effective_stat(self.actor, "DEX")
             dmg = int(round(dmg * (1 + str_val * 0.012 + dex_val * 0.004)))
 
+        msg = (
+            f"{attempt}\n{self.actor.key} hits {target.key}!\n"
+            f"{self.actor.key} deals {dmg} damage to {target.key}."
+        )
+
         return CombatResult(
             actor=self.actor,
             target=target,
-            message=f"{self.actor.key} strikes {target.key} for {dmg} damage!",
+            message=msg,
             damage=dmg,
             damage_type=dtype,
         )

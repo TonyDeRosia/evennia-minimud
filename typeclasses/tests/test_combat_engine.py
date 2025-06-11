@@ -140,4 +140,4 @@ class TestCombatEngine(unittest.TestCase):
             engine.process_round()
 
         expected = get_condition_msg(b.hp, b.traits.health.max)
-        room.msg_contents.assert_any_call(f"{b.key} {expected}")
+        room.msg_contents.assert_any_call(f"The {b.key} {expected}")
