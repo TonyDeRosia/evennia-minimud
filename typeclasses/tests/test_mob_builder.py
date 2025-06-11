@@ -298,3 +298,10 @@ class TestMobBuilder(EvenniaTest):
         assert result == "menunode_trigger_add"
         assert not hasattr(self.char1.ndb, "trigger_event")
 
+    def test_set_race_accepts_unique(self):
+        """_set_race should accept the 'unique' race value."""
+        self.char1.ndb.buildnpc = {}
+        result = npc_builder._set_race(self.char1, "unique")
+        assert result == "menunode_npc_class"
+        assert self.char1.ndb.buildnpc["race"] == "unique"
+
