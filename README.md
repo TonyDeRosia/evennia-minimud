@@ -124,13 +124,11 @@ and confirm to create your NPC. You can later update them with `cnpc edit
 
 See the `cnpc` help entry for a full breakdown of every menu option.
 
-The builder also lets you choose which NPC class to use. Available
-classes include `BaseNPC`, `MerchantNPC`, `BankerNPC`, `TrainerNPC`,
-`WandererNPC`, `GuildmasterNPC`, `GuildReceptionistNPC`,
-`QuestGiverNPC`, `CombatTrainerNPC` and `EventNPC` defined under
-`typeclasses.npcs`.
-After choosing the NPC class you can also assign a combat class from
-`world.scripts.classes`. This sets `npc.db.charclass` on the spawned NPC.
+The builder lets you choose an NPC type such as `merchant`, `banker`,
+`trainer`, `wanderer` or `combatant`. These map to the typeclasses under
+`typeclasses.npcs`. When you select the `combatant` type you'll be asked
+for a combat class from `world.scripts.classes`; this sets
+`npc.db.charclass` on the spawned NPC.
 
 While editing, there's a step to manage triggers using a numbered menu. Choose
 `Add trigger` to create a new reaction, `Delete trigger` to remove one, `List
@@ -141,7 +139,7 @@ commands with commas or semicolons to store them as multiple responses. See the
 
 ### NPC Roles and AI
 
-The builder now supports assigning extra roles and basic AI scripts. Roles are
+The builder lets you assign one or more roles and basic AI scripts. Roles are
 mixins found under `world.npc_roles`:
 
 - **merchant** – sells items to players.

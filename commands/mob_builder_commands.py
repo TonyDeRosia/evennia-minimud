@@ -64,7 +64,7 @@ class CmdMStat(Command):
             data = npc_builder._gather_npc_data(target)
         table = evtable.EvTable("|cAttribute|n", "|cValue|n", border="cells")
 
-        highlight = {"key", "level", "npc_class"}
+        highlight = {"key", "level", "npc_type"}
         special = {
             "actflags",
             "affected_by",
@@ -187,7 +187,7 @@ class CmdMSet(Command):
     _FIELD_CASTS = {
         "level": int,
         "race": lambda s: NPC_RACES.from_str(s).value,
-        "npc_class": lambda s: NPC_CLASSES.from_str(s).value,
+        "npc_type": lambda s: NPC_CLASSES.from_str(s).value,
         "actflags": lambda s: [f.value for f in parse_flag_list(s, ACTFLAGS)],
         "affected_by": lambda s: [f.value for f in parse_flag_list(s, AFFECTED_BY)],
         "languages": lambda s: [f.value for f in parse_flag_list(s, LANGUAGES)],
@@ -399,7 +399,7 @@ class CmdMList(Command):
                 str(vnum) if vnum is not None else "-",
                 key,
                 str(proto.get("level", "-")),
-                proto.get("npc_class", "-"),
+                proto.get("npc_type", "-"),
                 ", ".join(roles) if roles else "-",
                 str(counts.get(key, 0)),
             )

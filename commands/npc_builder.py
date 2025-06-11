@@ -80,7 +80,7 @@ ALLOWED_ROLES_PRIMARY = (
 )
 
 # Mapping of simple keys to NPC typeclass paths
-NPC_CLASS_MAP = {
+NPC_TYPE_MAP = {
     "base": "typeclasses.npcs.BaseNPC",
     "merchant": "typeclasses.npcs.merchant.MerchantNPC",
     "banker": "typeclasses.npcs.banker.BankerNPC",
@@ -103,9 +103,9 @@ SKILLS_BY_CLASS = {
 }
 
 
-def get_skills_for_class(npc_class: str) -> list[str]:
-    """Return list of suggested skills for ``npc_class``."""
-    return SKILLS_BY_CLASS.get(npc_class, DEFAULT_SKILLS)
+def get_skills_for_class(npc_type: str) -> list[str]:
+    """Return list of suggested skills for ``npc_type``."""
+    return SKILLS_BY_CLASS.get(npc_type, DEFAULT_SKILLS)
 
 
 # Additional configuration options
@@ -165,7 +165,7 @@ def format_mob_summary(data: dict) -> str:
     basic.add_row("|cLevel|n", fmt(data.get("level")))
     if "vnum" in data:
         basic.add_row("|cVNUM|n", fmt(data.get("vnum")))
-    basic.add_row("|cClass|n", fmt(data.get("npc_class")))
+    basic.add_row("|cType|n", fmt(data.get("npc_type")))
     if data.get("combat_class"):
         basic.add_row("|cCombat Class|n", fmt(data.get("combat_class")))
     if data.get("race"):
@@ -174,10 +174,8 @@ def format_mob_summary(data: dict) -> str:
         basic.add_row("|cSex|n", fmt(data.get("sex")))
     if data.get("weight"):
         basic.add_row("|cWeight|n", fmt(data.get("weight")))
-    if data.get("role"):
-        basic.add_row("|cRole|n", fmt(data.get("role")))
     if data.get("roles"):
-        basic.add_row("|cExtra Roles|n", fmt(data.get("roles")))
+        basic.add_row("|cRoles|n", fmt(data.get("roles")))
     if data.get("creature_type"):
         basic.add_row("|cCreature|n", fmt(data.get("creature_type")))
     if data.get("guild_affiliation"):
@@ -308,7 +306,7 @@ def _set_race(caller, raw_string, **kwargs):
             )
             return "menunode_race"
     caller.ndb.buildnpc["race"] = string
-    return "menunode_npc_class"
+    return "menunode_npc_type"
 
 
 def menunode_sex(caller, raw_string="", **kwargs):
@@ -330,7 +328,7 @@ def _set_sex(caller, raw_string, **kwargs):
 
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_npc_class"
+        return "menunode_npc_type"
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("sex", "")
     else:
@@ -456,38 +454,6 @@ def _set_vnum(caller, raw_string, **kwargs):
     return "menunode_creature_type"
 
 
-def menunode_role(caller, raw_string="", **kwargs):
-    default = caller.ndb.buildnpc.get("role", "")
-    types = "/".join(ALLOWED_ROLES_PRIMARY)
-    text = dedent(
-        f"""
-        |wRole (merchant, questgiver...)|n ({types})
-        Example: |wmerchant|n
-        Type |wback|n to return.
-        """
-    )
-    if default:
-        text += f" [current: {default}]"
-    options = add_back_only({"key": "_default", "goto": _set_role}, _set_role)
-    return with_summary(caller, text), options
-
-
-def _set_role(caller, raw_string, **kwargs):
-    string = raw_string.strip().lower()
-    if string == "back":
-        if caller.ndb.buildnpc.get("creature_type") == "unique":
-            return "menunode_custom_slots"
-        return "menunode_creature_type"
-    if not string:
-        caller.msg("Role is required.")
-        return "menunode_role"
-    if string and string not in ALLOWED_ROLES_PRIMARY:
-        caller.msg(f"Invalid role. Choose from: {', '.join(ALLOWED_ROLES_PRIMARY)}")
-        return "menunode_role"
-    caller.ndb.buildnpc["role"] = string
-    return "menunode_combat_class"
-
-
 def menunode_guild_affiliation(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("guild_affiliation", "")
     text = "|wEnter guild tag for this receptionist|n"
@@ -504,8 +470,6 @@ def menunode_guild_affiliation(caller, raw_string="", **kwargs):
 def _set_guild_affiliation(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        if not caller.ndb.buildnpc.get("role") and not caller.ndb.buildnpc.get("roles"):
-            return "menunode_weight"
         return "menunode_roles"
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("guild_affiliation", "")
@@ -546,12 +510,14 @@ def _set_creature_type(caller, raw_string, **kwargs):
             "front_legs",
             "hind_legs",
         ]
-        return "menunode_role"
+        next_node = "menunode_combat_class" if caller.ndb.buildnpc.get("npc_type") == "combatant" else "menunode_roles"
+        return next_node
     if ctype == "unique":
         caller.ndb.buildnpc["equipment_slots"] = list(SLOT_ORDER)
         return "menunode_custom_slots"
     caller.ndb.buildnpc["equipment_slots"] = list(SLOT_ORDER)
-    return "menunode_role"
+    next_node = "menunode_combat_class" if caller.ndb.buildnpc.get("npc_type") == "combatant" else "menunode_roles"
+    return next_node
 
 
 def menunode_custom_slots(caller, raw_string="", **kwargs):
@@ -578,7 +544,8 @@ def _edit_custom_slots(caller, raw_string, **kwargs):
     if string.lower() == "back":
         return "menunode_creature_type"
     if string.lower() in ("done", "finish", "skip", ""):
-        return "menunode_role"
+        next_node = "menunode_combat_class" if caller.ndb.buildnpc.get("npc_type") == "combatant" else "menunode_roles"
+        return next_node
     if string.lower().startswith("add "):
         slot = string[4:].strip().lower()
         if slot and slot not in slots:
@@ -599,31 +566,28 @@ def _edit_custom_slots(caller, raw_string, **kwargs):
     return "menunode_custom_slots"
 
 
-def menunode_npc_class(caller, raw_string="", **kwargs):
-    default = caller.ndb.buildnpc.get("npc_class", "base")
-    classes = "/".join(NPC_CLASS_MAP)
-    example = ", ".join(list(NPC_CLASS_MAP)[:3])
-    text = f"|wNPC class ({example}...)|n ({classes})"
+def menunode_npc_type(caller, raw_string="", **kwargs):
+    default = caller.ndb.buildnpc.get("npc_type", "base")
+    classes = "/".join(NPC_TYPE_MAP)
+    example = ", ".join(list(NPC_TYPE_MAP)[:3])
+    text = f"|wNPC type ({example}...)|n ({classes})"
     if default:
         text += f" [default: {default}]"
     text += "\n(back to go back, next for default)"
-    options = add_back_next({"key": "_default", "goto": _set_npc_class}, _set_npc_class)
+    options = add_back_next({"key": "_default", "goto": _set_npc_type}, _set_npc_type)
     return with_summary(caller, text), options
 
 
-def _set_npc_class(caller, raw_string, **kwargs):
+def _set_npc_type(caller, raw_string, **kwargs):
     string = raw_string.strip().lower()
     if string == "back":
-        # if a role has been set, we came here from role selection
-        if caller.ndb.buildnpc.get("role"):
-            return "menunode_role"
         return "menunode_race"
     if not string or string in ("skip", "next"):
-        string = caller.ndb.buildnpc.get("npc_class", "base")
-    if string not in NPC_CLASS_MAP:
-        caller.msg(f"Invalid class. Choose from: {', '.join(NPC_CLASS_MAP)}")
-        return "menunode_npc_class"
-    caller.ndb.buildnpc["npc_class"] = string
+        string = caller.ndb.buildnpc.get("npc_type", "base")
+    if string not in NPC_TYPE_MAP:
+        caller.msg(f"Invalid class. Choose from: {', '.join(NPC_TYPE_MAP)}")
+        return "menunode_npc_type"
+    caller.ndb.buildnpc["npc_type"] = string
 
     return "menunode_sex"
 
@@ -645,7 +609,7 @@ def menunode_combat_class(caller, raw_string="", **kwargs):
 def _set_combat_class(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_npc_class"
+        return "menunode_npc_type"
     if not string or string.lower() in ("skip", "next"):
         string = caller.ndb.buildnpc.get("combat_class", "")
     else:
@@ -683,7 +647,11 @@ def _edit_roles(caller, raw_string, **kwargs):
     string = raw_string.strip().lower()
     roles = caller.ndb.buildnpc.setdefault("roles", [])
     if string == "back":
-        return "menunode_combat_class"
+        if caller.ndb.buildnpc.get("npc_type") == "combatant":
+            return "menunode_combat_class"
+        if caller.ndb.buildnpc.get("creature_type") == "unique":
+            return "menunode_custom_slots"
+        return "menunode_creature_type"
     if string in ("done", "finish", "skip", ""):
         return "menunode_role_details"
     if string.startswith("add "):
@@ -1173,12 +1141,12 @@ def _set_behavior(caller, raw_string, **kwargs):
 def menunode_skills(caller, raw_string="", **kwargs):
     skills = caller.ndb.buildnpc.get("skills", [])
     default = ", ".join(skills)
-    npc_class = caller.ndb.buildnpc.get("npc_class", "base")
-    suggested = ", ".join(get_skills_for_class(npc_class))
+    npc_type = caller.ndb.buildnpc.get("npc_type", "base")
+    suggested = ", ".join(get_skills_for_class(npc_type))
     text = "|wList any skills or attacks (comma separated)|n"
     if default:
         text += f" [default: {default}]"
-    text += f"\nSuggested for {npc_class}: {suggested}"
+    text += f"\nSuggested for {npc_type}: {suggested}"
     text += "\nExample: |wfireball, slash, heal|n"
     text += "\n(back to go back, skip for default)"
     options = add_back_skip({"key": "_default", "goto": _set_skills}, _set_skills)
@@ -1633,7 +1601,7 @@ def menunode_confirm(caller, raw_string="", **kwargs):
         "desc": "menunode_desc",
         "vnum": "menunode_vnum",
         "creature_type": "menunode_creature_type",
-        "role": "menunode_role",
+        "npc_type": "menunode_npc_type",
         "level": "menunode_level",
     }
 
@@ -1671,8 +1639,8 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     if not isinstance(data, dict):
         caller.msg("Error: NPC data missing. Aborting.")
         return None
-    tclass_path = NPC_CLASS_MAP.get(
-        data.get("npc_class", "base"), "typeclasses.npcs.BaseNPC"
+    tclass_path = NPC_TYPE_MAP.get(
+        data.get("npc_type", "base"), "typeclasses.npcs.BaseNPC"
     )
     if data.get("edit_obj"):
         npc = data.get("edit_obj")
@@ -1691,12 +1659,10 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
         npc.db.vnum = vnum
         npc.tags.add(f"M{vnum}", category="vnum")
     npc.tags.add("npc")
-    role = data.get("role") or data.get("npc_type")
-    if role:
-        npc.tags.add(role, category="npc_type")
-        npc.tags.add(role, category="npc_role")
+    if t := data.get("npc_type"):
+        npc.tags.add(t, category="npc_type")
     for role in data.get("roles", []):
-        if role and not npc.tags.has(role, category="npc_role"):
+        if role:
             npc.tags.add(role, category="npc_role")
     if guild := data.get("guild_affiliation"):
         npc.tags.add(guild, category="guild_affiliation")
@@ -1850,14 +1816,9 @@ def _gather_npc_data(npc):
         "race": npc.db.race or "",
         "sex": npc.db.sex or "",
         "weight": npc.db.weight or "",
-        "role": npc.tags.get(category="npc_type") or "",
-        "roles": [
-            t
-            for t in npc.tags.get(category="npc_role", return_list=True) or []
-            if t != npc.tags.get(category="npc_type")
-        ],
-        "npc_class": next(
-            (k for k, path in NPC_CLASS_MAP.items() if path == npc.typeclass_path),
+        "roles": npc.tags.get(category="npc_role", return_list=True) or [],
+        "npc_type": next(
+            (k for k, path in NPC_TYPE_MAP.items() if path == npc.typeclass_path),
             "base",
         ),
         "combat_class": npc.db.charclass or "",
@@ -1947,7 +1908,7 @@ class CmdCNPC(Command):
                 "sex": "",
                 "weight": "",
                 "mobprogs": [],
-                "npc_class": "base",
+                "npc_type": "base",
                 "combat_class": "",
                 "roles": [],
                 "skills": [],
@@ -2111,8 +2072,8 @@ class CmdSpawnNPC(Command):
             if not proto:
                 self.msg("Unknown NPC prototype.")
                 return
-            tclass_path = NPC_CLASS_MAP.get(
-                proto.get("npc_class", "base"), "typeclasses.npcs.BaseNPC"
+            tclass_path = NPC_TYPE_MAP.get(
+                proto.get("npc_type", "base"), "typeclasses.npcs.BaseNPC"
             )
             proto = dict(proto)
             proto.setdefault("typeclass", tclass_path)
