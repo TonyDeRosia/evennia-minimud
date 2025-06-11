@@ -1861,6 +1861,10 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     else:
         caller.msg(f"NPC {npc.key} created.")
     finalize_mob_prototype(caller, npc)
+    if register and npc.db.vnum is not None:
+        caller.msg(
+            f"✅ Mob saved and registered as VNUM {npc.db.vnum}. Spawn with: @mspawn M{npc.db.vnum}"
+        )
     caller.ndb.buildnpc = None
     return None
 

@@ -181,3 +181,20 @@ class TestVnumMobs(EvenniaTest):
             if o.is_typeclass(BaseNPC, exact=False)
         ]
         self.assertGreaterEqual(len(npcs), 2)
+
+    def test_saved_vnum_message(self):
+        """Building with Yes & Save Prototype should show spawn instructions."""
+        vnum = 30
+        self.char1.ndb.buildnpc = {
+            "key": "kobold",
+            "npc_type": "base",
+            "vnum": vnum,
+            "creature_type": "humanoid",
+            "combat_class": "Warrior",
+            "level": 1,
+        }
+        npc_builder._create_npc(self.char1, "", register=True)
+
+        out = "".join(call.args[0] for call in self.char1.msg.call_args_list)
+        self.assertIn(f"Mob saved and registered as VNUM {vnum}", out)
+        self.assertIn(f"@mspawn M{vnum}", out)
