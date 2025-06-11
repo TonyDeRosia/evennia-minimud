@@ -322,20 +322,8 @@ class HeavyIronNeedle(SkillRecipe):
             "desc": "A thick, strong needle for sewing tough materials.",
             "tags": [("heavy needle", "crafting_tool")],
             "value": 3,
-        },
-        {
-            "key": "heavy iron needle",
-            "desc": "A thick, strong needle for sewing tough materials.",
-            "tags": [("heavy needle", "crafting_tool")],
-            "value": 3,
-        },
-        {
-            "key": "heavy iron needle",
-            "desc": "A thick, strong needle for sewing tough materials.",
-            "tags": [("heavy needle", "crafting_tool")],
-            "value": 3,
-        },
-    ]
+        }
+    ] * 3
 
 
 class HeavyCopperNeedle(SkillRecipe):
@@ -355,17 +343,5 @@ class HeavyCopperNeedle(SkillRecipe):
             "desc": "A thick, strong needle for sewing tough materials.",
             "tags": [("heavy needle", "crafting_tool")],
             "value": 3,
-        },
-        {
-            "key": "heavy copper needle",
-            "desc": "A thick, strong needle for sewing tough materials.",
-            "tags": [("heavy needle", "crafting_tool")],
-            "value": 3,
-        },
-        {
-            "key": "heavy copper needle",
-            "desc": "A thick, strong needle for sewing tough materials.",
-            "tags": [("heavy needle", "crafting_tool")],
-            "value": 3,
-        },
-    ]
+        }
+    ] * 3
