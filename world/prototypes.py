@@ -547,7 +547,7 @@ def get_npc_prototypes(filter_by: Optional[dict] = None) -> Dict[str, dict]:
 
     result: Dict[str, dict] = {}
     for key, proto in registry.items():
-        if "class" in filter_by and proto.get("npc_class") != filter_by["class"]:
+        if "class" in filter_by and proto.get("npc_type") != filter_by["class"]:
             continue
         if "race" in filter_by and proto.get("race") != filter_by["race"]:
             continue
@@ -613,7 +613,7 @@ def filter_npc_prototypes(protos: dict, filters: dict) -> list[tuple[str, dict]]
 
     result: list[tuple[str, dict]] = []
     for key, proto in protos.items():
-        if "class" in filters and proto.get("npc_class") != filters["class"]:
+        if "class" in filters and proto.get("npc_type") != filters["class"]:
             continue
         if "race" in filters and proto.get("race") != filters["race"]:
             continue
