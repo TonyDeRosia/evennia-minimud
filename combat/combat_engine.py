@@ -10,7 +10,7 @@ from world.system import state_manager
 
 from .combat_actions import Action, AttackAction, CombatResult
 from .damage_types import DamageType
-from .combat_utils import format_combat_message
+from .combat_utils import format_combat_message, get_condition_msg
 
 
 @dataclass
@@ -48,6 +48,7 @@ class CombatEngine:
         self.use_initiative = use_initiative
         self.queue: List[CombatParticipant] = []
         self.aggro: Dict[object, Dict[object, int]] = {}
+        self.round_output: List[str] = []
         if participants:
             for p in participants:
                 self.add_participant(p)
@@ -437,6 +438,7 @@ class CombatEngine:
         schedules the next round using :func:`evennia.utils.delay`.
         """
         self.start_round()
+        self.round_output = []
         actions: list[tuple[int, int, CombatParticipant, Action]] = []
         for participant in list(self.queue):
             actor = participant.actor
@@ -478,6 +480,11 @@ class CombatEngine:
                         dt = None
                 damage_done = self.apply_damage(actor, result.target, result.damage, dt)
                 self.dam_message(actor, result.target, damage_done)
+                hp = getattr(getattr(result.target, "traits", None), "health", None)
+                cur = getattr(hp, "value", getattr(result.target, "hp", 0))
+                max_hp = getattr(hp, "max", getattr(result.target, "max_hp", cur))
+                cond = get_condition_msg(cur, max_hp)
+                self.round_output.append(f"{result.target.key} {cond}")
 
             if actor.location and not result.damage:
                 actor.location.msg_contents(result.message)
