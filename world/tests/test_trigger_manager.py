@@ -50,6 +50,17 @@ class TestTriggerManager(unittest.TestCase):
         TriggerManager(self.obj).check("on_attack")
         self.obj.execute_cmd.assert_called_with("say hurt")
 
+    def test_conditions_string(self):
+        caller = object()
+        self.obj.db.triggers["on_timer"] = [
+            {"conditions": "caller is not None", "response": "say ok"}
+        ]
+        TriggerManager(self.obj).check("on_timer", caller=caller)
+        self.obj.execute_cmd.assert_called_with("say ok")
+        self.obj.execute_cmd.reset_mock()
+        TriggerManager(self.obj).check("on_timer", caller=None)
+        self.obj.execute_cmd.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()

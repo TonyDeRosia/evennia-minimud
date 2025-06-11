@@ -7,6 +7,7 @@ from typing import Any, Iterable
 from random import randint
 
 from evennia.utils import make_iter, logger, delay
+from utils import eval_safe
 from world.mpcommands import execute_mpcommand
 
 
@@ -108,6 +109,22 @@ class TriggerManager:
         return list(dict.fromkeys(events))
 
     def _evaluate(self, trig: dict, **kwargs):
+        # evaluate optional conditions expression
+        cond_expr = trig.get("conditions")
+        if isinstance(cond_expr, str):
+            sandbox = {
+                "caller": kwargs.get("caller")
+                or kwargs.get("chara")
+                or kwargs.get("looker")
+                or kwargs.get("speaker"),
+                "npc": self.obj,
+                "item": kwargs.get("item"),
+                "room": getattr(self.obj, "location", None),
+            }
+            sandbox.update(kwargs)
+            if not eval_safe(cond_expr, sandbox):
+                return
+
         match = trig.get("match")
         if match:
             text = str(kwargs.get("message") or kwargs.get("text") or "")
