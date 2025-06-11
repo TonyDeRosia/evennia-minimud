@@ -82,7 +82,9 @@ spawned later with `@spawnnpc`. These commands help you manage the prototypes:
 * `@mlist [/room|/area] [filters]` – list prototypes or spawned NPCs. Results
   include a VNUM column when one is registered. Filters can include
   `class=<val>`, `race=<val>`, `role=<val>`, `tag=<val>`, `zone=<name>`, an area
-  name or a numeric/letter range.
+  name or a numeric/letter range. When called with no arguments the command
+  also displays a **Finalized VNUMs** section showing every VNUM stored in the
+  mob database.
 
 Example:
 
