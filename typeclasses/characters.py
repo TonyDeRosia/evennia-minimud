@@ -1,7 +1,7 @@
 from random import randint, choice
 from string import punctuation
 from evennia import AttributeProperty
-from evennia.utils import lazy_property, iter_to_str, delay, logger
+from evennia.utils import lazy_property, iter_to_str, delay, logger, create
 from evennia.contrib.rpg.traits import TraitHandler
 from evennia.contrib.game_systems.clothing.clothing import (
     ClothedCharacter,
@@ -1003,9 +1003,16 @@ class NPC(Character):
                     else:
                         entry["_count"] = count + 1
 
+            corpse = create.create_object(
+                "typeclasses.objects.Corpse",
+                key=f"{self.key} corpse",
+                location=self.location,
+            )
+            corpse.db.corpse_of = self.key
+
             objs = spawn(*drops)
             for obj in objs:
-                obj.location = self.location
+                obj.location = corpse
             # delete ourself
             self.delete()
             return dmg
