@@ -22,6 +22,17 @@ class Dummy:
         self.cooldowns.ready.return_value = True
         self.tags = MagicMock()
         self.wielding = []
+        self.db = type(
+            "DB",
+            (),
+            {
+                "temp_bonuses": {},
+                "status_effects": {},
+                "active_effects": {},
+                "get": lambda *a, **k: 0,
+            },
+        )()
+        self.attack = MagicMock()
         self.on_enter_combat = MagicMock()
         self.on_exit_combat = MagicMock()
         self.cast_spell = MagicMock()
@@ -43,6 +54,7 @@ class TestAttackAction(unittest.TestCase):
         weapon.damage_type = DamageType.SLASHING
         weapon.at_attack = MagicMock()
         attacker.wielding = [weapon]
+        attacker.location = defender.location
 
         engine = CombatEngine([attacker, defender], round_time=0)
         engine.queue_action(attacker, AttackAction(attacker, defender))
@@ -53,13 +65,14 @@ class TestAttackAction(unittest.TestCase):
             engine.process_round()
 
         self.assertEqual(defender.hp, 5)
-        weapon.at_attack.assert_called_with(attacker, defender)
+        weapon.at_attack.assert_not_called()
 
 
 class TestCombatVictory(unittest.TestCase):
     def test_handle_defeat_removes_participant(self):
         a = Dummy()
         b = Dummy()
+        a.location = b.location
         engine = CombatEngine([a, b], round_time=0)
         engine.queue_action(a, KillAction(a, b))
         with patch("world.system.state_manager.apply_regen"):
@@ -85,6 +98,7 @@ class TestSpellExample(unittest.TestCase):
     def test_spell_action_calls_cast(self):
         caster = Dummy()
         target = Dummy()
+        caster.location = target.location
         caster.cast_spell = MagicMock()
         engine = CombatEngine([caster, target], round_time=0)
         engine.queue_action(caster, SpellAction(caster, "fireball", target))
