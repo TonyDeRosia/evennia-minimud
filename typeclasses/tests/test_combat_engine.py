@@ -118,7 +118,7 @@ class TestCombatEngine(unittest.TestCase):
             engine.start_round()
             engine.process_round()
             self.assertEqual(len(engine.participants), 2)
-            mock_delay.assert_called_with(1, engine.process_round)
+            mock_delay.assert_called_with(engine.round_time, engine.process_round)
 
     def test_condition_messages_broadcast(self):
         class DamageAction(Action):
