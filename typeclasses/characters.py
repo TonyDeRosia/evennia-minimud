@@ -908,6 +908,59 @@ class NPC(Character):
         """Called when character dies."""
         self.check_triggers("death", killer=killer)
 
+    # death handling -----------------------------------------------------
+
+    def drop_loot(self):
+        """Create a corpse and deposit any drops inside."""
+        drops = list(self.db.drops)
+        if loot_table := self.db.loot_table:
+            for entry in loot_table:
+                proto = entry.get("proto")
+                if not proto:
+                    continue
+                chance = int(entry.get("chance", 100))
+                guaranteed = entry.get("guaranteed_after")
+                count = entry.get("_count", 0)
+
+                roll = randint(1, 100)
+                if roll <= chance or (
+                    guaranteed is not None and count >= int(guaranteed)
+                ):
+                    drops.append(proto)
+                    entry["_count"] = 0
+                else:
+                    entry["_count"] = count + 1
+
+        corpse = create.create_object(
+            "typeclasses.objects.Corpse",
+            key=f"{self.key} corpse",
+            location=self.location,
+        )
+        corpse.db.corpse_of = self.key
+
+        objs = spawn(*drops)
+        for obj in objs:
+            obj.location = corpse
+        return corpse
+
+    def award_xp_to(self, attacker):
+        """Grant experience reward to ``attacker``."""
+        from world.system import state_manager
+        exp = int(getattr(self.db, "exp_reward", 0))
+        if not attacker or not exp:
+            return
+        attacker.db.exp = (attacker.db.exp or 0) + exp
+        if hasattr(attacker, "msg"):
+            attacker.msg(f"You gain {exp} experience.")
+        state_manager.check_level_up(attacker)
+
+    def on_death(self, attacker):
+        """Handle character death cleanup."""
+        self.at_death(attacker)
+        self.drop_loot()
+        self.award_xp_to(attacker)
+        self.delete()
+
     # property to mimic weapons
     @property
     def speed(self):
@@ -983,38 +1036,7 @@ class NPC(Character):
 
         if self.traits.health.value <= 0:
             # we've been defeated!
-            self.at_death(attacker)
-            drops = list(self.db.drops)
-            if loot_table := self.db.loot_table:
-                for entry in loot_table:
-                    proto = entry.get("proto")
-                    if not proto:
-                        continue
-                    chance = int(entry.get("chance", 100))
-                    guaranteed = entry.get("guaranteed_after")
-                    count = entry.get("_count", 0)
-
-                    roll = randint(1, 100)
-                    if roll <= chance or (
-                        guaranteed is not None and count >= int(guaranteed)
-                    ):
-                        drops.append(proto)
-                        entry["_count"] = 0
-                    else:
-                        entry["_count"] = count + 1
-
-            corpse = create.create_object(
-                "typeclasses.objects.Corpse",
-                key=f"{self.key} corpse",
-                location=self.location,
-            )
-            corpse.db.corpse_of = self.key
-
-            objs = spawn(*drops)
-            for obj in objs:
-                obj.location = corpse
-            # delete ourself
-            self.delete()
+            self.on_death(attacker)
             return dmg
 
         if "timid" in self.attributes.get("react_as", ""):
