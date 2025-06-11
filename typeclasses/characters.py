@@ -744,7 +744,7 @@ class Character(ObjectParent, ClothedCharacter):
             self.refresh_prompt()
 
         if hasattr(self, "check_triggers"):
-            self.check_triggers("on_enter", chara=chara)
+            self.check_triggers("char_enter", chara=chara)
 
     def at_character_depart(self, chara, destination, **kwargs):
         """
@@ -757,7 +757,7 @@ class Character(ObjectParent, ClothedCharacter):
             self.refresh_prompt()
 
         if hasattr(self, "check_triggers"):
-            self.check_triggers("on_leave", chara=chara, destination=destination)
+            self.check_triggers("char_leave", chara=chara, destination=destination)
 
     def at_tick(self):
         """Called by the global ticker.
@@ -908,10 +908,15 @@ class NPC(Character):
         super().at_object_creation()
         if self.db.triggers is None:
             self.db.triggers = {}
+        self.trigger_manager.start_random_triggers()
 
     def check_triggers(self, event, **kwargs):
         """Evaluate stored triggers for a given event."""
         self.trigger_manager.check(event, **kwargs)
+
+    def at_death(self, killer, **kwargs):
+        """Called when character dies."""
+        self.check_triggers("death", killer=killer)
 
     # property to mimic weapons
     @property
@@ -938,6 +943,7 @@ class NPC(Character):
         Respond to the arrival of a character
         """
         super().at_character_arrive(chara, **kwargs)
+        self.check_triggers("char_enter", chara=chara)
         if "aggressive" in self.attributes.get("react_as", ""):
             delay(0.1, self.enter_combat, chara)
 
@@ -946,6 +952,7 @@ class NPC(Character):
         Respond to the departure of a character
         """
         super().at_character_depart(chara, destination, **kwargs)
+        self.check_triggers("char_leave", chara=chara, destination=destination)
         if chara == self.db.following:
             # find an exit that goes the same way
             exits = [
@@ -959,7 +966,7 @@ class NPC(Character):
 
     def at_object_receive(self, obj, source_location, **kwargs):
         super().at_object_receive(obj, source_location, **kwargs)
-        self.check_triggers("on_give_item", item=obj, giver=source_location)
+        self.check_triggers("object_receive", item=obj, giver=source_location)
 
     def return_appearance(self, looker, **kwargs):
         text = super().return_appearance(looker, **kwargs)
@@ -976,6 +983,7 @@ class NPC(Character):
 
         if self.traits.health.value <= 0:
             # we've been defeated!
+            self.at_death(attacker)
             drops = list(self.db.drops)
             if loot_table := self.db.loot_table:
                 for entry in loot_table:
