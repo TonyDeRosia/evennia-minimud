@@ -15,7 +15,7 @@ class TestNPCAIScript(EvenniaTest):
         npc.scripts.add(NPCAIScript, key="npc_ai", autostart=False)
         script = npc.scripts.get("npc_ai")[0]
 
-        with patch("scripts.npc_ai_script.process_ai") as mock_proc:
+        with patch("scripts.npc_ai_script.process_mob_ai") as mock_proc:
             script.at_repeat()
             mock_proc.assert_called_with(npc)
 

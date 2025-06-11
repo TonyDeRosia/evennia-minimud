@@ -1,7 +1,7 @@
 """Script that drives NPC AI behavior."""
 
 from typeclasses.scripts import Script
-from world.npc_handlers.ai import process_ai
+from world.npc_handlers.mob_ai import process_mob_ai
 
 
 class NPCAIScript(Script):
@@ -13,4 +13,4 @@ class NPCAIScript(Script):
 
     def at_repeat(self):
         if self.obj:
-            process_ai(self.obj)
+            process_mob_ai(self.obj)
