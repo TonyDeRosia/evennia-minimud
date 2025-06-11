@@ -131,6 +131,42 @@ ALLOWED_AI_TYPES = (
 # Modules allowed when importing scripted AI callbacks or Scripts
 ALLOWED_SCRIPT_MODULES = ("scripts",)
 
+# Mapping of review option labels to menu nodes
+REVIEW_SECTIONS = [
+    ("Key", "menunode_key"),
+    ("Description", "menunode_desc"),
+    ("Race", "menunode_race"),
+    ("NPC Type", "menunode_npc_type"),
+    ("Sex", "menunode_sex"),
+    ("Weight", "menunode_weight"),
+    ("Level", "menunode_level"),
+    ("VNUM", "menunode_vnum"),
+    ("Creature Type", "menunode_creature_type"),
+    ("Combat Class", "menunode_combat_class"),
+    ("Roles", "menunode_roles"),
+    ("Role Details", "menunode_role_details"),
+    ("EXP Reward", "menunode_exp_reward"),
+    ("Coin Drop", "menunode_coin_drop"),
+    ("Loot Table", "menunode_loot_table"),
+    ("Resources", "menunode_resources_prompt"),
+    ("Combat Values", "menunode_combat_values"),
+    ("Modifiers", "menunode_modifiers"),
+    ("Primary Stats", "menunode_secondary_stats_prompt"),
+    ("Behavior", "menunode_behavior"),
+    ("Skills", "menunode_skills"),
+    ("Spells", "menunode_spells"),
+    ("AI Type", "menunode_ai"),
+    ("Act Flags", "menunode_actflags"),
+    ("Affects", "menunode_affects"),
+    ("Resists", "menunode_resists"),
+    ("Bodyparts", "menunode_bodyparts"),
+    ("Attacks", "menunode_attack"),
+    ("Defenses", "menunode_defense"),
+    ("Languages", "menunode_languages"),
+    ("Script", "menunode_script"),
+    ("Triggers", "menunode_triggers"),
+]
+
 
 def _import_script(path: str):
     """Safely import a script or callable from an allowed module."""
@@ -1460,7 +1496,7 @@ def menunode_triggers(caller, raw_string="", **kwargs):
         {"desc": "Add trigger", "goto": "menunode_trigger_add"},
         {"desc": "Delete trigger", "goto": "menunode_trigger_delete"},
         {"desc": "List triggers", "goto": "menunode_trigger_list"},
-        {"desc": "Finish", "goto": "menunode_confirm"},
+        {"desc": "Finish", "goto": "menunode_review"},
     ]
     return with_summary(caller, text), options
 
@@ -1596,6 +1632,20 @@ def _del_trigger(caller, raw_string, event=None, index=None, **kwargs):
         mobprogs.pop(index)
         caller.msg("MobProg removed.")
     return "menunode_triggers"
+
+
+def menunode_review(caller, raw_string="", **kwargs):
+    """Display a summary of the build and offer navigation options."""
+
+    data = caller.ndb.buildnpc or {}
+    text = format_mob_summary(data)
+    text += "\n|wReview the NPC and choose a section to edit or continue.|n"
+
+    options = [{"desc": "Continue", "goto": "menunode_confirm"}]
+    for label, node in REVIEW_SECTIONS:
+        options.append({"desc": label, "goto": node})
+
+    return text, options
 
 
 def menunode_confirm(caller, raw_string="", **kwargs):

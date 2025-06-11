@@ -315,3 +315,26 @@ class TestMobBuilder(EvenniaTest):
         assert result == "menunode_npc_type"
         assert self.char1.ndb.buildnpc["race"] == "unique"
 
+    def test_review_menu_and_edit(self):
+        """Navigating to the review menu and editing a field should work."""
+        self.char1.ndb.buildnpc = {
+            "key": "goblin",
+            "desc": "ugly",
+            "npc_type": "base",
+            "creature_type": "humanoid",
+            "level": 1,
+        }
+
+        _text, opts = npc_builder.menunode_triggers(self.char1)
+        finish = next(o for o in opts if o.get("desc") == "Finish")
+        assert finish["goto"] == "menunode_review"
+
+        text, opts = npc_builder.menunode_review(self.char1)
+        assert "Mob Prototype" in text
+        desc_opt = next(o for o in opts if o.get("desc") == "Description")
+        assert desc_opt["goto"] == "menunode_desc"
+
+        npc_builder._set_desc(self.char1, "A scary goblin")
+        text, _ = npc_builder.menunode_review(self.char1)
+        assert "scary goblin" in text
+
