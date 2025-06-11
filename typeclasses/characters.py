@@ -18,6 +18,7 @@ from world.triggers import TriggerManager
 from world.spells import Spell
 from combat.combat_actions import CombatResult
 from combat import get_condition_msg
+from combat import combat_utils
 
 from .objects import ObjectParent
 
@@ -206,7 +207,6 @@ class Character(ObjectParent, ClothedCharacter):
     def at_object_creation(self):
         from world import stats
         from world.system import stat_manager
-        from combat import combat_utils
 
         # Apply all default stats in a single modular step. If stats already
         # exist on the character, `apply_stats` will not overwrite them.
