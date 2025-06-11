@@ -109,9 +109,9 @@ class AttackAction(Action):
         target = self.target
         if not target:
             return CombatResult(self.actor, self.actor, "No target.")
+        weapon = self.actor
         if utils.inherits_from(self.actor, "typeclasses.characters.Character"):
             weapon = self.actor.wielding[0] if self.actor.wielding else self.actor
-            weapon.at_attack(self.actor, target)
         dmg = 0
         dtype = DamageType.BLUDGEONING
         if hasattr(target, "hp"):
