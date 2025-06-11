@@ -3068,6 +3068,25 @@ Notes:
 """,
     },
     {
+        "key": "@mobtemplate",
+        "category": "Building",
+        "text": """Help for @mobtemplate
+
+Load a predefined mob template into the current build session.
+
+Usage:
+    @mobtemplate list
+    @mobtemplate <template>
+
+Example:
+    @mobtemplate warrior
+
+Notes:
+    - Templates are defined in ``world.templates.mob_templates``.
+    - Available templates include: warrior, caster.
+""",
+    },
+    {
         "key": "@mobpreview",
         "category": "Building",
         "text": """Help for @mobpreview

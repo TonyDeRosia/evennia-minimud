@@ -229,6 +229,8 @@ Choosing **Yes & Save Prototype** will also store the entry in
 specific fields such as act flags and resistances.
 If you assign a VNUM when saving, the prototype is automatically registered
 for use with ``@mspawn M<number>``.
+Before launching `cnpc` or `mobbuilder` you can pre-load a baseline with `@mobtemplate <template>`. This fills the builder with default stats for the chosen template. Run `@mobtemplate list` to view the available presets such as `warrior` and `caster`.
+
 
 Example::
 

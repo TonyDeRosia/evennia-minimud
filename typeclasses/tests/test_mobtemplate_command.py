@@ -29,7 +29,9 @@ class TestMobTemplateCommand(EvenniaTest):
     def test_list_and_apply_template(self):
         self.char1.execute_cmd("@mobtemplate list")
         out = self.char1.msg.call_args[0][0]
+        assert "Available templates" in out
         assert "warrior" in out
+        assert "caster" in out
         self.char1.msg.reset_mock()
 
         self.char1.execute_cmd("@mobtemplate warrior")
