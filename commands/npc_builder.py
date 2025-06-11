@@ -10,7 +10,7 @@ from utils.slots import SLOT_ORDER
 from utils.menu_utils import add_back_skip, add_back_next, add_back_only
 from world.scripts import classes
 from utils import vnum_registry
-from utils.mob_utils import calculate_combat_stats
+from utils.mob_utils import calculate_combat_stats, mobprogs_to_triggers
 from .command import Command
 from django.conf import settings
 from importlib import import_module
@@ -1490,20 +1490,16 @@ def menunode_triggers(caller, raw_string="", **kwargs):
 
 def menunode_trigger_list(caller, raw_string="", **kwargs):
     """Show all triggers."""
-    triggers = caller.ndb.buildnpc.get("triggers") or {}
-    text = "|wCurrent Triggers|n\n"
-    if triggers:
-        for event, triglist in triggers.items():
-            for trig in make_iter(triglist):
-                if not isinstance(trig, dict):
-                    continue
-                match = trig.get("match", "")
-                resp = trig.get(
-                    "responses", trig.get("response", trig.get("reactions"))
-                )
-                if isinstance(resp, list):
-                    resp = ", ".join(resp)
-                text += f'{event}: "{match}" -> {resp}\n'
+    mobprogs = caller.ndb.buildnpc.get("mobprogs") or []
+    text = "|wCurrent MobProgs|n\n"
+    if mobprogs:
+        for idx, prog in enumerate(mobprogs, 1):
+            cond = prog.get("conditions") or {}
+            match = cond.get("match", "")
+            resp = prog.get("commands") or []
+            if isinstance(resp, list):
+                resp = ", ".join(resp)
+            text += f'{idx}. {prog.get("type")}: "{match}" -> {resp}\n'
     else:
         text += "None\n"
     options = [{"desc": "Back", "goto": "menunode_triggers"}]
@@ -1574,49 +1570,44 @@ def _save_trigger(caller, raw_string, **kwargs):
     reaction = raw_string.strip()
     event = caller.ndb.trigger_event
     match = caller.ndb.trigger_match
-    triggers = caller.ndb.buildnpc.setdefault("triggers", {})
-    triglist = triggers.setdefault(event, [])
+    mobprogs = caller.ndb.buildnpc.setdefault("mobprogs", [])
 
     responses = [part.strip() for part in re.split(r"[;,]", reaction) if part.strip()]
-    triglist.append({"match": match, "responses": responses})
+    prog = {"type": event, "conditions": {}, "commands": responses}
+    if match:
+        prog["conditions"]["match"] = match
+    mobprogs.append(prog)
     caller.ndb.trigger_event = None
     caller.ndb.trigger_match = None
-    caller.msg("Trigger added.")
+    caller.msg("MobProg added.")
     return "menunode_triggers"
 
 
 def menunode_trigger_delete(caller, raw_string="", **kwargs):
     """Select trigger to delete."""
-    triggers = caller.ndb.buildnpc.get("triggers") or {}
-    if not triggers:
-        caller.msg("No triggers to delete.")
+    mobprogs = caller.ndb.buildnpc.get("mobprogs") or []
+    if not mobprogs:
+        caller.msg("No mobprogs to delete.")
         return "menunode_triggers"
     text = "|wSelect trigger to delete|n"
     options = []
-    for event, triglist in triggers.items():
-        for idx, trig in enumerate(make_iter(triglist)):
-            if not isinstance(trig, dict):
-                continue
-            match = trig.get("match", "")
-            resp = trig.get("responses", trig.get("response", trig.get("reactions")))
-            if isinstance(resp, list):
-                resp = ", ".join(resp)
-            desc = f'{event}: "{match}" -> {resp}'
-            options.append(
-                {"desc": desc, "goto": (_del_trigger, {"event": event, "index": idx})}
-            )
+    for idx, prog in enumerate(mobprogs):
+        cond = prog.get("conditions") or {}
+        match = cond.get("match", "")
+        resp = prog.get("commands") or []
+        if isinstance(resp, list):
+            resp = ", ".join(resp)
+        desc = f'{idx}: {prog.get("type")}: "{match}" -> {resp}'
+        options.append({"desc": desc, "goto": (_del_trigger, {"index": idx})})
     options.append({"desc": "Back", "goto": "menunode_triggers"})
     return with_summary(caller, text), options
 
 
 def _del_trigger(caller, raw_string, event=None, index=None, **kwargs):
-    triggers = caller.ndb.buildnpc.get("triggers") or {}
-    triglist = triggers.get(event)
-    if triglist and index is not None and 0 <= index < len(triglist):
-        triglist.pop(index)
-        if not triglist:
-            del triggers[event]
-        caller.msg("Trigger removed.")
+    mobprogs = caller.ndb.buildnpc.get("mobprogs") or []
+    if index is not None and 0 <= index < len(mobprogs):
+        mobprogs.pop(index)
+        caller.msg("MobProg removed.")
     return "menunode_triggers"
 
 
@@ -1713,7 +1704,9 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.languages = data.get("languages")
     npc.db.modifiers = data.get("modifiers") or {}
     npc.db.buffs = data.get("buffs") or []
-    npc.db.triggers = data.get("triggers") or {}
+    mobprogs = data.get("mobprogs") or []
+    npc.db.mobprogs = mobprogs
+    npc.db.triggers = mobprogs_to_triggers(mobprogs)
     npc.db.coin_drop = data.get("coin_drop") or {}
     npc.db.loot_table = data.get("loot_table") or []
     npc.db.exp_reward = data.get("exp_reward", 0)
@@ -1792,6 +1785,8 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
             proto["coin_drop"] = data.get("coin_drop")
         if data.get("loot_table"):
             proto["loot_table"] = data.get("loot_table")
+        if data.get("mobprogs"):
+            proto["mobprogs"] = data.get("mobprogs")
         proto["damage"] = data.get("damage", 1)
         proto["armor"] = data.get("armor", 0)
         proto["initiative"] = data.get("initiative", 0)
@@ -1880,7 +1875,7 @@ def _gather_npc_data(npc):
         "loot_table": npc.db.loot_table or [],
         "merchant_markup": npc.db.merchant_markup or 1.0,
         "guild_affiliation": npc.tags.get(category="guild_affiliation") or "",
-        "triggers": npc.db.triggers or {},
+        "mobprogs": npc.db.mobprogs or [],
         "script": next(
             (scr.typeclass_path for scr in npc.scripts.all() if scr.key != "npc_ai"), ""
         ),
@@ -1939,7 +1934,7 @@ class CmdCNPC(Command):
                 "race": "",
                 "sex": "",
                 "weight": "",
-                "triggers": {},
+                "mobprogs": [],
                 "npc_class": "base",
                 "combat_class": "",
                 "roles": [],
