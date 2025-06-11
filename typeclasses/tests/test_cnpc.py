@@ -207,3 +207,28 @@ class TestCNPC(EvenniaTest):
         self.assertIn("Goblin", text)
         self.assertIn("Field", text)
         self.assertIn("Primary Stats", text)
+
+    def test_finalize_preserves_custom_resources(self):
+        npc = create.create_object("typeclasses.npcs.BaseNPC", key="dummy", location=self.room1)
+        npc.db.level = 2
+        npc.db.combat_class = "Warrior"
+        npc.traits.health.base = 30
+        npc.traits.mana.base = 10
+        npc.traits.stamina.base = 5
+        npc_builder.finalize_mob_prototype(self.char1, npc)
+        self.assertEqual(npc.db.hp, 30)
+        self.assertEqual(npc.db.mp, 10)
+        self.assertEqual(npc.db.sp, 5)
+
+    def test_finalize_fills_missing_resources(self):
+        npc = create.create_object("typeclasses.npcs.BaseNPC", key="dummy2", location=self.room1)
+        npc.db.level = 3
+        npc.db.combat_class = "Warrior"
+        npc.traits.health.base = 0
+        npc.traits.mana.base = 0
+        npc.traits.stamina.base = 0
+        npc_builder.finalize_mob_prototype(self.char1, npc)
+        stats = npc_builder.calculate_combat_stats("Warrior", 3)
+        self.assertEqual(npc.db.hp, stats["hp"])
+        self.assertEqual(npc.db.mp, stats["mp"])
+        self.assertEqual(npc.db.sp, stats["sp"])
