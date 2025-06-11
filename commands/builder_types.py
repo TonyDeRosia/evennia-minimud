@@ -31,7 +31,7 @@ def builder_cnpc_prompt(caller, name):
         "typeclass": "typeclasses.npcs.BaseNPC",
         "desc": desc,
         "race": race,
-        "npc_class": "base",
+        "npc_type": "base",
         "combat_class": combat_class,
         "level": level,
         "vnum": vnum,

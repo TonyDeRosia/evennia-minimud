@@ -69,7 +69,7 @@ class CmdMSpawn(Command):
                     self.msg("Prototype not found.")
                     return
                 tclass_path = npc_builder.NPC_CLASS_MAP.get(
-                    proto.get("npc_class", "base"), "typeclasses.npcs.BaseNPC"
+                    proto.get("npc_type", "base"), "typeclasses.npcs.BaseNPC"
                 )
                 proto = dict(proto)
                 proto.setdefault("typeclass", tclass_path)
@@ -117,7 +117,7 @@ class CmdMobPreview(Command):
                 self.msg("Prototype not found.")
                 return
             tclass_path = npc_builder.NPC_CLASS_MAP.get(
-                proto.get("npc_class", "base"), "typeclasses.npcs.BaseNPC"
+                proto.get("npc_type", "base"), "typeclasses.npcs.BaseNPC"
             )
             proto = dict(proto)
             proto.setdefault("typeclass", tclass_path)
