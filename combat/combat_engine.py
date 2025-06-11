@@ -485,6 +485,8 @@ class CombatEngine:
                 damage_done = self.apply_damage(actor, result.target, result.damage, dt)
                 if not result.message:
                     self.dam_message(actor, result.target, damage_done)
+
+            if result.target:
                 hp = getattr(getattr(result.target, "traits", None), "health", None)
                 cur = getattr(hp, "value", getattr(result.target, "hp", 0))
                 max_hp = getattr(hp, "max", getattr(result.target, "max_hp", cur))
