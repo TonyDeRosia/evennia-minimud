@@ -50,6 +50,7 @@ from .mob_builder import (
     CmdMList,
     CmdMobTemplate,
 )
+from .medit import CmdMEdit
 from .cmdmobbuilder import CmdMobProto
 from .nextvnum import CmdNextVnum
 from .builder_types import CmdBuilderTypes
@@ -1442,6 +1443,7 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdMobTemplate)
         self.add(CmdMSpawn)
         self.add(CmdMobPreview)
+        self.add(CmdMEdit)
         self.add(CmdMCreate)
         self.add(CmdMSet)
         self.add(CmdMList)

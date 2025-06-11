@@ -7,6 +7,7 @@ from typeclasses.npcs import BaseNPC
 from evennia.utils import evtable
 from evennia.objects.models import ObjectDB
 from world.scripts.mob_db import get_mobdb
+from utils.prototype_manager import load_all_prototypes
 
 from .command import Command
 from . import npc_builder
@@ -303,6 +304,12 @@ class CmdMList(Command):
                 area = part
 
         all_reg = prototypes.get_npc_prototypes()
+        extra = load_all_prototypes("npc")
+        for vnum, proto in extra.items():
+            key = proto.get("key", f"mob_{vnum}")
+            pdata = dict(proto)
+            pdata["vnum"] = vnum
+            all_reg[key] = pdata
         registry_list = prototypes.filter_npc_prototypes(all_reg, filter_by)
         registry = dict(registry_list)
 
@@ -371,6 +378,9 @@ class CmdMList(Command):
             pkey = data.get("proto_key") or data.get("prototype_key") or data.get("key")
             if pkey:
                 vnum_lookup[pkey] = vnum
+        for vnum, proto in extra.items():
+            key = proto.get("key", f"mob_{vnum}")
+            vnum_lookup[key] = vnum
 
         table = evtable.EvTable("VNUM", "Key", "Lvl", "Class", "Roles", "Count", border="cells")
         for key in keys:
@@ -380,7 +390,11 @@ class CmdMList(Command):
             roles = proto.get("roles") or []
             if isinstance(roles, str):
                 roles = [roles]
-            vnum = vnum_lookup.get(key) or vnum_lookup.get(proto.get("key"))
+            vnum = (
+                vnum_lookup.get(key)
+                or vnum_lookup.get(proto.get("key"))
+                or proto.get("vnum")
+            )
             table.add_row(
                 str(vnum) if vnum is not None else "-",
                 key,
