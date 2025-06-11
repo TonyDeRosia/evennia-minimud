@@ -1873,9 +1873,11 @@ def finalize_mob_prototype(caller, npc):
 
     npc.db.charclass = npc.db.combat_class
     stats = calculate_combat_stats(npc.db.combat_class, npc.db.level)
-    npc.db.hp = stats["hp"]
-    npc.db.mp = stats["mp"]
-    npc.db.sp = stats["sp"]
+    for attr, trait in (("hp", "health"), ("mp", "mana"), ("sp", "stamina")):
+        value = getattr(npc.traits.get(trait), "base", 0)
+        if not value:
+            value = stats[attr]
+        setattr(npc.db, attr, value)
     npc.db.armor = stats["armor"]
     npc.db.initiative = stats["initiative"]
 
