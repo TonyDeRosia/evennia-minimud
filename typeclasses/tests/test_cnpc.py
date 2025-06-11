@@ -232,3 +232,28 @@ class TestCNPC(EvenniaTest):
         self.assertEqual(npc.db.hp, stats["hp"])
         self.assertEqual(npc.db.mp, stats["mp"])
         self.assertEqual(npc.db.sp, stats["sp"])
+
+    def test_finalize_message_without_vnum(self):
+        npc = create.create_object("typeclasses.npcs.BaseNPC", key="dummy3", location=self.room1)
+        npc.db.level = 1
+        npc.db.combat_class = "Warrior"
+        npc.db.vnum = None
+        with patch("world.mobregistry.register_mob_vnum") as mock_reg:
+            npc_builder.finalize_mob_prototype(self.char1, npc)
+        mock_reg.assert_not_called()
+        msg = self.char1.msg.call_args[0][0]
+        self.assertIn("finalized", msg)
+        self.assertIn("added to mob list", msg)
+        self.assertNotIn("VNUM", msg)
+
+    def test_finalize_message_with_vnum(self):
+        npc = create.create_object("typeclasses.npcs.BaseNPC", key="dummy4", location=self.room1)
+        npc.db.level = 1
+        npc.db.combat_class = "Warrior"
+        npc.db.vnum = 5
+        with patch("world.mobregistry.register_mob_vnum") as mock_reg:
+            npc_builder.finalize_mob_prototype(self.char1, npc)
+        mock_reg.assert_called_with(vnum=5, prototype=npc)
+        msg = self.char1.msg.call_args[0][0]
+        self.assertIn("with VNUM 5", msg)
+        self.assertIn("added to mob list", msg)
