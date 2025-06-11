@@ -424,3 +424,17 @@ class CoinPile(Object):
         """Delete after being picked up if already deposited."""
         if self.db._deposited:
             self.delete()
+
+
+class Corpse(Object):
+    """A dead body left behind after a character dies."""
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.locks.add("get:false()")
+        self.db.display_priority = "corpse"
+
+    def get_display_name(self, looker, **kwargs):
+        name = self.db.corpse_of or self.key or "corpse"
+        return f"the corpse of {name}"
+
