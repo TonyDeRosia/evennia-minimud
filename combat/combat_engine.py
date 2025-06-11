@@ -515,4 +515,4 @@ class CombatEngine:
         self.round += 1
         if not self.participants:
             return
-        delay(1, self.process_round)
+        delay(self.round_time, self.process_round)
