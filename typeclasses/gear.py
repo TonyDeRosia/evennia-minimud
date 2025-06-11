@@ -152,25 +152,25 @@ class MeleeWeapon(Object):
         wielder.traits.stamina.current -= self.attributes.get("stamina_cost", 0)
         if not stat_manager.check_hit(wielder, target):
             wielder.at_emote(
-                "$conj(swings) {weapon} at $you(target), but $conj(misses).",
+                "$conj(swings) $pron(your) {weapon} at $you(target), but $conj(misses).",
                 mapping={"target": target, "weapon": self},
             )
         else:
             if combat_utils.roll_evade(wielder, target):
                 wielder.at_emote(
-                    "$conj(swings) {weapon} at $you(target), but they evade.",
+                    "$conj(swings) $pron(your) {weapon} at $you(target), but they evade.",
                     mapping={"target": target, "weapon": self},
                 )
                 return
             if combat_utils.roll_parry(wielder, target):
                 wielder.at_emote(
-                    "$conj(swings) {weapon}, but $you(target) parry.",
+                    "$conj(swings) $pron(your) {weapon} at $you(target), but $you(target) parry.",
                     mapping={"target": target, "weapon": self},
                 )
                 return
             if combat_utils.roll_block(wielder, target):
                 wielder.at_emote(
-                    "$conj(swings) {weapon}, but $you(target) block.",
+                    "$conj(swings) $pron(your) {weapon} at $you(target), but $you(target) block.",
                     mapping={"target": target, "weapon": self},
                 )
                 return
@@ -179,7 +179,7 @@ class MeleeWeapon(Object):
                 damage = stat_manager.crit_damage(wielder, damage)
             damage = combat_utils.apply_attack_power(wielder, damage)
             wielder.at_emote(
-                f"$conj({damage_type or 'swings'}) $you(target) with $pron(their) {{weapon}}.",
+                "$conj(hits) $you(target) with $pron(your) {weapon}.",
                 mapping={"target": target, "weapon": self},
             )
             dealt = target.at_damage(wielder, damage, damage_type, critical=crit)
