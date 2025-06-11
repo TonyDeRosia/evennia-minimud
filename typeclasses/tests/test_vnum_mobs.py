@@ -42,17 +42,36 @@ class TestVnumMobs(EvenniaTest):
         proto = {"key": "goblin", "typeclass": "typeclasses.npcs.BaseNPC"}
         vnum = register_prototype(proto, vnum=1)
         npc_mock = MagicMock()
-        with patch(
-            "evennia.prototypes.spawner.spawn", return_value=[npc_mock]
-        ) as mock_spawn:
-            npc = spawn_from_vnum(vnum, location=self.char1.location)
+        with patch("utils.mob_proto.finalize_mob_prototype") as mock_final:
+            with patch(
+                "evennia.prototypes.spawner.spawn", return_value=[npc_mock]
+            ) as mock_spawn:
+                npc = spawn_from_vnum(vnum, location=self.char1.location)
         mock_spawn.assert_called()
+        mock_final.assert_called_with(npc_mock, npc_mock)
         self.assertIs(npc, npc_mock)
         self.assertEqual(npc.location, self.char1.location)
         self.assertEqual(npc.db.vnum, vnum)
         self.assertEqual(npc.tags.get(category="vnum"), f"M{vnum}")
         mob_db = get_mobdb()
         self.assertEqual(mob_db.get_proto(vnum)["spawn_count"], 1)
+
+    def test_spawn_sets_default_combat_stats(self):
+        proto = {
+            "key": "orc",
+            "typeclass": "typeclasses.npcs.BaseNPC",
+            "level": 2,
+            "combat_class": "Warrior",
+        }
+        vnum = register_prototype(proto, vnum=3)
+        npc = spawn_from_vnum(vnum, location=self.char1.location)
+        stats = npc_builder.calculate_combat_stats("Warrior", 2)
+        self.assertEqual(npc.db.hp, stats["hp"])
+        self.assertEqual(npc.db.mp, stats["mp"])
+        self.assertEqual(npc.db.sp, stats["sp"])
+        self.assertEqual(npc.db.armor, stats["armor"])
+        self.assertEqual(npc.db.initiative, stats["initiative"])
+        self.assertEqual(npc.db.charclass, "Warrior")
 
     def test_command_set_flow(self):
         self.char1.execute_cmd("@mobproto create 1 gob")
