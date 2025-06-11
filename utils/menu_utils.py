@@ -86,3 +86,53 @@ def add_back_next(
     opts.append({"desc": "Back", "goto": _run("back")})
     opts.append({"desc": "Next", "goto": _run("skip")})
     return opts
+
+
+def toggle_multi_select(choice: str, options: Iterable[str], selected: List[str]) -> bool:
+    """Toggle ``choice`` in ``selected`` if valid.
+
+    Parameters
+    ----------
+    choice
+        Option label or numeric index (starting at 1).
+    options
+        Iterable of all valid option labels.
+    selected
+        List of currently selected options. Modified in place.
+
+    Returns
+    -------
+    bool
+        ``True`` if ``choice`` was recognized and toggled, ``False`` otherwise.
+    """
+
+    items = list(options)
+    value = None
+    c = str(choice).strip().lower()
+    if c.isdigit():
+        idx = int(c) - 1
+        if 0 <= idx < len(items):
+            value = items[idx]
+    else:
+        for opt in items:
+            if opt.lower() == c:
+                value = opt
+                break
+    if value is None:
+        return False
+    if value in selected:
+        selected.remove(value)
+    else:
+        selected.append(value)
+    return True
+
+
+def format_multi_select(options: Iterable[str], selected: Iterable[str]) -> str:
+    """Return checkbox lines for ``options`` given ``selected``."""
+
+    selected_set = set(selected)
+    lines = []
+    for idx, opt in enumerate(options, 1):
+        mark = "X" if opt in selected_set else " "
+        lines.append(f"{idx}. [{mark}] {opt}")
+    return "\n".join(lines)
