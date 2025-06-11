@@ -54,6 +54,7 @@ from .medit import CmdMEdit
 from .cmdmobbuilder import CmdMobProto
 from .nextvnum import CmdNextVnum
 from .builder_types import CmdBuilderTypes
+from .hedit import CmdHEdit
 
 
 def _safe_split(text):
@@ -1459,3 +1460,4 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdMobValidate)
         self.add(CmdMobProto)
         self.add(CmdNextVnum)
+        self.add(CmdHEdit)
