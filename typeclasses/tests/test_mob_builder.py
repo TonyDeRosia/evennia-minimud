@@ -44,7 +44,7 @@ class TestMobBuilder(EvenniaTest):
         npc_builder._set_desc(self.char1, "A small goblin")
         npc_builder._set_race(self.char1, "human")
         npc_builder._set_npc_type(self.char1, "base")
-        npc_builder._set_sex(self.char1, "male")
+        npc_builder._set_gender(self.char1, "male")
         npc_builder._set_weight(self.char1, "medium")
         npc_builder._set_level(self.char1, "1")
         npc_builder._set_vnum(self.char1, "auto")
@@ -104,7 +104,7 @@ class TestMobBuilder(EvenniaTest):
             "combat_class": "Warrior",
             "roles": ["fighter", "trainer", "fighter"],
             "race": "orc",
-            "sex": "male",
+            "gender": "male",
             "weight": "small",
             "level": 2,
             "hp": 10,
