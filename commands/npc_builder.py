@@ -1935,8 +1935,10 @@ def finalize_mob_prototype(caller, npc):
         if not value:
             value = stats[attr]
         setattr(npc.db, attr, value)
-    npc.db.armor = stats["armor"]
-    npc.db.initiative = stats["initiative"]
+    if npc.db.armor is None:
+        npc.db.armor = stats["armor"]
+    if npc.db.initiative is None:
+        npc.db.initiative = stats["initiative"]
 
     from world.mobregistry import register_mob_vnum
 
