@@ -804,10 +804,7 @@ class Character(ObjectParent, ClothedCharacter):
         if self.sessions.count():
             self.refresh_prompt()
 
-        auto = True
-        if self.account and (settings := self.account.db.settings):
-            auto = settings.get("auto attack")
-        if auto and (speed := getattr(weapon, "speed", None)):
+        if speed := getattr(weapon, "speed", None):
             delay(speed + 1, self.attack, None, weapon, persistent=True)
 
         if hasattr(self, "check_triggers"):

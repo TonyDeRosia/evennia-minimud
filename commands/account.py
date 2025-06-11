@@ -12,7 +12,7 @@ class CmdSettings(MuxCommand):
         settings <option> = <on/off>
 
     Example:
-        settings ansi = on
+        settings auto prompt = on
     """
 
     key = "settings"
