@@ -116,6 +116,11 @@ class AttackAction(Action):
         dtype = DamageType.BLUDGEONING
         if hasattr(target, "hp"):
             dmg = getattr(weapon, "damage", 0)
+            # scale damage using attacker stats
+            str_val = state_manager.get_effective_stat(self.actor, "STR")
+            dex_val = state_manager.get_effective_stat(self.actor, "DEX")
+            # Formula: base_damage * (1 + STR*0.012 + DEX*0.004)
+            dmg = int(round(dmg * (1 + str_val * 0.012 + dex_val * 0.004)))
             dtype = getattr(weapon, "damage_type", DamageType.BLUDGEONING)
         return CombatResult(
             actor=self.actor,
