@@ -150,49 +150,55 @@ def format_mob_summary(data: dict) -> str:
     from evennia.utils.evtable import EvTable
 
     def fmt(value):
-        if not value:
-            return "--"
+        """Format the given value for display."""
+
         if isinstance(value, dict):
             return ", ".join(f"{k}:{v}" for k, v in value.items())
         if isinstance(value, (list, tuple)):
             return ", ".join(str(v) for v in value)
         return str(value)
 
+    def add_row(table, label, key):
+        """Add ``label``/``value`` row if ``value`` is not empty."""
+
+        value = data.get(key)
+        if value is None or value == "" or value == [] or value == {}:
+            return
+        table.add_row(label, fmt(value))
+
     lines = [f"|cMob Prototype:|n {data.get('key', '--')}"]
 
     basic = EvTable(border="cells")
-    basic.add_row("|cShort Desc|n", fmt(data.get("desc")))
-    basic.add_row("|cLevel|n", fmt(data.get("level")))
-    if "vnum" in data:
-        basic.add_row("|cVNUM|n", fmt(data.get("vnum")))
-    basic.add_row("|cType|n", fmt(data.get("npc_type")))
+    add_row(basic, "|cShort Desc|n", "desc")
+    add_row(basic, "|cLevel|n", "level")
+    if "vnum" in data and data.get("vnum") is not None:
+        add_row(basic, "|cVNUM|n", "vnum")
+    add_row(basic, "|cNPC Type|n", "npc_type")
     if data.get("combat_class"):
         basic.add_row("|cCombat Class|n", fmt(data.get("combat_class")))
-    if data.get("race"):
-        basic.add_row("|cRace|n", fmt(data.get("race")))
-    if data.get("sex"):
-        basic.add_row("|cSex|n", fmt(data.get("sex")))
-    if data.get("weight"):
-        basic.add_row("|cWeight|n", fmt(data.get("weight")))
-    if data.get("roles"):
-        basic.add_row("|cRoles|n", fmt(data.get("roles")))
-    if data.get("creature_type"):
-        basic.add_row("|cCreature|n", fmt(data.get("creature_type")))
-    if data.get("guild_affiliation"):
-        basic.add_row("|cGuild|n", fmt(data.get("guild_affiliation")))
+    add_row(basic, "|cRace|n", "race")
+    add_row(basic, "|cSex|n", "sex")
+    add_row(basic, "|cWeight|n", "weight")
+    roles = data.get("roles") or []
+    if roles:
+        unique_roles = []
+        for role in roles:
+            if role and role not in unique_roles:
+                unique_roles.append(role)
+        if unique_roles:
+            basic.add_row("|cRoles|n", fmt(unique_roles))
+    add_row(basic, "|cCreature|n", "creature_type")
+    add_row(basic, "|cGuild|n", "guild_affiliation")
     lines.append("\n|cBasic Info|n")
     lines.append(str(basic))
 
     stats = EvTable(border="cells")
-    stats.add_row("|cHP|n", fmt(data.get("hp")))
-    stats.add_row("|cMP|n", fmt(data.get("mp")))
-    stats.add_row("|cSP|n", fmt(data.get("sp")))
-    if data.get("damage") is not None:
-        stats.add_row("|cDamage|n", fmt(data.get("damage")))
-    if data.get("armor") is not None:
-        stats.add_row("|cArmor|n", fmt(data.get("armor")))
-    if data.get("initiative") is not None:
-        stats.add_row("|cInitiative|n", fmt(data.get("initiative")))
+    for label, key in (("|cHP|n", "hp"), ("|cMP|n", "mp"), ("|cSP|n", "sp")):
+        if data.get(key) is not None:
+            stats.add_row(label, fmt(data.get(key)))
+    for label, key in (("|cDamage|n", "damage"), ("|cArmor|n", "armor"), ("|cInitiative|n", "initiative")):
+        if data.get(key) is not None:
+            stats.add_row(label, fmt(data.get(key)))
     if data.get("primary_stats"):
         stats.add_row("|cStats|n", fmt(data.get("primary_stats")))
     if data.get("modifiers"):
@@ -203,9 +209,9 @@ def format_mob_summary(data: dict) -> str:
     lines.append(str(stats))
 
     flags = EvTable(border="cells")
-    flags.add_row("|cAct Flags|n", fmt(data.get("actflags")))
-    flags.add_row("|cAffects|n", fmt(data.get("affected_by")))
-    flags.add_row("|cResists|n", fmt(data.get("ris")))
+    add_row(flags, "|cAct Flags|n", "actflags")
+    add_row(flags, "|cAffects|n", "affected_by")
+    add_row(flags, "|cResists|n", "ris")
     if data.get("attack_types"):
         flags.add_row("|cAttacks|n", fmt(data.get("attack_types")))
     if data.get("defense_types"):
@@ -214,14 +220,16 @@ def format_mob_summary(data: dict) -> str:
     lines.append(str(flags))
 
     rewards = EvTable(border="cells")
-    rewards.add_row("|cXP Reward|n", fmt(data.get("exp_reward")))
+    if data.get("exp_reward") is not None:
+        rewards.add_row("|cXP Reward|n", fmt(data.get("exp_reward")))
     if "coin_drop" in data or "coins" in data:
         coins = data.get("coin_drop") or data.get("coins")
         if isinstance(coins, dict):
             from utils.currency import format_wallet
 
             coins = format_wallet(coins)
-        rewards.add_row("|cCoin Drop|n", fmt(coins))
+        if coins not in (None, "", [], {}):
+            rewards.add_row("|cCoin Drop|n", fmt(coins))
     if data.get("loot_table"):
         loot = []
         for e in data.get("loot_table"):
@@ -234,8 +242,8 @@ def format_mob_summary(data: dict) -> str:
     lines.append(str(rewards))
 
     skills = EvTable(border="cells")
-    skills.add_row("|cSkills|n", fmt(data.get("skills")))
-    skills.add_row("|cSpells|n", fmt(data.get("spells")))
+    add_row(skills, "|cSkills|n", "skills")
+    add_row(skills, "|cSpells|n", "spells")
     lines.append("\n|cSkills|n")
     lines.append(str(skills))
 
