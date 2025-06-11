@@ -5,6 +5,7 @@ from copy import deepcopy
 MOB_TEMPLATES = {
     "warrior": {
         "level": 1,
+        "combat_class": "Warrior",
         "hp": 30,
         "mp": 0,
         "sp": 10,
@@ -14,6 +15,7 @@ MOB_TEMPLATES = {
     },
     "caster": {
         "level": 1,
+        "combat_class": "Mage",
         "hp": 20,
         "mp": 30,
         "sp": 5,

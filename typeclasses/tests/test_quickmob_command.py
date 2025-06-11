@@ -47,6 +47,8 @@ class TestQuickMobCommand(EvenniaTest):
         npc = [o for o in self.char1.location.contents if o.is_typeclass(BaseNPC, exact=False)][0]
         assert npc.key == "goblin"
         assert npc.db.vnum == 101
+        assert npc.db.charclass == "Warrior"
+        assert npc.db.hp > 0
         self.char1.msg.reset_mock()
         self.char1.execute_cmd("@mspawn M101")
         msg = self.char1.msg.call_args[0][0]
