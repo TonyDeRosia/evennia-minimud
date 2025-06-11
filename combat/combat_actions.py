@@ -111,12 +111,27 @@ class AttackAction(Action):
             return CombatResult(self.actor, self.actor, "No target.")
         weapon = self.actor
         if utils.inherits_from(self.actor, "typeclasses.characters.Character"):
-            weapon = self.actor.wielding[0] if self.actor.wielding else self.actor
+            if self.actor.wielding:
+                weapon = self.actor.wielding[0]
+            elif getattr(self.actor.db, "natural_weapon", None):
+                # use natural weapon stats when unarmed
+                weapon = self.actor.db.natural_weapon
+            else:
+                weapon = self.actor
         dmg = 0
         dtype = DamageType.BLUDGEONING
         if hasattr(target, "hp"):
-            dmg = getattr(weapon, "damage", 0)
-            dtype = getattr(weapon, "damage_type", DamageType.BLUDGEONING)
+            if isinstance(weapon, dict):
+                dmg = weapon.get("damage", 0)
+                dtype = weapon.get("damage_type", DamageType.BLUDGEONING)
+            else:
+                dmg = getattr(weapon, "damage", 0)
+                dtype = getattr(weapon, "damage_type", DamageType.BLUDGEONING)
+            # scale damage using attacker stats
+            str_val = state_manager.get_effective_stat(self.actor, "STR")
+            dex_val = state_manager.get_effective_stat(self.actor, "DEX")
+            # Formula: base_damage * (1 + STR*0.012 + DEX*0.004)
+            dmg = int(round(dmg * (1 + str_val * 0.012 + dex_val * 0.004)))
         return CombatResult(
             actor=self.actor,
             target=target,

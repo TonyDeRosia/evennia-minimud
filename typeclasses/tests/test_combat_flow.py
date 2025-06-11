@@ -67,6 +67,53 @@ class TestAttackAction(unittest.TestCase):
         self.assertEqual(defender.hp, 5)
         weapon.at_attack.assert_not_called()
 
+    def test_attack_damage_scaled_by_stats(self):
+        attacker = Dummy()
+        defender = Dummy()
+        weapon = MagicMock()
+        weapon.damage = 5
+        weapon.damage_type = DamageType.SLASHING
+        weapon.at_attack = MagicMock()
+        attacker.wielding = [weapon]
+        attacker.location = defender.location
+
+        engine = CombatEngine([attacker, defender], round_time=0)
+        engine.queue_action(attacker, AttackAction(attacker, defender))
+        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
+             patch("world.system.state_manager.apply_regen"), \
+             patch("random.randint", return_value=0), \
+             patch("world.system.state_manager.get_effective_stat") as mock_get:
+            def getter(obj, stat):
+                if obj is attacker and stat == "STR":
+                    return 10
+                if obj is attacker and stat == "DEX":
+                    return 5
+                return 0
+
+            mock_get.side_effect = getter
+            engine.start_round()
+            engine.process_round()
+
+        self.assertEqual(defender.hp, 4)
+
+    def test_npc_attack_uses_natural_weapon(self):
+        attacker = Dummy()
+        defender = Dummy()
+        attacker.wielding = []
+        attacker.location = defender.location
+        attacker.db.natural_weapon = {"damage": 5, "damage_type": DamageType.PIERCING}
+
+        engine = CombatEngine([attacker, defender], round_time=0)
+        engine.queue_action(attacker, AttackAction(attacker, defender))
+        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
+             patch("world.system.state_manager.apply_regen"), \
+             patch("world.system.state_manager.get_effective_stat", return_value=0), \
+             patch("random.randint", return_value=0):
+            engine.start_round()
+            engine.process_round()
+
+        self.assertEqual(defender.hp, 5)
+
 
 class TestCombatVictory(unittest.TestCase):
     def test_handle_defeat_removes_participant(self):
