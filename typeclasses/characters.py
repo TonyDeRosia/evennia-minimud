@@ -802,8 +802,7 @@ class Character(ObjectParent, ClothedCharacter):
         weapon.at_attack(self, target)
 
         if self.sessions.count():
-            status = self.get_display_status(self)
-            self.msg(prompt=status)
+            self.refresh_prompt()
 
         auto = True
         if self.account and (settings := self.account.db.settings):
@@ -856,9 +855,8 @@ class PlayerCharacter(Character):
 
     def at_damage(self, attacker, damage, damage_type=None, critical=False):
         dmg = super().at_damage(attacker, damage, damage_type=damage_type, critical=critical)
-        if self.traits.health.value < 50:
-            status = self.get_display_status(self)
-            self.msg(prompt=status)
+        if self.traits.health.value < 50 and self.sessions.count():
+            self.refresh_prompt()
         return dmg
 
 
@@ -1098,7 +1096,6 @@ class NPC(Character):
                     f"$conj(swings) $pron(your) {weapon.get('name')} at $you(target), but they evade.",
                     mapping={"target": target},
                 )
-                wielder.msg(f"[ Cooldown: {speed} seconds ]")
                 wielder.cooldowns.add("attack", speed)
                 return
             verb = weapon.get("damage_type", "hits")
@@ -1110,7 +1107,6 @@ class NPC(Character):
                 mapping={"target": target},
             )
             target.at_damage(wielder, damage, weapon.get("damage_type"), critical=crit)
-        wielder.msg(f"[ Cooldown: {speed} seconds ]")
         wielder.cooldowns.add("attack", speed)
 
     def at_tick(self):
