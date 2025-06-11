@@ -403,7 +403,16 @@ class CmdMList(Command):
                 str(counts.get(key, 0)),
             )
 
-        self.msg(str(table))
+        lines = [str(table)]
+        if not (area or filter_by or rangestr or show_room or show_area):
+            finalized = sorted(mob_db.db.vnums)
+            lines.append("\n|wFinalized VNUMs|n")
+            if finalized:
+                lines.append(", ".join(str(v) for v in finalized))
+            else:
+                lines.append("None")
+
+        self.msg("\n".join(lines))
 
 
 class CmdMakeShop(Command):

@@ -95,3 +95,24 @@ class TestMListCommand(EvenniaTest):
         out = self.char1.msg.call_args[0][0]
         assert "VNUM" in out
         assert "5" in out
+
+    def test_mlist_finalized_vnums_display(self):
+        from world.scripts.mob_db import get_mobdb
+
+        mob_db = get_mobdb()
+        mob_db.add_proto(12, {"key": "troll"})
+
+        self.char1.execute_cmd("@mlist")
+        out = self.char1.msg.call_args[0][0]
+        assert "Finalized VNUMs" in out
+        assert "12" in out
+
+    def test_finalized_vnums_hidden_with_args(self):
+        from world.scripts.mob_db import get_mobdb
+
+        mob_db = get_mobdb()
+        mob_db.add_proto(15, {"key": "troll"})
+
+        self.char1.execute_cmd("@mlist /room")
+        out = self.char1.msg.call_args[0][0]
+        assert "Finalized VNUMs" not in out
