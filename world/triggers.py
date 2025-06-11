@@ -7,6 +7,7 @@ from typing import Any
 from random import randint
 
 from evennia.utils import make_iter, logger
+from world.mpcommands import execute_mpcommand
 
 
 class TriggerManager:
@@ -63,6 +64,8 @@ class TriggerManager:
                 module, func = arg.rsplit(".", 1)
                 mod = import_module(module)
                 getattr(mod, func)(self.obj, **kwargs)
+            elif action == "mob":
+                execute_mpcommand(self.obj, arg)
             else:
                 self.obj.execute_cmd(f"{action} {arg}" if arg else action)
         except Exception as err:  # pragma: no cover - log errors
