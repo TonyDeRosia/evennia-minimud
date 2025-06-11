@@ -11,7 +11,13 @@ Example:
 """
 
 from .command import Command
-from utils.currency import to_copper, from_copper, COIN_VALUES, format_wallet
+from utils.currency import (
+    COIN_VALUES,
+    format_wallet,
+    deposit_coins,
+    withdraw_coins,
+    transfer_coins,
+)
 
 
 class CmdBank(Command):
@@ -61,21 +67,14 @@ class CmdBank(Command):
             amount = amt * COIN_VALUES[coin]
 
             if sub == "deposit":
-                wallet = caller.db.coins or {}
-                if to_copper(wallet) < amount:
+                if not deposit_coins(caller, amount):
                     caller.msg("You don't have that much coin.")
                     return
-                caller.db.coins = from_copper(to_copper(wallet) - amount)
-                caller.db.bank = int(caller.db.bank or 0) + amount
                 caller.msg(f"You deposit {amount} coins into your account.")
             else:  # withdraw
-                balance = int(caller.db.bank or 0)
-                if balance < amount:
+                if not withdraw_coins(caller, amount):
                     caller.msg("You do not have that much saved.")
                     return
-                caller.db.bank = balance - amount
-                wallet = caller.db.coins or {}
-                caller.db.coins = from_copper(to_copper(wallet) + amount)
                 caller.msg(f"You withdraw {amount} coins from your account.")
             return
 
@@ -104,12 +103,9 @@ class CmdBank(Command):
             target = caller.search(target_name, global_search=True)
             if not target:
                 return
-            balance = int(caller.db.bank or 0)
-            if balance < amount:
+            if not transfer_coins(caller, target, amount):
                 caller.msg("You do not have that much saved.")
                 return
-            caller.db.bank = balance - amount
-            target.db.bank = int(target.db.bank or 0) + amount
             caller.msg(
                 f"You transfer {amount} coins to {target.get_display_name(caller)}."
             )
