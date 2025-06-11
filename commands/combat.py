@@ -90,11 +90,6 @@ class CmdAttack(Command):
         # execute the actual attack
         self.caller.attack(target, weapon)
 
-        # check if we have auto-attack in settings
-        if self.account and (settings := self.account.db.settings):
-            if settings.get("auto attack"):
-                # let the player know we'll be auto-attacking
-                self.msg(f"[ Auto-attack is ON ]")
 
     def at_post_cmd(self):
         """
