@@ -1969,6 +1969,7 @@ class CmdCNPC(Command):
         parts = self.args.split(None, 1)
         sub = parts[0].lower()
         rest = parts[1].strip() if len(parts) > 1 else ""
+        use_mob = self.cmdstring.lower() == "mobbuilder"
         if sub == "start":
             if not rest:
                 self.msg("Usage: cnpc start <key>")
@@ -1996,6 +1997,8 @@ class CmdCNPC(Command):
                 "modifiers": {},
                 "buffs": [],
             }
+            if use_mob:
+                self.caller.ndb.buildnpc["use_mob"] = True
             EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
             return
         if sub == "edit":
@@ -2008,6 +2011,8 @@ class CmdCNPC(Command):
                 return
             data = _gather_npc_data(npc)
             self.caller.ndb.buildnpc = data
+            if use_mob:
+                self.caller.ndb.buildnpc["use_mob"] = True
             EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
             return
         if sub == "dev_spawn":
