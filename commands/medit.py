@@ -2,6 +2,7 @@ from evennia.utils.evmenu import EvMenu
 from utils.prototype_manager import load_prototype
 from utils.vnum_registry import validate_vnum, register_vnum
 from .command import Command
+from . import npc_builder
 
 
 class CmdMEdit(Command):
