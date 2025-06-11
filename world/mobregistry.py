@@ -12,7 +12,7 @@ def register_mob_vnum(vnum: int, prototype: Any) -> None:
         data: Dict[str, Any] = {
             "key": getattr(prototype, "key", ""),
             "level": getattr(prototype.db, "level", None),
-            "class": getattr(prototype.db, "class", None),
+            "class": getattr(prototype.db, "charclass", None),
             "proto_key": getattr(prototype.db, "prototype_key", None),
         }
     else:
