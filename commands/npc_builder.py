@@ -11,6 +11,7 @@ from utils.menu_utils import add_back_skip, add_back_next, add_back_only
 from world.scripts import classes
 from utils import vnum_registry
 from utils.mob_utils import calculate_combat_stats, mobprogs_to_triggers
+from world.triggers import TriggerManager
 from .command import Command
 from django.conf import settings
 from importlib import import_module
@@ -1707,6 +1708,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     mobprogs = data.get("mobprogs") or []
     npc.db.mobprogs = mobprogs
     npc.db.triggers = mobprogs_to_triggers(mobprogs)
+    TriggerManager(npc).start_random_triggers()
     npc.db.coin_drop = data.get("coin_drop") or {}
     npc.db.loot_table = data.get("loot_table") or []
     npc.db.exp_reward = data.get("exp_reward", 0)
