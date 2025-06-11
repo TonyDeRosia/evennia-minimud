@@ -44,6 +44,15 @@ class Action:
     requires_status: Iterable[str] | None = None
 
     def __init__(self, actor: object, target: Optional[object] = None):
+        """Initialize the action with its actor and optional target.
+
+        Parameters
+        ----------
+        actor
+            Character performing the action.
+        target
+            Object the action is aimed at, if any.
+        """
         self.actor = actor
         self.target = target
 
@@ -51,7 +60,14 @@ class Action:
     # Validation
     # -------------------------------------------------------------
     def validate(self) -> tuple[bool, str]:
-        """Return ``(True, "")`` if this action can be executed."""
+        """Check resources and positioning before execution.
+
+        Returns
+        -------
+        tuple[bool, str]
+            ``True`` and an empty string if valid, otherwise ``False`` and an
+            explanatory message.
+        """
 
         actor = self.actor
         traits = getattr(actor, "traits", None)
@@ -79,6 +95,7 @@ class Action:
         return True, ""
 
     def resolve(self) -> CombatResult:
+        """Execute the action and produce a :class:`CombatResult`."""
         raise NotImplementedError
 
 
@@ -88,6 +105,7 @@ class AttackAction(Action):
     priority = 1
 
     def resolve(self) -> CombatResult:
+        """Carry out a basic weapon attack."""
         target = self.target
         if not target:
             return CombatResult(self.actor, self.actor, "No target.")
@@ -114,6 +132,7 @@ class DefendAction(Action):
     priority = 5
 
     def resolve(self) -> CombatResult:
+        """Enter a defensive stance for one round."""
         state_manager.add_status_effect(self.actor, "defending", 1)
         return CombatResult(
             actor=self.actor,
@@ -128,11 +147,23 @@ class SkillAction(Action):
     priority = 3
 
     def __init__(self, actor: object, skill, target: Optional[object] = None):
+        """Create an action that executes ``skill``.
+
+        Parameters
+        ----------
+        actor
+            Character using the skill.
+        skill
+            Skill object providing the :py:meth:`resolve` implementation.
+        target
+            Optional target of the skill.
+        """
         super().__init__(actor, target)
         self.skill = skill
         self.stamina_cost = getattr(skill, "stamina_cost", 0)
 
     def resolve(self) -> CombatResult:
+        """Execute the skill and return its result."""
         if self.stamina_cost and hasattr(self.actor.traits, "stamina"):
             self.actor.traits.stamina.current -= self.stamina_cost
         return self.skill.resolve(self.actor, self.target)
@@ -144,6 +175,17 @@ class SpellAction(Action):
     priority = 3
 
     def __init__(self, actor: object, spell_key: str, target: Optional[object] = None):
+        """Create a spell casting action.
+
+        Parameters
+        ----------
+        actor
+            Character casting the spell.
+        spell_key
+            Key of the spell to look up.
+        target
+            Optional spell target.
+        """
         super().__init__(actor, target)
         from world.spells import SPELLS
 
@@ -152,6 +194,7 @@ class SpellAction(Action):
             self.mana_cost = self.spell.mana_cost
 
     def resolve(self) -> CombatResult:
+        """Invoke the stored spell and return its combat result."""
         if not self.spell:
             return CombatResult(self.actor, self.target or self.actor, "Nothing happens.")
         if self.mana_cost and hasattr(self.actor.traits, "mana"):

@@ -26,6 +26,17 @@ class CombatEngine:
     """Simple round-based combat engine."""
 
     def __init__(self, participants: Iterable[object] | None = None, round_time: int = 2, use_initiative: bool = True):
+        """Create a new combat engine instance.
+
+        Parameters
+        ----------
+        participants
+            Optional iterable of initial combatants.
+        round_time
+            Seconds between each combat round.
+        use_initiative
+            If ``True`` initiative rolls determine action order.
+        """
         self.participants: List[CombatParticipant] = []
         self.round = 0
         self.round_time = round_time
@@ -41,7 +52,18 @@ class CombatEngine:
     # -------------------------------------------------------------
 
     def update_pos(self, chara) -> None:
-        """Update position tags based on current health."""
+        """Update ``chara`` position tags based on remaining health.
+
+        Parameters
+        ----------
+        chara
+            Character being checked for status changes.
+
+        Side Effects
+        ------------
+        Adds the ``unconscious`` and ``lying down`` status tags when
+        ``chara`` has zero or less health.
+        """
         hp = getattr(getattr(chara, "traits", None), "health", None)
         cur = hp.value if hp else getattr(chara, "hp", 1)
         if cur <= 0:
@@ -50,7 +72,20 @@ class CombatEngine:
                 chara.tags.add("lying down", category="status")
 
     def change_alignment(self, attacker, victim) -> None:
-        """Modify ``attacker`` alignment based on ``victim``."""
+        """Modify ``attacker`` alignment based on ``victim`` alignment.
+
+        Parameters
+        ----------
+        attacker
+            Character delivering the attack.
+        victim
+            Character being attacked.
+
+        Side Effects
+        ------------
+        Adjusts ``attacker.db.alignment`` toward the opposite of
+        ``victim`` and clamps the result between ``-1000`` and ``1000``.
+        """
         if not attacker or not victim:
             return
         a_align = getattr(attacker.db, "alignment", None)
@@ -60,7 +95,20 @@ class CombatEngine:
         attacker.db.alignment = max(-1000, min(1000, a_align - v_align))
 
     def solo_gain(self, chara, exp: int) -> None:
-        """Award ``exp`` to ``chara``."""
+        """Award ``exp`` experience points directly to ``chara``.
+
+        Parameters
+        ----------
+        chara
+            Recipient of the experience points.
+        exp
+            Amount of experience awarded.
+
+        Side Effects
+        ------------
+        Increases ``chara.db.exp`` and informs the character if possible.
+        Triggers a level up check via :func:`state_manager.check_level_up`.
+        """
         if not exp or not chara:
             return
         chara.db.exp = (chara.db.exp or 0) + exp
@@ -69,7 +117,20 @@ class CombatEngine:
         state_manager.check_level_up(chara)
 
     def group_gain(self, members: Iterable, exp: int) -> None:
-        """Split ``exp`` between ``members``."""
+        """Split ``exp`` experience between all ``members``.
+
+        Parameters
+        ----------
+        members
+            Iterable of characters receiving a share.
+        exp
+            Total experience value to divide amongst ``members``.
+
+        Side Effects
+        ------------
+        Updates ``member.db.exp`` for each participant, sends a message if the
+        member can be messaged and checks for level gains.
+        """
         members = [m for m in members if m]
         if not members or not exp:
             return
@@ -81,14 +142,46 @@ class CombatEngine:
             state_manager.check_level_up(member)
 
     def dam_message(self, attacker, target, damage: int, *, crit: bool = False) -> None:
-        """Announce dealt damage to the room."""
+        """Announce that ``attacker`` dealt ``damage`` to ``target``.
+
+        Parameters
+        ----------
+        attacker
+            Character dealing the damage.
+        target
+            Character receiving the damage.
+        damage
+            Amount of damage dealt.
+        crit
+            Set to ``True`` if the hit was a critical strike.
+
+        Side Effects
+        ------------
+        Broadcasts a formatted combat message to the attacker's location.
+        """
         if not attacker or not target or not attacker.location:
             return
         msg = format_combat_message(attacker, target, "hits", damage, crit=crit)
         attacker.location.msg_contents(msg)
 
     def skill_message(self, actor, target, skill: str, success: bool = True) -> None:
-        """Announce the result of a skill use."""
+        """Inform the room of a skill attempt.
+
+        Parameters
+        ----------
+        actor
+            Character attempting the skill.
+        target
+            Target of the skill, if any.
+        skill
+            Name of the skill used.
+        success
+            Whether the skill succeeded.
+
+        Side Effects
+        ------------
+        Sends a descriptive message to ``actor.location`` if it exists.
+        """
         if not actor or not actor.location:
             return
         if success:
@@ -98,11 +191,28 @@ class CombatEngine:
         actor.location.msg_contents(msg)
 
     def perform_violence(self) -> None:
-        """Alias for :meth:`process_round`."""
+        """Run a single combat round.
+
+        This is a thin wrapper around :meth:`process_round` kept for
+        backward compatibility.
+        """
         self.process_round()
 
     def award_experience(self, attacker, victim) -> None:
-        """Distribute experience for defeating ``victim``."""
+        """Distribute experience for defeating ``victim``.
+
+        Parameters
+        ----------
+        attacker
+            Character credited with the kill.
+        victim
+            Character that was defeated.
+
+        Side Effects
+        ------------
+        Awards experience either to ``attacker`` or split among all
+        contributors tracked on ``victim``.
+        """
         exp = getattr(victim.db, "exp_reward", 0) if hasattr(victim, "db") else 0
         if not exp:
             return
@@ -113,13 +223,35 @@ class CombatEngine:
             self.group_gain(contributors, exp)
 
     def add_participant(self, actor: object) -> None:
-        """Add a combatant to this engine."""
+        """Add a combatant to this engine.
+
+        Parameters
+        ----------
+        actor
+            Object representing the combatant to add.
+
+        Side Effects
+        ------------
+        Appends a :class:`CombatParticipant` to :attr:`participants` and
+        calls ``actor.on_enter_combat`` if present.
+        """
         self.participants.append(CombatParticipant(actor=actor))
         if hasattr(actor, "on_enter_combat"):
             actor.on_enter_combat()
 
     def remove_participant(self, actor: object) -> None:
-        """Remove ``actor`` from combat."""
+        """Remove ``actor`` from combat.
+
+        Parameters
+        ----------
+        actor
+            Combatant to remove from this engine.
+
+        Side Effects
+        ------------
+        Cleans ``actor`` from internal queues and invokes
+        ``actor.on_exit_combat`` if available.
+        """
         self.participants = [p for p in self.participants if p.actor is not actor]
         self.queue = [p for p in self.queue if p.actor is not actor]
         if hasattr(actor, "on_exit_combat"):
@@ -127,10 +259,30 @@ class CombatEngine:
 
     @property
     def turn_order(self) -> List[CombatParticipant]:
-        """Return participants ordered by initiative descending."""
+        """List combatants sorted by current initiative.
+
+        Returns
+        -------
+        list[CombatParticipant]
+            Participants ordered from highest to lowest initiative.
+        """
         return sorted(self.participants, key=lambda p: p.initiative, reverse=True)
 
     def queue_action(self, actor: object, action: Action) -> None:
+        """Set ``action`` as ``actor``'s next action.
+
+        Parameters
+        ----------
+        actor
+            The combatant performing the action.
+        action
+            The :class:`~combat.combat_actions.Action` instance to queue.
+
+        Side Effects
+        ------------
+        Updates the ``next_action`` attribute of the matching
+        :class:`CombatParticipant`.
+        """
         for participant in self.participants:
             if participant.actor is actor:
                 participant.next_action = action
@@ -141,7 +293,13 @@ class CombatEngine:
     # -------------------------------------------------------------
 
     def start_round(self) -> None:
-        """Prepare a new combat round."""
+        """Prepare initiative order and regenerate resources.
+
+        Side Effects
+        ------------
+        Populates the internal action queue, applies regeneration and
+        rolls initiative for each participant.
+        """
         self.queue = []
         for participant in self.participants:
             actor = participant.actor
@@ -156,6 +314,19 @@ class CombatEngine:
             self.queue.sort(key=lambda p: p.initiative, reverse=True)
 
     def track_aggro(self, target, attacker) -> None:
+        """Record threat generated by ``attacker`` on ``target``.
+
+        Parameters
+        ----------
+        target
+            Character becoming hostile toward ``attacker``.
+        attacker
+            Character generating threat.
+
+        Side Effects
+        ------------
+        Updates an internal aggro table used when awarding experience.
+        """
         if not target or target is attacker:
             return
         from world.system import state_manager
@@ -165,6 +336,20 @@ class CombatEngine:
         data[attacker] = data.get(attacker, 0) + threat
 
     def handle_defeat(self, target, attacker) -> None:
+        """Handle ``target`` being reduced to zero health.
+
+        Parameters
+        ----------
+        target
+            The defeated character.
+        attacker
+            Character responsible for the defeat.
+
+        Side Effects
+        ------------
+        Calls ``target.at_defeat`` if defined, removes the participant
+        from combat and notifies allies in the same room.
+        """
         if hasattr(target, "on_exit_combat"):
             target.on_exit_combat()
         if hasattr(target, "at_defeat"):
@@ -185,7 +370,24 @@ class CombatEngine:
                     hook(target, attacker)
 
     def apply_damage(self, attacker, target, amount: int, damage_type: DamageType | None) -> int:
-        """Apply ``amount`` of damage to ``target`` using its hooks."""
+        """Apply ``amount`` of damage to ``target`` using its hooks.
+
+        Parameters
+        ----------
+        attacker
+            Character dealing the damage.
+        target
+            Character receiving the damage.
+        amount
+            Raw amount of damage attempted.
+        damage_type
+            Type of damage being inflicted.
+
+        Returns
+        -------
+        int
+            The actual damage dealt after hooks are processed.
+        """
 
         if hasattr(target, "at_damage"):
             before = getattr(getattr(target, "traits", None), "health", None)
@@ -207,13 +409,26 @@ class CombatEngine:
         return 0
 
     def cleanup_environment(self) -> None:
+        """Remove invalid participants from combat.
+
+        Side Effects
+        ------------
+        Participants that have left the room or dropped to zero health are
+        removed from the engine.
+        """
         for participant in list(self.participants):
             actor = participant.actor
             if getattr(actor, "location", None) is None or getattr(actor, "hp", 1) <= 0:
                 self.remove_participant(actor)
 
     def process_round(self) -> None:
-        """Process a single combat round."""
+        """Execute all queued actions for the current round.
+
+        Side Effects
+        ------------
+        Applies damage, sends combat messages, awards experience and
+        schedules the next round using :func:`evennia.utils.delay`.
+        """
         self.start_round()
         actions: list[tuple[int, int, CombatParticipant, Action]] = []
         for participant in list(self.queue):
