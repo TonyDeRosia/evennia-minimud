@@ -493,6 +493,20 @@ class CombatEngine:
                 self.award_experience(actor, result.target)
             self.track_aggro(result.target, actor)
         self.cleanup_environment()
+
+        if self.round_output:
+            msg = "\n".join(self.round_output)
+            room = None
+            if self.participants:
+                room = getattr(self.participants[0].actor, "location", None)
+            if room:
+                room.msg_contents(msg)
+            else:
+                for participant in self.participants:
+                    actor = participant.actor
+                    if hasattr(actor, "msg"):
+                        actor.msg(msg)
+
         self.round += 1
         if not self.participants:
             return

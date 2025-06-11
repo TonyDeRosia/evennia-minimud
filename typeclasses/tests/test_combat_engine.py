@@ -3,6 +3,7 @@ import unittest
 
 from combat.combat_engine import CombatEngine
 from combat.combat_actions import Action, CombatResult
+from combat.combat_utils import get_condition_msg
 
 
 class KillAction(Action):
@@ -117,3 +118,26 @@ class TestCombatEngine(unittest.TestCase):
             engine.process_round()
             self.assertEqual(len(engine.participants), 2)
             mock_delay.assert_called_with(1, engine.process_round)
+
+    def test_condition_messages_broadcast(self):
+        class DamageAction(Action):
+            def resolve(self):
+                return CombatResult(self.actor, self.target, "hit", damage=2)
+
+        a = Dummy()
+        b = Dummy()
+        a.key = "attacker"
+        b.key = "victim"
+        room = MagicMock()
+        a.location = b.location = room
+        b.traits.health = MagicMock(value=b.hp, max=b.hp)
+
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('random.randint', return_value=0):
+            engine = CombatEngine([a, b], round_time=0)
+            engine.queue_action(a, DamageAction(a, b))
+            engine.start_round()
+            engine.process_round()
+
+        expected = get_condition_msg(b.hp, b.traits.health.max)
+        room.msg_contents.assert_any_call(f"{b.key} {expected}")
