@@ -95,7 +95,7 @@ class TestCombatEngine(unittest.TestCase):
         a.key = "dummy"
         a.tags = MagicMock()
         with patch('world.system.state_manager.apply_regen'), \
-             patch('evennia.utils.delay') as mock_delay, \
+             patch('combat.combat_engine.delay') as mock_delay, \
              patch('random.randint', return_value=0):
             engine = CombatEngine([a], round_time=0)
             engine.queue_action(a, KillAction(a, a))
@@ -103,3 +103,17 @@ class TestCombatEngine(unittest.TestCase):
             engine.process_round()
             self.assertEqual(len(engine.participants), 0)
             mock_delay.assert_not_called()
+
+    def test_schedules_next_round(self):
+        a = Dummy()
+        b = Dummy()
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.get_effective_stat', return_value=0), \
+             patch('combat.combat_actions.utils.inherits_from', return_value=False), \
+             patch('combat.combat_engine.delay') as mock_delay, \
+             patch('random.randint', return_value=0):
+            engine = CombatEngine([a, b], round_time=0)
+            engine.start_round()
+            engine.process_round()
+            self.assertEqual(len(engine.participants), 2)
+            mock_delay.assert_called_with(1, engine.process_round)

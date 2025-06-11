@@ -496,4 +496,4 @@ class CombatEngine:
         self.round += 1
         if not self.participants:
             return
-        delay(random.uniform(1, max(1, self.round_time)), self.process_round)
+        delay(1, self.process_round)
