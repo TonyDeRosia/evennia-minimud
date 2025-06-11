@@ -3,7 +3,7 @@ from evennia.utils import make_iter, dedent
 from evennia import create_object
 from evennia.objects.models import ObjectDB
 from evennia.prototypes import spawner
-from utils.mob_proto import spawn_from_vnum
+from utils.mob_proto import spawn_from_vnum, get_prototype
 from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from typeclasses.characters import NPC
 from utils.slots import SLOT_ORDER
@@ -2156,7 +2156,15 @@ class CmdSpawnNPC(Command):
 
         proto = None
         if arg.isdigit():
-            obj = spawn_from_vnum(int(arg), location=self.caller.location)
+            vnum = int(arg)
+            proto = get_prototype(vnum)
+            if not proto:
+                if vnum_registry.validate_vnum(vnum, "npc"):
+                    self.msg("❌ Invalid VNUM. The prototype was never finalized or saved.")
+                else:
+                    self.msg("Unknown NPC prototype.")
+                return
+            obj = spawn_from_vnum(vnum, location=self.caller.location)
             if not obj:
                 self.msg("Unknown NPC prototype.")
                 return

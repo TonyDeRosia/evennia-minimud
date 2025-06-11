@@ -62,6 +62,15 @@ class TestSpawnNPCPrototype(EvenniaTest):
         self.assertIsNotNone(npc)
         self.assertTrue(npc.tags.has("merchant", category="npc_type"))
 
+    def test_vnum_not_finalized_message(self):
+        """Numeric VNUMs without prototypes should show a specific error."""
+        with patch("utils.mob_proto.spawn_from_vnum") as mock_spawn:
+            self.char1.execute_cmd("@spawnnpc 42")
+            mock_spawn.assert_not_called()
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Invalid VNUM", out)
+        self.assertIn("never finalized", out)
+
 
 class TestAreaSpawnerCombatStats(EvenniaTest):
     def setUp(self):
