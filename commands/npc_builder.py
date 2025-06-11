@@ -99,6 +99,9 @@ NPC_TYPE_MAP = {
     "event_npc": "typeclasses.npcs.event_npc.EventNPC",
 }
 
+# NPC types that can participate in combat and therefore need a combat class
+COMBATANT_TYPES = {"combatant", "combat_trainer"}
+
 
 # Suggested skill lists for each NPC class
 DEFAULT_SKILLS = list(SKILL_CLASSES.keys())
@@ -213,7 +216,7 @@ def format_mob_summary(data: dict) -> str:
     if "vnum" in data and data.get("vnum") is not None:
         core.append(f"|cVNUM:|n {fmt(data.get('vnum'))}")
     if data.get("npc_type"):
-        core.append(f"|cNPC Type:|n {fmt(data.get('npc_type'))}")
+        core.append(f"|cNPC Archetype:|n {fmt(data.get('npc_type'))}")
     if data.get("combat_class"):
         core.append(f"|cCombat Class:|n {fmt(data.get('combat_class'))}")
     if data.get("race"):
@@ -243,7 +246,11 @@ def format_mob_summary(data: dict) -> str:
     for label, key in (("|cHP|n", "hp"), ("|cMP|n", "mp"), ("|cSP|n", "sp")):
         if data.get(key) is not None:
             stats.add_row(label, fmt(data.get(key)))
-    for label, key in (("|cDamage|n", "damage"), ("|cArmor|n", "armor"), ("|cInitiative|n", "initiative")):
+    for label, key in (
+        ("|cDamage|n", "damage"),
+        ("|cArmor|n", "armor"),
+        ("|cInitiative|n", "initiative"),
+    ):
         if data.get(key) is not None:
             stats.add_row(label, fmt(data.get(key)))
     if data.get("primary_stats"):
@@ -565,13 +572,21 @@ def _set_creature_type(caller, raw_string, **kwargs):
             "front_legs",
             "hind_legs",
         ]
-        next_node = "menunode_combat_class" if caller.ndb.buildnpc.get("npc_type") == "combatant" else "menunode_roles"
+        next_node = (
+            "menunode_combat_class"
+            if caller.ndb.buildnpc.get("npc_type") in COMBATANT_TYPES
+            else "menunode_roles"
+        )
         return next_node
     if ctype == "unique":
         caller.ndb.buildnpc["equipment_slots"] = list(SLOT_ORDER)
         return "menunode_custom_slots"
     caller.ndb.buildnpc["equipment_slots"] = list(SLOT_ORDER)
-    next_node = "menunode_combat_class" if caller.ndb.buildnpc.get("npc_type") == "combatant" else "menunode_roles"
+    next_node = (
+        "menunode_combat_class"
+        if caller.ndb.buildnpc.get("npc_type") in COMBATANT_TYPES
+        else "menunode_roles"
+    )
     return next_node
 
 
@@ -599,7 +614,11 @@ def _edit_custom_slots(caller, raw_string, **kwargs):
     if string.lower() == "back":
         return "menunode_creature_type"
     if string.lower() in ("done", "finish", "skip", ""):
-        next_node = "menunode_combat_class" if caller.ndb.buildnpc.get("npc_type") == "combatant" else "menunode_roles"
+        next_node = (
+            "menunode_combat_class"
+            if caller.ndb.buildnpc.get("npc_type") in COMBATANT_TYPES
+            else "menunode_roles"
+        )
         return next_node
     if string.lower().startswith("add "):
         slot = string[4:].strip().lower()
@@ -625,9 +644,10 @@ def menunode_npc_type(caller, raw_string="", **kwargs):
     default = caller.ndb.buildnpc.get("npc_type", "base")
     classes = "/".join(NPC_TYPE_MAP)
     example = ", ".join(list(NPC_TYPE_MAP)[:3])
-    text = f"|wNPC type ({example}...)|n ({classes})"
+    text = f"|wNPC Type/Archetype|n ({classes})"
     if default:
         text += f" [default: {default}]"
+    text += f"\nChoose the NPC's general role, e.g. |w{example}|n"
     text += "\n(back to go back, next for default)"
     options = add_back_next({"key": "_default", "goto": _set_npc_type}, _set_npc_type)
     return with_summary(caller, text), options
@@ -648,11 +668,15 @@ def _set_npc_type(caller, raw_string, **kwargs):
 
 
 def menunode_combat_class(caller, raw_string="", **kwargs):
+    if caller.ndb.buildnpc.get("npc_type") not in COMBATANT_TYPES:
+        return menunode_roles(caller)
+
     default = caller.ndb.buildnpc.get("combat_class", "")
     names = ", ".join(entry["name"] for entry in classes.CLASS_LIST)
-    text = f"|wCombat class|n ({names})"
+    text = f"|wCombat Class|n ({names})"
     if default:
         text += f" [default: {default}]"
+    text += "\nChoose a combat specialization."
     text += "\nExample: |wWarrior|n"
     text += "\n(back to go back, next for default)"
     options = add_back_next(
@@ -700,7 +724,7 @@ def _edit_roles(caller, raw_string, **kwargs):
     string = raw_string.strip().lower()
     roles = caller.ndb.buildnpc.setdefault("roles", [])
     if string == "back":
-        if caller.ndb.buildnpc.get("npc_type") == "combatant":
+        if caller.ndb.buildnpc.get("npc_type") in COMBATANT_TYPES:
             return "menunode_combat_class"
         if caller.ndb.buildnpc.get("creature_type") == "unique":
             return "menunode_custom_slots"
@@ -1025,7 +1049,9 @@ def menunode_combat_values(caller, raw_string="", **kwargs):
         (back to go back, skip for default)
         """
     )
-    options = add_back_skip({"key": "_default", "goto": _set_combat_values}, _set_combat_values)
+    options = add_back_skip(
+        {"key": "_default", "goto": _set_combat_values}, _set_combat_values
+    )
     return with_summary(caller, text), options
 
 
@@ -1648,8 +1674,16 @@ def menunode_finalize(caller, raw_string="", **kwargs):
 
     text = "|wFinalize NPC Creation|n"
     options = [
-        {"key": "1", "desc": "Yes & Save Prototype", "goto": (_create_npc, {"register": True})},
-        {"key": "2", "desc": "Yes (Don't Save)", "goto": (_create_npc, {"register": False})},
+        {
+            "key": "1",
+            "desc": "Yes & Save Prototype",
+            "goto": (_create_npc, {"register": True}),
+        },
+        {
+            "key": "2",
+            "desc": "Yes (Don't Save)",
+            "goto": (_create_npc, {"register": False}),
+        },
         {"key": "3", "desc": "Edit Something", "goto": "menunode_review"},
         {"key": "4", "desc": "Cancel", "goto": _cancel},
     ]
@@ -1778,7 +1812,9 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
                 "stamina_cost": 5,
             }
         else:
-            npc.db.natural_weapon["damage"] = data.get("damage", npc.db.natural_weapon.get("damage", 1))
+            npc.db.natural_weapon["damage"] = data.get(
+                "damage", npc.db.natural_weapon.get("damage", 1)
+            )
     else:
         if data.get("damage") is not None:
             npc.db.natural_weapon = npc.db.natural_weapon or {
@@ -1888,7 +1924,7 @@ def _on_menu_exit(caller, menu):
         return
     if getattr(caller.ndb, "buildnpc", None):
         caller.msg(
-            "\u26A0\uFE0F You must choose ‘Yes & Save Prototype’ to make this NPC spawnable with @mspawn."
+            "\u26a0\ufe0f You must choose ‘Yes & Save Prototype’ to make this NPC spawnable with @mspawn."
         )
         caller.ndb.buildnpc = None
 
@@ -1915,7 +1951,9 @@ def _gather_npc_data(npc):
         "hp": npc.traits.health.base if npc.traits.get("health") else 0,
         "mp": npc.traits.mana.base if npc.traits.get("mana") else 0,
         "sp": npc.traits.stamina.base if npc.traits.get("stamina") else 0,
-        "damage": npc.db.natural_weapon.get("damage", 1) if npc.db.natural_weapon else 1,
+        "damage": (
+            npc.db.natural_weapon.get("damage", 1) if npc.db.natural_weapon else 1
+        ),
         "armor": npc.db.armor or 0,
         "initiative": getattr(npc.traits.get("initiative"), "base", 0),
         "primary_stats": npc.db.base_primary_stats or {},
@@ -2169,7 +2207,9 @@ class CmdSpawnNPC(Command):
             proto = get_prototype(vnum)
             if not proto:
                 if vnum_registry.validate_vnum(vnum, "npc"):
-                    self.msg("❌ Invalid VNUM. The prototype was never finalized or saved.")
+                    self.msg(
+                        "❌ Invalid VNUM. The prototype was never finalized or saved."
+                    )
                 else:
                     self.msg("Unknown NPC prototype.")
                 return
