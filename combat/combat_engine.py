@@ -483,4 +483,6 @@ class CombatEngine:
             self.track_aggro(result.target, actor)
         self.cleanup_environment()
         self.round += 1
+        if not self.participants:
+            return
         delay(random.uniform(1, max(1, self.round_time)), self.process_round)
