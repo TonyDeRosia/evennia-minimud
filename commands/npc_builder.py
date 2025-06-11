@@ -1684,7 +1684,6 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.weight = data.get("weight")
     if cc := data.get("combat_class"):
         npc.db.charclass = cc
-        npc.db.class = cc
         npc.db.combat_class = cc
     if vnum := data.get("vnum"):
         npc.db.vnum = vnum
@@ -1896,7 +1895,7 @@ def finalize_mob_prototype(caller, npc):
         caller.msg("|rCannot finalize mob. Missing level or class.|n")
         return
 
-    npc.db.class = npc.db.combat_class
+    npc.db.charclass = npc.db.combat_class
     stats = calculate_combat_stats(npc.db.combat_class, npc.db.level)
     npc.db.hp = stats["hp"]
     npc.db.mp = stats["mp"]
