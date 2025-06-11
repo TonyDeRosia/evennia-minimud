@@ -32,11 +32,17 @@ class CombatScript(Script):
 
         if not self.ndb.teams:
             teams = self.db.teams
-            if not teams:
-                teams = [[], []]
-                self.db.teams = teams
             if hasattr(teams, "deserialize"):
                 teams = teams.deserialize()
+
+            if (not isinstance(teams, list)) or len(teams) != 2:
+                teams = [[], []]
+                self.db.teams = teams
+            else:
+                # ensure each team is a list
+                teams = [list(make_iter(t)) if t else [] for t in teams]
+                self.db.teams = teams
+
             self.ndb.teams = teams
         return self.ndb.teams
 
@@ -164,10 +170,18 @@ class CombatScript(Script):
             self.delete()
             return
 
+        # ensure we have two valid team lists before iterating
+        teams = self.db.teams or [[], []]
+        if hasattr(teams, "deserialize"):
+            teams = teams.deserialize()
+        if not isinstance(teams, list) or len(teams) != 2:
+            teams = [[], []]
+        team_a = teams[0] or []
+        team_b = teams[1] if len(teams) > 1 else []
+
         # create a filtered list of only active fighters for each team
-        team_a, team_b = [
-            [obj for obj in team if obj in active_fighters] for team in self.db.teams
-        ]
+        team_a = [obj for obj in team_a if obj in active_fighters]
+        team_b = [obj for obj in team_b if obj in active_fighters]
 
         if team_a and team_b:
             # both teams are still active
