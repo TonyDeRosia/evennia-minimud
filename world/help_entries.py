@@ -2742,6 +2742,8 @@ Examples:
 
 Notes:
     - Same as |wcnpc edit <npc>|n.
+    - Starts at a summary screen where you can jump directly to
+      any section to edit.
 
 Related:
     help cnpc

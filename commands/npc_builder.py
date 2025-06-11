@@ -313,6 +313,21 @@ def with_summary(caller, text: str) -> str:
     return f"{summary}\n\n{text}"
 
 
+def _next_node(caller, default: str) -> str:
+    """Return ``default`` unless editing from review."""
+    ret = getattr(caller.ndb, "return_to", None)
+    if ret:
+        del caller.ndb.return_to
+        return ret
+    return default
+
+
+def _goto_section(caller, raw_string, node=None, **kwargs):
+    """Helper for jumping to ``node`` while remembering to return."""
+    caller.ndb.return_to = "menunode_review"
+    return node
+
+
 # Menu nodes for NPC creation
 def menunode_key(caller, raw_string="", **kwargs):
     """Prompt for the NPC key."""
@@ -334,7 +349,7 @@ def _set_key(caller, raw_string, **kwargs):
         return "menunode_key"
     caller.ndb.buildnpc = caller.ndb.buildnpc or {}
     caller.ndb.buildnpc["key"] = val
-    return "menunode_desc"
+    return _next_node(caller, "menunode_desc")
 
 
 def menunode_race(caller, raw_string="", **kwargs):
@@ -368,7 +383,7 @@ def _set_race(caller, raw_string, **kwargs):
             )
             return "menunode_race"
     caller.ndb.buildnpc["race"] = string
-    return "menunode_npc_type"
+    return _next_node(caller, "menunode_npc_type")
 
 
 def menunode_gender(caller, raw_string="", **kwargs):
@@ -402,7 +417,7 @@ def _set_gender(caller, raw_string, **kwargs):
             )
             return "menunode_gender"
     caller.ndb.buildnpc["gender"] = string
-    return "menunode_weight"
+    return _next_node(caller, "menunode_weight")
 
 
 def menunode_weight(caller, raw_string="", **kwargs):
@@ -436,7 +451,7 @@ def _set_weight(caller, raw_string, **kwargs):
             )
             return "menunode_weight"
     caller.ndb.buildnpc["weight"] = string
-    return "menunode_level"
+    return _next_node(caller, "menunode_level")
 
 
 def menunode_desc(caller, raw_string="", **kwargs):
@@ -461,7 +476,7 @@ def _set_desc(caller, raw_string, **kwargs):
         caller.msg("Description is required.")
         return "menunode_desc"
     caller.ndb.buildnpc["desc"] = string
-    return "menunode_race"
+    return _next_node(caller, "menunode_race")
 
 
 def menunode_vnum(caller, raw_string="", **kwargs):
@@ -513,7 +528,7 @@ def _set_vnum(caller, raw_string, **kwargs):
 
     data["vnum"] = val
     caller.ndb.buildnpc = data
-    return "menunode_creature_type"
+    return _next_node(caller, "menunode_creature_type")
 
 
 def menunode_guild_affiliation(caller, raw_string="", **kwargs):
@@ -536,7 +551,7 @@ def _set_guild_affiliation(caller, raw_string, **kwargs):
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("guild_affiliation", "")
     caller.ndb.buildnpc["guild_affiliation"] = string
-    return "menunode_role_details"
+    return _next_node(caller, "menunode_role_details")
 
 
 def menunode_creature_type(caller, raw_string="", **kwargs):
@@ -577,17 +592,17 @@ def _set_creature_type(caller, raw_string, **kwargs):
             if caller.ndb.buildnpc.get("npc_type") in COMBATANT_TYPES
             else "menunode_roles"
         )
-        return next_node
+        return _next_node(caller, next_node)
     if ctype == "unique":
         caller.ndb.buildnpc["equipment_slots"] = list(SLOT_ORDER)
-        return "menunode_custom_slots"
+        return _next_node(caller, "menunode_custom_slots")
     caller.ndb.buildnpc["equipment_slots"] = list(SLOT_ORDER)
     next_node = (
         "menunode_combat_class"
         if caller.ndb.buildnpc.get("npc_type") in COMBATANT_TYPES
         else "menunode_roles"
     )
-    return next_node
+    return _next_node(caller, next_node)
 
 
 def menunode_custom_slots(caller, raw_string="", **kwargs):
@@ -619,7 +634,7 @@ def _edit_custom_slots(caller, raw_string, **kwargs):
             if caller.ndb.buildnpc.get("npc_type") in COMBATANT_TYPES
             else "menunode_roles"
         )
-        return next_node
+        return _next_node(caller, next_node)
     if string.lower().startswith("add "):
         slot = string[4:].strip().lower()
         if slot and slot not in slots:
@@ -627,7 +642,7 @@ def _edit_custom_slots(caller, raw_string, **kwargs):
             caller.msg(f"Added {slot} slot.")
         else:
             caller.msg("Slot already present or invalid.")
-        return "menunode_custom_slots"
+        return _next_node(caller, "menunode_custom_slots")
     if string.lower().startswith("remove "):
         slot = string[7:].strip().lower()
         if slot in slots:
@@ -635,9 +650,9 @@ def _edit_custom_slots(caller, raw_string, **kwargs):
             caller.msg(f"Removed {slot} slot.")
         else:
             caller.msg("Slot not found.")
-        return "menunode_custom_slots"
+        return _next_node(caller, "menunode_custom_slots")
     caller.msg("Unknown command.")
-    return "menunode_custom_slots"
+    return _next_node(caller, "menunode_custom_slots")
 
 
 def menunode_npc_type(caller, raw_string="", **kwargs):
@@ -664,7 +679,7 @@ def _set_npc_type(caller, raw_string, **kwargs):
         return "menunode_npc_type"
     caller.ndb.buildnpc["npc_type"] = string
 
-    return "menunode_gender"
+    return _next_node(caller, "menunode_gender")
 
 
 def menunode_combat_class(caller, raw_string="", **kwargs):
@@ -705,7 +720,7 @@ def _set_combat_class(caller, raw_string, **kwargs):
                 break
     caller.ndb.buildnpc["combat_class"] = string
     _auto_fill_combat_stats(caller.ndb.buildnpc)
-    return "menunode_roles"
+    return _next_node(caller, "menunode_roles")
 
 
 def menunode_roles(caller, raw_string="", **kwargs):
@@ -730,7 +745,7 @@ def _edit_roles(caller, raw_string, **kwargs):
             return "menunode_custom_slots"
         return "menunode_creature_type"
     if string in ("done", "finish", "skip", ""):
-        return "menunode_role_details"
+        return _next_node(caller, "menunode_role_details")
     if toggle_multi_select(string, ALLOWED_ROLES, roles):
         return "menunode_roles"
     caller.msg("Invalid selection.")
@@ -776,7 +791,7 @@ def _set_merchant_pricing(caller, raw_string, **kwargs):
             caller.msg("Enter a number.")
             return "menunode_merchant_pricing"
     caller.ndb.buildnpc["merchant_markup"] = val
-    return "menunode_role_details"
+    return _next_node(caller, "menunode_role_details")
 
 
 def menunode_level(caller, raw_string="", **kwargs):
@@ -809,7 +824,7 @@ def _set_level(caller, raw_string, **kwargs):
         return "menunode_level"
     caller.ndb.buildnpc["level"] = val
     _auto_fill_combat_stats(caller.ndb.buildnpc)
-    return "menunode_vnum"
+    return _next_node(caller, "menunode_vnum")
 
 
 def menunode_exp_reward(caller, raw_string="", **kwargs):
@@ -847,7 +862,7 @@ def _set_exp_reward(caller, raw_string, **kwargs):
             caller.msg("Enter a number.")
             return "menunode_exp_reward"
     caller.ndb.buildnpc["exp_reward"] = val
-    return "menunode_coin_drop"
+    return _next_node(caller, "menunode_coin_drop")
 
 
 def menunode_coin_drop(caller, raw_string="", **kwargs):
@@ -884,7 +899,7 @@ def _set_coin_drop(caller, raw_string, **kwargs):
                 return "menunode_coin_drop"
             val[coin.lower()] = val.get(coin.lower(), 0) + int(amt)
     caller.ndb.buildnpc["coin_drop"] = val
-    return "menunode_loot_table"
+    return _next_node(caller, "menunode_loot_table")
 
 
 def menunode_loot_table(caller, raw_string="", **kwargs):
@@ -918,7 +933,7 @@ def _edit_loot_table(caller, raw_string, **kwargs):
     if string.lower() == "back":
         return "menunode_coin_drop"
     if string.lower() in ("done", "finish", "skip", ""):
-        return "menunode_resources_prompt"
+        return _next_node(caller, "menunode_resources_prompt")
     if string.lower().startswith("add "):
         parts = string[4:].split()
         if not parts:
@@ -953,7 +968,7 @@ def _edit_loot_table(caller, raw_string, **kwargs):
                 entry["guaranteed_after"] = guaranteed
             table.append(entry)
             caller.msg(f"Added {proto} ({chance}%).")
-        return "menunode_loot_table"
+        return _next_node(caller, "menunode_loot_table")
     if string.lower().startswith("remove "):
         proto = string[7:].strip()
         for entry in list(table):
@@ -963,9 +978,9 @@ def _edit_loot_table(caller, raw_string, **kwargs):
                 break
         else:
             caller.msg("Entry not found.")
-        return "menunode_loot_table"
+        return _next_node(caller, "menunode_loot_table")
     caller.msg("Unknown command.")
-    return "menunode_loot_table"
+    return _next_node(caller, "menunode_loot_table")
 
 
 def menunode_resources_prompt(caller, raw_string="", **kwargs):
@@ -996,7 +1011,7 @@ def _use_default_resources(caller, raw_string, **kwargs):
     caller.ndb.buildnpc.pop("mp", None)
     caller.ndb.buildnpc.pop("sp", None)
     _preview(caller)
-    return "menunode_combat_values"
+    return _next_node(caller, "menunode_combat_values")
 
 
 def menunode_resources(caller, raw_string="", **kwargs):
@@ -1024,7 +1039,7 @@ def _set_resources(caller, raw_string, **kwargs):
         caller.ndb.buildnpc["mp"] = caller.ndb.buildnpc.get("mp", 0)
         caller.ndb.buildnpc["sp"] = caller.ndb.buildnpc.get("sp", 0)
         _preview(caller)
-        return "menunode_combat_values"
+        return _next_node(caller, "menunode_combat_values")
     parts = string.split()
     if len(parts) != 3 or not all(p.isdigit() for p in parts):
         caller.msg("Enter three numbers separated by spaces.")
@@ -1033,7 +1048,7 @@ def _set_resources(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["mp"] = int(parts[1])
     caller.ndb.buildnpc["sp"] = int(parts[2])
     _preview(caller)
-    return "menunode_combat_values"
+    return _next_node(caller, "menunode_combat_values")
 
 
 def menunode_combat_values(caller, raw_string="", **kwargs):
@@ -1064,7 +1079,7 @@ def _set_combat_values(caller, raw_string, **kwargs):
         caller.ndb.buildnpc["armor"] = caller.ndb.buildnpc.get("armor", 0)
         caller.ndb.buildnpc["initiative"] = caller.ndb.buildnpc.get("initiative", 0)
         _preview(caller)
-        return "menunode_modifiers"
+        return _next_node(caller, "menunode_modifiers")
     parts = string.split()
     if len(parts) != 3 or not all(p.lstrip("-+").isdigit() for p in parts):
         caller.msg("Enter three numbers separated by spaces.")
@@ -1073,7 +1088,7 @@ def _set_combat_values(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["armor"] = int(parts[1])
     caller.ndb.buildnpc["initiative"] = int(parts[2])
     _preview(caller)
-    return "menunode_modifiers"
+    return _next_node(caller, "menunode_modifiers")
 
 
 def menunode_modifiers(caller, raw_string="", **kwargs):
@@ -1102,7 +1117,7 @@ def _set_modifiers(caller, raw_string, **kwargs):
         caller.ndb.buildnpc["modifiers"] = caller.ndb.buildnpc.get("modifiers", {})
         caller.ndb.buildnpc["buffs"] = caller.ndb.buildnpc.get("buffs", [])
         _preview(caller)
-        return "menunode_secondary_stats_prompt"
+        return _next_node(caller, "menunode_secondary_stats_prompt")
     try:
         mods, remainder = parse_stat_mods(string)
     except ValueError as err:
@@ -1114,7 +1129,7 @@ def _set_modifiers(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["modifiers"] = mods
     caller.ndb.buildnpc["buffs"] = buffs
     _preview(caller)
-    return "menunode_secondary_stats_prompt"
+    return _next_node(caller, "menunode_secondary_stats_prompt")
 
 
 def menunode_secondary_stats_prompt(caller, raw_string="", **kwargs):
@@ -1141,7 +1156,7 @@ def _use_default_stats(caller, raw_string, **kwargs):
         for stat in stats
     }
     _preview(caller)
-    return "menunode_behavior"
+    return _next_node(caller, "menunode_behavior")
 
 
 def menunode_stats(caller, raw_string="", **kwargs):
@@ -1170,7 +1185,7 @@ def _set_stats(caller, raw_string, **kwargs):
             for stat in stats
         }
         _preview(caller)
-        return "menunode_behavior"
+        return _next_node(caller, "menunode_behavior")
     parts = string.split()
     if len(parts) != 6 or not all(p.isdigit() for p in parts):
         caller.msg("Enter six numbers separated by spaces.")
@@ -1179,7 +1194,7 @@ def _set_stats(caller, raw_string, **kwargs):
         stat: int(val) for stat, val in zip(stats, parts)
     }
     _preview(caller)
-    return "menunode_behavior"
+    return _next_node(caller, "menunode_behavior")
 
 
 def menunode_behavior(caller, raw_string="", **kwargs):
@@ -1200,7 +1215,7 @@ def _set_behavior(caller, raw_string, **kwargs):
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("behavior", "")
     caller.ndb.buildnpc["behavior"] = string
-    return "menunode_skills"
+    return _next_node(caller, "menunode_skills")
 
 
 def menunode_skills(caller, raw_string="", **kwargs):
@@ -1227,7 +1242,7 @@ def _set_skills(caller, raw_string, **kwargs):
     else:
         skills = [s.strip() for s in string.split(",") if s.strip()]
     caller.ndb.buildnpc["skills"] = skills
-    return "menunode_spells"
+    return _next_node(caller, "menunode_spells")
 
 
 def menunode_spells(caller, raw_string="", **kwargs):
@@ -1251,7 +1266,7 @@ def _set_spells(caller, raw_string, **kwargs):
     else:
         spells = [s.strip() for s in string.split(",") if s.strip()]
     caller.ndb.buildnpc["spells"] = spells
-    return "menunode_ai"
+    return _next_node(caller, "menunode_ai")
 
 
 def menunode_ai(caller, raw_string="", **kwargs):
@@ -1281,8 +1296,8 @@ def _set_ai(caller, raw_string, **kwargs):
         return "menunode_ai"
     caller.ndb.buildnpc["ai_type"] = string
     if caller.ndb.buildnpc.get("use_mob"):
-        return "menunode_actflags"
-    return "menunode_triggers"
+        return _next_node(caller, "menunode_actflags")
+    return _next_node(caller, "menunode_triggers")
 
 
 def menunode_actflags(caller, raw_string="", **kwargs):
@@ -1311,7 +1326,7 @@ def _set_actflags(caller, raw_string, **kwargs):
             caller.msg("Invalid flag.")
             return "menunode_actflags"
     caller.ndb.buildnpc["actflags"] = flags
-    return "menunode_affects"
+    return _next_node(caller, "menunode_affects")
 
 
 def menunode_affects(caller, raw_string="", **kwargs):
@@ -1340,7 +1355,7 @@ def _set_affects(caller, raw_string, **kwargs):
             caller.msg("Invalid affect.")
             return "menunode_affects"
     caller.ndb.buildnpc["affected_by"] = val
-    return "menunode_resists"
+    return _next_node(caller, "menunode_resists")
 
 
 def menunode_resists(caller, raw_string="", **kwargs):
@@ -1369,7 +1384,7 @@ def _set_resists(caller, raw_string, **kwargs):
             caller.msg("Invalid type.")
             return "menunode_resists"
     caller.ndb.buildnpc["resistances"] = val
-    return "menunode_bodyparts"
+    return _next_node(caller, "menunode_bodyparts")
 
 
 def menunode_bodyparts(caller, raw_string="", **kwargs):
@@ -1398,7 +1413,7 @@ def _set_bodyparts(caller, raw_string, **kwargs):
             caller.msg("Invalid bodypart.")
             return "menunode_bodyparts"
     caller.ndb.buildnpc["bodyparts"] = val
-    return "menunode_attack"
+    return _next_node(caller, "menunode_attack")
 
 
 def menunode_attack(caller, raw_string="", **kwargs):
@@ -1427,7 +1442,7 @@ def _set_attack(caller, raw_string, **kwargs):
             caller.msg("Invalid attack type.")
             return "menunode_attack"
     caller.ndb.buildnpc["attack_types"] = val
-    return "menunode_defense"
+    return _next_node(caller, "menunode_defense")
 
 
 def menunode_defense(caller, raw_string="", **kwargs):
@@ -1456,7 +1471,7 @@ def _set_defense(caller, raw_string, **kwargs):
             caller.msg("Invalid defense type.")
             return "menunode_defense"
     caller.ndb.buildnpc["defense_types"] = val
-    return "menunode_languages"
+    return _next_node(caller, "menunode_languages")
 
 
 def menunode_languages(caller, raw_string="", **kwargs):
@@ -1485,7 +1500,7 @@ def _set_languages(caller, raw_string, **kwargs):
             caller.msg("Invalid language.")
             return "menunode_languages"
     caller.ndb.buildnpc["languages"] = val
-    return "menunode_script"
+    return _next_node(caller, "menunode_script")
 
 
 def menunode_script(caller, raw_string="", **kwargs):
@@ -1507,7 +1522,7 @@ def _set_script(caller, raw_string, **kwargs):
     else:
         val = string
     caller.ndb.buildnpc["script"] = val
-    return "menunode_triggers"
+    return _next_node(caller, "menunode_triggers")
 
 
 def menunode_triggers(caller, raw_string="", **kwargs):
@@ -1580,7 +1595,7 @@ def _set_custom_event(caller, raw_string, **kwargs):
 
 def _set_trigger_event(caller, raw_string, event=None, **kwargs):
     caller.ndb.trigger_event = event
-    return "menunode_trigger_match"
+    return _next_node(caller, "menunode_trigger_match")
 
 
 def menunode_trigger_match(caller, raw_string="", **kwargs):
@@ -1596,7 +1611,7 @@ def _set_trigger_match(caller, raw_string, **kwargs):
     if string.lower() in ("back", "skip"):
         return "menunode_trigger_add"
     caller.ndb.trigger_match = string
-    return "menunode_trigger_react"
+    return _next_node(caller, "menunode_trigger_react")
 
 
 def menunode_trigger_react(caller, raw_string="", **kwargs):
@@ -1624,7 +1639,7 @@ def _save_trigger(caller, raw_string, **kwargs):
     caller.ndb.trigger_event = None
     caller.ndb.trigger_match = None
     caller.msg("MobProg added.")
-    return "menunode_triggers"
+    return _next_node(caller, "menunode_triggers")
 
 
 def menunode_trigger_delete(caller, raw_string="", **kwargs):
@@ -1652,7 +1667,7 @@ def _del_trigger(caller, raw_string, event=None, index=None, **kwargs):
     if index is not None and 0 <= index < len(mobprogs):
         mobprogs.pop(index)
         caller.msg("MobProg removed.")
-    return "menunode_triggers"
+    return _next_node(caller, "menunode_triggers")
 
 
 def menunode_review(caller, raw_string="", **kwargs):
@@ -1664,7 +1679,7 @@ def menunode_review(caller, raw_string="", **kwargs):
 
     options = [{"desc": "Continue", "goto": "menunode_finalize"}]
     for label, node in REVIEW_SECTIONS:
-        options.append({"desc": label, "goto": node})
+        options.append({"desc": label, "goto": (_goto_section, {"node": node})})
 
     return text, options
 
@@ -2129,7 +2144,7 @@ class CmdEditNPC(Command):
         EvMenu(
             self.caller,
             "commands.npc_builder",
-            startnode="menunode_desc",
+            startnode="menunode_review",
             cmd_on_exit=_on_menu_exit,
         )
 
