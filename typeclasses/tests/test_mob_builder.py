@@ -296,9 +296,14 @@ class TestMobBuilder(EvenniaTest):
             "creature_type": "humanoid",
             "npc_type": "merchant",
         }
-        text, opts = npc_builder.menunode_confirm(self.char1)
+        text, opts = npc_builder.menunode_finalize(self.char1)
         labels = [o.get("desc") or o.get("key") for o in opts]
-        assert set(labels) == {"Yes", "Yes & Save Prototype", "No"}
+        assert set(labels) == {
+            "Yes & Save Prototype",
+            "Yes (Don't Save)",
+            "Edit Something",
+            "Cancel",
+        }
 
     def test_trigger_cancel_does_not_modify(self):
         """Back or skip should not alter trigger data."""
