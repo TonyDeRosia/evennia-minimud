@@ -806,7 +806,7 @@ class Character(ObjectParent, ClothedCharacter):
             self.refresh_prompt()
 
         if speed := getattr(weapon, "speed", None):
-            delay(speed + 1, self.attack, None, weapon, persistent=True)
+            delay(speed, self.attack, None, weapon, persistent=True)
 
         if hasattr(self, "check_triggers"):
             self.check_triggers("on_attack", target=target, weapon=weapon)

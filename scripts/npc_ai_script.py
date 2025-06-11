@@ -8,7 +8,7 @@ class NPCAIScript(Script):
     """Periodically call :func:`process_ai` for the attached NPC."""
 
     def at_script_creation(self):
-        self.interval = 10
+        self.interval = 1
         self.persistent = True
 
     def at_repeat(self):
