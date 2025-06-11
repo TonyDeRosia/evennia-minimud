@@ -8,6 +8,7 @@ from evennia.prototypes import spawner
 from world.scripts.mob_db import get_mobdb
 from .vnum_registry import get_next_vnum, register_vnum, validate_vnum
 from .mob_utils import mobprogs_to_triggers
+from world import prototypes
 
 
 def register_prototype(data: dict, vnum: int | None = None) -> int:
@@ -35,6 +36,7 @@ def spawn_from_vnum(vnum: int, location=None):
     if not proto:
         return None
     proto_data = dict(proto)
+    prototypes._normalize_proto(proto_data)
     npc = spawner.spawn(proto_data)[0]
     if location:
         npc.location = location

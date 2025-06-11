@@ -137,7 +137,7 @@ REVIEW_SECTIONS = [
     ("Description", "menunode_desc"),
     ("Race", "menunode_race"),
     ("NPC Type", "menunode_npc_type"),
-    ("Sex", "menunode_sex"),
+    ("Gender", "menunode_gender"),
     ("Weight", "menunode_weight"),
     ("Level", "menunode_level"),
     ("VNUM", "menunode_vnum"),
@@ -218,7 +218,7 @@ def format_mob_summary(data: dict) -> str:
     basic = EvTable(border="cells")
     add_row(basic, "|cShort Desc|n", "desc")
     add_row(basic, "|cLevel|n", "level")
-    add_row(basic, "|cSex|n", "sex")
+    add_row(basic, "|cGender|n", "gender")
     add_row(basic, "|cWeight|n", "weight")
     roles = data.get("roles") or []
     if roles:
@@ -358,37 +358,37 @@ def _set_race(caller, raw_string, **kwargs):
     return "menunode_npc_type"
 
 
-def menunode_sex(caller, raw_string="", **kwargs):
-    """Prompt for the NPC sex."""
-    from world.mob_constants import NPC_SEXES
+def menunode_gender(caller, raw_string="", **kwargs):
+    """Prompt for the NPC gender."""
+    from world.mob_constants import NPC_GENDERS
 
-    default = caller.ndb.buildnpc.get("sex", "")
-    options = add_back_skip({"key": "_default", "goto": _set_sex}, _set_sex)
-    sexes = "/".join(s.value for s in NPC_SEXES)
-    text = f"|wSex|n ({sexes})"
+    default = caller.ndb.buildnpc.get("gender", "")
+    options = add_back_skip({"key": "_default", "goto": _set_gender}, _set_gender)
+    sexes = "/".join(s.value for s in NPC_GENDERS)
+    text = f"|wGender|n ({sexes})"
     if default:
         text += f" [default: {default}]"
     text += "\nExample: |wmale|n"
     return with_summary(caller, text), options
 
 
-def _set_sex(caller, raw_string, **kwargs):
-    from world.mob_constants import NPC_SEXES
+def _set_gender(caller, raw_string, **kwargs):
+    from world.mob_constants import NPC_GENDERS
 
     string = raw_string.strip()
     if string.lower() == "back":
         return "menunode_npc_type"
     if not string or string.lower() == "skip":
-        string = caller.ndb.buildnpc.get("sex", "")
+        string = caller.ndb.buildnpc.get("gender", "")
     else:
         try:
-            NPC_SEXES.from_str(string)
+            NPC_GENDERS.from_str(string)
         except ValueError:
             caller.msg(
-                f"Invalid sex. Choose from: {', '.join(s.value for s in NPC_SEXES)}"
+                f"Invalid gender. Choose from: {', '.join(s.value for s in NPC_GENDERS)}"
             )
-            return "menunode_sex"
-    caller.ndb.buildnpc["sex"] = string
+            return "menunode_gender"
+    caller.ndb.buildnpc["gender"] = string
     return "menunode_weight"
 
 
@@ -411,7 +411,7 @@ def _set_weight(caller, raw_string, **kwargs):
 
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_sex"
+        return "menunode_gender"
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("weight", "")
     else:
@@ -638,7 +638,7 @@ def _set_npc_type(caller, raw_string, **kwargs):
         return "menunode_npc_type"
     caller.ndb.buildnpc["npc_type"] = string
 
-    return "menunode_sex"
+    return "menunode_gender"
 
 
 def menunode_combat_class(caller, raw_string="", **kwargs):
@@ -1713,7 +1713,9 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
         npc = create_object(tclass_path, key=data.get("key"), location=caller.location)
     npc.db.desc = data.get("desc")
     npc.db.race = data.get("race")
-    npc.db.sex = data.get("sex")
+    # accept legacy "sex" key
+    gender = data.get("gender") or data.get("sex")
+    npc.db.gender = gender
     npc.db.weight = data.get("weight")
     if cc := data.get("combat_class"):
         npc.db.charclass = cc
@@ -1877,7 +1879,7 @@ def _gather_npc_data(npc):
         "key": npc.key,
         "desc": npc.db.desc,
         "race": npc.db.race or "",
-        "sex": npc.db.sex or "",
+        "gender": npc.db.gender or getattr(npc.db, "sex", ""),
         "weight": npc.db.weight or "",
         "roles": npc.tags.get(category="npc_role", return_list=True) or [],
         "npc_type": next(
@@ -1972,7 +1974,7 @@ class CmdCNPC(Command):
             self.caller.ndb.buildnpc = {
                 "key": rest.strip(),
                 "race": "",
-                "sex": "",
+                "gender": "",
                 "weight": "",
                 "mobprogs": [],
                 "npc_type": "base",

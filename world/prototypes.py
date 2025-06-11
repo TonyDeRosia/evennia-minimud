@@ -520,6 +520,21 @@ def _load_npc_registry() -> Dict[str, dict]:
         return {}
 
 
+_ALIAS_MAP = {
+    "sex": "gender",
+    "coins": "coin_drop",
+    "xp_reward": "exp_reward",
+    "resists": "resistances",
+}
+
+
+def _normalize_proto(proto: dict) -> None:
+    """Convert legacy keys in ``proto`` to current names."""
+    for old, new in _ALIAS_MAP.items():
+        if old in proto and new not in proto:
+            proto[new] = proto[old]
+
+
 def _save_npc_registry(registry: Dict[str, dict]):
     path = _npc_proto_file()
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -540,6 +555,7 @@ def get_npc_prototypes(filter_by: Optional[dict] = None) -> Dict[str, dict]:
 
     registry = _load_npc_registry()
     for proto in registry.values():
+        _normalize_proto(proto)
         if "role" not in proto and proto.get("npc_type"):
             proto["role"] = proto["npc_type"]
     if not filter_by:
@@ -591,6 +607,7 @@ def get_npc_prototypes(filter_by: Optional[dict] = None) -> Dict[str, dict]:
 def register_npc_prototype(key: str, prototype: dict):
     """Save ``prototype`` under ``key`` in the persistent registry."""
     registry = _load_npc_registry()
+    _normalize_proto(prototype)
     registry[key] = prototype
     _save_npc_registry(registry)
 

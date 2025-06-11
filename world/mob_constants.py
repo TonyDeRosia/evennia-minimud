@@ -34,12 +34,15 @@ class NPC_RACES(_StrEnum):
     UNIQUE = "unique"
 
 
-class NPC_SEXES(_StrEnum):
-    """Biological sex options for NPCs."""
+class NPC_GENDERS(_StrEnum):
+    """Gender options for NPCs."""
 
     MALE = "male"
     FEMALE = "female"
     NEUTRAL = "neutral"
+
+# backwards compat
+NPC_SEXES = NPC_GENDERS
 
 
 class NPC_SIZES(_StrEnum):
@@ -191,6 +194,7 @@ def flags_to_string(flags: Iterable[_StrEnum]) -> str:
 
 __all__ = [
     "NPC_RACES",
+    "NPC_GENDERS",
     "NPC_SEXES",
     "NPC_SIZES",
     "NPC_CLASSES",
