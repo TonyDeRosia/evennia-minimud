@@ -96,6 +96,9 @@ class TestMobBuilder(EvenniaTest):
         data = {
             "key": "goblin",
             "desc": "A nasty goblin",
+            "npc_type": "combatant",
+            "combat_class": "Warrior",
+            "roles": ["fighter", "trainer", "fighter"],
             "race": "orc",
             "sex": "male",
             "weight": "small",
@@ -128,6 +131,10 @@ class TestMobBuilder(EvenniaTest):
             assert text in out
         for stat in ["Damage", "Armor", "Initiative"]:
             assert stat in out
+        assert "NPC Type" in out
+        assert "Combat Class" in out
+        assert out.count("fighter") == 1
+        assert "trainer" in out
         assert "slash" in out
         assert "gold" in out
         assert "RAW_MEAT" in out
