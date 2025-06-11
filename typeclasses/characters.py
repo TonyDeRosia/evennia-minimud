@@ -777,6 +777,44 @@ class Character(ObjectParent, ClothedCharacter):
         if self.sessions.count():
             self.msg(prompt=self.get_resource_prompt())
 
+    def attack(self, target, weapon, **kwargs):
+        """Execute an attack using ``weapon`` against ``target``."""
+        if not self.in_combat or self.db.fleeing or self.tags.has("unconscious"):
+            return
+
+        if not target:
+            if not (target := self.db.combat_target):
+                if self.sessions.count():
+                    self.msg("You cannot attack nothing.")
+                return
+        if self.location != target.location:
+            if self.sessions.count():
+                self.msg("You don't see your target.")
+            return
+
+        if not (hasattr(weapon, "at_pre_attack") and hasattr(weapon, "at_attack")):
+            if self.sessions.count():
+                self.msg(f"You cannot attack with {weapon.get_numbered_name(1, self)}.")
+            return
+        if not weapon.at_pre_attack(self):
+            return
+
+        weapon.at_attack(self, target)
+
+        if self.sessions.count():
+            status = self.get_display_status(self)
+            self.msg(prompt=status)
+
+        auto = True
+        if self.account and (settings := self.account.db.settings):
+            auto = settings.get("auto attack")
+        if auto and (speed := getattr(weapon, "speed", None)):
+            delay(speed + 1, self.attack, None, weapon, persistent=True)
+
+        if hasattr(self, "check_triggers"):
+            self.check_triggers("on_attack", target=target, weapon=weapon)
+
+
     def revive(self, reviver, **kwargs):
         """
         Revive a defeated character at partial health.
@@ -823,50 +861,6 @@ class PlayerCharacter(Character):
             self.msg(prompt=status)
         return dmg
 
-    def attack(self, target, weapon, **kwargs):
-        """
-        Execute an attack
-
-        Args:
-            target (Object or None): the entity being attacked. if None, attempts to use the combat_target db attribute
-            weapon (Object): the object dealing damage
-        """
-        # can't attack if we're not in combat!
-        if not self.in_combat:
-            return
-        # can't attack if we're fleeing!
-        if self.db.fleeing:
-            return
-        # make sure that we can use our chosen weapon
-        if not (hasattr(weapon, "at_pre_attack") and hasattr(weapon, "at_attack")):
-            self.msg(f"You cannot attack with {weapon.get_numbered_name(1, self)}.")
-            return
-        if not weapon.at_pre_attack(self):
-            # the method handles its own error messaging
-            return
-
-        # if target is not set, use stored target
-        if not target:
-            # make sure there's a stored target
-            if not (target := self.db.combat_target):
-                self.msg("You cannot attack nothing.")
-                return
-
-        if target.location != self.location:
-            self.msg("You don't see your target.")
-            return
-
-        # attack with the weapon
-        weapon.at_attack(self, target)
-
-        status = self.get_display_status(self)
-        self.msg(prompt=status)
-
-        # check if we have auto-attack in settings
-        if self.account and (settings := self.account.db.settings):
-            if settings.get("auto attack") and (speed := weapon.speed):
-                # queue up next attack; use None for target to reference stored target on execution
-                delay(speed + 1, self.attack, None, weapon, persistent=True)
 
     def respawn(self):
         """
@@ -1062,32 +1056,6 @@ class NPC(Character):
             return
 
         self.attack(target, weapon)
-
-    def attack(self, target, weapon, **kwargs):
-        # can't attack if we're not in combat, or if we're fleeing
-        if not self.in_combat or self.db.fleeing or self.tags.has("unconscious"):
-            return
-
-        # if target is not set, use stored target
-        if not target:
-            # make sure there's a stored target
-            if not (target := self.db.combat_target):
-                return
-        # verify that target is still here
-        if self.location != target.location:
-            return
-
-        # make sure that we can use our chosen weapon
-        if not (hasattr(weapon, "at_pre_attack") and hasattr(weapon, "at_attack")):
-            return
-        if not weapon.at_pre_attack(self):
-            return
-
-        # attack with the weapon
-        weapon.at_attack(self, target)
-        # queue up next attack; use None for target to reference stored target on execution
-        delay(weapon.speed + 1, self.attack, None, weapon, persistent=True)
-        self.check_triggers("on_attack", target=target, weapon=weapon)
 
     def at_pre_attack(self, wielder, **kwargs):
         """
