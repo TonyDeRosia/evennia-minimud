@@ -297,7 +297,7 @@ system is designed to plug into Evennia characters and rooms for dynamic fights.
 ### Damage Types and Resistances
 
 Damage dealt in combat is categorized by `DamageType`. Characters may hold
-resistance flags in their `db.ris` attribute. During damage resolution the
+resistance flags in their `db.resistances` attribute. During damage resolution the
 engine consults a resistance matrix to modify incoming damage. For example:
 
 ```python

@@ -116,7 +116,7 @@ class TestMobBuilder(EvenniaTest):
             "primary_stats": {"STR": 1, "CON": 1},
             "actflags": ["aggressive"],
             "affected_by": ["invisible"],
-            "ris": ["fire"],
+            "resistances": ["fire"],
             "exp_reward": 5,
             "coin_drop": {"gold": 1},
             "loot_table": [{"proto": "RAW_MEAT", "chance": 50}],

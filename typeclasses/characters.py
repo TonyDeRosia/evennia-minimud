@@ -346,7 +346,7 @@ class Character(ObjectParent, ClothedCharacter):
                 dt = None
 
         if dt:
-            resist_values = getattr(self.db, "ris", []) or []
+            resist_values = getattr(self.db, "resistances", []) or []
             resistances = [
                 ResistanceType(r)
                 for r in resist_values
