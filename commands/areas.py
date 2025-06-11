@@ -404,6 +404,8 @@ class AreaCmdSet(CmdSet):
         self.add(CmdRSet)
         self.add(CmdRReg)
         self.add(CmdRSpawner)
+        from .redit import CmdREdit
+        self.add(CmdREdit)
 
 
 
