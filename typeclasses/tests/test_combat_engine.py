@@ -19,9 +19,17 @@ class Dummy:
         self.location = MagicMock()
         self.traits = MagicMock()
         self.traits.get.return_value = MagicMock(value=init)
+        self.traits.health = MagicMock(value=self.hp, max=self.hp)
+        self.db = type("DB", (), {"temp_bonuses": {}})()
         self.on_enter_combat = MagicMock()
         self.on_exit_combat = MagicMock()
         self.msg = MagicMock()
+
+    def at_damage(self, attacker, amount, damage_type=None):
+        self.hp = max(self.hp - amount, 0)
+        if hasattr(self.traits, "health"):
+            self.traits.health.value = self.hp
+        return amount
 
 
 class TestCombatEngine(unittest.TestCase):
@@ -125,23 +133,31 @@ class TestCombatEngine(unittest.TestCase):
             def resolve(self):
                 return CombatResult(self.actor, self.target, "hit", damage=2)
 
-        a = Dummy()
-        b = Dummy()
-        a.key = "attacker"
-        b.key = "victim"
-        room = MagicMock()
-        a.location = b.location = room
-        b.traits.health = MagicMock(value=b.hp, max=b.hp)
+        class MissAction(Action):
+            def resolve(self):
+                return CombatResult(self.actor, self.target, "miss")
 
-        with patch('world.system.state_manager.apply_regen'), \
-             patch('random.randint', return_value=0):
-            engine = CombatEngine([a, b], round_time=0)
-            engine.queue_action(a, DamageAction(a, b))
-            engine.start_round()
-            engine.process_round()
+        for act_cls in (DamageAction, MissAction):
+            a = Dummy()
+            b = Dummy()
+            a.key = "attacker"
+            b.key = "victim"
+            room = MagicMock()
+            a.location = b.location = room
 
-        expected = get_condition_msg(b.hp, b.traits.health.max)
-        room.msg_contents.assert_any_call(f"The {b.key} {expected}")
+            with patch('world.system.state_manager.apply_regen'), \
+                 patch('world.system.state_manager.get_effective_stat', return_value=0), \
+                 patch('random.randint', return_value=0), \
+                 patch('combat.combat_engine.delay'):
+                engine = CombatEngine([a, b], round_time=0)
+                engine.queue_action(a, act_cls(a, b))
+                engine.start_round()
+                engine.process_round()
+
+            expected = get_condition_msg(b.hp, b.traits.health.max)
+            calls = [c.args[0] for c in room.msg_contents.call_args_list]
+            self.assertTrue(any(f"The {b.key} {expected}" in msg for msg in calls))
+            room.reset_mock()
 
 
 class TestCombatDeath(EvenniaTest):
