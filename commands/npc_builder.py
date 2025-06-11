@@ -1871,6 +1871,15 @@ def _cancel(caller, raw_string, **kwargs):
     return None
 
 
+def _on_menu_exit(caller, menu):
+    """Warn user if menu exits with unsaved data."""
+    if getattr(caller.ndb, "buildnpc", None):
+        caller.msg(
+            "\u26A0\uFE0F You must choose ‘Yes & Save Prototype’ to make this NPC spawnable with @mspawn."
+        )
+        caller.ndb.buildnpc = None
+
+
 def _gather_npc_data(npc):
     """Return a dict of editable NPC attributes."""
     return {
@@ -1999,7 +2008,12 @@ class CmdCNPC(Command):
             }
             if use_mob:
                 self.caller.ndb.buildnpc["use_mob"] = True
-            EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
+            EvMenu(
+                self.caller,
+                "commands.npc_builder",
+                startnode="menunode_desc",
+                cmd_on_exit=_on_menu_exit,
+            )
             return
         if sub == "edit":
             if not rest:
@@ -2013,7 +2027,12 @@ class CmdCNPC(Command):
             self.caller.ndb.buildnpc = data
             if use_mob:
                 self.caller.ndb.buildnpc["use_mob"] = True
-            EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
+            EvMenu(
+                self.caller,
+                "commands.npc_builder",
+                startnode="menunode_desc",
+                cmd_on_exit=_on_menu_exit,
+            )
             return
         if sub == "dev_spawn":
             if not self.caller.check_permstring("Developer"):
@@ -2056,7 +2075,12 @@ class CmdEditNPC(Command):
             self.msg("Invalid NPC.")
             return
         self.caller.ndb.buildnpc = _gather_npc_data(npc)
-        EvMenu(self.caller, "commands.npc_builder", startnode="menunode_desc")
+        EvMenu(
+            self.caller,
+            "commands.npc_builder",
+            startnode="menunode_desc",
+            cmd_on_exit=_on_menu_exit,
+        )
 
 
 class CmdDeleteNPC(Command):

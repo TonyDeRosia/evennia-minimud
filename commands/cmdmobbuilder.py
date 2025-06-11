@@ -163,7 +163,12 @@ class CmdMobProto(Command):
             return
         caller.ndb.buildnpc = dict(proto)
         caller.ndb.mob_vnum = vnum
-        EvMenu(caller, "commands.npc_builder", startnode="menunode_desc")
+        EvMenu(
+            caller,
+            "commands.npc_builder",
+            startnode="menunode_desc",
+            cmd_on_exit=npc_builder._on_menu_exit,
+        )
 
     def _sub_diff(self, rest: str):
         caller = self.caller

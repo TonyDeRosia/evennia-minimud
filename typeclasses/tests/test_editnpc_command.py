@@ -17,7 +17,12 @@ class TestEditNPCCommand(EvenniaTest):
         npc = create.create_object(BaseNPC, key="orc", location=self.room1)
         with patch("commands.npc_builder.EvMenu") as mock_menu:
             self.char1.execute_cmd(f"@editnpc {npc.key}")
-            mock_menu.assert_called_with(self.char1, "commands.npc_builder", startnode="menunode_desc")
+            mock_menu.assert_called_with(
+                self.char1,
+                "commands.npc_builder",
+                startnode="menunode_desc",
+                cmd_on_exit=npc_builder._on_menu_exit,
+            )
             data = self.char1.ndb.buildnpc
             assert data["key"] == "orc"
 

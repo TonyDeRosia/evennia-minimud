@@ -26,4 +26,9 @@ class CmdMEdit(Command):
             proto = {"key": f"mob_{vnum}", "level": 1}
         caller.ndb.mob_vnum = vnum
         caller.ndb.buildnpc = dict(proto)
-        EvMenu(caller, "commands.npc_builder", startnode="menunode_desc")
+        EvMenu(
+            caller,
+            "commands.npc_builder",
+            startnode="menunode_desc",
+            cmd_on_exit=npc_builder._on_menu_exit,
+        )
