@@ -4,11 +4,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Optional, Iterable
+import logging
 
 from .damage_types import DamageType
 
 from evennia.utils import utils
 from world.system import state_manager
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -125,6 +128,8 @@ class AttackAction(Action):
                 weapon = self.actor.db.natural_weapon
             else:
                 weapon = self.actor
+
+        logger.debug("AttackAction weapon=%s", getattr(weapon, "key", weapon))
 
         dmg = 0
         dtype = DamageType.BLUDGEONING
