@@ -107,7 +107,6 @@ CLOTHING_TYPE_LIMIT = {
 # Crafting - https://www.evennia.com/docs/latest/Contribs/Contrib-Crafting.html
 CRAFT_RECIPE_MODULES = [
     "world.recipes.smithing",
-    "world.recipes.tailoring",
     "world.recipes.cooking",
 ]
 
