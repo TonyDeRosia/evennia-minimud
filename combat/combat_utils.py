@@ -142,16 +142,16 @@ def get_condition_msg(hp: int, max_hp: int) -> str:
     """Return a short description of current health."""
 
     percent = hp * 100 // max_hp if max_hp else 0
-    if percent >= 100:
+    if percent >= 95:
         return "is in excellent condition."
-    if percent >= 75:
-        return "is slightly wounded."
-    if percent >= 50:
-        return "is wounded."
-    if percent >= 25:
-        return "is covered in blood."
-    if percent >= 10:
-        return "is badly injured."
+    if percent >= 80:
+        return "has a few scratches."
+    if percent >= 60:
+        return "has some wounds."
+    if percent >= 40:
+        return "has nasty wounds."
+    if percent >= 20:
+        return "is bleeding badly."
     if percent > 0:
-        return "is mortally wounded."
+        return "is in awful condition."
     return "is dead."
