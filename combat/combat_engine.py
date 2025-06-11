@@ -25,7 +25,12 @@ class CombatParticipant:
 class CombatEngine:
     """Simple round-based combat engine."""
 
-    def __init__(self, participants: Iterable[object] | None = None, round_time: int = 2, use_initiative: bool = True):
+    def __init__(
+        self,
+        participants: Iterable[object] | None = None,
+        round_time: int = 2,
+        use_initiative: bool = True,
+    ):
         """Create a new combat engine instance.
 
         Parameters
@@ -369,7 +374,9 @@ class CombatEngine:
                 if callable(hook):
                     hook(target, attacker)
 
-    def apply_damage(self, attacker, target, amount: int, damage_type: DamageType | None) -> int:
+    def apply_damage(
+        self, attacker, target, amount: int, damage_type: DamageType | None
+    ) -> int:
         """Apply ``amount`` of damage to ``target`` using its hooks.
 
         Parameters
@@ -467,7 +474,7 @@ class CombatEngine:
                         dt = None
                 damage_done = self.apply_damage(actor, result.target, result.damage, dt)
                 self.dam_message(actor, result.target, damage_done)
-            
+
             if actor.location and not result.damage:
                 actor.location.msg_contents(result.message)
             if getattr(result.target, "hp", 1) <= 0:
@@ -476,4 +483,4 @@ class CombatEngine:
             self.track_aggro(result.target, actor)
         self.cleanup_environment()
         self.round += 1
-        delay(self.round_time, self.process_round)
+        delay(random.uniform(1, max(1, self.round_time)), self.process_round)

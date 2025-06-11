@@ -28,12 +28,16 @@ class CombatScript(Script):
 
     @property
     def teams(self):
-        """
-        Returns a list of lists, where the inner lists are all members of combat teams
-        """
+        """Return cached combat teams or initialize them."""
+
         if not self.ndb.teams:
-            if teams := self.db.teams:
-                self.ndb.teams = teams.deserialize()
+            teams = self.db.teams
+            if not teams:
+                teams = [[], []]
+                self.db.teams = teams
+            if hasattr(teams, "deserialize"):
+                teams = teams.deserialize()
+            self.ndb.teams = teams
         return self.ndb.teams
 
     @property
@@ -127,9 +131,14 @@ class CombatScript(Script):
             return True
 
         # remove combatant from their team
-        self.db.teams[team].remove(combatant)
-        # reset the cache
-        del self.ndb.teams
+        teams = self.db.teams or [[], []]
+        if hasattr(teams, "deserialize"):
+            teams = teams.deserialize()
+        if 0 <= team < len(teams) and combatant in teams[team]:
+            teams[team].remove(combatant)
+            self.db.teams = teams
+            # reset the cache
+            del self.ndb.teams
 
         # grant exp to the other team, if relevant
         if exp := combatant.db.exp_reward:

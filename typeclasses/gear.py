@@ -17,7 +17,7 @@ class BareHand:
     stamina_cost = 3
     skill = "unarmed"
     name = "fist"
-    speed = 5
+    speed = 2
 
     def at_pre_attack(self, wielder, **kwargs):
         """
@@ -93,9 +93,11 @@ class MeleeWeapon(Object):
 
     def is_twohanded(self):
         """Return True if this weapon requires two hands."""
-        return bool(self.db.twohanded) or self.tags.has(
-            "twohanded", category="flag"
-        ) or self.tags.has("two_handed", category="wielded")
+        return (
+            bool(self.db.twohanded)
+            or self.tags.has("twohanded", category="flag")
+            or self.tags.has("two_handed", category="wielded")
+        )
 
     def at_pre_attack(self, wielder, **kwargs):
         """
