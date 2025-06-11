@@ -80,7 +80,6 @@ class BareHand:
                 effect, chance = status
                 if stat_manager.roll_status(wielder, target, int(chance)):
                     state_manager.add_status_effect(target, effect, 1)
-        wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)
 
 
@@ -179,7 +178,6 @@ class MeleeWeapon(Object):
                 effect, chance = status
                 if stat_manager.roll_status(wielder, target, int(chance)):
                     state_manager.add_status_effect(target, effect, 1)
-        wielder.msg(f"[ Cooldown: {self.speed} seconds ]")
         wielder.cooldowns.add("attack", self.speed)
 
 
