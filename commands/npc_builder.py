@@ -247,7 +247,7 @@ def format_mob_summary(data: dict) -> str:
     flags = EvTable(border="cells")
     add_row(flags, "|cAct Flags|n", "actflags")
     add_row(flags, "|cAffects|n", "affected_by")
-    add_row(flags, "|cResists|n", "ris")
+    add_row(flags, "|cResists|n", "resistances")
     if data.get("attack_types"):
         flags.add_row("|cAttacks|n", fmt(data.get("attack_types")))
     if data.get("defense_types"):
@@ -1323,7 +1323,7 @@ def _set_affects(caller, raw_string, **kwargs):
 
 
 def menunode_resists(caller, raw_string="", **kwargs):
-    default = caller.ndb.buildnpc.get("ris", [])
+    default = caller.ndb.buildnpc.get("resistances", [])
     choices = ", ".join(r.value for r in RIS_TYPES)
     text = "|wResistances|n (space separated)"
     if default:
@@ -1340,14 +1340,14 @@ def _set_resists(caller, raw_string, **kwargs):
     if string.lower() == "back":
         return "menunode_affects"
     if not string or string.lower() == "skip":
-        val = caller.ndb.buildnpc.get("ris", [])
+        val = caller.ndb.buildnpc.get("resistances", [])
     else:
         try:
             val = [f.value for f in parse_flag_list(string, RIS_TYPES)]
         except Exception:
             caller.msg("Invalid type.")
             return "menunode_resists"
-    caller.ndb.buildnpc["ris"] = val
+    caller.ndb.buildnpc["resistances"] = val
     return "menunode_bodyparts"
 
 
@@ -1732,7 +1732,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.spells = data.get("spells")
     npc.db.actflags = data.get("actflags")
     npc.db.affected_by = data.get("affected_by")
-    npc.db.ris = data.get("ris")
+    npc.db.resistances = data.get("resistances")
     npc.db.bodyparts = data.get("bodyparts")
     npc.db.attack_types = data.get("attack_types")
     npc.db.defense_types = data.get("defense_types")
@@ -1896,7 +1896,7 @@ def _gather_npc_data(npc):
         "ai_type": npc.db.ai_type or "",
         "actflags": npc.db.actflags or [],
         "affected_by": npc.db.affected_by or [],
-        "ris": npc.db.ris or [],
+        "resistances": npc.db.resistances or [],
         "bodyparts": npc.db.bodyparts or [],
         "attack_types": npc.db.attack_types or [],
         "defense_types": npc.db.defense_types or [],
@@ -1975,7 +1975,7 @@ class CmdCNPC(Command):
                 "roles": [],
                 "skills": [],
                 "spells": [],
-                "ris": [],
+                "resistances": [],
                 "coin_drop": {},
                 "loot_table": [],
                 "exp_reward": 0,

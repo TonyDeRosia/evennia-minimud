@@ -71,7 +71,7 @@ class CmdMStat(Command):
             "saving_throws",
             "attack_types",
             "defense_types",
-            "ris",
+            "resistances",
             "languages",
         }
 
@@ -110,7 +110,7 @@ class CmdMStat(Command):
         )
         table.add_row(
             "|cResists|n",
-            ", ".join(data.get("ris", [])) if data.get("ris") else "--",
+            ", ".join(data.get("resistances", [])) if data.get("resistances") else "--",
         )
         table.add_row(
             "|cLanguages|n",
@@ -193,7 +193,6 @@ class CmdMSet(Command):
         "languages": lambda s: [f.value for f in parse_flag_list(s, LANGUAGES)],
         "bodyparts": lambda s: [f.value for f in parse_flag_list(s, BODYPARTS)],
         "saving_throws": lambda s: [f.value for f in parse_flag_list(s, SAVING_THROWS)],
-        "ris": lambda s: [f.value for f in parse_flag_list(s, RIS_TYPES)],
         "resistances": lambda s: [f.value for f in parse_flag_list(s, RIS_TYPES)],
         "attack_types": lambda s: [f.value for f in parse_flag_list(s, ATTACK_TYPES)],
         "defense_types": lambda s: [f.value for f in parse_flag_list(s, DEFENSE_TYPES)],
