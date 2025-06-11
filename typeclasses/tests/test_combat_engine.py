@@ -19,6 +19,7 @@ class Dummy:
         self.traits.get.return_value = MagicMock(value=init)
         self.on_enter_combat = MagicMock()
         self.on_exit_combat = MagicMock()
+        self.msg = MagicMock()
 
 
 class TestCombatEngine(unittest.TestCase):
@@ -52,3 +53,38 @@ class TestCombatEngine(unittest.TestCase):
             engine.start_round()
             engine.process_round()
             self.assertIn(a, engine.aggro.get(b, {}))
+
+    def test_solo_gain_awards_exp(self):
+        attacker = Dummy()
+        attacker.db = type("DB", (), {"exp": 0})()
+        victim = Dummy()
+        victim.db = type("DB", (), {"exp_reward": 10})()
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.check_level_up'), \
+             patch.object(attacker, 'msg') as mock_msg:
+            engine = CombatEngine([attacker, victim], round_time=0)
+            engine.queue_action(attacker, KillAction(attacker, victim))
+            engine.start_round()
+            engine.process_round()
+            self.assertEqual(attacker.db.exp, 10)
+            mock_msg.assert_called()
+
+    def test_group_gain_splits_exp(self):
+        a = Dummy()
+        b = Dummy()
+        for obj in (a, b):
+            obj.db = type("DB", (), {"exp": 0})()
+        victim = Dummy()
+        victim.db = type("DB", (), {"exp_reward": 9})()
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.check_level_up'), \
+             patch.object(a, 'msg') as msg_a, patch.object(b, 'msg') as msg_b:
+            engine = CombatEngine([a, b, victim], round_time=0)
+            engine.aggro[victim] = {a: 1, b: 1}
+            engine.queue_action(a, KillAction(a, victim))
+            engine.start_round()
+            engine.process_round()
+            self.assertEqual(a.db.exp, 4)
+            self.assertEqual(b.db.exp, 4)
+            msg_a.assert_called()
+            msg_b.assert_called()
