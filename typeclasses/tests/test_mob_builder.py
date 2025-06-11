@@ -333,6 +333,7 @@ class TestMobBuilder(EvenniaTest):
         assert "Mob Prototype" in text
         desc_opt = next(o for o in opts if o.get("desc") == "Description")
         assert desc_opt["goto"] == "menunode_desc"
+        assert not any(o.get("desc") == "Roles" for o in opts)
 
         npc_builder._set_desc(self.char1, "A scary goblin")
         text, _ = npc_builder.menunode_review(self.char1)

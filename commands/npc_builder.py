@@ -143,7 +143,6 @@ REVIEW_SECTIONS = [
     ("VNUM", "menunode_vnum"),
     ("Creature Type", "menunode_creature_type"),
     ("Combat Class", "menunode_combat_class"),
-    ("Roles", "menunode_roles"),
     ("Role Details", "menunode_role_details"),
     ("EXP Reward", "menunode_exp_reward"),
     ("Coin Drop", "menunode_coin_drop"),
