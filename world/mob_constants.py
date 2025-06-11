@@ -31,6 +31,7 @@ class NPC_RACES(_StrEnum):
     PIXIE = "pixie"
     MINOTAUR = "minotaur"
     SATYR = "satyr"
+    UNIQUE = "unique"
 
 
 class NPC_SEXES(_StrEnum):

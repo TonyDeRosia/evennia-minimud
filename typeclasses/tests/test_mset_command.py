@@ -47,3 +47,9 @@ class TestMSetCommand(EvenniaTest):
         reg = prototypes.get_npc_prototypes()
         table = reg["boar"]["loot_table"]
         assert table[0]["guaranteed_after"] == 3
+
+    def test_mset_race_unique(self):
+        prototypes.register_npc_prototype("beast", {"key": "beast"})
+        self.char1.execute_cmd("@mset beast race unique")
+        reg = prototypes.get_npc_prototypes()
+        assert reg["beast"]["race"] == "unique"
