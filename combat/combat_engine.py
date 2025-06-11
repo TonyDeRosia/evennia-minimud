@@ -360,6 +360,8 @@ class CombatEngine:
             target.on_exit_combat()
         if hasattr(target, "at_defeat"):
             target.at_defeat(attacker)
+        if hasattr(target, "on_death"):
+            target.on_death(attacker)
         self.update_pos(target)
         if attacker and attacker.location:
             attacker.location.msg_contents(

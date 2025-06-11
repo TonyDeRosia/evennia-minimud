@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock, patch
 import unittest
+from evennia.utils.test_resources import EvenniaTest
 
 from combat.combat_engine import CombatEngine
 from combat.combat_actions import Action, CombatResult
@@ -141,3 +142,30 @@ class TestCombatEngine(unittest.TestCase):
 
         expected = get_condition_msg(b.hp, b.traits.health.max)
         room.msg_contents.assert_any_call(f"The {b.key} {expected}")
+
+
+class TestCombatDeath(EvenniaTest):
+    def test_npc_death_creates_corpse_and_awards_xp(self):
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        player = self.char1
+        player.db.exp = 0
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+        npc.db.exp_reward = 5
+
+        engine = CombatEngine([player, npc], round_time=0)
+        engine.queue_action(player, KillAction(player, npc))
+
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.check_level_up'):
+            engine.start_round()
+            engine.process_round()
+
+        self.assertEqual(player.db.exp, 5)
+        corpse = next(
+            obj for obj in self.room1.contents
+            if obj.is_typeclass('typeclasses.objects.Corpse', exact=False)
+        )
+        self.assertEqual(corpse.db.corpse_of, npc.key)
