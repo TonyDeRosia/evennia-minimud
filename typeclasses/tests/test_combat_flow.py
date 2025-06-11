@@ -154,3 +154,25 @@ class TestSpellExample(unittest.TestCase):
             engine.process_round()
         caster.cast_spell.assert_called_with("fireball", target)
 
+
+def test_auto_attack_uses_combat_target():
+    attacker = Dummy()
+    defender = Dummy(hp=2)
+    attacker.location = defender.location
+    attacker.db.natural_weapon = {"damage": 1, "damage_type": DamageType.BLUDGEONING}
+    attacker.db.combat_target = defender
+
+    engine = CombatEngine([attacker, defender], round_time=0)
+
+    with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
+         patch("world.system.state_manager.apply_regen"), \
+         patch("world.system.state_manager.get_effective_stat", return_value=0), \
+         patch("evennia.utils.delay"), \
+         patch("random.randint", return_value=0):
+        engine.start_round()
+        engine.process_round()
+        assert defender.hp == 1
+
+        engine.process_round()
+        assert defender.hp == 0
+

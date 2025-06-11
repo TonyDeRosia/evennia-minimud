@@ -442,7 +442,11 @@ class CombatEngine:
             actor = participant.actor
             if not hasattr(actor, "hp") or actor.hp <= 0:
                 continue
-            action = participant.next_action or AttackAction(actor, None)
+            if participant.next_action:
+                action = participant.next_action
+            else:
+                target = getattr(getattr(actor, "db", None), "combat_target", None)
+                action = AttackAction(actor, target)
             actions.append(
                 (
                     participant.initiative,
