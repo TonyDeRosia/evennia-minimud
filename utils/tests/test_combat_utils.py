@@ -97,3 +97,14 @@ class TestCombatUtils(EvenniaTest):
         self.assertIn("5", msg)
         self.assertIn("critical", msg)
 
+    def test_get_condition_msg(self):
+        from combat.combat_utils import get_condition_msg
+
+        self.assertEqual(get_condition_msg(10, 10), "is in excellent condition.")
+        self.assertEqual(get_condition_msg(9, 10), "has a few scratches.")
+        self.assertEqual(get_condition_msg(7, 10), "has some minor wounds.")
+        self.assertEqual(get_condition_msg(5, 10), "is injured.")
+        self.assertEqual(get_condition_msg(3, 10), "is badly injured.")
+        self.assertEqual(get_condition_msg(1, 10), "is in awful condition!")
+        self.assertEqual(get_condition_msg(0, 10), "is nearly dead!")
+

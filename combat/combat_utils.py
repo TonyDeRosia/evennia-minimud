@@ -136,3 +136,22 @@ def format_combat_message(
     if crit:
         parts.append("(critical)")
     return " ".join(parts) + "!"
+
+
+def get_condition_msg(hp: int, max_hp: int) -> str:
+    """Return a short description of current health."""
+
+    percent = hp * 100 // max_hp if max_hp else 0
+    if percent >= 100:
+        return "is in excellent condition."
+    if percent >= 90:
+        return "has a few scratches."
+    if percent >= 75:
+        return "has some minor wounds."
+    if percent >= 50:
+        return "is injured."
+    if percent >= 30:
+        return "is badly injured."
+    if percent >= 10:
+        return "is in awful condition!"
+    return "is nearly dead!"

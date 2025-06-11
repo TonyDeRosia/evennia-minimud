@@ -17,6 +17,7 @@ import math
 from world.triggers import TriggerManager
 from world.spells import Spell
 from combat.combat_actions import CombatResult
+from combat import get_condition_msg
 
 from .objects import ObjectParent
 
@@ -804,10 +805,7 @@ class Character(ObjectParent, ClothedCharacter):
         if self.sessions.count():
             self.refresh_prompt()
 
-        auto = True
-        if self.account and (settings := self.account.db.settings):
-            auto = settings.get("auto attack")
-        if auto and (speed := getattr(weapon, "speed", None)):
+        if speed := getattr(weapon, "speed", None):
             delay(speed + 1, self.attack, None, weapon, persistent=True)
 
         if hasattr(self, "check_triggers"):
@@ -964,6 +962,16 @@ class NPC(Character):
         text = super().return_appearance(looker, **kwargs)
         if looker != self:
             self.check_triggers("on_look", looker=looker)
+        if (
+            looker
+            and looker.has_account
+            and self.is_typeclass("typeclasses.npcs.NPC", exact=False)
+        ):
+            hp = getattr(getattr(self, "traits", None), "health", None)
+            cur = getattr(hp, "value", getattr(self, "hp", 0))
+            max_hp = getattr(hp, "max", getattr(self, "max_hp", cur))
+            cond = get_condition_msg(cur, max_hp)
+            text = text.rstrip() + f"\n{self.get_display_name(looker)} {cond}"
         return text
 
     def at_damage(self, attacker, damage, damage_type=None, critical=False):

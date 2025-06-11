@@ -12,6 +12,7 @@ from .combat_actions import (
 from .combat_states import CombatState, CombatStateManager
 from .combat_skills import Skill, ShieldBash, Cleave, SKILL_CLASSES
 from .damage_types import DamageType
+from .combat_utils import get_condition_msg
 
 __all__ = [
     "CombatEngine",
@@ -28,4 +29,5 @@ __all__ = [
     "Cleave",
     "SKILL_CLASSES",
     "DamageType",
+    "get_condition_msg",
 ]
