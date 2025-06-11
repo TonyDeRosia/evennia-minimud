@@ -5,6 +5,7 @@ from evennia import CmdSet, create_object
 from .command import Command
 from scripts.area_spawner import AreaSpawner
 from world.areas import Area, get_areas, save_area, update_area, find_area
+from .aedit import CmdAEdit, CmdAList, CmdASave, CmdAreaReset, CmdAreaAge
 from typeclasses.rooms import Room
 
 
@@ -394,7 +395,11 @@ class AreaCmdSet(CmdSet):
 
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
-        self.add(CmdAreas)
+        self.add(CmdAList)
+        self.add(CmdASave)
+        self.add(CmdAEdit)
+        self.add(CmdAreaReset)
+        self.add(CmdAreaAge)
         self.add(CmdAMake)
         self.add(CmdASet)
         self.add(CmdRooms)
