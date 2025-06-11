@@ -85,7 +85,10 @@ class TestVnumMobs(EvenniaTest):
         with patch("commands.cmdmobbuilder.EvMenu") as mock_menu:
             self.char1.execute_cmd("@mobproto edit 1")
         mock_menu.assert_called_with(
-            self.char1, "commands.npc_builder", startnode="menunode_desc"
+            self.char1,
+            "commands.npc_builder",
+            startnode="menunode_desc",
+            cmd_on_exit=npc_builder._on_menu_exit,
         )
         self.assertEqual(self.char1.ndb.mob_vnum, 1)
         self.assertEqual(self.char1.ndb.buildnpc["key"], "gob")

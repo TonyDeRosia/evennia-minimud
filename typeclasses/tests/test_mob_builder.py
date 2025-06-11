@@ -38,7 +38,10 @@ class TestMobBuilder(EvenniaTest):
         with patch("commands.npc_builder.EvMenu") as mock_menu:
             self.char1.execute_cmd("mobbuilder start goblin")
         mock_menu.assert_called_with(
-            self.char1, "commands.npc_builder", startnode="menunode_desc"
+            self.char1,
+            "commands.npc_builder",
+            startnode="menunode_desc",
+            cmd_on_exit=npc_builder._on_menu_exit,
         )
         npc_builder._set_key(self.char1, "goblin")
         npc_builder._set_desc(self.char1, "A small goblin")
@@ -93,6 +96,15 @@ class TestMobBuilder(EvenniaTest):
     def test_cancel_then_back(self):
         """Cancellation should clear build data."""
         npc_builder._cancel(self.char1, "")
+        assert self.char1.ndb.buildnpc is None
+
+    def test_on_exit_warns_if_unsaved(self):
+        """_on_menu_exit should warn if build data remains."""
+        self.char1.ndb.buildnpc = {}
+        npc_builder._on_menu_exit(self.char1, None)
+        self.char1.msg.assert_called_with(
+            "\u26A0\uFE0F You must choose ‘Yes & Save Prototype’ to make this NPC spawnable with @mspawn."
+        )
         assert self.char1.ndb.buildnpc is None
 
     def test_summary_contains_sections(self):

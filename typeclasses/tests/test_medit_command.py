@@ -35,7 +35,10 @@ class TestMEditCommand(EvenniaTest):
         with patch("commands.npc_builder.EvMenu") as mock_menu:
             self.char1.execute_cmd("medit 5")
             mock_menu.assert_called_with(
-                self.char1, "commands.npc_builder", startnode="menunode_desc"
+                self.char1,
+                "commands.npc_builder",
+                startnode="menunode_desc",
+                cmd_on_exit=npc_builder._on_menu_exit,
             )
         data = self.char1.ndb.buildnpc
         assert data["key"] == "orc"
