@@ -1646,9 +1646,23 @@ def menunode_review(caller, raw_string="", **kwargs):
     text = format_mob_summary(data)
     text += "\n|wReview the NPC and choose a section to edit or continue.|n"
 
-    options = [{"desc": "Continue", "goto": "menunode_confirm"}]
+    options = [{"desc": "Continue", "goto": "menunode_finalize"}]
     for label, node in REVIEW_SECTIONS:
         options.append({"desc": label, "goto": node})
+
+    return text, options
+
+
+def menunode_finalize(caller, raw_string="", **kwargs):
+    """Offer final options before creating the NPC."""
+
+    text = "|wFinalize NPC Creation|n"
+    options = [
+        {"key": "1", "desc": "Yes & Save Prototype", "goto": (_create_npc, {"register": True})},
+        {"key": "2", "desc": "Yes (Don't Save)", "goto": (_create_npc, {"register": False})},
+        {"key": "3", "desc": "Edit Something", "goto": "menunode_review"},
+        {"key": "4", "desc": "Cancel", "goto": _cancel},
+    ]
 
     return text, options
 
@@ -1865,6 +1879,8 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
         caller.msg(
             f"✅ Mob saved and registered as VNUM {npc.db.vnum}. Spawn with: @mspawn M{npc.db.vnum}"
         )
+    if register:
+        caller.ndb.builder_saved = True
     caller.ndb.buildnpc = None
     return None
 
@@ -1877,6 +1893,9 @@ def _cancel(caller, raw_string, **kwargs):
 
 def _on_menu_exit(caller, menu):
     """Warn user if menu exits with unsaved data."""
+    if getattr(caller.ndb, "builder_saved", False):
+        caller.ndb.builder_saved = False
+        return
     if getattr(caller.ndb, "buildnpc", None):
         caller.msg(
             "\u26A0\uFE0F You must choose ‘Yes & Save Prototype’ to make this NPC spawnable with @mspawn."
