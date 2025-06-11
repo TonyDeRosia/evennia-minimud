@@ -104,31 +104,46 @@ class AttackAction(Action):
 
     priority = 1
 
-    def resolve(self) -> CombatResult:
-        """Carry out a basic weapon attack."""
-        target = self.target
-        if not target:
-            return CombatResult(self.actor, self.actor, "No target.")
-        weapon = self.actor
-        if utils.inherits_from(self.actor, "typeclasses.characters.Character"):
-            weapon = self.actor.wielding[0] if self.actor.wielding else self.actor
-        dmg = 0
-        dtype = DamageType.BLUDGEONING
-        if hasattr(target, "hp"):
+def resolve(self) -> CombatResult:
+    """Carry out a basic weapon attack."""
+    target = self.target
+    if not target:
+        return CombatResult(self.actor, self.actor, "No target.")
+    
+    weapon = self.actor
+    if utils.inherits_from(self.actor, "typeclasses.characters.Character"):
+        if self.actor.wielding:
+            weapon = self.actor.wielding[0]
+        elif getattr(self.actor.db, "natural_weapon", None):
+            # Use natural weapon stats when unarmed
+            weapon = self.actor.db.natural_weapon
+        else:
+            weapon = self.actor
+
+    dmg = 0
+    dtype = DamageType.BLUDGEONING
+
+    if hasattr(target, "hp"):
+        if isinstance(weapon, dict):
+            dmg = weapon.get("damage", 0)
+            dtype = weapon.get("damage_type", DamageType.BLUDGEONING)
+        else:
             dmg = getattr(weapon, "damage", 0)
-            # scale damage using attacker stats
-            str_val = state_manager.get_effective_stat(self.actor, "STR")
-            dex_val = state_manager.get_effective_stat(self.actor, "DEX")
-            # Formula: base_damage * (1 + STR*0.012 + DEX*0.004)
-            dmg = int(round(dmg * (1 + str_val * 0.012 + dex_val * 0.004)))
             dtype = getattr(weapon, "damage_type", DamageType.BLUDGEONING)
-        return CombatResult(
-            actor=self.actor,
-            target=target,
-            message=f"{self.actor.key} strikes {target.key} for {dmg} damage!",
-            damage=dmg,
-            damage_type=dtype,
-        )
+
+        # Scale damage using attacker's stats
+        str_val = state_manager.get_effective_stat(self.actor, "STR")
+        dex_val = state_manager.get_effective_stat(self.actor, "DEX")
+        dmg = int(round(dmg * (1 + str_val * 0.012 + dex_val * 0.004)))
+
+    return CombatResult(
+        actor=self.actor,
+        target=target,
+        message=f"{self.actor.key} strikes {target.key} for {dmg} damage!",
+        damage=dmg,
+        damage_type=dtype,
+    )
+
 
 
 class DefendAction(Action):

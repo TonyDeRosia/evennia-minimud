@@ -96,6 +96,24 @@ class TestAttackAction(unittest.TestCase):
 
         self.assertEqual(defender.hp, 4)
 
+def test_npc_attack_uses_natural_weapon(self):
+    attacker = Dummy()
+    defender = Dummy()
+    attacker.wielding = []
+    attacker.location = defender.location
+    attacker.db.natural_weapon = {"damage": 5, "damage_type": DamageType.PIERCING}
+
+    engine = CombatEngine([attacker, defender], round_time=0)
+    engine.queue_action(attacker, AttackAction(attacker, defender))
+
+    with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
+         patch("world.system.state_manager.apply_regen"), \
+         patch("world.system.state_manager.get_effective_stat", return_value=0), \
+         patch("random.randint", return_value=0):
+        engine.start_round()
+        engine.process_round()
+
+    self.assertEqual(defender.hp, 5)
 
 class TestCombatVictory(unittest.TestCase):
     def test_handle_defeat_removes_participant(self):
