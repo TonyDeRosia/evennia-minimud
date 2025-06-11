@@ -4,6 +4,7 @@ from random import choice, randint
 
 from evennia.prototypes import spawner
 from utils.mob_proto import spawn_from_vnum
+from commands.npc_builder import finalize_mob_prototype
 from typeclasses.scripts import Script
 from typeclasses.npcs import BaseNPC
 from world import area_npcs, prototypes
@@ -50,5 +51,6 @@ class AreaSpawner(Script):
             npc = spawner.spawn(proto)[0]
             npc.location = room
             npc.db.prototype_key = proto_key
+        finalize_mob_prototype(npc, npc)
         npc.db.area_tag = area
         npc.db.spawn_room = room
