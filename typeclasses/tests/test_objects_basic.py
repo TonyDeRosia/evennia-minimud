@@ -199,3 +199,20 @@ class TestRoomHeaders(EvenniaTest):
         header = room.get_display_header(self.char1)
         self.assertIn("(2, 3, zone)", header)
 
+
+class TestMeleeWeaponAtAttack(EvenniaTest):
+    def test_damage_dice_only(self):
+        weapon = create_object(
+            "typeclasses.gear.MeleeWeapon", key="sword", location=self.char1
+        )
+        weapon.tags.add("equipment", category="flag")
+        weapon.tags.add("identified", category="flag")
+        weapon.db.damage_dice = "1d4"
+
+        self.char1.at_emote = MagicMock()
+        with patch("world.system.stat_manager.check_hit", return_value=False), patch(
+            "combat.combat_utils.roll_damage", return_value=2
+        ) as mock_roll:
+            weapon.at_attack(self.char1, self.char2)
+            mock_roll.assert_called_with((1, 4))
+
