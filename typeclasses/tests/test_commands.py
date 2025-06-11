@@ -517,6 +517,14 @@ class TestReturnAppearance(EvenniaTest):
         out = self.room1.return_appearance(self.char1)
         self.assertIn("ghost", out)
 
+    def test_npc_condition_displayed(self):
+        from evennia.utils import create
+        from typeclasses.npcs import BaseNPC
+
+        npc = create.create_object(BaseNPC, key="mob", location=self.room1)
+        out = npc.return_appearance(self.char1)
+        self.assertIn("excellent condition", out)
+
 
 class TestRestCommands(EvenniaTest):
     def setUp(self):
