@@ -238,6 +238,18 @@ Example::
     @mspawn mob_goblin
     @mspawn M200001
 
+### Quick Mob
+
+`@quickmob <key> [template]` creates and registers a new mob from a predefined
+template in a single step. Templates are defined in
+`world.templates.mob_templates` and default to `warrior`. The command assigns
+the next free VNUM automatically so you can respawn the mob later with
+``@mspawn M<number>``.
+
+Example::
+
+    @quickmob goblin warrior
+
 ## Mob Prototype Manager
 
 `@mobproto` works with numeric VNUMs to store and spawn NPCs. Newly

@@ -49,6 +49,7 @@ from .mob_builder import (
     CmdMStat,
     CmdMList,
     CmdMobTemplate,
+    CmdQuickMob,
 )
 from .medit import CmdMEdit
 from .cmdmobbuilder import CmdMobProto
@@ -1442,6 +1443,7 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdDupNPC)
         self.add(CmdBuilderTypes)
         self.add(CmdMobTemplate)
+        self.add(CmdQuickMob)
         self.add(CmdMSpawn)
         self.add(CmdMobPreview)
         self.add(CmdMEdit)
