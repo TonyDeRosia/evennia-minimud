@@ -464,9 +464,11 @@ class CombatEngine:
             actor = participant.actor
             valid, err = action.validate()
             if not valid:
-                result = CombatResult(actor=actor, target=actor, message=err)
-            else:
-                result = action.resolve()
+                if hasattr(actor, "msg") and err:
+                    actor.msg(err)
+                participant.next_action = None
+                continue
+            result = action.resolve()
 
             participant.next_action = None
 
@@ -479,14 +481,15 @@ class CombatEngine:
                     except ValueError:
                         dt = None
                 damage_done = self.apply_damage(actor, result.target, result.damage, dt)
-                self.dam_message(actor, result.target, damage_done)
+                if not result.message:
+                    self.dam_message(actor, result.target, damage_done)
                 hp = getattr(getattr(result.target, "traits", None), "health", None)
                 cur = getattr(hp, "value", getattr(result.target, "hp", 0))
                 max_hp = getattr(hp, "max", getattr(result.target, "max_hp", cur))
                 cond = get_condition_msg(cur, max_hp)
-                self.round_output.append(f"{result.target.key} {cond}")
+                self.round_output.append(f"The {result.target.key} {cond}")
 
-            if actor.location and not result.damage:
+            if actor.location and result.message:
                 actor.location.msg_contents(result.message)
             if getattr(result.target, "hp", 1) <= 0:
                 self.handle_defeat(result.target, actor)
