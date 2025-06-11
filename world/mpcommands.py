@@ -88,5 +88,24 @@ def execute_mpcommand(mob, command: str) -> None:
         delay(ticks, mob.execute_cmd, rest)
         return
 
+    if subcmd == "cast":
+        spell = arg
+        target_name = None
+        if " on " in arg:
+            spell, target_name = arg.split(" on ", 1)
+        elif " " in arg:
+            spell, target_name = arg.split(" ", 1)
+        spell = spell.strip().strip("'\"")
+        target = mob.search(target_name.strip()) if target_name else None
+        if hasattr(mob, "cast_spell") and spell:
+            mob.cast_spell(spell.lower(), target=target)
+        return
+
+    if subcmd == "kill":
+        target = mob.search(arg)
+        if target and hasattr(mob, "enter_combat"):
+            mob.enter_combat(target)
+        return
+
     # default: run raw command on mob
     mob.execute_cmd(f"{subcmd} {arg}".strip())
