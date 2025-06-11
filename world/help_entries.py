@@ -2678,12 +2678,11 @@ Notes:
     - createnpc
     - NPC roles include merchant, questgiver, guildmaster,
       guild_receptionist, banker, trainer and wanderer.
-    - NPC classes include base, merchant, banker, trainer, wanderer,
-      guildmaster, guild_receptionist, questgiver, combat_trainer and
-      event_npc.
-    - After choosing the NPC class you may select a combat class like
-      Warrior or Mage.
-    - The builder prompts for description, weight category, role,
+    - NPC types include merchant, banker, trainer, wanderer,
+      combatant and others.
+    - Selecting the combatant type allows you to choose a combat class
+      like Warrior or Mage.
+    - The builder prompts for description, weight category,
       creature type, level, experience reward, optional HP MP SP values,
       primary stats, modifiers or buffs, combat class, behavior, skills,
       spells, resistances and AI type.
@@ -2754,8 +2753,7 @@ Related:
         "category": "Building",
         "text": """Help for npc roles
 
-NPC roles grant extra behavior to an NPC. They are selected during the
-`cnpc` builder at the roles step. Available roles are:
+NPC roles grant extra behavior to an NPC. Available roles are:
     merchant - sells items to players
     banker - stores currency for players
     trainer - teaches skills

@@ -50,7 +50,7 @@ class TestSpawnNPCPrototype(EvenniaTest):
 
         prototypes.register_npc_prototype(
             "legacy_proto",
-            {"key": "legacy", "npc_type": "merchant", "npc_class": "merchant"},
+            {"key": "legacy", "npc_type": "merchant"},
         )
 
         self.char1.execute_cmd("@spawnnpc legacy_proto")

@@ -40,13 +40,13 @@ class TestMListCommand(EvenniaTest):
     def test_prototype_filtering(self):
         prototypes.register_npc_prototype(
             "orc_warrior",
-            {"key": "orc warrior", "npc_class": "warrior", "race": "orc", "roles": ["guard"]},
+            {"key": "orc warrior", "npc_type": "warrior", "race": "orc", "roles": ["guard"]},
         )
         prototypes.register_npc_prototype(
             "elf_mage",
             {
                 "key": "elf mage",
-                "npc_class": "mage",
+                "npc_type": "mage",
                 "race": "elf",
                 "roles": ["questgiver"],
                 "tags": ["caster"],
@@ -65,7 +65,7 @@ class TestMListCommand(EvenniaTest):
     def test_mlist_room_and_area(self):
         proto = {
             "key": "goblin",
-            "npc_class": "warrior",
+            "npc_type": "warrior",
             "level": 1,
             "typeclass": "typeclasses.npcs.BaseNPC",
         }

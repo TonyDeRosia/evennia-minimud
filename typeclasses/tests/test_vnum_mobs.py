@@ -122,7 +122,7 @@ class TestVnumMobs(EvenniaTest):
 
         self.char1.ndb.buildnpc = {
             "key": "ogre",
-            "npc_class": "base",
+            "npc_type": "base",
             "vnum": 12,
             "creature_type": "humanoid",
         }
@@ -140,7 +140,7 @@ class TestVnumMobs(EvenniaTest):
         vnum = 22
         self.char1.ndb.buildnpc = {
             "key": "bugbear",
-            "npc_class": "base",
+            "npc_type": "base",
             "vnum": vnum,
             "creature_type": "humanoid",
         }

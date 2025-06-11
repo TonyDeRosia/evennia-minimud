@@ -43,13 +43,12 @@ class TestMobBuilder(EvenniaTest):
         npc_builder._set_key(self.char1, "goblin")
         npc_builder._set_desc(self.char1, "A small goblin")
         npc_builder._set_race(self.char1, "human")
-        npc_builder._set_npc_class(self.char1, "base")
+        npc_builder._set_npc_type(self.char1, "base")
         npc_builder._set_sex(self.char1, "male")
         npc_builder._set_weight(self.char1, "medium")
         npc_builder._set_level(self.char1, "1")
         npc_builder._set_vnum(self.char1, "auto")
         npc_builder._set_creature_type(self.char1, "humanoid")
-        npc_builder._set_role(self.char1, "")
         npc_builder._set_combat_class(self.char1, "Warrior")
         npc_builder._edit_roles(self.char1, "done")
         npc_builder._set_exp_reward(self.char1, "5")
@@ -157,10 +156,10 @@ class TestMobBuilder(EvenniaTest):
         assert self.char1.ndb.buildnpc["vnum"] == 5
         assert result == "menunode_creature_type"
 
-    def test_npc_class_menu_shows_next(self):
-        """menunode_npc_class should offer a Next option."""
+    def test_npc_type_menu_shows_next(self):
+        """menunode_npc_type should offer a Next option."""
         self.char1.ndb.buildnpc = {}
-        _text, opts = npc_builder.menunode_npc_class(self.char1)
+        _text, opts = npc_builder.menunode_npc_type(self.char1)
         labels = [o.get("desc") or o.get("key") for o in opts]
         assert "Next" in labels
         assert "Skip" not in labels
@@ -183,7 +182,7 @@ class TestMobBuilder(EvenniaTest):
 
     def test_skills_menu_shows_suggestions(self):
         """menunode_skills should list suggested skills for the class."""
-        self.char1.ndb.buildnpc = {"npc_class": "combat_trainer"}
+        self.char1.ndb.buildnpc = {"npc_type": "combat_trainer"}
         text, _ = npc_builder.menunode_skills(self.char1)
         for skill in npc_builder.DEFAULT_SKILLS:
             assert skill in text
@@ -258,7 +257,7 @@ class TestMobBuilder(EvenniaTest):
             "level": 1,
             "vnum": 5,
             "creature_type": "humanoid",
-            "role": "merchant",
+            "npc_type": "merchant",
         }
         result = npc_builder.menunode_confirm(self.char1)
         self.assertEqual(result, "menunode_desc")
@@ -272,7 +271,7 @@ class TestMobBuilder(EvenniaTest):
             "level": 2,
             "vnum": 7,
             "creature_type": "humanoid",
-            "role": "merchant",
+            "npc_type": "merchant",
         }
         text, opts = npc_builder.menunode_confirm(self.char1)
         labels = [o.get("desc") or o.get("key") for o in opts]
@@ -302,6 +301,6 @@ class TestMobBuilder(EvenniaTest):
         """_set_race should accept the 'unique' race value."""
         self.char1.ndb.buildnpc = {}
         result = npc_builder._set_race(self.char1, "unique")
-        assert result == "menunode_npc_class"
+        assert result == "menunode_npc_type"
         assert self.char1.ndb.buildnpc["race"] == "unique"
 
