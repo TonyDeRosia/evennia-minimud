@@ -7,7 +7,13 @@ from utils.mob_proto import spawn_from_vnum, get_prototype
 from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from typeclasses.characters import NPC
 from utils.slots import SLOT_ORDER
-from utils.menu_utils import add_back_skip, add_back_next, add_back_only
+from utils.menu_utils import (
+    add_back_skip,
+    add_back_next,
+    add_back_only,
+    toggle_multi_select,
+    format_multi_select,
+)
 from world.scripts import classes
 from utils import vnum_registry
 from utils.mob_utils import calculate_combat_stats, mobprogs_to_triggers
@@ -680,13 +686,11 @@ def _set_combat_class(caller, raw_string, **kwargs):
 
 def menunode_roles(caller, raw_string="", **kwargs):
     roles = caller.ndb.buildnpc.get("roles", [])
-    available = ", ".join(ALLOWED_ROLES)
     text = "|wEdit NPC Roles|n\n"
-    text += ", ".join(roles) if roles else "None"
+    text += format_multi_select(ALLOWED_ROLES, roles)
     text += (
-        f"\nAvailable roles: {available}\n"
-        "Commands:\n  add <role>\n  remove <role>\n  done - finish\n  back - previous step\n"
-        "Example: |wadd merchant|n"
+        "\nSelect a number or role name to toggle.\n"
+        "done - finish, back - previous step"
     )
     options = add_back_skip({"key": "_default", "goto": _edit_roles}, _edit_roles)
     return with_summary(caller, text), options
@@ -703,23 +707,9 @@ def _edit_roles(caller, raw_string, **kwargs):
         return "menunode_creature_type"
     if string in ("done", "finish", "skip", ""):
         return "menunode_role_details"
-    if string.startswith("add "):
-        role = string[4:].strip()
-        if role in ALLOWED_ROLES and role not in roles:
-            roles.append(role)
-            caller.msg(f"Added role {role}.")
-        else:
-            caller.msg("Invalid or duplicate role.")
+    if toggle_multi_select(string, ALLOWED_ROLES, roles):
         return "menunode_roles"
-    if string.startswith("remove "):
-        role = string[7:].strip()
-        if role in roles:
-            roles.remove(role)
-            caller.msg(f"Removed role {role}.")
-        else:
-            caller.msg("Role not found.")
-        return "menunode_roles"
-    caller.msg("Unknown command.")
+    caller.msg("Invalid selection.")
     return "menunode_roles"
 
 
