@@ -203,15 +203,21 @@ def format_mob_summary(data: dict) -> str:
 
     lines = [f"|cMob Prototype:|n {data.get('key', '--')}"]
 
+    core = []
+    if "vnum" in data and data.get("vnum") is not None:
+        core.append(f"|cVNUM:|n {fmt(data.get('vnum'))}")
+    if data.get("npc_type"):
+        core.append(f"|cNPC Type:|n {fmt(data.get('npc_type'))}")
+    if data.get("combat_class"):
+        core.append(f"|cCombat Class:|n {fmt(data.get('combat_class'))}")
+    if data.get("race"):
+        core.append(f"|cRace:|n {fmt(data.get('race'))}")
+    if core:
+        lines.append(" | ".join(core))
+
     basic = EvTable(border="cells")
     add_row(basic, "|cShort Desc|n", "desc")
     add_row(basic, "|cLevel|n", "level")
-    if "vnum" in data and data.get("vnum") is not None:
-        add_row(basic, "|cVNUM|n", "vnum")
-    add_row(basic, "|cNPC Type|n", "npc_type")
-    if data.get("combat_class"):
-        basic.add_row("|cCombat Class|n", fmt(data.get("combat_class")))
-    add_row(basic, "|cRace|n", "race")
     add_row(basic, "|cSex|n", "sex")
     add_row(basic, "|cWeight|n", "weight")
     roles = data.get("roles") or []

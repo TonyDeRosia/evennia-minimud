@@ -135,8 +135,8 @@ class TestMobBuilder(EvenniaTest):
             assert text in out
         for stat in ["Damage", "Armor", "Initiative"]:
             assert stat in out
-        assert "NPC Type" in out
-        assert "Combat Class" in out
+        for field in ["NPC Type:", "Combat Class:", "Race:", "VNUM:"]:
+            assert field in out
         assert out.count("fighter") == 1
         assert "trainer" in out
         assert "slash" in out
