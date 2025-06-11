@@ -21,3 +21,19 @@ class TestCombatVictory(EvenniaTest):
         # should not raise and should attempt to delete the script
         script.check_victory()
         script.delete.assert_called()
+
+    def test_remove_all_combatants_preserves_team_structure(self):
+        """Removing everyone should leave two empty team lists."""
+        from typeclasses.scripts import CombatScript
+
+        self.room1.scripts.add(CombatScript, key="combat")
+        script = self.room1.scripts.get("combat")[0]
+        script.add_combatant(self.char1, enemy=self.char2)
+
+        script.delete = MagicMock()
+
+        for fighter in list(script.fighters):
+            script.remove_combatant(fighter)
+
+        self.assertEqual(script.db.teams, [[], []])
+        script.check_victory()

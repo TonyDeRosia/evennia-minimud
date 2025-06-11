@@ -142,9 +142,18 @@ class CombatScript(Script):
             teams = teams.deserialize()
         if 0 <= team < len(teams) and combatant in teams[team]:
             teams[team].remove(combatant)
-            self.db.teams = teams
-            # reset the cache
-            del self.ndb.teams
+
+        # ensure two proper list entries remain after the removal
+        if not isinstance(teams, list):
+            teams = [[], []]
+        else:
+            teams = [list(make_iter(t)) if t else [] for t in teams]
+            while len(teams) < 2:
+                teams.append([])
+
+        self.db.teams = teams
+        # reset the cache
+        del self.ndb.teams
 
         # grant exp to the other team, if relevant
         if exp := combatant.db.exp_reward:
