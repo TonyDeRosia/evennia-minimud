@@ -45,6 +45,9 @@ def spawn_from_vnum(vnum: int, location=None):
     npc.db.mobprogs = mobprogs
     npc.db.triggers = mobprogs_to_triggers(mobprogs)
 
+    from commands.npc_builder import finalize_mob_prototype
+    finalize_mob_prototype(npc, npc)
+
     # track how often this prototype has spawned
     mob_db.increment_spawn_count(vnum)
     return npc
