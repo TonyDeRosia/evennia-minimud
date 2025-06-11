@@ -124,7 +124,17 @@ class MeleeWeapon(Object):
         Use this weapon in an attack against a target.
         """
         # get the weapon's damage bonus
-        damage = self.db.dmg
+        damage = 0
+        if dice := getattr(self.db, "damage_dice", None):
+            try:
+                dice_num, dice_sides = map(int, str(dice).lower().split("d"))
+            except (TypeError, ValueError):
+                logger.log_err(f"Invalid damage_dice '{dice}' on {self}")
+                damage = int(self.db.dmg or 0)
+            else:
+                damage = combat_utils.roll_damage((dice_num, dice_sides))
+        else:
+            damage = int(self.db.dmg or 0)
         # pick a random option from our possible damage types
         damage_type = None
         if damage_types := self.tags.get(category="damage_type", return_list=True):
