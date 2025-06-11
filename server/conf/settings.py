@@ -49,6 +49,13 @@ DEFAULT_XP_PER_LEVEL = 10
 # XYZGrid - https://www.evennia.com/docs/latest/Contribs/Contrib-XYZGrid.html
 EXTRA_LAUNCHER_COMMANDS["xyzgrid"] = "evennia.contrib.grid.xyzgrid.launchcmd.xyzcommand"
 PROTOTYPE_MODULES += ["evennia.contrib.grid.xyzgrid.prototypes"]
+# Custom prototype packages
+PROTOTYPE_MODULES += [
+    "world.prototypes.rooms",
+    "world.prototypes.mobs",
+    "world.prototypes.objects",
+    "world.prototypes.areas",
+]
 XYZROOM_PROTOTYPE_OVERRIDE = {"typeclass": "typeclasses.rooms.XYGridRoom"}
 # exits are stored as room.db.exits mappings
 
