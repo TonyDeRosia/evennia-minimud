@@ -278,3 +278,23 @@ class TestMobBuilder(EvenniaTest):
         labels = [o.get("desc") or o.get("key") for o in opts]
         assert set(labels) == {"Yes", "Yes & Save Prototype", "No"}
 
+    def test_trigger_cancel_does_not_modify(self):
+        """Back or skip should not alter trigger data."""
+        self.char1.ndb.buildnpc = {}
+        npc_builder._set_trigger_event(self.char1, None, event="on_attack")
+        result = npc_builder._set_trigger_match(self.char1, "back")
+        assert result == "menunode_trigger_add"
+        assert "mobprogs" not in self.char1.ndb.buildnpc
+
+        npc_builder._set_trigger_event(self.char1, None, event="on_attack")
+        npc_builder._set_trigger_match(self.char1, "hello")
+        result = npc_builder._save_trigger(self.char1, "skip")
+        assert result == "menunode_trigger_match"
+        assert "mobprogs" not in self.char1.ndb.buildnpc
+
+    def test_custom_event_back(self):
+        """Back from custom event should not set event."""
+        result = npc_builder._set_custom_event(self.char1, "back")
+        assert result == "menunode_trigger_add"
+        assert not hasattr(self.char1.ndb, "trigger_event")
+

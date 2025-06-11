@@ -1537,6 +1537,8 @@ def menunode_trigger_custom(caller, raw_string="", **kwargs):
 
 def _set_custom_event(caller, raw_string, **kwargs):
     event = raw_string.strip()
+    if event.lower() in ("back", "skip"):
+        return "menunode_trigger_add"
     if not event:
         caller.msg("Enter a valid event name.")
         return "menunode_trigger_custom"
@@ -1557,7 +1559,10 @@ def menunode_trigger_match(caller, raw_string="", **kwargs):
 
 
 def _set_trigger_match(caller, raw_string, **kwargs):
-    caller.ndb.trigger_match = raw_string.strip()
+    string = raw_string.strip()
+    if string.lower() in ("back", "skip"):
+        return "menunode_trigger_add"
+    caller.ndb.trigger_match = string
     return "menunode_trigger_react"
 
 
@@ -1569,6 +1574,11 @@ def menunode_trigger_react(caller, raw_string="", **kwargs):
 
 def _save_trigger(caller, raw_string, **kwargs):
     reaction = raw_string.strip()
+    if reaction.lower() in ("back", "skip"):
+        caller.ndb.trigger_event = None
+        caller.ndb.trigger_match = None
+        return "menunode_trigger_match"
+
     event = caller.ndb.trigger_event
     match = caller.ndb.trigger_match
     mobprogs = caller.ndb.buildnpc.setdefault("mobprogs", [])
