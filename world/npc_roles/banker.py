@@ -8,15 +8,12 @@ class BankerRole:
         if not depositor or amount <= 0:
             return
 
-        from utils.currency import to_copper, from_copper
+        from utils.currency import deposit_coins
 
-        wallet = depositor.db.coins or {}
-        if to_copper(wallet) < amount:
+        if not deposit_coins(depositor, amount):
             depositor.msg("You don't have that much coin.")
             return
 
-        depositor.db.coins = from_copper(to_copper(wallet) - amount)
-        depositor.db.bank = int(depositor.db.bank or 0) + amount
         depositor.msg(f"You deposit {amount} coins with {self.key}.")
 
     def withdraw(self, withdrawer, amount: int) -> None:
@@ -24,16 +21,12 @@ class BankerRole:
         if not withdrawer or amount <= 0:
             return
 
-        from utils.currency import to_copper, from_copper
+        from utils.currency import withdraw_coins
 
-        balance = int(withdrawer.db.bank or 0)
-        if balance < amount:
+        if not withdraw_coins(withdrawer, amount):
             withdrawer.msg("You do not have that much saved.")
             return
 
-        withdrawer.db.bank = balance - amount
-        wallet = withdrawer.db.coins or {}
-        withdrawer.db.coins = from_copper(to_copper(wallet) + amount)
         withdrawer.msg(f"{self.key} gives you {amount} coins from your account.")
 
     def balance(self, player) -> None:
@@ -54,13 +47,11 @@ class BankerRole:
         if not sender or not receiver or amount <= 0:
             return
 
-        balance = int(sender.db.bank or 0)
-        if balance < amount:
+        from utils.currency import transfer_coins
+
+        if not transfer_coins(sender, receiver, amount):
             sender.msg("You do not have that much saved.")
             return
-
-        sender.db.bank = balance - amount
-        receiver.db.bank = int(receiver.db.bank or 0) + amount
 
         sender.msg(
             f"You transfer {amount} coins to {receiver.get_display_name(sender)} through {self.key}."

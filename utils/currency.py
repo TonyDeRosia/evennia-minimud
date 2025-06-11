@@ -57,3 +57,55 @@ def format_wallet(wallet) -> str:
     return ", ".join(parts)
 
 
+def deposit_coins(character, amount: int) -> bool:
+    """Deposit ``amount`` of coins from ``character``'s wallet into their bank.
+
+    Returns ``True`` if the transaction succeeded, ``False`` otherwise.
+    """
+    if not character or amount <= 0:
+        return False
+
+    wallet = character.db.coins or {}
+    if to_copper(wallet) < amount:
+        return False
+
+    character.db.coins = from_copper(to_copper(wallet) - amount)
+    character.db.bank = int(character.db.bank or 0) + amount
+    return True
+
+
+def withdraw_coins(character, amount: int) -> bool:
+    """Withdraw ``amount`` of coins from ``character``'s bank into their wallet.
+
+    Returns ``True`` if the transaction succeeded, ``False`` otherwise.
+    """
+    if not character or amount <= 0:
+        return False
+
+    balance = int(character.db.bank or 0)
+    if balance < amount:
+        return False
+
+    character.db.bank = balance - amount
+    wallet = character.db.coins or {}
+    character.db.coins = from_copper(to_copper(wallet) + amount)
+    return True
+
+
+def transfer_coins(sender, receiver, amount: int) -> bool:
+    """Transfer ``amount`` coins from ``sender``'s bank to ``receiver``'s bank.
+
+    Returns ``True`` if the transaction succeeded, ``False`` otherwise.
+    """
+    if not sender or not receiver or amount <= 0:
+        return False
+
+    balance = int(sender.db.bank or 0)
+    if balance < amount:
+        return False
+
+    sender.db.bank = balance - amount
+    receiver.db.bank = int(receiver.db.bank or 0) + amount
+    return True
+
+
