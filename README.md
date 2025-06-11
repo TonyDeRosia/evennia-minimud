@@ -368,7 +368,11 @@ three:
 ```bash
 python -m pip install --upgrade pip
 pip install -r requirements-test.txt
+# Install the project itself so tests can import it
+pip install -e .
 ```
+
+You can also run `scripts/setup_test_env.sh` to automate the above steps.
 
 After installing the dependencies, execute the tests with:
 
