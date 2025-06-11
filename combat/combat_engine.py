@@ -28,7 +28,7 @@ class CombatEngine:
     def __init__(
         self,
         participants: Iterable[object] | None = None,
-        round_time: int = 2,
+        round_time: int = 0,
         use_initiative: bool = True,
     ):
         """Create a new combat engine instance.
@@ -38,7 +38,8 @@ class CombatEngine:
         participants
             Optional iterable of initial combatants.
         round_time
-            Seconds between each combat round.
+            Delay between combat rounds in seconds. Defaults to ``0`` which
+            immediately begins the next round after the previous one resolves.
         use_initiative
             If ``True`` initiative rolls determine action order.
         """
@@ -517,4 +518,4 @@ class CombatEngine:
         self.round += 1
         if not self.participants:
             return
-        delay(self.round_time, self.process_round)
+        delay(0, self.process_round)
