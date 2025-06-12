@@ -153,15 +153,14 @@ class RoomParent(ObjectParent):
 
         env_objects, npcs, items, players = [], [], [], []
         for obj in visible:
-            name = obj.get_display_name(looker)
             if obj.db.display_priority == "environment":
-                env_objects.append(name)
+                env_objects.append(obj.get_display_name(looker))
             elif obj.is_typeclass("typeclasses.npcs.NPC", exact=False):
-                npcs.append(name)
+                npcs.append(obj.return_appearance(looker, room=True))
             elif obj.is_typeclass("typeclasses.characters.Character", exact=False):
-                players.append(name)
+                players.append(obj.get_display_name(looker))
             else:
-                items.append(name)
+                items.append(obj.get_display_name(looker))
 
         for category in (env_objects, npcs, items, players):
             if category:
