@@ -1808,9 +1808,17 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.race = data.get("race")
     # accept legacy "sex" key
     gender = data.get("gender") or data.get("sex")
-    npc.db.gender = gender
+    metadata = {
+        "type": data.get("npc_type", NPCType.BASE),
+        "roles": [r for r in data.get("roles", []) if r],
+        "combat_class": data.get("combat_class") or "",
+        "gender": gender or "",
+        "ai_type": data.get("ai_type") or "",
+    }
+    npc.db.metadata = metadata
+    npc.db.gender = metadata["gender"]
     npc.db.weight = data.get("weight")
-    if cc := data.get("combat_class"):
+    if cc := metadata.get("combat_class"):
         npc.db.charclass = cc
         npc.db.combat_class = cc
     if vnum := data.get("vnum"):
@@ -1826,7 +1834,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
         npc.tags.add(guild, category="guild_affiliation")
     if markup := data.get("merchant_markup"):
         npc.db.merchant_markup = markup
-    npc.db.ai_type = data.get("ai_type")
+    npc.db.ai_type = metadata["ai_type"]
     npc.db.behavior = data.get("behavior")
     npc.db.skills = data.get("skills")
     npc.db.spells = data.get("spells")
@@ -1986,15 +1994,16 @@ def _on_menu_exit(caller, menu):
 
 def _gather_npc_data(npc):
     """Return a dict of editable NPC attributes."""
+    meta = npc.db.metadata or {}
     return {
         "edit_obj": npc,
         "proto_key": npc.tags.get(category=PROTOTYPE_TAG_CATEGORY),
         "key": npc.key,
         "desc": npc.db.desc,
         "race": npc.db.race or "",
-        "gender": npc.db.gender or getattr(npc.db, "sex", ""),
+        "gender": meta.get("gender") or npc.db.gender or getattr(npc.db, "sex", ""),
         "weight": npc.db.weight or "",
-        "roles": npc.tags.get(category="npc_role", return_list=True) or [],
+        "roles": meta.get("roles") or npc.tags.get(category="npc_role", return_list=True) or [],
         "npc_type": next(
             (
                 key
@@ -2003,7 +2012,7 @@ def _gather_npc_data(npc):
             ),
             NPCType.BASE,
         ),
-        "combat_class": npc.db.charclass or "",
+        "combat_class": meta.get("combat_class") or npc.db.charclass or "",
         "creature_type": npc.db.creature_type or "humanoid",
         "equipment_slots": npc.db.equipment_slots or list(SLOT_ORDER),
         "level": npc.db.level or 1,
@@ -2019,7 +2028,7 @@ def _gather_npc_data(npc):
         "behavior": npc.db.behavior or "",
         "skills": npc.db.skills or [],
         "spells": npc.db.spells or [],
-        "ai_type": npc.db.ai_type or "",
+        "ai_type": meta.get("ai_type") or npc.db.ai_type or "",
         "actflags": npc.db.actflags or [],
         "affected_by": npc.db.affected_by or [],
         "resistances": npc.db.resistances or [],
