@@ -20,6 +20,7 @@ from evennia.contrib.game_systems.clothing import ContribClothing
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 from evennia.utils import lazy_property
 from world.triggers import TriggerManager
+from utils.mob_utils import mobprogs_to_triggers
 
 from utils.currency import COIN_VALUES
 
@@ -199,6 +200,12 @@ class Object(ObjectParent, DefaultObject):
             self.db.display_priority = "item"
         if self.db.obj_triggers is None:
             self.db.obj_triggers = {}
+
+        if self.db.obj_programs and not self.db.obj_triggers:
+            self.db.obj_triggers = mobprogs_to_triggers(self.db.obj_programs)
+
+        if self.db.obj_triggers:
+            self.trigger_manager.start_random_triggers()
 
     @lazy_property
     def trigger_manager(self):

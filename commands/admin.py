@@ -57,6 +57,8 @@ from .cmdmobbuilder import CmdMobProto
 from .nextvnum import CmdNextVnum
 from .builder_types import CmdBuilderTypes
 from .hedit import CmdHEdit
+from .opedit import CmdOPEdit
+from .rpedit import CmdRPEdit
 
 
 def _safe_split(text):
@@ -1465,3 +1467,5 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdMobProto)
         self.add(CmdNextVnum)
         self.add(CmdHEdit)
+        self.add(CmdOPEdit)
+        self.add(CmdRPEdit)

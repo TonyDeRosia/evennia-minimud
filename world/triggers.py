@@ -57,9 +57,22 @@ class TriggerManager:
         "hour_prog": "hour",
     }
 
-    def __init__(self, obj: Any, attr: str = "triggers"):
+    def __init__(self, obj: Any, attr: str | None = None):
+        """Create manager for ``obj``.
+
+        If ``attr`` is omitted the handler checks for ``obj.db.obj_triggers``
+        and ``obj.db.room_triggers`` before falling back to ``triggers``.
+        """
+
         self.obj = obj
-        self.attr = attr
+        if attr:
+            self.attr = attr
+        elif getattr(obj.db, "obj_triggers", None) is not None:
+            self.attr = "obj_triggers"
+        elif getattr(obj.db, "room_triggers", None) is not None:
+            self.attr = "room_triggers"
+        else:
+            self.attr = "triggers"
 
     # internal ---------------------------------------------------------------
 

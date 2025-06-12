@@ -13,6 +13,7 @@ from evennia.contrib.grid.wilderness.wilderness import WildernessRoom
 from .objects import ObjectParent
 from .scripts import RestockScript
 from world.triggers import TriggerManager
+from utils.mob_utils import mobprogs_to_triggers
 
 from commands.shops import ShopCmdSet
 from commands.skills import TrainCmdSet
@@ -31,6 +32,12 @@ class RoomParent(ObjectParent):
         self.db.exits = self.db.exits or {}
         if self.db.room_triggers is None:
             self.db.room_triggers = {}
+
+        if self.db.room_programs and not self.db.room_triggers:
+            self.db.room_triggers = mobprogs_to_triggers(self.db.room_programs)
+
+        if self.db.room_triggers:
+            self.trigger_manager.start_random_triggers()
 
     @lazy_property
     def trigger_manager(self):

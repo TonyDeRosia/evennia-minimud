@@ -225,6 +225,20 @@ Conditional logic is also available using `if`, `else` and `endif` along with
         mob echo Unlucky...
     endif
 
+### Object and Room Programs
+
+Objects and rooms can have simple programs attached as well. The `opedit`
+and `rpedit` commands add an entry to an object or room prototype by VNUM.
+After entering the number you specify the event name and the command to run.
+For example::
+
+    opedit 100001
+    on_use
+    say It glows brightly.
+
+Programs are saved under `objprogs` or `roomprogs` on the prototype and are
+converted to triggers when the object or room spawns.
+
 ### NPC Prototypes
 
 A prototype is a JSON record stored in `world/prototypes/npcs.json` describing
