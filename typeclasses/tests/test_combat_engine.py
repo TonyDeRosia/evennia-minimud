@@ -350,6 +350,31 @@ class TestMultipleActions(unittest.TestCase):
 
         self.assertEqual(record, ["second", "first"])
 
+    def test_queue_persists_if_round_interrupted(self):
+        class DamageAction(Action):
+            def resolve(self):
+                return CombatResult(self.actor, self.target, "hit", damage=1)
+
+        a = Dummy()
+        b = Dummy()
+        engine = CombatEngine([a, b], round_time=0)
+
+        first = DamageAction(a, b)
+        second = DamageAction(a, b)
+
+        engine.queue_action(a, first)
+        engine.queue_action(a, second)
+
+        with patch("world.system.state_manager.apply_regen"), \
+             patch("random.randint", return_value=0), \
+             patch.object(engine, "track_aggro", side_effect=Exception("stop")):
+            engine.start_round()
+            with self.assertRaises(Exception):
+                engine.process_round()
+
+        participant = next(p for p in engine.participants if p.actor is a)
+        self.assertEqual(participant.next_action, [second])
+
 
 def test_no_recovery_message_after_target_cleared():
     player = Dummy()

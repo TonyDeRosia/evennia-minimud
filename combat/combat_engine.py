@@ -514,11 +514,13 @@ class CombatEngine:
             if not valid:
                 if hasattr(actor, "msg") and err:
                     actor.msg(err)
-                participant.next_action = []
+                if action in participant.next_action:
+                    participant.next_action.remove(action)
                 continue
             result = action.resolve()
 
-            participant.next_action = []
+            if action in participant.next_action:
+                participant.next_action.remove(action)
 
             damage_done = 0
             if result.damage and result.target:
