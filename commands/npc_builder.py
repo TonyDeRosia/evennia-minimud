@@ -6,6 +6,7 @@ from evennia.prototypes import spawner
 from utils.mob_proto import spawn_from_vnum, get_prototype
 from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from typeclasses.characters import NPC
+from world.scripts.mob_db import get_mobdb
 from typeclasses.npcs import (
     BaseNPC,
     MerchantNPC,
@@ -1821,9 +1822,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     tclass = NPC_TYPE_MAP[npc_type]
     tclass_path = f"{tclass.__module__}.{tclass.__name__}"
     role_mixins = [
-        ROLE_MIXIN_MAP[r]
-        for r in data.get("roles", [])
-        if r in ROLE_MIXIN_MAP
+        ROLE_MIXIN_MAP[r] for r in data.get("roles", []) if r in ROLE_MIXIN_MAP
     ]
     dyn_class = type("DynamicNPC", tuple([tclass, *role_mixins]), {})
     if data.get("edit_obj"):
@@ -2013,7 +2012,9 @@ def _gather_npc_data(npc):
         "race": npc.db.race or "",
         "gender": meta.get("gender") or npc.db.gender or getattr(npc.db, "sex", ""),
         "weight": npc.db.weight or "",
-        "roles": meta.get("roles") or npc.tags.get(category="npc_role", return_list=True) or [],
+        "roles": meta.get("roles")
+        or npc.tags.get(category="npc_role", return_list=True)
+        or [],
         "npc_type": next(
             (
                 key
@@ -2062,7 +2063,9 @@ def _gather_npc_data(npc):
 
 def finalize_mob_prototype(caller, npc):
     """Finalize ``npc`` with default combat stats and register it."""
-    if not npc.db.level or not (npc.db.combat_class or (npc.db.metadata or {}).get("combat_class")):
+    if not npc.db.level or not (
+        npc.db.combat_class or (npc.db.metadata or {}).get("combat_class")
+    ):
         caller.msg("|rCannot finalize mob. Missing level or class.|n")
         return
 
@@ -2214,7 +2217,8 @@ class CmdCNPC(Command):
                 if proto_dict:
                     if (
                         proto_dict.get("combat_class")
-                        and NPCType.from_str(proto_dict.get("npc_type", "base")) not in COMBATANT_TYPES
+                        and NPCType.from_str(proto_dict.get("npc_type", "base"))
+                        not in COMBATANT_TYPES
                     ):
                         self.msg("|rCombat class defined for non-combat NPC type.|n")
                     obj = spawner.spawn(proto_dict)[0]
@@ -2246,6 +2250,17 @@ class CmdEditNPC(Command):
             self.msg("Invalid NPC.")
             return
         self.caller.ndb.buildnpc = _gather_npc_data(npc)
+        data = self.caller.ndb.buildnpc
+        mob_db = get_mobdb()
+        vnum = data.get("vnum") or npc.db.vnum
+        finalized = vnum is not None and int(vnum) in mob_db.db.vnums
+        status = "✅" if finalized else "🚫"
+        roles = data.get("roles") or []
+        if isinstance(roles, str):
+            roles = [roles]
+        primary = roles[0] if roles else "-"
+        level = data.get("level") or npc.db.level or "-"
+        self.msg(f"{status} {primary} L{level}")
         EvMenu(
             self.caller,
             "commands.npc_builder",
@@ -2333,7 +2348,11 @@ class CmdSpawnNPC(Command):
                 else:
                     self.msg("Unknown NPC prototype.")
                 return
-            if proto.get("combat_class") and NPCType.from_str(proto.get("npc_type", "base")) not in COMBATANT_TYPES:
+            if (
+                proto.get("combat_class")
+                and NPCType.from_str(proto.get("npc_type", "base"))
+                not in COMBATANT_TYPES
+            ):
                 self.msg("|rCombat class defined for non-combat NPC type.|n")
             obj = spawn_from_vnum(vnum, location=self.caller.location)
             if not obj:
@@ -2355,7 +2374,11 @@ class CmdSpawnNPC(Command):
             if not proto:
                 self.msg("Unknown NPC prototype.")
                 return
-            if proto.get("combat_class") and NPCType.from_str(proto.get("npc_type", "base")) not in COMBATANT_TYPES:
+            if (
+                proto.get("combat_class")
+                and NPCType.from_str(proto.get("npc_type", "base"))
+                not in COMBATANT_TYPES
+            ):
                 self.msg("|rCombat class defined for non-combat NPC type.|n")
             tclass = NPC_TYPE_MAP[NPCType.from_str(proto.get("npc_type", "base"))]
             proto = dict(proto)

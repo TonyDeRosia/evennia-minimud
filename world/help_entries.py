@@ -3011,7 +3011,9 @@ List NPC prototypes or counts of spawned NPCs. Prototypes are read from
 You may filter results with ``class=<name>``, ``race=<name>``,
 ``role=<name>``, ``tag=<tag>`` or ``zone=<area>``. Use ``/room`` to count
 NPCs present in your current room or ``/area`` for the entire area. The
-table shows columns for VNUM, Key, Level, Class, Roles and Count.
+table shows columns for VNUM, Key, Status, Level, Class, Primary Role,
+Roles and Count. Finalized prototypes display a ``✅`` in the Status
+column.
 
 Usage:
     @mlist [area] [/room|/area] [filters]
