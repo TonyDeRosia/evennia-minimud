@@ -156,6 +156,9 @@ def get_temp_bonus(chara, stat: str) -> int:
 
 def get_effective_stat(chara, stat: str) -> int:
     """Return ``stat`` value including temporary bonuses."""
+    if not hasattr(chara, "traits"):
+        return 0
+
     base = stats.sum_bonus(chara, stat)
     base += get_temp_bonus(chara, stat)
     base += get_effect_mods(chara).get(stat, 0)

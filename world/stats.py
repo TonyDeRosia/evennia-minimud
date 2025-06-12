@@ -126,8 +126,12 @@ def apply_stats(chara):
 def sum_bonus(obj, stat_key: str) -> int:
     """Return the total value of a stat, including bonuses."""
     total = 0
-    if (trait := obj.traits.get(stat_key)):
-        total += trait.value
+    traits = getattr(obj, "traits", None)
+    trait_get = getattr(traits, "get", None)
+    if callable(trait_get):
+        trait = trait_get(stat_key)
+        if trait:
+            total += trait.value
     # allow bonuses stored directly on the character
     if hasattr(obj, "attributes"):
         total += obj.attributes.get(f"{stat_key}_bonus", default=0)
