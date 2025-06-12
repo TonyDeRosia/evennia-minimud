@@ -6,17 +6,19 @@ from evennia.prototypes import spawner
 from utils.mob_proto import spawn_from_vnum, get_prototype
 from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from typeclasses.characters import NPC
-from typeclasses.npcs import BaseNPC
-from typeclasses.npcs.merchant import MerchantNPC
-from typeclasses.npcs.banker import BankerNPC
-from typeclasses.npcs.trainer import TrainerNPC
-from typeclasses.npcs.wanderer import WandererNPC
-from typeclasses.npcs.guildmaster import GuildmasterNPC
-from typeclasses.npcs.guild_receptionist import GuildReceptionistNPC
-from typeclasses.npcs.questgiver import QuestGiverNPC
-from typeclasses.npcs.combat import CombatNPC
-from typeclasses.npcs.combat_trainer import CombatTrainerNPC
-from typeclasses.npcs.event_npc import EventNPC
+from typeclasses.npcs import (
+    BaseNPC,
+    MerchantNPC,
+    BankerNPC,
+    TrainerNPC,
+    WandererNPC,
+    GuildmasterNPC,
+    GuildReceptionistNPC,
+    QuestGiverNPC,
+    CombatNPC,
+    CombatTrainerNPC,
+    EventNPC,
+)
 from utils.slots import SLOT_ORDER
 from utils.menu_utils import (
     add_back_skip,
