@@ -124,7 +124,11 @@ class CmdMobProto(Command):
             else:
                 caller.msg("Invalid room.")
                 return
-        npc = spawn_from_vnum(vnum, location=location)
+        try:
+            npc = spawn_from_vnum(vnum, location=location)
+        except ValueError as err:
+            caller.msg(str(err))
+            return
         if not npc:
             caller.msg("Prototype not found.")
         else:

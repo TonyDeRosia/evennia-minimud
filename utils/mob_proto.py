@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Optional
 
 from evennia.prototypes import spawner
+from evennia.utils import logger
 from world.scripts.mob_db import get_mobdb
 from .vnum_registry import get_next_vnum, register_vnum, validate_vnum
 from world import prototypes
@@ -46,6 +47,16 @@ def spawn_from_vnum(vnum: int, location=None):
     proto = mob_db.get_proto(vnum)
     if not proto:
         return None
+    from commands.npc_builder import validate_prototype  # lazy import
+
+    warnings = validate_prototype(proto)
+    if warnings:
+        logger.log_warn(f"Prototype {vnum}: {'; '.join(warnings)}")
+    missing = [field for field in ("key",) if not proto.get(field)]
+    if missing:
+        err = f"Prototype {vnum} missing required field(s): {', '.join(missing)}"
+        logger.log_err(err)
+        raise ValueError(err)
     proto_data = dict(proto)
     prototypes._normalize_proto(proto_data)
     if "typeclass" not in proto_data:

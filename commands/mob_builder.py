@@ -56,7 +56,11 @@ class CmdMSpawn(Command):
                 else:
                     self.msg("Invalid VNUM.")
                 return
-            obj = spawn_from_vnum(vnum, location=self.caller.location)
+            try:
+                obj = spawn_from_vnum(vnum, location=self.caller.location)
+            except ValueError as err:
+                self.msg(str(err))
+                return
             if not obj:
                 self.msg("Prototype not found.")
                 return
@@ -65,7 +69,11 @@ class CmdMSpawn(Command):
             mob_db = get_mobdb()
             vmatch = next((num for num, p in mob_db.db.vnums.items() if p.get("key") == arg), None)
             if vmatch is not None:
-                obj = spawn_from_vnum(vmatch, location=self.caller.location)
+                try:
+                    obj = spawn_from_vnum(vmatch, location=self.caller.location)
+                except ValueError as err:
+                    self.msg(str(err))
+                    return
                 if not obj:
                     self.msg("Prototype not found.")
                     return
@@ -116,7 +124,11 @@ class CmdMobPreview(Command):
             self.msg("Usage: @mobpreview <prototype>")
             return
         if key.isdigit():
-            obj = spawn_from_vnum(int(key), location=self.caller.location)
+            try:
+                obj = spawn_from_vnum(int(key), location=self.caller.location)
+            except ValueError as err:
+                self.msg(str(err))
+                return
             if not obj:
                 self.msg("Prototype not found.")
                 return
