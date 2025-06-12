@@ -92,21 +92,27 @@ class CmdMStat(Command):
         table.add_row("|cFlags|n", ", ".join(flags) if flags else "--")
         table.add_row(
             "|cSaves|n",
-            ", ".join(data.get("saving_throws", []))
-            if data.get("saving_throws")
-            else "--",
+            (
+                ", ".join(data.get("saving_throws", []))
+                if data.get("saving_throws")
+                else "--"
+            ),
         )
         table.add_row(
             "|cAttacks|n",
-            ", ".join(data.get("attack_types", []))
-            if data.get("attack_types")
-            else "--",
+            (
+                ", ".join(data.get("attack_types", []))
+                if data.get("attack_types")
+                else "--"
+            ),
         )
         table.add_row(
             "|cDefenses|n",
-            ", ".join(data.get("defense_types", []))
-            if data.get("defense_types")
-            else "--",
+            (
+                ", ".join(data.get("defense_types", []))
+                if data.get("defense_types")
+                else "--"
+            ),
         )
         table.add_row(
             "|cResists|n",
@@ -196,8 +202,8 @@ class CmdMSet(Command):
         "resistances": lambda s: [f.value for f in parse_flag_list(s, RIS_TYPES)],
         "attack_types": lambda s: [f.value for f in parse_flag_list(s, ATTACK_TYPES)],
         "defense_types": lambda s: [f.value for f in parse_flag_list(s, DEFENSE_TYPES)],
-        "skills": lambda s: [p.strip() for p in s.split(',') if p.strip()],
-        "spells": lambda s: [p.strip() for p in s.split(',') if p.strip()],
+        "skills": lambda s: [p.strip() for p in s.split(",") if p.strip()],
+        "spells": lambda s: [p.strip() for p in s.split(",") if p.strip()],
         "special_funcs": lambda s: [f.value for f in parse_flag_list(s, SPECIAL_FUNCS)],
         "loot_table": json.loads,
     }
@@ -373,15 +379,27 @@ class CmdMList(Command):
 
         mob_db = get_mobdb()
         vnum_lookup = {}
+        finalized_lookup = {}
         for vnum, data in mob_db.db.vnums.items():
             pkey = data.get("proto_key") or data.get("prototype_key") or data.get("key")
             if pkey:
                 vnum_lookup[pkey] = vnum
+                finalized_lookup[pkey] = vnum
         for vnum, proto in extra.items():
             key = proto.get("key", f"mob_{vnum}")
             vnum_lookup[key] = vnum
 
-        table = evtable.EvTable("VNUM", "Key", "Lvl", "Class", "Roles", "Count", border="cells")
+        table = evtable.EvTable(
+            "VNUM",
+            "Key",
+            "Status",
+            "Lvl",
+            "Class",
+            "Primary",
+            "Roles",
+            "Count",
+            border="cells",
+        )
         for key in keys:
             proto = registry.get(key)
             if not proto:
@@ -394,11 +412,20 @@ class CmdMList(Command):
                 or vnum_lookup.get(proto.get("key"))
                 or proto.get("vnum")
             )
+            finalized = False
+            if vnum is not None and int(vnum) in mob_db.db.vnums:
+                finalized = True
+            elif key in finalized_lookup or proto.get("key") in finalized_lookup:
+                finalized = True
+            status = "✅" if finalized else "🚫"
+            primary = roles[0] if roles else "-"
             table.add_row(
                 str(vnum) if vnum is not None else "-",
                 key,
+                status,
                 str(proto.get("level", "-")),
                 proto.get("npc_type", "-"),
+                primary,
                 ", ".join(roles) if roles else "-",
                 str(counts.get(key, 0)),
             )
