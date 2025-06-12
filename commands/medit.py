@@ -30,6 +30,6 @@ class CmdMEdit(Command):
         EvMenu(
             caller,
             "commands.npc_builder",
-            startnode="menunode_desc",
+            startnode="menunode_key",
             cmd_on_exit=npc_builder._on_menu_exit,
         )
