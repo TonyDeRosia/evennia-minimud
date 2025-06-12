@@ -1,6 +1,7 @@
 from evennia.utils.evmenu import EvMenu
 from utils.prototype_manager import load_prototype
 from utils.vnum_registry import validate_vnum, register_vnum
+from utils.mob_proto import get_prototype
 from .command import Command
 from . import npc_builder
 from world.templates.mob_templates import get_template
@@ -40,7 +41,9 @@ class CmdMEdit(Command):
                 caller.msg("Usage: medit <vnum> | medit create <vnum>")
                 return
             vnum = int(sub)
-            proto = load_prototype("npc", vnum)
+            proto = get_prototype(vnum)
+            if proto is None:
+                proto = load_prototype("npc", vnum)
             if proto is None:
                 if not validate_vnum(vnum, "npc"):
                     caller.msg("Invalid or already used VNUM.")
