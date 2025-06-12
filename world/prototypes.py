@@ -534,6 +534,11 @@ def _normalize_proto(proto: dict) -> None:
         if old in proto and new not in proto:
             proto[new] = proto[old]
 
+    proto.setdefault("npc_type", "base")
+    proto.setdefault("race", "human")
+    proto.setdefault("level", 1)
+    proto.setdefault("damage", 1)
+
 
 def _save_npc_registry(registry: Dict[str, dict]):
     path = _npc_proto_file()
