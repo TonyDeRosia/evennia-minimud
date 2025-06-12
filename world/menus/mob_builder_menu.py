@@ -10,6 +10,7 @@ from utils.menu_utils import (
     toggle_multi_select,
     format_multi_select,
 )
+from utils import vnum_registry
 from evennia.utils import dedent
 import re
 
@@ -177,7 +178,8 @@ def _set_weight(caller, raw_string, **kwargs):
             )
             return "menunode_weight"
     caller.ndb.buildnpc["weight"] = string
-    return _next_node(caller, "menunode_vnum")
+    next_step = "menunode_creature_type" if caller.ndb.buildnpc.get("vnum") is not None else "menunode_vnum"
+    return _next_node(caller, next_step)
 
 
 def menunode_desc(caller, raw_string="", **kwargs):

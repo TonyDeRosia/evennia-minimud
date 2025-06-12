@@ -36,6 +36,7 @@ class CmdMEdit(Command):
             proto = get_template("warrior") or {}
             proto.setdefault("key", f"mob_{vnum}")
             proto.setdefault("level", 1)
+            proto["vnum"] = vnum
         else:
             if not sub.isdigit():
                 caller.msg("Usage: medit <vnum> | medit create <vnum>")
@@ -50,6 +51,7 @@ class CmdMEdit(Command):
                     return
                 register_vnum(vnum)
                 proto = {"key": f"mob_{vnum}", "level": 1}
+            proto.setdefault("vnum", vnum)
 
         caller.ndb.mob_vnum = vnum
         caller.ndb.buildnpc = dict(proto)
