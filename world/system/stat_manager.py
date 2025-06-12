@@ -387,10 +387,18 @@ def refresh_stats(obj) -> None:
 
 
 def get_effective_stat(obj, key: str) -> int:
-    """Return ``key`` value including temporary bonuses."""
+    """Return ``key`` value including temporary bonuses.
+
+    Gracefully handles objects without the trait system by
+    falling back to ``0`` for missing values.
+    """
     base = 0
-    if trait := obj.traits.get(key):
-        base = trait.value
+    traits = getattr(obj, "traits", None)
+    trait_get = getattr(traits, "get", None)
+    if callable(trait_get):
+        trait = trait_get(key)
+        if trait:
+            base = trait.value
     bonus_get = getattr(getattr(obj, "db", None), "get", None)
     if callable(bonus_get):
         try:

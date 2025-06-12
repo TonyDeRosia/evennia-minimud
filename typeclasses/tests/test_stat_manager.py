@@ -264,3 +264,8 @@ class TestBonusPersistence(EvenniaTest):
 
         self.assertFalse(self.char1.db.equip_bonuses)
         self.assertFalse(any(itm == item for itm in self.char1.db.equipment.values()))
+
+    def test_effective_stat_handles_objects_without_traits(self):
+        obj = create.create_object("typeclasses.objects.Object", key="rock")
+        self.assertEqual(stat_manager.get_effective_stat(obj, "STR"), 0)
+        self.assertEqual(state_manager.get_effective_stat(obj, "STR"), 0)
