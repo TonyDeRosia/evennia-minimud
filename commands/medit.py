@@ -55,6 +55,7 @@ class CmdMEdit(Command):
 
         caller.ndb.mob_vnum = vnum
         caller.ndb.buildnpc = dict(proto)
+        caller.ndb.buildnpc_orig = dict(caller.ndb.buildnpc)
         startnode = "menunode_desc" if caller.ndb.buildnpc.get("key") else "menunode_key"
         EvMenu(
             caller,

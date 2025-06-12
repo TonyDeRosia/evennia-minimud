@@ -213,7 +213,7 @@ class CmdREdit(Command):
         register_vnum(vnum)
         self.caller.ndb.room_protos = {vnum: {"vnum": vnum, "key": f"Room {vnum}", "desc": "", "flags": [], "exits": {}}}
         self.caller.ndb.current_vnum = vnum
-        state = OLCState(data=self.caller.ndb.room_protos, vnum=vnum)
+        state = OLCState(data=self.caller.ndb.room_protos, vnum=vnum, original=dict(self.caller.ndb.room_protos))
         OLCEditor(
             self.caller,
             "commands.redit",

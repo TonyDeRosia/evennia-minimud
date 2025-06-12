@@ -304,9 +304,19 @@ class TestMobBuilder(EvenniaTest):
         assert set(labels) == {
             "Yes & Save Prototype",
             "Yes (Don't Save)",
+            "Preview Prototype",
             "Edit Something",
+            "Undo Changes",
             "Cancel",
         }
+
+    def test_undo_reverts_changes(self):
+        self.char1.ndb.buildnpc = {"key": "goblin", "desc": "old"}
+        self.char1.ndb.buildnpc_orig = {"key": "goblin", "desc": "old"}
+        self.char1.ndb.buildnpc["desc"] = "new"
+        result = npc_builder._undo_changes(self.char1, "")
+        assert result == "menunode_review"
+        assert self.char1.ndb.buildnpc["desc"] == "old"
 
     def test_trigger_cancel_does_not_modify(self):
         """Back or skip should not alter trigger data."""
