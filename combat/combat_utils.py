@@ -7,6 +7,39 @@ from typing import Tuple
 from world.system import state_manager
 from world.system.stat_manager import check_hit, roll_crit, crit_damage
 
+
+def calculate_initiative(combatant) -> int:
+    """Return an initiative roll using DEX, level and gear bonuses."""
+
+    base = 0
+    if hasattr(combatant, "traits"):
+        trait = combatant.traits.get("initiative")
+        if trait:
+            base = trait.value
+    else:
+        base = getattr(combatant, "initiative", 0)
+
+    level = getattr(getattr(combatant, "db", None), "level", 1) or 1
+    level_bonus = level // 4
+
+    equip_bonus = 0
+    equipment = getattr(combatant, "equipment", None)
+    if isinstance(equipment, dict):
+        for item in equipment.values():
+            if not item:
+                continue
+            if hasattr(item, "attributes"):
+                equip_bonus += item.attributes.get("initiative_bonus", default=0)
+            else:
+                getter = getattr(getattr(item, "db", None), "get", None)
+                if callable(getter):
+                    try:
+                        equip_bonus += getter("initiative_bonus", 0)
+                    except Exception:
+                        pass
+
+    return base + level_bonus + equip_bonus + random.randint(1, 20)
+
 logger = logging.getLogger(__name__)
 
 
