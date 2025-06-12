@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from evennia.utils.evmenu import EvMenu
+from olc.base import OLCEditor, OLCState, OLCValidator
 from utils.prototype_manager import save_prototype
 from utils.vnum_registry import validate_vnum, register_vnum
 from .building import DIR_FULL, OPPOSITE
@@ -213,5 +213,12 @@ class CmdREdit(Command):
         register_vnum(vnum)
         self.caller.ndb.room_protos = {vnum: {"vnum": vnum, "key": f"Room {vnum}", "desc": "", "flags": [], "exits": {}}}
         self.caller.ndb.current_vnum = vnum
-        EvMenu(self.caller, "commands.redit", startnode="menunode_main")
+        state = OLCState(data=self.caller.ndb.room_protos, vnum=vnum)
+        OLCEditor(
+            self.caller,
+            "commands.redit",
+            startnode="menunode_main",
+            state=state,
+            validator=OLCValidator(),
+        ).start()
 

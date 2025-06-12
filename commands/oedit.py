@@ -1,6 +1,6 @@
 # Object prototype editor
 
-from evennia.utils.evmenu import EvMenu
+from olc.base import OLCEditor, OLCState, OLCValidator
 from utils.prototype_manager import (
     load_prototype,
     save_prototype,
@@ -197,5 +197,12 @@ class CmdOEdit(Command):
             proto = {"key": f"object_{vnum}", "typeclass": "typeclasses.objects.Object"}
         self.caller.ndb.obj_proto = dict(proto)
         self.caller.ndb.obj_vnum = vnum
-        EvMenu(self.caller, "commands.oedit", startnode="menunode_main")
+        state = OLCState(data=self.caller.ndb.obj_proto, vnum=vnum)
+        OLCEditor(
+            self.caller,
+            "commands.oedit",
+            startnode="menunode_main",
+            state=state,
+            validator=OLCValidator(),
+        ).start()
 
