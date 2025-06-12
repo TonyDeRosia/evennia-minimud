@@ -1982,8 +1982,12 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
                         caller.msg(
                             f"VNUM {data['vnum']} outside {area} range {rng[0]}-{rng[1]}"
                         )
+                        npc.db.vnum = None
+                        finalize_mob_prototype(caller, npc)
                         return None
                 caller.msg("Invalid VNUM for prototype.")
+                npc.db.vnum = None
+                finalize_mob_prototype(caller, npc)
                 return None
         if area:
             from world import area_npcs
@@ -2097,6 +2101,9 @@ def finalize_mob_prototype(caller, npc):
     ):
         caller.msg("|rCannot finalize mob. Missing level or class.|n")
         return
+
+    from world import stats as world_stats
+    world_stats.apply_stats(npc)
 
     meta = npc.db.metadata or {}
 
