@@ -308,7 +308,8 @@ class CmdSlay(Command):
             self.msg("Target has no health stat.")
             return
         target.traits.health.current = 0
-        target.at_damage(self.caller, 0)
+        if callable(getattr(target, "at_damage", None)):
+            target.at_damage(self.caller, 0)
         self.msg(f"You slay {target.key}.")
 
 

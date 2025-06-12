@@ -38,6 +38,10 @@ class BareHand:
         """
         Hit something with your fists!
         """
+        if not getattr(target, "traits", None) or not callable(getattr(target, "at_damage", None)):
+            if hasattr(wielder, "msg"):
+                wielder.msg("You can't attack that.")
+            return
         damage = self.damage
         # subtract the stamina required to use this
         wielder.traits.stamina.current -= self.stamina_cost
@@ -129,6 +133,10 @@ class MeleeWeapon(Object):
         """
         Use this weapon in an attack against a target.
         """
+        if not getattr(target, "traits", None) or not callable(getattr(target, "at_damage", None)):
+            if hasattr(wielder, "msg"):
+                wielder.msg("You can't attack that.")
+            return
         # get the weapon's damage bonus
         damage = 0
         if dice := getattr(self.db, "damage_dice", None):
