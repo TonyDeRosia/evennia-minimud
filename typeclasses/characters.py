@@ -878,6 +878,29 @@ class PlayerCharacter(Character):
         self.move_to(self.home)
         self.msg(prompt=self.get_display_status(self))
 
+    def return_appearance(self, looker):
+        """Return a description of this player with equipped items."""
+
+        if not looker:
+            return ""
+
+        eq_lines = []
+        for slot, item in self.equipment.items():
+            if not item:
+                continue
+            if not item.access(looker, "view") or not item.access(looker, "search", default=True):
+                continue
+            if hasattr(looker, "can_see") and not looker.can_see(item):
+                continue
+            eq_lines.append(f"|w{slot.capitalize()}|n: {item.get_display_name(looker)}")
+
+        if not eq_lines:
+            eq_lines.append("They are not wearing any equipment.")
+
+        eq_text = "\n".join(eq_lines)
+        desc = self.db.desc or "You see nothing special."
+        return f"{eq_text}\n{desc}"
+
 
 class NPC(Character):
     """Base typeclass for AI-driven non-player characters.
