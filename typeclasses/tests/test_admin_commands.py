@@ -474,6 +474,8 @@ class TestAdminCommands(EvenniaTest):
 
         self.room1.scripts.add(CombatScript, key="combat")
         script = self.room1.scripts.get("combat")[0]
+        # ensure the script is saved before modifying teams
+        script.save()
         script.add_combatant(self.char1, enemy=self.char2)
 
         # defeat the opponent
@@ -486,4 +488,25 @@ class TestAdminCommands(EvenniaTest):
         self.char1.msg.reset_mock()
         self.char1.execute_cmd("peace")
         self.char1.msg.assert_called_with("There is no fighting here.")
+
+    def test_peace_after_npc_initiated_combat(self):
+        """NPC-initiated combat should be stopped cleanly by peace."""
+
+        from typeclasses.npcs import BaseNPC
+        from commands.admin import CmdPeace
+        from evennia.utils import create
+
+        npc = create.create_object(BaseNPC, key="mob", location=self.room1)
+        npc.attack = MagicMock()
+
+        npc.enter_combat(self.char1)
+
+        self.assertTrue(npc.in_combat)
+        self.assertTrue(self.char1.in_combat)
+
+        cmd = CmdPeace()
+        cmd.caller = self.char1
+        cmd.func()
+
+        self.assertFalse(self.room1.scripts.get("combat"))
 

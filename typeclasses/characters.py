@@ -1237,13 +1237,9 @@ class NPC(Character):
         self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
         location = self.location
 
-        if not (combat_script := location.scripts.get("combat")):
-            # there's no combat instance; start one
-            from typeclasses.scripts import CombatScript
+        from typeclasses.scripts import get_or_create_combat_script
 
-            location.scripts.add(CombatScript, key="combat")
-            combat_script = location.scripts.get("combat")
-        combat_script = combat_script[0]
+        combat_script = get_or_create_combat_script(location)
 
         self.db.combat_target = target
         # adding a combatant to combat just returns True if they're already there, so this is safe
