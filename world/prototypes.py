@@ -21,7 +21,7 @@ IRON_DAGGER = {
     "value": 20,
     "stamina_cost": 3,
     "speed": 3,
-    "dmg": 20,
+    "damage_dice": "1d4",
 }
 
 IRON_SWORD = {
@@ -32,7 +32,7 @@ IRON_SWORD = {
     "value": 30,
     "stamina_cost": 5,
     "speed": 7,
-    "dmg": 40,
+    "damage_dice": "1d8",
 }
 
 IRON_GREATSWORD = {
@@ -47,7 +47,7 @@ IRON_GREATSWORD = {
     "value": 50,
     "stamina_cost": 10,
     "speed": 12,
-    "dmg": 60,
+    "damage_dice": "2d6",
 }
 
 IRON_HAUBERK = {
