@@ -440,7 +440,7 @@ class CmdPeace(Command):
             return
 
         combat_script = location.scripts.get("combat")
-        if not combat_script:
+        if not combat_script or combat_script[0].pk is None:
             caller.msg("There is no fighting here.")
             return
 
