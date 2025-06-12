@@ -459,7 +459,12 @@ class CombatEngine:
         for participant in list(self.participants):
             actor = participant.actor
             hp = _current_hp(actor)
-            if getattr(actor, "location", None) is None or (hp is not None and hp <= 0):
+            target = getattr(getattr(actor, "db", None), "combat_target", None)
+            if (
+                getattr(actor, "location", None) is None
+                or (hp is not None and hp <= 0)
+                or target is None
+            ):
                 self.remove_participant(actor)
 
     def process_round(self) -> None:
@@ -484,7 +489,12 @@ class CombatEngine:
             if callable(hook):
                 hook(target)
 
-            queued = participant.next_action or [AttackAction(actor, target)]
+            if participant.next_action:
+                queued = participant.next_action
+            elif target:
+                queued = [AttackAction(actor, target)]
+            else:
+                queued = []
             for idx, action in enumerate(queued):
                 actions.append(
                     (

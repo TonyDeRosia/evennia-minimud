@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call
 import unittest
 from evennia.utils.test_resources import EvenniaTest
 
@@ -324,3 +324,27 @@ class TestMultipleActions(unittest.TestCase):
             engine.process_round()
 
         self.assertEqual(record, ["second", "first"])
+
+
+def test_no_recovery_message_after_target_cleared():
+    player = Dummy()
+    mob = Dummy()
+    player.location = mob.location
+
+    engine = CombatEngine([player, mob], round_time=0)
+    engine.queue_action(player, KillAction(player, mob))
+
+    with patch("world.system.state_manager.apply_regen"), \
+         patch("combat.combat_engine.delay"), \
+         patch("random.randint", return_value=0):
+        engine.start_round()
+        engine.process_round()
+
+        player.msg.reset_mock()
+        player.db.combat_target = None
+        player.cooldowns.ready.return_value = False
+
+        engine.process_round()
+
+    messages = [call.args[0] for call in player.msg.call_args_list]
+    assert "Still recovering." not in messages
