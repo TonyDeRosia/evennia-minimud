@@ -983,7 +983,7 @@ class NPC(Character):
         from utils.currency import COIN_VALUES
         from utils.prototype_manager import load_prototype
 
-        drops = list(self.db.drops)
+        drops = list(self.db.drops or [])
         coin_loot: dict[str, int] = {}
         if loot_table := self.db.loot_table:
             for entry in loot_table:
