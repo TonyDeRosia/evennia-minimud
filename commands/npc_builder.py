@@ -352,6 +352,8 @@ def format_mob_summary(data: dict) -> str:
         loot = []
         for e in data.get("loot_table"):
             part = f"{e.get('proto')}({e.get('chance', 100)}%)"
+            if "amount" in e:
+                part += f" x{e['amount']}"
             if "guaranteed_after" in e:
                 part += f" g:{e['guaranteed_after']}"
             loot.append(part)

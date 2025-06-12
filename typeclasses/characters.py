@@ -940,7 +940,10 @@ class NPC(Character):
 
     def drop_loot(self, killer=None):
         """Create a corpse and deposit any drops and coins."""
+        from utils.currency import COIN_VALUES
+
         drops = list(self.db.drops)
+        coin_loot: dict[str, int] = {}
         if loot_table := self.db.loot_table:
             for entry in loot_table:
                 proto = entry.get("proto")
@@ -949,12 +952,16 @@ class NPC(Character):
                 chance = int(entry.get("chance", 100))
                 guaranteed = entry.get("guaranteed_after")
                 count = entry.get("_count", 0)
-
+                
                 roll = randint(1, 100)
                 if roll <= chance or (
                     guaranteed is not None and count >= int(guaranteed)
                 ):
-                    drops.append(proto)
+                    if proto.lower() in COIN_VALUES:
+                        amt = int(entry.get("amount", 1))
+                        coin_loot[proto.lower()] = coin_loot.get(proto.lower(), 0) + amt
+                    else:
+                        drops.append(proto)
                     entry["_count"] = 0
                 else:
                     entry["_count"] = count + 1
@@ -981,6 +988,8 @@ class NPC(Character):
         if self.db.coins:
             for coin, amt in (self.db.coins or {}).items():
                 coin_map[coin] = coin_map.get(coin, 0) + int(amt)
+        for coin, amt in coin_loot.items():
+            coin_map[coin] = coin_map.get(coin, 0) + int(amt)
 
         if coin_map:
             total_copper = to_copper(coin_map)

@@ -233,6 +233,13 @@ class TestMobBuilder(EvenniaTest):
             {"proto": "RAW_MEAT", "chance": 50, "guaranteed_after": 2}
         ]
 
+    def test_edit_loot_table_coin_amount(self):
+        self.char1.ndb.buildnpc = {}
+        npc_builder._edit_loot_table(self.char1, "add gold 100 5")
+        assert self.char1.ndb.buildnpc["loot_table"] == [
+            {"proto": "gold", "chance": 100, "amount": 5}
+        ]
+
     def test_exp_reward_back_returns_to_level(self):
         """Entering back at exp reward should return to level menu."""
         self.char1.ndb.buildnpc = {"level": 1}
@@ -269,12 +276,13 @@ class TestMobBuilder(EvenniaTest):
         data = {
             "key": "orc",
             "coin_drop": {"gold": 2},
-            "loot_table": [{"proto": "RAW_MEAT", "chance": 50, "guaranteed_after": 2}],
+            "loot_table": [{"proto": "RAW_MEAT", "chance": 50, "guaranteed_after": 2, "amount": 1}],
         }
         out = npc_builder.format_mob_summary(data)
         assert "gold" in out
         assert "RAW_MEAT" in out
         assert "g:2" in out
+        assert "x1" in out
 
     def test_confirm_requires_missing_fields(self):
         self.char1.msg = MagicMock()
