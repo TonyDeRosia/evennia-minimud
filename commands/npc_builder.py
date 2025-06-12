@@ -39,6 +39,7 @@ from world.npc_roles import (
     EventNPCRole,
 )
 from world.scripts import classes
+from scripts import BuilderAutosave
 from utils import vnum_registry
 from utils.mob_utils import generate_base_stats, mobprogs_to_triggers
 from world.triggers import TriggerManager
@@ -1997,14 +1998,23 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
 
 def _cancel(caller, raw_string, **kwargs):
     caller.msg("NPC creation cancelled.")
+    script = caller.scripts.get("builder_autosave")
+    if script:
+        script[0].stop()
+    caller.db.builder_autosave = None
     caller.ndb.buildnpc = None
     return None
 
 
 def _on_menu_exit(caller, menu):
     """Warn user if menu exits with unsaved data."""
+    # stop autosave script when menu closes
+    script = caller.scripts.get("builder_autosave")
+    if script:
+        script[0].stop()
     if getattr(caller.ndb, "builder_saved", False):
         caller.ndb.builder_saved = False
+        caller.db.builder_autosave = None
         return
     if getattr(caller.ndb, "buildnpc", None):
         caller.msg(
@@ -2158,6 +2168,25 @@ class CmdCNPC(Command):
         parts = self.args.split(None, 1)
         sub = parts[0].lower()
         rest = parts[1].strip() if len(parts) > 1 else ""
+        autosave = self.caller.db.builder_autosave
+        if sub in ("restore", "discard") and autosave:
+            if sub == "restore":
+                self.caller.ndb.buildnpc = dict(autosave)
+                self.caller.db.builder_autosave = None
+                self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
+                EvMenu(
+                    self.caller,
+                    "commands.npc_builder",
+                    startnode="menunode_desc",
+                    cmd_on_exit=_on_menu_exit,
+                )
+            else:
+                self.caller.db.builder_autosave = None
+                self.msg("Autosave discarded.")
+            return
+        if autosave and sub not in ("restore", "discard"):
+            self.msg("Autosave found. Use 'cnpc restore' to continue or 'cnpc discard' to start over.")
+            return
         use_mob = self.cmdstring.lower() == "mobbuilder"
         if sub == "start":
             if not rest:
@@ -2188,6 +2217,7 @@ class CmdCNPC(Command):
             }
             if use_mob:
                 self.caller.ndb.buildnpc["use_mob"] = True
+            self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
             EvMenu(
                 self.caller,
                 "commands.npc_builder",
@@ -2207,6 +2237,7 @@ class CmdCNPC(Command):
             self.caller.ndb.buildnpc = data
             if use_mob:
                 self.caller.ndb.buildnpc["use_mob"] = True
+            self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
             EvMenu(
                 self.caller,
                 "commands.npc_builder",

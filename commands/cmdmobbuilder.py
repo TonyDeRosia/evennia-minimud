@@ -15,6 +15,8 @@ from utils.mob_proto import (
 )
 from world.scripts.mob_db import get_mobdb
 from typeclasses.npcs import BaseNPC
+from scripts import BuilderAutosave
+from commands import npc_builder
 
 
 class CmdMobProto(Command):
@@ -154,6 +156,26 @@ class CmdMobProto(Command):
 
     def _sub_edit(self, rest: str):
         caller = self.caller
+        autosave = caller.db.builder_autosave
+        if rest in ("restore", "discard") and autosave:
+            if rest == "restore":
+                caller.ndb.buildnpc = dict(autosave)
+                caller.ndb.mob_vnum = caller.ndb.buildnpc.get("vnum")
+                caller.db.builder_autosave = None
+                caller.scripts.add(BuilderAutosave, key="builder_autosave")
+                EvMenu(
+                    caller,
+                    "commands.npc_builder",
+                    startnode="menunode_desc",
+                    cmd_on_exit=npc_builder._on_menu_exit,
+                )
+            else:
+                caller.db.builder_autosave = None
+                caller.msg("Autosave discarded.")
+            return
+        if autosave and rest not in ("restore", "discard"):
+            caller.msg("Autosave found. Use '@mobproto/edit restore' to resume or '@mobproto/edit discard' to start over.")
+            return
         if not rest.isdigit():
             caller.msg("Usage: @mobproto/edit <vnum>")
             return
@@ -164,6 +186,7 @@ class CmdMobProto(Command):
             return
         caller.ndb.buildnpc = dict(proto)
         caller.ndb.mob_vnum = vnum
+        caller.scripts.add(BuilderAutosave, key="builder_autosave")
         EvMenu(
             caller,
             "commands.npc_builder",
