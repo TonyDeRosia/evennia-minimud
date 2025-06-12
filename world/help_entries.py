@@ -3087,7 +3087,7 @@ Example:
 
 Notes:
     - Templates are defined in ``world.templates.mob_templates``.
-    - Available templates include: warrior, caster, merchant.
+    - Available templates include all combat classes such as warrior, mystic, wizard, sorcerer, mage, battlemage, necromancer, spellbinder, priest, paladin, druid, shaman, rogue, ranger, warlock, bard and swashbuckler plus the merchant utility template.
 """,
     },
     {
