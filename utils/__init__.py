@@ -19,3 +19,5 @@ try:
 except Exception:  # pragma: no cover - may fail before Django setup
     def eval_safe(*args, **kwargs):
         raise RuntimeError("eval_safe unavailable before Django setup")
+
+from .dice import roll_dice_string

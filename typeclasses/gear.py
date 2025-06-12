@@ -6,6 +6,7 @@ from evennia.contrib.game_systems.containers import ContribContainer
 from .objects import Object, ClothingObject
 from world.system import stat_manager, state_manager
 from combat import combat_utils
+from utils import roll_dice_string
 from world.combat import get_health_description
 
 
@@ -137,20 +138,28 @@ class MeleeWeapon(Object):
             return
         # get the weapon's damage bonus
         damage = 0
-        if dice := getattr(self.db, "damage_dice", None):
-            try:
-                dice_num, dice_sides = map(int, str(dice).lower().split("d"))
-            except (TypeError, ValueError):
-                logger.log_err(f"Invalid damage_dice '{dice}' on {self}")
-                damage = int(self.db.dmg or 0)
-            else:
-                damage = combat_utils.roll_damage((dice_num, dice_sides))
-        else:
-            damage = int(self.db.dmg or 0)
-        # pick a random option from our possible damage types
         damage_type = None
-        if damage_types := self.tags.get(category="damage_type", return_list=True):
-            damage_type = choice(damage_types)
+        if (dmg_map := getattr(self.db, "damage", None)):
+            for i, (dtype, formula) in enumerate(dmg_map.items()):
+                try:
+                    damage += roll_dice_string(str(formula))
+                except Exception:
+                    logger.log_err(f"Invalid damage formula '{formula}' on {self}")
+                if i == 0:
+                    damage_type = dtype
+        else:
+            if dice := getattr(self.db, "damage_dice", None):
+                try:
+                    dice_num, dice_sides = map(int, str(dice).lower().split("d"))
+                except (TypeError, ValueError):
+                    logger.log_err(f"Invalid damage_dice '{dice}' on {self}")
+                    damage = int(self.db.dmg or 0)
+                else:
+                    damage = combat_utils.roll_damage((dice_num, dice_sides))
+            else:
+                damage = int(self.db.dmg or 0)
+            if damage_types := self.tags.get(category="damage_type", return_list=True):
+                damage_type = choice(damage_types)
 
         # does this require skill to use?
         if skill := self.tags.get(category="skill_class"):
