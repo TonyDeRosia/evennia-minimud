@@ -444,3 +444,26 @@ class TestAdminCommands(EvenniaTest):
         self.assertIsNotNone(weapon)
         self.assertEqual(weapon.key, "|BBigger Ass Sword|n")
 
+    def test_peace_on_fresh_combat(self):
+        """Peace should immediately end a newly started fight."""
+
+        from commands.combat import CombatCmdSet
+        from commands.admin import CmdPeace
+
+        self.char1.cmdset.add_default(CombatCmdSet)
+        self.char2.cmdset.add_default(CombatCmdSet)
+
+        # avoid running the full combat logic
+        self.char1.attack = MagicMock()
+
+        # start combat via attack command
+        self.char1.execute_cmd(f"attack {self.char2.key}")
+
+        self.assertTrue(self.char1.in_combat)
+
+        cmd = CmdPeace()
+        cmd.caller = self.char1
+        cmd.func()
+
+        self.assertFalse(self.room1.scripts.get("combat"))
+
