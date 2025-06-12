@@ -293,6 +293,10 @@ def refresh_stats(obj) -> None:
     # ensure baseline traits exist
     stats.apply_stats(obj)
 
+    # dynamic bonuses from gear or buffs can change between refreshes
+    gear_bonus = _gear_mods(obj)
+    buff_bonus = _buff_mods(obj)
+
     # cache base stat values on first run so repeated refreshes don't
     # continue stacking static bonuses like race or class modifiers
     if not hasattr(obj.db, "base_primary_stats") or not isinstance(
@@ -301,11 +305,11 @@ def refresh_stats(obj) -> None:
         obj.db.base_primary_stats = {}
         for key in PRIMARY_STATS:
             trait = trait_get(key)
-            obj.db.base_primary_stats[key] = trait.base if trait else 0
-
-    # dynamic bonuses from gear or buffs can change between refreshes
-    gear_bonus = _gear_mods(obj)
-    buff_bonus = _buff_mods(obj)
+            base = trait.base if trait else 0
+            # subtract current bonuses to recover the actual baseline
+            base -= gear_bonus.get(key, 0)
+            base -= buff_bonus.get(key, 0)
+            obj.db.base_primary_stats[key] = base
 
     primary_totals: Dict[str, int] = {}
     for key in PRIMARY_STATS:
