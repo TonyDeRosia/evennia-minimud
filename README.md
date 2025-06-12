@@ -245,7 +245,10 @@ A prototype is a JSON record stored in `world/prototypes/npcs.json` describing
 all of an NPC's settings such as stats, roles, triggers and AI. When you finish
 the builder, selecting **Yes** spawns the NPC in your current location.
 Choosing **Yes & Save Prototype** spawns the NPC and writes the prototype to
-that file so you can recreate it later.
+that file so you can recreate it later. In this context **prototype** means the
+saved blueprint of the NPC. The **archetype**, set by the `NPCType` field in the
+builder, defines the NPC's overall role or behavior such as *merchant* or
+*combatant*.
 
 You can spawn a saved prototype at any time with `@spawnnpc <key>`. Prototypes
 made with `mobbuilder` are automatically given the `mob_` prefix. Use
