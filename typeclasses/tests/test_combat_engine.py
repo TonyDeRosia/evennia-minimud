@@ -209,3 +209,29 @@ class TestCombatDeath(EvenniaTest):
             if obj.is_typeclass('typeclasses.objects.Corpse', exact=False)
         )
         self.assertEqual(corpse.db.corpse_of, npc.key)
+
+
+class TestCombatNPCTurn(EvenniaTest):
+    def test_at_combat_turn_auto_attack(self):
+        from evennia.utils import create
+        from typeclasses.npcs import CombatNPC
+        from combat.combat_actions import AttackAction
+
+        npc = create.create_object(CombatNPC, key="mob", location=self.room1)
+        target = self.char1
+        target.location = self.room1
+        npc.db.auto_attack_enabled = True
+        npc.db.combat_target = target
+
+        engine = CombatEngine([npc, target], round_time=0)
+
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.get_effective_stat', return_value=0), \
+             patch('combat.combat_actions.utils.inherits_from', return_value=True), \
+             patch('random.randint', return_value=0), \
+             patch('combat.combat_engine.delay'), \
+             patch.object(engine, 'queue_action', wraps=engine.queue_action) as mock_queue:
+            engine.start_round()
+            engine.process_round()
+
+        self.assertTrue(any(isinstance(c.args[1], AttackAction) for c in mock_queue.call_args_list))

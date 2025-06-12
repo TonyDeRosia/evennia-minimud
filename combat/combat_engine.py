@@ -243,6 +243,8 @@ class CombatEngine:
         calls ``actor.on_enter_combat`` if present.
         """
         self.participants.append(CombatParticipant(actor=actor))
+        if hasattr(actor, "ndb"):
+            actor.ndb.combat_engine = self
         if hasattr(actor, "on_enter_combat"):
             actor.on_enter_combat()
 
@@ -263,6 +265,8 @@ class CombatEngine:
         self.queue = [p for p in self.queue if p.actor is not actor]
         if hasattr(actor, "on_exit_combat"):
             actor.on_exit_combat()
+        if hasattr(actor, "ndb") and hasattr(actor.ndb, "combat_engine"):
+            del actor.ndb.combat_engine
 
     @property
     def turn_order(self) -> List[CombatParticipant]:
@@ -448,10 +452,13 @@ class CombatEngine:
             actor = participant.actor
             if not hasattr(actor, "hp") or actor.hp <= 0:
                 continue
+            target = getattr(getattr(actor, "db", None), "combat_target", None)
+            hook = getattr(actor, "at_combat_turn", None)
+            if callable(hook):
+                hook(target)
             if participant.next_action:
                 action = participant.next_action
             else:
-                target = getattr(getattr(actor, "db", None), "combat_target", None)
                 action = AttackAction(actor, target)
             actions.append(
                 (
