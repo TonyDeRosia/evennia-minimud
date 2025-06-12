@@ -11,6 +11,7 @@ from evennia.contrib.game_systems.cooldowns import CooldownHandler
 from evennia.prototypes.spawner import spawn
 from utils.currency import to_copper, from_copper, format_wallet
 from utils import normalize_slot
+from utils.mob_utils import make_corpse
 from utils.slots import SLOT_ORDER
 from collections.abc import Mapping
 import math
@@ -997,15 +998,7 @@ class NPC(Character):
                 else:
                     entry["_count"] = count + 1
 
-        attrs = [("corpse_of", self.key)]
-        if (decay := getattr(self.db, "corpse_decay_time", None)):
-            attrs.append(("decay_time", decay))
-        corpse = create.create_object(
-            "typeclasses.objects.Corpse",
-            key=f"{self.key} corpse",
-            location=self.location,
-            attributes=attrs,
-        )
+        corpse = make_corpse(self)
 
         objs = spawn(*drops)
         for obj in objs:
@@ -1015,9 +1008,6 @@ class NPC(Character):
         coin_map = {}
         if self.db.coin_drop:
             for coin, amt in (self.db.coin_drop or {}).items():
-                coin_map[coin] = coin_map.get(coin, 0) + int(amt)
-        if self.db.coins:
-            for coin, amt in (self.db.coins or {}).items():
                 coin_map[coin] = coin_map.get(coin, 0) + int(amt)
         for coin, amt in coin_loot.items():
             coin_map[coin] = coin_map.get(coin, 0) + int(amt)
@@ -1055,9 +1045,27 @@ class NPC(Character):
 
     def on_death(self, attacker):
         """Handle character death cleanup."""
+        if not self.location or self.attributes.get("_dead"):
+            return
+        self.db._dead = True
+
+        # remove from combat if necessary
+        if self.in_combat and (script := self.location.scripts.get("combat")):
+            script[0].remove_combatant(self)
+
+        corpse = self.drop_loot(attacker)
+        if corpse:
+            corpse.location = self.location
+
         self.at_death(attacker)
-        self.drop_loot(attacker)
         self.award_xp_to(attacker)
+        if self.location:
+            if attacker:
+                self.location.msg_contents(
+                    f"{self.key} is slain by {attacker.key}!"
+                )
+            else:
+                self.location.msg_contents(f"{self.key} dies.")
         self.delete()
 
     # property to mimic weapons

@@ -10,6 +10,7 @@ try:  # optional during early initialization
         add_to_mlist,
         auto_calc,
         auto_calc_secondary,
+        make_corpse,
     )
 except Exception:  # pragma: no cover - may fail before Django setup
     pass
