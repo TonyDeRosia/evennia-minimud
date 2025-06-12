@@ -232,9 +232,12 @@ def get_or_create_combat_script(location):
     if not (combat_script := location.scripts.get("combat")):
         # there's no combat instance; start one
         location.scripts.add(CombatScript, key="combat")
-        combat_script = location.scripts.get("combat")
+        combat_script = location.scripts.get("combat")[0]
+        # ensure the script is saved before any modifications occur
+        combat_script.save()
+    else:
+        combat_script = combat_script[0]
 
-    combat_script = combat_script[0]
     return combat_script
 
 
