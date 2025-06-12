@@ -329,7 +329,7 @@ def menunode_loot(caller, raw_string="", **kwargs):
         text += "None\n"
     text += (
         "Commands:\n  add <proto> [chance] [amount] [guaranteed]\n  remove <proto>\n  "
-        "done - return\n  back - return\nExample: |wadd 5000 50|n, |wadd gold 100 5|n"
+        "done - return\n  back - return\nExample: |wadd 100001 50|n, |wadd gold 100 5|n"
     )
     options = {"key": "_default", "goto": _edit_loot}
     return _with_summary(caller, text), options

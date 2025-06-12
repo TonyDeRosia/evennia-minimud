@@ -685,7 +685,7 @@ def menunode_loot_table(caller, raw_string="", **kwargs):
         text += "None\n"
     text += (
         "Commands:\n  add <proto> [chance] [amount] [guaranteed]\n  remove <proto>\n  done - finish\n  back - previous step\n"
-        "Example: |wadd 5000 50|n, |wadd gold 100 5|n"
+        "Example: |wadd 100001 50|n, |wadd gold 100 5|n"
     )
     options = add_back_skip(
         {"key": "_default", "goto": _edit_loot_table}, _edit_loot_table
