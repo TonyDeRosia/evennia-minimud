@@ -4,6 +4,7 @@ from evennia.utils.test_resources import EvenniaTest
 
 from combat.combat_engine import CombatEngine
 from combat.combat_actions import Action, CombatResult
+from utils.currency import from_copper, to_copper
 from combat.combat_utils import get_condition_msg
 
 
@@ -194,6 +195,8 @@ class TestCombatDeath(EvenniaTest):
         npc = create.create_object(NPC, key="mob", location=self.room1)
         npc.db.drops = []
         npc.db.exp_reward = 5
+        npc.db.coin_drop = {"silver": 3}
+        self.char1.db.coins = from_copper(0)
 
         engine = CombatEngine([player, npc], round_time=0)
         engine.queue_action(player, KillAction(player, npc))
@@ -204,6 +207,7 @@ class TestCombatDeath(EvenniaTest):
             engine.process_round()
 
         self.assertEqual(player.db.exp, 5)
+        self.assertEqual(to_copper(player.db.coins), to_copper({"silver": 3}))
         corpse = next(
             obj for obj in self.room1.contents
             if obj.is_typeclass('typeclasses.objects.Corpse', exact=False)
