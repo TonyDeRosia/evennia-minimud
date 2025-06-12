@@ -11,6 +11,7 @@ from utils.menu_utils import (
     format_multi_select,
 )
 from evennia.utils import dedent
+import re
 
 # Expose some frequently used constants locally
 NPCType = npc_builder.NPCType
@@ -23,48 +24,7 @@ REVIEW_SECTIONS = npc_builder.REVIEW_SECTIONS
 # bring helper functions into namespace
 
 # many menunode helper setters are reused directly
-_set_key = npc_builder._set_key
-_set_race = npc_builder._set_race
-_set_gender = npc_builder._set_gender
-_set_weight = npc_builder._set_weight
-_set_desc = npc_builder._set_desc
-_set_longdesc = npc_builder._set_longdesc
-_set_vnum = npc_builder._set_vnum
-_set_guild_affiliation = npc_builder._set_guild_affiliation
-_set_creature_type = npc_builder._set_creature_type
-_edit_custom_slots = npc_builder._edit_custom_slots
-_set_npc_type = npc_builder._set_npc_type
-_set_combat_class = npc_builder._set_combat_class
-_edit_roles = npc_builder._edit_roles
-_set_merchant_pricing = npc_builder._set_merchant_pricing
-_set_level = npc_builder._set_level
-_set_exp_reward = npc_builder._set_exp_reward
-_set_coin_drop = npc_builder._set_coin_drop
-_edit_loot_table = npc_builder._edit_loot_table
-_preview = npc_builder._preview
-_use_default_resources = npc_builder._use_default_resources
-_set_resources = npc_builder._set_resources
-_set_combat_values = npc_builder._set_combat_values
-_set_modifiers = npc_builder._set_modifiers
-_use_default_stats = npc_builder._use_default_stats
-_set_stats = npc_builder._set_stats
-_set_behavior = npc_builder._set_behavior
-_set_skills = npc_builder._set_skills
-_set_spells = npc_builder._set_spells
-_set_ai = npc_builder._set_ai
-_set_actflags = npc_builder._set_actflags
-_set_affects = npc_builder._set_affects
-_set_resists = npc_builder._set_resists
-_set_bodyparts = npc_builder._set_bodyparts
-_set_attack = npc_builder._set_attack
-_set_defense = npc_builder._set_defense
-_set_languages = npc_builder._set_languages
-_set_script = npc_builder._set_script
-_set_custom_event = npc_builder._set_custom_event
-_set_trigger_event = npc_builder._set_trigger_event
-_set_trigger_match = npc_builder._set_trigger_match
-_save_trigger = npc_builder._save_trigger
-_del_trigger = npc_builder._del_trigger
+_auto_fill_combat_stats = npc_builder._auto_fill_combat_stats
 _cancel = npc_builder._cancel
 _create_npc = npc_builder._create_npc
 validate_prototype = npc_builder.validate_prototype
