@@ -49,3 +49,15 @@ class TestNPCLootTable(EvenniaTest):
                 item.location.is_typeclass("typeclasses.objects.Corpse", exact=False)
             )
 
+    def test_loot_table_coin_amount(self):
+        from typeclasses.characters import NPC
+
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+        npc.db.loot_table = [{"proto": "gold", "chance": 100, "amount": 5}]
+        npc.traits.health.current = 1
+        self.char1.db.coins = from_copper(0)
+        with patch("evennia.prototypes.spawner.spawn", return_value=[]):
+            npc.at_damage(self.char1, 2)
+        self.assertEqual(to_copper(self.char1.db.coins), to_copper({"gold": 5}))
+

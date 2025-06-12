@@ -682,8 +682,8 @@ def menunode_loot_table(caller, raw_string="", **kwargs):
     else:
         text += "None\n"
     text += (
-        "Commands:\n  add <proto> [chance] [guaranteed]\n  remove <proto>\n  done - finish\n  back - previous step\n"
-        "Example: |wadd RAW_MEAT 50 3|n"
+        "Commands:\n  add <proto> [chance] [amount] [guaranteed]\n  remove <proto>\n  done - finish\n  back - previous step\n"
+        "Example: |wadd RAW_MEAT 50 3|n, |wadd gold 100 5|n"
     )
     options = add_back_skip(
         {"key": "_default", "goto": _edit_loot_table}, _edit_loot_table
@@ -692,6 +692,8 @@ def menunode_loot_table(caller, raw_string="", **kwargs):
 
 
 def _edit_loot_table(caller, raw_string, **kwargs):
+    from utils.currency import COIN_VALUES
+
     string = raw_string.strip()
     table = caller.ndb.buildnpc.setdefault("loot_table", [])
     if string.lower() == "back":
@@ -701,17 +703,28 @@ def _edit_loot_table(caller, raw_string, **kwargs):
     if string.lower().startswith("add "):
         parts = string[4:].split()
         if not parts:
-            caller.msg("Usage: add <proto> [chance] [guaranteed]")
+            caller.msg("Usage: add <proto> [chance] [amount] [guaranteed]")
             return "menunode_loot_table"
         proto = parts[0]
         chance = 100
+        amount = 1
         guaranteed = None
         if len(parts) > 1:
             if not parts[1].isdigit():
                 caller.msg("Chance must be a number.")
                 return "menunode_loot_table"
             chance = int(parts[1])
-        if len(parts) > 2:
+        if proto.lower() in COIN_VALUES and len(parts) > 2:
+            if not parts[2].isdigit():
+                caller.msg("Amount must be a number.")
+                return "menunode_loot_table"
+            amount = int(parts[2])
+            if len(parts) > 3:
+                if not parts[3].isdigit():
+                    caller.msg("Guaranteed count must be a number.")
+                    return "menunode_loot_table"
+                guaranteed = int(parts[3])
+        elif len(parts) > 2:
             if not parts[2].isdigit():
                 caller.msg("Guaranteed count must be a number.")
                 return "menunode_loot_table"
@@ -720,6 +733,8 @@ def _edit_loot_table(caller, raw_string, **kwargs):
         for entry in table:
             if entry.get("proto") == proto:
                 entry["chance"] = chance
+                if proto.lower() in COIN_VALUES:
+                    entry["amount"] = amount
                 if guaranteed is not None:
                     entry["guaranteed_after"] = guaranteed
                 else:
@@ -728,6 +743,8 @@ def _edit_loot_table(caller, raw_string, **kwargs):
                 break
         else:
             entry = {"proto": proto, "chance": chance}
+            if proto.lower() in COIN_VALUES:
+                entry["amount"] = amount
             if guaranteed is not None:
                 entry["guaranteed_after"] = guaranteed
             table.append(entry)
