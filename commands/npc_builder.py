@@ -6,6 +6,17 @@ from evennia.prototypes import spawner
 from utils.mob_proto import spawn_from_vnum, get_prototype
 from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from typeclasses.characters import NPC
+from typeclasses.npcs import BaseNPC
+from typeclasses.npcs.merchant import MerchantNPC
+from typeclasses.npcs.banker import BankerNPC
+from typeclasses.npcs.trainer import TrainerNPC
+from typeclasses.npcs.wanderer import WandererNPC
+from typeclasses.npcs.guildmaster import GuildmasterNPC
+from typeclasses.npcs.guild_receptionist import GuildReceptionistNPC
+from typeclasses.npcs.questgiver import QuestGiverNPC
+from typeclasses.npcs.combat import CombatNPC
+from typeclasses.npcs.combat_trainer import CombatTrainerNPC
+from typeclasses.npcs.event_npc import EventNPC
 from utils.slots import SLOT_ORDER
 from utils.menu_utils import (
     add_back_skip,
@@ -85,19 +96,19 @@ ALLOWED_ROLES_PRIMARY = (
     "wanderer",
 )
 
-# Mapping of simple keys to NPC typeclass paths
+# Mapping of simple keys to NPC typeclass classes
 NPC_TYPE_MAP = {
-    "base": "typeclasses.npcs.BaseNPC",
-    "merchant": "typeclasses.npcs.merchant.MerchantNPC",
-    "banker": "typeclasses.npcs.banker.BankerNPC",
-    "trainer": "typeclasses.npcs.trainer.TrainerNPC",
-    "wanderer": "typeclasses.npcs.wanderer.WandererNPC",
-    "guildmaster": "typeclasses.npcs.guildmaster.GuildmasterNPC",
-    "guild_receptionist": "typeclasses.npcs.guild_receptionist.GuildReceptionistNPC",
-    "questgiver": "typeclasses.npcs.questgiver.QuestGiverNPC",
-    "combatant": "typeclasses.npcs.combat.CombatNPC",
-    "combat_trainer": "typeclasses.npcs.combat_trainer.CombatTrainerNPC",
-    "event_npc": "typeclasses.npcs.event_npc.EventNPC",
+    "base": BaseNPC,
+    "merchant": MerchantNPC,
+    "banker": BankerNPC,
+    "trainer": TrainerNPC,
+    "wanderer": WandererNPC,
+    "guildmaster": GuildmasterNPC,
+    "guild_receptionist": GuildReceptionistNPC,
+    "questgiver": QuestGiverNPC,
+    "combatant": CombatNPC,
+    "combat_trainer": CombatTrainerNPC,
+    "event_npc": EventNPC,
 }
 
 # NPC types that can participate in combat and therefore need a combat class
@@ -1756,15 +1767,14 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     if not isinstance(data, dict):
         caller.msg("Error: NPC data missing. Aborting.")
         return None
-    tclass_path = NPC_TYPE_MAP.get(
-        data.get("npc_type", "base"), "typeclasses.npcs.BaseNPC"
-    )
+    tclass = NPC_TYPE_MAP[data.get("npc_type", "base")]
+    tclass_path = f"{tclass.__module__}.{tclass.__name__}"
     if data.get("edit_obj"):
         npc = data.get("edit_obj")
-        if npc.typeclass_path != tclass_path:
-            npc.swap_typeclass(tclass_path, clean_attributes=False)
+        if npc.__class__ != tclass:
+            npc.swap_typeclass(tclass, clean_attributes=False)
     else:
-        npc = create_object(tclass_path, key=data.get("key"), location=caller.location)
+        npc = create_object(tclass, key=data.get("key"), location=caller.location)
     npc.db.desc = data.get("desc")
     npc.db.race = data.get("race")
     # accept legacy "sex" key
@@ -1957,7 +1967,11 @@ def _gather_npc_data(npc):
         "weight": npc.db.weight or "",
         "roles": npc.tags.get(category="npc_role", return_list=True) or [],
         "npc_type": next(
-            (k for k, path in NPC_TYPE_MAP.items() if path == npc.typeclass_path),
+            (
+                key
+                for key, cls in NPC_TYPE_MAP.items()
+                if f"{cls.__module__}.{cls.__name__}" == npc.typeclass_path
+            ),
             "base",
         ),
         "combat_class": npc.db.charclass or "",
@@ -2249,11 +2263,9 @@ class CmdSpawnNPC(Command):
             if not proto:
                 self.msg("Unknown NPC prototype.")
                 return
-            tclass_path = NPC_TYPE_MAP.get(
-                proto.get("npc_type", "base"), "typeclasses.npcs.BaseNPC"
-            )
+            tclass = NPC_TYPE_MAP[proto.get("npc_type", "base")]
             proto = dict(proto)
-            proto.setdefault("typeclass", tclass_path)
+            proto.setdefault("typeclass", f"{tclass.__module__}.{tclass.__name__}")
             obj = spawner.spawn(proto)[0]
             obj.move_to(self.caller.location, quiet=True)
             obj.db.prototype_key = key
