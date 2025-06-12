@@ -4,6 +4,7 @@ from random import choice, randint
 
 from evennia.prototypes import spawner
 from utils.mob_proto import spawn_from_vnum
+from evennia.utils import logger
 from commands.npc_builder import finalize_mob_prototype
 from typeclasses.scripts import Script
 from typeclasses.npcs import BaseNPC
@@ -41,8 +42,10 @@ class AreaSpawner(Script):
 
         proto_key = choice(proto_keys)
         if proto_key.isdigit():
-            npc = spawn_from_vnum(int(proto_key), location=room)
-            if not npc:
+            try:
+                npc = spawn_from_vnum(int(proto_key), location=room)
+            except ValueError as err:
+                logger.log_err(str(err))
                 return
         else:
             proto = prototypes.get_npc_prototypes().get(proto_key)

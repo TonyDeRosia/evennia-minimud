@@ -61,9 +61,6 @@ class CmdMSpawn(Command):
             except ValueError as err:
                 self.msg(str(err))
                 return
-            if not obj:
-                self.msg("Prototype not found.")
-                return
         else:
             # look for a vnum prototype matching this key
             mob_db = get_mobdb()
@@ -73,9 +70,6 @@ class CmdMSpawn(Command):
                     obj = spawn_from_vnum(vmatch, location=self.caller.location)
                 except ValueError as err:
                     self.msg(str(err))
-                    return
-                if not obj:
-                    self.msg("Prototype not found.")
                     return
             else:
                 registry = prototypes.get_npc_prototypes()
@@ -128,9 +122,6 @@ class CmdMobPreview(Command):
                 obj = spawn_from_vnum(int(key), location=self.caller.location)
             except ValueError as err:
                 self.msg(str(err))
-                return
-            if not obj:
-                self.msg("Prototype not found.")
                 return
         else:
             registry = prototypes.get_npc_prototypes()

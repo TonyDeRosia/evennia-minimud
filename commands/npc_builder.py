@@ -2371,9 +2371,6 @@ class CmdSpawnNPC(Command):
             except ValueError as err:
                 self.msg(str(err))
                 return
-            if not obj:
-                self.msg("Unknown NPC prototype.")
-                return
             key = None
         else:
             if "/" in arg:
