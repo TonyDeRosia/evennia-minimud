@@ -442,6 +442,7 @@ class CombatEngine:
         """
         self.start_round()
         self.round_output = []
+        damage_totals: Dict[object, int] = {}
         actions: list[tuple[int, int, CombatParticipant, Action]] = []
         for participant in list(self.queue):
             actor = participant.actor
@@ -486,6 +487,7 @@ class CombatEngine:
                 damage_done = self.apply_damage(actor, result.target, result.damage, dt)
                 if not result.message:
                     self.dam_message(actor, result.target, damage_done)
+                damage_totals[actor] = damage_totals.get(actor, 0) + damage_done
 
             if result.target:
                 hp = getattr(getattr(result.target, "traits", None), "health", None)
@@ -501,6 +503,13 @@ class CombatEngine:
                 self.award_experience(actor, result.target)
             self.track_aggro(result.target, actor)
         self.cleanup_environment()
+
+        summary_lines = [
+            f"{getattr(att, 'key', att)} dealt {dmg} damage."
+            for att, dmg in damage_totals.items()
+        ]
+        if summary_lines:
+            self.round_output.extend(summary_lines)
 
         if self.round_output:
             msg = "\n".join(self.round_output)
