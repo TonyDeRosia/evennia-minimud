@@ -329,7 +329,7 @@ def menunode_loot(caller, raw_string="", **kwargs):
         text += "None\n"
     text += (
         "Commands:\n  add <proto> [chance] [amount] [guaranteed]\n  remove <proto>\n  "
-        "done - return\n  back - return\nExample: |wadd RAW_MEAT 50 3|n, |wadd gold 100 5|n"
+        "done - return\n  back - return\nExample: |wadd 5000 50|n, |wadd gold 100 5|n"
     )
     options = {"key": "_default", "goto": _edit_loot}
     return _with_summary(caller, text), options
@@ -337,6 +337,8 @@ def menunode_loot(caller, raw_string="", **kwargs):
 
 def _edit_loot(caller, raw_string, **kwargs):
     from utils.currency import COIN_VALUES
+    from utils.prototype_manager import load_prototype
+    from utils import vnum_registry
 
     string = raw_string.strip()
     table = caller.ndb.mob_proto.setdefault("loot_table", [])
@@ -348,6 +350,15 @@ def _edit_loot(caller, raw_string, **kwargs):
             caller.msg("Usage: add <proto> [chance] [amount] [guaranteed]")
             return "menunode_loot"
         proto = parts[0]
+        if proto.isdigit():
+            vnum = int(proto)
+            if not vnum_registry.VNUM_RANGES["object"][0] <= vnum <= vnum_registry.VNUM_RANGES["object"][1]:
+                caller.msg("Invalid object VNUM.")
+                return "menunode_loot"
+            if not load_prototype("object", vnum):
+                caller.msg("Unknown object VNUM.")
+                return "menunode_loot"
+            proto = vnum
         chance = 100
         amount = 1
         guaranteed = None
@@ -356,7 +367,7 @@ def _edit_loot(caller, raw_string, **kwargs):
                 caller.msg("Chance must be a number.")
                 return "menunode_loot"
             chance = int(parts[1])
-        if proto.lower() in COIN_VALUES and len(parts) > 2:
+        if isinstance(proto, str) and proto.lower() in COIN_VALUES and len(parts) > 2:
             if not parts[2].isdigit():
                 caller.msg("Amount must be a number.")
                 return "menunode_loot"
@@ -374,7 +385,7 @@ def _edit_loot(caller, raw_string, **kwargs):
         for entry in table:
             if entry.get("proto") == proto:
                 entry["chance"] = chance
-                if proto.lower() in COIN_VALUES:
+                if isinstance(proto, str) and proto.lower() in COIN_VALUES:
                     entry["amount"] = amount
                 if guaranteed is not None:
                     entry["guaranteed_after"] = guaranteed
@@ -384,7 +395,7 @@ def _edit_loot(caller, raw_string, **kwargs):
                 break
         else:
             entry = {"proto": proto, "chance": chance}
-            if proto.lower() in COIN_VALUES:
+            if isinstance(proto, str) and proto.lower() in COIN_VALUES:
                 entry["amount"] = amount
             if guaranteed is not None:
                 entry["guaranteed_after"] = guaranteed

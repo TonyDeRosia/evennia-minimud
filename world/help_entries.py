@@ -3523,7 +3523,7 @@ Usage:
         "text": """Help for loot tables
 
 Loot tables control random item drops from NPCs. Each entry is a mapping with
-the prototype key and drop chance::
+the prototype key or object VNUM and drop chance::
 
     [{"proto": "RAW_MEAT", "chance": 50}]
 
@@ -3533,7 +3533,7 @@ Usage:
     @mset <proto> loot_table <json>
 
 Examples:
-    @mset wolf loot_table "[{\"proto\": \"RAW_MEAT\", \"chance\": 75}]"
+    @mset wolf loot_table "[{\"proto\": 5000, \"chance\": 75}]"
     @mset bandit loot_table "[{\"proto\": \"IRON_SWORD\", \"chance\": 25}]"
     @mset goblin loot_table "[{\"proto\": \"gold\", \"chance\": 100, \"amount\": 5}]"
 

@@ -9,14 +9,17 @@ class TestNPCLootTable(EvenniaTest):
 
         npc = create.create_object(NPC, key="mob", location=self.room1)
         npc.db.drops = []
-        npc.db.loot_table = [{"proto": "RAW_MEAT", "chance": 100}]
+        npc.db.loot_table = [{"proto": 100001, "chance": 100}]
         npc.db.coin_drop = {"gold": 1}
         self.char1.db.coins = from_copper(0)
         npc.traits.health.current = 1
-        with patch("evennia.prototypes.spawner.spawn", return_value=[MagicMock()]) as mock_spawn:
+        proto_data = {"key": "ruby dagger"}
+        with patch("utils.prototype_manager.load_prototype", return_value=proto_data) as load_mock, \
+             patch("evennia.prototypes.spawner.spawn", return_value=[MagicMock()]) as mock_spawn:
             room = npc.location
             npc.at_damage(self.char1, 2)
-            mock_spawn.assert_called_with("RAW_MEAT")
+            load_mock.assert_called_with("object", 100001)
+            mock_spawn.assert_called_with(proto_data)
 
             corpse = next(
                 obj

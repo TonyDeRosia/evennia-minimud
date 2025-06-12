@@ -973,6 +973,7 @@ class NPC(Character):
     def drop_loot(self, killer=None):
         """Create a corpse and deposit any drops and coins."""
         from utils.currency import COIN_VALUES
+        from utils.prototype_manager import load_prototype
 
         drops = list(self.db.drops)
         coin_loot: dict[str, int] = {}
@@ -989,11 +990,16 @@ class NPC(Character):
                 if roll <= chance or (
                     guaranteed is not None and count >= int(guaranteed)
                 ):
-                    if proto.lower() in COIN_VALUES:
+                    if isinstance(proto, str) and proto.lower() in COIN_VALUES:
                         amt = int(entry.get("amount", 1))
                         coin_loot[proto.lower()] = coin_loot.get(proto.lower(), 0) + amt
                     else:
-                        drops.append(proto)
+                        if isinstance(proto, int) or (isinstance(proto, str) and proto.isdigit()):
+                            proto_data = load_prototype("object", int(proto))
+                            if proto_data:
+                                drops.append(proto_data)
+                        else:
+                            drops.append(proto)
                     entry["_count"] = 0
                 else:
                     entry["_count"] = count + 1

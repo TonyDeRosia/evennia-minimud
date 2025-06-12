@@ -240,6 +240,14 @@ class TestMobBuilder(EvenniaTest):
             {"proto": "gold", "chance": 100, "amount": 5}
         ]
 
+    def test_edit_loot_table_vnum(self):
+        self.char1.ndb.buildnpc = {}
+        with patch("world.menus.mob_builder_menu.load_prototype", return_value={"key": "obj"}):
+            npc_builder._edit_loot_table(self.char1, "add 100001 50")
+        assert self.char1.ndb.buildnpc["loot_table"] == [
+            {"proto": 100001, "chance": 50}
+        ]
+
     def test_exp_reward_back_returns_to_level(self):
         """Entering back at exp reward should return to level menu."""
         self.char1.ndb.buildnpc = {"level": 1}
