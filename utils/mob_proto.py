@@ -12,7 +12,9 @@ from world import prototypes
 from world.areas import get_area_vnum_range
 
 
-def register_prototype(data: dict, vnum: int | None = None, *, area: str | None = None) -> int:
+def register_prototype(
+    data: dict, vnum: int | None = None, *, area: str | None = None
+) -> int:
     """Register ``data`` in the mob database under ``vnum``.
 
     If ``area`` is given, ``vnum`` must fall within that area's range.
@@ -20,6 +22,7 @@ def register_prototype(data: dict, vnum: int | None = None, *, area: str | None 
     mob_db = get_mobdb()
     if "typeclass" in data:
         from typeclasses.characters import NPC
+
         tc = data["typeclass"]
         if isinstance(tc, type):
             if not issubclass(tc, NPC):
@@ -46,9 +49,8 @@ def register_prototype(data: dict, vnum: int | None = None, *, area: str | None 
             rng = get_area_vnum_range(area)
             if rng and not (rng[0] <= vnum <= rng[1]):
                 raise ValueError("VNUM outside area range")
-        if not validate_vnum(vnum, "npc"):
-            raise ValueError("Invalid or already used VNUM")
-        register_vnum(vnum)
+        if validate_vnum(vnum, "npc"):
+            register_vnum(vnum)
     mob_db.add_proto(vnum, data)
     return vnum
 
@@ -97,14 +99,19 @@ def spawn_from_vnum(vnum: int, location=None):
     metadata = proto_data.get("metadata") or {}
     role_names = metadata.get("roles") or []
     from commands.npc_builder import ROLE_MIXIN_MAP
+
     mixins = [ROLE_MIXIN_MAP[r] for r in role_names if r in ROLE_MIXIN_MAP]
+    dyn_class = None
     if mixins:
         dyn_class = type("DynamicNPC", tuple([base_cls, *mixins]), {})
-        proto_data["typeclass"] = dyn_class
-    else:
-        proto_data["typeclass"] = base_cls
+    proto_data["typeclass"] = f"{base_cls.__module__}.{base_cls.__name__}"
 
     npc = spawner.spawn(proto_data)[0]
+    if dyn_class:
+        try:
+            npc.swap_typeclass(dyn_class, clean_attributes=False)
+        except Exception:  # fallback if swap_typeclass doesn't accept class
+            npc.__class__ = dyn_class
     if location:
         npc.location = location
     npc.db.vnum = vnum
@@ -114,6 +121,7 @@ def spawn_from_vnum(vnum: int, location=None):
     npc.db.mobprogs = mobprogs
 
     from commands.npc_builder import finalize_mob_prototype
+
     finalize_mob_prototype(npc, npc)
 
     # track how often this prototype has spawned
