@@ -216,3 +216,31 @@ class TestMeleeWeaponAtAttack(EvenniaTest):
             weapon.at_attack(self.char1, self.char2)
             mock_roll.assert_called_with((1, 4))
 
+    def test_damage_mapping_with_dice_strings(self):
+        weapon = create_object(
+            "typeclasses.gear.MeleeWeapon", key="sword", location=self.char1
+        )
+        weapon.tags.add("equipment", category="flag")
+        weapon.tags.add("identified", category="flag")
+        weapon.db.damage = {"slash": "1d4", "fire": "1d6"}
+
+        self.char2.at_damage = MagicMock()
+        self.char1.at_emote = MagicMock()
+        with patch("world.system.stat_manager.check_hit", return_value=True), patch(
+            "combat.combat_utils.roll_evade", return_value=False
+        ), patch("combat.combat_utils.roll_parry", return_value=False), patch(
+            "combat.combat_utils.roll_block", return_value=False
+        ), patch(
+            "world.system.stat_manager.roll_crit", return_value=False
+        ), patch(
+            "combat.combat_utils.apply_attack_power", side_effect=lambda w, d: d
+        ), patch(
+            "combat.combat_utils.apply_lifesteal"
+        ), patch(
+            "utils.dice.roll_dice_string", side_effect=[2, 3]
+        ) as mock_roll:
+            weapon.at_attack(self.char1, self.char2)
+            mock_roll.assert_any_call("1d4")
+            mock_roll.assert_any_call("1d6")
+        self.char2.at_damage.assert_called_with(self.char1, 5, "slash", critical=False)
+
