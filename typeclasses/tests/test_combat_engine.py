@@ -213,6 +213,7 @@ class TestCombatDeath(EvenniaTest):
             if obj.is_typeclass('typeclasses.objects.Corpse', exact=False)
         )
         self.assertEqual(corpse.db.corpse_of, npc.key)
+        self.assertEqual(corpse.db.desc, f"The corpse of {npc.key} lies here.")
 
     def test_npc_death_creates_only_one_corpse(self):
         from evennia.utils import create
@@ -235,6 +236,32 @@ class TestCombatDeath(EvenniaTest):
             if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
         ]
         self.assertEqual(len(corpses), 1)
+
+    def test_corpse_decay_script(self):
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        player = self.char1
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+        npc.db.corpse_decay_time = 1
+
+        engine = CombatEngine([player, npc], round_time=0)
+        engine.queue_action(player, KillAction(player, npc))
+
+        with patch("world.system.state_manager.apply_regen"):
+            engine.start_round()
+            engine.process_round()
+
+        corpse = next(
+            obj
+            for obj in self.room1.contents
+            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+        )
+        script = corpse.scripts.get("auto_decay")[0]
+        self.assertEqual(script.interval, 60)
+        script.at_repeat()
+        self.assertNotIn(corpse, self.room1.contents)
 
 
 class TestCombatNPCTurn(EvenniaTest):

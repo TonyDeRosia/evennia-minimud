@@ -440,6 +440,19 @@ class Corpse(Object):
         super().at_object_creation()
         self.locks.add("get:false()")
         self.db.display_priority = "corpse"
+        if (decay := self.db.decay_time):
+            # start auto-decay timer in minutes
+            self.scripts.add(
+                "typeclasses.scripts.AutoDecayScript",
+                key="auto_decay",
+                interval=int(decay) * 60,
+                start_delay=True,
+            )
+
+    def at_object_post_creation(self):
+        super().at_object_post_creation()
+        name = self.db.corpse_of or self.key or "someone"
+        self.db.desc = f"The corpse of {name} lies here."
 
     def get_display_name(self, looker, **kwargs):
         name = self.db.corpse_of or self.key or "corpse"

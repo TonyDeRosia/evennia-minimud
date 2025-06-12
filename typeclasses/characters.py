@@ -936,12 +936,15 @@ class NPC(Character):
                 else:
                     entry["_count"] = count + 1
 
+        attrs = [("corpse_of", self.key)]
+        if (decay := getattr(self.db, "corpse_decay_time", None)):
+            attrs.append(("decay_time", decay))
         corpse = create.create_object(
             "typeclasses.objects.Corpse",
             key=f"{self.key} corpse",
             location=self.location,
+            attributes=attrs,
         )
-        corpse.db.corpse_of = self.key
 
         objs = spawn(*drops)
         for obj in objs:

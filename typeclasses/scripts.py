@@ -306,3 +306,18 @@ class GlobalTick(Script):
 
             if hasattr(obj, "refresh_prompt"):
                 obj.refresh_prompt()
+
+
+class AutoDecayScript(Script):
+    """Delete the attached object after a delay."""
+
+    def at_script_creation(self):
+        self.key = "auto_decay"
+        self.desc = "Automatically delete an object after a delay"
+        self.persistent = True
+
+    def at_repeat(self):
+        obj = self.obj
+        if obj:
+            obj.delete()
+        self.stop()
