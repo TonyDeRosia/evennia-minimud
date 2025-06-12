@@ -203,11 +203,12 @@ ALLOWED_SCRIPT_MODULES = ("scripts",)
 REVIEW_SECTIONS = [
     ("Key", "menunode_key"),
     ("Description", "menunode_desc"),
+    ("Long Description", "menunode_longdesc"),
+    ("Level", "menunode_level"),
     ("Race", "menunode_race"),
     ("NPC Type", "menunode_npc_type"),
     ("Gender", "menunode_gender"),
     ("Weight", "menunode_weight"),
-    ("Level", "menunode_level"),
     ("VNUM", "menunode_vnum"),
     ("Creature Type", "menunode_creature_type"),
     ("Combat Class", "menunode_combat_class"),
@@ -285,6 +286,7 @@ def format_mob_summary(data: dict) -> str:
 
     basic = EvTable(border="cells")
     add_row(basic, "|cShort Desc|n", "desc")
+    add_row(basic, "|cLong Desc|n", "long_desc")
     add_row(basic, "|cLevel|n", "level")
     add_row(basic, "|cGender|n", "gender")
     add_row(basic, "|cWeight|n", "weight")
@@ -431,7 +433,7 @@ def _set_race(caller, raw_string, **kwargs):
 
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_desc"
+        return "menunode_level"
     if not string or string.lower() == "skip":
         string = caller.ndb.buildnpc.get("race", "")
     else:
@@ -511,7 +513,7 @@ def _set_weight(caller, raw_string, **kwargs):
             )
             return "menunode_weight"
     caller.ndb.buildnpc["weight"] = string
-    return _next_node(caller, "menunode_level")
+    return _next_node(caller, "menunode_vnum")
 
 
 def menunode_desc(caller, raw_string="", **kwargs):
@@ -536,7 +538,29 @@ def _set_desc(caller, raw_string, **kwargs):
         caller.msg("Description is required.")
         return "menunode_desc"
     caller.ndb.buildnpc["desc"] = string
-    return _next_node(caller, "menunode_race")
+    return _next_node(caller, "menunode_longdesc")
+
+
+def menunode_longdesc(caller, raw_string="", **kwargs):
+    """Prompt for a long description."""
+    default = caller.ndb.buildnpc.get("long_desc", "")
+    text = "|wEnter a long description for the NPC|n"
+    if default:
+        text += f" [current: {default}]"
+    text += "\n(back to go back)"
+    options = add_back_only({"key": "_default", "goto": _set_longdesc}, _set_longdesc)
+    return with_summary(caller, text), options
+
+
+def _set_longdesc(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    if string.lower() == "back":
+        return "menunode_weight"
+    if not string:
+        caller.msg("Long description is required.")
+        return "menunode_longdesc"
+    caller.ndb.buildnpc["long_desc"] = string
+    return _next_node(caller, "menunode_level")
 
 
 def menunode_vnum(caller, raw_string="", **kwargs):
@@ -855,7 +879,7 @@ def menunode_merchant_pricing(caller, raw_string="", **kwargs):
 def _set_merchant_pricing(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_roles"
+        return "menunode_longdesc"
     if not string or string.lower() == "skip":
         val = caller.ndb.buildnpc.get("merchant_markup", 1.0)
     else:
@@ -884,7 +908,7 @@ def menunode_level(caller, raw_string="", **kwargs):
 def _set_level(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
-        return "menunode_roles"
+        return "menunode_longdesc"
     if not string:
         caller.msg("Level is required.")
         return "menunode_level"
@@ -898,7 +922,7 @@ def _set_level(caller, raw_string, **kwargs):
         return "menunode_level"
     caller.ndb.buildnpc["level"] = val
     _auto_fill_combat_stats(caller.ndb.buildnpc)
-    return _next_node(caller, "menunode_vnum")
+    return _next_node(caller, "menunode_race")
 
 
 def menunode_exp_reward(caller, raw_string="", **kwargs):
@@ -1853,6 +1877,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
             npc.tags.remove(f"M{old_vnum}", category="vnum")
         caller.ndb.mob_vnum = new_vnum
     npc.db.desc = data.get("desc")
+    npc.db.long_desc = data.get("long_desc")
     npc.db.race = data.get("race")
     # accept legacy "sex" key
     gender = data.get("gender") or data.get("sex")
@@ -2055,6 +2080,7 @@ def _gather_npc_data(npc):
         "proto_key": npc.tags.get(category=PROTOTYPE_TAG_CATEGORY),
         "key": npc.key,
         "desc": npc.db.desc,
+        "long_desc": npc.db.long_desc,
         "race": npc.db.race or "",
         "gender": meta.get("gender") or npc.db.gender or getattr(npc.db, "sex", ""),
         "weight": npc.db.weight or "",
