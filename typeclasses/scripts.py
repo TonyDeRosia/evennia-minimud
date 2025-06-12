@@ -98,6 +98,8 @@ class CombatScript(Script):
             self.db.teams[team].append(combatant)
             # reset the cache
             del self.ndb.teams
+            from combat.round_manager import CombatRoundManager
+            CombatRoundManager.get().add_instance(self)
             return True
 
         # if enemy is given, find enemy's team
@@ -109,6 +111,8 @@ class CombatScript(Script):
             self.db.teams[team].append(combatant)
             # reset the cache
             del self.ndb.teams
+            from combat.round_manager import CombatRoundManager
+            CombatRoundManager.get().add_instance(self)
             return True
 
         # if we got here, then no one provided was in combat already
@@ -118,6 +122,8 @@ class CombatScript(Script):
             self.db.teams = [[combatant], [enemy]]
             # reset the cache
             del self.ndb.teams
+            from combat.round_manager import CombatRoundManager
+            CombatRoundManager.get().add_instance(self)
             return True
 
         # at this point, there are no valid ways to add

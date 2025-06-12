@@ -1,6 +1,7 @@
 """Combat system package."""
 
 from .combat_engine import CombatEngine
+from .round_manager import CombatRoundManager, CombatInstance
 from .combat_actions import (
     Action,
     AttackAction,
@@ -31,4 +32,6 @@ __all__ = [
     "DamageType",
     "get_condition_msg",
     "calculate_initiative",
+    "CombatRoundManager",
+    "CombatInstance",
 ]

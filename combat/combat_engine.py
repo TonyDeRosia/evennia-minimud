@@ -533,6 +533,6 @@ class CombatEngine:
                         actor.msg(msg)
 
         self.round += 1
-        if not self.participants:
+        if not self.participants or self.round_time is None:
             return
-        delay(0, self.process_round)
+        delay(self.round_time, self.process_round)
