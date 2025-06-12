@@ -44,6 +44,7 @@ from world.mob_constants import (
     RIS_TYPES,
     ATTACK_TYPES,
     DEFENSE_TYPES,
+    NPCType,
     parse_flag_list,
 )
 from combat.combat_skills import SKILL_CLASSES
@@ -74,7 +75,15 @@ def validate_prototype(data: dict) -> list[str]:
 
     combat_class = data.get("combat_class")
     npc_type = data.get("npc_type")
-    if combat_class and npc_type not in COMBATANT_TYPES:
+    try:
+        npc_type_enum = (
+            npc_type
+            if isinstance(npc_type, NPCType)
+            else NPCType.from_str(str(npc_type))
+        )
+    except ValueError:
+        npc_type_enum = None
+    if combat_class and npc_type_enum not in COMBATANT_TYPES:
         warnings.append("Combat class set on non-combat NPC type.")
 
     return warnings
@@ -105,21 +114,21 @@ ALLOWED_ROLES_PRIMARY = (
 
 # Mapping of simple keys to NPC typeclass classes
 NPC_TYPE_MAP = {
-    "base": BaseNPC,
-    "merchant": MerchantNPC,
-    "banker": BankerNPC,
-    "trainer": TrainerNPC,
-    "wanderer": WandererNPC,
-    "guildmaster": GuildmasterNPC,
-    "guild_receptionist": GuildReceptionistNPC,
-    "questgiver": QuestGiverNPC,
-    "combatant": CombatNPC,
-    "combat_trainer": CombatTrainerNPC,
-    "event_npc": EventNPC,
+    NPCType.BASE: BaseNPC,
+    NPCType.MERCHANT: MerchantNPC,
+    NPCType.BANKER: BankerNPC,
+    NPCType.TRAINER: TrainerNPC,
+    NPCType.WANDERER: WandererNPC,
+    NPCType.GUILDMASTER: GuildmasterNPC,
+    NPCType.GUILD_RECEPTIONIST: GuildReceptionistNPC,
+    NPCType.QUESTGIVER: QuestGiverNPC,
+    NPCType.COMBATANT: CombatNPC,
+    NPCType.COMBAT_TRAINER: CombatTrainerNPC,
+    NPCType.EVENT_NPC: EventNPC,
 }
 
 # NPC types that can participate in combat and therefore need a combat class
-COMBATANT_TYPES = {"combatant", "combat_trainer"}
+COMBATANT_TYPES = {NPCType.COMBATANT, NPCType.COMBAT_TRAINER}
 
 
 # Suggested skill lists for each NPC class
@@ -608,7 +617,7 @@ def _set_creature_type(caller, raw_string, **kwargs):
         ]
         next_node = (
             "menunode_combat_class"
-            if caller.ndb.buildnpc.get("npc_type") in COMBATANT_TYPES
+            if caller.ndb.buildnpc.get("npc_type", NPCType.BASE) in COMBATANT_TYPES
             else "menunode_roles"
         )
         return _next_node(caller, next_node)
@@ -618,7 +627,7 @@ def _set_creature_type(caller, raw_string, **kwargs):
     caller.ndb.buildnpc["equipment_slots"] = list(SLOT_ORDER)
     next_node = (
         "menunode_combat_class"
-        if caller.ndb.buildnpc.get("npc_type") in COMBATANT_TYPES
+        if caller.ndb.buildnpc.get("npc_type", NPCType.BASE) in COMBATANT_TYPES
         else "menunode_roles"
     )
     return _next_node(caller, next_node)
@@ -650,7 +659,7 @@ def _edit_custom_slots(caller, raw_string, **kwargs):
     if string.lower() in ("done", "finish", "skip", ""):
         next_node = (
             "menunode_combat_class"
-            if caller.ndb.buildnpc.get("npc_type") in COMBATANT_TYPES
+            if caller.ndb.buildnpc.get("npc_type", NPCType.BASE) in COMBATANT_TYPES
             else "menunode_roles"
         )
         return _next_node(caller, next_node)
@@ -675,9 +684,9 @@ def _edit_custom_slots(caller, raw_string, **kwargs):
 
 
 def menunode_npc_type(caller, raw_string="", **kwargs):
-    default = caller.ndb.buildnpc.get("npc_type", "base")
-    classes = "/".join(NPC_TYPE_MAP)
-    example = ", ".join(list(NPC_TYPE_MAP)[:3])
+    default = caller.ndb.buildnpc.get("npc_type", NPCType.BASE)
+    classes = "/".join(t.value for t in NPC_TYPE_MAP)
+    example = ", ".join(t.value for t in list(NPC_TYPE_MAP)[:3])
     text = f"|wNPC Type/Archetype|n ({classes})"
     if default:
         text += f" [default: {default}]"
@@ -688,21 +697,32 @@ def menunode_npc_type(caller, raw_string="", **kwargs):
 
 
 def _set_npc_type(caller, raw_string, **kwargs):
-    string = raw_string.strip().lower()
-    if string == "back":
+    string = raw_string.strip()
+    if string.lower() == "back":
         return "menunode_race"
-    if not string or string in ("skip", "next"):
-        string = caller.ndb.buildnpc.get("npc_type", "base")
-    if string not in NPC_TYPE_MAP:
-        caller.msg(f"Invalid class. Choose from: {', '.join(NPC_TYPE_MAP)}")
+    if not string or string.lower() in ("skip", "next"):
+        npc_type = caller.ndb.buildnpc.get("npc_type", NPCType.BASE)
+    else:
+        try:
+            npc_type = NPCType.from_str(string)
+        except ValueError:
+            caller.msg(
+                "Invalid class. Choose from: "
+                + ", ".join(t.value for t in NPC_TYPE_MAP)
+            )
+            return "menunode_npc_type"
+    if npc_type not in NPC_TYPE_MAP:
+        caller.msg(
+            f"Invalid class. Choose from: {', '.join(t.value for t in NPC_TYPE_MAP)}"
+        )
         return "menunode_npc_type"
-    caller.ndb.buildnpc["npc_type"] = string
+    caller.ndb.buildnpc["npc_type"] = npc_type
 
     return _next_node(caller, "menunode_gender")
 
 
 def menunode_combat_class(caller, raw_string="", **kwargs):
-    if caller.ndb.buildnpc.get("npc_type") not in COMBATANT_TYPES:
+    if caller.ndb.buildnpc.get("npc_type", NPCType.BASE) not in COMBATANT_TYPES:
         return menunode_roles(caller)
 
     default = caller.ndb.buildnpc.get("combat_class", "")
@@ -758,7 +778,7 @@ def _edit_roles(caller, raw_string, **kwargs):
     string = raw_string.strip().lower()
     roles = caller.ndb.buildnpc.setdefault("roles", [])
     if string == "back":
-        if caller.ndb.buildnpc.get("npc_type") in COMBATANT_TYPES:
+        if caller.ndb.buildnpc.get("npc_type", NPCType.BASE) in COMBATANT_TYPES:
             return "menunode_combat_class"
         if caller.ndb.buildnpc.get("creature_type") == "unique":
             return "menunode_custom_slots"
@@ -1240,7 +1260,7 @@ def _set_behavior(caller, raw_string, **kwargs):
 def menunode_skills(caller, raw_string="", **kwargs):
     skills = caller.ndb.buildnpc.get("skills", [])
     default = ", ".join(skills)
-    npc_type = caller.ndb.buildnpc.get("npc_type", "base")
+    npc_type = caller.ndb.buildnpc.get("npc_type", NPCType.BASE)
     suggested = ", ".join(get_skills_for_class(npc_type))
     text = "|wList any skills or attacks (comma separated)|n"
     if default:
@@ -1774,9 +1794,10 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     if not isinstance(data, dict):
         caller.msg("Error: NPC data missing. Aborting.")
         return None
-    if data.get("combat_class") and data.get("npc_type") not in COMBATANT_TYPES:
+    npc_type = data.get("npc_type", NPCType.BASE)
+    if data.get("combat_class") and npc_type not in COMBATANT_TYPES:
         caller.msg("|rCombat class defined for non-combat NPC type.|n")
-    tclass = NPC_TYPE_MAP[data.get("npc_type", "base")]
+    tclass = NPC_TYPE_MAP[npc_type]
     tclass_path = f"{tclass.__module__}.{tclass.__name__}"
     if data.get("edit_obj"):
         npc = data.get("edit_obj")
@@ -1981,7 +2002,7 @@ def _gather_npc_data(npc):
                 for key, cls in NPC_TYPE_MAP.items()
                 if f"{cls.__module__}.{cls.__name__}" == npc.typeclass_path
             ),
-            "base",
+            NPCType.BASE,
         ),
         "combat_class": npc.db.charclass or "",
         "creature_type": npc.db.creature_type or "humanoid",
@@ -2139,7 +2160,7 @@ class CmdCNPC(Command):
                 if proto_dict:
                     if (
                         proto_dict.get("combat_class")
-                        and proto_dict.get("npc_type") not in COMBATANT_TYPES
+                        and NPCType.from_str(proto_dict.get("npc_type", "base")) not in COMBATANT_TYPES
                     ):
                         self.msg("|rCombat class defined for non-combat NPC type.|n")
                     obj = spawner.spawn(proto_dict)[0]
@@ -2258,7 +2279,7 @@ class CmdSpawnNPC(Command):
                 else:
                     self.msg("Unknown NPC prototype.")
                 return
-            if proto.get("combat_class") and proto.get("npc_type") not in COMBATANT_TYPES:
+            if proto.get("combat_class") and NPCType.from_str(proto.get("npc_type", "base")) not in COMBATANT_TYPES:
                 self.msg("|rCombat class defined for non-combat NPC type.|n")
             obj = spawn_from_vnum(vnum, location=self.caller.location)
             if not obj:
@@ -2280,9 +2301,9 @@ class CmdSpawnNPC(Command):
             if not proto:
                 self.msg("Unknown NPC prototype.")
                 return
-            if proto.get("combat_class") and proto.get("npc_type") not in COMBATANT_TYPES:
+            if proto.get("combat_class") and NPCType.from_str(proto.get("npc_type", "base")) not in COMBATANT_TYPES:
                 self.msg("|rCombat class defined for non-combat NPC type.|n")
-            tclass = NPC_TYPE_MAP[proto.get("npc_type", "base")]
+            tclass = NPC_TYPE_MAP[NPCType.from_str(proto.get("npc_type", "base"))]
             proto = dict(proto)
             proto.setdefault("typeclass", f"{tclass.__module__}.{tclass.__name__}")
             obj = spawner.spawn(proto)[0]
