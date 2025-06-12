@@ -66,6 +66,7 @@ class CombatScript(Script):
         ]
 
     def at_script_creation(self):
+        self.persistent = True
         self.db.teams = [[], []]
 
     def get_team(self, combatant):
