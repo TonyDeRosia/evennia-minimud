@@ -181,7 +181,7 @@ class CmdQuickMob(Command):
 
     def func(self):
         from world.templates.mob_templates import get_template
-        from utils.mob_utils import assign_next_vnum
+        from utils import vnum_registry
 
         args = self.args.strip()
         if not args:
@@ -197,7 +197,14 @@ class CmdQuickMob(Command):
             self.msg("Unknown template.")
             return
 
-        vnum = assign_next_vnum("npc")
+        area = self.caller.location.db.area if self.caller.location else None
+        if area:
+            try:
+                vnum = vnum_registry.get_next_vnum_for_area(area, "npc")
+            except Exception:
+                vnum = vnum_registry.get_next_vnum("npc")
+        else:
+            vnum = vnum_registry.get_next_vnum("npc")
 
         data = dict(data)
         data.update({"key": key, "vnum": vnum, "use_mob": True})

@@ -11,6 +11,7 @@ __all__ = [
     "validate_vnum",
     "register_vnum",
     "get_next_vnum",
+    "get_next_vnum_for_area",
 ]
 
 # Mapping of category -> (start, end) of allowed VNUM range
@@ -80,6 +81,53 @@ def get_next_vnum(category: str) -> int:
         vnum += 1
     if vnum > end:
         raise ValueError("No available VNUMs in range")
+    used.add(vnum)
+    entry["used"] = sorted(used)
+    entry["next"] = vnum + 1
+    data[category] = entry
+    _save(data)
+    return vnum
+
+
+def get_next_vnum_for_area(area_name: str, category: str) -> int:
+    """Return and reserve the next available VNUM for ``category`` in ``area_name``.
+
+    The area's valid VNUM range is read from :mod:`world.areas`. The returned
+    VNUM will be persisted as used in the registry.
+    """
+    from world.areas import get_area_vnum_range
+
+    if category not in VNUM_RANGES:
+        raise KeyError(f"Unknown category: {category}")
+
+    area_range = get_area_vnum_range(area_name)
+    if not area_range:
+        raise ValueError(f"Unknown area: {area_name}")
+
+    cat_start, cat_end = VNUM_RANGES[category]
+    start = max(area_range[0], cat_start)
+    end = min(area_range[1], cat_end)
+    if start > end:
+        raise ValueError("Area range does not overlap with category range")
+
+    data = _load()
+    entry = data.setdefault(category, {"used": [], "next": start})
+    used = set(entry.get("used", []))
+
+    # start searching from the larger of area start or stored next counter
+    vnum = max(entry.get("next", start), start)
+    for num in range(vnum, end + 1):
+        if num not in used:
+            vnum = num
+            break
+    else:
+        for num in range(start, vnum):
+            if num not in used:
+                vnum = num
+                break
+        else:
+            raise ValueError("No available VNUMs in area range")
+
     used.add(vnum)
     entry["used"] = sorted(used)
     entry["next"] = vnum + 1

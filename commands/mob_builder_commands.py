@@ -167,7 +167,15 @@ class CmdMCreate(Command):
                 self.msg("Copy prototype not found.")
                 return
             proto = dict(proto)
+        from utils import vnum_registry
+
         proto["key"] = self.new_key
+        area = self.caller.location.db.area if self.caller.location else None
+        if area:
+            try:
+                proto["vnum"] = vnum_registry.get_next_vnum_for_area(area, "npc")
+            except Exception:
+                pass
         prototypes.register_npc_prototype(self.new_key, proto)
         self.msg(f"Prototype {self.new_key} created.")
 
