@@ -51,7 +51,8 @@ from .mob_builder import (
     CmdMobTemplate,
     CmdQuickMob,
 )
-from .medit import CmdMEdit
+from .medit import CmdMEdit as CmdMEditMenu
+from .mob_builder_commands import CmdMEdit
 from .cmdmobbuilder import CmdMobProto
 from .nextvnum import CmdNextVnum
 from .builder_types import CmdBuilderTypes
@@ -1446,6 +1447,7 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdQuickMob)
         self.add(CmdMSpawn)
         self.add(CmdMobPreview)
+        self.add(CmdMEditMenu)
         self.add(CmdMEdit)
         self.add(CmdMCreate)
         self.add(CmdMSet)

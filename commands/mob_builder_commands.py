@@ -832,3 +832,84 @@ class CmdMobImport(Command):
             return
         prototypes.register_npc_prototype(key, data)
         self.msg(f"Prototype {key} imported.")
+
+
+
+class CmdMEdit(Command):
+    """Edit fields on a numbered mob prototype or display its summary."""
+
+    key = "@medit"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    _FIELD_CASTS = {
+        "level": int,
+        "race": lambda s: NPC_RACES.from_str(s).value,
+        "npc_type": lambda s: NPC_CLASSES.from_str(s).value,
+        "actflags": lambda s: [f.value for f in parse_flag_list(s, ACTFLAGS)],
+        "affected_by": lambda s: [f.value for f in parse_flag_list(s, AFFECTED_BY)],
+        "languages": lambda s: [f.value for f in parse_flag_list(s, LANGUAGES)],
+        "bodyparts": lambda s: [f.value for f in parse_flag_list(s, BODYPARTS)],
+        "saving_throws": lambda s: [f.value for f in parse_flag_list(s, SAVING_THROWS)],
+        "resistances": lambda s: [f.value for f in parse_flag_list(s, RIS_TYPES)],
+        "attack_types": lambda s: [f.value for f in parse_flag_list(s, ATTACK_TYPES)],
+        "defense_types": lambda s: [f.value for f in parse_flag_list(s, DEFENSE_TYPES)],
+        "skills": lambda s: [p.strip() for p in s.split(',') if p.strip()],
+        "spells": lambda s: [p.strip() for p in s.split(',') if p.strip()],
+        "special_funcs": lambda s: [f.value for f in parse_flag_list(s, SPECIAL_FUNCS)],
+        "loot_table": json.loads,
+    }
+
+    def parse(self):
+        try:
+            parts = shlex.split(self.args)
+        except ValueError:
+            parts = []
+        if parts and parts[0].isdigit():
+            self.vnum = int(parts[0])
+            if len(parts) >= 3:
+                self.field = parts[1]
+                self.value = " ".join(parts[2:])
+            else:
+                self.field = self.value = None
+        else:
+            self.vnum = None
+            self.field = self.value = None
+
+    def func(self):
+        from utils.mob_proto import get_prototype, register_prototype
+
+        if self.vnum is None:
+            self.msg("Usage: @medit <vnum> [<field> <value>]")
+            return
+
+        proto = get_prototype(self.vnum)
+        if not proto:
+            self.msg("Prototype not found.")
+            return
+
+        if not self.field:
+            self.msg(npc_builder.format_mob_summary(proto))
+            self.msg(f"Edit with: @medit {self.vnum} <field> <value>")
+            return
+
+        cast = self._FIELD_CASTS.get(self.field, str)
+        if cast is int:
+            try:
+                val = int(self.value)
+            except (TypeError, ValueError):
+                self.msg("Value must be an integer.")
+                return
+        elif callable(cast):
+            try:
+                val = cast(self.value)
+            except ValueError:
+                self.msg("Invalid value for field.")
+                return
+        else:
+            val = self.value
+
+        proto = dict(proto)
+        proto[self.field] = val
+        register_prototype(proto, vnum=self.vnum)
+        self.msg(f"{self.field} updated on {self.vnum}.")
