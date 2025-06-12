@@ -13,7 +13,7 @@ from typeclasses.npcs import BaseNPC
 
 
 @override_settings(DEFAULT_HOME=None)
-class TestQuickMobCommand(EvenniaTest):
+class TestCNPCQuickCommand(EvenniaTest):
     def setUp(self):
         super().setUp()
         self.char1.msg = MagicMock()
@@ -37,10 +37,10 @@ class TestQuickMobCommand(EvenniaTest):
         if not hasattr(prototypes, "_normalize_proto"):
             prototypes._normalize_proto = prototypes._legacy._normalize_proto
 
-    def test_quickmob_creates_and_spawns(self):
+    def test_cnpc_quick_creates_and_spawns(self):
         self.char1.location.set_area("town", 1)
         with patch("utils.vnum_registry.get_next_vnum_for_area", return_value=101) as mock_vnum:
-            self.char1.execute_cmd("@quickmob goblin")
+            self.char1.execute_cmd("cnpc quick goblin")
         mock_vnum.assert_called_with("town", "npc", builder=self.char1.key)
         reg = prototypes.get_npc_prototypes()
         assert "mob_goblin" in reg

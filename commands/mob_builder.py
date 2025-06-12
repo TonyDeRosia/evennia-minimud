@@ -185,37 +185,9 @@ class CmdQuickMob(Command):
     help_category = "Building"
 
     def func(self):
-        from world.templates.mob_templates import get_template
-        from utils import vnum_registry
-
         args = self.args.strip()
         if not args:
             self.msg("Usage: @quickmob <key> [template]")
             return
 
-        parts = args.split(None, 1)
-        key = parts[0]
-        template = parts[1] if len(parts) > 1 else "warrior"
-
-        data = get_template(template)
-        if not data:
-            self.msg("Unknown template.")
-            return
-
-        area = self.caller.location.db.area if self.caller.location else None
-        if area:
-            try:
-                vnum = vnum_registry.get_next_vnum_for_area(
-                    area,
-                    "npc",
-                    builder=self.caller.key,
-                )
-            except Exception:
-                vnum = vnum_registry.get_next_vnum("npc")
-        else:
-            vnum = vnum_registry.get_next_vnum("npc")
-
-        data = dict(data)
-        data.update({"key": key, "vnum": vnum, "use_mob": True})
-        self.caller.ndb.buildnpc = data
-        npc_builder._create_npc(self.caller, "", register=True)
+        self.caller.execute_cmd(f"cnpc quick {args}")

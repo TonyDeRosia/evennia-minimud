@@ -2189,12 +2189,18 @@ class CmdCNPC(Command):
     def func(self):
         if not self.args:
             self.msg(
-                "Usage: cnpc start <key> | cnpc edit <npc> | cnpc dev_spawn <proto>"
+                "Usage: cnpc start <key> | cnpc edit <npc> | cnpc dev_spawn <proto> | cnpc quick <key> [template]"
             )
             return
-        parts = self.args.split(None, 1)
-        sub = parts[0].lower()
-        rest = parts[1].strip() if len(parts) > 1 else ""
+
+        argstr = self.args.strip()
+        if argstr.lower().startswith("/quick"):
+            sub = "quick"
+            rest = argstr[6:].strip()
+        else:
+            parts = argstr.split(None, 1)
+            sub = parts[0].lower()
+            rest = parts[1].strip() if len(parts) > 1 else ""
         autosave = self.caller.db.builder_autosave
         if sub in ("restore", "discard") and autosave:
             if sub == "restore":
@@ -2217,6 +2223,39 @@ class CmdCNPC(Command):
             self.msg("Autosave found. Use 'cnpc restore' to continue or 'cnpc discard' to start over.")
             return
         use_mob = self.cmdstring.lower() == "mobbuilder"
+
+        if sub == "quick":
+            if not rest:
+                self.msg("Usage: cnpc quick <key> [template]")
+                return
+            from world.templates.mob_templates import get_template
+            from utils import vnum_registry
+
+            parts = rest.split(None, 1)
+            key = parts[0]
+            template = parts[1] if len(parts) > 1 else "warrior"
+
+            data = get_template(template)
+            if not data:
+                self.msg("Unknown template.")
+                return
+            area = self.caller.location.db.area if self.caller.location else None
+            if area:
+                try:
+                    vnum = vnum_registry.get_next_vnum_for_area(
+                        area, "npc", builder=self.caller.key
+                    )
+                except Exception:
+                    vnum = vnum_registry.get_next_vnum("npc")
+            else:
+                vnum = vnum_registry.get_next_vnum("npc")
+
+            data = dict(data)
+            data.update({"key": key, "vnum": vnum, "use_mob": True})
+            self.caller.ndb.buildnpc = data
+            _create_npc(self.caller, "", register=True)
+            return
+
         if sub == "start":
             if not rest:
                 self.msg("Usage: cnpc start <key>")
@@ -2307,7 +2346,9 @@ class CmdCNPC(Command):
             obj.move_to(self.caller.location, quiet=True)
             self.msg(f"Spawned {obj.get_display_name(self.caller)}.")
             return
-        self.msg("Usage: cnpc start <key> | cnpc edit <npc> | cnpc dev_spawn <proto>")
+        self.msg(
+            "Usage: cnpc start <key> | cnpc edit <npc> | cnpc dev_spawn <proto> | cnpc quick <key> [template]"
+        )
 
 
 class CmdEditNPC(Command):
