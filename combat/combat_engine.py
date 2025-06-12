@@ -17,6 +17,19 @@ from .combat_utils import (
 from world.combat import get_health_description
 
 
+def _current_hp(obj):
+    """Return current health of ``obj`` if available."""
+    if hasattr(obj, "hp"):
+        try:
+            return obj.hp
+        except Exception:
+            pass
+    hp_trait = getattr(getattr(obj, "traits", None), "health", None)
+    if hp_trait is not None:
+        return hp_trait.value
+    return None
+
+
 @dataclass
 class CombatParticipant:
     """Representation of a combatant in the engine."""
@@ -445,7 +458,8 @@ class CombatEngine:
         """
         for participant in list(self.participants):
             actor = participant.actor
-            if getattr(actor, "location", None) is None or getattr(actor, "hp", 1) <= 0:
+            hp = _current_hp(actor)
+            if getattr(actor, "location", None) is None or (hp is not None and hp <= 0):
                 self.remove_participant(actor)
 
     def process_round(self) -> None:
@@ -462,7 +476,8 @@ class CombatEngine:
         actions: list[tuple[int, int, CombatParticipant, Action]] = []
         for participant in list(self.queue):
             actor = participant.actor
-            if not hasattr(actor, "hp") or actor.hp <= 0:
+            hp = _current_hp(actor)
+            if hp is not None and hp <= 0:
                 continue
             target = getattr(getattr(actor, "db", None), "combat_target", None)
             hook = getattr(actor, "at_combat_turn", None)
@@ -514,7 +529,8 @@ class CombatEngine:
 
             if actor.location and result.message:
                 actor.location.msg_contents(result.message)
-            if getattr(result.target, "hp", 1) <= 0:
+            target_hp = _current_hp(result.target)
+            if target_hp is not None and target_hp <= 0:
                 self.handle_defeat(result.target, actor)
                 self.award_experience(actor, result.target)
             self.track_aggro(result.target, actor)
