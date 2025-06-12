@@ -10,7 +10,11 @@ from world.system import state_manager
 
 from .combat_actions import Action, AttackAction, CombatResult
 from .damage_types import DamageType
-from .combat_utils import format_combat_message, get_condition_msg
+from .combat_utils import (
+    format_combat_message,
+    get_condition_msg,
+    calculate_initiative,
+)
 
 
 @dataclass
@@ -316,10 +320,7 @@ class CombatEngine:
             actor = participant.actor
             if hasattr(actor, "traits"):
                 state_manager.apply_regen(actor)
-                base = getattr(actor.traits.get("initiative"), "value", 0)
-            else:
-                base = getattr(actor, "initiative", 0)
-            participant.initiative = base + random.randint(1, 20)
+            participant.initiative = calculate_initiative(actor)
             self.queue.append(participant)
         if self.use_initiative:
             self.queue.sort(key=lambda p: p.initiative, reverse=True)
