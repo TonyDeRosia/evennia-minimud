@@ -24,42 +24,46 @@ def _default_behaviors(npc) -> Iterable[Behavior]:
     """Yield behaviors for any skills or spells the NPC knows."""
 
     # Spells are highest priority if the NPC has mana for them.
+    def make_spell_behavior(spell_key, spell):
+        def check(engine, n, t):
+            mana = getattr(n.traits, "mana", None)
+            return mana and mana.current >= spell.mana_cost and n.cooldowns.ready(spell.key)
+
+        def act(engine, n, t):
+            if engine:
+                engine.queue_action(n, SpellAction(n, spell_key, t))
+            else:
+                n.cast_spell(spell_key, target=t)
+
+        return Behavior(30, check, act)
+
     for sp in getattr(npc.db, "spells", []):
         spell_key = sp.key if hasattr(sp, "key") else sp
         spell = SPELLS.get(spell_key)
         if not spell:
             continue
-
-        def check(engine, n, t, sk=spell):
-            mana = getattr(n.traits, "mana", None)
-            return mana and mana.current >= sk.mana_cost and n.cooldowns.ready(sk.key)
-
-        def act(engine, n, t, sk=spell_key):
-            if engine:
-                engine.queue_action(n, SpellAction(n, sk, t))
-            else:
-                n.cast_spell(sk, target=t)
-
-        yield Behavior(30, check, act)
+        yield make_spell_behavior(spell_key, spell)
 
     # Skills next.
+    def make_skill_behavior(skill):
+        def check(engine, n, t):
+            stam = getattr(n.traits, "stamina", None)
+            return stam and stam.current >= skill.stamina_cost and n.cooldowns.ready(skill.name)
+
+        def act(engine, n, t):
+            if engine:
+                engine.queue_action(n, SkillAction(n, skill, t))
+            else:
+                n.use_skill(skill.name, target=t)
+
+        return Behavior(20, check, act)
+
     for sk in getattr(npc.db, "skills", []):
         skill_cls = SKILL_CLASSES.get(sk)
         if not skill_cls:
             continue
         skill = skill_cls()
-
-        def check(engine, n, t, s=skill):
-            stam = getattr(n.traits, "stamina", None)
-            return stam and stam.current >= s.stamina_cost and n.cooldowns.ready(s.name)
-
-        def act(engine, n, t, s=skill):
-            if engine:
-                engine.queue_action(n, SkillAction(n, s, t))
-            else:
-                n.use_skill(s.name, target=t)
-
-        yield Behavior(20, check, act)
+        yield make_skill_behavior(skill)
 
     # Fallback to a normal attack.
     def atk_check(engine, n, t):
