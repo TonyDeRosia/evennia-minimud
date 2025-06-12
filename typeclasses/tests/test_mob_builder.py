@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, ANY
 from tempfile import TemporaryDirectory
 from pathlib import Path
 from unittest import mock
@@ -35,13 +35,13 @@ class TestMobBuilder(EvenniaTest):
         return None
 
     def test_builder_flow_and_spawn(self):
-        with patch("commands.npc_builder.EvMenu") as mock_menu:
+        with patch("olc.base.EvMenu") as mock_menu:
             self.char1.execute_cmd("mobbuilder start goblin")
         mock_menu.assert_called_with(
             self.char1,
             "commands.npc_builder",
-            startnode="menunode_desc",
-            cmd_on_exit=npc_builder._on_menu_exit,
+            startnode="menunode_key",
+            cmd_on_exit=ANY,
         )
         npc_builder._set_key(self.char1, "goblin")
         npc_builder._set_desc(self.char1, "A small goblin")

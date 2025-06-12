@@ -2682,7 +2682,7 @@ Notes:
       combatant and others.
     - Selecting the combatant type allows you to choose a combat class
       like Warrior or Mage.
-    - The builder prompts for description, weight category,
+    - The builder prompts for key, description, weight category,
       creature type, level, experience reward, optional HP MP SP values,
       primary stats, modifiers or buffs, combat class, behavior, skills,
       spells, resistances and AI type.

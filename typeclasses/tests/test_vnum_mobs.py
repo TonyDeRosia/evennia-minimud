@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, ANY
 from tempfile import TemporaryDirectory
 from pathlib import Path
 from unittest import mock
@@ -32,11 +32,16 @@ class TestVnumMobs(EvenniaTest):
             "VNUM_REGISTRY_FILE",
             Path(self.tmp.name) / "vnums.json",
         )
+        patcher3 = mock.patch.object(
+            vnum_registry, "_REG_PATH", Path(self.tmp.name) / "vnums.json"
+        )
         self.addCleanup(self.tmp.cleanup)
         self.addCleanup(patcher1.stop)
         self.addCleanup(patcher2.stop)
+        self.addCleanup(patcher3.stop)
         patcher1.start()
         patcher2.start()
+        patcher3.start()
 
     def test_register_and_spawn_vnum(self):
         proto = {"key": "goblin", "typeclass": "typeclasses.npcs.BaseNPC"}
@@ -98,8 +103,8 @@ class TestVnumMobs(EvenniaTest):
         mock_menu.assert_called_with(
             self.char1,
             "commands.npc_builder",
-            startnode="menunode_desc",
-            cmd_on_exit=npc_builder._on_menu_exit,
+            startnode="menunode_key",
+            cmd_on_exit=ANY,
         )
         self.assertEqual(self.char1.ndb.mob_vnum, 1)
         self.assertEqual(self.char1.ndb.buildnpc["key"], "gob")

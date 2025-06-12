@@ -2192,7 +2192,7 @@ class CmdCNPC(Command):
                 OLCEditor(
                     self.caller,
                     "commands.npc_builder",
-                    startnode="menunode_desc",
+                    startnode="menunode_key",
                     state=state,
                     validator=NPCValidator(),
                 ).start()
@@ -2238,7 +2238,7 @@ class CmdCNPC(Command):
             OLCEditor(
                 self.caller,
                 "commands.npc_builder",
-                startnode="menunode_desc",
+                startnode="menunode_key",
                 state=state,
                 validator=NPCValidator(),
             ).start()
@@ -2260,7 +2260,7 @@ class CmdCNPC(Command):
             OLCEditor(
                 self.caller,
                 "commands.npc_builder",
-                startnode="menunode_desc",
+                startnode="menunode_key",
                 state=state,
                 validator=NPCValidator(),
             ).start()

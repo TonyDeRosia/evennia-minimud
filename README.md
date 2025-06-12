@@ -117,8 +117,8 @@ If you wind up having any issues or questions working with Evennia, [the Discord
 ### NPC Creation Menu
 
 You can quickly set up non-player characters using `cnpc start <key>` (alias
-`createnpc`). This opens an interactive menu where you enter the description,
-type, level and other details. Follow the prompts, review the summary at the end
+`createnpc`). This opens an interactive menu where you enter the key,
+description, type, level and other details. Follow the prompts, review the summary at the end
 and confirm to create your NPC. You can later update them with `cnpc edit
 <npc>`.
 
