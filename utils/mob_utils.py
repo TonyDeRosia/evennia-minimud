@@ -14,6 +14,7 @@ __all__ = [
     "auto_calc_secondary",
     "assign_next_vnum",
     "add_to_mlist",
+    "generate_base_stats",
     "calculate_combat_stats",
     "mobprogs_to_triggers",
 ]
@@ -29,22 +30,23 @@ def add_to_mlist(vnum: int, prototype: Dict) -> None:
     get_mobdb().add_proto(int(vnum), dict(prototype))
 
 
-def calculate_combat_stats(combat_class: str, level: int) -> Dict[str, int]:
-    """Return base combat stats for ``combat_class`` at ``level``."""
+def generate_base_stats(class_name: str, level: int) -> Dict[str, int]:
+    """Return default combat stats for ``class_name`` at ``level``."""
+
     base = int(level) * 10
+    lower = class_name.lower()
     return {
         "hp": base,
-        "mp": base // 2
-        if combat_class.lower() in ("wizard", "sorcerer", "mage", "necromancer")
-        else base // 4,
-        "sp": base // 2
-        if combat_class.lower() in ("warrior", "rogue", "swashbuckler")
-        else base // 3,
-        "armor": level * 2
-        if combat_class.lower() in ("warrior", "paladin")
-        else level,
+        "mp": base // 2 if lower in ("wizard", "sorcerer", "mage", "necromancer") else base // 4,
+        "sp": base // 2 if lower in ("warrior", "rogue", "swashbuckler") else base // 3,
+        "armor": level * 2 if lower in ("warrior", "paladin") else level,
         "initiative": 10 + level // 2,
     }
+
+
+def calculate_combat_stats(combat_class: str, level: int) -> Dict[str, int]:
+    """Return base combat stats for ``combat_class`` at ``level``."""
+    return generate_base_stats(combat_class, level)
 
 
 def auto_calc(primary_stats: Dict[str, int]) -> Dict[str, int]:

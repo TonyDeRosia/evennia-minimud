@@ -65,7 +65,7 @@ class TestVnumMobs(EvenniaTest):
         }
         vnum = register_prototype(proto, vnum=3)
         npc = spawn_from_vnum(vnum, location=self.char1.location)
-        stats = npc_builder.calculate_combat_stats("Warrior", 2)
+        stats = npc_builder.generate_base_stats("Warrior", 2)
         self.assertEqual(npc.db.hp, stats["hp"])
         self.assertEqual(npc.db.mp, stats["mp"])
         self.assertEqual(npc.db.sp, stats["sp"])

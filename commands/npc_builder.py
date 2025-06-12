@@ -27,7 +27,7 @@ from utils.menu_utils import (
 )
 from world.scripts import classes
 from utils import vnum_registry
-from utils.mob_utils import calculate_combat_stats, mobprogs_to_triggers
+from utils.mob_utils import generate_base_stats, mobprogs_to_triggers
 from world.triggers import TriggerManager
 from .command import Command
 from django.conf import settings
@@ -84,7 +84,7 @@ def _auto_fill_combat_stats(data: dict) -> None:
     level = data.get("level")
     if not combat_class or not level:
         return
-    stats = calculate_combat_stats(combat_class, level)
+    stats = generate_base_stats(combat_class, level)
     for field in ("hp", "mp", "sp", "armor", "initiative"):
         data.setdefault(field, stats[field])
 
@@ -2026,7 +2026,7 @@ def finalize_mob_prototype(caller, npc):
         return
 
     npc.db.charclass = npc.db.combat_class
-    stats = calculate_combat_stats(npc.db.combat_class, npc.db.level)
+    stats = generate_base_stats(npc.db.combat_class, npc.db.level)
     for attr, trait in (("hp", "health"), ("mp", "mana"), ("sp", "stamina")):
         value = getattr(npc.traits.get(trait), "base", 0)
         if not value:

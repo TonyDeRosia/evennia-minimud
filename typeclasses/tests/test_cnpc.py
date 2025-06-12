@@ -228,7 +228,7 @@ class TestCNPC(EvenniaTest):
         npc.traits.mana.base = 0
         npc.traits.stamina.base = 0
         npc_builder.finalize_mob_prototype(self.char1, npc)
-        stats = npc_builder.calculate_combat_stats("Warrior", 3)
+        stats = npc_builder.generate_base_stats("Warrior", 3)
         self.assertEqual(npc.db.hp, stats["hp"])
         self.assertEqual(npc.db.mp, stats["mp"])
         self.assertEqual(npc.db.sp, stats["sp"])
