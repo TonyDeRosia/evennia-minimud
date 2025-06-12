@@ -250,3 +250,31 @@ class TestVnumMobs(EvenniaTest):
             mock_spawn.assert_not_called()
         out = self.char1.msg.call_args[0][0]
         self.assertIn("Invalid VNUM", out)
+
+    def test_edit_proto_changes_vnum(self):
+        """Editing a prototype to a new VNUM should free the old one."""
+        proto = {
+            "key": "orc",
+            "npc_type": "base",
+            "creature_type": "humanoid",
+            "combat_class": "Warrior",
+            "level": 1,
+        }
+        register_prototype(proto, vnum=1)
+
+        self.char1.ndb.buildnpc = dict(proto)
+        self.char1.ndb.buildnpc["vnum"] = 1
+        self.char1.ndb.mob_vnum = 1
+
+        npc_builder._set_vnum(self.char1, "2")
+        npc_builder._create_npc(self.char1, "", register=True)
+
+        mob_db = get_mobdb()
+        self.assertIsNone(mob_db.get_proto(1))
+        self.assertIsNotNone(mob_db.get_proto(2))
+        self.assertTrue(vnum_registry.validate_vnum(1, "npc"))
+        self.assertFalse(vnum_registry.validate_vnum(2, "npc"))
+
+        npc = [o for o in self.char1.location.contents if o.key == "orc"][0]
+        self.assertTrue(npc.tags.has("M2", category="vnum"))
+        self.assertFalse(npc.tags.has("M1", category="vnum"))
