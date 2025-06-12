@@ -8,14 +8,26 @@ from evennia.prototypes import spawner
 from world.scripts.mob_db import get_mobdb
 from .vnum_registry import get_next_vnum, register_vnum, validate_vnum
 from world import prototypes
+from world.areas import get_area_vnum_range
 
 
-def register_prototype(data: dict, vnum: int | None = None) -> int:
-    """Register ``data`` in the mob database under ``vnum``."""
+def register_prototype(data: dict, vnum: int | None = None, *, area: str | None = None) -> int:
+    """Register ``data`` in the mob database under ``vnum``.
+
+    If ``area`` is given, ``vnum`` must fall within that area's range.
+    """
     mob_db = get_mobdb()
     if vnum is None:
         vnum = get_next_vnum("npc")
+        if area:
+            rng = get_area_vnum_range(area)
+            if rng and not (rng[0] <= vnum <= rng[1]):
+                raise ValueError("VNUM outside area range")
     else:
+        if area:
+            rng = get_area_vnum_range(area)
+            if rng and not (rng[0] <= vnum <= rng[1]):
+                raise ValueError("VNUM outside area range")
         if not validate_vnum(vnum, "npc"):
             raise ValueError("Invalid or already used VNUM")
         register_vnum(vnum)

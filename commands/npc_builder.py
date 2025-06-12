@@ -1960,11 +1960,22 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
         if data.get("script"):
             proto["scripts"] = [data["script"]]
         prototypes.register_npc_prototype(proto_key, proto)
-        if data.get("vnum") is not None:
-            from world.scripts.mob_db import get_mobdb
-
-            get_mobdb().add_proto(data["vnum"], proto)
         area = caller.location.db.area
+        if data.get("vnum") is not None:
+            try:
+                mob_proto.register_prototype(proto, vnum=data["vnum"], area=area)
+            except ValueError:
+                if area:
+                    from world.areas import get_area_vnum_range
+
+                    rng = get_area_vnum_range(area)
+                    if rng:
+                        caller.msg(
+                            f"VNUM {data['vnum']} outside {area} range {rng[0]}-{rng[1]}"
+                        )
+                        return None
+                caller.msg("Invalid VNUM for prototype.")
+                return None
         if area:
             from world import area_npcs
 

@@ -19,6 +19,14 @@ def builder_cnpc_prompt(caller, name):
         caller.msg("Cancelled.")
         return
     vnum = vnum_registry.get_next_vnum("npc")
+    area = caller.location.db.area if caller.location else None
+    if area:
+        from world.areas import get_area_vnum_range
+
+        rng = get_area_vnum_range(area)
+        if rng and not (rng[0] <= vnum <= rng[1]):
+            caller.msg(f"VNUM {vnum} outside {area} range {rng[0]}-{rng[1]}")
+            return
     npc = create_object("typeclasses.npcs.BaseNPC", key=name, location=caller.location)
     npc.db.desc = desc
     npc.db.race = race
@@ -37,9 +45,9 @@ def builder_cnpc_prompt(caller, name):
         "vnum": vnum,
     }
     prototypes.register_npc_prototype(name, proto)
-    mob_proto.register_prototype(proto, vnum=vnum)
-    if caller.location and caller.location.db.area:
-        area_npcs.add_area_npc(caller.location.db.area, name)
+    mob_proto.register_prototype(proto, vnum=vnum, area=area)
+    if area:
+        area_npcs.add_area_npc(area, name)
     caller.msg(f"NPC {name} created with VNUM {vnum}.")
 
 

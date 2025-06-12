@@ -95,3 +95,11 @@ def find_area(name: str) -> tuple[int, Optional[Area]]:
     return -1, None
 
 
+def get_area_vnum_range(name: str) -> Optional[tuple[int, int]]:
+    """Return the allowed VNUM range for ``name`` if the area exists."""
+    _, area = find_area(name)
+    if area:
+        return area.start, area.end
+    return None
+
+
