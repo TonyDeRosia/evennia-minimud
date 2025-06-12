@@ -107,8 +107,17 @@ def add_cooldown(chara, key: str, duration: int):
 
 
 def remove_cooldown(chara, key: str):
-    """Remove a cooldown."""
-    chara.cooldowns.remove(key)
+    """Remove a cooldown if it exists."""
+    handler = getattr(chara, "cooldowns", None)
+    if not handler:
+        return
+    if hasattr(handler, "remove"):
+        handler.remove(key)
+    else:
+        try:
+            del handler[key]
+        except Exception:
+            pass
 
 
 def add_effect(chara, key: str, duration: int):
