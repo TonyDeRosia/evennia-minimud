@@ -50,6 +50,23 @@ def spawn_from_vnum(vnum: int, location=None):
     prototypes._normalize_proto(proto_data)
     if "typeclass" not in proto_data:
         proto_data["typeclass"] = "typeclasses.npcs.BaseNPC"
+
+    # dynamically combine base class with role mixins
+    base_cls = proto_data["typeclass"]
+    if isinstance(base_cls, str):
+        module, clsname = base_cls.rsplit(".", 1)
+        base_cls = getattr(__import__(module, fromlist=[clsname]), clsname)
+
+    metadata = proto_data.get("metadata") or {}
+    role_names = metadata.get("roles") or []
+    from commands.npc_builder import ROLE_MIXIN_MAP
+    mixins = [ROLE_MIXIN_MAP[r] for r in role_names if r in ROLE_MIXIN_MAP]
+    if mixins:
+        dyn_class = type("DynamicNPC", tuple([base_cls, *mixins]), {})
+        proto_data["typeclass"] = dyn_class
+    else:
+        proto_data["typeclass"] = base_cls
+
     npc = spawner.spawn(proto_data)[0]
     if location:
         npc.location = location
