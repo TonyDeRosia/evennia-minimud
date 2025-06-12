@@ -467,3 +467,23 @@ class TestAdminCommands(EvenniaTest):
 
         self.assertFalse(self.room1.scripts.get("combat"))
 
+    def test_peace_after_victory(self):
+        """Peace should handle the combat script being deleted already."""
+
+        from typeclasses.scripts import CombatScript
+
+        self.room1.scripts.add(CombatScript, key="combat")
+        script = self.room1.scripts.get("combat")[0]
+        script.add_combatant(self.char1, enemy=self.char2)
+
+        # defeat the opponent
+        self.char2.tags.add("dead", category="status")
+        script.check_victory()
+
+        # combat script should now be deleted
+        self.assertFalse(self.room1.scripts.get("combat"))
+
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("peace")
+        self.char1.msg.assert_called_with("There is no fighting here.")
+
