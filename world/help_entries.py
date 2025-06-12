@@ -3057,9 +3057,10 @@ Notes:
         "category": "Building",
         "text": """Help for @quickmob
 
-Load a predefined mob template and open the NPC builder with those values
-pre-filled. A VNUM is reserved automatically so after saving the prototype
-you can respawn the mob with ``@mspawn M<number>``.
+Quickly create a mob from a template. The command reserves a VNUM and
+opens the builder on the review screen so you can tweak the values before
+spawning. Selecting |wYes & Save Prototype|n will also register the
+prototype for ``@mspawn M<number>``.
 
 Usage:
     @quickmob <key> [template]
@@ -3069,6 +3070,7 @@ Example:
 
 Notes:
     - Templates are defined in ``world.templates.mob_templates``.
+    - The mob is spawned after you confirm the menu options.
 """,
     },
     {
@@ -3076,7 +3078,9 @@ Notes:
         "category": "Building",
         "text": """Help for @mobtemplate
 
-Load a predefined mob template into the current build session.
+Load a predefined mob template into the current build session. Run this
+before ``cnpc``, ``@quickmob`` or ``medit create`` to start with preset
+stats.
 
 Usage:
     @mobtemplate list
@@ -3096,7 +3100,9 @@ Notes:
         "text": """Help for medit
 
 Open the NPC builder for a numeric prototype. ``create`` reserves the
-number and loads a default template for editing.
+number, loads a basic template and starts the builder from the beginning.
+After editing choose |wYes & Save Prototype|n to spawn the mob and save the
+prototype.
 
 Usage:
     medit <vnum>
@@ -3107,7 +3113,7 @@ Example:
 
 Notes:
     - VNUMs are validated against the registry.
-    - Choose |wYes & Save Prototype|n in the builder to store the result.
+    - The mob is spawned when you finish the menu.
 """,
     },
     {
