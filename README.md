@@ -279,20 +279,27 @@ Example::
 
 ### Quick Mob
 
-`@quickmob <key> [template]` loads a template from
-`world.templates.mob_templates` and opens the NPC builder with those defaults
-filled in. A VNUM is reserved automatically so once you finish the builder and
-save the prototype you can respawn the mob later with ``@mspawn M<number>``.
+`@quickmob <key> [template]` loads a mob template from
+`world.templates.mob_templates` and immediately launches the builder on the
+review screen. A VNUM is reserved for you so after tweaking any fields you can
+select **Continue** followed by **Yes & Save Prototype** to spawn the NPC and
+store the prototype for future use. You can then respawn it anytime with
+``@mspawn M<number>``.
 
 Example::
 
     @quickmob goblin warrior
+    [review summary]
+    [choose **Continue**]
+    [choose **Yes & Save Prototype**]
+    @mspawn M<number>
 
 ### MEdit
 
 Use `medit <vnum>` to edit an existing numeric prototype. The command
-`medit create <vnum>` reserves the number, loads a basic template and
-opens the same builder menu for customization.
+`medit create <vnum>` reserves the number, loads a basic template and opens the
+builder from the beginning. After setting the desired values choose
+**Yes & Save Prototype** to spawn the NPC and register the prototype.
 
 ## Mob Prototype Manager
 
