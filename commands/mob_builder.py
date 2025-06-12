@@ -176,6 +176,8 @@ class CmdMobTemplate(Command):
         self.caller.ndb.buildnpc = self.caller.ndb.buildnpc or {}
         for key, val in data.items():
             self.caller.ndb.buildnpc[key] = deepcopy(val)
+        if not hasattr(self.caller.ndb, "buildnpc_orig"):
+            self.caller.ndb.buildnpc_orig = dict(self.caller.ndb.buildnpc)
         self.msg(f"Template '{arg}' loaded into builder.")
 
 
@@ -220,8 +222,9 @@ class CmdQuickMob(Command):
         data = dict(data)
         data.update({"key": key, "vnum": vnum, "use_mob": True})
         self.caller.ndb.buildnpc = data
+        self.caller.ndb.buildnpc_orig = dict(self.caller.ndb.buildnpc)
         self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
-        state = OLCState(data=self.caller.ndb.buildnpc)
+        state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
         OLCEditor(
             self.caller,
             "commands.npc_builder",

@@ -737,7 +737,7 @@ class CmdCNPC(Command):
     def func(self):
         if not self.args:
             self.msg(
-                "Usage: cnpc start <key> | cnpc edit <npc> | cnpc dev_spawn <proto>"
+                "Usage: cnpc start <key> | cnpc edit <npc> | cnpc clone <proto> [= new_key] | cnpc dev_spawn <proto>"
             )
             return
         parts = self.args.split(None, 1)
@@ -747,9 +747,10 @@ class CmdCNPC(Command):
         if sub in ("restore", "discard") and autosave:
             if sub == "restore":
                 self.caller.ndb.buildnpc = dict(autosave)
+                self.caller.ndb.buildnpc_orig = dict(self.caller.ndb.buildnpc)
                 self.caller.db.builder_autosave = None
                 self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
-                state = OLCState(data=self.caller.ndb.buildnpc)
+                state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
                 startnode = (
                     "menunode_desc" if self.caller.ndb.buildnpc.get("key") else "menunode_key"
                 )
@@ -797,8 +798,9 @@ class CmdCNPC(Command):
             }
             if use_mob:
                 self.caller.ndb.buildnpc["use_mob"] = True
+            self.caller.ndb.buildnpc_orig = dict(self.caller.ndb.buildnpc)
             self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
-            state = OLCState(data=self.caller.ndb.buildnpc)
+            state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
             startnode = (
                 "menunode_desc" if self.caller.ndb.buildnpc.get("key") else "menunode_key"
             )
@@ -820,10 +822,11 @@ class CmdCNPC(Command):
                 return
             data = _gather_npc_data(npc)
             self.caller.ndb.buildnpc = data
+            self.caller.ndb.buildnpc_orig = dict(self.caller.ndb.buildnpc)
             if use_mob:
                 self.caller.ndb.buildnpc["use_mob"] = True
             self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
-            state = OLCState(data=self.caller.ndb.buildnpc)
+            state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
             startnode = (
                 "menunode_desc" if self.caller.ndb.buildnpc.get("key") else "menunode_key"
             )
@@ -831,6 +834,36 @@ class CmdCNPC(Command):
                 self.caller,
                 "world.menus.mob_builder_menu",
                 startnode=startnode,
+                state=state,
+                validator=NPCValidator(),
+            ).start()
+            return
+        if sub == "clone":
+            if not rest:
+                self.msg("Usage: cnpc clone <prototype> [= <new_key>]")
+                return
+            proto_key, _, new_key = rest.partition("=")
+            proto_key = proto_key.strip()
+            new_key = new_key.strip() if new_key else ""
+            from world import prototypes
+
+            proto = prototypes.get_npc_prototypes().get(proto_key)
+            if not proto:
+                self.msg("Unknown NPC prototype.")
+                return
+            data = dict(proto)
+            if new_key:
+                data["key"] = new_key
+            self.caller.ndb.buildnpc = data
+            self.caller.ndb.buildnpc_orig = dict(self.caller.ndb.buildnpc)
+            if use_mob:
+                self.caller.ndb.buildnpc["use_mob"] = True
+            self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
+            state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
+            OLCEditor(
+                self.caller,
+                "world.menus.mob_builder_menu",
+                startnode="menunode_review",
                 state=state,
                 validator=NPCValidator(),
             ).start()
@@ -864,7 +897,9 @@ class CmdCNPC(Command):
             obj.move_to(self.caller.location, quiet=True)
             self.msg(f"Spawned {obj.get_display_name(self.caller)}.")
             return
-        self.msg("Usage: cnpc start <key> | cnpc edit <npc> | cnpc dev_spawn <proto>")
+        self.msg(
+            "Usage: cnpc start <key> | cnpc edit <npc> | cnpc clone <proto> [= new_key] | cnpc dev_spawn <proto>"
+        )
 
 
 class CmdEditNPC(Command):
@@ -894,7 +929,7 @@ class CmdEditNPC(Command):
         primary = roles[0] if roles else "-"
         level = data.get("level") or npc.db.level or "-"
         self.msg(f"{status} {primary} L{level}")
-        state = OLCState(data=self.caller.ndb.buildnpc)
+        state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
         OLCEditor(
             self.caller,
             "world.menus.mob_builder_menu",
