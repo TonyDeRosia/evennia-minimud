@@ -9,6 +9,7 @@ from evennia.utils import delay
 from world import prototypes
 from typeclasses.characters import NPC
 from . import npc_builder
+from copy import deepcopy
 
 from .command import Command
 from .mob_builder_commands import CmdMStat as _OldMStat, CmdMList as _OldMList
@@ -168,7 +169,8 @@ class CmdMobTemplate(Command):
             self.msg("Unknown template.")
             return
         self.caller.ndb.buildnpc = self.caller.ndb.buildnpc or {}
-        self.caller.ndb.buildnpc.update(data)
+        for key, val in data.items():
+            self.caller.ndb.buildnpc[key] = deepcopy(val)
         self.msg(f"Template '{arg}' loaded into builder.")
 
 
