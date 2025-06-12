@@ -12,9 +12,9 @@ from .combat_actions import Action, AttackAction, CombatResult
 from .damage_types import DamageType
 from .combat_utils import (
     format_combat_message,
-    get_condition_msg,
     calculate_initiative,
 )
+from world.combat import get_health_description
 
 
 @dataclass
@@ -509,10 +509,7 @@ class CombatEngine:
                 damage_totals[actor] = damage_totals.get(actor, 0) + damage_done
 
             if result.target:
-                hp = getattr(getattr(result.target, "traits", None), "health", None)
-                cur = getattr(hp, "value", getattr(result.target, "hp", 0))
-                max_hp = getattr(hp, "max", getattr(result.target, "max_hp", cur))
-                cond = get_condition_msg(cur, max_hp)
+                cond = get_health_description(result.target)
                 self.round_output.append(f"The {result.target.key} {cond}")
 
             if actor.location and result.message:
