@@ -885,12 +885,20 @@ class PlayerCharacter(Character):
             location=self.location,
             attributes=[("corpse_of", self.key)],
         )
+        from world import prototypes
+
         for part in BODYPARTS:
-            create.create_object(
-                "typeclasses.objects.Object",
-                key=part.value,
-                location=corpse,
-            )
+            proto_name = f"{part.name}_PART"
+            proto = getattr(prototypes, proto_name, None)
+            if proto:
+                obj = spawn(proto)[0]
+                obj.location = corpse
+            else:
+                create.create_object(
+                    "typeclasses.objects.Object",
+                    key=part.value,
+                    location=corpse,
+                )
         self.at_death(attacker)
         self.award_xp_to(attacker)
 

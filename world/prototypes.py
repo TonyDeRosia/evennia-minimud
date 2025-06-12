@@ -485,6 +485,78 @@ DEER_ANTLER = {
     ],
 }
 
+### Body parts
+
+HEAD_PART = {
+    "key": "head",
+    "desc": "A severed head.",
+}
+
+ARMS_PART = {
+    "key": "arms",
+    "desc": "Two severed arms.",
+}
+
+LEGS_PART = {
+    "key": "legs",
+    "desc": "Two severed legs.",
+}
+
+HEART_PART = {
+    "key": "heart",
+    "desc": "A bloody heart.",
+}
+
+BRAIN_PART = {
+    "key": "brain",
+    "desc": "A pale brain.",
+}
+
+GUTS_PART = {
+    "key": "guts",
+    "desc": "Some slippery entrails.",
+}
+
+HANDS_PART = {
+    "key": "hands",
+    "desc": "A pair of severed hands.",
+}
+
+FEET_PART = {
+    "key": "feet",
+    "desc": "A pair of severed feet.",
+}
+
+FINGERS_PART = {
+    "key": "fingers",
+    "desc": "Several disjointed fingers.",
+}
+
+EARS_PART = {
+    "key": "ears",
+    "desc": "A pair of severed ears.",
+}
+
+EYES_PART = {
+    "key": "eyes",
+    "desc": "Two staring eyes.",
+}
+
+LONG_TONGUE_PART = {
+    "key": "long tongue",
+    "desc": "A remarkably long tongue.",
+}
+
+EYESTALKS_PART = {
+    "key": "eyestalks",
+    "desc": "A set of slimy eyestalks.",
+}
+
+TENTACLES_PART = {
+    "key": "tentacles",
+    "desc": "A mass of twitching tentacles.",
+}
+
 # Example loot table entry structure. A loot table is stored on
 # ``npc.db.loot_table`` as a list of mappings with the prototype key and the
 # percent chance to drop that prototype when the NPC dies.
