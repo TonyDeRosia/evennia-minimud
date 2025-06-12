@@ -21,6 +21,7 @@ from world.combat import get_health_description
 from combat import combat_utils
 
 from .objects import ObjectParent
+from world.mob_constants import BODYPARTS
 
 _IMMOBILE = ("sitting", "lying down", "unconscious", "sleeping")
 
@@ -412,6 +413,8 @@ class Character(ObjectParent, ClothedCharacter):
                 attacker.db.coins = from_copper(total)
                 attacker.msg(f"You claim {bounty} coins for defeating {self.key}.")
                 self.db.bounty = 0
+            if utils.inherits_from(self, PlayerCharacter):
+                self.on_death(attacker)
         return damage
     def at_emote(self, message, **kwargs):
         """
@@ -861,6 +864,34 @@ class PlayerCharacter(Character):
         if self.traits.health.value < 50 and self.sessions.count():
             self.refresh_prompt()
         return dmg
+
+    def on_death(self, attacker):
+        """Create a corpse with body parts when the player dies."""
+        if not self.location:
+            return
+        # avoid spawning multiple corpses for repeated calls
+        existing = [
+            obj
+            for obj in self.location.contents
+            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+            and obj.db.corpse_of == self.key
+        ]
+        if existing:
+            return
+        corpse = create.create_object(
+            "typeclasses.objects.Corpse",
+            key=f"{self.key} corpse",
+            location=self.location,
+            attributes=[("corpse_of", self.key)],
+        )
+        for part in BODYPARTS:
+            create.create_object(
+                "typeclasses.objects.Object",
+                key=part.value,
+                location=corpse,
+            )
+        self.at_death(attacker)
+        self.award_xp_to(attacker)
 
 
     def respawn(self):
