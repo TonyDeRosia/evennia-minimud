@@ -10,6 +10,7 @@ __all__ = [
     "VNUM_RANGES",
     "validate_vnum",
     "register_vnum",
+    "unregister_vnum",
     "get_next_vnum",
     "get_next_vnum_for_area",
 ]
@@ -66,6 +67,22 @@ def register_vnum(vnum: int):
                 _save(data)
             return
     raise ValueError("VNUM outside defined ranges")
+
+
+def unregister_vnum(vnum: int, category: str) -> None:
+    """Remove ``vnum`` from the registry for ``category``."""
+    if category not in VNUM_RANGES:
+        raise KeyError(f"Unknown category: {category}")
+    data = _load()
+    entry = data.get(category, {"used": [], "next": VNUM_RANGES[category][0]})
+    used = set(entry.get("used", []))
+    if vnum in used:
+        used.remove(vnum)
+        entry["used"] = sorted(used)
+        if vnum < entry.get("next", VNUM_RANGES[category][0]):
+            entry["next"] = vnum
+        data[category] = entry
+        _save(data)
 
 
 def get_next_vnum(category: str) -> int:

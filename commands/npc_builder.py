@@ -569,6 +569,7 @@ def _set_vnum(caller, raw_string, **kwargs):
         return "menunode_desc"
 
     data = caller.ndb.buildnpc or {}
+    old = data.get("vnum")
 
     if not string:
         caller.msg("VNUM is required.")
@@ -584,6 +585,9 @@ def _set_vnum(caller, raw_string, **kwargs):
             caller.msg("Invalid or already used VNUM.")
             return "menunode_vnum"
         vnum_registry.register_vnum(val)
+
+    if old is not None and old != val:
+        vnum_registry.unregister_vnum(int(old), "npc")
 
     data["vnum"] = val
     caller.ndb.buildnpc = data
@@ -1839,6 +1843,14 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
             npc.swap_typeclass(dyn_class, clean_attributes=False)
     else:
         npc = create_object(dyn_class, key=data.get("key"), location=caller.location)
+
+    old_vnum = getattr(caller.ndb, "mob_vnum", None)
+    new_vnum = data.get("vnum")
+    if old_vnum is not None and new_vnum is not None and int(old_vnum) != int(new_vnum):
+        get_mobdb().delete_proto(int(old_vnum))
+        if data.get("edit_obj"):
+            npc.tags.remove(f"M{old_vnum}", category="vnum")
+        caller.ndb.mob_vnum = new_vnum
     npc.db.desc = data.get("desc")
     npc.db.race = data.get("race")
     # accept legacy "sex" key
