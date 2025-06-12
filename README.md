@@ -298,7 +298,8 @@ Example::
 
 Use `medit <vnum>` to edit an existing numeric prototype. The command
 `medit create <vnum>` reserves the number, loads a basic template and opens the
-builder from the beginning. After setting the desired values choose
+builder from the beginning. The reserved VNUM is pre-filled so the VNUM step in
+the builder is skipped. After setting the desired values choose
 **Yes & Save Prototype** to spawn the NPC and register the prototype.
 
 ## Mob Prototype Manager
