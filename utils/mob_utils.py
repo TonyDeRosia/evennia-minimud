@@ -17,6 +17,7 @@ __all__ = [
     "generate_base_stats",
     "calculate_combat_stats",
     "mobprogs_to_triggers",
+    "make_corpse",
 ]
 
 
@@ -81,3 +82,58 @@ def mobprogs_to_triggers(mobprogs: list[dict]) -> Dict[str, list[dict]]:
         entry["responses"] = prog.get("commands") or []
         result.setdefault(event, []).append(entry)
     return result
+
+
+def make_corpse(npc):
+    """Create a corpse object for ``npc`` and transfer belongings."""
+
+    from evennia import create
+    from world.mob_constants import ACTFLAGS
+
+    if not npc or not npc.location:
+        return None
+
+    # avoid multiple corpses if on_death is called repeatedly
+    existing = [
+        obj
+        for obj in npc.location.contents
+        if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+        and obj.db.corpse_of == npc.key
+    ]
+    if existing:
+        return existing[0]
+
+    attrs = [("corpse_of", npc.key)]
+    if decay := getattr(npc.db, "corpse_decay_time", None):
+        attrs.append(("decay_time", decay))
+    corpse = create.create_object(
+        "typeclasses.objects.Corpse",
+        key=f"{npc.key} corpse",
+        location=npc.location,
+        attributes=attrs,
+    )
+
+    # move carried items
+    for obj in list(npc.contents):
+        obj.location = corpse
+
+    moved = set()
+    for item in npc.equipment.values():
+        if item and item not in moved:
+            item.location = corpse
+            moved.add(item)
+
+    # drop carried coins unless flagged NOLOOT
+    if ACTFLAGS.NOLOOT.value not in (npc.db.actflags or []):
+        for coin, amt in (npc.db.coins or {}).items():
+            if int(amt):
+                pile = create.create_object(
+                    "typeclasses.objects.CoinPile",
+                    key=f"{coin} coins",
+                    location=corpse,
+                )
+                pile.db.coin_type = coin
+                pile.db.amount = int(amt)
+
+    return corpse
+

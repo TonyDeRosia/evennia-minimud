@@ -68,6 +68,7 @@ class ACTFLAGS(_StrEnum):
     WIMPY = "wimpy"
     ASSIST = "assist"
     CALL_FOR_HELP = "call_for_help"
+    NOLOOT = "noloot"
 
 
 class AFFECTED_BY(_StrEnum):

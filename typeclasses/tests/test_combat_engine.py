@@ -197,6 +197,12 @@ class TestCombatDeath(EvenniaTest):
         npc.db.exp_reward = 5
         npc.db.coin_drop = {"silver": 3}
         self.char1.db.coins = from_copper(0)
+        item = create.create_object("typeclasses.objects.Object", key="loot", location=npc)
+        weapon = create.create_object("typeclasses.objects.Object", key="sword")
+        weapon.tags.add("equipment", category="flag")
+        weapon.tags.add("identified", category="flag")
+        npc.db.equipment = {"mainhand": weapon}
+        weapon.location = None
 
         engine = CombatEngine([player, npc], round_time=0)
         engine.queue_action(player, KillAction(player, npc))
@@ -214,6 +220,8 @@ class TestCombatDeath(EvenniaTest):
         )
         self.assertEqual(corpse.db.corpse_of, npc.key)
         self.assertEqual(corpse.db.desc, f"The corpse of {npc.key} lies here.")
+        self.assertIn(item, corpse.contents)
+        self.assertIn(weapon, corpse.contents)
 
     def test_npc_death_creates_only_one_corpse(self):
         from evennia.utils import create
