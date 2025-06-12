@@ -69,9 +69,11 @@ class CmdAttack(Command):
         if not target:
             # no valid match
             return
-        if not target.db.can_attack:
+        if target.db.can_attack is False:
             # this isn't something you can attack
-            self.msg(f"You can't attack {target.get_display_name(self.caller)}.")
+            self.msg(
+                f"You can't attack {target.get_display_name(self.caller)}."
+            )
             return
 
         # if we were trying to flee, cancel that
