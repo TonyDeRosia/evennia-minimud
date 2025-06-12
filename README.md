@@ -208,6 +208,23 @@ Several basic NPC prototypes are included out of the box. Try `cnpc dev_spawn ba
 or `@spawnnpc basic_merchant` to quickly create a merchant, or `basic_questgiver` for a quest
 giver.
 
+### Mob Program Commands
+
+Triggers can run mob program commands to control NPCs. Useful actions include:
+
+- `mob mpdamage <target> <amount> [type]` – deal damage to a target.
+- `mob mpapply <target> <effect> [duration]` – apply a timed status effect.
+- `mob mpcall <module.func>` – invoke a Python callback.
+
+Conditional logic is also available using `if`, `else` and `endif` along with
+`break` and `return` to control flow::
+
+    if rand(50)
+        mob echo Lucky!
+    else
+        mob echo Unlucky...
+    endif
+
 ### NPC Prototypes
 
 A prototype is a JSON record stored in `world/prototypes/npcs.json` describing
