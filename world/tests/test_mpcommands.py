@@ -37,3 +37,30 @@ class TestMPCommands(EvenniaTest):
         execute_mpcommand(self.mob, "kill enemy")
         self.mob.enter_combat.assert_called_with(enemy)
 
+    def test_mpdamage(self):
+        target = create_object(BaseNPC, key="victim", location=self.room1)
+        target.at_damage = MagicMock()
+        execute_mpcommand(self.mob, "mpdamage victim 5 fire")
+        target.at_damage.assert_called_with(self.mob, 5, damage_type="fire")
+
+    def test_mpapply(self):
+        target = create_object(BaseNPC, key="victim", location=self.room1)
+        with patch("world.system.state_manager.add_effect") as add_eff:
+            execute_mpcommand(self.mob, "mpapply victim stunned 2")
+            add_eff.assert_called_with(target, "stunned", 2)
+
+    def test_mpcall(self):
+        func = MagicMock()
+        module = MagicMock()
+        module.cb = func
+        with patch("world.mpcommands.import_module", return_value=module) as mod:
+            execute_mpcommand(self.mob, "mpcall mod.cb")
+            mod.assert_called_with("mod")
+            func.assert_called_with(self.mob)
+
+    def test_conditionals(self):
+        self.room1.msg_contents = MagicMock()
+        script = """if True\n    echo yes\nelse\n    echo no\nendif"""
+        execute_mpcommand(self.mob, script)
+        self.room1.msg_contents.assert_called_once_with("yes")
+
