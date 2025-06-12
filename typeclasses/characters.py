@@ -87,6 +87,34 @@ class Character(ObjectParent, ClothedCharacter):
         return CooldownHandler(self, db_attribute="cooldowns")
 
     @property
+    def hp(self):
+        """Current health points."""
+        hp_trait = getattr(self.traits, "health", None)
+        if hp_trait:
+            return hp_trait.current
+        return 0
+
+    @hp.setter
+    def hp(self, value: int) -> None:
+        hp_trait = getattr(self.traits, "health", None)
+        if hp_trait:
+            hp_trait.current = value
+
+    @property
+    def max_hp(self):
+        """Maximum health points."""
+        hp_trait = getattr(self.traits, "health", None)
+        if hp_trait:
+            return hp_trait.max
+        return 0
+
+    @max_hp.setter
+    def max_hp(self, value: int) -> None:
+        hp_trait = getattr(self.traits, "health", None)
+        if hp_trait:
+            hp_trait.max = value
+
+    @property
     def wielding(self):
         """Access a list of all wielded objects"""
         return [obj for obj in self.attributes.get("_wielded", {}).values() if obj]

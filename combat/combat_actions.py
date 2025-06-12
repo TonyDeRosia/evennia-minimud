@@ -156,7 +156,8 @@ class AttackAction(Action):
         dmg = 0
         dtype = DamageType.BLUDGEONING
 
-        if hasattr(target, "hp"):
+        hp_trait = getattr(getattr(target, "traits", None), "health", None)
+        if hasattr(target, "hp") or hp_trait:
             if isinstance(weapon, dict):
                 dmg = weapon.get("damage", 0)
                 dtype = weapon.get("damage_type", DamageType.BLUDGEONING)
