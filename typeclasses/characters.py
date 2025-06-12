@@ -1096,6 +1096,7 @@ class NPC(Character):
         if not self.location or self.attributes.get("_dead"):
             return
         self.db._dead = True
+        self.db.dead = True
 
         # remove from combat if necessary. The combat script may have been
         # cleaned up already, so verify it before using it.
@@ -1182,6 +1183,9 @@ class NPC(Character):
 
         if looker != self:
             self.check_triggers("on_look", looker=looker)
+
+        if self.db.dead:
+            return f"{self.key} is lying here, lifeless."
 
         longdesc = self.db.long_desc or self.db.desc or "You see nothing special."
         status = get_health_description(self)

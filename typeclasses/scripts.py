@@ -67,6 +67,8 @@ class CombatScript(Script):
 
     def at_script_creation(self):
         self.persistent = True
+        if not self.id:
+            self.save()
         self.db.teams = [[], []]
 
     def get_team(self, combatant):
@@ -144,6 +146,9 @@ class CombatScript(Script):
             return True
 
         # remove combatant from their team
+        if not self.id:
+            self.save()
+
         teams = self.db.teams or [[], []]
         if hasattr(teams, "deserialize"):
             teams = teams.deserialize()
@@ -161,6 +166,9 @@ class CombatScript(Script):
         self.db.teams = teams
         # reset the cache
         del self.ndb.teams
+
+        from world.system import state_manager
+        state_manager.remove_cooldown(combatant, "attack")
 
         # grant exp to the other team, if relevant
         if exp := combatant.db.exp_reward:
@@ -210,9 +218,12 @@ class CombatScript(Script):
             return
 
         # only one team is active at this point; message the winners
+        from world.system import state_manager
+
         for obj in active_fighters:
             # remove their combat target if they have one
             del obj.db.combat_target
+            state_manager.remove_cooldown(obj, "attack")
             obj.msg("The fight is over.")
 
         # say farewell to the combat script!
