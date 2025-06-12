@@ -392,6 +392,7 @@ def menunode_key(caller, raw_string="", **kwargs):
     """Prompt for the NPC key."""
     default = caller.ndb.buildnpc.get("key", "")
     text = "|wEnter NPC key|n"
+    text += "\n(Prototype = saved blueprint; archetype/NPC type defines role)"
     if default:
         text += f" [default: {default}]"
     text += "\nExample: |wmerchant_01|n"
