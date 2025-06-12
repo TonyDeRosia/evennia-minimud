@@ -1463,11 +1463,36 @@ def menunode_finalize(caller, raw_string="", **kwargs):
             "desc": "Yes (Don't Save)",
             "goto": (_create_npc, {"register": False}),
         },
-        {"key": "3", "desc": "Edit Something", "goto": "menunode_review"},
-        {"key": "4", "desc": "Cancel", "goto": _cancel},
+        {"key": "3", "desc": "Preview Prototype", "goto": "menunode_preview_proto"},
+        {"key": "4", "desc": "Edit Something", "goto": "menunode_review"},
+        {"key": "5", "desc": "Undo Changes", "goto": _undo_changes},
+        {"key": "6", "desc": "Cancel", "goto": _cancel},
     ]
 
     return text, options
+
+
+def menunode_preview_proto(caller, raw_string="", **kwargs):
+    """Display raw prototype data."""
+    data = getattr(caller.ndb, "buildnpc", {})
+    import json
+
+    text = json.dumps(data, indent=4)
+    options = [{"desc": "Back", "goto": "menunode_finalize"}]
+    return text, options
+
+
+def _undo_changes(caller, raw_string="", **kwargs):
+    """Revert builder data to the original snapshot."""
+    from copy import deepcopy
+
+    orig = getattr(caller.ndb, "buildnpc_orig", None)
+    if orig:
+        caller.ndb.buildnpc = deepcopy(orig)
+        caller.msg("Changes reverted.")
+    else:
+        caller.msg("Nothing to undo.")
+    return "menunode_review"
 
 
 def menunode_confirm(caller, raw_string="", **kwargs):

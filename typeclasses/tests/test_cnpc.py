@@ -274,3 +274,13 @@ class TestCNPC(EvenniaTest):
         msg = self.char1.msg.call_args[0][0]
         self.assertIn("with VNUM 5", msg)
         self.assertIn("added to mob list", msg)
+
+    def test_clone_command_loads_prototype(self):
+        from world import prototypes
+
+        prototypes.register_npc_prototype("base_proto", {"key": "old"})
+        with patch("commands.npc_builder.EvMenu") as mock_menu:
+            self.char1.execute_cmd("cnpc clone base_proto = newone")
+            mock_menu.assert_called()
+        data = self.char1.ndb.buildnpc
+        assert data["key"] == "newone"

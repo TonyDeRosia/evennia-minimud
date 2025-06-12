@@ -197,7 +197,7 @@ class CmdOEdit(Command):
             proto = {"key": f"object_{vnum}", "typeclass": "typeclasses.objects.Object"}
         self.caller.ndb.obj_proto = dict(proto)
         self.caller.ndb.obj_vnum = vnum
-        state = OLCState(data=self.caller.ndb.obj_proto, vnum=vnum)
+        state = OLCState(data=self.caller.ndb.obj_proto, vnum=vnum, original=dict(self.caller.ndb.obj_proto))
         OLCEditor(
             self.caller,
             "commands.oedit",

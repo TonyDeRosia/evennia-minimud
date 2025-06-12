@@ -161,6 +161,7 @@ class CmdMobProto(Command):
             if rest == "restore":
                 caller.ndb.buildnpc = dict(autosave)
                 caller.ndb.mob_vnum = caller.ndb.buildnpc.get("vnum")
+                caller.ndb.buildnpc_orig = dict(caller.ndb.buildnpc)
                 caller.db.builder_autosave = None
                 caller.scripts.add(BuilderAutosave, key="builder_autosave")
                 startnode = (
@@ -188,6 +189,7 @@ class CmdMobProto(Command):
             caller.msg("Prototype not found.")
             return
         caller.ndb.buildnpc = dict(proto)
+        caller.ndb.buildnpc_orig = dict(caller.ndb.buildnpc)
         caller.ndb.mob_vnum = vnum
         caller.scripts.add(BuilderAutosave, key="builder_autosave")
         startnode = "menunode_desc" if caller.ndb.buildnpc.get("key") else "menunode_key"

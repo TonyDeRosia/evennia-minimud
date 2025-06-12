@@ -12,6 +12,7 @@ class OLCState:
 
     data: Dict[str, Any] = field(default_factory=dict)
     vnum: Optional[int] = None
+    original: Dict[str, Any] = field(default_factory=dict)
 
 
 class OLCValidator:
