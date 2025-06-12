@@ -279,7 +279,7 @@ Example::
 
 ### Quick Mob
 
-`@quickmob <key> [template]` creates and registers a new mob from a predefined
+`cnpc quick <key> [template]` creates and registers a new mob from a predefined
 template in a single step. Templates are defined in
 `world.templates.mob_templates` and default to `warrior`. The command assigns
 the next free VNUM automatically so you can respawn the mob later with
@@ -287,7 +287,7 @@ the next free VNUM automatically so you can respawn the mob later with
 
 Example::
 
-    @quickmob goblin warrior
+    cnpc quick goblin warrior
 
 ## Mob Prototype Manager
 

@@ -2660,6 +2660,7 @@ Usage:
     cnpc start <key>
     cnpc edit <npc>
     cnpc dev_spawn <proto>
+    cnpc quick <key> [template]
 
 Switches:
     None
@@ -2671,6 +2672,7 @@ Examples:
     cnpc start merchant_01
     cnpc edit Bob
     cnpc dev_spawn basic_merchant
+    cnpc quick goblin
 
 Notes:
     - Aliases:
@@ -2712,6 +2714,7 @@ Notes:
       Choosing Add prompts for the event type, match text and reaction
       command.
     - |wcnpc dev_spawn|n quickly spawns prototype NPCs for testing (Developer only).
+    - |wcnpc quick|n creates and registers a mob from a template in one step.
     - Example: |wcnpc dev_spawn basic_merchant|n
     - See |whelp triggers|n for available events and reactions.
     - ANSI color codes are supported in names and descriptions.
@@ -3057,9 +3060,9 @@ Notes:
         "category": "Building",
         "text": """Help for @quickmob
 
-Create and register a simple mob using a predefined template. The mob is
-assigned the next free VNUM so it can be respawned later with
-``@mspawn M<number>``.
+This command is deprecated. Use |wcnpc quick <key> [template]|n instead.
+It creates and registers a simple mob from a predefined template so it can be
+respawned later with ``@mspawn M<number>``.
 
 Usage:
     @quickmob <key> [template]
