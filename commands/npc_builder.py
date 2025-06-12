@@ -1,5 +1,5 @@
-from evennia.utils.evmenu import EvMenu
 from evennia.utils import make_iter, dedent
+from olc.base import OLCEditor, OLCState, OLCValidator
 from evennia import create_object
 from evennia.objects.models import ObjectDB
 from evennia.prototypes import spawner
@@ -99,6 +99,13 @@ def validate_prototype(data: dict) -> list[str]:
         warnings.append("Combat class set on non-combat NPC type.")
 
     return warnings
+
+
+class NPCValidator(OLCValidator):
+    """Validator that wraps :func:`validate_prototype`."""
+
+    def validate(self, data: dict) -> list[str]:  # type: ignore[override]
+        return validate_prototype(data)
 
 
 def _auto_fill_combat_stats(data: dict) -> None:
@@ -2174,12 +2181,14 @@ class CmdCNPC(Command):
                 self.caller.ndb.buildnpc = dict(autosave)
                 self.caller.db.builder_autosave = None
                 self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
-                EvMenu(
+                state = OLCState(data=self.caller.ndb.buildnpc)
+                OLCEditor(
                     self.caller,
                     "commands.npc_builder",
                     startnode="menunode_desc",
-                    cmd_on_exit=_on_menu_exit,
-                )
+                    state=state,
+                    validator=NPCValidator(),
+                ).start()
             else:
                 self.caller.db.builder_autosave = None
                 self.msg("Autosave discarded.")
@@ -2218,12 +2227,14 @@ class CmdCNPC(Command):
             if use_mob:
                 self.caller.ndb.buildnpc["use_mob"] = True
             self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
-            EvMenu(
+            state = OLCState(data=self.caller.ndb.buildnpc)
+            OLCEditor(
                 self.caller,
                 "commands.npc_builder",
                 startnode="menunode_desc",
-                cmd_on_exit=_on_menu_exit,
-            )
+                state=state,
+                validator=NPCValidator(),
+            ).start()
             return
         if sub == "edit":
             if not rest:
@@ -2238,12 +2249,14 @@ class CmdCNPC(Command):
             if use_mob:
                 self.caller.ndb.buildnpc["use_mob"] = True
             self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
-            EvMenu(
+            state = OLCState(data=self.caller.ndb.buildnpc)
+            OLCEditor(
                 self.caller,
                 "commands.npc_builder",
                 startnode="menunode_desc",
-                cmd_on_exit=_on_menu_exit,
-            )
+                state=state,
+                validator=NPCValidator(),
+            ).start()
             return
         if sub == "dev_spawn":
             if not self.caller.check_permstring("Developer"):
@@ -2304,12 +2317,14 @@ class CmdEditNPC(Command):
         primary = roles[0] if roles else "-"
         level = data.get("level") or npc.db.level or "-"
         self.msg(f"{status} {primary} L{level}")
-        EvMenu(
+        state = OLCState(data=self.caller.ndb.buildnpc)
+        OLCEditor(
             self.caller,
             "commands.npc_builder",
             startnode="menunode_review",
-            cmd_on_exit=_on_menu_exit,
-        )
+            state=state,
+            validator=NPCValidator(),
+        ).start()
 
 
 class CmdDeleteNPC(Command):

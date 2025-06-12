@@ -2,6 +2,19 @@ from evennia.utils.evtable import EvTable
 from evennia import CmdSet
 from .command import Command
 from world.areas import Area, get_areas, save_area, update_area, find_area
+from olc.base import OLCValidator
+
+
+class AreaValidator(OLCValidator):
+    """Simple validator for area data."""
+
+    def validate(self, data: dict) -> list[str]:  # type: ignore[override]
+        warnings: list[str] = []
+        start = data.get("start")
+        end = data.get("end")
+        if start is not None and end is not None and start > end:
+            warnings.append("Start VNUM greater than end; values swapped.")
+        return warnings
 
 
 class CmdAList(Command):
@@ -67,7 +80,10 @@ class CmdAEdit(Command):
                 self.msg("Usage: aedit create <name> <start> <end>")
                 return
             name = args[0]
-            start, end = int(args[1]), int(args[2])
+            start_val, end_val = int(args[1]), int(args[2])
+            for warn in AreaValidator().validate({"start": start_val, "end": end_val}):
+                self.msg(warn)
+            start, end = min(start_val, end_val), max(start_val, end_val)
             if find_area(name)[1]:
                 self.msg("Area already exists.")
                 return
@@ -85,7 +101,10 @@ class CmdAEdit(Command):
             if area is None:
                 self.msg("Unknown area.")
                 return
-            area.start, area.end = min(int(args[1]), int(args[2])), max(int(args[1]), int(args[2]))
+            start_val, end_val = int(args[1]), int(args[2])
+            for warn in AreaValidator().validate({"start": start_val, "end": end_val}):
+                self.msg(warn)
+            area.start, area.end = min(start_val, end_val), max(start_val, end_val)
             update_area(idx, area)
             self.msg("Range updated.")
             return
