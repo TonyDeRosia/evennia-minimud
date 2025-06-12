@@ -279,11 +279,10 @@ Example::
 
 ### Quick Mob
 
-`@quickmob <key> [template]` creates and registers a new mob from a predefined
-template in a single step. Templates are defined in
-`world.templates.mob_templates` and default to `warrior`. The command assigns
-the next free VNUM automatically so you can respawn the mob later with
-``@mspawn M<number>``.
+`@quickmob <key> [template]` loads a template from
+`world.templates.mob_templates` and opens the NPC builder with those defaults
+filled in. A VNUM is reserved automatically so once you finish the builder and
+save the prototype you can respawn the mob later with ``@mspawn M<number>``.
 
 Example::
 

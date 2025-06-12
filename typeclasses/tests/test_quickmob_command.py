@@ -37,21 +37,22 @@ class TestQuickMobCommand(EvenniaTest):
         if not hasattr(prototypes, "_normalize_proto"):
             prototypes._normalize_proto = prototypes._legacy._normalize_proto
 
-    def test_quickmob_creates_and_spawns(self):
+    def test_quickmob_opens_builder(self):
         self.char1.location.set_area("town", 1)
-        with patch("utils.vnum_registry.get_next_vnum_for_area", return_value=101) as mock_vnum:
+        with (
+            patch("utils.vnum_registry.get_next_vnum_for_area", return_value=101) as mock_vnum,
+            patch("olc.base.EvMenu") as mock_menu,
+        ):
             self.char1.execute_cmd("@quickmob goblin")
+
         mock_vnum.assert_called_with("town", "npc", builder=self.char1.key)
+        mock_menu.assert_called()
+
+        data = self.char1.ndb.buildnpc
+        assert data["key"] == "goblin"
+        assert data["vnum"] == 101
+        assert data.get("use_mob") is True
+
         reg = prototypes.get_npc_prototypes()
-        assert "mob_goblin" in reg
-        assert reg["mob_goblin"]["vnum"] == 101
-        npc = [o for o in self.char1.location.contents if o.is_typeclass(BaseNPC, exact=False)][0]
-        assert npc.key == "goblin"
-        assert npc.db.vnum == 101
-        assert npc.db.charclass == "Warrior"
-        assert npc.db.hp > 0
-        self.char1.msg.reset_mock()
-        self.char1.execute_cmd("@mspawn M101")
-        msg = self.char1.msg.call_args[0][0]
-        assert "Spawned" in msg
-        assert any(o.db.vnum == 101 for o in self.char1.location.contents)
+        assert "mob_goblin" not in reg
+        assert not any(o.is_typeclass(BaseNPC, exact=False) for o in self.char1.location.contents)

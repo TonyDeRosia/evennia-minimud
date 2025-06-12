@@ -10,6 +10,8 @@ from world import prototypes
 from typeclasses.characters import NPC
 from . import npc_builder
 from copy import deepcopy
+from olc.base import OLCEditor, OLCState
+from scripts import BuilderAutosave
 
 from .command import Command
 from .mob_builder_commands import CmdMStat as _OldMStat, CmdMList as _OldMList
@@ -218,4 +220,12 @@ class CmdQuickMob(Command):
         data = dict(data)
         data.update({"key": key, "vnum": vnum, "use_mob": True})
         self.caller.ndb.buildnpc = data
-        npc_builder._create_npc(self.caller, "", register=True)
+        self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
+        state = OLCState(data=self.caller.ndb.buildnpc)
+        OLCEditor(
+            self.caller,
+            "commands.npc_builder",
+            startnode="menunode_review",
+            state=state,
+            validator=npc_builder.NPCValidator(),
+        ).start()
