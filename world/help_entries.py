@@ -3286,7 +3286,9 @@ Events:
     on_attack  - combat starts or damage occurs
     on_timer   - once every game tick
     hour       - fires at a specific game hour
+    hour_prog  - alias of hour
     time       - fires at an exact HH:MM time
+    time_prog  - alias of time
 
 Reactions:
     say <text>         - speak
@@ -3384,6 +3386,7 @@ Examples:
     leave_prog         - someone leaves
     sleep_prog         - someone sleeps here
     time_prog <hour>   - at a specific game hour
+    hour_prog <hour>   - alias of time_prog
     rand_prog <pct>    - random chance
     speech_prog <txt>  - hears someone speak <txt>
 

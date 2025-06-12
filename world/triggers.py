@@ -6,6 +6,8 @@ from importlib import import_module
 from typing import Any, Iterable
 from random import randint
 
+from datetime import datetime
+from evennia.objects.models import ObjectDB
 from evennia.utils import make_iter, logger, delay
 from utils import eval_safe
 from world.mpcommands import execute_mpcommand
@@ -51,7 +53,8 @@ class TriggerManager:
         "wear_prog": "on_wear",
         "remove_prog": "on_remove",
         "sac_prog": "on_sacrifice",
-        "time_prog": "hour",
+        "time_prog": "time",
+        "hour_prog": "hour",
     }
 
     def __init__(self, obj: Any, attr: str = "triggers"):
@@ -217,3 +220,31 @@ class TriggerManager:
         for trig in self._collect_triggers(events):
             interval = int(trig.get("interval", 60))
             delay(interval, self._run_random_trigger, trig, persistent=True)
+
+
+def _iter_time_trigger_objects():
+    """Yield pairs of objects and attribute names that may hold time triggers."""
+    attrs = ("triggers", "obj_triggers", "room_triggers")
+    seen = set()
+    for attr in attrs:
+        for obj in ObjectDB.objects.get_by_attribute(key=attr):
+            if obj.id in seen:
+                continue
+            seen.add(obj.id)
+            yield obj, attr
+
+
+def process_hour_triggers(current_time: datetime | None = None):
+    """Check all objects for hour-based triggers."""
+    now = current_time or datetime.now()
+    hour = now.hour
+    for obj, attr in _iter_time_trigger_objects():
+        TriggerManager(obj, attr=attr).check("hour", hour=hour)
+
+
+def process_time_triggers(current_time: datetime | None = None):
+    """Check all objects for time-based triggers."""
+    now = current_time or datetime.now()
+    timestr = now.strftime("%H:%M")
+    for obj, attr in _iter_time_trigger_objects():
+        TriggerManager(obj, attr=attr).check("time", time=timestr)
