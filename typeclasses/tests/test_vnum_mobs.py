@@ -198,3 +198,12 @@ class TestVnumMobs(EvenniaTest):
         out = "".join(call.args[0] for call in self.char1.msg.call_args_list)
         self.assertIn(f"Mob saved and registered as VNUM {vnum}", out)
         self.assertIn(f"@mspawn M{vnum}", out)
+
+    def test_mspawn_not_finalized_message(self):
+        """Valid VNUMs without prototypes should show a helpful error."""
+        with patch("utils.mob_proto.spawn_from_vnum") as mock_spawn:
+            self.char1.execute_cmd("@mspawn 42")
+            mock_spawn.assert_not_called()
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("not finalized", out)
+        self.assertIn("editnpc 42", out)
