@@ -34,24 +34,91 @@ class CmdMStat(Command):
 
     Prototype data is read from ``world/prototypes/npcs.json``. This is a
     read-only command and will not change any existing NPCs. Use ``@editnpc`` if
-    you need to update a live NPC from a prototype.
+    you need to update a live NPC from a prototype. Use ``/rom`` for a ROM-style
+    summary instead of the default table.
 
     Usage:
-        @mstat <npc or proto>
+        @mstat [/rom] <npc or proto>
 
     Example:
         @mstat bandit
+        @mstat /rom bandit
     """
 
     key = "@mstat"
     locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
+    def parse(self):
+        parts = self.args.strip().split()
+        self.use_rom = False
+        clean = []
+        for part in parts:
+            if part.lower() == "/rom":
+                self.use_rom = True
+            else:
+                clean.append(part)
+        self.target = " ".join(clean)
+
+    def _format_rom(self, data: dict) -> str:
+        """Return ROM-style stats for ``data``."""
+
+        lines = [f"Name: {data.get('key', 'Unknown')}"]
+        lines.append(
+            f"Level: {data.get('level', '--')}  Race: {data.get('race', '--')}  "
+            f"Class: {data.get('npc_type', '--')}"
+        )
+        lines.append(
+            f"Hit Points: {data.get('hp', '--')}  Damage: {data.get('damage', '--')}  "
+            f"Armor: {data.get('armor', '--')}"
+        )
+        flags = []
+        flags.extend(data.get("actflags", []))
+        flags.extend(data.get("affected_by", []))
+        lines.append("Flags: " + (", ".join(flags) if flags else "--"))
+        lines.append(
+            "Saves: "
+            + (
+                ", ".join(data.get("saving_throws", []))
+                if data.get("saving_throws")
+                else "--"
+            )
+        )
+        lines.append(
+            "Attacks: "
+            + (
+                ", ".join(data.get("attack_types", []))
+                if data.get("attack_types")
+                else "--"
+            )
+        )
+        lines.append(
+            "Defenses: "
+            + (
+                ", ".join(data.get("defense_types", []))
+                if data.get("defense_types")
+                else "--"
+            )
+        )
+        lines.append(
+            "Resists: "
+            + (
+                ", ".join(data.get("resistances", []))
+                if data.get("resistances")
+                else "--"
+            )
+        )
+        lines.append(
+            "Languages: "
+            + (", ".join(data.get("languages", [])) if data.get("languages") else "--")
+        )
+        return "\n".join(lines)
+
     def func(self):
-        if not self.args:
+        if not getattr(self, "target", None):
             self.msg("Usage: @mstat <npc or proto>")
             return
-        arg = self.args.strip()
+        arg = self.target
         registry = prototypes.get_npc_prototypes()
         proto = registry.get(arg)
         if proto:
@@ -123,9 +190,12 @@ class CmdMStat(Command):
             ", ".join(data.get("languages", [])) if data.get("languages") else "--",
         )
 
-        header = f"|Y[ NPC STATS: {data.get('key', 'Unknown')} ]|n"
-        self.msg(header)
-        self.msg(str(table))
+        if self.use_rom:
+            self.msg(self._format_rom(data))
+        else:
+            header = f"|Y[ NPC STATS: {data.get('key', 'Unknown')} ]|n"
+            self.msg(header)
+            self.msg(str(table))
 
 
 class CmdMCreate(Command):

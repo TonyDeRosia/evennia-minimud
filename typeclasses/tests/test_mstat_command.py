@@ -39,3 +39,22 @@ class TestMStatCommand(EvenniaTest):
         assert "Defenses" in out
         assert "Resists" in out
         assert "Languages" in out
+
+    def test_mstat_rom_switch(self):
+        prototypes.register_npc_prototype(
+            "orc",
+            {
+                "key": "orc",
+                "level": 3,
+                "race": "orc",
+                "npc_type": "warrior",
+                "damage": 2,
+                "actflags": ["aggressive"],
+            },
+        )
+        self.char1.execute_cmd("@mstat /rom orc")
+        out = self.char1.msg.call_args[0][0]
+        assert "Level: 3" in out
+        assert "Race: orc" in out
+        assert "Damage" in out
+        assert "aggressive" in out
