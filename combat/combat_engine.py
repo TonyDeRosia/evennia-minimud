@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Iterable, Dict
+from typing import List, Iterable, Dict
 import random
 from evennia.utils import delay
 from world.system import state_manager
@@ -23,7 +23,7 @@ class CombatParticipant:
 
     actor: object
     initiative: int = 0
-    next_action: Optional[Action] = None
+    next_action: List[Action] = field(default_factory=list)
 
 
 class CombatEngine:
@@ -295,12 +295,12 @@ class CombatEngine:
 
         Side Effects
         ------------
-        Updates the ``next_action`` attribute of the matching
+        Appends ``action`` to the ``next_action`` queue of the matching
         :class:`CombatParticipant`.
         """
         for participant in self.participants:
             if participant.actor is actor:
-                participant.next_action = action
+                participant.next_action.append(action)
                 break
 
     # -------------------------------------------------------------
@@ -468,32 +468,32 @@ class CombatEngine:
             hook = getattr(actor, "at_combat_turn", None)
             if callable(hook):
                 hook(target)
-            if participant.next_action:
-                action = participant.next_action
-            else:
-                action = AttackAction(actor, target)
-            actions.append(
-                (
-                    participant.initiative,
-                    getattr(action, "priority", 0),
-                    participant,
-                    action,
+
+            queued = participant.next_action or [AttackAction(actor, target)]
+            for idx, action in enumerate(queued):
+                actions.append(
+                    (
+                        participant.initiative,
+                        getattr(action, "priority", 0),
+                        -idx,
+                        participant,
+                        action,
+                    )
                 )
-            )
 
-        actions.sort(key=lambda t: (t[0], t[1]), reverse=True)
+        actions.sort(key=lambda t: (t[0], t[1], t[2]), reverse=True)
 
-        for _, _, participant, action in actions:
+        for _, _, _, participant, action in actions:
             actor = participant.actor
             valid, err = action.validate()
             if not valid:
                 if hasattr(actor, "msg") and err:
                     actor.msg(err)
-                participant.next_action = None
+                participant.next_action = []
                 continue
             result = action.resolve()
 
-            participant.next_action = None
+            participant.next_action = []
 
             damage_done = 0
             if result.damage and result.target:
