@@ -525,6 +525,27 @@ class TestReturnAppearance(EvenniaTest):
         out = npc.return_appearance(self.char1)
         self.assertIn("Mob is in excellent condition.", out)
 
+    def test_player_equipment_displayed(self):
+        from evennia.utils import create
+
+        item = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="cap",
+            location=self.char1,
+        )
+        item.tags.add("equipment", category="flag")
+        item.tags.add("identified", category="flag")
+        item.tags.add("head", category="slot")
+        item.wear(self.char1, True)
+
+        out = self.char1.return_appearance(self.char2)
+        self.assertIn("|wHead|n: ", out)
+        self.assertIn(item.key, out)
+
+    def test_player_no_equipment(self):
+        out = self.char1.return_appearance(self.char2)
+        self.assertIn("They are not wearing any equipment.", out)
+
 
 class TestRestCommands(EvenniaTest):
     def setUp(self):
