@@ -2989,14 +2989,14 @@ Display stats for an NPC or prototype. Prototype information is read
 from ``world/prototypes/npcs.json`` and this command never changes an
 NPC. Use |w@editnpc|n for modifications. The output lists common combat
 attributes along with any flags, resistances and languages defined on
-the target.
+the target. Use ``/rom`` for a condensed ROM-style summary.
 
 Usage:
-    @mstat <npc or proto>
+    @mstat [/rom] <npc or proto>
 
 Examples:
     @mstat bandit
-    @mstat Bob
+    @mstat /rom Bob
 """,
     },
     {

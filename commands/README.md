@@ -78,7 +78,7 @@ spawned later with `@spawnnpc`. These commands help you manage the prototypes:
   existing one.
 * `@mset <key> <field> <value>` – update a field on a prototype. Valid races,
   classes and flag names can be found in `world/mob_constants.py`.
-* `@mstat <key>` – view the details of a prototype or an existing NPC.
+* `@mstat [/rom] <key>` – view the details of a prototype or an existing NPC. Use `/rom` for ROM-style output.
 * `@mlist [/room|/area] [filters]` – list prototypes or spawned NPCs. Results
   include a VNUM column when one is registered. Filters can include
   `class=<val>`, `race=<val>`, `role=<val>`, `tag=<val>`, `zone=<name>`, an area
