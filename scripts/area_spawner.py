@@ -51,7 +51,24 @@ class AreaSpawner(Script):
             proto = prototypes.get_npc_prototypes().get(proto_key)
             if not proto:
                 return
-            npc = spawner.spawn(proto)[0]
+            proto_data = dict(proto)
+            base_cls = proto_data.get("typeclass", "typeclasses.npcs.BaseNPC")
+            if isinstance(base_cls, str):
+                module, clsname = base_cls.rsplit(".", 1)
+                base_cls = getattr(__import__(module, fromlist=[clsname]), clsname)
+
+            from typeclasses.characters import NPC
+
+            if not issubclass(base_cls, NPC):
+                logger.log_warn(
+                    f"Prototype {proto_key}: {base_cls} is not a subclass of NPC; using BaseNPC."
+                )
+                from typeclasses.npcs import BaseNPC as DefaultNPC
+
+                base_cls = DefaultNPC
+
+            proto_data["typeclass"] = base_cls
+            npc = spawner.spawn(proto_data)[0]
             npc.location = room
             npc.db.prototype_key = proto_key
         finalize_mob_prototype(npc, npc)
