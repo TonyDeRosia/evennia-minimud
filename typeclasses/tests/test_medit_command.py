@@ -80,3 +80,13 @@ class TestMEditCommand(EvenniaTest):
         data = self.char1.ndb.buildnpc
         assert data["key"] == "troll"
         assert self.char1.ndb.mob_vnum == 7
+
+    def test_rom_menu_has_loot_option(self):
+        from commands import rom_mob_editor
+
+        self.char1.ndb.mob_proto = {}
+        self.char1.ndb.mob_vnum = 1
+        _, options = rom_mob_editor.menunode_main(self.char1)
+        gotos = [opt.get("goto") for opt in options]
+        assert "menunode_loot" in gotos
+        assert gotos[-2:] == ["menunode_loot", "menunode_cancel"]
