@@ -11,6 +11,7 @@ from utils.menu_utils import (
     format_multi_select,
 )
 from utils import vnum_registry
+from utils.prototype_manager import load_prototype
 from evennia.utils import dedent
 import re
 
@@ -645,8 +646,6 @@ def menunode_coin_drop(caller, raw_string="", **kwargs):
 
 def _set_coin_drop(caller, raw_string, **kwargs):
     from utils.currency import COIN_VALUES
-    from utils.prototype_manager import load_prototype
-    from utils import vnum_registry
 
     string = raw_string.strip()
     if string.lower() == "back":
