@@ -2366,7 +2366,11 @@ class CmdSpawnNPC(Command):
                 not in COMBATANT_TYPES
             ):
                 self.msg("|rCombat class defined for non-combat NPC type.|n")
-            obj = spawn_from_vnum(vnum, location=self.caller.location)
+            try:
+                obj = spawn_from_vnum(vnum, location=self.caller.location)
+            except ValueError as err:
+                self.msg(str(err))
+                return
             if not obj:
                 self.msg("Unknown NPC prototype.")
                 return

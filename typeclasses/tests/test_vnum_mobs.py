@@ -218,3 +218,18 @@ class TestVnumMobs(EvenniaTest):
         out = self.char1.msg.call_args[0][0]
         self.assertIn("not finalized", out)
         self.assertIn("editnpc 42", out)
+
+    def test_spawn_from_vnum_missing_key_error(self):
+        proto = {"desc": "bad"}
+        vnum = register_prototype(proto, vnum=60)
+        with patch("evennia.utils.logger.log_err") as mock_log:
+            with self.assertRaises(ValueError):
+                spawn_from_vnum(vnum, location=self.char1.location)
+            mock_log.assert_called()
+
+    def test_mspawn_reports_missing_fields(self):
+        vnum = register_prototype({"desc": "bad"}, vnum=61)
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd(f"@mspawn M{vnum}")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("missing required field", out.lower())

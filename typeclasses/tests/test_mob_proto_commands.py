@@ -112,3 +112,10 @@ class TestMobPrototypeCommands(EvenniaTest):
         self.assertIn("deleted", out)
         self.assertIsNone(get_prototype(vnum))
 
+    def test_spawn_reports_missing_fields(self):
+        vnum = register_prototype({"desc": "bad"}, vnum=50)
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd(f"@mobproto spawn {vnum}")
+        out = self.char1.msg.call_args[0][0]
+        assert "missing required field" in out.lower()
+
