@@ -88,6 +88,7 @@ def menunode_main(caller, raw_string="", **kwargs):
         {"desc": "Edit resists", "goto": "menunode_resists"},
         {"desc": "Edit languages", "goto": "menunode_languages"},
         {"desc": "Save & quit", "goto": "menunode_done"},
+        {"desc": "Edit loot", "goto": "menunode_loot"},
         {"desc": "Cancel", "goto": "menunode_cancel"},
     ]
     return _with_summary(caller, text), options
@@ -309,6 +310,82 @@ def _set_languages(caller, raw_string, **kwargs):
         return "menunode_languages"
     caller.ndb.mob_proto["languages"] = flags
     return "menunode_main"
+
+
+def menunode_loot(caller, raw_string="", **kwargs):
+    """Menu for editing loot table entries."""
+    loot = caller.ndb.mob_proto.get("loot_table", [])
+    text = "|wEdit Loot Table|n\n"
+    if loot:
+        for entry in loot:
+            proto = entry.get("proto")
+            chance = entry.get("chance", 100)
+            guaranteed = entry.get("guaranteed_after")
+            line = f" - {proto} ({chance}%)"
+            if guaranteed is not None:
+                line += f" g:{guaranteed}"
+            text += line + "\n"
+    else:
+        text += "None\n"
+    text += (
+        "Commands:\n  add <proto> [chance] [guaranteed]\n  remove <proto>\n  "
+        "done - return\n  back - return\nExample: |wadd RAW_MEAT 50 3|n"
+    )
+    options = {"key": "_default", "goto": _edit_loot}
+    return _with_summary(caller, text), options
+
+
+def _edit_loot(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    table = caller.ndb.mob_proto.setdefault("loot_table", [])
+    if string.lower() in ("back", "done", "finish", ""):
+        return "menunode_main"
+    if string.lower().startswith("add "):
+        parts = string[4:].split()
+        if not parts:
+            caller.msg("Usage: add <proto> [chance] [guaranteed]")
+            return "menunode_loot"
+        proto = parts[0]
+        chance = 100
+        guaranteed = None
+        if len(parts) > 1:
+            if not parts[1].isdigit():
+                caller.msg("Chance must be a number.")
+                return "menunode_loot"
+            chance = int(parts[1])
+        if len(parts) > 2:
+            if not parts[2].isdigit():
+                caller.msg("Guaranteed count must be a number.")
+                return "menunode_loot"
+            guaranteed = int(parts[2])
+        for entry in table:
+            if entry.get("proto") == proto:
+                entry["chance"] = chance
+                if guaranteed is not None:
+                    entry["guaranteed_after"] = guaranteed
+                else:
+                    entry.pop("guaranteed_after", None)
+                caller.msg(f"Updated {proto} ({chance}%).")
+                break
+        else:
+            entry = {"proto": proto, "chance": chance}
+            if guaranteed is not None:
+                entry["guaranteed_after"] = guaranteed
+            table.append(entry)
+            caller.msg(f"Added {proto} ({chance}%).")
+        return "menunode_loot"
+    if string.lower().startswith("remove "):
+        proto = string[7:].strip()
+        for entry in list(table):
+            if entry.get("proto") == proto:
+                table.remove(entry)
+                caller.msg(f"Removed {proto}.")
+                break
+        else:
+            caller.msg("Entry not found.")
+        return "menunode_loot"
+    caller.msg("Unknown command.")
+    return "menunode_loot"
 
 
 def menunode_done(caller, raw_string="", **kwargs):
