@@ -17,7 +17,7 @@ import math
 from world.triggers import TriggerManager
 from world.spells import Spell
 from combat.combat_actions import CombatResult
-from combat import get_condition_msg
+from world.combat import get_health_description
 from combat import combat_utils
 
 from .objects import ObjectParent
@@ -1056,10 +1056,7 @@ class NPC(Character):
             and looker.has_account
             and self.is_typeclass("typeclasses.npcs.NPC", exact=False)
         ):
-            hp = getattr(getattr(self, "traits", None), "health", None)
-            cur = getattr(hp, "value", getattr(self, "hp", 0))
-            max_hp = getattr(hp, "max", getattr(self, "max_hp", cur))
-            cond = get_condition_msg(cur, max_hp)
+            cond = get_health_description(self)
             text = text.rstrip() + f"\n{self.get_display_name(looker)} {cond}"
         return text
 

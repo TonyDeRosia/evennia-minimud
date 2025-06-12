@@ -6,6 +6,7 @@ from evennia.contrib.game_systems.containers import ContribContainer
 from .objects import Object, ClothingObject
 from world.system import stat_manager, state_manager
 from combat import combat_utils
+from world.combat import get_health_description
 
 
 class BareHand:
@@ -80,10 +81,7 @@ class BareHand:
             )
             dealt = target.at_damage(wielder, damage, "bludgeon", critical=crit)
             combat_utils.apply_lifesteal(wielder, dealt)
-            hp = getattr(getattr(target, "traits", None), "health", None)
-            cur = getattr(hp, "value", getattr(target, "hp", 0))
-            max_hp = getattr(hp, "max", getattr(target, "max_hp", cur))
-            condition = combat_utils.get_condition_msg(cur, max_hp)
+            condition = get_health_description(target)
             if wielder.location:
                 wielder.location.msg_contents(f"The {target.key} {condition}")
             if status := getattr(self, "status_effect", None):
@@ -198,10 +196,7 @@ class MeleeWeapon(Object):
             )
             dealt = target.at_damage(wielder, damage, damage_type, critical=crit)
             combat_utils.apply_lifesteal(wielder, dealt)
-            hp = getattr(getattr(target, "traits", None), "health", None)
-            cur = getattr(hp, "value", getattr(target, "hp", 0))
-            max_hp = getattr(hp, "max", getattr(target, "max_hp", cur))
-            condition = combat_utils.get_condition_msg(cur, max_hp)
+            condition = get_health_description(target)
             if wielder.location:
                 wielder.location.msg_contents(f"The {target.key} {condition}")
             if status := getattr(self.db, "status_effect", None):
