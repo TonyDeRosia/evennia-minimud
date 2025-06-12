@@ -38,3 +38,37 @@ class TestAICombat(unittest.TestCase):
         npc_take_turn(self.engine, self.npc, self.target)
         action = self.engine.queue_action.call_args[0][1]
         self.assertIsInstance(action, SkillAction)
+
+    def test_spell_order(self):
+        self.npc.db.spells = ["fireball", "heal"]
+        npc_take_turn(self.engine, self.npc, self.target)
+        action = self.engine.queue_action.call_args[0][1]
+        self.assertIsInstance(action, SpellAction)
+        self.assertEqual(action.spell.key, "fireball")
+
+    def test_spell_fallback_to_next(self):
+        self.npc.db.spells = ["fireball", "heal"]
+        self.npc.traits.mana.current = 8
+        self.engine.queue_action.reset_mock()
+        npc_take_turn(self.engine, self.npc, self.target)
+        action = self.engine.queue_action.call_args[0][1]
+        self.assertIsInstance(action, SpellAction)
+        self.assertEqual(action.spell.key, "heal")
+
+    def test_skill_order(self):
+        self.npc.db.spells = []
+        self.npc.db.skills = ["cleave", "shield bash"]
+        npc_take_turn(self.engine, self.npc, self.target)
+        action = self.engine.queue_action.call_args[0][1]
+        self.assertIsInstance(action, SkillAction)
+        self.assertEqual(action.skill.name, "cleave")
+
+    def test_skill_fallback_to_next(self):
+        self.npc.db.spells = []
+        self.npc.db.skills = ["cleave", "shield bash"]
+        self.npc.traits.stamina.current = 15
+        self.engine.queue_action.reset_mock()
+        npc_take_turn(self.engine, self.npc, self.target)
+        action = self.engine.queue_action.call_args[0][1]
+        self.assertIsInstance(action, SkillAction)
+        self.assertEqual(action.skill.name, "shield bash")
