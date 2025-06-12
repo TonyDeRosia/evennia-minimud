@@ -68,6 +68,15 @@ def spawn_from_vnum(vnum: int, location=None):
         module, clsname = base_cls.rsplit(".", 1)
         base_cls = getattr(__import__(module, fromlist=[clsname]), clsname)
 
+    from typeclasses.characters import NPC
+    from typeclasses.npcs import BaseNPC
+
+    if not issubclass(base_cls, NPC):
+        logger.log_warn(
+            f"Prototype {vnum}: {base_cls} is not a subclass of NPC; using BaseNPC."
+        )
+        base_cls = BaseNPC
+
     metadata = proto_data.get("metadata") or {}
     role_names = metadata.get("roles") or []
     from commands.npc_builder import ROLE_MIXIN_MAP

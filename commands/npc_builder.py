@@ -2442,6 +2442,24 @@ class CmdSpawnNPC(Command):
             tclass = NPC_TYPE_MAP[NPCType.from_str(proto.get("npc_type", "base"))]
             proto = dict(proto)
             proto.setdefault("typeclass", f"{tclass.__module__}.{tclass.__name__}")
+
+            base_cls = proto["typeclass"]
+            if isinstance(base_cls, str):
+                module, clsname = base_cls.rsplit(".", 1)
+                base_cls_obj = getattr(__import__(module, fromlist=[clsname]), clsname)
+            else:
+                base_cls_obj = base_cls
+
+            from typeclasses.characters import NPC
+            from typeclasses.npcs import BaseNPC
+
+            if not issubclass(base_cls_obj, NPC):
+                logger.log_warn(
+                    f"Prototype {key}: {base_cls_obj} is not a subclass of NPC; using BaseNPC."
+                )
+                base_cls_obj = BaseNPC
+
+            proto["typeclass"] = base_cls_obj
             obj = spawner.spawn(proto)[0]
             obj.move_to(self.caller.location, quiet=True)
             obj.db.prototype_key = key
