@@ -110,7 +110,7 @@ def _run_single(mob, command: str) -> None:
             amount = int(amount_str)
         except (TypeError, ValueError):
             return
-        if target:
+        if target and getattr(target, "traits", None) and callable(getattr(target, "at_damage", None)):
             target.at_damage(mob, amount, damage_type=dtype or None)
         return
 

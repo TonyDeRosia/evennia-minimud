@@ -793,6 +793,11 @@ class Character(ObjectParent, ClothedCharacter):
                 self.msg("You don't see your target.")
             return
 
+        if not getattr(target, "traits", None) or not callable(getattr(target, "at_damage", None)):
+            if self.sessions.count():
+                self.msg("You can't attack that.")
+            return
+
         if not (hasattr(weapon, "at_pre_attack") and hasattr(weapon, "at_attack")):
             if self.sessions.count():
                 self.msg(f"You cannot attack with {weapon.get_numbered_name(1, self)}.")
@@ -1113,6 +1118,10 @@ class NPC(Character):
         """
         attack with your natural weapon
         """
+        if not getattr(target, "traits", None) or not callable(getattr(target, "at_damage", None)):
+            if hasattr(wielder, "msg"):
+                wielder.msg("You can't attack that.")
+            return
         from world.system import stat_manager
 
         weapon = self.db.natural_weapon
