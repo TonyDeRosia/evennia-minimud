@@ -288,3 +288,31 @@ class TestCombatNPCTurn(EvenniaTest):
             engine.process_round()
 
         self.assertTrue(any(isinstance(c.args[1], AttackAction) for c in mock_queue.call_args_list))
+
+
+class TestMultipleActions(unittest.TestCase):
+    def test_all_queued_actions_execute_in_order(self):
+        record = []
+
+        class RecordAction(Action):
+            def __init__(self, actor, target, label, priority=0):
+                super().__init__(actor, target)
+                self.label = label
+                self.priority = priority
+
+            def resolve(self):
+                record.append(self.label)
+                return CombatResult(self.actor, self.target, self.label)
+
+        a = Dummy()
+        b = Dummy()
+        engine = CombatEngine([a, b], round_time=0)
+
+        engine.queue_action(a, RecordAction(a, b, "first", priority=1))
+        engine.queue_action(a, RecordAction(a, b, "second", priority=5))
+
+        with patch("world.system.state_manager.apply_regen"), patch("random.randint", return_value=0):
+            engine.start_round()
+            engine.process_round()
+
+        self.assertEqual(record, ["second", "first"])
