@@ -208,6 +208,10 @@ Several basic NPC prototypes are included out of the box. Try `cnpc dev_spawn ba
 or `@spawnnpc basic_merchant` to quickly create a merchant, or `basic_questgiver` for a quest
 giver.
 
+Body part prototypes such as `HEAD_PART` or `ARMS_PART` are also provided in
+`world/prototypes.py`. These are used when player corpses are created and can be
+spawned in your own areas or loot tables.
+
 ### Mob Program Commands
 
 Triggers can run mob program commands to control NPCs. Useful actions include:

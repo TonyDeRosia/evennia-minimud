@@ -90,6 +90,7 @@ Notes:
     - Primary stats cap at 999.
     - Use @mcreate and @mset to manage NPC prototypes.
     - Shops and repairs use @makeshop/@shopset and @makerepair/@repairset.
+    - Body part prototypes like HEAD_PART and ARMS_PART can be spawned for corpses or loot.
 
 Related:
     help ansi
