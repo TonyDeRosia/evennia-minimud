@@ -95,6 +95,7 @@ NPC_TYPE_MAP = {
     "guildmaster": "typeclasses.npcs.guildmaster.GuildmasterNPC",
     "guild_receptionist": "typeclasses.npcs.guild_receptionist.GuildReceptionistNPC",
     "questgiver": "typeclasses.npcs.questgiver.QuestGiverNPC",
+    "combatant": "typeclasses.npcs.combat.CombatNPC",
     "combat_trainer": "typeclasses.npcs.combat_trainer.CombatTrainerNPC",
     "event_npc": "typeclasses.npcs.event_npc.EventNPC",
 }
