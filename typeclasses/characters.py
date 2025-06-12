@@ -898,6 +898,12 @@ class PlayerCharacter(Character):
         """Create a corpse with body parts when the player dies."""
         if not self.location:
             return
+
+        # remove from combat if necessary. Victory cleanup may have already
+        # deleted the combat script, so ensure it is valid before using it.
+        if self.in_combat and (script := self.location.scripts.get("combat")):
+            if script and script[0].pk:
+                script[0].remove_combatant(self)
         # avoid spawning multiple corpses for repeated calls
         existing = [
             obj
@@ -1091,9 +1097,11 @@ class NPC(Character):
             return
         self.db._dead = True
 
-        # remove from combat if necessary
+        # remove from combat if necessary. The combat script may have been
+        # cleaned up already, so verify it before using it.
         if self.in_combat and (script := self.location.scripts.get("combat")):
-            script[0].remove_combatant(self)
+            if script and script[0].pk:
+                script[0].remove_combatant(self)
 
         corpse = self.drop_loot(attacker)
         if corpse:
