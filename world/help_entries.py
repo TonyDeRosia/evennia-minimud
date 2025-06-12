@@ -3534,7 +3534,7 @@ Usage:
     @mset <proto> loot_table <json>
 
 Examples:
-    @mset wolf loot_table "[{\"proto\": 5000, \"chance\": 75}]"
+    @mset wolf loot_table "[{\"proto\": 100001, \"chance\": 75}]"
     @mset bandit loot_table "[{\"proto\": \"IRON_SWORD\", \"chance\": 25}]"
     @mset goblin loot_table "[{\"proto\": \"gold\", \"chance\": 100, \"amount\": 5}]"
 
