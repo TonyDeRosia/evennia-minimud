@@ -33,6 +33,16 @@ class Dummy:
         return amount
 
 
+class NoHealth:
+    def __init__(self):
+        self.location = MagicMock()
+        self.traits = MagicMock()
+        self.db = type("DB", (), {"temp_bonuses": {}, "combat_target": None})()
+        self.on_enter_combat = MagicMock()
+        self.on_exit_combat = MagicMock()
+        self.msg = MagicMock()
+
+
 class TestCombatEngine(unittest.TestCase):
     def test_enter_and_exit_callbacks(self):
         a = Dummy()
@@ -183,6 +193,20 @@ class TestCombatEngine(unittest.TestCase):
 
         calls = [c.args[0] for c in room.msg_contents.call_args_list]
         self.assertTrue(any("attacker dealt 3 damage" in msg for msg in calls))
+
+    def test_participant_without_hp_removed(self):
+        a = Dummy()
+        b = NoHealth()
+        a.db.combat_target = b
+        b.db.combat_target = a
+
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('random.randint', return_value=0):
+            engine = CombatEngine([a, b], round_time=0)
+            engine.start_round()
+            engine.process_round()
+
+        self.assertNotIn(b, [p.actor for p in engine.participants])
 
 
 class TestCombatDeath(EvenniaTest):
