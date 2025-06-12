@@ -83,9 +83,8 @@ def save_prototype(category: str, data: dict, vnum: int | None = None) -> int:
     if vnum is None:
         vnum = get_next_vnum(category)
     else:
-        if not validate_vnum(vnum, category):
-            raise ValueError("Invalid or already used VNUM")
-        register_vnum(vnum)
+        if validate_vnum(vnum, category):
+            register_vnum(vnum)
     path = _proto_file(category, vnum)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w") as f:
