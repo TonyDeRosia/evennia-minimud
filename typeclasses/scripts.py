@@ -67,6 +67,8 @@ class CombatScript(Script):
 
     def at_script_creation(self):
         self.persistent = True
+        if not self.id:
+            self.save()
         self.db.teams = [[], []]
 
     def get_team(self, combatant):
@@ -144,6 +146,9 @@ class CombatScript(Script):
             return True
 
         # remove combatant from their team
+        if not self.id:
+            self.save()
+
         teams = self.db.teams or [[], []]
         if hasattr(teams, "deserialize"):
             teams = teams.deserialize()
@@ -162,6 +167,9 @@ class CombatScript(Script):
         # reset the cache
         del self.ndb.teams
 
+        from world.system import state_manager
+        state_manager.remove_cooldown(combatant, "attack")
+
         # grant exp to the other team, if relevant
         if exp := combatant.db.exp_reward:
             from world.system import state_manager
@@ -176,49 +184,48 @@ class CombatScript(Script):
             del combatant.db.combat_target
         return True
 
-    def check_victory(self):
-        """
-        Check the combat instance to see if either side has lost
+def check_victory(self):
+    """
+    Check the combat instance to see if either side has lost.
 
-        If one side is victorious, message the remaining members and delete ourself.
-        """
-        if not (active_fighters := self.active):
-            # everyone lost or is gone
-            self.delete()
-            return
-
-        # ensure we have two valid team lists before iterating
-        teams = self.db.teams or [[], []]
-        if hasattr(teams, "deserialize"):
-            teams = teams.deserialize()
-        if not isinstance(teams, list) or len(teams) != 2:
-            teams = [[], []]
-        team_a = teams[0] or []
-        team_b = teams[1] if len(teams) > 1 else []
-
-        # create a filtered list of only active fighters for each team
-        team_a = [obj for obj in team_a if obj in active_fighters]
-        team_b = [obj for obj in team_b if obj in active_fighters]
-
-        if team_a and team_b:
-            # both teams are still active
-            return
-
-        # this case shouldn't arise, but as a redundancy, checks if both teams are inactive
-        if not team_a and not team_b:
-            # everyone lost or is gone
-            self.delete()
-            return
-
-        # only one team is active at this point; message the winners
-        for obj in active_fighters:
-            # remove their combat target if they have one
-            if hasattr(obj.db, "combat_target"):
-                del obj.db.combat_target
-            obj.msg("The fight is over.")
-
-        # say farewell to the combat script!
+    If one side is victorious, message the remaining members and delete ourself.
+    """
+    if not (active_fighters := self.active):
+        # Everyone is dead or removed
         self.delete()
+        return
+
+    # Safely retrieve and validate teams
+    teams = self.db.teams or [[], []]
+    if hasattr(teams, "deserialize"):
+        teams = teams.deserialize()
+    if not isinstance(teams, list) or len(teams) != 2:
+        teams = [[], []]
+
+    team_a = [obj for obj in (teams[0] or []) if obj in active_fighters]
+    team_b = [obj for obj in (teams[1] if len(teams) > 1 else []) if obj in active_fighters]
+
+    # If both teams still have fighters, continue combat
+    if team_a and team_b:
+        return
+
+    # If no one is left at all, clean up
+    if not team_a and not team_b:
+        self.delete()
+        return
+
+    # Only one team remains - combat is over
+    from world.system import state_manager
+
+    for obj in active_fighters:
+        if hasattr(obj.db, "combat_target"):
+            del obj.db.combat_target
+        state_manager.remove_cooldown(obj, "attack")
+        obj.msg("The fight is over.")
+
+    # Delete the combat script
+    self.delete()
+
 
 
 def get_or_create_combat_script(location):
