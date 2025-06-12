@@ -21,6 +21,7 @@ from .wanderer import WandererNPC  # noqa: E402
 from .guildmaster import GuildmasterNPC  # noqa: E402
 from .guild_receptionist import GuildReceptionistNPC  # noqa: E402
 from .questgiver import QuestGiverNPC  # noqa: E402
+from .combat import CombatNPC  # noqa: E402
 from .combat_trainer import CombatTrainerNPC  # noqa: E402
 from .event_npc import EventNPC  # noqa: E402
 
@@ -33,6 +34,7 @@ __all__ = [
     "GuildmasterNPC",
     "GuildReceptionistNPC",
     "QuestGiverNPC",
+    "CombatNPC",
     "CombatTrainerNPC",
     "EventNPC",
 ]

@@ -128,7 +128,9 @@ The builder lets you choose an NPC type such as `merchant`, `banker`,
 `trainer`, `wanderer` or `combatant`. These map to the typeclasses under
 `typeclasses.npcs`. When you select the `combatant` type you'll be asked
 for a combat class from `world.scripts.classes`; this sets
-`npc.db.charclass` on the spawned NPC.
+`npc.db.charclass` on the spawned NPC. Combatants use the
+`typeclasses.npcs.combat.CombatNPC` class which automatically sets
+`npc.db.can_attack = True`.
 
 While editing, there's a step to manage triggers using a numbered menu. Choose
 `Add trigger` to create a new reaction, `Delete trigger` to remove one, `List
