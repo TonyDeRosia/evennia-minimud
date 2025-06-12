@@ -70,6 +70,11 @@ def validate_prototype(data: dict) -> list[str]:
     if "sentinel" in actflags and ai_type == "wander":
         warnings.append("Sentinel flag conflicts with wander AI type.")
 
+    combat_class = data.get("combat_class")
+    npc_type = data.get("npc_type")
+    if combat_class and npc_type not in COMBATANT_TYPES:
+        warnings.append("Combat class set on non-combat NPC type.")
+
     return warnings
 
 
@@ -1767,6 +1772,8 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     if not isinstance(data, dict):
         caller.msg("Error: NPC data missing. Aborting.")
         return None
+    if data.get("combat_class") and data.get("npc_type") not in COMBATANT_TYPES:
+        caller.msg("|rCombat class defined for non-combat NPC type.|n")
     tclass = NPC_TYPE_MAP[data.get("npc_type", "base")]
     tclass_path = f"{tclass.__module__}.{tclass.__name__}"
     if data.get("edit_obj"):
@@ -2128,8 +2135,14 @@ class CmdCNPC(Command):
             proto_dict = prototypes.get_npc_prototypes().get(proto)
             try:
                 if proto_dict:
+                    if (
+                        proto_dict.get("combat_class")
+                        and proto_dict.get("npc_type") not in COMBATANT_TYPES
+                    ):
+                        self.msg("|rCombat class defined for non-combat NPC type.|n")
                     obj = spawner.spawn(proto_dict)[0]
                 else:
+                    # proto is a path string
                     obj = spawner.spawn(proto)[0]
             except KeyError:
                 self.msg(f"Unknown prototype: {proto}")
@@ -2243,6 +2256,8 @@ class CmdSpawnNPC(Command):
                 else:
                     self.msg("Unknown NPC prototype.")
                 return
+            if proto.get("combat_class") and proto.get("npc_type") not in COMBATANT_TYPES:
+                self.msg("|rCombat class defined for non-combat NPC type.|n")
             obj = spawn_from_vnum(vnum, location=self.caller.location)
             if not obj:
                 self.msg("Unknown NPC prototype.")
@@ -2263,6 +2278,8 @@ class CmdSpawnNPC(Command):
             if not proto:
                 self.msg("Unknown NPC prototype.")
                 return
+            if proto.get("combat_class") and proto.get("npc_type") not in COMBATANT_TYPES:
+                self.msg("|rCombat class defined for non-combat NPC type.|n")
             tclass = NPC_TYPE_MAP[proto.get("npc_type", "base")]
             proto = dict(proto)
             proto.setdefault("typeclass", f"{tclass.__module__}.{tclass.__name__}")
