@@ -5,6 +5,8 @@ from __future__ import annotations
 from enum import Enum
 from typing import Iterable, Set
 
+from world.constants import NPC_CLASSES, NPC_RACES
+
 
 class _StrEnum(str, Enum):
     """Enum with string values supporting case-insensitive comparison."""
@@ -17,21 +19,7 @@ class _StrEnum(str, Enum):
         raise ValueError(value)
 
 
-class NPC_RACES(_StrEnum):
-    HUMAN = "human"
-    ELF = "elf"
-    TABAXI = "tabaxi"
-    LIZARDFOLK = "lizardfolk"
-    KITSUNE = "kitsune"
-    HALFLING = "halfling"
-    DWARF = "dwarf"
-    ORC = "orc"
-    OGRE = "ogre"
-    BIRDFOLK = "birdfolk"
-    PIXIE = "pixie"
-    MINOTAUR = "minotaur"
-    SATYR = "satyr"
-    UNIQUE = "unique"
+# NPC_RACES and NPC_CLASSES are defined in ``world.constants``.
 
 
 class NPC_GENDERS(_StrEnum):
@@ -53,24 +41,7 @@ class NPC_SIZES(_StrEnum):
     LARGE = "large"
 
 
-class NPC_CLASSES(_StrEnum):
-    WARRIOR = "warrior"
-    MYSTIC = "mystic"
-    WIZARD = "wizard"
-    SORCERER = "sorcerer"
-    MAGE = "mage"
-    BATTLEMAGE = "battlemage"
-    NECROMANCER = "necromancer"
-    SPELLBINDER = "spellbinder"
-    PRIEST = "priest"
-    PALADIN = "paladin"
-    DRUID = "druid"
-    SHAMAN = "shaman"
-    ROGUE = "rogue"
-    RANGER = "ranger"
-    WARLOCK = "warlock"
-    BARD = "bard"
-    SWASHBUCKLER = "swashbuckler"
+
 
 
 class ACTFLAGS(_StrEnum):
