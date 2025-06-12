@@ -159,6 +159,30 @@ class TestCombatEngine(unittest.TestCase):
             self.assertTrue(any(f"The {b.key} {expected}" in msg for msg in calls))
             room.reset_mock()
 
+    def test_damage_summary_broadcast(self):
+        class DamageAction(Action):
+            def resolve(self):
+                return CombatResult(self.actor, self.target, "hit", damage=3)
+
+        a = Dummy()
+        b = Dummy()
+        a.key = "attacker"
+        b.key = "victim"
+        room = MagicMock()
+        a.location = b.location = room
+
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.get_effective_stat', return_value=0), \
+             patch('random.randint', return_value=0), \
+             patch('combat.combat_engine.delay'):
+            engine = CombatEngine([a, b], round_time=0)
+            engine.queue_action(a, DamageAction(a, b))
+            engine.start_round()
+            engine.process_round()
+
+        calls = [c.args[0] for c in room.msg_contents.call_args_list]
+        self.assertTrue(any("attacker dealt 3 damage" in msg for msg in calls))
+
 
 class TestCombatDeath(EvenniaTest):
     def test_npc_death_creates_corpse_and_awards_xp(self):
