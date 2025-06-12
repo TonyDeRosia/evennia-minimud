@@ -30,4 +30,5 @@ class GuardPatrol(Script):
         else:
             exits = npc.location.contents_get(content_type="exit")
             if exits:
-                choice(exits).at_traverse(npc, exits[0].destination)
+                exit_obj = choice(exits)
+                exit_obj.at_traverse(npc, exit_obj.destination)
