@@ -46,6 +46,12 @@ def at_server_start():
             script.delete()
         create.create_script("typeclasses.scripts.GlobalTick", key="global_tick")
 
+    script = ScriptDB.objects.filter(db_key="area_reset").first()
+    if not script or script.typeclass_path != "world.area_reset.AreaReset":
+        if script:
+            script.delete()
+        create.create_script("world.area_reset.AreaReset", key="area_reset")
+
     # Ensure mob database script exists
     get_mobdb()
 

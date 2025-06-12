@@ -205,7 +205,11 @@ class CmdQuickMob(Command):
         area = self.caller.location.db.area if self.caller.location else None
         if area:
             try:
-                vnum = vnum_registry.get_next_vnum_for_area(area, "npc")
+                vnum = vnum_registry.get_next_vnum_for_area(
+                    area,
+                    "npc",
+                    builder=self.caller.key,
+                )
             except Exception:
                 vnum = vnum_registry.get_next_vnum("npc")
         else:

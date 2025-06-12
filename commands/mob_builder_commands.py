@@ -243,7 +243,11 @@ class CmdMCreate(Command):
         area = self.caller.location.db.area if self.caller.location else None
         if area:
             try:
-                proto["vnum"] = vnum_registry.get_next_vnum_for_area(area, "npc")
+                proto["vnum"] = vnum_registry.get_next_vnum_for_area(
+                    area,
+                    "npc",
+                    builder=self.caller.key,
+                )
             except Exception:
                 pass
         prototypes.register_npc_prototype(self.new_key, proto)

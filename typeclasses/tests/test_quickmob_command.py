@@ -41,7 +41,7 @@ class TestQuickMobCommand(EvenniaTest):
         self.char1.location.set_area("town", 1)
         with patch("utils.vnum_registry.get_next_vnum_for_area", return_value=101) as mock_vnum:
             self.char1.execute_cmd("@quickmob goblin")
-        mock_vnum.assert_called_with("town", "npc")
+        mock_vnum.assert_called_with("town", "npc", builder=self.char1.key)
         reg = prototypes.get_npc_prototypes()
         assert "mob_goblin" in reg
         assert reg["mob_goblin"]["vnum"] == 101

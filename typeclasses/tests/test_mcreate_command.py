@@ -36,6 +36,6 @@ class TestMCreateCommand(EvenniaTest):
         self.char1.location.set_area("town", 1)
         with mock.patch("utils.vnum_registry.get_next_vnum_for_area", return_value=55) as mock_vnum:
             self.char1.execute_cmd("@mcreate gob")
-        mock_vnum.assert_called_with("town", "npc")
+        mock_vnum.assert_called_with("town", "npc", builder=self.char1.key)
         reg = prototypes.get_npc_prototypes()
         assert reg["gob"]["vnum"] == 55

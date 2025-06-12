@@ -89,13 +89,14 @@ def get_next_vnum(category: str) -> int:
     return vnum
 
 
-def get_next_vnum_for_area(area_name: str, category: str) -> int:
+def get_next_vnum_for_area(area_name: str, category: str, *, builder: str | None = None) -> int:
     """Return and reserve the next available VNUM for ``category`` in ``area_name``.
 
-    The area's valid VNUM range is read from :mod:`world.areas`. The returned
-    VNUM will be persisted as used in the registry.
+    The area's valid VNUM range is read from :mod:`world.areas`. If ``builder``
+    is given, they must be listed as an authorized builder for the area. The
+    returned VNUM will be persisted as used in the registry.
     """
-    from world.areas import get_area_vnum_range
+    from world.areas import get_area_vnum_range, find_area
 
     if category not in VNUM_RANGES:
         raise KeyError(f"Unknown category: {category}")
@@ -103,6 +104,10 @@ def get_next_vnum_for_area(area_name: str, category: str) -> int:
     area_range = get_area_vnum_range(area_name)
     if not area_range:
         raise ValueError(f"Unknown area: {area_name}")
+    if builder is not None:
+        _, area = find_area(area_name)
+        if area and area.builders and builder not in area.builders:
+            raise PermissionError("Builder not authorized for this area")
 
     cat_start, cat_end = VNUM_RANGES[category]
     start = max(area_range[0], cat_start)
