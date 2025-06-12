@@ -32,9 +32,17 @@ class TestMobTemplateCommand(EvenniaTest):
         assert "Available templates" in out
         assert "warrior" in out
         assert "caster" in out
+        assert "merchant" in out
         self.char1.msg.reset_mock()
 
         self.char1.execute_cmd("@mobtemplate warrior")
         data = self.char1.ndb.buildnpc
         assert data["hp"] == 30
         assert "aggressive" in data.get("actflags", [])
+        assert "IRON_SWORD" in data.get("equipment", [])
+
+    def test_template_with_shop(self):
+        self.char1.execute_cmd("@mobtemplate merchant")
+        data = self.char1.ndb.buildnpc
+        assert data.get("shop")
+        assert data.get("equipment")

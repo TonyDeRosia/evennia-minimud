@@ -12,6 +12,7 @@ MOB_TEMPLATES = {
         "primary_stats": {"STR": 4, "CON": 3, "DEX": 3, "INT": 1, "WIS": 1, "LUCK": 1},
         "actflags": ["aggressive"],
         "skills": ["slash"],
+        "equipment": ["IRON_SWORD", "IRON_HAUBERK", "LEATHER_BOOTS"],
     },
     "caster": {
         "level": 1,
@@ -22,6 +23,22 @@ MOB_TEMPLATES = {
         "primary_stats": {"STR": 1, "CON": 2, "DEX": 2, "INT": 4, "WIS": 4, "LUCK": 1},
         "spells": ["magic missile"],
         "actflags": ["sentinel"],
+        "equipment": ["IRON_DAGGER", "WOOL_TUNIC", "WOOL_LEGGINGS"],
+    },
+    "merchant": {
+        "level": 1,
+        "npc_type": "merchant",
+        "roles": ["merchant"],
+        "ai_type": "passive",
+        "actflags": ["sentinel"],
+        "equipment": ["WOOL_TUNIC", "WOOL_LEGGINGS"],
+        "shop": {
+            "buy_percent": 100,
+            "sell_percent": 100,
+            "hours": "0-24",
+            "item_types": ["weapon", "armor"],
+        },
+        "merchant_markup": 1.0,
     },
 }
 

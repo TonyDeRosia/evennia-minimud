@@ -3087,7 +3087,7 @@ Example:
 
 Notes:
     - Templates are defined in ``world.templates.mob_templates``.
-    - Available templates include: warrior, caster.
+    - Available templates include: warrior, caster, merchant.
 """,
     },
     {
