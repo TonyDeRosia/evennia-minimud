@@ -46,8 +46,14 @@ class CmdMSpawn(Command):
             vnum = int(arg[1:])
 
         if vnum is not None:
-            if not vnum_registry.validate_vnum(vnum, "npc") and not get_prototype(vnum):
-                self.msg("Invalid VNUM.")
+            proto = get_prototype(vnum)
+            if not proto:
+                if vnum_registry.validate_vnum(vnum, "npc"):
+                    self.msg(
+                        f"Prototype {vnum} not finalized. Use editnpc {vnum} and finalize with 'Yes & Save'."
+                    )
+                else:
+                    self.msg("Invalid VNUM.")
                 return
             obj = spawn_from_vnum(vnum, location=self.caller.location)
             if not obj:
