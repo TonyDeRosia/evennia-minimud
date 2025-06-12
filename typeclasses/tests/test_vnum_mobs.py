@@ -73,6 +73,17 @@ class TestVnumMobs(EvenniaTest):
         self.assertEqual(npc.db.initiative, stats["initiative"])
         self.assertEqual(npc.db.charclass, "Warrior")
 
+    def test_spawn_applies_role_mixins(self):
+        proto = {
+            "key": "clerk",
+            "typeclass": "typeclasses.npcs.BaseNPC",
+            "metadata": {"roles": ["merchant", "banker"]},
+        }
+        vnum = register_prototype(proto, vnum=4)
+        npc = spawn_from_vnum(vnum, location=self.char1.location)
+        self.assertTrue(callable(getattr(npc, "sell", None)))
+        self.assertTrue(callable(getattr(npc, "deposit", None)))
+
     def test_command_set_flow(self):
         self.char1.execute_cmd("@mobproto create 1 gob")
         self.assertIn("key", get_prototype(1))

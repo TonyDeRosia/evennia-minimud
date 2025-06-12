@@ -1934,6 +1934,7 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
         proto = {k: v for k, v in data.items() if k not in ("edit_obj", "proto_key")}
         proto["typeclass"] = tclass_path
         proto["exp_reward"] = data.get("exp_reward", 0)
+        proto["metadata"] = metadata
         if data.get("vnum") is not None:
             proto["vnum"] = data.get("vnum")
         if data.get("coin_drop"):
