@@ -1047,18 +1047,24 @@ class NPC(Character):
         super().at_object_receive(obj, source_location, **kwargs)
         self.check_triggers("object_receive", item=obj, giver=source_location)
 
-    def return_appearance(self, looker, **kwargs):
-        text = super().return_appearance(looker, **kwargs)
+    def return_appearance(self, looker, *, room=False, **kwargs):
+        """Return a description of this NPC.
+
+        Args:
+            looker (Object): The object looking at us.
+            room (bool, optional): If ``True``, return the short room
+                description. Defaults to ``False``.
+        """
+
+        if room:
+            return f"{self.db.shortdesc or self.key} is here."
+
         if looker != self:
             self.check_triggers("on_look", looker=looker)
-        if (
-            looker
-            and looker.has_account
-            and self.is_typeclass("typeclasses.npcs.NPC", exact=False)
-        ):
-            cond = get_health_description(self)
-            text = text.rstrip() + f"\n{self.get_display_name(looker)} {cond}"
-        return text
+
+        longdesc = self.db.long_desc or self.db.desc or "You see nothing special."
+        status = get_health_description(self)
+        return f"{longdesc}\n\n{self.key.capitalize()} {status}"
 
     def at_damage(self, attacker, damage, damage_type=None, critical=False):
         """

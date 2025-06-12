@@ -523,7 +523,7 @@ class TestReturnAppearance(EvenniaTest):
 
         npc = create.create_object(BaseNPC, key="mob", location=self.room1)
         out = npc.return_appearance(self.char1)
-        self.assertIn("excellent condition", out)
+        self.assertIn("Mob is in excellent condition.", out)
 
 
 class TestRestCommands(EvenniaTest):
