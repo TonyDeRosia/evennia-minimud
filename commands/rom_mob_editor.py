@@ -404,6 +404,8 @@ def _edit_loot(caller, raw_string, **kwargs):
         return "menunode_loot"
     if string.lower().startswith("remove "):
         proto = string[7:].strip()
+        if proto.isdigit():
+            proto = int(proto)
         for entry in list(table):
             if entry.get("proto") == proto:
                 table.remove(entry)
