@@ -1,12 +1,12 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from evennia.utils.test_resources import EvenniaTest
 from commands.admin import BuilderCmdSet
-from unittest.mock import patch
 from tempfile import TemporaryDirectory
 from pathlib import Path
 from django.conf import settings
 from unittest import mock
 from typeclasses.npcs import MerchantNPC, BaseNPC
+from evennia.contrib.rpg.traits import TraitHandler
 from scripts.area_spawner import AreaSpawner
 from world import area_npcs
 
@@ -34,6 +34,19 @@ class TestSpawnNPCPrototype(EvenniaTest):
         self.assertEqual(npc.db.prototype_key, "basic_merchant")
         self.assertIs(npc.db.spawn_room, self.char1.location)
         self.assertEqual(npc.db.area_tag, "testarea")
+        self.assertIsInstance(npc.traits, TraitHandler)
+
+    def test_spawn_basic_questgiver_has_traits(self):
+        self.char1.execute_cmd("@spawnnpc basic_questgiver")
+        npc = self._find("quest giver")
+        self.assertIsNotNone(npc)
+        self.assertIsInstance(npc.traits, TraitHandler)
+
+    def test_spawn_basic_guard_has_traits(self):
+        self.char1.execute_cmd("@spawnnpc basic_guard")
+        npc = self._find("town guard")
+        self.assertIsNotNone(npc)
+        self.assertIsInstance(npc.traits, TraitHandler)
 
     @patch("scripts.area_spawner.choice", return_value="basic_merchant")
     @patch("scripts.area_spawner.randint", return_value=1)

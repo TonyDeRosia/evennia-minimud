@@ -48,6 +48,8 @@ def spawn_from_vnum(vnum: int, location=None):
         return None
     proto_data = dict(proto)
     prototypes._normalize_proto(proto_data)
+    if "typeclass" not in proto_data:
+        proto_data["typeclass"] = "typeclasses.npcs.BaseNPC"
     npc = spawner.spawn(proto_data)[0]
     if location:
         npc.location = location
