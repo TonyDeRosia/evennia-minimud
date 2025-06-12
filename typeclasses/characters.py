@@ -9,7 +9,7 @@ from evennia.contrib.game_systems.clothing.clothing import (
 )
 from evennia.contrib.game_systems.cooldowns import CooldownHandler
 from evennia.prototypes.spawner import spawn
-from utils.currency import to_copper, from_copper
+from utils.currency import to_copper, from_copper, format_wallet
 from utils import normalize_slot
 from utils.slots import SLOT_ORDER
 from collections.abc import Mapping
@@ -915,8 +915,8 @@ class NPC(Character):
 
     # death handling -----------------------------------------------------
 
-    def drop_loot(self):
-        """Create a corpse and deposit any drops inside."""
+    def drop_loot(self, killer=None):
+        """Create a corpse and deposit any drops and coins."""
         drops = list(self.db.drops)
         if loot_table := self.db.loot_table:
             for entry in loot_table:
@@ -946,6 +946,34 @@ class NPC(Character):
         objs = spawn(*drops)
         for obj in objs:
             obj.location = corpse
+
+        # handle coin rewards
+        coin_map = {}
+        if self.db.coin_drop:
+            for coin, amt in (self.db.coin_drop or {}).items():
+                coin_map[coin] = coin_map.get(coin, 0) + int(amt)
+        if self.db.coins:
+            for coin, amt in (self.db.coins or {}).items():
+                coin_map[coin] = coin_map.get(coin, 0) + int(amt)
+
+        if coin_map:
+            total_copper = to_copper(coin_map)
+            if killer:
+                wallet = killer.db.coins or {}
+                killer.db.coins = from_copper(to_copper(wallet) + total_copper)
+                if hasattr(killer, "msg"):
+                    killer.msg(f"You receive {format_wallet(from_copper(total_copper))}.")
+            else:
+                for coin, amt in from_copper(total_copper).items():
+                    if amt:
+                        pile = create.create_object(
+                            "typeclasses.objects.CoinPile",
+                            key=f"{coin} coins",
+                            location=corpse,
+                        )
+                        pile.db.coin_type = coin
+                        pile.db.amount = amt
+
         return corpse
 
     def award_xp_to(self, attacker):
@@ -962,7 +990,7 @@ class NPC(Character):
     def on_death(self, attacker):
         """Handle character death cleanup."""
         self.at_death(attacker)
-        self.drop_loot()
+        self.drop_loot(attacker)
         self.award_xp_to(attacker)
         self.delete()
 

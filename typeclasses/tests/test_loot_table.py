@@ -1,6 +1,7 @@
 from unittest.mock import patch, MagicMock
 from evennia.utils import create
 from evennia.utils.test_resources import EvenniaTest
+from utils.currency import from_copper, to_copper
 
 class TestNPCLootTable(EvenniaTest):
     def test_loot_table_spawn(self):
@@ -9,6 +10,8 @@ class TestNPCLootTable(EvenniaTest):
         npc = create.create_object(NPC, key="mob", location=self.room1)
         npc.db.drops = []
         npc.db.loot_table = [{"proto": "RAW_MEAT", "chance": 100}]
+        npc.db.coin_drop = {"gold": 1}
+        self.char1.db.coins = from_copper(0)
         npc.traits.health.current = 1
         with patch("evennia.prototypes.spawner.spawn", return_value=[MagicMock()]) as mock_spawn:
             room = npc.location
@@ -22,6 +25,7 @@ class TestNPCLootTable(EvenniaTest):
             )
             item = mock_spawn.return_value[0]
             self.assertIs(item.location, corpse)
+            self.assertEqual(to_copper(self.char1.db.coins), to_copper({"gold": 1}))
 
     def test_loot_table_guaranteed_after(self):
         from typeclasses.characters import NPC
