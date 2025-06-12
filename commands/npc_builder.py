@@ -707,8 +707,7 @@ def _set_npc_type(caller, raw_string, **kwargs):
             npc_type = NPCType.from_str(string)
         except ValueError:
             caller.msg(
-                "Invalid class. Choose from: "
-                + ", ".join(t.value for t in NPC_TYPE_MAP)
+                f"Invalid NPC type. Choose from: {', '.join(t.value for t in NPCType)}"
             )
             return "menunode_npc_type"
     if npc_type not in NPC_TYPE_MAP:
