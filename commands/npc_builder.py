@@ -27,6 +27,16 @@ from utils.menu_utils import (
     toggle_multi_select,
     format_multi_select,
 )
+from world.npc_roles import (
+    MerchantRole,
+    BankerRole,
+    TrainerRole,
+    GuildmasterRole,
+    GuildReceptionistRole,
+    QuestGiverRole,
+    CombatTrainerRole,
+    EventNPCRole,
+)
 from world.scripts import classes
 from utils import vnum_registry
 from utils.mob_utils import generate_base_stats, mobprogs_to_triggers
@@ -129,6 +139,18 @@ NPC_TYPE_MAP = {
 
 # NPC types that can participate in combat and therefore need a combat class
 COMBATANT_TYPES = {NPCType.COMBATANT, NPCType.COMBAT_TRAINER}
+
+# Mapping of role names to mixin classes
+ROLE_MIXIN_MAP = {
+    "merchant": MerchantRole,
+    "banker": BankerRole,
+    "trainer": TrainerRole,
+    "guildmaster": GuildmasterRole,
+    "guild_receptionist": GuildReceptionistRole,
+    "questgiver": QuestGiverRole,
+    "combat_trainer": CombatTrainerRole,
+    "event_npc": EventNPCRole,
+}
 
 
 # Suggested skill lists for each NPC class
@@ -1798,12 +1820,18 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
         caller.msg("|rCombat class defined for non-combat NPC type.|n")
     tclass = NPC_TYPE_MAP[npc_type]
     tclass_path = f"{tclass.__module__}.{tclass.__name__}"
+    role_mixins = [
+        ROLE_MIXIN_MAP[r]
+        for r in data.get("roles", [])
+        if r in ROLE_MIXIN_MAP
+    ]
+    dyn_class = type("DynamicNPC", tuple([tclass, *role_mixins]), {})
     if data.get("edit_obj"):
         npc = data.get("edit_obj")
-        if npc.__class__ != tclass:
-            npc.swap_typeclass(tclass, clean_attributes=False)
+        if npc.__class__ != dyn_class:
+            npc.swap_typeclass(dyn_class, clean_attributes=False)
     else:
-        npc = create_object(tclass, key=data.get("key"), location=caller.location)
+        npc = create_object(dyn_class, key=data.get("key"), location=caller.location)
     npc.db.desc = data.get("desc")
     npc.db.race = data.get("race")
     # accept legacy "sex" key

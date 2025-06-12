@@ -165,6 +165,23 @@ class TestCNPC(EvenniaTest):
         self.assertTrue(npc.tags.has("guild_receptionist", category="npc_role"))
         self.assertEqual(npc.db.ai_type, "scripted")
 
+    def test_multiple_role_mixins(self):
+        """NPCs should gain methods from all selected roles."""
+        self.char1.ndb.buildnpc = {
+            "key": "multi",
+            "desc": "combo",
+            "npc_type": "base",
+            "creature_type": "humanoid",
+            "roles": ["merchant", "banker"],
+            "level": 1,
+            "combat_class": "Warrior",
+        }
+        npc_builder._create_npc(self.char1, "")
+
+        npc = self._find("multi")
+        self.assertTrue(callable(getattr(npc, "sell", None)))
+        self.assertTrue(callable(getattr(npc, "deposit", None)))
+
     def test_confirm_incomplete_data(self):
         """menunode_confirm should handle missing data gracefully."""
         self.char1.ndb.buildnpc = {}
