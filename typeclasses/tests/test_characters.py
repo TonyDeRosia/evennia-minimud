@@ -406,3 +406,31 @@ class TestCombatResists(EvenniaTest):
             before = self.char2.traits.health.current
             self.weapon.at_attack(self.char1, self.char2)
             self.assertEqual(self.char2.traits.health.current, before)
+
+
+class TestPlayerDeath(EvenniaTest):
+    def test_player_death_spawns_corpse_with_bodyparts_and_keeps_inventory(self):
+        from evennia.utils import create
+        from typeclasses.objects import Object
+        from world.mob_constants import BODYPARTS
+
+        player = self.char1
+        attacker = self.char2
+        player.db.coins = {"gold": 2}
+        item = create.create_object(Object, key="dagger", location=player, nohome=True)
+
+        player.traits.health.current = 1
+        player.at_damage(attacker, 2)
+
+        corpses = [
+            obj
+            for obj in self.room1.contents
+            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+        ]
+        self.assertEqual(len(corpses), 1)
+        corpse = corpses[0]
+        part_names = sorted(obj.key for obj in corpse.contents)
+        expected = sorted(part.value for part in BODYPARTS)
+        self.assertEqual(part_names, expected)
+        self.assertIn(item, player.contents)
+        self.assertEqual(player.db.coins.get("gold"), 2)
