@@ -36,6 +36,7 @@ from commands.bank import CmdBank
 from commands.info import InfoCmdSet
 from commands.guilds import GuildCmdSet
 from commands.rest import RestCmdSet
+from commands.loot import LootCmdSet
 from commands.who import CmdWho
 from commands.building import CmdDig, CmdTeleport, CmdDelRoom
 from commands.areas import AreaCmdSet
@@ -77,6 +78,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(SpellCmdSet)
         self.add(InteractCmdSet)
         self.add(InfoCmdSet)
+        self.add(LootCmdSet)
         self.add(RestCmdSet)
         self.add(GuildCmdSet)
         self.add(EquipmentCmdSet)
