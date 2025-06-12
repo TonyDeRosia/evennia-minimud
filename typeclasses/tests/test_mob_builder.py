@@ -84,7 +84,7 @@ class TestMobBuilder(EvenniaTest):
         assert npc is not None
         assert npc.is_typeclass(BaseNPC, exact=False)
         assert npc.db.charclass == "Warrior"
-        stats = npc_builder.calculate_combat_stats("Warrior", 1)
+        stats = npc_builder.generate_base_stats("Warrior", 1)
         assert npc.db.hp == 10
         assert npc.db.mp == stats["mp"]
         assert npc.db.sp == stats["sp"]
