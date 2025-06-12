@@ -489,6 +489,32 @@ class TestAdminCommands(EvenniaTest):
         self.char1.execute_cmd("peace")
         self.char1.msg.assert_called_with("There is no fighting here.")
 
+    def test_peace_after_victory_from_active_combat(self):
+        """Calling peace after combat ends should report no fighting."""
+
+        from commands.combat import CombatCmdSet
+
+        # allow starting combat via command
+        self.char1.cmdset.add_default(CombatCmdSet)
+        self.char2.cmdset.add_default(CombatCmdSet)
+
+        self.char1.attack = MagicMock()
+
+        # start combat
+        self.char1.execute_cmd(f"attack {self.char2.key}")
+        combat_script = self.room1.scripts.get("combat")[0]
+
+        # defeat the opponent so check_victory deletes the script
+        self.char2.tags.add("dead", category="status")
+        combat_script.check_victory()
+
+        # ensure script is gone
+        self.assertFalse(self.room1.scripts.get("combat"))
+
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("peace")
+        self.char1.msg.assert_called_with("There is no fighting here.")
+
     def test_peace_after_npc_initiated_combat(self):
         """NPC-initiated combat should be stopped cleanly by peace."""
 
