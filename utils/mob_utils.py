@@ -87,7 +87,7 @@ def mobprogs_to_triggers(mobprogs: list[dict]) -> Dict[str, list[dict]]:
 def make_corpse(npc):
     """Create a corpse object for ``npc`` and transfer belongings."""
 
-    from evennia import create
+    from evennia.utils import create
     from world.mob_constants import ACTFLAGS
 
     if not npc or not npc.location:
