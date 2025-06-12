@@ -15,6 +15,7 @@ class Area:
     end: int
     desc: str = ""
     builders: List[str] = field(default_factory=list)
+    reset_interval: int = 0
     flags: List[str] = field(default_factory=list)
     age: int = 0
 
@@ -26,6 +27,7 @@ class Area:
             end=int(data.get("end", 0)),
             desc=data.get("desc", ""),
             builders=data.get("builders", []),
+            reset_interval=int(data.get("reset_interval", 0)),
             flags=data.get("flags", []),
             age=int(data.get("age", 0)),
         )

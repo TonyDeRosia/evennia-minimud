@@ -29,7 +29,7 @@ class CmdAList(Command):
         if not areas:
             self.msg("No areas defined.")
             return
-        table = EvTable("Name", "Range", "Builders", "Flags", "Age", border="cells")
+        table = EvTable("Name", "Range", "Builders", "Flags", "Age", "Interval", border="cells")
         for area in areas:
             table.add_row(
                 area.key,
@@ -37,6 +37,7 @@ class CmdAList(Command):
                 ", ".join(area.builders),
                 ", ".join(area.flags),
                 str(area.age),
+                str(area.reset_interval),
             )
         self.msg(str(table))
 
@@ -68,7 +69,8 @@ class CmdAEdit(Command):
             self.msg(
                 "Usage: aedit create <name> <start> <end> | "
                 "aedit range <name> <start> <end> | "
-                "aedit builders <name> <list> | aedit flags <name> <list>"
+                "aedit builders <name> <list> | aedit flags <name> <list> | "
+                "aedit interval <name> <ticks>"
             )
             return
         parts = self.args.split(None, 1)
@@ -121,6 +123,20 @@ class CmdAEdit(Command):
             area.builders = [b.strip() for b in builders.split(',') if b.strip()]
             update_area(idx, area)
             self.msg("Builders updated.")
+            return
+        if sub == "interval":
+            args = rest.split()
+            if len(args) != 2 or not args[1].isdigit():
+                self.msg("Usage: aedit interval <name> <ticks>")
+                return
+            name, val = args[0], int(args[1])
+            idx, area = find_area(name)
+            if area is None:
+                self.msg("Unknown area.")
+                return
+            area.reset_interval = val
+            update_area(idx, area)
+            self.msg("Reset interval updated.")
             return
         if sub == "flags":
             args = rest.split(None, 1)
