@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from typing import Callable, Dict, Optional
+from weakref import WeakKeyDictionary
 
 
 @dataclass
@@ -23,7 +24,7 @@ class CombatStateManager:
     """Track active combat states on characters."""
 
     def __init__(self):
-        self.states: Dict[object, Dict[str, CombatState]] = {}
+        self.states: WeakKeyDictionary[object, Dict[str, CombatState]] = WeakKeyDictionary()
 
     def add_state(self, obj: object, state: CombatState) -> None:
         """Add ``state`` to ``obj``.
