@@ -1844,25 +1844,16 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
         "ai_type": data.get("ai_type") or "",
     }
     npc.db.metadata = metadata
-    npc.db.gender = metadata["gender"]
     npc.db.weight = data.get("weight")
     if cc := metadata.get("combat_class"):
-        npc.db.charclass = cc
         npc.db.combat_class = cc
     if vnum := data.get("vnum"):
         npc.db.vnum = vnum
         npc.tags.add(f"M{vnum}", category="vnum")
-    npc.tags.add("npc")
-    if t := data.get("npc_type"):
-        npc.tags.add(t, category="npc_type")
-    for role in data.get("roles", []):
-        if role:
-            npc.tags.add(role, category="npc_role")
     if guild := data.get("guild_affiliation"):
         npc.tags.add(guild, category="guild_affiliation")
     if markup := data.get("merchant_markup"):
         npc.db.merchant_markup = markup
-    npc.db.ai_type = metadata["ai_type"]
     npc.db.behavior = data.get("behavior")
     npc.db.skills = data.get("skills")
     npc.db.spells = data.get("spells")
@@ -1877,20 +1868,11 @@ def _create_npc(caller, raw_string, register=False, **kwargs):
     npc.db.buffs = data.get("buffs") or []
     mobprogs = data.get("mobprogs") or []
     npc.db.mobprogs = mobprogs
-    npc.db.triggers = mobprogs_to_triggers(mobprogs)
-    TriggerManager(npc).start_random_triggers()
     npc.db.coin_drop = data.get("coin_drop") or {}
     npc.db.loot_table = data.get("loot_table") or []
     npc.db.exp_reward = data.get("exp_reward", 0)
     if script_path := data.get("script"):
-        try:
-            script_cls = _import_script(script_path)
-            npc.scripts.add(script_cls, key=script_cls.__name__)
-        except ImportError as err:
-            logger.log_err(f"Script import rejected in npc builder: {err}")
-            caller.msg(f"Module not allowed for script: {script_path}")
-        except Exception as err:  # pragma: no cover - log errors
-            caller.msg(f"Could not attach script {script_path}: {err}")
+        npc.db.metadata["script"] = script_path
     npc.db.creature_type = data.get("creature_type")
     if data.get("use_mob"):
         npc.db.can_attack = True
@@ -2080,9 +2062,45 @@ def _gather_npc_data(npc):
 
 def finalize_mob_prototype(caller, npc):
     """Finalize ``npc`` with default combat stats and register it."""
-    if not npc.db.level or not npc.db.combat_class:
+    if not npc.db.level or not (npc.db.combat_class or (npc.db.metadata or {}).get("combat_class")):
         caller.msg("|rCannot finalize mob. Missing level or class.|n")
         return
+
+    meta = npc.db.metadata or {}
+
+    npc.tags.add("npc")
+    npc_type = meta.get("type") or getattr(npc.db, "npc_type", None)
+    if npc_type:
+        npc.tags.add(npc_type, category="npc_type")
+    roles = meta.get("roles") or getattr(npc.db, "roles", [])
+    for role in make_iter(roles):
+        if role:
+            npc.tags.add(role, category="npc_role")
+
+    if meta.get("gender"):
+        npc.db.gender = meta["gender"]
+    if meta.get("ai_type"):
+        npc.db.ai_type = meta["ai_type"]
+    if meta.get("combat_class"):
+        npc.db.combat_class = meta["combat_class"]
+
+    if npc.db.mobprogs and not npc.db.triggers:
+        npc.db.triggers = mobprogs_to_triggers(npc.db.mobprogs)
+    TriggerManager(npc).start_random_triggers()
+
+    if meta.get("script"):
+        try:
+            script_cls = _import_script(meta["script"])
+            if not npc.scripts.get(script_cls.__name__):
+                npc.scripts.add(script_cls, key=script_cls.__name__)
+        except Exception as err:  # pragma: no cover - log errors
+            logger.log_err(f"Could not attach script {meta['script']}: {err}")
+
+    if hasattr(npc, "at_npc_spawn"):
+        try:
+            npc.at_npc_spawn()
+        except Exception as err:  # pragma: no cover - log errors
+            logger.log_err(f"at_npc_spawn error on {npc}: {err}")
 
     npc.db.charclass = npc.db.combat_class
     stats = generate_base_stats(npc.db.combat_class, npc.db.level)

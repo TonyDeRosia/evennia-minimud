@@ -7,7 +7,6 @@ from typing import Optional
 from evennia.prototypes import spawner
 from world.scripts.mob_db import get_mobdb
 from .vnum_registry import get_next_vnum, register_vnum, validate_vnum
-from .mob_utils import mobprogs_to_triggers
 from world import prototypes
 
 
@@ -45,7 +44,6 @@ def spawn_from_vnum(vnum: int, location=None):
 
     mobprogs = proto_data.get("mobprogs") or []
     npc.db.mobprogs = mobprogs
-    npc.db.triggers = mobprogs_to_triggers(mobprogs)
 
     from commands.npc_builder import finalize_mob_prototype
     finalize_mob_prototype(npc, npc)
