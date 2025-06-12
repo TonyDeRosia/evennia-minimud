@@ -56,7 +56,7 @@ class CmdMEdit(Command):
         startnode = "menunode_desc" if caller.ndb.buildnpc.get("key") else "menunode_key"
         EvMenu(
             caller,
-            "commands.npc_builder",
+            "world.menus.mob_builder_menu",
             startnode=startnode,
             cmd_on_exit=npc_builder._on_menu_exit,
         )
