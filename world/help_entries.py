@@ -3091,6 +3091,26 @@ Notes:
 """,
     },
     {
+        "key": "medit",
+        "category": "Building",
+        "text": """Help for medit
+
+Open the NPC builder for a numeric prototype. ``create`` reserves the
+number and loads a default template for editing.
+
+Usage:
+    medit <vnum>
+    medit create <vnum>
+
+Example:
+    medit create 10
+
+Notes:
+    - VNUMs are validated against the registry.
+    - Choose |wYes & Save Prototype|n in the builder to store the result.
+""",
+    },
+    {
         "key": "@mobpreview",
         "category": "Building",
         "text": """Help for @mobpreview

@@ -49,3 +49,18 @@ class TestMEditCommand(EvenniaTest):
         data = self.char1.ndb.buildnpc
         assert data["key"] == "orc"
         assert self.char1.ndb.mob_vnum == 5
+
+    def test_medit_create(self):
+        with patch("commands.medit.EvMenu") as mock_menu, patch(
+            "commands.medit.get_template", return_value={"level": 2}
+        ):
+            self.char1.execute_cmd("medit create 10")
+            mock_menu.assert_called_with(
+                self.char1,
+                "commands.npc_builder",
+                startnode="menunode_key",
+                cmd_on_exit=npc_builder._on_menu_exit,
+            )
+        data = self.char1.ndb.buildnpc
+        assert data["level"] == 2
+        assert self.char1.ndb.mob_vnum == 10

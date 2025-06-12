@@ -12,7 +12,7 @@ from utils.mob_proto import register_prototype, get_prototype
 
 
 @override_settings(DEFAULT_HOME=None)
-class TestMEditProto(EvenniaTest):
+class TestProtoEdit(EvenniaTest):
     def setUp(self):
         super().setUp()
         self.char1.msg = MagicMock()
@@ -34,15 +34,15 @@ class TestMEditProto(EvenniaTest):
         patcher1.start()
         patcher2.start()
 
-    def test_medit_sets_field(self):
+    def test_protoedit_sets_field(self):
         register_prototype({"key": "orc"}, vnum=5)
-        self.char1.execute_cmd("@medit 5 level 3")
+        self.char1.execute_cmd("@protoedit 5 level 3")
         self.assertEqual(get_prototype(5)["level"], 3)
 
-    def test_medit_shows_summary(self):
+    def test_protoedit_shows_summary(self):
         register_prototype({"key": "orc", "level": 2}, vnum=7)
         self.char1.msg.reset_mock()
-        self.char1.execute_cmd("@medit 7")
+        self.char1.execute_cmd("@protoedit 7")
         out = self.char1.msg.call_args[0][0]
         self.assertIn("orc", out)
         self.assertIn("2", out)
