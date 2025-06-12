@@ -233,3 +233,15 @@ class TestVnumMobs(EvenniaTest):
         self.char1.execute_cmd(f"@mspawn M{vnum}")
         out = self.char1.msg.call_args[0][0]
         self.assertIn("missing required field", out.lower())
+
+    def test_spawn_from_vnum_invalid_vnum_error(self):
+        """spawn_from_vnum should raise if the prototype is missing."""
+        with self.assertRaises(ValueError):
+            spawn_from_vnum(999, location=self.char1.location)
+
+    def test_mspawn_invalid_vnum_message(self):
+        with patch("utils.mob_proto.spawn_from_vnum") as mock_spawn:
+            self.char1.execute_cmd("@mspawn 999")
+            mock_spawn.assert_not_called()
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Invalid VNUM", out)

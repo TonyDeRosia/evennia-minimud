@@ -46,7 +46,7 @@ def spawn_from_vnum(vnum: int, location=None):
     mob_db = get_mobdb()
     proto = mob_db.get_proto(vnum)
     if not proto:
-        return None
+        raise ValueError(f"Prototype not found for VNUM {vnum}")
     from commands.npc_builder import validate_prototype  # lazy import
 
     warnings = validate_prototype(proto)

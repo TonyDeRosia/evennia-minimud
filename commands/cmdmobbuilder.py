@@ -129,10 +129,7 @@ class CmdMobProto(Command):
         except ValueError as err:
             caller.msg(str(err))
             return
-        if not npc:
-            caller.msg("Prototype not found.")
-        else:
-            caller.msg(f"Spawned {npc.key} (vnum {vnum}).")
+        caller.msg(f"Spawned {npc.key} (vnum {vnum}).")
 
     def _sub_delete(self, rest: str):
         caller = self.caller

@@ -47,7 +47,10 @@ def execute_mpcommand(mob, command: str) -> None:
             vnum = int(arg.strip())
         except (TypeError, ValueError):
             return
-        spawn_from_vnum(vnum, location=mob.location)
+        try:
+            spawn_from_vnum(vnum, location=mob.location)
+        except ValueError:
+            return
         return
 
     if subcmd == "oload":
