@@ -271,6 +271,31 @@ class TestCombatDeath(EvenniaTest):
         script.at_repeat()
         self.assertNotIn(corpse, self.room1.contents)
 
+    def test_on_death_handles_deleted_combat_script(self):
+        """NPC.on_death should handle a deleted combat script gracefully."""
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+        from typeclasses.scripts import CombatScript
+
+        player = self.char1
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+
+        # create combat script then immediately delete it to mimic victory cleanup
+        self.room1.scripts.add(CombatScript, key="combat")
+        combat_script = self.room1.scripts.get("combat")[0]
+        combat_script.delete()
+
+        # should not raise when combat script has been removed
+        npc.on_death(player)
+
+        corpse = next(
+            obj
+            for obj in self.room1.contents
+            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+        )
+        self.assertEqual(corpse.db.corpse_of, npc.key)
+
 
 class TestCombatNPCTurn(EvenniaTest):
     def test_at_combat_turn_auto_attack(self):
