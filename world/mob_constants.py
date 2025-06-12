@@ -41,6 +41,22 @@ class NPC_SIZES(_StrEnum):
     LARGE = "large"
 
 
+class NPCType(_StrEnum):
+    """Archetype identifiers for NPCs."""
+
+    BASE = "base"
+    MERCHANT = "merchant"
+    BANKER = "banker"
+    TRAINER = "trainer"
+    WANDERER = "wanderer"
+    GUILDMASTER = "guildmaster"
+    GUILD_RECEPTIONIST = "guild_receptionist"
+    QUESTGIVER = "questgiver"
+    COMBATANT = "combatant"
+    COMBAT_TRAINER = "combat_trainer"
+    EVENT_NPC = "event_npc"
+
+
 
 
 
@@ -168,6 +184,7 @@ __all__ = [
     "NPC_GENDERS",
     "NPC_SEXES",
     "NPC_SIZES",
+    "NPCType",
     "NPC_CLASSES",
     "ACTFLAGS",
     "AFFECTED_BY",

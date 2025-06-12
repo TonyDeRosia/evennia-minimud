@@ -68,11 +68,14 @@ class CmdMSpawn(Command):
                 if not proto:
                     self.msg("Prototype not found.")
                     return
-                tclass_path = npc_builder.NPC_TYPE_MAP.get(
-                    proto.get("npc_type", "base"), "typeclasses.npcs.BaseNPC"
+                tclass = npc_builder.NPC_TYPE_MAP.get(
+                    npc_builder.NPCType.from_str(proto.get("npc_type", "base")),
+                    npc_builder.BaseNPC,
                 )
                 proto = dict(proto)
-                proto.setdefault("typeclass", tclass_path)
+                proto.setdefault(
+                    "typeclass", f"{tclass.__module__}.{tclass.__name__}"
+                )
                 obj = spawner.spawn(proto)[0]
                 obj.move_to(self.caller.location, quiet=True)
                 if proto.get("vnum"):
@@ -116,11 +119,14 @@ class CmdMobPreview(Command):
             if not proto:
                 self.msg("Prototype not found.")
                 return
-            tclass_path = npc_builder.NPC_TYPE_MAP.get(
-                proto.get("npc_type", "base"), "typeclasses.npcs.BaseNPC"
+            tclass = npc_builder.NPC_TYPE_MAP.get(
+                npc_builder.NPCType.from_str(proto.get("npc_type", "base")),
+                npc_builder.BaseNPC,
             )
             proto = dict(proto)
-            proto.setdefault("typeclass", tclass_path)
+            proto.setdefault(
+                "typeclass", f"{tclass.__module__}.{tclass.__name__}"
+            )
             obj = spawner.spawn(proto)[0]
             obj.move_to(self.caller.location, quiet=True)
         delay(30, obj.delete)
