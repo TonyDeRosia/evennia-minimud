@@ -53,3 +53,14 @@ class TestCombatStates(unittest.TestCase):
 
         self.assertEqual(events, ["apply", "tick", "expire"])
 
+    def test_states_removed_when_object_deleted(self):
+        mgr = CombatStateManager()
+        obj = Dummy()
+        mgr.add_state(obj, CombatState(key="bleeding", duration=1))
+        self.assertIn(obj, mgr.states)
+        del obj
+        import gc
+
+        gc.collect()
+        self.assertEqual(len(mgr.states), 0)
+
