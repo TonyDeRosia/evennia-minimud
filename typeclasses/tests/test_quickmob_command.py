@@ -38,9 +38,10 @@ class TestQuickMobCommand(EvenniaTest):
             prototypes._normalize_proto = prototypes._legacy._normalize_proto
 
     def test_quickmob_creates_and_spawns(self):
-        with patch("utils.mob_utils.assign_next_vnum", return_value=101) as mock_vnum:
+        self.char1.location.set_area("town", 1)
+        with patch("utils.vnum_registry.get_next_vnum_for_area", return_value=101) as mock_vnum:
             self.char1.execute_cmd("@quickmob goblin")
-        mock_vnum.assert_called_with("npc")
+        mock_vnum.assert_called_with("town", "npc")
         reg = prototypes.get_npc_prototypes()
         assert "mob_goblin" in reg
         assert reg["mob_goblin"]["vnum"] == 101
