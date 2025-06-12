@@ -362,17 +362,28 @@ class CombatEngine:
         Calls ``target.at_defeat`` if defined, removes the participant
         from combat and notifies allies in the same room.
         """
+        if getattr(target, "pk", None) is None:
+            # already cleaned up elsewhere
+            self.remove_participant(target)
+            return
+
         if hasattr(target, "on_exit_combat"):
             target.on_exit_combat()
+
         if hasattr(target, "at_defeat"):
             target.at_defeat(attacker)
-        if hasattr(target, "on_death"):
+
+        if getattr(target, "pk", None) is not None and hasattr(target, "on_death"):
             target.on_death(attacker)
-        self.update_pos(target)
+
+        if getattr(target, "pk", None) is not None:
+            self.update_pos(target)
+
         if attacker and attacker.location:
             attacker.location.msg_contents(
                 f"{target.key} is defeated by {attacker.key}!"
             )
+
         self.remove_participant(target)
         for participant in list(self.participants):
             ally = participant.actor

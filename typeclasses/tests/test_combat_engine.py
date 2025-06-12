@@ -214,6 +214,28 @@ class TestCombatDeath(EvenniaTest):
         )
         self.assertEqual(corpse.db.corpse_of, npc.key)
 
+    def test_npc_death_creates_only_one_corpse(self):
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        player = self.char1
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+
+        engine = CombatEngine([player, npc], round_time=0)
+        engine.queue_action(player, KillAction(player, npc))
+
+        with patch("world.system.state_manager.apply_regen"):
+            engine.start_round()
+            engine.process_round()
+
+        corpses = [
+            obj
+            for obj in self.room1.contents
+            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+        ]
+        self.assertEqual(len(corpses), 1)
+
 
 class TestCombatNPCTurn(EvenniaTest):
     def test_at_combat_turn_auto_attack(self):
