@@ -283,6 +283,13 @@ def _buff_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
 def refresh_stats(obj) -> None:
     """Recalculate and cache all stats for ``obj``."""
 
+    traits = getattr(obj, "traits", None)
+    trait_get = getattr(traits, "get", None)
+    trait_add = getattr(traits, "add", None)
+
+    if not callable(trait_get) or not callable(trait_add):
+        return
+
     # ensure baseline traits exist
     stats.apply_stats(obj)
 
@@ -291,10 +298,10 @@ def refresh_stats(obj) -> None:
     if not hasattr(obj.db, "base_primary_stats") or not isinstance(
         obj.db.base_primary_stats, dict
     ):
-        obj.db.base_primary_stats = {
-            key: (obj.traits.get(key).base if obj.traits.get(key) else 0)
-            for key in PRIMARY_STATS
-        }
+        obj.db.base_primary_stats = {}
+        for key in PRIMARY_STATS:
+            trait = trait_get(key)
+            obj.db.base_primary_stats[key] = trait.base if trait else 0
 
     # dynamic bonuses from gear or buffs can change between refreshes
     gear_bonus = _gear_mods(obj)
@@ -318,10 +325,11 @@ def refresh_stats(obj) -> None:
         if key in cap_map:
             total = min(total, cap_map[key])
 
-        if obj.traits.get(key):
-            obj.traits.get(key).base = total
+        trait = trait_get(key)
+        if trait:
+            trait.base = total
         else:
-            obj.traits.add(key, key, base=total)
+            trait_add(key, key, base=total)
         primary_totals[key] = total
 
     derived: Dict[str, int] = {}
@@ -335,10 +343,11 @@ def refresh_stats(obj) -> None:
         derived[dkey] = result
 
     # perception scales off primary stats but keeps its base value
-    if obj.traits.get("perception"):
+    perception_trait = trait_get("perception")
+    if perception_trait:
         base_per = getattr(obj.db, "base_perception", None)
         if base_per is None:
-            base_per = obj.traits.get("perception").base
+            base_per = perception_trait.base
             obj.db.base_perception = base_per
     else:
         base_per = 0
@@ -359,15 +368,15 @@ def refresh_stats(obj) -> None:
     obj.db.primary_stats = primary_totals
 
     # update resource traits
-    if hp := obj.traits.get("health"):
+    if hp := trait_get("health"):
         hp.base = derived.get("HP", hp.base)
         if hp.current > hp.max:
             hp.current = hp.max
-    if mp := obj.traits.get("mana"):
+    if mp := trait_get("mana"):
         mp.base = derived.get("MP", mp.base)
         if mp.current > mp.max:
             mp.current = mp.max
-    if sp := obj.traits.get("stamina"):
+    if sp := trait_get("stamina"):
         sp.base = derived.get("SP", sp.base)
         if sp.current > sp.max:
             sp.current = sp.max
@@ -376,13 +385,13 @@ def refresh_stats(obj) -> None:
     for key, val in derived.items():
         if key in ("HP", "MP", "SP"):
             continue
-        trait = obj.traits.get(key)
+        trait = trait_get(key)
         if trait:
             trait.base = val
         else:
-            obj.traits.add(key, key, base=val)
+            trait_add(key, key, base=val)
 
-    if obj.traits.get("STR"):
+    if trait_get("STR"):
         obj.db.carry_capacity = get_effective_stat(obj, "STR") * 20
 
 
