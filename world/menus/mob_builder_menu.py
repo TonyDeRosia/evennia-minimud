@@ -295,7 +295,7 @@ def menunode_vnum(caller, raw_string="", **kwargs):
 def _set_vnum(caller, raw_string, **kwargs):
     string = str(raw_string).strip()
     if string.lower() == "back":
-        return "menunode_desc"
+        return "menunode_weight"
 
     data = caller.ndb.buildnpc or {}
     old = data.get("vnum")
