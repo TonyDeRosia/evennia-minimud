@@ -839,10 +839,15 @@ class CmdMobImport(Command):
 
 
 
-class CmdMEdit(Command):
-    """Edit fields on a numbered mob prototype or display its summary."""
+class CmdProtoEdit(Command):
+    """Edit fields on a numbered mob prototype or display its summary.
 
-    key = "@medit"
+    The ``@medit`` alias is kept for backward compatibility but is
+    deprecated in favor of ``@protoedit``.
+    """
+
+    key = "@protoedit"
+    aliases = ["@medit"]
     locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
@@ -884,7 +889,7 @@ class CmdMEdit(Command):
         from utils.mob_proto import get_prototype, register_prototype
 
         if self.vnum is None:
-            self.msg("Usage: @medit <vnum> [<field> <value>]")
+            self.msg("Usage: @protoedit <vnum> [<field> <value>]")
             return
 
         proto = get_prototype(self.vnum)
@@ -894,7 +899,7 @@ class CmdMEdit(Command):
 
         if not self.field:
             self.msg(npc_builder.format_mob_summary(proto))
-            self.msg(f"Edit with: @medit {self.vnum} <field> <value>")
+            self.msg(f"Edit with: @protoedit {self.vnum} <field> <value>")
             return
 
         cast = self._FIELD_CASTS.get(self.field, str)

@@ -288,6 +288,12 @@ Example::
 
     @quickmob goblin warrior
 
+### MEdit
+
+Use `medit <vnum>` to edit an existing numeric prototype. The command
+`medit create <vnum>` reserves the number, loads a basic template and
+opens the same builder menu for customization.
+
 ## Mob Prototype Manager
 
 `@mobproto` works with numeric VNUMs to store and spawn NPCs. Newly
