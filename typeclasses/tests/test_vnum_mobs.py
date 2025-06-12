@@ -278,3 +278,12 @@ class TestVnumMobs(EvenniaTest):
         npc = [o for o in self.char1.location.contents if o.key == "orc"][0]
         self.assertTrue(npc.tags.has("M2", category="vnum"))
         self.assertFalse(npc.tags.has("M1", category="vnum"))
+
+    def test_typeclass_object_converted_to_path(self):
+        vnum = register_prototype({"key": "ogre", "typeclass": BaseNPC}, vnum=64)
+        self.assertEqual(get_prototype(vnum)["typeclass"], "typeclasses.npcs.BaseNPC")
+
+    def test_invalid_typeclass_raises(self):
+        with self.assertRaises(ValueError):
+            register_prototype({"key": "bad", "typeclass": "typeclasses.objects.ObjectParent"}, vnum=65)
+

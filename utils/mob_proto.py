@@ -18,6 +18,23 @@ def register_prototype(data: dict, vnum: int | None = None, *, area: str | None 
     If ``area`` is given, ``vnum`` must fall within that area's range.
     """
     mob_db = get_mobdb()
+    if "typeclass" in data:
+        from typeclasses.characters import NPC
+        tc = data["typeclass"]
+        if isinstance(tc, type):
+            if not issubclass(tc, NPC):
+                raise ValueError(f"Typeclass {tc} does not inherit from NPC")
+            data["typeclass"] = f"{tc.__module__}.{tc.__name__}"
+        elif isinstance(tc, str):
+            module, clsname = tc.rsplit(".", 1)
+            try:
+                cls = getattr(__import__(module, fromlist=[clsname]), clsname)
+            except Exception as err:
+                raise ValueError(f"Could not import typeclass '{tc}'") from err
+            if not issubclass(cls, NPC):
+                raise ValueError(f"Typeclass {tc} does not inherit from NPC")
+        else:
+            raise ValueError("typeclass must be a dotted path string or class object")
     if vnum is None:
         vnum = get_next_vnum("npc")
         if area:
