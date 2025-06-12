@@ -172,7 +172,8 @@ class CombatScript(Script):
                 state_manager.check_level_up(obj)
         self.check_victory()
         # remove their combat target if they have one
-        del combatant.db.combat_target
+        if hasattr(combatant.db, "combat_target"):
+            del combatant.db.combat_target
         return True
 
     def check_victory(self):
@@ -212,7 +213,8 @@ class CombatScript(Script):
         # only one team is active at this point; message the winners
         for obj in active_fighters:
             # remove their combat target if they have one
-            del obj.db.combat_target
+            if hasattr(obj.db, "combat_target"):
+                del obj.db.combat_target
             obj.msg("The fight is over.")
 
         # say farewell to the combat script!
