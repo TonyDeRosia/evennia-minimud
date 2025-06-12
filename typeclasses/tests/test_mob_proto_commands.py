@@ -119,3 +119,8 @@ class TestMobPrototypeCommands(EvenniaTest):
         out = self.char1.msg.call_args[0][0]
         assert "missing required field" in out.lower()
 
+    def test_invalid_typeclass(self):
+        with self.assertRaises(ValueError):
+            register_prototype({"key": "bad", "typeclass": "typeclasses.objects.ObjectParent"}, vnum=51)
+
+
