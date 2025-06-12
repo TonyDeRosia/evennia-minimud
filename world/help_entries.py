@@ -3057,9 +3057,9 @@ Notes:
         "category": "Building",
         "text": """Help for @quickmob
 
-Create and register a simple mob using a predefined template. The mob is
-assigned the next free VNUM so it can be respawned later with
-``@mspawn M<number>``.
+Load a predefined mob template and open the NPC builder with those values
+pre-filled. A VNUM is reserved automatically so after saving the prototype
+you can respawn the mob with ``@mspawn M<number>``.
 
 Usage:
     @quickmob <key> [template]
