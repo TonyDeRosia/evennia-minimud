@@ -499,7 +499,7 @@ class CmdMList(Command):
                 finalized = True
             elif key in finalized_lookup or proto.get("key") in finalized_lookup:
                 finalized = True
-            status = "✅" if finalized else "🚫"
+            status = "yes" if finalized else "no"
             primary = roles[0] if roles else "-"
             table.add_row(
                 str(vnum) if vnum is not None else "-",
