@@ -43,7 +43,7 @@ class TestMEditCommand(EvenniaTest):
             mock_menu.assert_called_with(
                 self.char1,
                 "commands.npc_builder",
-                startnode="menunode_key",
+                startnode="menunode_desc",
                 cmd_on_exit=npc_builder._on_menu_exit,
             )
         data = self.char1.ndb.buildnpc
@@ -58,7 +58,7 @@ class TestMEditCommand(EvenniaTest):
             mock_menu.assert_called_with(
                 self.char1,
                 "commands.npc_builder",
-                startnode="menunode_key",
+                startnode="menunode_desc",
                 cmd_on_exit=npc_builder._on_menu_exit,
             )
         data = self.char1.ndb.buildnpc

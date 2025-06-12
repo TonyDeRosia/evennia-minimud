@@ -2202,10 +2202,13 @@ class CmdCNPC(Command):
                 self.caller.db.builder_autosave = None
                 self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
                 state = OLCState(data=self.caller.ndb.buildnpc)
+                startnode = (
+                    "menunode_desc" if self.caller.ndb.buildnpc.get("key") else "menunode_key"
+                )
                 OLCEditor(
                     self.caller,
                     "commands.npc_builder",
-                    startnode="menunode_key",
+                    startnode=startnode,
                     state=state,
                     validator=NPCValidator(),
                 ).start()
@@ -2248,10 +2251,13 @@ class CmdCNPC(Command):
                 self.caller.ndb.buildnpc["use_mob"] = True
             self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
             state = OLCState(data=self.caller.ndb.buildnpc)
+            startnode = (
+                "menunode_desc" if self.caller.ndb.buildnpc.get("key") else "menunode_key"
+            )
             OLCEditor(
                 self.caller,
                 "commands.npc_builder",
-                startnode="menunode_key",
+                startnode=startnode,
                 state=state,
                 validator=NPCValidator(),
             ).start()
@@ -2270,10 +2276,13 @@ class CmdCNPC(Command):
                 self.caller.ndb.buildnpc["use_mob"] = True
             self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
             state = OLCState(data=self.caller.ndb.buildnpc)
+            startnode = (
+                "menunode_desc" if self.caller.ndb.buildnpc.get("key") else "menunode_key"
+            )
             OLCEditor(
                 self.caller,
                 "commands.npc_builder",
-                startnode="menunode_key",
+                startnode=startnode,
                 state=state,
                 validator=NPCValidator(),
             ).start()
