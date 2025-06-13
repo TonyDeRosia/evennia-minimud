@@ -29,5 +29,11 @@ def start_plugin_services(portal):
 
     factory = protocol.ServerFactory()
     factory.protocol = Echo
-    portal.services.addService(internet.TCPServer(9000, factory))
+
+    # Attach the Echo service to the Twisted application container. The
+    # `application` attribute was introduced in newer Evennia versions but
+    # older installs may not define it yet, so fall back to the Portal's
+    # parent service when needed.
+    application = getattr(portal, "application", None) or portal.parent
+    application.addService(internet.TCPServer(9000, factory))
 
