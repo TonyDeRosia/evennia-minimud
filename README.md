@@ -393,6 +393,10 @@ If a character's `sated` value reaches zero they gain the `hungry_thirsty`
 status effect. Each tick removes 5% of their maximum health, mana and stamina
 while this status is active, rather than a single point from each resource.
 
+### Looting Corpses
+
+Defeated enemies leave a corpse containing any gear they carried. Use `loot` or `get all corpse` to quickly grab everything before the body decays.
+
 ### AI Settings
 
 NPC behavior is configured by an AI type during `cnpc` or `mobbuilder`.
