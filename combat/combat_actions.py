@@ -112,8 +112,6 @@ class AttackAction(Action):
 
     def validate(self) -> tuple[bool, str]:
         """Check if the actor can attack this round."""
-        if hasattr(self.actor, "cooldowns") and not self.actor.cooldowns.ready("attack"):
-            return False, "Still recovering."
         return super().validate()
 
     def resolve(self) -> CombatResult:

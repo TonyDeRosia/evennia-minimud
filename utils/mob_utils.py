@@ -103,7 +103,7 @@ def make_corpse(npc):
     if existing:
         return existing[0]
 
-    attrs = [("corpse_of", npc.key), ("corpse_of_id", npc.dbref)]
+    attrs = [("corpse_of", npc.key), ("corpse_of_id", npc.dbref), ("is_corpse", True)]
     if decay := getattr(npc.db, "corpse_decay_time", None):
         attrs.append(("decay_time", decay))
     corpse = create_object(

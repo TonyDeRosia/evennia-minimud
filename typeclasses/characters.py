@@ -918,7 +918,7 @@ class PlayerCharacter(Character):
             "typeclasses.objects.Corpse",
             key=f"{self.key} corpse",
             location=self.location,
-            attributes=[("corpse_of", self.key)],
+            attributes=[("corpse_of", self.key), ("is_corpse", True)],
         )
         from world import prototypes
 
@@ -1267,10 +1267,6 @@ class NPC(Character):
         # make sure wielder has enough strength left
         if self.traits.stamina.value < weapon.get("stamina_cost", 5):
             return False
-        # can't attack if on cooldown
-        if not wielder.cooldowns.ready("attack"):
-            return False
-
         return True
 
     def at_attack(self, wielder, target, **kwargs):
@@ -1301,7 +1297,6 @@ class NPC(Character):
                     f"$conj(swings) $pron(your) {weapon.get('name')} at $you(target), but they evade.",
                     mapping={"target": target},
                 )
-                wielder.cooldowns.add("attack", speed)
                 return
             verb = weapon.get("damage_type", "hits")
             crit = stat_manager.roll_crit(wielder, target)
@@ -1312,7 +1307,7 @@ class NPC(Character):
                 mapping={"target": target},
             )
             target.at_damage(wielder, damage, weapon.get("damage_type"), critical=crit)
-        wielder.cooldowns.add("attack", speed)
+        return
 
     def at_tick(self):
         super().at_tick()
