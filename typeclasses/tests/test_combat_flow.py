@@ -96,6 +96,55 @@ class TestAttackAction(unittest.TestCase):
 
         self.assertEqual(defender.hp, 4)
 
+    def test_attack_uses_damage_dice_when_damage_missing(self):
+        attacker = Dummy()
+        defender = Dummy()
+        weapon = MagicMock()
+        weapon.damage = None
+        weapon.damage_type = DamageType.SLASHING
+        weapon.db = type("db", (), {"damage_dice": "1d4", "dmg": 0})()
+        weapon.at_attack = MagicMock()
+        attacker.wielding = [weapon]
+        attacker.location = defender.location
+
+        engine = CombatEngine([attacker, defender], round_time=0)
+        engine.queue_action(attacker, AttackAction(attacker, defender))
+        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
+             patch("world.system.state_manager.apply_regen"), \
+             patch("world.system.state_manager.get_effective_stat", return_value=0), \
+             patch("random.randint", return_value=0), \
+             patch("combat.combat_utils.roll_damage", return_value=3) as mock_roll:
+            engine.start_round()
+            engine.process_round()
+
+        self.assertEqual(defender.hp, 3)
+        mock_roll.assert_called_with((1, 4))
+
+    def test_attack_uses_db_damage_mapping(self):
+        attacker = Dummy()
+        defender = Dummy()
+        weapon = MagicMock()
+        weapon.damage = None
+        weapon.damage_type = None
+        weapon.db = type("db", (), {"damage": {"slash": "1d4", "fire": "1d6"}})()
+        weapon.at_attack = MagicMock()
+        attacker.wielding = [weapon]
+        attacker.location = defender.location
+
+        engine = CombatEngine([attacker, defender], round_time=0)
+        engine.queue_action(attacker, AttackAction(attacker, defender))
+        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
+             patch("world.system.state_manager.apply_regen"), \
+             patch("world.system.state_manager.get_effective_stat", return_value=0), \
+             patch("random.randint", return_value=0), \
+             patch("combat.combat_actions.roll_dice_string", side_effect=[2, 3]) as mock_roll:
+            engine.start_round()
+            engine.process_round()
+
+        self.assertEqual(defender.hp, 5)
+        mock_roll.assert_any_call("1d4")
+        mock_roll.assert_any_call("1d6")
+
 def test_npc_attack_uses_natural_weapon(self):
     attacker = Dummy()
     defender = Dummy()
