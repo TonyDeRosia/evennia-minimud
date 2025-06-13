@@ -365,6 +365,10 @@ class Character(ObjectParent, ClothedCharacter):
             reduction = max(0, reduction - state_manager.get_effective_stat(attacker, "piercing"))
         damage -= reduction
         damage = max(0, damage)
+        if attacker:
+            log = getattr(self.ndb, "damage_log", {})
+            log[attacker] = log.get(attacker, 0) + int(damage)
+            self.ndb.damage_log = log
 
         dt = None
         if damage_type:
@@ -1104,7 +1108,30 @@ class NPC(Character):
             corpse.location = self.location
 
         self.at_death(attacker)
-        self.award_xp_to(attacker)
+        engine = getattr(getattr(self, "ndb", None), "combat_engine", None)
+        if engine:
+            engine.award_experience(attacker, self)
+        else:
+            from world.system import state_manager
+            exp = int(getattr(self.db, "exp_reward", 0) or 0)
+            if exp:
+                log = getattr(getattr(self, "ndb", None), "damage_log", {})
+                contributors = list(log.keys()) or ([attacker] if attacker else [])
+                contributors = [c for c in contributors if c]
+                if contributors:
+                    if len(contributors) == 1:
+                        c = contributors[0]
+                        c.db.exp = (c.db.exp or 0) + exp
+                        if hasattr(c, "msg"):
+                            c.msg(f"You gain {exp} experience.")
+                        state_manager.check_level_up(c)
+                    else:
+                        share = max(1, int(exp / len(contributors)))
+                        for c in contributors:
+                            c.db.exp = (c.db.exp or 0) + share
+                            if hasattr(c, "msg"):
+                                c.msg(f"You gain {share} experience.")
+                            state_manager.check_level_up(c)
         if self.location:
             if attacker:
                 self.location.msg_contents(

@@ -547,7 +547,6 @@ class CombatEngine:
             target_hp = _current_hp(result.target)
             if target_hp <= 0:
                 self.handle_defeat(result.target, actor)
-                self.award_experience(actor, result.target)
             self.track_aggro(result.target, actor)
         self.cleanup_environment()
 

@@ -338,6 +338,21 @@ class TestCombatDeath(EvenniaTest):
         )
         self.assertEqual(corpse.db.corpse_of, npc.key)
 
+    def test_out_of_combat_kill_awards_xp(self):
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        player = self.char1
+        player.db.exp = 0
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+        npc.db.exp_reward = 7
+
+        with patch('world.system.state_manager.check_level_up'):
+            npc.at_damage(player, npc.traits.health.current + 1)
+
+        self.assertEqual(player.db.exp, 7)
+
 
 class TestCombatNPCTurn(EvenniaTest):
     def test_at_combat_turn_auto_attack(self):
