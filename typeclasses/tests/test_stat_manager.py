@@ -64,6 +64,25 @@ class TestStatManager(EvenniaTest):
         for key in stats.CORE_STAT_KEYS:
             self.assertIn(key, char.db.base_primary_stats)
 
+    def test_initial_refresh_with_equipped_item(self):
+        """Bonuses shouldn't invert stats when cached for the first time."""
+        char = self.char1
+        char.db.base_primary_stats = None
+
+        item = create.create_object(
+            "typeclasses.objects.ClothingObject",
+            key="ring",
+            location=char,
+        )
+        item.tags.add("equipment", category="flag")
+        item.tags.add("identified", category="flag")
+        item.db.stat_mods = {"STR": 15}
+        item.wear(char, True)
+
+        # after equipping, STR base should remain positive
+        self.assertEqual(char.db.base_primary_stats.get("STR"), 5)
+        self.assertEqual(char.traits.STR.base, 20)
+
     def test_stat_overrides(self):
         char = self.char1
         char.db.stat_overrides = {"attack_power": 123}

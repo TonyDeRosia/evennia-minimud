@@ -372,10 +372,14 @@ def refresh_stats(obj) -> None:
         for key in PRIMARY_STATS:
             trait = trait_get(key)
             base = trait.base if trait else 0
-            # subtract current bonuses to recover the actual baseline
-            base -= gear_bonus.get(key, 0)
-            base -= buff_bonus.get(key, 0)
-            obj.db.base_primary_stats[key] = base
+            # subtract any active bonuses if possible; fall back to the
+            # current trait value when this would drop below zero. This
+            # prevents already-equipped gear from inverting the base value
+            # when stats are cached for the first time.
+            candidate = base - gear_bonus.get(key, 0) - buff_bonus.get(key, 0)
+            if candidate < 0:
+                candidate = base
+            obj.db.base_primary_stats[key] = candidate
 
     primary_totals: Dict[str, int] = {}
     for key in PRIMARY_STATS:
