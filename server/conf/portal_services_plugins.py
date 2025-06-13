@@ -16,6 +16,7 @@ process.
 
 
 from twisted.internet import protocol
+from twisted.application import internet
 
 
 class Echo(protocol.Protocol):
@@ -28,5 +29,5 @@ def start_plugin_services(portal):
 
     factory = protocol.ServerFactory()
     factory.protocol = Echo
-    portal.application.listenTCP(9000, factory)
+    portal.services.addService(internet.TCPServer(9000, factory))
 
