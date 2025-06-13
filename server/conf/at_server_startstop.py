@@ -18,17 +18,37 @@ at_server_cold_stop()
 """
 
 
+import time
+
+from evennia.utils import logger
+from evennia.server.models import ServerConfig
+from utils.prototype_manager import load_all_prototypes
+
+
+_PROTOTYPE_CACHE = {}
+
+
+def _build_caches():
+    """Load prototypes into memory for quick access."""
+
+    _PROTOTYPE_CACHE["room"] = load_all_prototypes("room")
+    _PROTOTYPE_CACHE["npc"] = load_all_prototypes("npc")
+    _PROTOTYPE_CACHE["object"] = load_all_prototypes("object")
+    logger.log_info("Prototype cache built")
+
+
+def _clear_caches():
+    """Clear the in-memory caches."""
+
+    _PROTOTYPE_CACHE.clear()
+    logger.log_info("Prototype cache cleared")
+
+
 def at_server_init():
     """Called as the service layer initializes."""
 
-    from evennia.utils.logger import log_info
-
-    # Example custom behavior: populate in-memory caches or pre-load data.
-    log_info("at_server_init: building caches")
-
-    # add initialization code here
-
-    pass
+    logger.log_info("at_server_init: building caches")
+    _build_caches()
 
 
 def at_server_start():
@@ -62,45 +82,34 @@ def at_server_start():
         if not char.tags.has("tickable"):
             char.tags.add("tickable")
 
+    _build_caches()
+    ServerConfig.objects.conf("server_start_time", time.time())
+
 
 def at_server_stop():
     """
     This is called just before the server is shut down, regardless
     of it is for a reload, reset or shutdown.
     """
-    from evennia.utils.logger import log_info
-
-    log_info("at_server_stop: cleaning up")
-
-    # add shutdown logic here
-
-    pass
+    logger.log_info("at_server_stop: cleaning up")
+    _clear_caches()
+    ServerConfig.objects.conf("server_start_time", delete=True)
 
 
 def at_server_reload_start():
     """
     This is called only when server starts back up after a reload.
     """
-    from evennia.utils.logger import log_info
-
-    log_info("at_server_reload_start: preparing reload")
-
-    # add reload-start logic here
-
-    pass
+    logger.log_info("at_server_reload_start: preparing reload")
+    ServerConfig.objects.conf("reload_started", time.time())
 
 
 def at_server_reload_stop():
     """
     This is called only time the server stops before a reload.
     """
-    from evennia.utils.logger import log_info
-
-    log_info("at_server_reload_stop: reload complete")
-
-    # add reload-stop logic here
-
-    pass
+    logger.log_info("at_server_reload_stop: reload complete")
+    ServerConfig.objects.conf("reload_started", delete=True)
 
 
 def at_server_cold_start():
@@ -108,13 +117,8 @@ def at_server_cold_start():
     This is called only when the server starts "cold", i.e. after a
     shutdown or a reset.
     """
-    from evennia.utils.logger import log_info
-
-    log_info("at_server_cold_start: cold boot")
-
-    # add cold-start logic here
-
-    pass
+    logger.log_info("at_server_cold_start: cold boot")
+    _build_caches()
 
 
 def at_server_cold_stop():
@@ -122,10 +126,6 @@ def at_server_cold_stop():
     This is called only when the server goes down due to a shutdown or
     reset.
     """
-    from evennia.utils.logger import log_info
+    logger.log_info("at_server_cold_stop: shutting down")
+    _clear_caches()
 
-    log_info("at_server_cold_stop: shutting down")
-
-    # add cold-stop logic here
-
-    pass

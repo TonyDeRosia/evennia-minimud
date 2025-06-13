@@ -15,25 +15,31 @@ services are started last in the Server startup process.
 """
 
 
+from twisted.application import service, internet
+from twisted.internet import task
+from evennia.utils import logger
+
+
+class HeartbeatService(service.Service):
+    """Simple service that logs a heartbeat periodically."""
+
+    def startService(self):
+        super().startService()
+        self._task = task.LoopingCall(self._beat)
+        self._task.start(30)
+
+    def stopService(self):
+        if self._task.running:
+            self._task.stop()
+        super().stopService()
+
+    def _beat(self):
+        logger.log_info("Heartbeat from plugin service")
+
+
 def start_plugin_services(server):
     """Hook for attaching additional Twisted services to the Server."""
 
-    # The core game requires no extra services.  If you wish to run your
-    # own Twisted ``IService`` alongside the Evennia Server, create and
-    # start it here.
+    heartbeat = HeartbeatService()
+    server.services.addService(heartbeat)
 
-    # Example (broadcast time every minute):
-    #
-    #   from twisted.internet import task
-    #   from evennia.utils import logger
-    #
-    #   def announce():
-    #       logger.log_info("Tick ", time.time())
-    #
-    #   t = task.LoopingCall(announce)
-    #   t.start(60)
-    #   server.services.addService(t)
-    #
-    # Remove or replace with your own service implementations.
-
-    pass
