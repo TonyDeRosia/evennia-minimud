@@ -305,10 +305,10 @@ class TestCombatDeath(EvenniaTest):
         npc = create.create_object(NPC, key="mob", location=self.room1)
         npc.db.drops = []
 
-        # create combat script then immediately delete it to mimic victory cleanup
+        # create combat script then immediately stop it to mimic victory cleanup
         self.room1.scripts.add(CombatScript, key="combat")
         combat_script = self.room1.scripts.get("combat")[0]
-        combat_script.delete()
+        combat_script.stop()
 
         # should not raise when combat script has been removed
         npc.on_death(player)
