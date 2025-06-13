@@ -8,6 +8,7 @@ from django.test import override_settings
 from evennia.utils import create
 
 
+@override_settings(DEFAULT_HOME=None)
 class TestCharacterHooks(EvenniaTest):
     def setUp(self):
         super().setUp()
@@ -33,6 +34,12 @@ class TestCharacterHooks(EvenniaTest):
         self.char2.msg.assert_any_call("You take 90 damage from |gChar|n.")
         calls = [c.args[0] for c in self.char2.msg.call_args_list if c.args]
         self.assertTrue(any("You fall unconscious" in c for c in calls))
+
+    def test_at_damage_handles_none_log(self):
+        """Ensure damage_log defaults to an empty dict when set to None."""
+        self.char2.ndb.damage_log = None
+        self.char2.at_damage(self.char1, 5)
+        self.assertEqual(self.char2.ndb.damage_log.get(self.char1), 5)
 
     def test_at_wield_unwield(self):
         self.char1.attributes.add("_wielded", {"left": None, "right": None})

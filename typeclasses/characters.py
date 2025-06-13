@@ -366,7 +366,7 @@ class Character(ObjectParent, ClothedCharacter):
         damage -= reduction
         damage = max(0, damage)
         if attacker:
-            log = getattr(self.ndb, "damage_log", {})
+            log = getattr(self.ndb, "damage_log", None) or {}
             log[attacker] = log.get(attacker, 0) + int(damage)
             self.ndb.damage_log = log
 
