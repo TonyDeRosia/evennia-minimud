@@ -159,3 +159,23 @@ class TestAIBehaviors(EvenniaTest):
             ai.process_ai(caller)
             mock.assert_called_with(self.char1)
         self.assertTrue(self.room1.msg_contents.called)
+
+    def test_finalize_adds_ai_script_and_auto_attacks(self):
+        from commands import npc_builder
+        from typeclasses.npcs import BaseNPC
+
+        npc = create.create_object(BaseNPC, key="attacker", location=self.room1)
+        npc.db.level = 1
+        npc.db.combat_class = "Warrior"
+        npc.db.ai_type = "aggressive"
+
+        npc_builder.finalize_mob_prototype(self.char1, npc)
+
+        script = npc.scripts.get("npc_ai")[0]
+        self.assertTrue(script)
+
+        self.char1.location = self.room1
+
+        with patch.object(npc, "enter_combat") as mock:
+            script.at_repeat()
+            mock.assert_called_with(self.char1)
