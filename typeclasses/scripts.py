@@ -71,6 +71,15 @@ class CombatScript(Script):
             self.save()
         self.db.teams = [[], []]
 
+    def stop(self):
+        """Safely stop and delete this combat script."""
+        if not self.id:
+            return
+        from combat.round_manager import CombatRoundManager
+        CombatRoundManager.get().remove_instance(self)
+        self.stop_script()
+        self.delete()
+
     def get_team(self, combatant):
         """
         Gets the index of the team containing combatant, or None if combatant is not in this combat
@@ -147,7 +156,7 @@ class CombatScript(Script):
 
         # remove combatant from their team
         if not self.id:
-            self.save()
+            return False
 
         teams = self.db.teams or [[], []]
         if hasattr(teams, "deserialize"):
@@ -187,11 +196,12 @@ class CombatScript(Script):
         """
         Check the combat instance to see if either side has lost
 
-        If one side is victorious, message the remaining members and delete ourself.
+        If one side is victorious, message the remaining members and clean up the
+        combat script.
         """
         if not (active_fighters := self.active):
             # everyone lost or is gone
-            self.delete()
+            self.stop()
             return
 
         # ensure we have two valid team lists before iterating
@@ -214,7 +224,7 @@ class CombatScript(Script):
         # this case shouldn't arise, but as a redundancy, checks if both teams are inactive
         if not team_a and not team_b:
             # everyone lost or is gone
-            self.delete()
+            self.stop()
             return
 
         # only one team is active at this point; message the winners
@@ -227,7 +237,7 @@ class CombatScript(Script):
             obj.msg("The fight is over.")
 
         # say farewell to the combat script!
-        self.delete()
+        self.stop()
 
 
 def get_or_create_combat_script(location):

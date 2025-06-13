@@ -447,7 +447,7 @@ class CmdPeace(Command):
         combat_script = combat_script[0]
         for fighter in list(combat_script.fighters):
             combat_script.remove_combatant(fighter)
-        combat_script.delete()
+        combat_script.stop()
         location.msg_contents("Peace falls over the area.")
 
 
