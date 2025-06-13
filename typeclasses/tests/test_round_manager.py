@@ -53,3 +53,11 @@ class TestCombatRoundManager(EvenniaTest):
                 self.manager.tick()
             except Exception as err:  # pragma: no cover - fail fast if exception
                 self.fail(f"tick raised {err!r}")
+
+    def test_tick_cleans_up_deleted_script(self):
+        """Tick should remove instances whose scripts were deleted."""
+        with patch("combat.round_manager.delay"):
+            inst = self.manager.add_instance(self.script)
+            self.script.delete()
+            self.manager.tick()
+            self.assertNotIn(inst, self.manager.instances)
