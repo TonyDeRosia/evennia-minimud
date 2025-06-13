@@ -43,7 +43,7 @@ from .mob_builder_commands import (
     CmdRepairStat,
     CmdMobValidate,
 )
-from .mob_builder import (
+from .npc_builder import (
     CmdMSpawn,
     CmdMobPreview,
     CmdMStat,

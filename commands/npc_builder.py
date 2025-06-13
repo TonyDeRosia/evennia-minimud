@@ -1,4 +1,4 @@
-from evennia.utils import make_iter, dedent
+from evennia.utils import make_iter, dedent, delay
 from olc.base import OLCEditor, OLCState, OLCValidator
 from evennia import create_object
 from evennia.objects.models import ObjectDB
@@ -40,6 +40,7 @@ from world.npc_roles import (
 )
 from world.scripts import classes
 from scripts import BuilderAutosave
+from copy import deepcopy
 from utils import vnum_registry
 from utils.mob_utils import generate_base_stats, mobprogs_to_triggers
 from world.triggers import TriggerManager
@@ -1145,3 +1146,191 @@ class CmdDupNPC(Command):
         prototypes.register_npc_prototype(new_key, new_proto)
         area_npcs.add_area_npc(area, new_key)
         self.msg(f"Prototype {key} duplicated to {new_key} in area {area}.")
+
+
+class CmdMSpawn(Command):
+    """Spawn a mob prototype."""
+
+    key = "@mspawn"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        arg = self.args.strip()
+        if not arg:
+            self.msg("Usage: @mspawn <prototype>")
+            return
+
+        vnum = None
+        if arg.isdigit():
+            vnum = int(arg)
+        elif arg.upper().startswith("M") and arg[1:].isdigit():
+            vnum = int(arg[1:])
+
+        if vnum is not None:
+            proto = get_prototype(vnum)
+            if not proto:
+                if vnum_registry.validate_vnum(vnum, "npc"):
+                    self.msg(
+                        f"Prototype {vnum} not finalized. Use editnpc {vnum} and finalize with 'Yes & Save'."
+                    )
+                else:
+                    self.msg("Invalid VNUM.")
+                return
+            try:
+                obj = spawn_from_vnum(vnum, location=self.caller.location)
+            except ValueError as err:
+                self.msg(str(err))
+                return
+        else:
+            mob_db = get_mobdb()
+            vmatch = next((num for num, p in mob_db.db.vnums.items() if p.get("key") == arg), None)
+            if vmatch is not None:
+                try:
+                    obj = spawn_from_vnum(vmatch, location=self.caller.location)
+                except ValueError as err:
+                    self.msg(str(err))
+                    return
+            else:
+                from world import prototypes
+
+                registry = prototypes.get_npc_prototypes()
+                proto = registry.get(arg) or registry.get(f"mob_{arg}")
+                if not proto:
+                    self.msg("Prototype not found.")
+                    return
+                tclass = NPC_TYPE_MAP.get(
+                    NPCType.from_str(proto.get("npc_type", "base")),
+                    BaseNPC,
+                )
+                proto = dict(proto)
+                proto.setdefault("typeclass", f"{tclass.__module__}.{tclass.__name__}")
+                obj = spawner.spawn(proto)[0]
+                obj.move_to(self.caller.location, quiet=True)
+                if proto.get("vnum"):
+                    obj.db.vnum = proto["vnum"]
+                    obj.tags.add(f"M{proto['vnum']}", category="vnum")
+                apply_proto_items(obj, proto)
+
+        self.msg(f"Spawned {obj.key}.")
+
+
+class CmdMobPreview(Command):
+    """Spawn a mob prototype briefly for preview."""
+
+    key = "@mobpreview"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        key = self.args.strip()
+        if not key:
+            self.msg("Usage: @mobpreview <prototype>")
+            return
+        if key.isdigit():
+            try:
+                obj = spawn_from_vnum(int(key), location=self.caller.location)
+            except ValueError as err:
+                self.msg(str(err))
+                return
+        else:
+            from world import prototypes
+
+            registry = prototypes.get_npc_prototypes()
+            proto = registry.get(key) or registry.get(f"mob_{key}")
+            if not proto:
+                self.msg("Prototype not found.")
+                return
+            tclass = NPC_TYPE_MAP.get(
+                NPCType.from_str(proto.get("npc_type", "base")),
+                BaseNPC,
+            )
+            proto = dict(proto)
+            proto.setdefault("typeclass", f"{tclass.__module__}.{tclass.__name__}")
+            obj = spawner.spawn(proto)[0]
+            obj.move_to(self.caller.location, quiet=True)
+            apply_proto_items(obj, proto)
+        delay(30, obj.delete)
+        self.msg(f"Previewing {obj.key}. It will vanish soon.")
+
+
+from .mob_builder_commands import CmdMStat as CmdMStat, CmdMList as CmdMList
+
+
+class CmdMobTemplate(Command):
+    """Load a predefined mob template into the current build."""
+
+    key = "@mobtemplate"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        from world.templates.mob_templates import MOB_TEMPLATES, get_template
+
+        arg = self.args.strip().lower()
+        if not arg or arg == "list":
+            names = ", ".join(sorted(MOB_TEMPLATES))
+            self.msg(f"Available templates: {names}")
+            return
+        data = get_template(arg)
+        if not data:
+            self.msg("Unknown template.")
+            return
+        self.caller.ndb.buildnpc = self.caller.ndb.buildnpc or {}
+        for key, val in data.items():
+            self.caller.ndb.buildnpc[key] = deepcopy(val)
+        if not hasattr(self.caller.ndb, "buildnpc_orig"):
+            self.caller.ndb.buildnpc_orig = dict(self.caller.ndb.buildnpc)
+        self.msg(f"Template '{arg}' loaded into builder.")
+
+
+class CmdQuickMob(Command):
+    """Spawn and register a mob from a template in one step."""
+
+    key = "@quickmob"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        from world.templates.mob_templates import get_template
+
+        args = self.args.strip()
+        if not args:
+            self.msg("Usage: @quickmob <key> [template]")
+            return
+
+        parts = args.split(None, 1)
+        key = parts[0]
+        template = parts[1] if len(parts) > 1 else "warrior"
+
+        data = get_template(template)
+        if not data:
+            self.msg("Unknown template.")
+            return
+
+        area = self.caller.location.db.area if self.caller.location else None
+        if area:
+            try:
+                vnum = vnum_registry.get_next_vnum_for_area(
+                    area,
+                    "npc",
+                    builder=self.caller.key,
+                )
+            except Exception:
+                vnum = vnum_registry.get_next_vnum("npc")
+        else:
+            vnum = vnum_registry.get_next_vnum("npc")
+
+        data = dict(data)
+        data.update({"key": key, "vnum": vnum, "use_mob": True})
+        self.caller.ndb.buildnpc = data
+        self.caller.ndb.buildnpc_orig = dict(self.caller.ndb.buildnpc)
+        self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
+        state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
+        OLCEditor(
+            self.caller,
+            "commands.npc_builder",
+            startnode="menunode_review",
+            state=state,
+            validator=NPCValidator(),
+        ).start()
