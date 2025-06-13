@@ -134,7 +134,10 @@ class AttackAction(Action):
 
         logger.debug("AttackAction weapon=%s", getattr(weapon, "key", weapon))
 
-        wname = getattr(weapon, "key", None)
+        if weapon is self.actor:
+            wname = "fists"
+        else:
+            wname = getattr(weapon, "key", None)
         if not wname and isinstance(weapon, dict):
             wname = weapon.get("name", "fists")
         attempt = f"{self.actor.key} swings {wname or 'fists'} at {target.key}."
