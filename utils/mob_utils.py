@@ -108,7 +108,7 @@ def make_corpse(npc):
         attrs.append(("decay_time", decay))
     corpse = create_object(
         "typeclasses.objects.Corpse",
-        key=f"{npc.key} corpse",
+        key=f"corpse of {npc.key}",
         location=npc.location,
         attributes=attrs,
     )
