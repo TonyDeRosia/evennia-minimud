@@ -244,6 +244,9 @@ class CombatEngine:
         if not exp:
             return
         contributors = list(self.aggro.get(victim, {}).keys()) or [attacker]
+        # limit contributors to those still participating in combat
+        active = {p.actor for p in self.participants}
+        contributors = [c for c in contributors if c in active]
         if len(contributors) == 1:
             self.solo_gain(contributors[0], exp)
         else:
@@ -544,10 +547,12 @@ class CombatEngine:
 
             if actor.location and result.message:
                 actor.location.msg_contents(result.message)
+            # track threat from this action before checking defeat so the
+            # killer is properly credited for experience
+            self.track_aggro(result.target, actor)
             target_hp = _current_hp(result.target)
             if target_hp <= 0:
                 self.handle_defeat(result.target, actor)
-            self.track_aggro(result.target, actor)
         self.cleanup_environment()
 
         summary_lines = [
