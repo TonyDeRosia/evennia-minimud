@@ -350,7 +350,7 @@ cweapon "epee" offhand 2d6 3 STR+1, Attack Power+2 A balanced offhand blade.
 inspect epee-2
 ```
 
-Modifiers use the form `Stat+Value` separated by commas. Quote names that
+Modifiers use the form `Stat+Value` or `Stat-Value` separated by commas. Quote names that
 contain spaces or ANSI colour codes, as shown above.
 
 Add `/unidentified` before the name to create the weapon unidentified.

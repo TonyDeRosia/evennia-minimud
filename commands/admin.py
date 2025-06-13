@@ -94,7 +94,7 @@ def parse_stat_mods(text):
         return bonuses, desc
 
     pieces = [p.strip() for p in text.split(",")]
-    pattern = re.compile(r"([A-Za-z][A-Za-z _]*?)\+(-?\d+)")
+    pattern = re.compile(r"([A-Za-z][A-Za-z _]*?)([+-]\d+)")
     desc_parts = []
 
     for i, piece in enumerate(pieces):
@@ -114,7 +114,7 @@ def parse_stat_mods(text):
                 desc_parts.extend(p.strip() for p in pieces[i + 1 :])
                 break
         else:
-            if "+" in piece:
+            if "+" in piece or "-" in piece:
                 raise ValueError(piece)
             desc_parts.append(piece)
             desc_parts.extend(p.strip() for p in pieces[i + 1 :])
@@ -726,39 +726,13 @@ class CmdCWeapon(Command):
                 self.msg("Damage must be a number or NdN dice string.")
                 return
 
-        if rest:
-            pieces = [p.strip() for p in rest.split(",")]
-            pattern = re.compile(r"([A-Za-z][A-Za-z _]*?)\+(-?\d+)")
-            desc_parts = []
-            for piece in pieces:
-                if not piece:
-                    continue
-                match = pattern.match(piece)
-                if match:
-                    stat_name = match.group(1).strip()
-                    amount = int(match.group(2))
-                    key = normalize_stat_key(stat_name)
-                    if key not in VALID_STATS:
-                        self.msg(
-                            f"Invalid stat modifier: {stat_name}. See 'help statmods' for valid stats."
-                        )
-                        return
-                    bonuses[key] = amount
-                    remainder = piece[match.end() :].strip()
-                    if remainder:
-                        desc_parts.append(remainder)
-                        desc_parts.extend(
-                            p.strip() for p in pieces[pieces.index(piece) + 1 :]
-                        )
-                        break
-                else:
-                    desc_parts.append(piece)
-                    desc_parts.extend(
-                        p.strip() for p in pieces[pieces.index(piece) + 1 :]
-                    )
-                    break
-            if desc_parts:
-                desc = ", ".join(desc_parts).strip()
+        try:
+            bonuses, desc = parse_stat_mods(rest)
+        except ValueError as err:
+            self.msg(
+                f"Invalid stat modifier: {err}. See 'help statmods' for valid stats."
+            )
+            return
         if desc is None and rest:
             desc = rest.strip()
 
@@ -868,39 +842,13 @@ class CmdCShield(Command):
 
         bonuses = {}
         desc = None
-        if rest:
-            pieces = [p.strip() for p in rest.split(",")]
-            pattern = re.compile(r"([A-Za-z][A-Za-z _]*?)\+(-?\d+)")
-            desc_parts = []
-            for piece in pieces:
-                if not piece:
-                    continue
-                match = pattern.match(piece)
-                if match:
-                    stat_name = match.group(1).strip()
-                    amount = int(match.group(2))
-                    key = normalize_stat_key(stat_name)
-                    if key not in VALID_STATS:
-                        self.msg(
-                            f"Invalid stat modifier: {stat_name}. See 'help statmods' for valid stats."
-                        )
-                        return
-                    bonuses[key] = amount
-                    remainder = piece[match.end() :].strip()
-                    if remainder:
-                        desc_parts.append(remainder)
-                        desc_parts.extend(
-                            p.strip() for p in pieces[pieces.index(piece) + 1 :]
-                        )
-                        break
-                else:
-                    desc_parts.append(piece)
-                    desc_parts.extend(
-                        p.strip() for p in pieces[pieces.index(piece) + 1 :]
-                    )
-                    break
-            if desc_parts:
-                desc = ", ".join(desc_parts).strip()
+        try:
+            bonuses, desc = parse_stat_mods(rest)
+        except ValueError as err:
+            self.msg(
+                f"Invalid stat modifier: {err}. See 'help statmods' for valid stats."
+            )
+            return
         if desc is None and rest:
             desc = rest.strip()
 
