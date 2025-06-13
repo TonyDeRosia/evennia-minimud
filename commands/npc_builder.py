@@ -684,6 +684,9 @@ def finalize_mob_prototype(caller, npc):
         npc.db.gender = meta["gender"]
     if meta.get("ai_type"):
         npc.db.ai_type = meta["ai_type"]
+        from scripts.npc_ai_script import NPCAIScript
+        if npc.db.ai_type and not npc.scripts.get("npc_ai"):
+            npc.scripts.add(NPCAIScript, key="npc_ai")
     if meta.get("combat_class"):
         npc.db.combat_class = meta["combat_class"]
 
