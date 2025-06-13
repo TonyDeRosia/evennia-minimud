@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Any
 
 from evennia.prototypes import spawner
 from evennia.utils import logger
@@ -58,6 +58,54 @@ def register_prototype(
 def get_prototype(vnum: int) -> Optional[dict]:
     """Return the prototype stored for ``vnum`` or ``None``."""
     return get_mobdb().get_proto(vnum)
+
+
+def _spawn_item(vnum: int) -> Any | None:
+    """Spawn and return an item object from an object VNUM."""
+    from .prototype_manager import load_prototype
+
+    proto = load_prototype("object", int(vnum))
+    if not proto:
+        logger.log_err(f"Object prototype not found for VNUM {vnum}")
+        return None
+    return spawner.spawn(proto)[0]
+
+
+def apply_proto_items(npc, proto_data: dict) -> None:
+    """Spawn loot and equipment defined in ``proto_data`` onto ``npc``."""
+    from utils.slots import normalize_slot
+
+    loot_table = proto_data.get("loot_table") or []
+    for entry in loot_table:
+        proto = entry
+        if isinstance(entry, dict):
+            proto = entry.get("proto")
+        if isinstance(proto, (int, str)) and str(proto).isdigit():
+            item = _spawn_item(int(proto))
+            if item:
+                item.location = npc
+
+    equipped = proto_data.get("equipped") or {}
+    for slot, val in equipped.items():
+        if not (isinstance(val, (int, str)) and str(val).isdigit()):
+            continue
+        item = _spawn_item(int(val))
+        if not item:
+            continue
+        item.location = npc
+        slot_norm = normalize_slot(slot) or slot
+        try:
+            if slot_norm in {"mainhand", "offhand", "twohanded", "mainhand/offhand", "left", "right"}:
+                hand = None
+                if slot_norm in {"mainhand", "right"}:
+                    hand = "right"
+                elif slot_norm in {"offhand", "left"}:
+                    hand = "left"
+                npc.at_wield(item, hand=hand)
+            else:
+                item.wear(npc, True)
+        except Exception:
+            pass
 
 
 def spawn_from_vnum(vnum: int, location=None):
@@ -119,6 +167,8 @@ def spawn_from_vnum(vnum: int, location=None):
 
     mobprogs = proto_data.get("mobprogs") or []
     npc.db.mobprogs = mobprogs
+
+    apply_proto_items(npc, proto_data)
 
     from commands.npc_builder import finalize_mob_prototype
 

@@ -3,7 +3,7 @@ from olc.base import OLCEditor, OLCState, OLCValidator
 from evennia import create_object
 from evennia.objects.models import ObjectDB
 from evennia.prototypes import spawner
-from utils.mob_proto import spawn_from_vnum, get_prototype
+from utils.mob_proto import spawn_from_vnum, get_prototype, apply_proto_items
 from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from typeclasses.characters import NPC
 from world.scripts.mob_db import get_mobdb
@@ -1077,6 +1077,7 @@ class CmdSpawnNPC(Command):
             obj = spawner.spawn(proto)[0]
             obj.move_to(self.caller.location, quiet=True)
             obj.db.prototype_key = key
+            apply_proto_items(obj, proto)
         obj.db.area_tag = self.caller.location.db.area
         obj.db.spawn_room = self.caller.location
         self.msg(f"Spawned {obj.get_display_name(self.caller)}.")
