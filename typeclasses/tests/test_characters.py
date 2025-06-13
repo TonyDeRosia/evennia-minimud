@@ -41,6 +41,12 @@ class TestCharacterHooks(EvenniaTest):
         self.char2.at_damage(self.char1, 5)
         self.assertEqual(self.char2.ndb.damage_log.get(self.char1), 5)
 
+    def test_at_damage_no_attacker(self):
+        """Calling at_damage with no attacker should not error."""
+        self.char2.at_damage(None, 10)
+        self.char2.msg.assert_called_once_with("You take 10 damage.")
+        self.char1.msg.assert_not_called()
+
     def test_at_wield_unwield(self):
         self.char1.attributes.add("_wielded", {"left": None, "right": None})
         used_hands = self.char1.at_wield(self.obj1)
