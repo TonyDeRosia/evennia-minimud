@@ -62,7 +62,11 @@ class CombatScript(Script):
         return [
             obj
             for obj in self.fighters
-            if not any(obj.tags.has(["unconscious", "dead", "defeated"]))
+            if not obj.tags.has([
+                "unconscious",
+                "dead",
+                "defeated",
+            ], category="status")
         ]
 
     def at_script_creation(self):
