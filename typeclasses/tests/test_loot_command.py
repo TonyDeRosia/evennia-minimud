@@ -29,3 +29,22 @@ class TestCmdLoot(EvenniaTest):
         self.char1.execute_cmd(f"loot {corpse.key}")
 
         assert item.location == self.char1
+
+    def test_lootcorpse_respects_get_lock(self):
+        from typeclasses.characters import NPC
+
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        item = create.create_object("typeclasses.objects.Object", key="loot", location=npc)
+        item.locks.add("get:false()")
+        npc.db.drops = []
+        npc.traits.health.current = 1
+        npc.at_damage(self.char1, 2)
+
+        corpse = next(
+            obj for obj in self.room1.contents
+            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+        )
+
+        self.char1.execute_cmd(f"lootcorpse {corpse.key}")
+
+        assert item.location == corpse
