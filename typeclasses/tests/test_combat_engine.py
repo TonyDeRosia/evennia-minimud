@@ -269,6 +269,24 @@ class TestCombatDeath(EvenniaTest):
         ]
         self.assertEqual(len(corpses), 1)
 
+    def test_same_key_npcs_create_multiple_corpses(self):
+        """Killing NPCs with the same key should spawn separate corpses."""
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        npc1 = create.create_object(NPC, key="mob", location=self.room1)
+        npc2 = create.create_object(NPC, key="mob", location=self.room1)
+        for npc in (npc1, npc2):
+            npc.db.drops = []
+            npc.on_death(self.char1)
+
+        corpses = [
+            obj
+            for obj in self.room1.contents
+            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+        ]
+        self.assertEqual(len(corpses), 2)
+
     def test_corpse_decay_script(self):
         from evennia.utils import create
         from typeclasses.characters import NPC
