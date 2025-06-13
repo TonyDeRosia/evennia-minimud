@@ -65,7 +65,8 @@ class CombatRoundManager:
     def tick(self) -> None:
         for inst in list(self.instances):
             script = inst.script
-            if not script or not getattr(script, "id", None):
+            # ensure the script still exists before touching any of its fields
+            if not script or not getattr(script, "pk", None):
                 self.remove_instance(script)
                 continue
             if not script.active:
