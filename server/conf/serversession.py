@@ -22,22 +22,15 @@ settings file:
 """
 
 from evennia.server.serversession import ServerSession as BaseServerSession
+from evennia.utils.logger import log_info
 
 
 class ServerSession(BaseServerSession):
     """Representation of a player's connection to the server."""
 
-    # Evennia already provides a fully featured ``ServerSession``. This
-    # subclass exists purely as a customization point for games that want
-    # to extend the behaviour of individual sessions.  Typical use cases
-    # are storing extra per-session state, overriding connection hooks or
-    # adding convenience methods used by your own protocol extensions.
+    def at_disconnect(self, reason=None):
+        """Log when this session disconnects."""
 
-    #  Example: uncomment ``at_disconnect`` to log when a session closes.
-    #
-    # def at_disconnect(self, reason=None):
-    #     """Custom logic whenever this session disconnects."""
-    #     self.log(f"Session closed: {reason}")
-    #     super().at_disconnect(reason=reason)
+        log_info(f"Session {self.address} closed: {reason}")
+        super().at_disconnect(reason=reason)
 
-    pass

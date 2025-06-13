@@ -15,26 +15,18 @@ process.
 """
 
 
+from twisted.internet import protocol
+
+
+class Echo(protocol.Protocol):
+    def dataReceived(self, data):
+        self.transport.write(data)
+
+
 def start_plugin_services(portal):
     """Hook for adding custom Twisted services to the Portal."""
 
-    # By default the Portal does not require any extra services.  This
-    # function exists solely as an extension point.  To enable one you
-    # would import or define a twisted ``IService`` here and attach it to
-    # ``portal``.
+    factory = protocol.ServerFactory()
+    factory.protocol = Echo
+    portal.application.listenTCP(9000, factory)
 
-    # Example (very basic TCP echo service):
-    #
-    #   from twisted.internet import protocol
-    #
-    #   class Echo(protocol.Protocol):
-    #       def dataReceived(self, data):
-    #           self.transport.write(data)
-    #
-    #   factory = protocol.ServerFactory()
-    #   factory.protocol = Echo
-    #   portal.application.listenTCP(9000, factory)
-    #
-    # Remove or modify this sample as needed.
-
-    pass
