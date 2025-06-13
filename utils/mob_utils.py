@@ -93,17 +93,17 @@ def make_corpse(npc):
     if not npc or not npc.location:
         return None
 
-    # avoid multiple corpses if on_death is called repeatedly
+    # avoid multiple corpses if on_death is called repeatedly for the same npc
     existing = [
         obj
         for obj in npc.location.contents
         if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
-        and obj.db.corpse_of == npc.key
+        and obj.db.corpse_of_id == npc.dbref
     ]
     if existing:
         return existing[0]
 
-    attrs = [("corpse_of", npc.key)]
+    attrs = [("corpse_of", npc.key), ("corpse_of_id", npc.dbref)]
     if decay := getattr(npc.db, "corpse_decay_time", None):
         attrs.append(("decay_time", decay))
     corpse = create_object(
