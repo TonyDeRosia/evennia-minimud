@@ -2,10 +2,17 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from combat.combat_engine import CombatEngine
-from combat.combat_actions import AttackAction, SkillAction, SpellAction, CombatResult, Action
+from combat.combat_actions import (
+    AttackAction,
+    SkillAction,
+    SpellAction,
+    CombatResult,
+    Action,
+)
 from combat.combat_skills import ShieldBash
 from combat.damage_types import DamageType
 from combat.ai_combat import npc_take_turn
+from typeclasses.gear import BareHand
 
 
 class Dummy:
@@ -145,6 +152,24 @@ class TestAttackAction(unittest.TestCase):
         mock_roll.assert_any_call("1d4")
         mock_roll.assert_any_call("1d6")
 
+    def test_unarmed_attack_mentions_fists(self):
+        attacker = Dummy()
+        defender = Dummy()
+        attacker.wielding = []
+        attacker.location = defender.location
+
+        engine = CombatEngine([attacker, defender], round_time=0)
+        engine.queue_action(attacker, AttackAction(attacker, defender))
+        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
+             patch("world.system.state_manager.apply_regen"), \
+             patch("world.system.stat_manager.check_hit", return_value=False), \
+             patch("random.randint", return_value=0):
+            engine.start_round()
+            engine.process_round()
+
+        calls = [c.args[0] for c in attacker.location.msg_contents.call_args_list]
+        self.assertTrue(any("fists" in msg for msg in calls))
+
 def test_npc_attack_uses_natural_weapon(self):
     attacker = Dummy()
     defender = Dummy()
@@ -163,6 +188,18 @@ def test_npc_attack_uses_natural_weapon(self):
         engine.process_round()
 
     self.assertEqual(defender.hp, 5)
+
+
+def test_barehand_attack_mentions_fists():
+    attacker = Dummy()
+    defender = Dummy()
+    attacker.at_emote = MagicMock()
+    with patch("world.system.stat_manager.check_hit", return_value=False):
+        BareHand().at_attack(attacker, defender)
+
+    attacker.at_emote.assert_called()
+    msg = attacker.at_emote.call_args[0][0]
+    assert "fists" in msg
 
 class TestCombatVictory(unittest.TestCase):
     def test_handle_defeat_removes_participant(self):
