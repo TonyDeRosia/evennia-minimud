@@ -77,7 +77,7 @@ class CombatScript(Script):
             return
         from combat.round_manager import CombatRoundManager
         CombatRoundManager.get().remove_instance(self)
-        self.stop_script()
+        super().stop()
         self.delete()
 
     def delete(self, *args, **kwargs):
