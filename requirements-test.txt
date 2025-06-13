@@ -1,5 +1,7 @@
-# Packages required to run the test suite
-# Evennia brings in Django but we list it explicitly to avoid missing deps
+# Packages required to run the test suite.
+# Install these first with `pip install -r requirements-test.txt` before
+# running `pytest`. Evennia brings in Django but we list it explicitly to avoid
+# missing dependencies.
 "evennia[extra] >= 4.2, <5.0"
 Django>=4.2,<5.0
 pytest
