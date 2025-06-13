@@ -287,3 +287,24 @@ class TestVnumMobs(EvenniaTest):
         with self.assertRaises(ValueError):
             register_prototype({"key": "bad", "typeclass": "typeclasses.objects.ObjectParent"}, vnum=65)
 
+    def test_spawn_populates_stat_caches(self):
+        """spawn_from_vnum should set primary and derived stat caches."""
+        proto = {
+            "key": "fighter",
+            "typeclass": "typeclasses.npcs.BaseNPC",
+            "level": 1,
+            "combat_class": "Warrior",
+        }
+        vnum = register_prototype(proto, vnum=80)
+        npc = spawn_from_vnum(vnum, location=self.char1.location)
+
+        self.assertTrue(getattr(npc.db, "primary_stats", None))
+        self.assertTrue(getattr(npc.db, "derived_stats", None))
+
+        from world.system import stat_manager
+
+        self.assertEqual(
+            stat_manager.get_effective_stat(npc, "STR"),
+            npc.db.primary_stats.get("STR"),
+        )
+
