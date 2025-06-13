@@ -253,26 +253,96 @@ def recalculate_stats(chara) -> None:
 
 
 def _gear_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
-    """Return cached stat bonuses from equipped gear.
+    """Return stat bonuses contributed by currently equipped gear.
 
-    This helper currently only exposes the precomputed values stored on
-    ``obj.db.equip_bonuses``.  It exists so projects can override it with a
-    more involved implementation that pulls live modifiers from equipment if
-    desired.
+    The default implementation scans ``obj.equipment`` (if present) and sums
+    the modifiers provided by each equipped item using :func:`collect_item_mods`.
+    If no equipment mapping is available, the legacy ``obj.db.equip_bonuses``
+    value is returned instead.  Games may override this helper to implement a
+    different equipment system.
     """
 
-    return getattr(obj.db, "equip_bonuses", {}) or {}
+    mods: Dict[str, int] = {}
+
+    equip = getattr(obj, "equipment", None)
+    items = []
+    if equip and hasattr(equip, "values"):
+        try:
+            items = list(equip.values())
+        except Exception:
+            items = []
+
+    for itm in items:
+        if not itm:
+            continue
+        for stat, val in collect_item_mods(itm).items():
+            mods[stat] = mods.get(stat, 0) + int(val)
+
+    if not mods:
+        mods = getattr(getattr(obj, "db", None), "equip_bonuses", {}) or {}
+
+    return mods
 
 
 def _buff_mods(obj) -> Dict[str, int]:  # pragma: no cover - placeholder
     """Collect stat modifiers from active effects.
 
-    The default implementation simply returns the aggregated modifiers from
-    :func:`state_manager.get_effect_mods`.  It serves as an extension point
-    for games that wish to incorporate additional buff logic.
+    In addition to the values returned by :func:`state_manager.get_effect_mods`,
+    this helper aggregates modifiers provided by active scripts or tags on the
+    object.  Scripts may define ``stat_mods``/``mods``/``modifiers``/``buffs``
+    either as attributes or on ``script.db``.  Tags formatted as ``STAT+N`` are
+    also parsed for bonuses.  Projects can override this function to customize
+    how buffs are gathered.
     """
 
-    return state_manager.get_effect_mods(obj)
+    mods = dict(state_manager.get_effect_mods(obj))
+
+    tags = getattr(obj, "tags", None)
+    if tags:
+        for tag in tags.all():
+            if not isinstance(tag, str):
+                continue
+            m = re.match(r"([A-Z_]+)\+(-?\d+)$", tag)
+            if m:
+                stat, amt = m.groups()
+                stat = normalize_stat_key(stat)
+                mods[stat] = mods.get(stat, 0) + int(amt)
+
+    handler = getattr(obj, "scripts", None)
+    if handler:
+        try:
+            scripts = handler.all()
+        except Exception:
+            scripts = []
+        for scr in scripts:
+            bonus_dict = None
+            for field in ("stat_mods", "mods", "modifiers", "buffs"):
+                if hasattr(scr, field):
+                    bonus_dict = getattr(scr, field)
+                if bonus_dict is None and hasattr(scr, "db"):
+                    bonus_dict = getattr(scr.db, field, None)
+                if bonus_dict:
+                    break
+            if callable(bonus_dict):
+                try:
+                    bonus_dict = bonus_dict()
+                except Exception:
+                    bonus_dict = None
+            if bonus_dict:
+                for stat, val in bonus_dict.items():
+                    stat = normalize_stat_key(stat)
+                    mods[stat] = mods.get(stat, 0) + int(val)
+            if hasattr(scr, "tags"):
+                for tag in scr.tags.all():
+                    if not isinstance(tag, str):
+                        continue
+                    m = re.match(r"([A-Z_]+)\+(-?\d+)$", tag)
+                    if m:
+                        stat, amt = m.groups()
+                        stat = normalize_stat_key(stat)
+                        mods[stat] = mods.get(stat, 0) + int(amt)
+
+    return mods
 
 
 # -------------------------------------------------------------
