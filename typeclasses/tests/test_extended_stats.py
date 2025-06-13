@@ -71,20 +71,6 @@ class TestExtendedStats(EvenniaTest):
         state_manager.add_cooldown(self.char1, "test", 10)
         self.assertLess(self.char1.cooldowns.time_left("test", use_int=True), 10)
 
-    def test_movement_speed_reduces_cost(self):
-        self.char1.traits.movement_speed.base = 2
-        self.char1.db.carry_capacity = 10
-        self.char1.db.carry_weight = 20
-        self.char1.traits.stamina.current = 10
-        self.char1.at_post_move(self.room1)
-        self.assertEqual(self.char1.traits.stamina.current, 9)
-
-    def test_pvp_power_and_resilience(self):
-        self.char1.traits.pvp_power.base = 100
-        self.char2.traits.pvp_resilience.base = 0
-        self.char2.traits.armor.base = 0
-        dmg = self.char2.at_damage(self.char1, 10)
-        self.assertEqual(dmg, 20)
 
     def test_threat_increases_aggro(self):
         from combat.combat_engine import CombatEngine
@@ -103,12 +89,6 @@ class TestExtendedStats(EvenniaTest):
             recipe.craft()
             mock_rand.assert_called_with(0, 15)
 
-    def test_guild_honor_mod_promotes(self):
-        guild = Guild("Test", ranks=ADVENTURERS_GUILD_RANKS, rank_thresholds={t: v for v, t in ADVENTURERS_GUILD_RANKS})
-        self.char1.db.guild_points = {"Test": 9}
-        self.char1.traits.guild_honor_mod.base = 20
-        auto_promote(self.char1, guild)
-        self.assertEqual(self.char1.db.guild_rank, "Corporal")
 
 
 if __name__ == "__main__":

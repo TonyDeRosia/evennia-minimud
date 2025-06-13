@@ -61,11 +61,7 @@ STAT_SCALING: Dict[str, Dict[str, float]] = {
     "detection": {"perception": 0.4, "WIS": 0.2},
     "perception": {},
     "threat": {"STR": 0.2, "CON": 0.1},
-    "movement_speed": {"DEX": 0.1, "perception": 0.1},
     "craft_bonus": {"INT": 0.2, "WIS": 0.2, "LUCK": 0.1},
-    # PvP stats
-    "pvp_power": {"STR": 0.2, "INT": 0.2, "DEX": 0.1},
-    "pvp_resilience": {"CON": 0.2, "WIS": 0.2},
     # Base evasion skill
     "evasion": {"DEX": 0.5, "perception": 0.2},
 }

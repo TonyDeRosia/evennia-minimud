@@ -2674,8 +2674,7 @@ Evasion, Armor, Magic Resist, Dodge, Block Rate, Parry Rate, Status Resist,
 Critical Resist, Attack Power, Spell Power, Critical Chance, Critical Damage
 Bonus, Accuracy, Armor Penetration, Spell Penetration, Health Regen, Mana Regen,
 Stamina Regen, Lifesteal, Leech, Cooldown Reduction, Initiative, Stealth,
-Detection, Threat, Movement Speed, Crafting Bonus, PvP Power, PvP Resilience,
-Guild Honor Rank Modifiers.
+Detection, Threat, Crafting Bonus.
 """,
     },
     {
