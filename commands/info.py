@@ -332,14 +332,23 @@ class CmdGive(Command):
     help_category = "General"
 
     def parse(self):
-        lhs, rhs = self.args.split("=", 1) if "=" in self.args else (self.args, "")
-        self.lhs = lhs.strip()
-        self.rhs = rhs.strip()
+        if "=" in self.args:
+            lhs, rhs = self.args.split("=", 1)
+            self.lhs = lhs.strip()
+            self.rhs = rhs.strip()
+        else:
+            parts = self.args.split()
+            if len(parts) >= 2:
+                self.lhs = " ".join(parts[:-1])
+                self.rhs = parts[-1]
+            else:
+                self.lhs = self.args.strip()
+                self.rhs = ""
 
     def func(self):
         caller = self.caller
         if not self.lhs or not self.rhs:
-            caller.msg("Give <item|amount coin> = <target>")
+            caller.msg("Give <item|amount coin> <target>")
             return
 
         target = caller.search(self.rhs)
