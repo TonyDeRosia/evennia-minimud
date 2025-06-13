@@ -87,7 +87,7 @@ def mobprogs_to_triggers(mobprogs: list[dict]) -> Dict[str, list[dict]]:
 def make_corpse(npc):
     """Create a corpse object for ``npc`` and transfer belongings."""
 
-    from evennia import create
+    from evennia import create_object
     from world.mob_constants import ACTFLAGS
 
     if not npc or not npc.location:
@@ -106,7 +106,7 @@ def make_corpse(npc):
     attrs = [("corpse_of", npc.key)]
     if decay := getattr(npc.db, "corpse_decay_time", None):
         attrs.append(("decay_time", decay))
-    corpse = create.create_object(
+    corpse = create_object(
         "typeclasses.objects.Corpse",
         key=f"{npc.key} corpse",
         location=npc.location,
@@ -127,7 +127,7 @@ def make_corpse(npc):
     if ACTFLAGS.NOLOOT.value not in (npc.db.actflags or []):
         for coin, amt in (npc.db.coins or {}).items():
             if int(amt):
-                pile = create.create_object(
+                pile = create_object(
                     "typeclasses.objects.CoinPile",
                     key=f"{coin} coins",
                     location=corpse,

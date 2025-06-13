@@ -1,7 +1,8 @@
 from random import randint, choice
 from string import punctuation
 from evennia import AttributeProperty
-from evennia.utils import lazy_property, iter_to_str, delay, logger, create
+from evennia import create_object
+from evennia.utils import lazy_property, iter_to_str, delay, logger
 from evennia.contrib.rpg.traits import TraitHandler
 from evennia.contrib.game_systems.clothing.clothing import (
     ClothedCharacter,
@@ -913,7 +914,7 @@ class PlayerCharacter(Character):
         ]
         if existing:
             return
-        corpse = create.create_object(
+        corpse = create_object(
             "typeclasses.objects.Corpse",
             key=f"{self.key} corpse",
             location=self.location,
@@ -928,7 +929,7 @@ class PlayerCharacter(Character):
                 obj = spawn(proto)[0]
                 obj.location = corpse
             else:
-                create.create_object(
+                create_object(
                     "typeclasses.objects.Object",
                     key=part.value,
                     location=corpse,
@@ -1070,7 +1071,7 @@ class NPC(Character):
             else:
                 for coin, amt in from_copper(total_copper).items():
                     if amt:
-                        pile = create.create_object(
+                        pile = create_object(
                             "typeclasses.objects.CoinPile",
                             key=f"{coin} coins",
                             location=corpse,

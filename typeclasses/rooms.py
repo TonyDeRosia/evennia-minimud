@@ -5,7 +5,8 @@ Rooms are simple containers that has no location of their own.
 
 """
 
-from evennia.utils import create, iter_to_str, logger, lazy_property
+from evennia import create_object
+from evennia.utils import iter_to_str, logger, lazy_property
 from evennia.objects.objects import DefaultRoom
 from evennia.contrib.grid.xyzgrid.xyzroom import XYZRoom
 from evennia.contrib.grid.wilderness.wilderness import WildernessRoom
@@ -232,7 +233,7 @@ class XYGridShop(XYGridRoom):
         # add the shopping commands to the room
         self.cmdset.add(ShopCmdSet, persistent=True)
         # create an invisible, inaccessible storage object
-        self.db.storage = create.object(
+        self.db.storage = create_object(
             key="shop storage",
             locks="view:perm(Builder);get:perm(Builder);search:perm(Builder)",
             home=self,
