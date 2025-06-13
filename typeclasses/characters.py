@@ -1080,22 +1080,15 @@ class NPC(Character):
     def award_xp_to(self, attacker):
         """Grant experience reward to ``attacker``."""
         from world.system import state_manager
-        from utils.xp import gain_xp
-
-        exp = getattr(self.db, "xp_reward", None)
-        if exp is None:
-            exp = getattr(self.db, "exp_reward", 0)
-
-        if not attacker or not getattr(attacker, "has_account", False):
+        exp_reward = getattr(self.db, "exp_reward", 0)
+        if exp_reward is None:
+            exp_reward = 0
+        exp = int(exp_reward)
+        if not attacker or not exp:
             return
-        try:
-            exp = int(exp or 0)
-        except (TypeError, ValueError):
-            exp = 0
-        if not exp:
-            return
-
-        gain_xp(attacker, exp)
+        attacker.db.exp = (attacker.db.exp or 0) + exp
+        if hasattr(attacker, "msg"):
+            attacker.msg(f"You gain {exp} experience.")
         state_manager.check_level_up(attacker)
 
     def on_death(self, attacker):
