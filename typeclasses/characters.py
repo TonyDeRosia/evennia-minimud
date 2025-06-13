@@ -116,11 +116,6 @@ class Character(ObjectParent, ClothedCharacter):
             hp_trait.max = value
 
     @property
-    def is_alive(self):
-        """Return ``True`` if this character is not flagged dead."""
-        return not bool(getattr(self.db, "dead", False))
-
-    @property
     def wielding(self):
         """Access a list of all wielded objects"""
         return [obj for obj in self.attributes.get("_wielded", {}).values() if obj]
@@ -1093,18 +1088,18 @@ class NPC(Character):
 
     def on_death(self, attacker):
         """Handle character death cleanup."""
-        if not self.location or self.db.dead:
+        if not self.location or self.attributes.get("_dead"):
             return
+        self.db._dead = True
         self.db.dead = True
 
-        # remove from combat immediately if present
+        # remove from combat if necessary. The combat script may have been
+        # cleaned up already, so verify it before using it.
         if self.in_combat and (script := self.location.scripts.get("combat")):
             if script and script[0].pk:
                 script[0].remove_combatant(self)
 
-        logger.debug("NPC %s killed by %s", self.key, getattr(attacker, "key", None))
-
-        corpse = make_corpse(self)
+        corpse = self.drop_loot(attacker)
         if corpse:
             corpse.location = self.location
 
@@ -1117,7 +1112,6 @@ class NPC(Character):
                 )
             else:
                 self.location.msg_contents(f"{self.key} dies.")
-
         self.delete()
 
     # property to mimic weapons
