@@ -64,8 +64,12 @@ class CombatRoundManager:
 
     def tick(self) -> None:
         for inst in list(self.instances):
-            if not inst.script or not inst.script.active:
-                self.remove_instance(inst.script)
+            script = inst.script
+            if not script or not getattr(script, "id", None):
+                self.remove_instance(script)
+                continue
+            if not script.active:
+                self.remove_instance(script)
                 continue
             inst.sync_participants()
             inst.engine.process_round()

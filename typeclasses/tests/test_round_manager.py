@@ -43,3 +43,13 @@ class TestCombatRoundManager(EvenniaTest):
 
         self.assertEqual(order[0], self.char1)
         self.assertEqual(order[1], self.char2)
+
+    def test_tick_handles_deleted_script(self):
+        with patch("combat.round_manager.delay"):
+            self.manager.add_instance(self.script)
+            # deleting the script should not cause tick to fail
+            self.script.delete()
+            try:
+                self.manager.tick()
+            except Exception as err:  # pragma: no cover - fail fast if exception
+                self.fail(f"tick raised {err!r}")

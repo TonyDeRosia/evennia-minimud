@@ -80,6 +80,12 @@ class CombatScript(Script):
         self.stop_script()
         self.delete()
 
+    def delete(self, *args, **kwargs):
+        """Remove this script from the round manager before deletion."""
+        from combat.round_manager import CombatRoundManager
+        CombatRoundManager.get().remove_instance(self)
+        super().delete(*args, **kwargs)
+
     def get_team(self, combatant):
         """
         Gets the index of the team containing combatant, or None if combatant is not in this combat
