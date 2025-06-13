@@ -41,5 +41,5 @@ def start_plugin_services(server):
     """Hook for attaching additional Twisted services to the Server."""
 
     heartbeat = HeartbeatService()
-    server.services.addService(heartbeat)
+    server.services.append(heartbeat)
 
