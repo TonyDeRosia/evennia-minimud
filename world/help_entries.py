@@ -2068,6 +2068,36 @@ Related:
 """,
     },
     {
+        "key": "corpse",
+        "aliases": ["corpses"],
+        "category": "General",
+        "text": """Help for corpse
+
+Dead characters leave corpses that hold any items they carried.
+
+Usage:
+    get all corpse
+    loot
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    loot
+    get all corpse
+
+Notes:
+    - |wloot|n is a shortcut for |wget all corpse|n.
+    - Corpses decay after a time.
+
+Related:
+    help inventory
+""",
+    },
+    {
         "key": "buffs",
         "category": "General",
         "text": """
