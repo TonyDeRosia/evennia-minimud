@@ -57,7 +57,7 @@ def roll_evade(attacker, target, base: int = 50) -> bool:
     chance = max(5, min(95, base + evade - acc))
     roll = random.randint(1, 100)
     result = roll <= chance
-    logger.debug(
+    logger.log_info(
         "evade roll=%s chance=%s result=%s",
         roll,
         chance,
@@ -74,7 +74,7 @@ def roll_block(attacker, target, base: int = 0) -> bool:
     chance = max(0, min(95, base + block - acc))
     roll = random.randint(1, 100)
     result = roll <= chance
-    logger.debug("block roll=%s chance=%s result=%s", roll, chance, result)
+    logger.log_info("block roll=%s chance=%s result=%s", roll, chance, result)
     return result
 
 
@@ -86,7 +86,7 @@ def roll_parry(attacker, target, base: int = 0) -> bool:
     chance = max(0, min(95, base + parry - acc))
     roll = random.randint(1, 100)
     result = roll <= chance
-    logger.debug("parry roll=%s chance=%s result=%s", roll, chance, result)
+    logger.log_info("parry roll=%s chance=%s result=%s", roll, chance, result)
     return result
 
 
@@ -95,7 +95,7 @@ def apply_attack_power(attacker, damage: int) -> int:
 
     ap = state_manager.get_effective_stat(attacker, "attack_power")
     result = int(round(damage * (1 + ap / 100)))
-    logger.debug("atk power=%s dmg=%s result=%s", ap, damage, result)
+    logger.log_info("atk power=%s dmg=%s result=%s", ap, damage, result)
     return result
 
 
@@ -104,7 +104,7 @@ def apply_spell_power(caster, damage: int) -> int:
 
     sp = state_manager.get_effective_stat(caster, "spell_power")
     result = int(round(damage * (1 + sp / 100)))
-    logger.debug("spell power=%s dmg=%s result=%s", sp, damage, result)
+    logger.log_info("spell power=%s dmg=%s result=%s", sp, damage, result)
     return result
 
 
@@ -144,7 +144,7 @@ def check_distance(a, b, max_range: int) -> bool:
 
     dist = get_distance(a, b)
     result = dist <= max_range
-    logger.debug("distance %s max=%s result=%s", dist, max_range, result)
+    logger.log_info("distance %s max=%s result=%s", dist, max_range, result)
     return result
 
 
