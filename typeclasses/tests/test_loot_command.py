@@ -48,3 +48,33 @@ class TestCmdLoot(EvenniaTest):
         self.char1.execute_cmd(f"lootcorpse {corpse.key}")
 
         assert item.location == corpse
+
+    def test_getall_container_loots_items(self):
+        bag = create.create_object(
+            "typeclasses.gear.WearableContainer", key="bag", location=self.room1
+        )
+        item = create.create_object(
+            "typeclasses.objects.Object", key="gem", location=bag
+        )
+
+        self.char1.execute_cmd(f"get all {bag.key}")
+
+        assert item.location == self.char1
+
+    def test_getall_corpse_loots_items(self):
+        from typeclasses.characters import NPC
+
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        loot = create.create_object("typeclasses.objects.Object", key="loot", location=npc)
+        npc.db.drops = []
+        npc.traits.health.current = 1
+        npc.at_damage(self.char1, 2)
+
+        corpse = next(
+            obj for obj in self.room1.contents
+            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+        )
+
+        self.char1.execute_cmd("get all corpse")
+
+        assert loot.location == self.char1

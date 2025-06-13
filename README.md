@@ -395,7 +395,7 @@ while this status is active, rather than a single point from each resource.
 
 ### Looting Corpses
 
-Defeated enemies leave a corpse containing any gear they carried. Use `loot` or `get all corpse` to quickly grab everything before the body decays.
+Defeated enemies leave a corpse containing any gear they carried. Use `loot` or `get all corpse` to quickly grab everything before the body decays. `get all <container>` works for looting other containers as well.
 
 ### AI Settings
 

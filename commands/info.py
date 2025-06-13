@@ -385,7 +385,7 @@ class CmdGive(Command):
 
 
 class CmdGetAll(Command):
-    """Pick up everything in the room."""
+    """Pick up everything or loot a container."""
 
     key = "get all"
     aliases = ("getall",)
@@ -397,6 +397,26 @@ class CmdGetAll(Command):
         if not location:
             caller.msg("You cannot pick anything up.")
             return
+
+        if self.args:
+            target = caller.search(self.args.strip())
+            if not target:
+                return
+            items = [
+                obj for obj in list(target.contents) if is_gettable(obj, caller)
+            ]
+            if not items:
+                caller.msg("There is nothing to take from it.")
+                return
+            for obj in items:
+                if obj.move_to(caller, quiet=True, move_type="get"):
+                    obj.at_get(caller)
+                    caller.msg(
+                        f"You loot {obj.get_display_name(caller)} from {target.get_display_name(caller)}."
+                    )
+            caller.update_carry_weight()
+            return
+
         items = [
             obj
             for obj in location.contents
@@ -413,28 +433,41 @@ class CmdGetAll(Command):
 
 
 class CmdGetAllCorpse(Command):
-    """Pick up all corpses in the room."""
+    """Loot everything from a corpse."""
 
     key = "get all corpse"
     help_category = "General"
 
     def func(self):
         caller = self.caller
-        location = caller.location
-        if not location:
-            caller.msg("You cannot pick anything up.")
+        if not self.args:
+            corpses = [
+                obj
+                for obj in caller.location.contents
+                if getattr(obj.db, "is_corpse", False)
+            ]
+            if not corpses:
+                caller.msg("There are no corpses here.")
+                return
+            target = corpses[0]
+        else:
+            target = caller.search(self.args.strip())
+            if not target:
+                return
+        if not target.is_typeclass("typeclasses.objects.Corpse", exact=False):
+            caller.msg("You can only loot corpses.")
             return
-        corpses = [
-            obj for obj in location.contents if getattr(obj.db, "is_corpse", False)
-        ]
-        if not corpses:
-            caller.msg("There are no corpses here.")
+        items = [obj for obj in list(target.contents) if is_gettable(obj, caller)]
+        if not items:
+            caller.msg("There's nothing left to loot.")
             return
-        for obj in corpses:
+        for obj in items:
             if obj.move_to(caller, quiet=True, move_type="get"):
                 obj.at_get(caller)
+                caller.msg(
+                    f"You loot {obj.get_display_name(caller)} from {target.get_display_name(caller)}."
+                )
         caller.update_carry_weight()
-        caller.msg("You gather the corpses.")
 
 
 class CmdEquipment(Command):

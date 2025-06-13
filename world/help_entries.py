@@ -2079,6 +2079,9 @@ Usage:
     get all corpse
     loot
 
+Taking everything from a container works with other targets too:
+    get all <container>
+
 Switches:
     None
 
@@ -2091,6 +2094,7 @@ Examples:
 
 Notes:
     - |wloot|n is a shortcut for |wget all corpse|n.
+    - |wget all <target>|n loots everything from that container.
     - Corpses decay after a time.
 
 Related:
