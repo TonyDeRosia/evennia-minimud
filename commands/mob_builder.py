@@ -2,7 +2,7 @@
 
 from evennia.utils.evmenu import EvMenu
 from evennia.prototypes import spawner
-from utils.mob_proto import spawn_from_vnum, get_prototype
+from utils.mob_proto import spawn_from_vnum, get_prototype, apply_proto_items
 from utils import vnum_registry
 from world.scripts.mob_db import get_mobdb
 from evennia.utils import delay
@@ -92,6 +92,7 @@ class CmdMSpawn(Command):
                 if proto.get("vnum"):
                     obj.db.vnum = proto["vnum"]
                     obj.tags.add(f"M{proto['vnum']}", category="vnum")
+                apply_proto_items(obj, proto)
 
         self.msg(f"Spawned {obj.key}.")
 
@@ -141,6 +142,7 @@ class CmdMobPreview(Command):
             )
             obj = spawner.spawn(proto)[0]
             obj.move_to(self.caller.location, quiet=True)
+            apply_proto_items(obj, proto)
         delay(30, obj.delete)
         self.msg(f"Previewing {obj.key}. It will vanish soon.")
 
