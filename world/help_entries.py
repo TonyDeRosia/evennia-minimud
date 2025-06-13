@@ -431,7 +431,7 @@ Notes:
     the item as given.
     - Optional stat modifiers can be provided as comma separated entries like
     |wSTR+2, Attack Power+5|n. Valid stats include all core and derived values.
-    - Modifiers use the form |wStat+Value|n and are comma separated.
+    - Modifiers use the form |wStat+Value|n or |wStat-Value|n and are comma separated.
     - Enclose multiword or ANSI-colored names in quotes.
     - The item is a |ctypeclasses.gear.MeleeWeapon|n.
     - ANSI color codes are supported.
@@ -466,7 +466,7 @@ Notes:
     - Optional comma separated modifiers may be given, such as
     |wBlock Rate+3|n or |wSTR+2, Attack Power+5|n. Valid stats include
     all core and derived values.
-    - Modifiers use the form |wStat+Value|n and are comma separated.
+    - Modifiers use the form |wStat+Value|n or |wStat-Value|n and are comma separated.
     - Enclose multiword or ANSI-colored names in quotes.
     - Add |w/unidentified|n before the name to create the shield unidentified.
 
@@ -497,7 +497,7 @@ Examples:
 Notes:
     - Slot becomes the clothing type.
     - Add |w/unidentified|n before the name to create the armor unidentified.
-    - Modifiers use the form |wStat+Value|n and are comma separated.
+    - Modifiers use the form |wStat+Value|n or |wStat-Value|n and are comma separated.
     - Enclose multiword or ANSI-colored names in quotes.
 
 Related:
@@ -526,7 +526,7 @@ Examples:
 
 Notes:
     - The tag is added with category 'crafting_tool'.
-    - Modifiers use the form |wStat+Value|n and are comma separated.
+    - Modifiers use the form |wStat+Value|n or |wStat-Value|n and are comma separated.
     - Enclose multiword or ANSI-colored names in quotes.
 
 Related:
@@ -556,7 +556,7 @@ Examples:
 Notes:
     - Creates an object of the given typeclass and places it in your inventory.
     - Add |w/unidentified|n before the name to create the item unidentified.
-    - Modifiers use the form |wStat+Value|n and are comma separated.
+    - Modifiers use the form |wStat+Value|n or |wStat-Value|n and are comma separated.
     - Enclose multiword or ANSI-colored names in quotes.
 
 Related:
@@ -586,7 +586,7 @@ Examples:
 Notes:
     - Slot defaults to ring1. Use ring2 for the other finger.
     - Add |w/unidentified|n before the name to create the ring unidentified.
-    - Modifiers use the form |wStat+Value|n and are comma separated.
+    - Modifiers use the form |wStat+Value|n or |wStat-Value|n and are comma separated.
     - Enclose multiword or ANSI-colored names in quotes.
 
 Related:
@@ -616,7 +616,7 @@ Examples:
 Notes:
     - Trinkets occupy the dedicated trinket slot.
     - Add |w/unidentified|n before the name to create the item unidentified.
-    - Modifiers use the form |wStat+Value|n and are comma separated.
+    - Modifiers use the form |wStat+Value|n or |wStat-Value|n and are comma separated.
     - Enclose multiword or ANSI-colored names in quotes.
 
 Related:
@@ -702,7 +702,7 @@ Examples:
 Notes:
     - Items are flagged edible automatically.
     - Weight is set to 1.
-    - Modifiers use the form |wStat+Value|n and are comma separated.
+    - Modifiers use the form |wStat+Value|n or |wStat-Value|n and are comma separated.
 
 Related:
     help ansi

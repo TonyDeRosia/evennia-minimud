@@ -146,7 +146,7 @@ def collect_item_mods(item) -> Dict[str, int]:  # pragma: no cover - helper
         for tag in tags:
             if not isinstance(tag, str):
                 continue
-            m = re.match(r"([A-Z_]+)\+(\-?\d+)$", tag)
+            m = re.match(r"([A-Z_]+)([+-]\d+)$", tag)
             if m:
                 stat, amt = m.groups()
                 stat = normalize_stat_key(stat)
