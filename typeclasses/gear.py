@@ -18,7 +18,7 @@ class BareHand:
     damage = 1
     stamina_cost = 3
     skill = "unarmed"
-    name = "fist"
+    name = "fists"
     speed = 2
 
     def at_pre_attack(self, wielder, **kwargs):
