@@ -338,6 +338,15 @@ class TestCombatDeath(EvenniaTest):
         )
         self.assertEqual(corpse.db.corpse_of, npc.key)
 
+    def test_is_alive_property(self):
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        self.assertTrue(npc.is_alive)
+        npc.db.dead = True
+        self.assertFalse(npc.is_alive)
+
 
 class TestCombatNPCTurn(EvenniaTest):
     def test_at_combat_turn_auto_attack(self):
@@ -363,6 +372,28 @@ class TestCombatNPCTurn(EvenniaTest):
             engine.process_round()
 
         self.assertTrue(any(isinstance(c.args[1], AttackAction) for c in mock_queue.call_args_list))
+
+    def test_attack_skipped_when_target_dead(self):
+        from evennia.utils import create
+        from typeclasses.characters import Character
+        from combat.combat_engine import AttackAction
+
+        attacker = create.create_object(Character, key="attacker", location=self.room1)
+        target = create.create_object(Character, key="target", location=self.room1)
+        attacker.db.combat_target = target
+        target.db.combat_target = attacker
+        target.db.dead = True
+
+        engine = CombatEngine([attacker, target], round_time=0)
+
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('random.randint', return_value=0), \
+             patch('combat.combat_engine.delay'), \
+             patch('combat.combat_engine.AttackAction') as mock_attack:
+            engine.start_round()
+            engine.process_round()
+
+        mock_attack.assert_not_called()
 
 
 class TestMultipleActions(unittest.TestCase):

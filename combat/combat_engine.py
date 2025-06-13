@@ -494,7 +494,7 @@ class CombatEngine:
 
             if participant.next_action:
                 queued = participant.next_action
-            elif target:
+            elif target and getattr(target, "is_alive", lambda: True)():
                 queued = [AttackAction(actor, target)]
             else:
                 queued = []
