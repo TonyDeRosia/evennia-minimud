@@ -130,7 +130,7 @@ class AttackAction(Action):
             else:
                 weapon = self.actor
 
-        logger.debug("AttackAction weapon=%s", getattr(weapon, "key", weapon))
+        logger.log_info("AttackAction weapon=%s", getattr(weapon, "key", weapon))
 
         if weapon is self.actor:
             wname = "fists"

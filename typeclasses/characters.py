@@ -1109,7 +1109,9 @@ class NPC(Character):
             if script and script[0].pk:
                 script[0].remove_combatant(self)
 
-        logger.debug("NPC %s killed by %s", self.key, getattr(attacker, "key", None))
+        logger.log_info(
+            "NPC %s killed by %s", self.key, getattr(attacker, "key", None)
+        )
 
         corpse = make_corpse(self)
         if corpse:
