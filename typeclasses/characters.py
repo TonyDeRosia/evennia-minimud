@@ -1084,7 +1084,10 @@ class NPC(Character):
     def award_xp_to(self, attacker):
         """Grant experience reward to ``attacker``."""
         from world.system import state_manager
-        exp = int(getattr(self.db, "exp_reward", 0))
+        exp_reward = getattr(self.db, "exp_reward", 0)
+        if exp_reward is None:
+            exp_reward = 0
+        exp = int(exp_reward)
         if not attacker or not exp:
             return
         attacker.db.exp = (attacker.db.exp or 0) + exp
