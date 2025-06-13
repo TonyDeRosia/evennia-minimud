@@ -397,13 +397,16 @@ class Character(ObjectParent, ClothedCharacter):
 
         self.traits.health.current -= damage
         crit_prefix = "|rCritical!|n " if critical else ""
-        self.msg(
-            f"{crit_prefix}You take {damage} damage from {attacker.get_display_name(self)}."
-        )
-        attacker.msg(
-            f"You deal {damage} damage to {self.get_display_name(attacker)}"
-            + ("!" if critical else ".")
-        )
+        if attacker:
+            self.msg(
+                f"{crit_prefix}You take {damage} damage from {attacker.get_display_name(self)}."
+            )
+            attacker.msg(
+                f"You deal {damage} damage to {self.get_display_name(attacker)}"
+                + ("!" if critical else ".")
+            )
+        else:
+            self.msg(f"{crit_prefix}You take {damage} damage.")
         if self.traits.health.value <= 0:
             self.tags.add("unconscious", category="status")
             self.tags.add("lying down", category="status")
