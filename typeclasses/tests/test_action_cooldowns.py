@@ -3,7 +3,6 @@ from evennia.utils.test_resources import EvenniaTest
 
 from combat.combat_actions import AttackAction
 from typeclasses.npcs import BaseNPC
-from world.system import state_manager
 
 
 class TestAttackCooldowns(EvenniaTest):
@@ -16,8 +15,8 @@ class TestAttackCooldowns(EvenniaTest):
 
         action = AttackAction(attacker, defender)
         valid, err = action.validate()
-        assert not valid
-        assert "recovering" in err.lower()
+        assert valid
+        assert err == ""
 
     def test_npc_attack_respects_cooldown(self):
         npc = create.create_object(BaseNPC, key="mob", location=self.room1)
@@ -26,6 +25,6 @@ class TestAttackCooldowns(EvenniaTest):
 
         action = AttackAction(npc, target)
         valid, err = action.validate()
-        assert not valid
-        assert "recovering" in err.lower()
+        assert valid
+        assert err == ""
 

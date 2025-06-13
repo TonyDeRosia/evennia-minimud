@@ -6,14 +6,27 @@ class CmdLoot(Command):
     """Loot items from a corpse."""
 
     key = "loot"
+    aliases = ("loot corpse",)
     help_category = "General"
 
     def func(self):
         caller = self.caller
         if not self.args:
-            caller.msg("Loot what?")
-            return
-        target = caller.search(self.args.strip())
+            if self.cmdstring.strip().lower() == "loot corpse":
+                corpses = [
+                    obj
+                    for obj in caller.location.contents
+                    if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+                ]
+                if not corpses:
+                    caller.msg("There is nothing to loot.")
+                    return
+                target = corpses[0]
+            else:
+                caller.msg("Loot what?")
+                return
+        else:
+            target = caller.search(self.args.strip())
         if not target:
             return
         if not target.is_typeclass("typeclasses.objects.Corpse", exact=False):

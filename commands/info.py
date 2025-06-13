@@ -412,6 +412,31 @@ class CmdGetAll(Command):
         caller.msg("You pick up everything you can.")
 
 
+class CmdGetAllCorpse(Command):
+    """Pick up all corpses in the room."""
+
+    key = "get all corpse"
+    help_category = "General"
+
+    def func(self):
+        caller = self.caller
+        location = caller.location
+        if not location:
+            caller.msg("You cannot pick anything up.")
+            return
+        corpses = [
+            obj for obj in location.contents if getattr(obj.db, "is_corpse", False)
+        ]
+        if not corpses:
+            caller.msg("There are no corpses here.")
+            return
+        for obj in corpses:
+            if obj.move_to(caller, quiet=True, move_type="get"):
+                obj.at_get(caller)
+        caller.update_carry_weight()
+        caller.msg("You gather the corpses.")
+
+
 class CmdEquipment(Command):
     """
     Show what you are wearing and wielding. Usage: equipment
@@ -821,6 +846,7 @@ class InfoCmdSet(CmdSet):
         self.add(CmdDrop)
         self.add(CmdGive)
         self.add(CmdGetAll)
+        self.add(CmdGetAllCorpse)
         self.add(CmdDropAll)
         self.add(CmdInspect)
         self.add(CmdEquipment)

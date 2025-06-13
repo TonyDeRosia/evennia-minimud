@@ -99,6 +99,13 @@ class CmdLook(DefaultCmdLook):
         look
     """
 
+    aliases = ("l", "look in", "l in")
+
+    def parse(self):
+        super().parse()
+        if self.args and self.args.lower().startswith("in "):
+            self.args = self.args[3:].strip()
+
     def func(self):
         if self.caller.tags.has("sleeping", category="status"):
             self.caller.msg("You can't see anything with your eyes closed.")

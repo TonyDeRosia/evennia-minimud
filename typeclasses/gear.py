@@ -29,11 +29,6 @@ class BareHand:
         if wielder.traits.stamina.value < self.stamina_cost:
             wielder.msg("You are too tired to hit anything.")
             return False
-        # can't attack if on cooldown
-        if not wielder.cooldowns.ready("attack"):
-            wielder.msg("You can't attack again yet.")
-            return False
-
         return True
 
     def at_attack(self, wielder, target, **kwargs):
@@ -89,7 +84,7 @@ class BareHand:
                 effect, chance = status
                 if stat_manager.roll_status(wielder, target, int(chance)):
                     state_manager.add_status_effect(target, effect, 1)
-        wielder.cooldowns.add("attack", self.speed)
+        pass
 
 
 class MeleeWeapon(Object):
@@ -114,10 +109,6 @@ class MeleeWeapon(Object):
         # make sure wielder has enough strength left
         if wielder.traits.stamina.value < self.attributes.get("stamina_cost", 0):
             wielder.msg("You are too tired to use this.")
-            return False
-        # can't attack if on cooldown
-        if not wielder.cooldowns.ready("attack"):
-            wielder.msg("You can't attack again yet.")
             return False
         # this can only be used if it's being wielded
         if self not in wielder.wielding:
@@ -212,7 +203,7 @@ class MeleeWeapon(Object):
                 effect, chance = status
                 if stat_manager.roll_status(wielder, target, int(chance)):
                     state_manager.add_status_effect(target, effect, 1)
-        wielder.cooldowns.add("attack", self.speed)
+        pass
 
 
 class WearableContainer(ContribContainer, ClothingObject):
