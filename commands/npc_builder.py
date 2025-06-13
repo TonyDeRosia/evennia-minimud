@@ -729,6 +729,10 @@ def finalize_mob_prototype(caller, npc):
     if npc.db.vnum is not None:
         msg += f" with VNUM {npc.db.vnum}"
     msg += " and added to mob list.|n"
+
+    from world.system import stat_manager
+    stat_manager.refresh_stats(npc)
+
     caller.msg(msg)
 
 
