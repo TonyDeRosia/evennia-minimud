@@ -81,15 +81,18 @@ def menunode_main(caller, raw_string="", **kwargs):
         {"desc": "Edit race", "goto": "menunode_race"},
         {"desc": "Edit gender", "goto": "menunode_gender"},
         {"desc": "Edit stats", "goto": "menunode_stats"},
-        {"desc": "Edit actflags", "goto": "menunode_actflags"},
-        {"desc": "Edit affects", "goto": "menunode_affects"},
-        {"desc": "Edit attacks", "goto": "menunode_attacks"},
         {"desc": "Edit defenses", "goto": "menunode_defenses"},
         {"desc": "Edit resists", "goto": "menunode_resists"},
         {"desc": "Edit languages", "goto": "menunode_languages"},
-        {"desc": "Save & quit", "goto": "menunode_done"},
         {"desc": "Edit loot", "goto": "menunode_loot"},
+        {"desc": "Edit inventory", "goto": "menunode_inventory"},
+        {"desc": "Edit equipment", "goto": "menunode_equipment"},
+        {"desc": "Edit actflags", "goto": "menunode_actflags"},
+        {"desc": "Edit affects", "goto": "menunode_affects"},
+        {"desc": "Edit attacks", "goto": "menunode_attacks"},
+        {"desc": "Edit AI flags", "goto": "menunode_ai_flags"},
         {"desc": "Cancel", "goto": "menunode_cancel"},
+        {"desc": "Save & quit", "goto": "menunode_done"},
     ]
     return _with_summary(caller, text), options
 
@@ -142,7 +145,22 @@ def _set_level(caller, raw_string, **kwargs):
     if not raw_string.strip().isdigit():
         caller.msg("Level must be numeric.")
         return "menunode_level"
-    caller.ndb.mob_proto["level"] = int(raw_string.strip())
+    val = int(raw_string.strip())
+    caller.ndb.mob_proto["level"] = val
+    stats = {
+        "STR": 5 + val // 2,
+        "CON": 5 + val // 2,
+        "DEX": 5 + val // 3,
+        "INT": 3 + val // 3,
+        "WIS": 3 + val // 3,
+        "LUCK": 5 + val // 4,
+        "PER": 5 + val // 4,
+    }
+    caller.ndb.mob_proto["primary_stats"] = stats
+    parts = "  ".join(f"{k} {v}" for k, v in stats.items())
+    caller.msg(
+        f"Level set to {val}. Primary stats auto-scaled:\n{parts}\n(You may override these manually in 'Edit stats'.)"
+    )
     return "menunode_main"
 
 
@@ -416,6 +434,24 @@ def _edit_loot(caller, raw_string, **kwargs):
         return "menunode_loot"
     caller.msg("Unknown command.")
     return "menunode_loot"
+
+
+def menunode_inventory(caller, raw_string="", **kwargs):
+    """Placeholder for inventory editing."""
+    caller.msg("Inventory editing not yet implemented.")
+    return "menunode_main"
+
+
+def menunode_equipment(caller, raw_string="", **kwargs):
+    """Placeholder for equipment editing."""
+    caller.msg("Equipment editing not yet implemented.")
+    return "menunode_main"
+
+
+def menunode_ai_flags(caller, raw_string="", **kwargs):
+    """Placeholder for AI flag editing."""
+    caller.msg("AI flag editing not yet implemented.")
+    return "menunode_main"
 
 
 def menunode_done(caller, raw_string="", **kwargs):
