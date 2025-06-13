@@ -414,10 +414,10 @@ with VNUM-based NPCs.
 
 ## Running the Tests
 
-The test suite requires Evennia and Django in addition to `pytest`. Make sure
-these packages are installed before invoking the test runner. The easiest way is
-to use the provided requirements file which installs compatible versions of all
-three:
+The test suite relies on Evennia (with its optional **extras**) and Django in
+addition to `pytest`. Make sure these packages are installed before invoking the
+test runner. The easiest way is to use the provided requirements file, which
+installs compatible versions of all three dependencies:
 
 ```bash
 python -m pip install --upgrade pip
@@ -425,6 +425,9 @@ pip install -r requirements-test.txt
 # Install the project itself so tests can import it
 pip install -e .
 ```
+
+Ensure these requirements are installed before running `pytest` so that Django
+and the full Evennia extras are available to the test suite.
 
 You can also run `scripts/setup_test_env.sh` to automate the above steps.
 
