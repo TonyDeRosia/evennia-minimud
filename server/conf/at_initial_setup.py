@@ -8,7 +8,8 @@ database reset to run again, so test carefully.
 """
 
 
-from evennia.utils import create, logger, search
+from evennia import create_object
+from evennia.utils import logger, search
 from evennia.accounts.models import AccountDB
 from world.areas import Area, save_area
 
@@ -20,7 +21,7 @@ def _create_start_room():
     if room:
         return room[0]
 
-    room = create.create_object(
+    room = create_object(
         "typeclasses.rooms.Room",
         key="Town Square",
     )
