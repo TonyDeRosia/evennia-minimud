@@ -75,23 +75,22 @@ class TestCombatEngine(unittest.TestCase):
             engine.process_round()
             self.assertIn(a, engine.aggro.get(b, {}))
 
-    def test_award_experience_is_no_op_for_non_npc(self):
+    def test_solo_gain_awards_exp(self):
         attacker = Dummy()
         attacker.db = type("DB", (), {"exp": 0})()
         victim = Dummy()
         victim.db = type("DB", (), {"exp_reward": 10})()
         with patch('world.system.state_manager.apply_regen'), \
-             patch('world.system.state_manager.check_level_up') as mock_level, \
+             patch('world.system.state_manager.check_level_up'), \
              patch.object(attacker, 'msg') as mock_msg:
             engine = CombatEngine([attacker, victim], round_time=0)
             engine.queue_action(attacker, KillAction(attacker, victim))
             engine.start_round()
             engine.process_round()
-            self.assertEqual(attacker.db.exp, 0)
-            mock_msg.assert_not_called()
-            mock_level.assert_not_called()
+            self.assertEqual(attacker.db.exp, 10)
+            mock_msg.assert_called()
 
-    def test_group_award_experience_is_no_op(self):
+    def test_group_gain_splits_exp(self):
         a = Dummy()
         b = Dummy()
         for obj in (a, b):
@@ -99,18 +98,17 @@ class TestCombatEngine(unittest.TestCase):
         victim = Dummy()
         victim.db = type("DB", (), {"exp_reward": 9})()
         with patch('world.system.state_manager.apply_regen'), \
-             patch('world.system.state_manager.check_level_up') as mock_level, \
+             patch('world.system.state_manager.check_level_up'), \
              patch.object(a, 'msg') as msg_a, patch.object(b, 'msg') as msg_b:
             engine = CombatEngine([a, b, victim], round_time=0)
             engine.aggro[victim] = {a: 1, b: 1}
             engine.queue_action(a, KillAction(a, victim))
             engine.start_round()
             engine.process_round()
-            self.assertEqual(a.db.exp, 0)
-            self.assertEqual(b.db.exp, 0)
-            msg_a.assert_not_called()
-            msg_b.assert_not_called()
-            mock_level.assert_not_called()
+            self.assertEqual(a.db.exp, 4)
+            self.assertEqual(b.db.exp, 4)
+            msg_a.assert_called()
+            msg_b.assert_called()
 
     def test_engine_stops_when_empty(self):
         a = Dummy()

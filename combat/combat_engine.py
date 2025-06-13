@@ -226,12 +226,28 @@ class CombatEngine:
         self.process_round()
 
     def award_experience(self, attacker, victim) -> None:
-        """Legacy hook for awarding experience.
+        """Distribute experience for defeating ``victim``.
 
-        Experience is now granted by the defeated object itself via
-        :meth:`NPC.award_xp_to`, so this method performs no action.
+        Parameters
+        ----------
+        attacker
+            Character credited with the kill.
+        victim
+            Character that was defeated.
+
+        Side Effects
+        ------------
+        Awards experience either to ``attacker`` or split among all
+        contributors tracked on ``victim``.
         """
-        return
+        exp = getattr(victim.db, "exp_reward", 0) if hasattr(victim, "db") else 0
+        if not exp:
+            return
+        contributors = list(self.aggro.get(victim, {}).keys()) or [attacker]
+        if len(contributors) == 1:
+            self.solo_gain(contributors[0], exp)
+        else:
+            self.group_gain(contributors, exp)
 
     def add_participant(self, actor: object) -> None:
         """Add a combatant to this engine.
