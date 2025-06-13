@@ -77,15 +77,12 @@ UTILITY_STATS: List[Stat] = [
     Stat("detection", "Detection", stat="WIS"),
     Stat("perception", "Perception", base=5, stat="WIS"),
     Stat("threat", "Threat", stat="STR"),
-    Stat("movement_speed", "Movement Speed", base=1, stat="DEX"),
     Stat("craft_bonus", "Crafting Bonus", stat="INT"),
 ]
 
 # PvP / guild-related stats
 PVP_STATS: List[Stat] = [
-    Stat("pvp_power", "PvP Power", stat="STR"),
-    Stat("pvp_resilience", "PvP Resilience", stat="CON"),
-    Stat("guild_honor_mod", "Guild Honor Rank Modifiers", stat="WIS"),
+    # deprecated PvP related stats removed
 ]
 
 
@@ -98,7 +95,6 @@ ALL_STATS: List[Stat] = (
     + REGEN_STATS
     + TEMPO_STATS
     + UTILITY_STATS
-    + PVP_STATS
 )
 
 # Convenience: list of only core stat keys

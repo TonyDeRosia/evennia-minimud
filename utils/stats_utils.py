@@ -26,7 +26,6 @@ ALIAS_MAP = {
     "armor_pen": "piercing",
     "spell_pen": "spell_penetration",
     "crafting_bonus": "craft_bonus",
-    "guild_honor_rank_modifiers": "guild_honor_mod",
 }
 
 
@@ -49,7 +48,6 @@ from world.stats import (
     REGEN_STATS,
     TEMPO_STATS,
     UTILITY_STATS,
-    PVP_STATS,
     sum_bonus,
     apply_stats,
 )
@@ -69,7 +67,6 @@ SECONDARY_STATS = (
     + REGEN_STATS
     + TEMPO_STATS
     + [stat for stat in UTILITY_STATS if stat.key != PRIMARY_EXTRA]
-    + PVP_STATS
 )
 
 SECONDARY_KEYS = [stat.key for stat in SECONDARY_STATS]
