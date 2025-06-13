@@ -438,8 +438,15 @@ class Corpse(Object):
 
     def at_object_creation(self):
         super().at_object_creation()
-        self.locks.add("get:false()")
         self.db.display_priority = "corpse"
+        if getattr(self.db, "weight", None) is None:
+            weight = 0
+            if self.db.corpse_of and self.location:
+                for obj in self.location.contents:
+                    if obj.key == self.db.corpse_of:
+                        weight = getattr(obj.db, "weight", 0)
+                        break
+            self.db.weight = weight
         if (decay := self.db.decay_time):
             # start auto-decay timer in minutes
             self.scripts.add(
