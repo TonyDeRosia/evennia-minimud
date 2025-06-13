@@ -1106,11 +1106,6 @@ class NPC(Character):
             if script and script[0].pk:
                 script[0].remove_combatant(self)
 
-        corpse = self.drop_loot(attacker)
-        if corpse:
-            corpse.location = self.location
-
-        self.at_death(attacker)
         engine = getattr(getattr(self, "ndb", None), "combat_engine", None)
         if engine:
             engine.award_experience(attacker, self)
@@ -1135,6 +1130,12 @@ class NPC(Character):
                             if hasattr(c, "msg"):
                                 c.msg(f"You gain {share} experience.")
                             state_manager.check_level_up(c)
+
+        corpse = self.drop_loot(attacker)
+        if corpse:
+            corpse.location = self.location
+
+        self.at_death(attacker)
         if self.location:
             if attacker:
                 self.location.msg_contents(
