@@ -1140,6 +1140,10 @@ class NPC(Character):
             contributors = list(log.keys()) or ([attacker] if attacker else [])
             contributors = [c for c in contributors if c]
             award_xp(attacker, xp, contributors)
+
+        if attacker and getattr(attacker.db, "combat_target", None) is self:
+            attacker.db.combat_target = None
+
         self.delete()
 
     # property to mimic weapons
