@@ -96,6 +96,15 @@ class TestCombatEngine(unittest.TestCase):
             engine.process_round()
             self.assertIn(a, engine.aggro.get(b, {}))
 
+    def test_track_aggro_skips_missing_pk(self):
+        a = Dummy()
+        b = Dummy()
+        b.pk = None
+        engine = CombatEngine([a, b], round_time=0)
+        with patch('world.system.state_manager.get_effective_stat', return_value=0):
+            engine.track_aggro(b, a)
+        self.assertNotIn(b, engine.aggro)
+
     def test_solo_gain_awards_exp(self):
         attacker = Dummy()
         attacker.db.experience = 0
