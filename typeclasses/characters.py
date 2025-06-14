@@ -1106,31 +1106,6 @@ class NPC(Character):
             if script and script[0].pk:
                 script[0].remove_combatant(self)
 
-        engine = getattr(getattr(self, "ndb", None), "combat_engine", None)
-        if engine:
-            engine.award_experience(attacker, self)
-        else:
-            from world.system import state_manager
-            exp = int(getattr(self.db, "exp_reward", 0) or 0)
-            if exp:
-                log = getattr(getattr(self, "ndb", None), "damage_log", {})
-                contributors = list(log.keys()) or ([attacker] if attacker else [])
-                contributors = [c for c in contributors if c]
-                if contributors:
-                    if len(contributors) == 1:
-                        c = contributors[0]
-                        c.db.exp = (c.db.exp or 0) + exp
-                        if hasattr(c, "msg"):
-                            c.msg(f"You gain {exp} experience.")
-                        state_manager.check_level_up(c)
-                    else:
-                        share = max(1, int(exp / len(contributors)))
-                        for c in contributors:
-                            c.db.exp = (c.db.exp or 0) + share
-                            if hasattr(c, "msg"):
-                                c.msg(f"You gain {share} experience.")
-                            state_manager.check_level_up(c)
-
         corpse = self.drop_loot(attacker)
         if corpse:
             corpse.location = self.location
@@ -1143,6 +1118,25 @@ class NPC(Character):
                 )
             else:
                 self.location.msg_contents(f"{self.key} dies.")
+
+        engine = getattr(getattr(self, "ndb", None), "combat_engine", None)
+        if engine:
+            engine.award_experience(attacker, self)
+        else:
+            from combat.combat_utils import award_xp
+
+            xp = getattr(self.db, "xp_reward", None)
+            if xp is None:
+                xp = getattr(self.db, "exp_reward", 0)
+            xp = int(xp or 0)
+            if not xp:
+                level = getattr(self.db, "level", 1) or 1
+                xp = level * 5
+
+            log = getattr(getattr(self, "ndb", None), "damage_log", {})
+            contributors = list(log.keys()) or ([attacker] if attacker else [])
+            contributors = [c for c in contributors if c]
+            award_xp(attacker, xp, contributors)
         self.delete()
 
     # property to mimic weapons

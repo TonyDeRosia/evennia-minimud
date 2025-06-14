@@ -21,7 +21,7 @@ class TestLeveling(EvenniaTest):
         self.char1.msg.assert_called()
         output = self.char1.msg.call_args[0][0]
         self.assertIn("practice sessions", output)
-        self.assertIn("training point", output)
+        self.assertIn("training session", output)
 
     def test_multiple_level_ups(self):
         self.char1.db.exp = 210
@@ -31,4 +31,4 @@ class TestLeveling(EvenniaTest):
         self.assertEqual(self.char1.db.training_points, 2)
         output = self.char1.msg.call_args[0][0]
         self.assertIn("practice sessions", output)
-        self.assertIn("training point", output)
+        self.assertIn("training session", output)
