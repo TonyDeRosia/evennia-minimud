@@ -126,7 +126,9 @@ class AttackAction(Action):
                 # Use natural weapon stats when unarmed
                 weapon = self.actor.db.natural_weapon
             else:
-                weapon = self.actor
+                from typeclasses.gear import BareHand
+                # Default to bare hands if no natural weapon is defined
+                weapon = BareHand()
 
         logger.debug("AttackAction weapon=%s", getattr(weapon, "key", weapon))
 
