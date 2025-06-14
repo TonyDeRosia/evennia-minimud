@@ -60,7 +60,7 @@ class CombatRoundManager:
 
     def _schedule_tick(self) -> None:
         """Schedule the next combat tick."""
-        delay(0.3, self.tick)
+        delay(2, self.tick)
 
     def tick(self) -> None:
         for inst in list(self.instances):

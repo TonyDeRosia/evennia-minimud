@@ -2,10 +2,40 @@
 
 import logging
 import random
-from typing import Tuple
+from typing import Tuple, Iterable
 
 from world.system import state_manager
 from world.system.stat_manager import check_hit, roll_crit, crit_damage
+
+
+def award_xp(killer, total_xp: int, participants: Iterable | None = None) -> None:
+    """Distribute ``total_xp`` among ``participants``.
+
+    Parameters
+    ----------
+    killer
+        Character credited with the kill.
+    total_xp
+        Amount of experience to award.
+    participants
+        Iterable of characters who contributed to the kill. ``killer`` will be
+        included if not already present.
+    """
+
+    members = list(participants or [])
+    if killer and killer not in members:
+        members.insert(0, killer)
+
+    members = [m for m in members if m]
+    if not members or not total_xp:
+        return
+
+    share = max(int(total_xp / len(members)), int(total_xp * 0.10))
+    for member in members:
+        member.db.exp = (member.db.exp or 0) + share
+        if hasattr(member, "msg"):
+            member.msg(f"You gain {share} experience points!")
+        state_manager.check_level_up(member)
 
 
 def calculate_initiative(combatant) -> int:

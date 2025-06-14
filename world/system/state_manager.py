@@ -321,9 +321,8 @@ def check_level_up(chara) -> bool:
 
     if leveled:
         chara.db.level = level
-        chara.msg(
-            f"You advance to level {level}! +3 practice sessions and +1 training point awarded."
-        )
+        chara.msg(f"You have reached level {level}!")
+        chara.msg("You gain 3 practice sessions and 1 training session.")
         stat_manager.refresh_stats(chara)
 
     return leveled

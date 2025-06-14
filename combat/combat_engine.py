@@ -240,17 +240,25 @@ class CombatEngine:
         Awards experience either to ``attacker`` or split among all
         contributors tracked on ``victim``.
         """
-        exp = getattr(victim.db, "exp_reward", 0) if hasattr(victim, "db") else 0
+        from combat.combat_utils import award_xp
+
+        if hasattr(victim, "db"):
+            exp = getattr(victim.db, "xp_reward", None)
+            if exp is None:
+                exp = getattr(victim.db, "exp_reward", 0)
+        else:
+            exp = 0
+        exp = int(exp or 0)
         if not exp:
-            return
+            level = getattr(getattr(victim, "db", None), "level", 1) or 1
+            exp = level * 5
+
         contributors = list(self.aggro.get(victim, {}).keys()) or [attacker]
         # limit contributors to those still participating in combat
         active = {p.actor for p in self.participants}
         contributors = [c for c in contributors if c in active]
-        if len(contributors) == 1:
-            self.solo_gain(contributors[0], exp)
-        else:
-            self.group_gain(contributors, exp)
+
+        award_xp(attacker, exp, contributors)
 
     def add_participant(self, actor: object) -> None:
         """Add a combatant to this engine.
