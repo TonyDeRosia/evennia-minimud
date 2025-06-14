@@ -162,3 +162,16 @@ class TestStateManager(EvenniaTest):
         for key, regen in expected.items():
             trait = char.traits.get(key)
             self.assertEqual(trait.current, trait.max // 2 + regen)
+
+    def test_sated_decay_script_reduces_sated(self):
+        from scripts.sated_decay import SatedDecayScript
+
+        char = self.char1
+        char.db.sated = 10
+
+        script = SatedDecayScript()
+        script.at_script_creation()
+
+        script.at_repeat()
+
+        self.assertEqual(char.db.sated, 9)
