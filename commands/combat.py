@@ -83,9 +83,10 @@ class CmdAttack(Command):
         # it's all good! let's get started!
         from combat.round_manager import CombatRoundManager
 
-        instance = CombatRoundManager.get().add_instance(location)
+        manager = CombatRoundManager.get()
+        instance = manager.start_combat([self.caller, target])
 
-        if not instance.add_combatant(self.caller):
+        if self.caller not in instance.combatants:
             if _current_hp(self.caller) <= 0:
                 self.msg("You are in no condition to fight.")
             else:
@@ -237,7 +238,7 @@ class CmdFlee(Command):
 
         from combat.round_manager import CombatRoundManager
         manager = CombatRoundManager.get()
-        if instance := manager.instances_by_room.get(caller.location.id):
+        if instance := manager.get_combatant_combat(caller):
             if not instance.remove_combatant(self.caller):
                 self.msg("You cannot leave combat.")
 

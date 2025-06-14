@@ -466,7 +466,7 @@ class TestAdminCommands(EvenniaTest):
         cmd.func()
 
         from combat.round_manager import CombatRoundManager
-        self.assertFalse(CombatRoundManager.get().instances)
+        self.assertFalse(CombatRoundManager.get().combats)
 
     def test_peace_after_victory(self):
         """Peace should handle the combat script being deleted already."""
@@ -474,7 +474,7 @@ class TestAdminCommands(EvenniaTest):
         from combat.round_manager import CombatRoundManager
 
         manager = CombatRoundManager.get()
-        instance = manager.add_instance(self.room1, fighters=[self.char1, self.char2])
+        instance = manager.start_combat([self.char1, self.char2])
 
         # defeat the opponent
         self.char2.tags.add("dead", category="status")
@@ -482,7 +482,7 @@ class TestAdminCommands(EvenniaTest):
         manager._tick()
 
         # combat instance should now be deleted
-        self.assertFalse(manager.instances)
+        self.assertFalse(manager.combats)
 
         self.char1.msg.reset_mock()
         self.char1.execute_cmd("peace")
@@ -503,7 +503,7 @@ class TestAdminCommands(EvenniaTest):
         self.char1.execute_cmd(f"attack {self.char2.key}")
         from combat.round_manager import CombatRoundManager
         manager = CombatRoundManager.get()
-        instance = manager.instances_by_room.get(self.room1.id)
+        instance = manager.get_combatant_combat(self.char1)
 
         # defeat the opponent so combat ends
         self.char2.tags.add("dead", category="status")
@@ -511,7 +511,7 @@ class TestAdminCommands(EvenniaTest):
 
         # ensure instance is removed
         manager._tick()
-        self.assertFalse(manager.instances)
+        self.assertFalse(manager.combats)
 
         self.char1.msg.reset_mock()
         self.char1.execute_cmd("peace")
@@ -537,5 +537,5 @@ class TestAdminCommands(EvenniaTest):
         cmd.func()
 
         from combat.round_manager import CombatRoundManager
-        self.assertFalse(CombatRoundManager.get().instances)
+        self.assertFalse(CombatRoundManager.get().combats)
 

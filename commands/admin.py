@@ -441,14 +441,19 @@ class CmdPeace(Command):
 
         from combat.round_manager import CombatRoundManager
         manager = CombatRoundManager.get()
-        instance = manager.instances_by_room.get(location.id)
+        instance = manager.get_combatant_combat(caller)
+        if not instance:
+            for inst in manager.combats.values():
+                if any(getattr(f, "location", None) == location for f in inst.combatants):
+                    instance = inst
+                    break
         if not instance:
             caller.msg("There is no fighting here.")
             return
 
         for p in list(instance.engine.participants):
             instance.remove_combatant(p.actor)
-        manager.remove_instance(location)
+        manager.remove_combat(instance.combat_id)
         location.msg_contents("Peace falls over the area.")
 
 

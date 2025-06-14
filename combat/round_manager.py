@@ -1,10 +1,10 @@
-"""Combat round management across all active rooms."""
+"""Combat round management across all active combats."""
 
 from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Set
 
 from evennia.utils import delay
 from evennia.utils.logger import log_trace
@@ -14,38 +14,26 @@ from .engine import _current_hp
 
 @dataclass
 class CombatInstance:
-    """Container for a combat engine tied to a room."""
+    """Container representing a single combat encounter."""
 
-    room: object
+    combat_id: int
     engine: object  # CombatEngine
+    combatants: Set[object]
     round_time: float = 2.0
     round_number: int = 0
     last_round_time: float = field(default_factory=time.time)
     combat_ended: bool = False
 
-    def gather_fighters(self) -> List[object]:
-        """Return all objects in the room flagged as in combat."""
-        if not self.room:
-            return []
-        return [
-            obj
-            for obj in getattr(self.room, "contents", [])
-            if getattr(getattr(obj, "db", None), "in_combat", False)
-        ]
-
     def add_combatant(self, combatant, **kwargs) -> bool:
-        """Add ``combatant`` to this combat instance.
-
-        Raises:
-            RuntimeError: If the combat engine is missing.
-        """
+        """Add ``combatant`` to this combat instance."""
         if not self.engine:
-            raise RuntimeError("Combat engine failed to initialize for room")
+            raise RuntimeError("Combat engine failed to initialize")
         if _current_hp(combatant) <= 0:
             return False
         current = {p.actor for p in self.engine.participants}
         if combatant in current:
             return True
+        self.combatants.add(combatant)
         self.engine.add_participant(combatant)
         return True
 
@@ -54,16 +42,12 @@ class CombatInstance:
         if not self.engine:
             return False
         self.engine.remove_participant(combatant)
+        self.combatants.discard(combatant)
         return True
 
     def is_valid(self) -> bool:
-        """Return ``True`` if the underlying room still exists."""
-        return (
-            self.room
-            and hasattr(self.room, "pk")
-            and self.room.pk
-            and not self.combat_ended
-        )
+        """Return ``True`` if this instance is still active."""
+        return bool(self.combatants) and not self.combat_ended
 
     def has_active_fighters(self) -> bool:
         """Return ``True`` if at least two participants can still fight."""
@@ -98,7 +82,7 @@ class CombatInstance:
             self.end_combat("No fighters available")
             return
 
-        fighters = set(self.gather_fighters())
+        fighters = set(self.combatants)
 
         if hasattr(self.engine, "participants"):
             current = {p.actor for p in self.engine.participants}
@@ -219,7 +203,7 @@ class CombatInstance:
             return
 
         self.combat_ended = True
-        CombatRoundManager.get().remove_instance(self.room)
+        CombatRoundManager.get().remove_combat(self.combat_id)
 
         # Clean up fighter states
         if self.engine:
@@ -243,11 +227,12 @@ class CombatRoundManager:
     _instance: Optional["CombatRoundManager"] = None
 
     def __init__(self) -> None:
-        self.instances: List[CombatInstance] = []
-        self.instances_by_room: Dict[int, CombatInstance] = {}
+        self.combats: Dict[int, CombatInstance] = {}
+        self.combatant_to_combat: Dict[object, int] = {}
         self.running = False
         self.tick_delay = 2.0
         self._next_tick_scheduled = False
+        self._next_id = 1
 
     @classmethod
     def get(cls) -> "CombatRoundManager":
@@ -256,60 +241,70 @@ class CombatRoundManager:
         return cls._instance
 
     # ------------------------------------------------------------------
-    # instance management
+    # combat management
     # ------------------------------------------------------------------
-    def add_instance(
-        self, room, fighters: Optional[List[object]] = None, round_time: Optional[float] = None
+
+    def create_combat(
+        self, combatants: Optional[List[object]] = None, round_time: Optional[float] = None
     ) -> CombatInstance:
-        """Create or fetch a combat instance for ``room``."""
-        key = getattr(room, "id", id(room))
-        inst = self.instances_by_room.get(key)
-        if inst:
-            inst.sync_participants()
-            if not self.running:
-                inst.process_round()
-                self.start_ticking()
-            return inst
+        """Create a new combat with ``combatants``."""
 
-        fighters = fighters or [
-            obj
-            for obj in getattr(room, "contents", [])
-            if getattr(getattr(obj, "db", None), "in_combat", False)
-        ]
+        fighters = combatants or []
 
-        # Create combat engine
         try:
             from .engine import CombatEngine
         except ImportError as err:
-            # Propagate ImportError so callers are aware engine is unavailable
             raise ImportError("Combat engine could not be imported") from err
 
         engine = CombatEngine(fighters, round_time=None)
         if not engine:
             raise RuntimeError("CombatEngine failed to initialize")
 
-        # Create instance
-        inst = CombatInstance(room, engine, round_time or self.tick_delay)
-        self.instances.append(inst)
-        self.instances_by_room[key] = inst
+        combat_id = self._next_id
+        self._next_id += 1
 
-        # Process initial round
+        inst = CombatInstance(combat_id, engine, set(fighters), round_time or self.tick_delay)
+        self.combats[combat_id] = inst
+        for fighter in fighters:
+            self.combatant_to_combat[fighter] = combat_id
+
         inst.process_round()
 
-        # Start ticking if not already running
         if not self.running:
             self.start_ticking()
 
         return inst
 
-    def remove_instance(self, room) -> None:
-        """Remove ``room``'s instance from management."""
-        key = getattr(room, "id", id(room))
-        inst = self.instances_by_room.pop(key, None)
-        if inst:
-            self.instances = [i for i in self.instances if i is not inst]
-        if not self.instances:
+    def remove_combat(self, combat_id: int) -> None:
+        """Remove combat ``combat_id`` from management."""
+        inst = self.combats.pop(combat_id, None)
+        if not inst:
+            return
+        for fighter in list(inst.combatants):
+            self.combatant_to_combat.pop(fighter, None)
+        if not self.combats:
             self.stop_ticking()
+
+    def get_combatant_combat(self, combatant) -> Optional[CombatInstance]:
+        """Return the combat instance ``combatant`` is part of."""
+        cid = self.combatant_to_combat.get(combatant)
+        if cid is None:
+            return None
+        return self.combats.get(cid)
+
+    def start_combat(self, combatants: List[object]) -> CombatInstance:
+        """Start combat for the given ``combatants``."""
+        for combatant in combatants:
+            inst = self.get_combatant_combat(combatant)
+            if inst:
+                for c in combatants:
+                    if c not in inst.combatants:
+                        inst.add_combatant(c)
+                        self.combatant_to_combat[c] = inst.combat_id
+                if not self.running:
+                    self.start_ticking()
+                return inst
+        return self.create_combat(combatants)
 
     # ------------------------------------------------------------------
     # ticking logic
@@ -330,36 +325,36 @@ class CombatRoundManager:
         self._next_tick_scheduled = True
         delay(self.tick_delay, self._tick)
 
-    def _process_instances(self) -> List[object]:
-        """Process all combat instances and return rooms to remove."""
-        remove: List[object] = []
+    def _process_combats(self) -> List[int]:
+        """Process all combats and return those to remove."""
+        remove: List[int] = []
 
-        for inst in list(self.instances_by_room.values()):
+        for cid, inst in list(self.combats.items()):
             try:
                 if not inst.is_valid():
-                    remove.append(inst.room)
+                    remove.append(cid)
                     continue
 
                 if not inst.has_active_fighters():
                     inst.end_combat("No active fighters remaining")
-                    remove.append(inst.room)
+                    remove.append(cid)
                     continue
 
                 inst.process_round()
 
                 if inst.combat_ended:
-                    remove.append(inst.room)
+                    remove.append(cid)
 
             except Exception as err:
                 log_trace(f"Error processing combat instance: {err}")
-                remove.append(inst.room)
+                remove.append(cid)
 
         return remove
 
-    def _cleanup_instances(self, rooms: List[object]) -> None:
-        """Remove instances whose rooms are in ``rooms``."""
-        for room in rooms:
-            self.remove_instance(room)
+    def _cleanup_combats(self, combat_ids: List[int]) -> None:
+        """Remove combats whose ids are in ``combat_ids``."""
+        for cid in combat_ids:
+            self.remove_combat(cid)
 
     def _tick(self) -> None:
         self._next_tick_scheduled = False
@@ -368,11 +363,11 @@ class CombatRoundManager:
         if not self.running:
             return
 
-        remove = self._process_instances()
-        self._cleanup_instances(remove)
+        remove = self._process_combats()
+        self._cleanup_combats(remove)
 
         # Schedule next tick if instances remain
-        if self.instances and self.running:
+        if self.combats and self.running:
             self._schedule_next_tick()
 
     # ------------------------------------------------------------------
@@ -381,11 +376,11 @@ class CombatRoundManager:
     def get_combat_status(self) -> Dict:
         status = {
             "running": self.running,
-            "total_instances": len(self.instances),
+            "total_instances": len(self.combats),
             "instances": [],
         }
 
-        for inst in self.instances:
+        for inst in self.combats.values():
             # Get fighter count based on engine type
             fighter_count = 0
             if inst.engine:
@@ -396,7 +391,7 @@ class CombatRoundManager:
 
             status["instances"].append(
                 {
-                    "room": str(inst.room),
+                    "id": inst.combat_id,
                     "round_number": inst.round_number,
                     "fighters": fighter_count,
                     "valid": inst.is_valid(),
@@ -408,10 +403,10 @@ class CombatRoundManager:
 
     def force_end_all_combat(self) -> None:
         """Force end all combat instances."""
-        for inst in list(self.instances_by_room.values()):
+        for inst in list(self.combats.values()):
             inst.end_combat("Force ended by admin")
-        self.instances.clear()
-        self.instances_by_room.clear()
+        self.combats.clear()
+        self.combatant_to_combat.clear()
         self.stop_ticking()
 
     def debug_info(self) -> str:
@@ -428,7 +423,7 @@ class CombatRoundManager:
             lines.extend(
                 [
                     f"  Instance {i + 1}:",
-                    f"    Room: {inst['room']}",
+                    f"    ID: {inst['id']}",
                     f"    Round: {inst['round_number']}",
                     f"    Fighters: {inst['fighters']}",
                     f"    Valid: {inst['valid']}",
@@ -439,3 +434,22 @@ class CombatRoundManager:
             )
 
         return "\n".join(lines)
+
+
+def cleanup_room_based_combat() -> None:
+    """End any existing room-based combat instances left from older versions."""
+    mgr = CombatRoundManager._instance
+    if not mgr:
+        return
+    if hasattr(mgr, "instances_by_room"):
+        for inst in list(getattr(mgr, "instances_by_room", {}).values()):
+            try:
+                inst.end_combat("Migrated to ID-based combat")
+            except Exception:
+                pass
+        mgr.instances_by_room.clear()
+        if hasattr(mgr, "instances"):
+            mgr.instances.clear()
+
+
+cleanup_room_based_combat()
