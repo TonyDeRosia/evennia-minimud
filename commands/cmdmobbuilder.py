@@ -163,7 +163,7 @@ class CmdMobProto(Command):
                 caller.ndb.mob_vnum = caller.ndb.buildnpc.get("vnum")
                 caller.ndb.buildnpc_orig = dict(caller.ndb.buildnpc)
                 caller.db.builder_autosave = None
-                caller.scripts.add(BuilderAutosave, key="builder_autosave")
+                npc_builder._ensure_autosave_script(caller)
                 startnode = (
                     "menunode_desc" if caller.ndb.buildnpc.get("key") else "menunode_key"
                 )
@@ -191,7 +191,7 @@ class CmdMobProto(Command):
         caller.ndb.buildnpc = dict(proto)
         caller.ndb.buildnpc_orig = dict(caller.ndb.buildnpc)
         caller.ndb.mob_vnum = vnum
-        caller.scripts.add(BuilderAutosave, key="builder_autosave")
+        npc_builder._ensure_autosave_script(caller)
         startnode = "menunode_desc" if caller.ndb.buildnpc.get("key") else "menunode_key"
         EvMenu(
             caller,
