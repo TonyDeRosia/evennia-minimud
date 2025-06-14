@@ -8,6 +8,7 @@ from typing import Dict, List, Optional
 
 from evennia.utils import delay
 from evennia.utils.logger import log_trace
+from .combat_engine import _current_hp
 
 
 @dataclass
@@ -48,7 +49,7 @@ class CombatInstance:
         for fighter in fighters:
             if not fighter:
                 continue
-            hp = getattr(fighter, "hp", 0)
+            hp = _current_hp(fighter)
             if hp <= 0:
                 continue
             if getattr(fighter, "in_combat", False):
@@ -79,7 +80,7 @@ class CombatInstance:
             
             # Remove defeated combatants
             for actor in list(fighters):
-                if getattr(actor, "hp", 0) <= 0:
+                if _current_hp(actor) <= 0:
                     if hasattr(actor, "db"):
                         actor.db.in_combat = False
                     if hasattr(self.engine, "remove_participant"):
@@ -92,7 +93,7 @@ class CombatInstance:
                 if not fighter:
                     continue
 
-                if getattr(fighter, "hp", 0) <= 0:
+                if _current_hp(fighter) <= 0:
                     fighter.db.in_combat = False
                     continue
 
@@ -139,7 +140,7 @@ class CombatInstance:
         fighters = getattr(self.engine, "fighters", [])
         
         for fighter in list(fighters):
-            if not fighter or getattr(fighter, "hp", 0) <= 0:
+            if not fighter or _current_hp(fighter) <= 0:
                 continue
 
             if not getattr(fighter, "in_combat", False):
@@ -162,7 +163,7 @@ class CombatInstance:
                 fighter != npc
                 and hasattr(fighter, "has_account")
                 and fighter.has_account
-                and getattr(fighter, "hp", 0) > 0
+                and _current_hp(fighter) > 0
                 and getattr(fighter, "in_combat", False)
             ):
                 targets.append(fighter)
