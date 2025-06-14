@@ -314,7 +314,11 @@ def check_level_up(chara) -> bool:
     level = int(chara.db.level or 1)
     leveled = False
 
-    while level < MAX_LEVEL and exp >= level * settings.XP_PER_LEVEL:
+    def _total_xp_for(lvl: int) -> int:
+        """Return cumulative XP required to reach ``lvl``."""
+        return sum(settings.XP_TO_LEVEL(i) for i in range(1, lvl))
+
+    while level < MAX_LEVEL and exp >= _total_xp_for(level + 1):
         level += 1
         leveled = True
         chara.db.practice_sessions = (chara.db.practice_sessions or 0) + 3
@@ -339,7 +343,7 @@ def level_up(chara, excess: int = 0) -> None:
     chara.db.level = level
     chara.db.practice_sessions = (chara.db.practice_sessions or 0) + 3
     chara.db.training_points = (chara.db.training_points or 0) + 1
-    chara.db.tnl = settings.XP_PER_LEVEL
+    chara.db.tnl = settings.XP_TO_LEVEL(level)
     if not settings.XP_CARRY_OVER:
         chara.db.experience = (chara.db.experience or 0) - excess
     chara.msg(f"You have reached level {level}!")
@@ -354,8 +358,9 @@ def gain_xp(chara, amount: int) -> None:
         return
 
     amt = int(amount)
+    current_level = int(chara.db.level or 1)
     chara.db.experience = (chara.db.experience or 0) + amt
-    chara.db.tnl = (chara.db.tnl or settings.XP_PER_LEVEL) - amt
+    chara.db.tnl = (chara.db.tnl or settings.XP_TO_LEVEL(current_level)) - amt
 
     while chara.db.tnl <= 0 and (chara.db.level or 1) < MAX_LEVEL:
         excess = -chara.db.tnl
@@ -363,5 +368,5 @@ def gain_xp(chara, amount: int) -> None:
         if settings.XP_CARRY_OVER:
             chara.db.tnl -= excess
         else:
-            chara.db.tnl = settings.XP_PER_LEVEL
+            chara.db.tnl = settings.XP_TO_LEVEL(int(chara.db.level or 1))
 

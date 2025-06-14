@@ -29,7 +29,7 @@ class Dummy:
             {
                 "temp_bonuses": {},
                 "experience": 0,
-                "tnl": settings.XP_PER_LEVEL,
+                "tnl": settings.XP_TO_LEVEL(1),
                 "level": 1,
             },
         )()
@@ -55,7 +55,7 @@ class NoHealth:
                 "temp_bonuses": {},
                 "combat_target": None,
                 "experience": 0,
-                "tnl": settings.XP_PER_LEVEL,
+                "tnl": settings.XP_TO_LEVEL(1),
                 "level": 1,
             },
         )()
