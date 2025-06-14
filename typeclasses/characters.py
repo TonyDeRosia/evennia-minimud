@@ -1274,7 +1274,15 @@ class NPC(Character):
         if not combat_script.add_combatant(self, enemy=target):
             return
 
-        self.attack(target, weapon)
+        from combat.round_manager import CombatRoundManager
+        instance = CombatRoundManager.get().add_instance(combat_script)
+        engine = getattr(instance, "engine", None)
+
+        if engine:
+            from combat.combat_actions import AttackAction
+            engine.queue_action(self, AttackAction(self, target))
+        else:
+            self.attack(target, weapon)
 
     def at_pre_attack(self, wielder, **kwargs):
         """
