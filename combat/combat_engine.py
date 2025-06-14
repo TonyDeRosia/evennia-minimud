@@ -378,8 +378,6 @@ class CombatEngine:
         """
         if not target or target is attacker:
             return
-        if hasattr(target, "pk") and target.pk is None:
-            return
         from world.system import state_manager
 
         data = self.aggro.setdefault(target, {})
