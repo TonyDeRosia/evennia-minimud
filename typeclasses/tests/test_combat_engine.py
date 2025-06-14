@@ -44,6 +44,17 @@ class Dummy:
         return amount
 
 
+class UnsavedDummy(Dummy):
+    class FakeDB:
+        def __setattr__(self, name, value):
+            raise AttributeError("unsaved object")
+
+    def __init__(self, hp=10, init=0):
+        super().__init__(hp, init)
+        self.pk = None
+        self.db = self.FakeDB()
+
+
 class NoHealth:
     def __init__(self):
         self.location = MagicMock()
@@ -527,3 +538,33 @@ def test_no_recovery_message_after_target_cleared():
 
     messages = [call.args[0] for call in player.msg.call_args_list]
     assert "Still recovering." not in messages
+
+
+class TestUnsavedPrototypeCombat(unittest.TestCase):
+    def test_combat_with_unsaved_npc(self):
+        player = Dummy()
+        npc = UnsavedDummy()
+        engine = CombatEngine([player, npc], round_time=0)
+        engine.queue_action(player, KillAction(player, npc))
+
+        with patch("world.system.state_manager.apply_regen"), \
+             patch("world.system.state_manager.check_level_up"), \
+             patch("world.system.state_manager.get_effective_stat", return_value=0), \
+             patch("combat.combat_actions.utils.inherits_from", return_value=False), \
+             patch("random.randint", return_value=0), \
+             patch("combat.combat_engine.delay"):
+            engine.start_round()
+            engine.process_round()
+
+        self.assertNotIn(npc, [p.actor for p in engine.participants])
+
+    def test_track_aggro_ignores_unsaved(self):
+        player = Dummy()
+        npc = UnsavedDummy()
+        engine = CombatEngine([player], round_time=0)
+
+        with patch("world.system.state_manager.get_effective_stat", return_value=0):
+            engine.track_aggro(npc, player)
+            engine.track_aggro(player, npc)
+
+        self.assertFalse(engine.aggro)
