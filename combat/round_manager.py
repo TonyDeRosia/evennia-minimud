@@ -272,10 +272,11 @@ class CombatRoundManager:
         # Create combat engine
         try:
             from .engine import CombatEngine
-            engine = CombatEngine(fighters, round_time=None)
-        except ImportError:
-            # Fallback for environments without the combat engine
-            engine = None
+        except ImportError as err:
+            # Propagate ImportError so callers are aware engine is unavailable
+            raise ImportError("Combat engine could not be imported") from err
+
+        engine = CombatEngine(fighters, round_time=None)
 
         # Create instance
         inst = CombatInstance(room, engine, round_time or self.tick_delay)
