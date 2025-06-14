@@ -539,3 +539,15 @@ class TestAdminCommands(EvenniaTest):
         from combat.round_manager import CombatRoundManager
         self.assertFalse(CombatRoundManager.get().combats)
 
+    def test_force_mob_report(self):
+        from commands.admin import CmdForceMobReport
+
+        cmd = CmdForceMobReport()
+        cmd.caller = self.char1
+        cmd.args = self.char2.key
+        self.room1.msg_contents = MagicMock()
+        cmd.func()
+        output = self.room1.msg_contents.call_args[0][0]
+        self.assertIn(self.char2.key, output)
+        self.assertIn("HP", output)
+

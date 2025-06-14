@@ -186,18 +186,30 @@ def format_combat_message(
     crit: bool = False,
     miss: bool = False,
 ) -> str:
-    """Return a standardized combat log message."""
+    """Return a standardized combat log message with color coding."""
 
     a_name = getattr(actor, "key", str(actor))
     t_name = getattr(target, "key", str(target))
+
     if miss:
-        return f"{a_name}'s {action} misses {t_name}!"
-    parts = [f"{a_name} {action} {t_name}"]
+        return f"|C{a_name}'s {action} misses {t_name}!|n"
+
     if damage is not None:
-        parts.append(f"for {damage} damage")
-    if crit:
-        parts.append("(critical)")
-    return " ".join(parts) + "!"
+        if damage >= 50:
+            color = "|R"  # bright red for massive damage
+        elif damage >= 25:
+            color = "|r"  # red for heavy damage
+        elif damage >= 10:
+            color = "|y"  # yellow for moderate damage
+        elif damage > 0:
+            color = "|g"  # green for low damage
+        else:
+            color = "|w"  # white for 0
+
+        crit_text = " (critical)" if crit else ""
+        return f"{color}{a_name} {action} {t_name} for {damage} damage{crit_text}!|n"
+
+    return f"{a_name} {action} {t_name}!"
 
 
 def get_condition_msg(hp: int, max_hp: int) -> str:
