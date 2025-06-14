@@ -2821,6 +2821,8 @@ The mob builder offers the same AI step for prototypes saved with
 `@mcreate` or `@mset`. For scripted AI, store a callable path on
 ``npc.db.ai_script`` such as ``scripts.example_ai.patrol_ai``. Only modules
 within the ``scripts`` package can be used.
+Custom behaviors can be added by registering a class with
+``combat.ai.register_ai`` and setting ``npc.db.ai_type`` to the new key.
 
 Related:
     help cnpc
@@ -3606,6 +3608,7 @@ NPC behavior is controlled by an AI type set in the |wcnpc|n builder or
 |wmobbuilder|n. Available types are passive, aggressive, defensive,
 wander and scripted. Scripted AI runs the callback stored on
 |wnpc.db.ai_script|n.
+Additional AI classes can be registered with ``combat.ai.register_ai``.
 """,
     },
     {
