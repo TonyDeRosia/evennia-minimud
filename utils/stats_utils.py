@@ -177,8 +177,8 @@ def get_display_scroll(chara):
     lines.append(name)
 
     level = _db_get(chara, "level", 1)
-    xp = _db_get(chara, "experience", 0)
-    tnl = _db_get(chara, "tnl", 0)
+    xp = getattr(chara.db, "experience", 0) or 0
+    tnl = getattr(chara.db, "tnl", 0) or 0
     practice_sessions = _db_get(chara, "practice_sessions", 0) or 0
     training_points = _db_get(chara, "training_points", 0) or 0
 

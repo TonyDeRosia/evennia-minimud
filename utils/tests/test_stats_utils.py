@@ -45,3 +45,11 @@ class TestDisplayScroll(EvenniaTest):
         sheet = get_display_scroll(char)
         self.assertIn("Prac", sheet)
         self.assertIn("TP", sheet)
+
+    def test_xp_and_tnl_display(self):
+        char = self.char1
+        char.db.experience = 10
+        char.db.tnl = 90
+        sheet = get_display_scroll(char)
+        self.assertIn("XP|n 10", sheet)
+        self.assertIn("TNL|n 90", sheet)
