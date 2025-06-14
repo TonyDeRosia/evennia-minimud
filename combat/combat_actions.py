@@ -154,7 +154,7 @@ class AttackAction(Action):
         msg = f"{attempt}\n{self.actor.key} hits {target.key}!\n"
         if crit:
             msg += "Critical hit!\n"
-        msg += f"{self.actor.key} deals {dmg} damage to {target.key}."
+        # msg += f"{self.actor.key} deals {dmg} damage to {target.key}."
 
         return CombatResult(
             actor=self.actor,
