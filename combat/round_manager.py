@@ -284,6 +284,8 @@ class CombatRoundManager:
             raise ImportError("Combat engine could not be imported") from err
 
         engine = CombatEngine(fighters, round_time=None)
+        if not engine:
+            raise RuntimeError("CombatEngine failed to initialize")
 
         # Create instance
         inst = CombatInstance(room, engine, round_time or self.tick_delay)
