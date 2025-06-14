@@ -1,6 +1,6 @@
 from unittest.mock import patch
 from evennia.utils.test_resources import EvenniaTest
-from combat.round_manager import CombatRoundManager
+from combat.round_manager import CombatRoundManager, CombatInstance
 from combat.engine import CombatEngine
 
 
@@ -196,3 +196,9 @@ class TestCombatRoundManager(EvenniaTest):
             self.manager._tick()
             self.assertNotIn(inst, self.manager.instances)
             self.assertTrue(inst.combat_ended)
+
+    def test_add_combatant_raises_without_engine(self):
+        """add_combatant should raise RuntimeError if engine is missing."""
+        inst = CombatInstance(self.room1, None)
+        with self.assertRaises(RuntimeError):
+            inst.add_combatant(self.char1)
