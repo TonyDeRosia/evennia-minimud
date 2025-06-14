@@ -931,3 +931,18 @@ class TestFlagCommands(EvenniaTest):
         self.assertTrue(self.obj1.tags.has("equipment", category="flag"))
         self.char1.execute_cmd(f"removeflag {self.obj1.key} equipment")
         self.assertFalse(self.obj1.tags.has("equipment", category="flag"))
+
+
+class TestReportCommand(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.msg = MagicMock()
+        self.room1.msg_contents = MagicMock()
+
+    def test_report_broadcasts_status(self):
+        prompt = self.char1.get_display_status(self.char1)
+        self.char1.execute_cmd("report")
+        self.room1.msg_contents.assert_called_with(
+            f"{self.char1.key} reports:\n{prompt}", exclude=self.char1
+        )
+        self.char1.msg.assert_any_call("|gYou report your current status.|n")

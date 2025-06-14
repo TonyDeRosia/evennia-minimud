@@ -457,6 +457,41 @@ class CmdPeace(Command):
         location.msg_contents("Peace falls over the area.")
 
 
+class CmdForceMobReport(Command):
+    """Force a target to broadcast their HP/MP/SP."""
+
+    key = "force mob report"
+    locks = "cmd:perm(Admin)"
+    help_category = "Admin"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: force mob report <target>")
+            return
+
+        target = self.caller.search(self.args.strip())
+        if not target:
+            return
+
+        traits = getattr(target, "traits", None)
+        if not traits:
+            self.msg(f"{target.key} has no trait system.")
+            return
+
+        hp = traits.get("health")
+        mp = traits.get("mana")
+        sp = traits.get("stamina")
+
+        values = [
+            f"|rHP|n: {hp.current}/{hp.max}" if hp else "No HP",
+            f"|bMP|n: {mp.current}/{mp.max}" if mp else "No MP",
+            f"|gSP|n: {sp.current}/{sp.max}" if sp else "No SP",
+        ]
+        self.caller.location.msg_contents(
+            f"|Y{target.key} status:|n {'  '.join(values)}"
+        )
+
+
 def _create_gear(
     caller,
     typeclass,
@@ -1360,6 +1395,7 @@ class AdminCmdSet(CmdSet):
         self.add(CmdRestoreAll)
         self.add(CmdPurge)
         self.add(CmdPeace)
+        self.add(CmdForceMobReport)
         self.add(CmdScan)
 
 

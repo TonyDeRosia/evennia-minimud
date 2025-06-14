@@ -97,6 +97,24 @@ class TestCombatUtils(EvenniaTest):
         self.assertIn("5", msg)
         self.assertIn("critical", msg)
 
+    def test_format_combat_message_colors(self):
+        from combat import combat_utils
+
+        levels = [
+            (60, "|R"),
+            (30, "|r"),
+            (15, "|y"),
+            (5, "|g"),
+            (0, "|w"),
+        ]
+        for dmg, code in levels:
+            msg = combat_utils.format_combat_message(
+                self.char1, self.char2, "hits", damage=dmg
+            )
+            self.assertTrue(msg.startswith(code))
+            self.assertIn(str(dmg), msg)
+            self.assertTrue(msg.endswith("|n"))
+
     def test_get_condition_msg(self):
         from combat.combat_utils import get_condition_msg
 

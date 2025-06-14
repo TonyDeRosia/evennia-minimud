@@ -765,6 +765,22 @@ class CmdPrompt(Command):
         caller.refresh_prompt()
 
 
+class CmdReport(Command):
+    """Broadcast your status to the room."""
+
+    key = "report"
+    help_category = "General"
+
+    def func(self):
+        prompt = self.caller.get_display_status(self.caller)
+        location = self.caller.location
+        if location:
+            location.msg_contents(
+                f"{self.caller.key} reports:\n{prompt}", exclude=self.caller
+            )
+        self.caller.msg("|gYou report your current status.|n")
+
+
 class CmdScan(Command):
     """
     Look around and into adjacent rooms.
@@ -863,4 +879,5 @@ class InfoCmdSet(CmdSet):
         self.add(CmdBuffs)
         self.add(CmdTitle)
         self.add(CmdPrompt)
+        self.add(CmdReport)
         self.add(CmdScan)
