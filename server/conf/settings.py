@@ -42,7 +42,11 @@ COMMAND_DEFAULT_CLASS = "commands.command.MuxCommand"
 # Default experience reward given per NPC level when creating mobs
 DEFAULT_XP_PER_LEVEL = 10
 
-# Experience required to reach the next character level
+# Experience required to advance from ``level`` to ``level + 1``
+XP_TO_LEVEL = lambda level: 100 + (level ** 2 * 20)
+
+# Legacy constant for backwards compatibility
+# (fixed value of 100 XP per level)
 XP_PER_LEVEL = 100
 
 # Whether excess XP carries over when leveling
