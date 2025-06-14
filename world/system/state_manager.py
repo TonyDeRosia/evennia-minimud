@@ -327,3 +327,36 @@ def check_level_up(chara) -> bool:
         stat_manager.refresh_stats(chara)
 
     return leveled
+
+
+def level_up(chara) -> None:
+    """Increase ``chara.db.level`` and award practice/training."""
+
+    level = int(chara.db.level or 1)
+    if level >= MAX_LEVEL:
+        return
+    level += 1
+    chara.db.level = level
+    chara.db.practice_sessions = (chara.db.practice_sessions or 0) + 3
+    chara.db.training_points = (chara.db.training_points or 0) + 1
+    chara.db.tnl = settings.XP_PER_LEVEL
+    chara.msg(f"You have reached level {level}!")
+    chara.msg("You gain 3 practice sessions and 1 training session.")
+    stat_manager.refresh_stats(chara)
+
+
+def gain_xp(chara, amount: int) -> None:
+    """Increase ``chara.db.experience`` and check for leveling."""
+
+    if not chara or not amount:
+        return
+
+    amt = int(amount)
+    chara.db.experience = (chara.db.experience or 0) + amt
+    chara.db.tnl = (chara.db.tnl or settings.XP_PER_LEVEL) - amt
+
+    while chara.db.tnl <= 0 and (chara.db.level or 1) < MAX_LEVEL:
+        excess = -chara.db.tnl
+        level_up(chara)
+        chara.db.tnl -= excess
+

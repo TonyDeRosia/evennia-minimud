@@ -138,10 +138,9 @@ class CombatEngine:
         """
         if not exp or not chara:
             return
-        chara.db.exp = (chara.db.exp or 0) + exp
         if hasattr(chara, "msg"):
             chara.msg(f"You gain {exp} experience.")
-        state_manager.check_level_up(chara)
+        state_manager.gain_xp(chara, exp)
 
     def group_gain(self, members: Iterable, exp: int) -> None:
         """Split ``exp`` experience between all ``members``.
@@ -163,10 +162,9 @@ class CombatEngine:
             return
         share = max(int(exp / len(members)), int(exp * 0.10))
         for member in members:
-            member.db.exp = (member.db.exp or 0) + share
             if hasattr(member, "msg"):
                 member.msg(f"You gain {share} experience.")
-            state_manager.check_level_up(member)
+            state_manager.gain_xp(member, share)
 
     def dam_message(self, attacker, target, damage: int, *, crit: bool = False) -> None:
         """Announce that ``attacker`` dealt ``damage`` to ``target``.

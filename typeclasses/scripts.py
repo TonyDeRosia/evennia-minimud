@@ -195,8 +195,7 @@ class CombatScript(Script):
 
             for obj in self.db.teams[team - 1]:
                 obj.msg(f"You gain {exp} experience.")
-                obj.db.exp = (obj.db.exp or 0) + exp
-                state_manager.check_level_up(obj)
+                state_manager.gain_xp(obj, exp)
         self.check_victory()
         # remove their combat target if they have one
         del combatant.db.combat_target
