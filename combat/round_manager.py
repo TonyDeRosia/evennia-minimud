@@ -48,6 +48,8 @@ class CombatRoundManager:
         engine = CombatEngine(script.fighters, round_time=None)
         inst = CombatInstance(script, engine)
         self.instances.append(inst)
+        # process the first combat round immediately
+        inst.engine.process_round()
         if not self.running:
             self.running = True
             self._schedule_tick()
