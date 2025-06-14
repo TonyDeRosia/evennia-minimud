@@ -250,7 +250,7 @@ class Character(ObjectParent, ClothedCharacter):
         from django.conf import settings
         self.db.level = 1
         self.db.experience = 0
-        self.db.tnl = settings.XP_PER_LEVEL
+        self.db.tnl = settings.XP_TO_LEVEL(1)
         self.db.sated = 5
 
     def at_post_puppet(self, **kwargs):
