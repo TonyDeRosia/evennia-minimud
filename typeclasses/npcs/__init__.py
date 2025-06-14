@@ -8,7 +8,9 @@ class BaseNPC(NPC):
 
     def at_object_creation(self):
         super().at_object_creation()
-        if self.db.ai_type:
+        ai_flags = {"aggressive", "scavenger", "assist", "call_for_help"}
+        flags = set(self.db.actflags or [])
+        if self.db.ai_type or ai_flags.intersection(flags):
             from scripts.npc_ai_script import NPCAIScript
 
             if not self.scripts.get("npc_ai"):

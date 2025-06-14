@@ -47,6 +47,20 @@ class TestMobAIBehaviors(EvenniaTest):
             mob_ai.process_mob_ai(npc)
             mock.assert_called_with(self.char1)
 
+    def test_aggressive_flag_spawns_script_and_attacks(self):
+        from typeclasses.npcs import BaseNPC
+
+        npc = create.create_object(BaseNPC, key="flag", location=self.room1)
+        npc.db.actflags = ["aggressive"]
+        npc.at_object_creation()
+
+        script = npc.scripts.get("npc_ai")[0]
+        self.assertTrue(script)
+
+        with patch.object(npc, "enter_combat") as mock:
+            script.at_repeat()
+            mock.assert_called_with(self.char1)
+
     def test_memory_attack(self):
         from typeclasses.npcs import BaseNPC
 
