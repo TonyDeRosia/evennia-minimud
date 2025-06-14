@@ -306,26 +306,6 @@ class CombatRoundManager:
                 return inst
         return self.create_combat(combatants)
 
-    def add_combatant_to_combat(
-        self, combatant: object, instance: CombatInstance
-    ) -> CombatInstance:
-        """Add ``combatant`` to ``instance`` and return the combat instance."""
-
-        if combatant in instance.combatants:
-            return instance
-
-        current = self.get_combatant_combat(combatant)
-        if current:
-            return current
-
-        if instance.add_combatant(combatant):
-            self.combatant_to_combat[combatant] = instance.combat_id
-
-        if not self.running:
-            self.start_ticking()
-
-        return instance
-
     # ------------------------------------------------------------------
     # ticking logic
     # ------------------------------------------------------------------
