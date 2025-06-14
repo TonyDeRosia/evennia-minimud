@@ -200,3 +200,68 @@ class TestCombatRoundManager(EvenniaTest):
         inst = CombatInstance(1, None, set())
         with self.assertRaises(RuntimeError):
             inst.add_combatant(self.char1)
+
+    def test_get_combatant_combat(self):
+        """Combatants should map back to their combat instance."""
+        from evennia.utils import create
+        from typeclasses.characters import PlayerCharacter
+
+        with patch("combat.round_manager.delay"):
+            inst = self.manager.start_combat([self.char1, self.char2])
+
+        # existing combatant returns the instance
+        self.assertIs(self.manager.get_combatant_combat(self.char1), inst)
+
+        # non-combatant returns None
+        char3 = create.create_object(
+            PlayerCharacter,
+            key="Char3",
+            location=self.room1,
+            home=self.room1,
+        )
+        self.assertIsNone(self.manager.get_combatant_combat(char3))
+
+        # removing combat should clear mapping
+        self.manager.remove_combat(inst.combat_id)
+        self.assertIsNone(self.manager.get_combatant_combat(self.char1))
+
+    def test_dynamic_add_remove_combatant(self):
+        """Combatants can be added and removed at runtime."""
+        from evennia.utils import create
+        from typeclasses.characters import PlayerCharacter
+
+        with patch("combat.round_manager.delay"):
+            inst = self.manager.start_combat([self.char1])
+
+        char3 = create.create_object(
+            PlayerCharacter,
+            key="Char3",
+            location=self.room1,
+            home=self.room1,
+        )
+
+        # add combatant using manager helper
+        self.manager.add_combatant_to_combat(char3, inst)
+        self.assertIn(char3, inst.combatants)
+        self.assertIs(self.manager.get_combatant_combat(char3), inst)
+
+        # remove combatant via instance
+        inst.remove_combatant(char3)
+        self.manager.combatant_to_combat.pop(char3, None)
+        self.assertNotIn(char3, inst.combatants)
+        self.assertIsNone(self.manager.get_combatant_combat(char3))
+
+    def test_cross_room_processing(self):
+        """Combats should process even if combatants are in different rooms."""
+        with (
+            patch("combat.round_manager.delay"),
+            patch.object(CombatEngine, "process_round") as mock_proc,
+        ):
+            self.char2.location = self.room2
+            inst = self.manager.start_combat([self.char1, self.char2])
+            mock_proc.reset_mock()
+
+            # tick should still process despite separate rooms
+            self.manager._tick()
+            mock_proc.assert_called()
+
