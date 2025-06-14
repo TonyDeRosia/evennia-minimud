@@ -216,6 +216,7 @@ REVIEW_SECTIONS = [
     ("Role Details", "menunode_role_details"),
     ("Rewards", "menunode_exp_reward"),
     ("EXP Reward", "menunode_exp_reward"),
+    ("Edit XP reward", "menunode_exp_reward"),
     ("Coin Drop", "menunode_coin_drop"),
     ("Loot Table", "menunode_loot_table"),
     ("Combat Stats", "menunode_resources_prompt"),
