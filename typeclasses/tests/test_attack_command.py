@@ -32,6 +32,19 @@ class TestAttackCommand(EvenniaTest):
         )
         self.assertTrue(queued)
 
+    def test_attack_when_not_fleeing(self):
+        """Attacking without a fleeing flag should not raise errors."""
+        mob = create.create_object(BaseNPC, key="mob", location=self.room1)
+        # ensure the fleeing attribute is not present
+        if self.char1.attributes.has("fleeing"):
+            self.char1.attributes.remove("fleeing")
+
+        # should not raise when no fleeing attribute exists
+        self.char1.execute_cmd("attack mob")
+
+        # fleeing flag should still be absent after attacking
+        self.assertFalse(self.char1.attributes.has("fleeing"))
+
     def test_joining_combat_queues_immediately(self):
         """Joining an ongoing fight should allow immediate actions."""
         from typeclasses.characters import PlayerCharacter
