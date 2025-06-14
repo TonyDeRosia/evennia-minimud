@@ -89,9 +89,27 @@ class TestCombatRoundManager(EvenniaTest):
         with patch("combat.round_manager.delay"):
             inst1 = self.manager.add_instance(self.script)
             inst2 = self.manager.add_instance(self.script)
-            
+
             self.assertIs(inst1, inst2)
             self.assertEqual(len(self.manager.instances), 1)
+
+    def test_add_existing_triggers_round_when_idle(self):
+        """If the manager isn't running, adding an existing instance should process immediately."""
+        with (
+            patch("combat.round_manager.delay") as mock_delay,
+            patch.object(CombatEngine, "process_round") as mock_proc,
+        ):
+            inst = self.manager.add_instance(self.script)
+            mock_proc.reset_mock()
+            self.manager.running = False
+            self.manager._next_tick_scheduled = False
+
+            inst2 = self.manager.add_instance(self.script)
+
+            self.assertIs(inst, inst2)
+            mock_proc.assert_called_once()
+            mock_delay.assert_called_with(self.manager.tick_delay, self.manager._tick)
+            self.assertTrue(self.manager.running)
 
     def test_remove_instance(self):
         """Test that instances can be properly removed."""
