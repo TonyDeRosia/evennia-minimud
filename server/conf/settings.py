@@ -42,6 +42,9 @@ COMMAND_DEFAULT_CLASS = "commands.command.MuxCommand"
 # Default experience reward given per NPC level when creating mobs
 DEFAULT_XP_PER_LEVEL = 10
 
+# Experience required to reach the next character level
+XP_PER_LEVEL = 100
+
 ######################################################################
 # Config for contrib packages
 ######################################################################

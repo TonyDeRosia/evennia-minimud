@@ -4,6 +4,7 @@ from typing import Dict, List
 from world import stats
 from world.system import stat_manager
 from world.effects import EFFECTS
+from django.conf import settings
 from .constants import MAX_SATED, MAX_LEVEL
 
 
@@ -313,7 +314,7 @@ def check_level_up(chara) -> bool:
     level = int(chara.db.level or 1)
     leveled = False
 
-    while level < MAX_LEVEL and exp >= level * 100:
+    while level < MAX_LEVEL and exp >= level * settings.XP_PER_LEVEL:
         level += 1
         leveled = True
         chara.db.practice_sessions = (chara.db.practice_sessions or 0) + 3

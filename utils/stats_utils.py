@@ -178,7 +178,9 @@ def get_display_scroll(chara):
 
     level = _db_get(chara, "level", 1)
     xp = _db_get(chara, "exp", 0)
-    tnl = max(level * 100 - xp, 0)
+    from django.conf import settings
+
+    tnl = max(level * settings.XP_PER_LEVEL - xp, 0)
     practice_sessions = _db_get(chara, "practice_sessions", 0) or 0
     training_points = _db_get(chara, "training_points", 0) or 0
 
