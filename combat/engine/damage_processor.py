@@ -110,6 +110,8 @@ class DamageProcessor:
 
         if attacker and attacker.location:
             attacker.location.msg_contents(f"{target.key} is defeated by {attacker.key}!")
+        if attacker and getattr(attacker, "db", None) is not None:
+            attacker.db.combat_target = None
 
         self.turn_manager.remove_participant(target)
         for participant in list(self.turn_manager.participants):

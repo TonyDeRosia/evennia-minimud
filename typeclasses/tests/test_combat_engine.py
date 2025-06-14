@@ -567,3 +567,20 @@ class TestUnsavedPrototypeCombat(unittest.TestCase):
             engine.track_aggro(player, npc)
 
         self.assertFalse(engine.aggro)
+
+
+def test_attacker_target_cleared_on_defeat():
+    attacker = Dummy()
+    defender = Dummy()
+    attacker.db.combat_target = defender
+    defender.db.combat_target = attacker
+
+    engine = CombatEngine([attacker, defender], round_time=0)
+    engine.queue_action(attacker, KillAction(attacker, defender))
+
+    with patch("world.system.state_manager.apply_regen"), \
+         patch("random.randint", return_value=0):
+        engine.start_round()
+        engine.process_round()
+
+    assert attacker.db.combat_target is None
