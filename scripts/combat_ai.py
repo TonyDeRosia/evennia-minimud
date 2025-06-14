@@ -9,7 +9,13 @@ class BaseCombatAI(Script):
         self.persistent = True
 
     def select_target(self):
-        """Return an object to attack or ``None``."""
+        """Return a valid player character in the same room or ``None``."""
+        npc = self.obj
+        if not npc or not npc.location:
+            return None
+        for obj in npc.location.contents:
+            if getattr(obj, "account", None) and not obj.tags.has("unconscious", category="status"):
+                return obj
         return None
 
     def attack_target(self, target):
