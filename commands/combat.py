@@ -235,7 +235,7 @@ class CmdFlee(Command):
 
         from combat.round_manager import CombatRoundManager
         manager = CombatRoundManager.get()
-        if instance := manager.instances_by_room.get(str(caller.location.id)):
+        if instance := manager.instances_by_room.get(caller.location.id):
             if not instance.remove_combatant(self.caller):
                 self.msg("You cannot leave combat.")
 

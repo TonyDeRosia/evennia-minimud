@@ -6,7 +6,8 @@ This project models its turn-based fighting system after the traditional combat 
 
 File: `combat/round_manager.py`
 
-- Maintains a registry of all active combat instances, keyed by room.
+- Maintains a registry of all active combat instances. The
+  `instances_by_room` dictionary maps each room's id to its `CombatInstance`.
 - Ticks every few seconds to drive combat across rooms, much like ROM's `violence_update` that iterates over every character currently fighting.
 - Each tick triggers the associated `CombatEngine` to process a new round.
 

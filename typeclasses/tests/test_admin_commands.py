@@ -503,7 +503,7 @@ class TestAdminCommands(EvenniaTest):
         self.char1.execute_cmd(f"attack {self.char2.key}")
         from combat.round_manager import CombatRoundManager
         manager = CombatRoundManager.get()
-        instance = manager.instances_by_room.get(str(self.room1.id))
+        instance = manager.instances_by_room.get(self.room1.id)
 
         # defeat the opponent so combat ends
         self.char2.tags.add("dead", category="status")

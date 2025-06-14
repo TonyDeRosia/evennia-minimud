@@ -236,7 +236,7 @@ class CombatRoundManager:
 
     def __init__(self) -> None:
         self.instances: List[CombatInstance] = []
-        self.instances_by_room: Dict[str, CombatInstance] = {}
+        self.instances_by_room: Dict[int, CombatInstance] = {}
         self.running = False
         self.tick_delay = 2.0
         self._next_tick_scheduled = False
@@ -255,13 +255,13 @@ class CombatRoundManager:
     ) -> CombatInstance:
         """Create or fetch a combat instance for ``room``."""
         key = getattr(room, "id", id(room))
-        for inst in self.instances:
-            if getattr(inst.room, "id", id(inst.room)) == key:
-                inst.sync_participants()
-                if not self.running:
-                    inst.process_round()
-                    self.start_ticking()
-                return inst
+        inst = self.instances_by_room.get(key)
+        if inst:
+            inst.sync_participants()
+            if not self.running:
+                inst.process_round()
+                self.start_ticking()
+            return inst
 
         fighters = fighters or [
             obj
@@ -280,7 +280,7 @@ class CombatRoundManager:
         # Create instance
         inst = CombatInstance(room, engine, round_time or self.tick_delay)
         self.instances.append(inst)
-        self.instances_by_room[str(key)] = inst
+        self.instances_by_room[key] = inst
 
         # Process initial round
         inst.process_round()
@@ -294,7 +294,7 @@ class CombatRoundManager:
     def remove_instance(self, room) -> None:
         """Remove ``room``'s instance from management."""
         key = getattr(room, "id", id(room))
-        inst = self.instances_by_room.pop(str(key), None)
+        inst = self.instances_by_room.pop(key, None)
         if inst:
             self.instances = [i for i in self.instances if i is not inst]
         if not self.instances:
@@ -323,7 +323,7 @@ class CombatRoundManager:
         """Process all combat instances and return rooms to remove."""
         remove: List[object] = []
 
-        for inst in list(self.instances):
+        for inst in list(self.instances_by_room.values()):
             try:
                 if not inst.is_valid():
                     remove.append(inst.room)
@@ -395,9 +395,10 @@ class CombatRoundManager:
 
     def force_end_all_combat(self) -> None:
         """Force end all combat instances."""
-        for inst in list(self.instances):
+        for inst in list(self.instances_by_room.values()):
             inst.end_combat("Force ended by admin")
         self.instances.clear()
+        self.instances_by_room.clear()
         self.stop_ticking()
 
     def debug_info(self) -> str:

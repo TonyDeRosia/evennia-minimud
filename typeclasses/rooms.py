@@ -67,9 +67,10 @@ class RoomParent(ObjectParent):
         Apply extra hooks when an object enters this room, so things (e.g. NPCs) can react.
         """
         super().at_object_leave(mover, destination, **kwargs)
-        if combat := self.scripts.get("combat"):
-            combat = combat[0]
-            combat.remove_combatant(mover)
+        from combat.round_manager import CombatRoundManager
+        manager = CombatRoundManager.get()
+        if instance := manager.instances_by_room.get(self.id):
+            instance.remove_combatant(mover)
         # only react if the arriving object is a character
         if "character" in mover._content_types:
             for obj in self.contents_get(content_type="character"):
