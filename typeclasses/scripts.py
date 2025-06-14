@@ -115,7 +115,7 @@ class CombatScript(Script):
             return False
 
         # if ally is given, find ally's team
-        if ally and (team := self.get_team(ally)):
+        if ally and (team := self.get_team(ally)) is not None:
             # add combatant to ally's team
             self.db.teams[team].append(combatant)
             # reset the cache
@@ -125,7 +125,7 @@ class CombatScript(Script):
             return True
 
         # if enemy is given, find enemy's team
-        if enemy and (team := self.get_team(enemy)):
+        if enemy and (team := self.get_team(enemy)) is not None:
             # since there are only 2 teams, subtracting 1 from the team index will flip to the other team
             team -= 1
 
