@@ -232,6 +232,11 @@ class CombatRoundManager:
             if inst.script is script:
                 # ensure any new fighters are added immediately
                 inst.sync_participants()
+                # If manager is idle, kick off processing right away so queued
+                # actions run without waiting for the next tick
+                if not self.running:
+                    inst.process_round()
+                    self.start_ticking()
                 return inst
 
         # Get fighters from script
