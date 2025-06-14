@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock
 from evennia.utils.test_resources import EvenniaTest
+from django.test import override_settings
+from django.conf import settings
 from world.system import state_manager
 
 
@@ -32,3 +34,28 @@ class TestLeveling(EvenniaTest):
         output = self.char1.msg.call_args[0][0]
         self.assertIn("practice sessions", output)
         self.assertIn("training session", output)
+
+
+class TestExperienceCarryOver(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.db.level = 1
+        self.char1.db.experience = 0
+        self.char1.db.tnl = settings.XP_PER_LEVEL
+        self.char1.msg = MagicMock()
+
+    @override_settings(XP_CARRY_OVER=False)
+    def test_no_carry_over_discards_excess(self):
+        state_manager.gain_xp(self.char1, settings.XP_PER_LEVEL + 10)
+        self.assertEqual(self.char1.db.level, 2)
+        self.assertEqual(self.char1.db.experience, settings.XP_PER_LEVEL)
+        self.assertEqual(self.char1.db.tnl, settings.XP_PER_LEVEL)
+
+    @override_settings(XP_CARRY_OVER=True)
+    def test_carry_over_keeps_excess(self):
+        state_manager.gain_xp(self.char1, settings.XP_PER_LEVEL + 10)
+        self.assertEqual(self.char1.db.level, 2)
+        self.assertEqual(
+            self.char1.db.experience, settings.XP_PER_LEVEL + 10
+        )
+        self.assertEqual(self.char1.db.tnl, settings.XP_PER_LEVEL - 10)
