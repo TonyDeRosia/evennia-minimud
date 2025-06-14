@@ -387,8 +387,8 @@ class TestCombatDeath(EvenniaTest):
 
         from combat.round_manager import CombatRoundManager
         manager = CombatRoundManager.get()
-        instance = manager.add_instance(self.room1, fighters=[player, npc])
-        manager.remove_instance(self.room1)
+        instance = manager.start_combat([player, npc])
+        manager.remove_combat(instance.combat_id)
 
         # should not raise when combat script has been removed
         npc.on_death(player)

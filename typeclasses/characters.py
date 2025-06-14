@@ -426,7 +426,7 @@ class Character(ObjectParent, ClothedCharacter):
             if self.in_combat:
                 from combat.round_manager import CombatRoundManager
                 manager = CombatRoundManager.get()
-                inst = manager.instances_by_room.get(self.location.id)
+                inst = manager.get_combatant_combat(self)
                 if inst and not inst.remove_combatant(self):
                     logger.log_err(
                         f"Could not remove defeated character from combat! Character: {self.name} (#{self.id}) Location: {self.location.name} (#{self.location.id})"
@@ -901,7 +901,7 @@ class PlayerCharacter(Character):
         if self.in_combat:
             from combat.round_manager import CombatRoundManager
             manager = CombatRoundManager.get()
-            inst = manager.instances_by_room.get(self.location.id)
+            inst = manager.get_combatant_combat(self)
             if inst:
                 inst.remove_combatant(self)
         # avoid spawning multiple corpses for repeated calls
@@ -1105,7 +1105,7 @@ class NPC(Character):
         if self.in_combat:
             from combat.round_manager import CombatRoundManager
             manager = CombatRoundManager.get()
-            inst = manager.instances_by_room.get(self.location.id)
+            inst = manager.get_combatant_combat(self)
             if inst:
                 inst.remove_combatant(self)
 
@@ -1231,7 +1231,7 @@ class NPC(Character):
             self.db.fleeing = True
             from combat.round_manager import CombatRoundManager
             manager = CombatRoundManager.get()
-            inst = manager.instances_by_room.get(self.location.id)
+            inst = manager.get_combatant_combat(self)
             if inst and not inst.remove_combatant(self):
                 return dmg
             # there's a 50/50 chance the object will escape forever
@@ -1267,9 +1267,10 @@ class NPC(Character):
 
         from combat.round_manager import CombatRoundManager
 
-        instance = CombatRoundManager.get().add_instance(location)
+        manager = CombatRoundManager.get()
+        instance = manager.start_combat([self, target])
         self.db.combat_target = target
-        if not instance.add_combatant(self):
+        if self not in instance.combatants:
             return
 
         engine = getattr(instance, "engine", None)

@@ -424,14 +424,12 @@ with VNUM-based NPCs.
 ### Combat Round Manager
 
 The `CombatRoundManager` singleton, found in `combat.round_manager`, manages all
-active combat instances per room. It ticks every **2 seconds** by default (see
-`tick_delay` at line 214 of `combat/round_manager.py`). Rooms are registered
-with the manager when combat starts via
-`CombatRoundManager.get().add_instance(room)`, which returns a `CombatInstance`
-object and kicks off the automatic round loop. Instances are stored in
-`manager.instances_by_room` using the room's id as the key for quick lookups.
-If the underlying `CombatEngine` fails to initialize for any reason,
-`add_instance` will raise a `RuntimeError` to signal the error.
+active combat encounters. It ticks every **2 seconds** by default (see
+`tick_delay` at line 214 of `combat/round_manager.py`). Combat is started with
+`CombatRoundManager.get().start_combat(combatants)` which returns a
+`CombatInstance` keyed by a unique combat id. The manager tracks which combat
+each combatant belongs to for quick lookups. If the underlying `CombatEngine`
+fails to initialize for any reason, `start_combat` will raise a `RuntimeError`.
 
 For a deeper look at how this round system mirrors the classic ROM MUD
 functions like `violence_update` and `multi_hit`, see the documentation in

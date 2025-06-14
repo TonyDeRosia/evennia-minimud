@@ -8,11 +8,11 @@ class TestCombatRoundManager(EvenniaTest):
     def setUp(self):
         super().setUp()
         self.manager = CombatRoundManager.get()
-        self.manager.instances.clear()
-        self.manager.instances_by_room.clear()
+        self.manager.combats.clear()
+        self.manager.combatant_to_combat.clear()
         self.manager.running = False
-        self.instance = self.manager.add_instance(
-            self.room1, fighters=[self.char1, self.char2]
+        self.instance = self.manager.create_combat(
+            combatants=[self.char1, self.char2]
         )
 
     def test_tick_schedules(self):
@@ -22,7 +22,7 @@ class TestCombatRoundManager(EvenniaTest):
             patch.object(CombatEngine, "process_round") as mock_proc,
         ):
             # Adding instance should schedule first tick
-            self.manager.add_instance(self.room1)
+            self.manager.create_combat(combatants=[self.char1, self.char2])
             mock_delay.assert_called_with(self.manager.tick_delay, self.manager._tick)
             
             # First tick should process round
@@ -55,7 +55,7 @@ class TestCombatRoundManager(EvenniaTest):
             # Set up initiative values: char1 gets 10, char2 gets 1
             mock_calc.side_effect = lambda c: 10 if c is self.char1 else 1
             
-            self.manager.add_instance(self.room1)
+            self.manager.create_combat(combatants=[self.char1, self.char2])
             self.manager._tick()
         
         # char1 should go first (higher initiative)
@@ -65,9 +65,9 @@ class TestCombatRoundManager(EvenniaTest):
     def test_tick_handles_deleted_script(self):
         """Test that tick gracefully handles deleted scripts without crashing."""
         with patch("combat.round_manager.delay"):
-            self.manager.add_instance(self.room1)
-            self.room1.pk = None
-            
+            inst = self.manager.create_combat(combatants=[self.char1])
+            inst.combatants.clear()
+
             # This should not raise an exception
             try:
                 self.manager._tick()
@@ -77,21 +77,21 @@ class TestCombatRoundManager(EvenniaTest):
     def test_tick_cleans_up_deleted_script(self):
         """Test that tick removes instances whose scripts were deleted."""
         with patch("combat.round_manager.delay"):
-            inst = self.manager.add_instance(self.room1)
-            self.room1.pk = None
-            
+            inst = self.manager.create_combat(combatants=[self.char1])
+            inst.combatants.clear()
+
             # After tick, the instance should be removed
             self.manager._tick()
-            self.assertNotIn(inst, self.manager.instances)
+            self.assertNotIn(inst.combat_id, self.manager.combats)
 
-    def test_add_instance_returns_existing(self):
-        """Test that adding the same script twice returns the existing instance."""
+    def test_start_combat_reuses_instance(self):
+        """Starting combat with a combatant already fighting returns the same instance."""
         with patch("combat.round_manager.delay"):
-            inst1 = self.manager.add_instance(self.room1)
-            inst2 = self.manager.add_instance(self.room1)
+            inst1 = self.manager.start_combat([self.char1, self.char2])
+            inst2 = self.manager.start_combat([self.char1])
 
             self.assertIs(inst1, inst2)
-            self.assertEqual(len(self.manager.instances), 1)
+            self.assertEqual(len(self.manager.combats), 1)
 
     def test_add_existing_triggers_round_when_idle(self):
         """If the manager isn't running, adding an existing instance should process immediately."""
@@ -99,12 +99,12 @@ class TestCombatRoundManager(EvenniaTest):
             patch("combat.round_manager.delay") as mock_delay,
             patch.object(CombatEngine, "process_round") as mock_proc,
         ):
-            inst = self.manager.add_instance(self.room1)
+            inst = self.manager.start_combat([self.char1])
             mock_proc.reset_mock()
             self.manager.running = False
             self.manager._next_tick_scheduled = False
 
-            inst2 = self.manager.add_instance(self.room1)
+            inst2 = self.manager.start_combat([self.char1])
 
             self.assertIs(inst, inst2)
             mock_proc.assert_called_once()
@@ -114,25 +114,25 @@ class TestCombatRoundManager(EvenniaTest):
     def test_remove_instance(self):
         """Test that instances can be properly removed."""
         with patch("combat.round_manager.delay"):
-            self.manager.add_instance(self.room1)
-            self.assertEqual(len(self.manager.instances), 1)
-            
-            self.manager.remove_instance(self.room1)
-            self.assertEqual(len(self.manager.instances), 0)
+            self.manager.start_combat([self.char1])
+            self.assertEqual(len(self.manager.combats), 1)
+
+            self.manager.remove_combat(self.instance.combat_id)
+            self.assertEqual(len(self.manager.combats), 0)
 
     def test_stop_ticking_when_no_instances(self):
         """Test that ticking stops when all instances are removed."""
         with patch("combat.round_manager.delay"):
-            self.manager.add_instance(self.room1)
+            self.manager.start_combat([self.char1])
             self.assertTrue(self.manager.running)
             
-            self.manager.remove_instance(self.room1)
+            self.manager.remove_combat(self.instance.combat_id)
             self.assertFalse(self.manager.running)
 
     def test_combat_status_reporting(self):
         """Test that combat status is properly reported."""
         with patch("combat.round_manager.delay"):
-            inst = self.manager.add_instance(self.room1)
+            inst = self.manager.start_combat([self.char1])
             status = self.manager.get_combat_status()
             
             self.assertTrue(status["running"])
@@ -140,7 +140,7 @@ class TestCombatRoundManager(EvenniaTest):
             self.assertEqual(len(status["instances"]), 1)
             
             inst_status = status["instances"][0]
-            self.assertEqual(inst_status["room"], str(self.room1))
+            self.assertEqual(inst_status["id"], inst.combat_id)
             self.assertTrue(inst_status["valid"])
 
     def test_force_end_all_combat(self):
@@ -150,15 +150,15 @@ class TestCombatRoundManager(EvenniaTest):
             self.assertTrue(self.manager.running)
             
             self.manager.force_end_all_combat()
-            
-            self.assertEqual(len(self.manager.instances), 0)
+
+            self.assertEqual(len(self.manager.combats), 0)
             self.assertFalse(self.manager.running)
             self.assertTrue(inst.combat_ended)
 
     def test_debug_info_format(self):
         """Test that debug info is properly formatted."""
         with patch("combat.round_manager.delay"):
-            self.manager.add_instance(self.room1)
+            self.manager.start_combat([self.char1])
             debug_info = self.manager.debug_info()
             
             self.assertIn("Combat Manager Status:", debug_info)
@@ -176,13 +176,11 @@ class TestCombatRoundManager(EvenniaTest):
     def test_invalid_script_cleanup(self):
         """Test that invalid scripts are cleaned up during tick."""
         with patch("combat.round_manager.delay"):
-            inst = self.manager.add_instance(self.room1)
-            
-            # Make script invalid by removing its pk
-            self.room1.pk = None
-            
+            inst = self.manager.create_combat(combatants=[self.char1])
+            inst.combatants.clear()
+
             self.manager._tick()
-            self.assertNotIn(inst, self.manager.instances)
+            self.assertNotIn(inst.combat_id, self.manager.combats)
 
     def test_no_active_fighters_cleanup(self):
         """Test that instances with no active fighters are cleaned up."""
@@ -191,14 +189,14 @@ class TestCombatRoundManager(EvenniaTest):
             patch.object(self.char1.db, "hp", 0),  # Make char1 dead
             patch.object(self.char2.db, "hp", 0),  # Make char2 dead
         ):
-            inst = self.manager.add_instance(self.room1)
-            
+            inst = self.manager.start_combat([self.char1, self.char2])
+
             self.manager._tick()
-            self.assertNotIn(inst, self.manager.instances)
+            self.assertNotIn(inst.combat_id, self.manager.combats)
             self.assertTrue(inst.combat_ended)
 
     def test_add_combatant_raises_without_engine(self):
         """add_combatant should raise RuntimeError if engine is missing."""
-        inst = CombatInstance(self.room1, None)
+        inst = CombatInstance(1, None, set())
         with self.assertRaises(RuntimeError):
             inst.add_combatant(self.char1)

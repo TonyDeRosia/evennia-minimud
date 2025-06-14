@@ -130,7 +130,7 @@ class TestAIBehaviors(EvenniaTest):
         self.char1.location = self.room1
         from combat.round_manager import CombatRoundManager
         manager = CombatRoundManager.get()
-        manager.add_instance(self.room1, fighters=[self.char1, self.char2])
+        manager.start_combat([self.char1, self.char2])
 
         with patch.object(npc, "enter_combat") as mock:
             ai.process_ai(npc)
@@ -145,7 +145,7 @@ class TestAIBehaviors(EvenniaTest):
         caller.db.actflags = ["call_for_help"]
         from combat.round_manager import CombatRoundManager
         manager = CombatRoundManager.get()
-        manager.add_instance(self.room1, fighters=[caller, self.char1])
+        manager.start_combat([caller, self.char1])
 
         ally = create.create_object(BaseNPC, key="ally", location=self.room1)
         ally.db.ai_type = "passive"

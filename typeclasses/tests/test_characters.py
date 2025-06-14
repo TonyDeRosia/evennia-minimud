@@ -173,7 +173,7 @@ class TestCharacterProperties(EvenniaTest):
         from combat.round_manager import CombatRoundManager
 
         manager = CombatRoundManager.get()
-        instance = manager.add_instance(self.room1, fighters=[self.char1, self.char2])
+        instance = manager.start_combat([self.char1, self.char2])
         self.assertFalse(self.char1.in_combat)
         instance.add_combatant(self.char1)
         self.assertTrue(self.char1.in_combat)

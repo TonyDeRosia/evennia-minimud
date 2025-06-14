@@ -23,8 +23,8 @@ class TestAttackCommand(EvenniaTest):
         from combat.combat_actions import AttackAction
 
         manager = CombatRoundManager.get()
-        self.assertTrue(manager.instances)
-        engine = manager.instances[0].engine
+        self.assertTrue(manager.combats)
+        engine = list(manager.combats.values())[0].engine
         queued = any(
             isinstance(act, AttackAction)
             for p in engine.participants
@@ -67,7 +67,7 @@ class TestAttackCommand(EvenniaTest):
             char3.execute_cmd("attack char2")
 
         manager = CombatRoundManager.get()
-        engine = manager.instances[0].engine
+        engine = list(manager.combats.values())[0].engine
 
         self.assertIn(char3, [p.actor for p in engine.participants])
         queued = [

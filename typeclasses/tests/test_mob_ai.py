@@ -78,7 +78,7 @@ class TestMobAIBehaviors(EvenniaTest):
         ally.db.ai_type = "defensive"
         ally.db.actflags = []
         manager = CombatRoundManager.get()
-        instance = manager.add_instance(self.room1, fighters=[ally, self.char1])
+        instance = manager.start_combat([ally, self.char1])
 
         helper = create.create_object(BaseNPC, key="helper", location=self.room1)
         helper.db.actflags = ["assist"]

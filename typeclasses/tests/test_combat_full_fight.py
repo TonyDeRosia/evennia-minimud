@@ -21,7 +21,7 @@ class TestCombatFullFight(EvenniaTest):
     def test_fight_runs_until_defeat(self):
         with patch("combat.round_manager.delay"):
             manager = CombatRoundManager.get()
-            instance = manager.add_instance(self.room1, fighters=[self.char1, self.char2])
+            instance = manager.start_combat([self.char1, self.char2])
             engine = instance.engine
 
             # give both characters small amounts of health

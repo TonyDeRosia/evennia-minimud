@@ -69,7 +69,7 @@ class RoomParent(ObjectParent):
         super().at_object_leave(mover, destination, **kwargs)
         from combat.round_manager import CombatRoundManager
         manager = CombatRoundManager.get()
-        if instance := manager.instances_by_room.get(self.id):
+        if instance := manager.get_combatant_combat(mover):
             instance.remove_combatant(mover)
         # only react if the arriving object is a character
         if "character" in mover._content_types:
