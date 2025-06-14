@@ -8,6 +8,7 @@ from typing import Dict, List, Optional
 
 from evennia.utils import delay
 from evennia.utils.logger import log_trace
+from django.conf import settings
 from .engine import _current_hp
 
 
@@ -362,6 +363,8 @@ class CombatRoundManager:
 
     def _tick(self) -> None:
         self._next_tick_scheduled = False
+        if getattr(settings, "COMBAT_DEBUG_TICKS", False):
+            log_trace("CombatRoundManager tick")
         if not self.running:
             return
 
