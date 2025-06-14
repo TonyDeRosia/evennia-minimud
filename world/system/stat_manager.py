@@ -22,7 +22,7 @@ from world.scripts import races, classes
 
 # Primary and secondary stat keys
 PRIMARY_STATS = stats.CORE_STAT_KEYS
-SECONDARY_STATS = ["HP", "MP", "SP", "ATK", "DEF", "ACC", "EVA"]
+SECONDARY_STATS = ["HP", "MP", "SP", "ATK", "DEF", "ACC", "EVA", "haste"]
 
 # Mapping of derived stat keys to weighted primary stats
 STAT_SCALING: Dict[str, Dict[str, float]] = {
@@ -56,6 +56,7 @@ STAT_SCALING: Dict[str, Dict[str, float]] = {
     # Tempo stats
     "cooldown_reduction": {"INT": 0.1, "WIS": 0.1},
     "initiative": {"perception": 0.3, "DEX": 0.2},
+    "haste": {"DEX": 0.3, "perception": 0.2},
     # Utility stats
     "stealth": {"DEX": 0.2, "perception": 0.2, "LUCK": 0.1},
     "detection": {"perception": 0.4, "WIS": 0.2},
