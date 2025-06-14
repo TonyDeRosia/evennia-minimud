@@ -43,7 +43,9 @@ def calculate_damage(attacker, weapon, target) -> Tuple[int, object]:
             if db:
                 dmg_map = getattr(db, "damage", None)
                 if dmg_map:
-                    for i, (dt, formula) in enumerate(dmg_map.items()):
+                    for i, (dt, formula) in enumerate(
+                        sorted(dmg_map.items(), key=lambda kv: str(kv[0]))
+                    ):
                         try:
                             roll = roll_dice_string(str(formula))
                         except Exception:

@@ -43,6 +43,39 @@ class TestActionUtils(unittest.TestCase):
         self.assertEqual(dtype, DamageType.SLASHING)
         self.assertEqual(dmg, int(round(4 * (1 + 10 * 0.012))))
 
+    def test_damage_mapping_stable_order(self):
+        """Weapon damage mapping should produce consistent results regardless of key order."""
+        from combat.actions import utils
+
+        weapon = MagicMock()
+        weapon.damage = None
+        weapon.damage_type = None
+        weapon.db = MagicMock()
+        weapon.db.damage_dice = None
+        weapon.db.dmg = None
+
+        mapping1 = {
+            DamageType.FIRE: "1",
+            DamageType.ACID: "1",
+        }
+        mapping2 = {
+            DamageType.ACID: "1",
+            DamageType.FIRE: "1",
+        }
+
+        with patch("combat.actions.utils.roll_dice_string", return_value=1), \
+             patch("combat.actions.utils.state_manager.get_effective_stat", side_effect=lambda obj, stat: 0):
+            weapon.db.damage = mapping1
+            dmg1, dtype1 = utils.calculate_damage(self.attacker, weapon, self.target)
+
+        with patch("combat.actions.utils.roll_dice_string", return_value=1), \
+             patch("combat.actions.utils.state_manager.get_effective_stat", side_effect=lambda obj, stat: 0):
+            weapon.db.damage = mapping2
+            dmg2, dtype2 = utils.calculate_damage(self.attacker, weapon, self.target)
+
+        self.assertEqual(dmg1, dmg2)
+        self.assertEqual(dtype1, dtype2)
+
     def test_apply_critical(self):
         from combat.actions import utils
         with patch("combat.actions.utils.stat_manager.roll_crit", return_value=True), \
