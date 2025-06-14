@@ -33,9 +33,13 @@ class CombatInstance:
         ]
 
     def add_combatant(self, combatant, **kwargs) -> bool:
-        """Add ``combatant`` to this combat instance."""
+        """Add ``combatant`` to this combat instance.
+
+        Raises:
+            RuntimeError: If the combat engine is missing.
+        """
         if not self.engine:
-            return False
+            raise RuntimeError("Combat engine failed to initialize for room")
         if _current_hp(combatant) <= 0:
             return False
         current = {p.actor for p in self.engine.participants}
