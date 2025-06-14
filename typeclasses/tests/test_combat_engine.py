@@ -6,6 +6,8 @@ from combat.combat_engine import CombatEngine
 from combat.combat_actions import Action, CombatResult
 from utils.currency import from_copper, to_copper
 from combat.combat_utils import get_condition_msg
+from commands import npc_builder
+from django.conf import settings
 
 
 class KillAction(Action):
@@ -352,6 +354,26 @@ class TestCombatDeath(EvenniaTest):
             npc.at_damage(player, npc.traits.health.current + 1)
 
         self.assertEqual(player.db.exp, 7)
+
+    def test_default_exp_reward_based_on_level(self):
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        player = self.char1
+        player.db.exp = 0
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+        npc.db.level = 3
+        npc.db.combat_class = "Warrior"
+
+        npc_builder.finalize_mob_prototype(self.char1, npc)
+        expected = (npc.db.level or 1) * settings.DEFAULT_XP_PER_LEVEL
+        self.assertEqual(npc.db.exp_reward, expected)
+
+        with patch('world.system.state_manager.check_level_up'):
+            npc.at_damage(player, npc.traits.health.current + 1)
+
+        self.assertEqual(player.db.exp, expected)
 
 
 class TestCombatNPCTurn(EvenniaTest):
