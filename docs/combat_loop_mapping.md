@@ -8,15 +8,15 @@ File: `combat/round_manager.py`
 
 - Maintains a registry of all active combat instances keyed by a unique combat id.
 - Tracks which combat each combatant belongs to for quick lookup.
-- Ticks every few seconds to drive combat across rooms, much like ROM's `violence_update` that iterates over every character currently fighting.
+- Ticks every few seconds to drive all active combats, much like ROM's `violence_update` that iterates over every character currently fighting.
 - Each tick triggers the associated `CombatEngine` to process a new round.
 - When `COMBAT_DEBUG_TICKS` is `True` in `server/conf/settings.py`, a debug log is emitted each tick.
 
 ## CombatInstance
 
-Created by `CombatRoundManager` for a room when combat starts.
-- Tracks participants in that room and syncs them with the `CombatEngine`.
-- Replaces the old room-attached script and mirrors ROM's per-room fight list.
+Created by `CombatRoundManager` when a new combat begins.
+- Tracks its participants and keeps them synchronized with the `CombatEngine`.
+- Replaces the old room-attached scripts used in earlier versions.
 
 ## CombatEngine
 

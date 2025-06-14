@@ -436,11 +436,12 @@ class CombatRoundManager:
         return "\n".join(lines)
 
 
-def cleanup_room_based_combat() -> None:
-    """End any existing room-based combat instances left from older versions."""
+def cleanup_legacy_room_combat() -> None:
+    """Clean up any leftover room-based combat stored in `instances_by_room`."""
     mgr = CombatRoundManager._instance
     if not mgr:
         return
+    # Older revisions stored combats in `instances_by_room`. Remove any that remain.
     if hasattr(mgr, "instances_by_room"):
         for inst in list(getattr(mgr, "instances_by_room", {}).values()):
             try:
@@ -452,4 +453,4 @@ def cleanup_room_based_combat() -> None:
             mgr.instances.clear()
 
 
-cleanup_room_based_combat()
+cleanup_legacy_room_combat()
