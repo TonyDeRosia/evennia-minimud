@@ -7,7 +7,7 @@ from typing import Optional, Iterable
 import logging
 
 from .damage_types import DamageType
-from .combat_utils import roll_evade, roll_damage
+from .combat_utils import roll_evade, roll_damage, roll_parry, roll_block
 from world.system import stat_manager
 
 from evennia.utils import utils
@@ -155,6 +155,20 @@ class AttackAction(Action):
                 message=f"{attempt}\n{target.key} evades the attack!",
             )
 
+        if roll_parry(self.actor, target):
+            return CombatResult(
+                actor=self.actor,
+                target=target,
+                message=f"{attempt}\n{target.key} parries the attack!",
+            )
+
+        if roll_block(self.actor, target):
+            return CombatResult(
+                actor=self.actor,
+                target=target,
+                message=f"{attempt}\n{target.key} blocks the attack!",
+            )
+
         dmg = 0
         dtype = DamageType.BLUDGEONING
 
@@ -202,10 +216,14 @@ class AttackAction(Action):
             dex_val = state_manager.get_effective_stat(self.actor, "DEX")
             dmg = int(round(dmg * (1 + str_val * 0.012 + dex_val * 0.004)))
 
-        msg = (
-            f"{attempt}\n{self.actor.key} hits {target.key}!\n"
-            f"{self.actor.key} deals {dmg} damage to {target.key}."
-        )
+        crit = stat_manager.roll_crit(self.actor, target)
+        if crit:
+            dmg = stat_manager.crit_damage(self.actor, dmg)
+
+        msg = f"{attempt}\n{self.actor.key} hits {target.key}!\n"
+        if crit:
+            msg += "Critical hit!\n"
+        msg += f"{self.actor.key} deals {dmg} damage to {target.key}."
 
         return CombatResult(
             actor=self.actor,
