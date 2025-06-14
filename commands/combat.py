@@ -103,11 +103,9 @@ class CmdAttack(Command):
         """
         optional post-command auto prompt
         """
-        # check if we have auto-prompt in settings
-        if self.account and (settings := self.account.db.settings):
-            if settings.get("auto prompt"):
-                status = self.caller.get_display_status(self.caller)
-                self.msg(prompt=status)
+        from utils import display_auto_prompt
+
+        display_auto_prompt(self.account, self.caller, self.msg)
 
 
 class CmdWield(Command):
@@ -279,11 +277,9 @@ class CmdBerserk(Command):
         """
         optional post-command auto prompt
         """
-        # check if we have auto-prompt in settings
-        if self.account and (settings := self.account.db.settings):
-            if settings.get("auto prompt"):
-                status = self.caller.get_display_status(self.caller)
-                self.msg(prompt=status)
+        from utils import display_auto_prompt
+
+        display_auto_prompt(self.account, self.caller, self.msg)
 
 
 class CmdRespawn(Command):
@@ -364,9 +360,10 @@ class CmdStatus(Command):
 
     def func(self):
         if not self.args:
+            from utils import display_auto_prompt
+
             target = self.caller
-            status = target.get_display_status(self.caller)
-            self.msg(prompt=status)
+            display_auto_prompt(self.account, target, self.msg, force=True)
         else:
             target = self.caller.search(self.args.strip())
             if not target:
