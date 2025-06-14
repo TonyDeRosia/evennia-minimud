@@ -77,7 +77,7 @@ class CmdAttack(Command):
             return
 
         # if we were trying to flee, cancel that
-        if "fleeing" in self.caller.db:
+        if self.caller.attributes.has("fleeing"):
             del self.caller.db.fleeing
 
         # it's all good! let's get started!
