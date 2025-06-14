@@ -720,6 +720,9 @@ def finalize_mob_prototype(caller, npc):
     if npc.db.initiative is None:
         npc.db.initiative = stats["initiative"]
 
+    if not npc.db.exp_reward:
+        npc.db.exp_reward = (npc.db.level or 1) * settings.DEFAULT_XP_PER_LEVEL
+
     from world.mobregistry import register_mob_vnum
 
     if npc.db.vnum:
