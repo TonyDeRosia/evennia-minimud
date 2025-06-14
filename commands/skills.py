@@ -32,7 +32,7 @@ class CmdStatSheet(Command):
         self.msg(f"|w{caller.name}|n")
         # display current status
         self.msg(caller.get_display_status(caller))
-        self.msg(f"EXP: {caller.db.exp or 0}")
+        self.msg(f"EXP: {caller.db.experience or 0}")
 
         # display the primary stats
         self.msg("STATS")

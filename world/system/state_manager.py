@@ -310,7 +310,7 @@ def check_level_up(chara) -> bool:
         bool: True if the character gained at least one level.
     """
 
-    exp = int(chara.db.exp or 0)
+    exp = int(chara.db.experience or 0)
     level = int(chara.db.level or 1)
     leveled = False
 

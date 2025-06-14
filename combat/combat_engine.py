@@ -133,7 +133,7 @@ class CombatEngine:
 
         Side Effects
         ------------
-        Increases ``chara.db.exp`` and informs the character if possible.
+        Increases ``chara.db.experience`` and informs the character if possible.
         Triggers a level up check via :func:`state_manager.check_level_up`.
         """
         if not exp or not chara:
@@ -154,7 +154,7 @@ class CombatEngine:
 
         Side Effects
         ------------
-        Updates ``member.db.exp`` for each participant, sends a message if the
+        Updates ``member.db.experience`` for each participant, sends a message if the
         member can be messaged and checks for level gains.
         """
         members = [m for m in members if m]
