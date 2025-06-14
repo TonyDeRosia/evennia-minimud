@@ -7,6 +7,7 @@ from typing import Iterable
 from .turn_manager import TurnManager
 from .aggro_tracker import AggroTracker
 from .damage_processor import DamageProcessor
+from evennia.utils.logger import log_trace
 
 
 class CombatEngine:
@@ -43,6 +44,7 @@ class CombatEngine:
         self.turn_manager.start_round()
 
     def process_round(self) -> None:
+        log_trace(f"Processing combat round {self.round}")
         self.processor.process_round()
 
     # Convenience wrappers for processor functionality
