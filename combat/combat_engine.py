@@ -299,8 +299,13 @@ class CombatEngine:
         """
         self.participants = [p for p in self.participants if p.actor is not actor]
         self.queue = [p for p in self.queue if p.actor is not actor]
+
+        if hasattr(actor, "db"):
+            actor.db.in_combat = False
+
         if hasattr(actor, "on_exit_combat"):
             actor.on_exit_combat()
+
         if hasattr(actor, "ndb") and hasattr(actor.ndb, "combat_engine"):
             del actor.ndb.combat_engine
 

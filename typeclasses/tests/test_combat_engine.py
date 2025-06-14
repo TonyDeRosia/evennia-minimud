@@ -246,6 +246,20 @@ class TestCombatEngine(unittest.TestCase):
 
         self.assertNotIn(b, [p.actor for p in engine.participants])
 
+    def test_remove_participant_marks_not_in_combat(self):
+        a = Dummy()
+        b = Dummy()
+
+        engine = CombatEngine([a, b], round_time=0)
+
+        a.on_exit_combat.reset_mock()
+
+        engine.remove_participant(a)
+
+        self.assertFalse(a.db.in_combat)
+        a.on_exit_combat.assert_called()
+        self.assertNotIn(a, [p.actor for p in engine.participants])
+
 
 class TestCombatDeath(EvenniaTest):
     def test_npc_death_creates_corpse_and_awards_xp(self):
