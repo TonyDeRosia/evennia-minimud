@@ -53,13 +53,14 @@ class TestDisplayScroll(EvenniaTest):
         sheet = get_display_scroll(char)
         self.assertIn("XP|n 10", sheet)
         self.assertIn("TNL|n 90", sheet)
-    def test_sated_decay_updates_display(self):
-        from scripts.sated_decay import SatedDecayScript
+    def test_tick_updates_display(self):
+        from world.system import state_manager
+
         char = self.char1
         char.db.sated = 10
-        script = SatedDecayScript()
-        script.at_script_creation()
-        script.at_repeat()
+
+        state_manager.tick_character(char)
+
         sheet = get_display_scroll(char)
         self.assertIn("|ySated|n", sheet)
         self.assertIn("9", sheet)
