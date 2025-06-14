@@ -65,4 +65,8 @@ class TestDisplayScroll(EvenniaTest):
         self.assertIn("|ySated|n", sheet)
         self.assertIn("9", sheet)
 
+    def test_haste_stat_displayed(self):
+        sheet = get_display_scroll(self.char1)
+        self.assertIn("Haste", sheet)
+
 
