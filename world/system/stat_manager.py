@@ -557,7 +557,8 @@ def display_stat_block(obj) -> str:
     lines.append(primaries)
 
     secondaries = "  ".join(
-        f"{key}: |w{get_secondary_stat(obj, key)}|n" for key in SECONDARY_STATS
+        f"{(key if key.isupper() else key.title())}: |w{get_secondary_stat(obj, key)}|n"
+        for key in SECONDARY_STATS
     )
     lines.append(secondaries)
 
