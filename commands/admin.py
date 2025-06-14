@@ -441,7 +441,7 @@ class CmdPeace(Command):
 
         from combat.round_manager import CombatRoundManager
         manager = CombatRoundManager.get()
-        instance = manager.instances_by_room.get(str(location.id))
+        instance = manager.instances_by_room.get(location.id)
         if not instance:
             caller.msg("There is no fighting here.")
             return
