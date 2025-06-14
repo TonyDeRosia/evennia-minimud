@@ -602,6 +602,7 @@ def menunode_exp_reward(caller, raw_string="", **kwargs):
         f"""
         |wEXP reward|n [default: {default}]
         Example: |w{level * settings.DEFAULT_XP_PER_LEVEL}|n
+        Leave blank for level \xd7 DEFAULT_XP_PER_LEVEL
         (back to go back, skip for default)
         """
     )
