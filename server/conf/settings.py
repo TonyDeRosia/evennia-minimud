@@ -75,6 +75,8 @@ VNUM_REGISTRY_FILE = Path(GAME_DIR) / "world" / "vnum_registry.json"
 
 # Log each combat tick when set to True
 COMBAT_DEBUG_TICKS = False
+# Delay in seconds between combat manager ticks
+COMBAT_TICK_DELAY = 2.0
 
 # Clothing - https://www.evennia.com/docs/latest/Contribs/Contrib-Clothing.html#configuration
 CLOTHING_WEARSTYLE_MAXLENGTH = 40

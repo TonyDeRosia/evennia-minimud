@@ -424,8 +424,8 @@ with VNUM-based NPCs.
 ### Combat Round Manager
 
 The `CombatRoundManager` singleton, found in `combat.round_manager`, manages all
-active combat encounters. It ticks every **2 seconds** by default (see
-`tick_delay` at line 214 of `combat/round_manager.py`). Call
+active combat encounters. It ticks every **2 seconds** by default (configurable
+via the `COMBAT_TICK_DELAY` setting and stored on the manager as `tick_delay`). Call
 `CombatRoundManager.get().start_combat([fighter1, fighter2])` to create a combat
 with those combatants. The manager stores each combat instance by a unique ID
 and uses the `combatant_to_combat` dictionary to map combatants back to their
