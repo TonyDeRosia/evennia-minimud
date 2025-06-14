@@ -52,7 +52,9 @@ class CombatInstance:
             hp = _current_hp(fighter)
             if hp <= 0:
                 continue
-            if getattr(fighter, "in_combat", False):
+            # check combat status using the persistent db attribute
+            in_combat = getattr(fighter.db, "in_combat", False)
+            if in_combat:
                 active_fighters.append(fighter)
 
         return len(active_fighters) >= 2
