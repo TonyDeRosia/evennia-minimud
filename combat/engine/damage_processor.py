@@ -12,7 +12,6 @@ from .turn_manager import TurnManager
 from .aggro_tracker import AggroTracker
 from ..damage_types import DamageType
 from world.system import state_manager
-from world.combat import get_health_description
 
 
 class DamageProcessor:
@@ -177,10 +176,6 @@ class DamageProcessor:
             if not result.message:
                 self.dam_message(actor, result.target, damage_done)
             damage_totals[actor] = damage_totals.get(actor, 0) + damage_done
-
-        if result.target:
-            cond = get_health_description(result.target)
-            self.round_output.append(f"The {result.target.key} {cond}")
 
         if actor.location and result.message:
             actor.location.msg_contents(result.message)

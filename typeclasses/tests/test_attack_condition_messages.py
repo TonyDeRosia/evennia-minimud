@@ -21,12 +21,12 @@ class TestAttackConditionMessages(EvenniaTest):
         target.traits.health.current -= amount
         return amount
 
-    def _expect_condition_message(self, target):
+    def _expect_no_condition_message(self, target):
         expected = get_condition_msg(
             target.traits.health.current, target.traits.health.max
         )
         calls = [c.args[0] for c in self.room1.msg_contents.call_args_list]
-        self.assertTrue(any(f"The {target.key} {expected}" in msg for msg in calls))
+        self.assertFalse(any(f"The {target.key} {expected}" in msg for msg in calls))
 
     def test_barehand_condition(self):
         self.char2.at_damage = self._simple_damage
@@ -42,7 +42,7 @@ class TestAttackConditionMessages(EvenniaTest):
         ), patch("combat.combat_utils.apply_lifesteal"):
             BareHand().at_attack(self.char1, self.char2)
 
-        self._expect_condition_message(self.char2)
+        self._expect_no_condition_message(self.char2)
 
     def test_melee_weapon_condition(self):
         weapon = create.create_object(
@@ -65,5 +65,5 @@ class TestAttackConditionMessages(EvenniaTest):
         ), patch("combat.combat_utils.apply_lifesteal"):
             weapon.at_attack(self.char1, self.char2)
 
-        self._expect_condition_message(self.char2)
+        self._expect_no_condition_message(self.char2)
 

@@ -217,7 +217,7 @@ class TestCombatEngine(unittest.TestCase):
 
             expected = get_condition_msg(b.hp, b.traits.health.max)
             calls = [c.args[0] for c in room.msg_contents.call_args_list]
-            self.assertTrue(any(f"The {b.key} {expected}" in msg for msg in calls))
+            self.assertFalse(any(f"The {b.key} {expected}" in msg for msg in calls))
             room.reset_mock()
 
     @override_settings(COMBAT_DEBUG_SUMMARY=True)

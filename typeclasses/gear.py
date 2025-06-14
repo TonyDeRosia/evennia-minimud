@@ -77,9 +77,6 @@ class BareHand:
             )
             dealt = target.at_damage(wielder, damage, "bludgeon", critical=crit)
             combat_utils.apply_lifesteal(wielder, dealt)
-            condition = get_health_description(target)
-            if wielder.location:
-                wielder.location.msg_contents(f"The {target.key} {condition}")
             if status := getattr(self, "status_effect", None):
                 effect, chance = status
                 if stat_manager.roll_status(wielder, target, int(chance)):
@@ -196,9 +193,6 @@ class MeleeWeapon(Object):
             )
             dealt = target.at_damage(wielder, damage, damage_type, critical=crit)
             combat_utils.apply_lifesteal(wielder, dealt)
-            condition = get_health_description(target)
-            if wielder.location:
-                wielder.location.msg_contents(f"The {target.key} {condition}")
             if status := getattr(self.db, "status_effect", None):
                 effect, chance = status
                 if stat_manager.roll_status(wielder, target, int(chance)):
