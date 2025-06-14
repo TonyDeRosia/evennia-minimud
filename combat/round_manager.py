@@ -46,9 +46,12 @@ class CombatInstance:
 
         active_fighters = []
         for fighter in fighters:
-            if not fighter or not hasattr(fighter, "db"):
+            if not fighter:
                 continue
-            if getattr(fighter.db, "hp", 0) > 0 and getattr(fighter.db, "in_combat", False):
+            hp = getattr(fighter, "hp", 0)
+            if hp <= 0:
+                continue
+            if getattr(fighter, "in_combat", False):
                 active_fighters.append(fighter)
 
         return len(active_fighters) >= 2
@@ -86,14 +89,14 @@ class CombatInstance:
         elif hasattr(self.engine, "fighters"):
             valid_fighters = []
             for fighter in list(self.engine.fighters):
-                if not fighter or not hasattr(fighter, "db"):
+                if not fighter:
                     continue
 
-                if getattr(fighter.db, "hp", 0) <= 0:
+                if getattr(fighter, "hp", 0) <= 0:
                     fighter.db.in_combat = False
                     continue
 
-                if not getattr(fighter.db, "in_combat", False):
+                if not getattr(fighter, "in_combat", False):
                     continue
 
                 valid_fighters.append(fighter)
@@ -136,10 +139,10 @@ class CombatInstance:
         fighters = getattr(self.engine, "fighters", [])
         
         for fighter in list(fighters):
-            if not fighter or getattr(fighter.db, "hp", 0) <= 0:
+            if not fighter or getattr(fighter, "hp", 0) <= 0:
                 continue
 
-            if not getattr(fighter.db, "in_combat", False):
+            if not getattr(fighter, "in_combat", False):
                 continue
 
             # Handle NPC auto-attacks
@@ -159,8 +162,8 @@ class CombatInstance:
                 fighter != npc
                 and hasattr(fighter, "has_account")
                 and fighter.has_account
-                and getattr(fighter.db, "hp", 0) > 0
-                and getattr(fighter.db, "in_combat", False)
+                and getattr(fighter, "hp", 0) > 0
+                and getattr(fighter, "in_combat", False)
             ):
                 targets.append(fighter)
 
