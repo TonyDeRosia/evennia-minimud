@@ -195,19 +195,25 @@ def format_combat_message(
         return f"|C{a_name}'s {action} misses {t_name}!|n"
 
     if damage is not None:
-        if damage >= 50:
-            color = "|R"  # bright red for massive damage
-        elif damage >= 25:
-            color = "|r"  # red for heavy damage
-        elif damage >= 10:
-            color = "|y"  # yellow for moderate damage
-        elif damage > 0:
-            color = "|g"  # green for low damage
-        else:
-            color = "|w"  # white for 0
+        max_range = state_manager.get_effective_stat(actor, "attack_power")
+        if not max_range:
+            level = getattr(getattr(actor, "db", None), "level", 0) or 0
+            max_range = level * 5
+        max_range = max(max_range, 1)
 
-        crit_text = " (critical)" if crit else ""
-        return f"{color}{a_name} {action} {t_name} for {damage} damage{crit_text}!|n"
+        if damage >= 0.9 * max_range:
+            color = "|R"
+        elif damage >= 0.6 * max_range:
+            color = "|r"
+        elif damage >= 0.3 * max_range:
+            color = "|y"
+        elif damage > 0:
+            color = "|g"
+        else:
+            color = "|w"
+
+        crit_text = " |y(critical)|n" if crit else ""
+        return f"{a_name} {action} {t_name} for {color}{damage}|n damage{crit_text}"
 
     return f"{a_name} {action} {t_name}!"
 
