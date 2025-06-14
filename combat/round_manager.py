@@ -212,6 +212,7 @@ class CombatInstance:
             return
 
         self.combat_ended = True
+        CombatRoundManager.get().remove_instance(self.room)
 
         # Clean up fighter states
         if self.engine:
