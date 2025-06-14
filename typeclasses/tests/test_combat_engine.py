@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, patch, call
 import unittest
 from evennia.utils.test_resources import EvenniaTest
 
-from combat.combat_engine import CombatEngine
+from combat.engine import CombatEngine
 from combat.combat_actions import Action, CombatResult
 from utils.currency import from_copper, to_copper
 from combat.combat_utils import get_condition_msg
@@ -165,7 +165,7 @@ class TestCombatEngine(unittest.TestCase):
         a.key = "dummy"
         a.tags = MagicMock()
         with patch('world.system.state_manager.apply_regen'), \
-             patch('combat.combat_engine.delay') as mock_delay, \
+             patch('combat.engine.damage_processor.delay') as mock_delay, \
              patch('random.randint', return_value=0):
             engine = CombatEngine([a], round_time=0)
             engine.queue_action(a, KillAction(a, a))
@@ -180,7 +180,7 @@ class TestCombatEngine(unittest.TestCase):
         with patch('world.system.state_manager.apply_regen'), \
              patch('world.system.state_manager.get_effective_stat', return_value=0), \
              patch('combat.combat_actions.utils.inherits_from', return_value=False), \
-             patch('combat.combat_engine.delay') as mock_delay, \
+             patch('combat.engine.damage_processor.delay') as mock_delay, \
              patch('random.randint', return_value=0):
             engine = CombatEngine([a, b], round_time=0)
             engine.start_round()
@@ -208,7 +208,7 @@ class TestCombatEngine(unittest.TestCase):
             with patch('world.system.state_manager.apply_regen'), \
                  patch('world.system.state_manager.get_effective_stat', return_value=0), \
                  patch('random.randint', return_value=0), \
-                 patch('combat.combat_engine.delay'):
+                 patch('combat.engine.damage_processor.delay'):
                 engine = CombatEngine([a, b], round_time=0)
                 engine.queue_action(a, act_cls(a, b))
                 engine.start_round()
@@ -234,7 +234,7 @@ class TestCombatEngine(unittest.TestCase):
         with patch('world.system.state_manager.apply_regen'), \
              patch('world.system.state_manager.get_effective_stat', return_value=0), \
              patch('random.randint', return_value=0), \
-             patch('combat.combat_engine.delay'):
+             patch('combat.engine.damage_processor.delay'):
             engine = CombatEngine([a, b], round_time=0)
             engine.queue_action(a, DamageAction(a, b))
             engine.start_round()
@@ -454,7 +454,7 @@ class TestCombatNPCTurn(EvenniaTest):
              patch('world.system.state_manager.get_effective_stat', return_value=0), \
              patch('combat.combat_actions.utils.inherits_from', return_value=True), \
              patch('random.randint', return_value=0), \
-             patch('combat.combat_engine.delay'), \
+             patch('combat.engine.damage_processor.delay'), \
              patch.object(engine, 'queue_action', wraps=engine.queue_action) as mock_queue:
             engine.start_round()
             engine.process_round()
@@ -524,7 +524,7 @@ def test_no_recovery_message_after_target_cleared():
     engine.queue_action(player, KillAction(player, mob))
 
     with patch("world.system.state_manager.apply_regen"), \
-         patch("combat.combat_engine.delay"), \
+         patch("combat.engine.damage_processor.delay"), \
          patch("random.randint", return_value=0):
         engine.start_round()
         engine.process_round()
@@ -551,7 +551,7 @@ class TestUnsavedPrototypeCombat(unittest.TestCase):
              patch("world.system.state_manager.get_effective_stat", return_value=0), \
              patch("combat.combat_actions.utils.inherits_from", return_value=False), \
              patch("random.randint", return_value=0), \
-             patch("combat.combat_engine.delay"):
+             patch("combat.engine.damage_processor.delay"):
             engine.start_round()
             engine.process_round()
 

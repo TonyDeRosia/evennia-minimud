@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import Callable, Iterable
 
 from .combat_actions import AttackAction, SkillAction, SpellAction
-from .combat_engine import CombatEngine
+from .engine import CombatEngine
 from .combat_skills import SKILL_CLASSES
 from world.spells import SPELLS
 

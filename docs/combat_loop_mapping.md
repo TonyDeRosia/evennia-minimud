@@ -19,7 +19,7 @@ Created by `CombatRoundManager` for a room when combat starts.
 
 ## CombatEngine
 
-File: `combat/combat_engine.py`
+File: `combat/engine/combat_engine.py`
 
 - Executes the actual round logic: rolling initiative, queueing actions and resolving them in order.
 - The `process_round` method performs multiple attacks when haste allows, providing functionality similar to ROM's `multi_hit` routine.

@@ -73,7 +73,7 @@ class TestExtendedStats(EvenniaTest):
 
 
     def test_threat_increases_aggro(self):
-        from combat.combat_engine import CombatEngine
+        from combat.engine import CombatEngine
 
         self.char1.traits.threat.base = 5
         engine = CombatEngine([self.char1, self.char2], round_time=0)

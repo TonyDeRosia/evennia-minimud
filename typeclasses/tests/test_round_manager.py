@@ -1,7 +1,7 @@
 from unittest.mock import patch
 from evennia.utils.test_resources import EvenniaTest
 from combat.round_manager import CombatRoundManager
-from combat.combat_engine import CombatEngine
+from combat.engine import CombatEngine
 
 
 class TestCombatRoundManager(EvenniaTest):

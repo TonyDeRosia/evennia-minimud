@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch, call
 
-from combat.combat_engine import CombatEngine
+from combat.engine import CombatEngine
 from combat.combat_actions import DefendAction, CombatResult, Action
 
 
