@@ -69,25 +69,25 @@ class CombatInstance:
         if hasattr(self.engine, "participants"):
             current = {p.actor for p in self.engine.participants}
             fighters = set(self.script.fighters)
-            
+
             # Add new fighters
             for actor in fighters - current:
                 if hasattr(self.engine, "add_participant"):
                     self.engine.add_participant(actor)
-            
+
             # Remove fighters no longer in script
             for actor in current - fighters:
                 if hasattr(self.engine, "remove_participant"):
                     self.engine.remove_participant(actor)
-            
+
             # Remove defeated combatants
             for actor in list(fighters):
                 if _current_hp(actor) <= 0:
-                    if hasattr(actor, "db"):
+                    if hasattr(actor, "db") and getattr(actor, "pk", None) is not None:
                         actor.db.in_combat = False
                     if hasattr(self.engine, "remove_participant"):
                         self.engine.remove_participant(actor)
-        
+
         # Handle legacy fighter-based engines
         elif hasattr(self.engine, "fighters"):
             valid_fighters = []
@@ -96,7 +96,8 @@ class CombatInstance:
                     continue
 
                 if _current_hp(fighter) <= 0:
-                    fighter.db.in_combat = False
+                    if getattr(fighter, "pk", None) is not None:
+                        fighter.db.in_combat = False
                     continue
 
                 if not getattr(fighter, "in_combat", False):
@@ -109,7 +110,9 @@ class CombatInstance:
             # Check for combat end
             if len(valid_fighters) <= 1:
                 winner = valid_fighters[0] if valid_fighters else None
-                self.end_combat(f"Combat ended - winner: {winner.key if winner else 'none'}")
+                self.end_combat(
+                    f"Combat ended - winner: {winner.key if winner else 'none'}"
+                )
 
     def process_round(self) -> None:
         """Process a single combat round for this instance."""
@@ -140,7 +143,7 @@ class CombatInstance:
     def _manual_round_processing(self) -> None:
         """Fallback round processing if engine doesn't have process_round."""
         fighters = getattr(self.engine, "fighters", [])
-        
+
         for fighter in list(fighters):
             if not fighter or _current_hp(fighter) <= 0:
                 continue
@@ -159,7 +162,7 @@ class CombatInstance:
 
         fighters = getattr(self.engine, "fighters", [])
         targets = []
-        
+
         for fighter in fighters:
             if (
                 fighter != npc
@@ -196,7 +199,11 @@ class CombatInstance:
                 fighters = self.engine.fighters
 
             for fighter in fighters:
-                if fighter and hasattr(fighter, "db"):
+                if (
+                    fighter
+                    and hasattr(fighter, "db")
+                    and getattr(fighter, "pk", None) is not None
+                ):
                     fighter.db.in_combat = False
 
         if reason:
@@ -240,6 +247,7 @@ class CombatRoundManager:
         # Create combat engine
         try:
             from .combat_engine import CombatEngine
+
             engine = CombatEngine(fighters, round_time=None)
         except ImportError:
             # Fallback for environments without the combat engine

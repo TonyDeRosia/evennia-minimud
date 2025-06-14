@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import List, Iterable, Dict
 import random
 from evennia.utils import delay
+from evennia.utils.logger import log_trace
 from world.system import state_manager
 
 # For every ``HASTE_PER_EXTRA_ATTACK`` haste, an actor gains one additional
@@ -276,8 +277,10 @@ class CombatEngine:
         Appends a :class:`CombatParticipant` to :attr:`participants` and
         calls ``actor.on_enter_combat`` if present.
         """
-        if hasattr(actor, "db"):
+        if hasattr(actor, "db") and getattr(actor, "pk", None) is not None:
             actor.db.in_combat = True
+        elif getattr(actor, "pk", None) is None:
+            log_trace(f"add_participant skipped setting in_combat for unsaved {actor}")
         self.participants.append(CombatParticipant(actor=actor))
         if hasattr(actor, "ndb"):
             actor.ndb.combat_engine = self
@@ -300,8 +303,12 @@ class CombatEngine:
         self.participants = [p for p in self.participants if p.actor is not actor]
         self.queue = [p for p in self.queue if p.actor is not actor]
 
-        if hasattr(actor, "db"):
+        if hasattr(actor, "db") and getattr(actor, "pk", None) is not None:
             actor.db.in_combat = False
+        elif getattr(actor, "pk", None) is None:
+            log_trace(
+                f"remove_participant skipped setting in_combat for unsaved {actor}"
+            )
 
         if hasattr(actor, "on_exit_combat"):
             actor.on_exit_combat()
@@ -378,6 +385,11 @@ class CombatEngine:
         """
         if not target or target is attacker:
             return
+        if getattr(target, "pk", None) is None or getattr(attacker, "pk", None) is None:
+            log_trace(
+                f"track_aggro skipped for unsaved objects: target={target} attacker={attacker}"
+            )
+            return
         from world.system import state_manager
 
         data = self.aggro.setdefault(target, {})
@@ -453,6 +465,9 @@ class CombatEngine:
             The actual damage dealt after hooks are processed.
         """
 
+        if getattr(target, "pk", None) is None:
+            log_trace(f"apply_damage on unsaved object {target}")
+
         if hasattr(target, "at_damage"):
             before = getattr(getattr(target, "traits", None), "health", None)
             if before:
@@ -484,11 +499,7 @@ class CombatEngine:
             actor = participant.actor
             hp = _current_hp(actor)
             target = getattr(getattr(actor, "db", None), "combat_target", None)
-            if (
-                getattr(actor, "location", None) is None
-                or hp <= 0
-                or target is None
-            ):
+            if getattr(actor, "location", None) is None or hp <= 0 or target is None:
                 self.remove_participant(actor)
 
     def process_round(self) -> None:
@@ -618,5 +629,7 @@ class CombatEngine:
                         actor.msg(msg)
 
         self.round += 1
-        if self.round_time is not None and any(_current_hp(p.actor) > 0 for p in self.participants):
+        if self.round_time is not None and any(
+            _current_hp(p.actor) > 0 for p in self.participants
+        ):
             delay(self.round_time, self.process_round)
