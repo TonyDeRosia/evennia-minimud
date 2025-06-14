@@ -77,7 +77,8 @@ class CmdAttack(Command):
             return
 
         # if we were trying to flee, cancel that
-        del self.caller.db.fleeing
+        if "fleeing" in self.caller.db:
+            del self.caller.db.fleeing
 
         # it's all good! let's get started!
         combat_script = get_or_create_combat_script(location)
