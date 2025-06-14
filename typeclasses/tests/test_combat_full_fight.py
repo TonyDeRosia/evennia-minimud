@@ -4,7 +4,6 @@ from unittest.mock import patch
 from evennia.utils.test_resources import EvenniaTest
 from combat.combat_actions import Action, CombatResult
 from combat.round_manager import CombatRoundManager
-from typeclasses.scripts import CombatScript
 
 
 class DamageAction(Action):
@@ -21,11 +20,8 @@ class DamageAction(Action):
 class TestCombatFullFight(EvenniaTest):
     def test_fight_runs_until_defeat(self):
         with patch("combat.round_manager.delay"):
-            self.room1.scripts.add(CombatScript, key="combat")
-            script = self.room1.scripts.get("combat")[0]
-            script.add_combatant(self.char1, enemy=self.char2)
             manager = CombatRoundManager.get()
-            instance = manager.add_instance(script)
+            instance = manager.add_instance(self.room1, fighters=[self.char1, self.char2])
             engine = instance.engine
 
             # give both characters small amounts of health

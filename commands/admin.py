@@ -439,15 +439,16 @@ class CmdPeace(Command):
             caller.msg("You have no location.")
             return
 
-        combat_script = location.scripts.get("combat")
-        if not combat_script or not combat_script[0].pk:
+        from combat.round_manager import CombatRoundManager
+        manager = CombatRoundManager.get()
+        instance = manager.instances_by_room.get(str(location.id))
+        if not instance:
             caller.msg("There is no fighting here.")
             return
 
-        combat_script = combat_script[0]
-        for fighter in list(combat_script.fighters):
-            combat_script.remove_combatant(fighter)
-        combat_script.stop()
+        for p in list(instance.engine.participants):
+            instance.remove_combatant(p.actor)
+        manager.remove_instance(location)
         location.msg_contents("Peace falls over the area.")
 
 

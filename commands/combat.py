@@ -5,7 +5,6 @@ from evennia.utils.evtable import EvTable
 
 from .command import Command
 from typeclasses.gear import BareHand
-from typeclasses.scripts import get_or_create_combat_script
 
 
 class CmdAttack(Command):
@@ -81,10 +80,11 @@ class CmdAttack(Command):
             del self.caller.db.fleeing
 
         # it's all good! let's get started!
-        combat_script = get_or_create_combat_script(location)
+        from combat.round_manager import CombatRoundManager
 
-        # adding a combatant to combat just returns True if they're already there, so this is safe
-        if not combat_script.add_combatant(self.caller, enemy=target):
+        instance = CombatRoundManager.get().add_instance(location)
+
+        if not instance.add_combatant(self.caller):
             self.msg("You can't fight right now.")
             return
 
@@ -92,10 +92,7 @@ class CmdAttack(Command):
         target.db.combat_target = self.caller
 
         from combat import AttackAction
-        from combat.round_manager import CombatRoundManager
-
-        inst = CombatRoundManager.get().add_instance(combat_script)
-        inst.engine.queue_action(self.caller, AttackAction(self.caller, target))
+        instance.engine.queue_action(self.caller, AttackAction(self.caller, target))
 
 
     def at_post_cmd(self):
@@ -236,9 +233,10 @@ class CmdFlee(Command):
             self.msg("There is nowhere to flee to!")
             return
 
-        if combat_script := caller.location.scripts.get("combat"):
-            combat_script = combat_script[0]
-            if not combat_script.remove_combatant(self.caller):
+        from combat.round_manager import CombatRoundManager
+        manager = CombatRoundManager.get()
+        if instance := manager.instances_by_room.get(str(caller.location.id)):
+            if not instance.remove_combatant(self.caller):
                 self.msg("You cannot leave combat.")
 
         self.caller.db.fleeing = True

@@ -465,25 +465,24 @@ class TestAdminCommands(EvenniaTest):
         cmd.caller = self.char1
         cmd.func()
 
-        self.assertFalse(self.room1.scripts.get("combat"))
+        from combat.round_manager import CombatRoundManager
+        self.assertFalse(CombatRoundManager.get().instances)
 
     def test_peace_after_victory(self):
         """Peace should handle the combat script being deleted already."""
 
-        from typeclasses.scripts import CombatScript
+        from combat.round_manager import CombatRoundManager
 
-        self.room1.scripts.add(CombatScript, key="combat")
-        script = self.room1.scripts.get("combat")[0]
-        # ensure the script is saved before modifying teams
-        script.save()
-        script.add_combatant(self.char1, enemy=self.char2)
+        manager = CombatRoundManager.get()
+        instance = manager.add_instance(self.room1, fighters=[self.char1, self.char2])
 
         # defeat the opponent
         self.char2.tags.add("dead", category="status")
-        script.check_victory()
+        instance.engine.process_round()
+        manager._tick()
 
-        # combat script should now be deleted
-        self.assertFalse(self.room1.scripts.get("combat"))
+        # combat instance should now be deleted
+        self.assertFalse(manager.instances)
 
         self.char1.msg.reset_mock()
         self.char1.execute_cmd("peace")
@@ -502,14 +501,17 @@ class TestAdminCommands(EvenniaTest):
 
         # start combat
         self.char1.execute_cmd(f"attack {self.char2.key}")
-        combat_script = self.room1.scripts.get("combat")[0]
+        from combat.round_manager import CombatRoundManager
+        manager = CombatRoundManager.get()
+        instance = manager.instances_by_room.get(str(self.room1.id))
 
-        # defeat the opponent so check_victory deletes the script
+        # defeat the opponent so combat ends
         self.char2.tags.add("dead", category="status")
-        combat_script.check_victory()
+        instance.engine.process_round()
 
-        # ensure script is gone
-        self.assertFalse(self.room1.scripts.get("combat"))
+        # ensure instance is removed
+        manager._tick()
+        self.assertFalse(manager.instances)
 
         self.char1.msg.reset_mock()
         self.char1.execute_cmd("peace")
@@ -534,5 +536,6 @@ class TestAdminCommands(EvenniaTest):
         cmd.caller = self.char1
         cmd.func()
 
-        self.assertFalse(self.room1.scripts.get("combat"))
+        from combat.round_manager import CombatRoundManager
+        self.assertFalse(CombatRoundManager.get().instances)
 

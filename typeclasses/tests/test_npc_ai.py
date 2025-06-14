@@ -128,10 +128,9 @@ class TestAIBehaviors(EvenniaTest):
         npc.db.following = self.char1
 
         self.char1.location = self.room1
-        from typeclasses.scripts import CombatScript
-        self.room1.scripts.add(CombatScript, key="combat")
-        combat_script = self.room1.scripts.get("combat")[0]
-        combat_script.add_combatant(self.char1, enemy=self.char2)
+        from combat.round_manager import CombatRoundManager
+        manager = CombatRoundManager.get()
+        manager.add_instance(self.room1, fighters=[self.char1, self.char2])
 
         with patch.object(npc, "enter_combat") as mock:
             ai.process_ai(npc)
@@ -144,10 +143,9 @@ class TestAIBehaviors(EvenniaTest):
         caller = create.create_object(BaseNPC, key="caller", location=self.room1)
         caller.db.ai_type = "defensive"
         caller.db.actflags = ["call_for_help"]
-        from typeclasses.scripts import CombatScript
-        self.room1.scripts.add(CombatScript, key="combat")
-        combat_script = self.room1.scripts.get("combat")[0]
-        combat_script.add_combatant(caller, enemy=self.char1)
+        from combat.round_manager import CombatRoundManager
+        manager = CombatRoundManager.get()
+        manager.add_instance(self.room1, fighters=[caller, self.char1])
 
         ally = create.create_object(BaseNPC, key="ally", location=self.room1)
         ally.db.ai_type = "passive"

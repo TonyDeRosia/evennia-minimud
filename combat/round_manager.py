@@ -15,20 +15,46 @@ from .combat_engine import _current_hp
 class CombatInstance:
     """Container for a combat engine tied to a room."""
 
-    script: object
+    room: object
     engine: object  # CombatEngine
     round_time: float = 2.0
     round_number: int = 0
     last_round_time: float = field(default_factory=time.time)
     combat_ended: bool = False
 
+    def gather_fighters(self) -> List[object]:
+        """Return all objects in the room flagged as in combat."""
+        if not self.room:
+            return []
+        return [
+            obj
+            for obj in getattr(self.room, "contents", [])
+            if getattr(getattr(obj, "db", None), "in_combat", False)
+        ]
+
+    def add_combatant(self, combatant, **kwargs) -> bool:
+        """Add ``combatant`` to this combat instance."""
+        if not self.engine:
+            return False
+        current = {p.actor for p in self.engine.participants}
+        if combatant in current:
+            return True
+        self.engine.add_participant(combatant)
+        return True
+
+    def remove_combatant(self, combatant, **kwargs) -> bool:
+        """Remove ``combatant`` from this combat instance."""
+        if not self.engine:
+            return False
+        self.engine.remove_participant(combatant)
+        return True
+
     def is_valid(self) -> bool:
-        """Return ``True`` if the underlying script is still active."""
+        """Return ``True`` if the underlying room still exists."""
         return (
-            self.script
-            and hasattr(self.script, "pk")
-            and self.script.pk
-            and getattr(self.script, "active", False)
+            self.room
+            and hasattr(self.room, "pk")
+            and self.room.pk
             and not self.combat_ended
         )
 
@@ -60,22 +86,22 @@ class CombatInstance:
         return len(active_fighters) >= 2
 
     def sync_participants(self) -> None:
-        """Keep engine participants aligned with script fighters and remove defeated combatants."""
-        if not self.engine or not hasattr(self.script, "fighters"):
+        """Keep engine participants aligned with room fighters and remove defeated combatants."""
+        if not self.engine:
             self.end_combat("No fighters available")
             return
 
-        # Handle modern participant-based engines
+        fighters = set(self.gather_fighters())
+
         if hasattr(self.engine, "participants"):
             current = {p.actor for p in self.engine.participants}
-            fighters = set(self.script.fighters)
             
             # Add new fighters
             for actor in fighters - current:
                 if hasattr(self.engine, "add_participant"):
                     self.engine.add_participant(actor)
             
-            # Remove fighters no longer in script
+            # Remove fighters no longer present in the room
             for actor in current - fighters:
                 if hasattr(self.engine, "remove_participant"):
                     self.engine.remove_participant(actor)
@@ -210,6 +236,7 @@ class CombatRoundManager:
 
     def __init__(self) -> None:
         self.instances: List[CombatInstance] = []
+        self.instances_by_room: Dict[str, CombatInstance] = {}
         self.running = False
         self.tick_delay = 2.0
         self._next_tick_scheduled = False
@@ -224,25 +251,23 @@ class CombatRoundManager:
     # instance management
     # ------------------------------------------------------------------
     def add_instance(
-        self, script, round_time: Optional[float] = None
+        self, room, fighters: Optional[List[object]] = None, round_time: Optional[float] = None
     ) -> CombatInstance:
-        """Create or fetch a combat instance for ``script``."""
-        # Check if instance already exists
+        """Create or fetch a combat instance for ``room``."""
+        key = getattr(room, "id", id(room))
         for inst in self.instances:
-            if inst.script is script:
-                # ensure any new fighters are added immediately
+            if getattr(inst.room, "id", id(inst.room)) == key:
                 inst.sync_participants()
-                # If manager is idle, kick off processing right away so queued
-                # actions run without waiting for the next tick
                 if not self.running:
                     inst.process_round()
                     self.start_ticking()
                 return inst
 
-        # Get fighters from script
-        fighters = getattr(script, "fighters", [])
-        if hasattr(script, "get_fighters"):
-            fighters = script.get_fighters()
+        fighters = fighters or [
+            obj
+            for obj in getattr(room, "contents", [])
+            if getattr(getattr(obj, "db", None), "in_combat", False)
+        ]
 
         # Create combat engine
         try:
@@ -253,8 +278,9 @@ class CombatRoundManager:
             engine = None
 
         # Create instance
-        inst = CombatInstance(script, engine, round_time or self.tick_delay)
+        inst = CombatInstance(room, engine, round_time or self.tick_delay)
         self.instances.append(inst)
+        self.instances_by_room[str(key)] = inst
 
         # Process initial round
         inst.process_round()
@@ -265,9 +291,12 @@ class CombatRoundManager:
 
         return inst
 
-    def remove_instance(self, script) -> None:
-        """Remove ``script``'s instance from management."""
-        self.instances = [i for i in self.instances if i.script is not script]
+    def remove_instance(self, room) -> None:
+        """Remove ``room``'s instance from management."""
+        key = getattr(room, "id", id(room))
+        inst = self.instances_by_room.pop(str(key), None)
+        if inst:
+            self.instances = [i for i in self.instances if i is not inst]
         if not self.instances:
             self.stop_ticking()
 
@@ -291,35 +320,35 @@ class CombatRoundManager:
         delay(self.tick_delay, self._tick)
 
     def _process_instances(self) -> List[object]:
-        """Process all combat instances and return scripts to remove."""
+        """Process all combat instances and return rooms to remove."""
         remove: List[object] = []
 
         for inst in list(self.instances):
             try:
                 if not inst.is_valid():
-                    remove.append(inst.script)
+                    remove.append(inst.room)
                     continue
 
                 if not inst.has_active_fighters():
                     inst.end_combat("No active fighters remaining")
-                    remove.append(inst.script)
+                    remove.append(inst.room)
                     continue
 
                 inst.process_round()
 
                 if inst.combat_ended:
-                    remove.append(inst.script)
+                    remove.append(inst.room)
 
             except Exception as err:
                 log_trace(f"Error processing combat instance: {err}")
-                remove.append(inst.script)
+                remove.append(inst.room)
 
         return remove
 
-    def _cleanup_instances(self, scripts: List[object]) -> None:
-        """Remove instances whose scripts are in ``scripts``."""
-        for script in scripts:
-            self.remove_instance(script)
+    def _cleanup_instances(self, rooms: List[object]) -> None:
+        """Remove instances whose rooms are in ``rooms``."""
+        for room in rooms:
+            self.remove_instance(room)
 
     def _tick(self) -> None:
         self._next_tick_scheduled = False
@@ -354,7 +383,7 @@ class CombatRoundManager:
 
             status["instances"].append(
                 {
-                    "script": str(inst.script),
+                    "room": str(inst.room),
                     "round_number": inst.round_number,
                     "fighters": fighter_count,
                     "valid": inst.is_valid(),
@@ -385,7 +414,7 @@ class CombatRoundManager:
             lines.extend(
                 [
                     f"  Instance {i + 1}:",
-                    f"    Script: {inst['script']}",
+                    f"    Room: {inst['room']}",
                     f"    Round: {inst['round_number']}",
                     f"    Fighters: {inst['fighters']}",
                     f"    Valid: {inst['valid']}",

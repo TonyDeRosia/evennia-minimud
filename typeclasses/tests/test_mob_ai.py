@@ -72,14 +72,13 @@ class TestMobAIBehaviors(EvenniaTest):
 
     def test_assist_allies(self):
         from typeclasses.npcs import BaseNPC
-        from typeclasses.scripts import CombatScript
+        from combat.round_manager import CombatRoundManager
 
         ally = create.create_object(BaseNPC, key="ally", location=self.room1)
         ally.db.ai_type = "defensive"
         ally.db.actflags = []
-        self.room1.scripts.add(CombatScript, key="combat")
-        combat_script = self.room1.scripts.get("combat")[0]
-        combat_script.add_combatant(ally, enemy=self.char1)
+        manager = CombatRoundManager.get()
+        instance = manager.add_instance(self.room1, fighters=[ally, self.char1])
 
         helper = create.create_object(BaseNPC, key="helper", location=self.room1)
         helper.db.actflags = ["assist"]

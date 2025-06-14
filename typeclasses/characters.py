@@ -48,15 +48,7 @@ class Character(ObjectParent, ClothedCharacter):
     @property
     def in_combat(self):
         """Return True if in combat, otherwise False"""
-        if not (location := self.location):
-            # can't be in combat if we're nowhere!
-            return False
-        if not (combat_script := location.scripts.get("combat")):
-            # there is no combat instance in this location
-            return False
-
-        # return whether we're in the combat instance's combatants
-        return self in combat_script[0].fighters
+        return bool(getattr(self.db, "in_combat", False))
 
     @property
     def can_flee(self):
@@ -432,9 +424,10 @@ class Character(ObjectParent, ClothedCharacter):
                     self.db.bounty = 0
             self.traits.health.rate = 0
             if self.in_combat:
-                combat = self.location.scripts.get("combat")[0]
-                if not combat.remove_combatant(self):
-                    # something went wrong...
+                from combat.round_manager import CombatRoundManager
+                manager = CombatRoundManager.get()
+                inst = manager.instances_by_room.get(str(self.location.id))
+                if inst and not inst.remove_combatant(self):
                     logger.log_err(
                         f"Could not remove defeated character from combat! Character: {self.name} (#{self.id}) Location: {self.location.name} (#{self.location.id})"
                     )
@@ -905,9 +898,12 @@ class PlayerCharacter(Character):
 
         # remove from combat if necessary. Victory cleanup may have already
         # deleted the combat script, so ensure it is valid before using it.
-        if self.in_combat and (script := self.location.scripts.get("combat")):
-            if script and script[0].pk:
-                script[0].remove_combatant(self)
+        if self.in_combat:
+            from combat.round_manager import CombatRoundManager
+            manager = CombatRoundManager.get()
+            inst = manager.instances_by_room.get(str(self.location.id))
+            if inst:
+                inst.remove_combatant(self)
         # avoid spawning multiple corpses for repeated calls
         existing = [
             obj
@@ -1106,9 +1102,12 @@ class NPC(Character):
 
         # remove from combat if necessary. The combat script may have been
         # cleaned up already, so verify it before using it.
-        if self.in_combat and (script := self.location.scripts.get("combat")):
-            if script and script[0].pk:
-                script[0].remove_combatant(self)
+        if self.in_combat:
+            from combat.round_manager import CombatRoundManager
+            manager = CombatRoundManager.get()
+            inst = manager.instances_by_room.get(str(self.location.id))
+            if inst:
+                inst.remove_combatant(self)
 
         corpse = self.drop_loot(attacker)
         if corpse:
@@ -1230,10 +1229,11 @@ class NPC(Character):
         if "timid" in self.attributes.get("react_as", ""):
             self.at_emote("flees!")
             self.db.fleeing = True
-            if combat_script := self.location.scripts.get("combat"):
-                combat_script = combat_script[0]
-                if not combat_script.remove_combatant(self):
-                    return dmg
+            from combat.round_manager import CombatRoundManager
+            manager = CombatRoundManager.get()
+            inst = manager.instances_by_room.get(str(self.location.id))
+            if inst and not inst.remove_combatant(self):
+                return dmg
             # there's a 50/50 chance the object will escape forever
             if randint(0, 1):
                 self.move_to(None)
@@ -1265,17 +1265,13 @@ class NPC(Character):
         self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
         location = self.location
 
-        from typeclasses.scripts import get_or_create_combat_script
+        from combat.round_manager import CombatRoundManager
 
-        combat_script = get_or_create_combat_script(location)
-
+        instance = CombatRoundManager.get().add_instance(location)
         self.db.combat_target = target
-        # adding a combatant to combat just returns True if they're already there, so this is safe
-        if not combat_script.add_combatant(self, enemy=target):
+        if not instance.add_combatant(self):
             return
 
-        from combat.round_manager import CombatRoundManager
-        instance = CombatRoundManager.get().add_instance(combat_script)
         engine = getattr(instance, "engine", None)
 
         if engine:

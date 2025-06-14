@@ -170,12 +170,12 @@ class TestCharacterProperties(EvenniaTest):
 
     def test_in_combat(self):
         self.assertFalse(self.char1.in_combat)
-        from typeclasses.scripts import CombatScript
+        from combat.round_manager import CombatRoundManager
 
-        self.room1.scripts.add(CombatScript, key="combat")
-        combat_script = self.room1.scripts.get("combat")[0]
+        manager = CombatRoundManager.get()
+        instance = manager.add_instance(self.room1, fighters=[self.char1, self.char2])
         self.assertFalse(self.char1.in_combat)
-        combat_script.add_combatant(self.char1, enemy=self.char2)
+        instance.add_combatant(self.char1)
         self.assertTrue(self.char1.in_combat)
 
 
