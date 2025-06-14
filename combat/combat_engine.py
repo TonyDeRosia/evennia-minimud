@@ -8,6 +8,8 @@ import random
 from evennia.utils import delay
 from world.system import state_manager
 
+HASTE_PER_EXTRA_ATTACK = 50
+
 from .combat_actions import Action, AttackAction, CombatResult
 from .damage_types import DamageType
 from .combat_utils import (
@@ -502,11 +504,22 @@ class CombatEngine:
                 hook(target)
 
             if participant.next_action:
-                queued = participant.next_action
+                queued = list(participant.next_action)
             elif target:
                 queued = [AttackAction(actor, target)]
             else:
                 queued = []
+
+            # add extra attacks based on haste
+            haste = state_manager.get_effective_stat(actor, "haste")
+            extra = max(0, haste // HASTE_PER_EXTRA_ATTACK)
+            if extra and queued:
+                extras: list[Action] = []
+                for action in queued:
+                    if isinstance(action, AttackAction):
+                        for _ in range(extra):
+                            extras.append(AttackAction(actor, action.target))
+                queued.extend(extras)
             for idx, action in enumerate(queued):
                 actions.append(
                     (
