@@ -6,12 +6,10 @@ from dataclasses import dataclass
 from typing import Optional, Iterable
 import logging
 
-from .damage_types import DamageType
-from .combat_utils import roll_evade, roll_damage, roll_parry, roll_block
+from .actions.utils import calculate_damage, check_hit, apply_critical
 from world.system import stat_manager
 
 from evennia.utils import utils
-from utils import roll_dice_string
 from world.system import state_manager
 
 logger = logging.getLogger(__name__)
@@ -140,85 +138,16 @@ class AttackAction(Action):
             wname = weapon.get("name", "fists")
         attempt = f"{self.actor.key} swings {wname or 'fists'} at {target.key}."
 
-        # Determine hit/miss
-        if not stat_manager.check_hit(self.actor, target):
+        hit, outcome = check_hit(self.actor, target)
+        if not hit:
             return CombatResult(
                 actor=self.actor,
                 target=target,
-                message=f"{attempt}\n{self.actor.key} misses.",
+                message=f"{attempt}\n{outcome}",
             )
 
-        if roll_evade(self.actor, target):
-            return CombatResult(
-                actor=self.actor,
-                target=target,
-                message=f"{attempt}\n{target.key} evades the attack!",
-            )
-
-        if roll_parry(self.actor, target):
-            return CombatResult(
-                actor=self.actor,
-                target=target,
-                message=f"{attempt}\n{target.key} parries the attack!",
-            )
-
-        if roll_block(self.actor, target):
-            return CombatResult(
-                actor=self.actor,
-                target=target,
-                message=f"{attempt}\n{target.key} blocks the attack!",
-            )
-
-        dmg = 0
-        dtype = DamageType.BLUDGEONING
-
-        hp_trait = getattr(getattr(target, "traits", None), "health", None)
-        if hasattr(target, "hp") or hp_trait:
-            if isinstance(weapon, dict):
-                dmg = weapon.get("damage")
-                dtype = weapon.get("damage_type", DamageType.BLUDGEONING)
-            else:
-                dmg = getattr(weapon, "damage", None)
-                dtype = getattr(weapon, "damage_type", DamageType.BLUDGEONING)
-
-            if dmg is None:
-                db = getattr(weapon, "db", None)
-                if db:
-                    dmg_map = getattr(db, "damage", None)
-                    if dmg_map:
-                        for i, (dt, formula) in enumerate(dmg_map.items()):
-                            try:
-                                roll = roll_dice_string(str(formula))
-                            except Exception:
-                                logger.error("Invalid damage formula '%s' on %s", formula, weapon)
-                                roll = 0
-                            dmg = dmg + roll if dmg else roll
-                            if i == 0:
-                                dtype = dt
-                    else:
-                        dice = getattr(db, "damage_dice", None)
-                        if dice:
-                            try:
-                                num, sides = map(int, str(dice).lower().split("d"))
-                            except (TypeError, ValueError):
-                                logger.error("Invalid damage_dice '%s' on %s", dice, weapon)
-                                dmg = int(getattr(db, "dmg", 0))
-                            else:
-                                dmg = roll_damage((num, sides))
-                        else:
-                            dmg = int(getattr(db, "dmg", 0))
-
-            if dmg is None:
-                dmg = 0
-
-            # Scale damage using attacker's stats
-            str_val = state_manager.get_effective_stat(self.actor, "STR")
-            dex_val = state_manager.get_effective_stat(self.actor, "DEX")
-            dmg = int(round(dmg * (1 + str_val * 0.012 + dex_val * 0.004)))
-
-        crit = stat_manager.roll_crit(self.actor, target)
-        if crit:
-            dmg = stat_manager.crit_damage(self.actor, dmg)
+        dmg, dtype = calculate_damage(self.actor, weapon, target)
+        dmg, crit = apply_critical(self.actor, target, dmg)
 
         msg = f"{attempt}\n{self.actor.key} hits {target.key}!\n"
         if crit:
@@ -275,7 +204,12 @@ class SkillAction(Action):
         """Execute the skill and return its result."""
         if self.stamina_cost and hasattr(self.actor.traits, "stamina"):
             self.actor.traits.stamina.current -= self.stamina_cost
-        return self.skill.resolve(self.actor, self.target)
+        result = self.skill.resolve(self.actor, self.target)
+        if getattr(result, "damage", 0):
+            result.damage, crit = apply_critical(self.actor, result.target, result.damage)
+            if crit:
+                result.message += "\nCritical hit!"
+        return result
 
 
 class SpellAction(Action):
@@ -311,8 +245,13 @@ class SpellAction(Action):
         success = getattr(self.actor, "cast_spell", None)
         if callable(success):
             success(self.spell.key, self.target)
-        return CombatResult(
+        result = CombatResult(
             actor=self.actor,
             target=self.target or self.actor,
             message=f"{self.actor.key} casts {self.spell.key}!",
         )
+        if getattr(result, "damage", 0):
+            result.damage, crit = apply_critical(self.actor, result.target, result.damage)
+            if crit:
+                result.message += "\nCritical hit!"
+        return result
