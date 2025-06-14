@@ -576,6 +576,7 @@ def _cancel(caller, raw_string, **kwargs):
     script = caller.scripts.get("builder_autosave")
     if script:
         script[0].stop()
+        script[0].delete()
     caller.db.builder_autosave = None
     caller.ndb.buildnpc = None
     return None
@@ -587,6 +588,7 @@ def _on_menu_exit(caller, menu):
     script = caller.scripts.get("builder_autosave")
     if script:
         script[0].stop()
+        script[0].delete()
     if getattr(caller.ndb, "builder_saved", False):
         caller.ndb.builder_saved = False
         caller.db.builder_autosave = None
@@ -740,6 +742,15 @@ def finalize_mob_prototype(caller, npc):
     caller.msg(msg)
 
 
+def _ensure_autosave_script(caller) -> None:
+    """(Re)start the autosave script, removing any existing copy."""
+    script = caller.scripts.get("builder_autosave")
+    if script:
+        script[0].stop()
+        script[0].delete()
+    caller.scripts.add(BuilderAutosave, key="builder_autosave")
+
+
 class CmdCNPC(Command):
     """Create or edit an NPC using a guided menu."""
 
@@ -763,7 +774,7 @@ class CmdCNPC(Command):
                 self.caller.ndb.buildnpc = dict(autosave)
                 self.caller.ndb.buildnpc_orig = dict(self.caller.ndb.buildnpc)
                 self.caller.db.builder_autosave = None
-                self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
+                _ensure_autosave_script(self.caller)
                 state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
                 startnode = (
                     "menunode_desc" if self.caller.ndb.buildnpc.get("key") else "menunode_key"
@@ -813,7 +824,7 @@ class CmdCNPC(Command):
             if use_mob:
                 self.caller.ndb.buildnpc["use_mob"] = True
             self.caller.ndb.buildnpc_orig = dict(self.caller.ndb.buildnpc)
-            self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
+            _ensure_autosave_script(self.caller)
             state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
             startnode = (
                 "menunode_desc" if self.caller.ndb.buildnpc.get("key") else "menunode_key"
@@ -839,7 +850,7 @@ class CmdCNPC(Command):
             self.caller.ndb.buildnpc_orig = dict(self.caller.ndb.buildnpc)
             if use_mob:
                 self.caller.ndb.buildnpc["use_mob"] = True
-            self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
+            _ensure_autosave_script(self.caller)
             state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
             startnode = (
                 "menunode_desc" if self.caller.ndb.buildnpc.get("key") else "menunode_key"
@@ -872,7 +883,7 @@ class CmdCNPC(Command):
             self.caller.ndb.buildnpc_orig = dict(self.caller.ndb.buildnpc)
             if use_mob:
                 self.caller.ndb.buildnpc["use_mob"] = True
-            self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
+            _ensure_autosave_script(self.caller)
             state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
             OLCEditor(
                 self.caller,
@@ -1336,7 +1347,7 @@ class CmdQuickMob(Command):
         data.update({"key": key, "vnum": vnum, "use_mob": True})
         self.caller.ndb.buildnpc = data
         self.caller.ndb.buildnpc_orig = dict(self.caller.ndb.buildnpc)
-        self.caller.scripts.add(BuilderAutosave, key="builder_autosave")
+        _ensure_autosave_script(self.caller)
         state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
         OLCEditor(
             self.caller,
