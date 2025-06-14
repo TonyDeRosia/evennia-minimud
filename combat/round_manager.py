@@ -290,11 +290,8 @@ class CombatRoundManager:
         self._next_tick_scheduled = True
         delay(self.tick_delay, self._tick)
 
-    def _tick(self) -> None:
-        self._next_tick_scheduled = False
-        if not self.running:
-            return
-
+    def _process_instances(self) -> List[object]:
+        """Process all combat instances and return scripts to remove."""
         remove: List[object] = []
 
         for inst in list(self.instances):
@@ -317,9 +314,20 @@ class CombatRoundManager:
                 log_trace(f"Error processing combat instance: {err}")
                 remove.append(inst.script)
 
-        # Remove ended instances
-        for script in remove:
+        return remove
+
+    def _cleanup_instances(self, scripts: List[object]) -> None:
+        """Remove instances whose scripts are in ``scripts``."""
+        for script in scripts:
             self.remove_instance(script)
+
+    def _tick(self) -> None:
+        self._next_tick_scheduled = False
+        if not self.running:
+            return
+
+        remove = self._process_instances()
+        self._cleanup_instances(remove)
 
         # Schedule next tick if instances remain
         if self.instances and self.running:
