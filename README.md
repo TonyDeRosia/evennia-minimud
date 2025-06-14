@@ -427,6 +427,10 @@ script if one is not already present. Calling
 `CombatRoundManager.get().add_instance(script)` registers that script with the
 manager and begins the automatic round loop.
 
+For a deeper look at how this round system mirrors the classic ROM MUD
+functions like `violence_update` and `multi_hit`, see the documentation in
+[`docs/combat_loop_mapping.md`](docs/combat_loop_mapping.md).
+
 
 ## Running the Tests
 
