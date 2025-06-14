@@ -46,7 +46,7 @@ DEFAULT_XP_PER_LEVEL = 10
 XP_PER_LEVEL = 100
 
 # Whether excess XP carries over when leveling
-XP_CARRY_OVER = False
+XP_CARRY_OVER = True
 
 ######################################################################
 # Config for contrib packages
