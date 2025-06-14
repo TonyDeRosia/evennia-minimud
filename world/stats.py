@@ -69,6 +69,7 @@ REGEN_STATS: List[Stat] = [
 TEMPO_STATS: List[Stat] = [
     Stat("cooldown_reduction", "Cooldown Reduction", stat="WIS"),
     Stat("initiative", "Initiative", stat="DEX"),
+    Stat("haste", "Haste", stat="DEX"),
 ]
 
 # Utility / miscellaneous stats

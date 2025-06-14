@@ -15,6 +15,7 @@ ALIAS_MAP = {
     "def": "DEF",
     "acc": "ACC",
     "eva": "EVA",
+    "haste": "haste",
     "per": "perception",
     "critical_chance": "crit_chance",
     "critchance": "crit_chance",
