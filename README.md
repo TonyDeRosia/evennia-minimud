@@ -420,12 +420,11 @@ with VNUM-based NPCs.
 ### Combat Round Manager
 
 The `CombatRoundManager` singleton, found in `combat.round_manager`, manages all
-active `CombatScript` instances. It ticks every **2 seconds** by default (see
-`tick_delay` at line 214 of `combat/round_manager.py`). Rooms receive a
-`CombatScript` via `get_or_create_combat_script(room)`, which attaches a new
-script if one is not already present. Calling
-`CombatRoundManager.get().add_instance(script)` registers that script with the
-manager and begins the automatic round loop.
+active combat instances per room. It ticks every **2 seconds** by default (see
+`tick_delay` at line 214 of `combat/round_manager.py`). Rooms are registered
+with the manager when combat starts via
+`CombatRoundManager.get().add_instance(room)`, which returns a `CombatInstance`
+object and kicks off the automatic round loop.
 
 For a deeper look at how this round system mirrors the classic ROM MUD
 functions like `violence_update` and `multi_hit`, see the documentation in

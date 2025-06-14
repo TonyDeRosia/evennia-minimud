@@ -6,17 +6,15 @@ This project models its turn-based fighting system after the traditional combat 
 
 File: `combat/round_manager.py`
 
-- Maintains a registry of all active `CombatScript` instances.
+- Maintains a registry of all active combat instances, keyed by room.
 - Ticks every few seconds to drive combat across rooms, much like ROM's `violence_update` that iterates over every character currently fighting.
 - Each tick triggers the associated `CombatEngine` to process a new round.
 
-## CombatScript
+## CombatInstance
 
-File: `typeclasses/scripts.py`
-
-- Attached to a room when combat begins and keeps track of the two opposing teams of fighters.
-- Starts or stops the room's `CombatEngine` and exposes helper methods for adding and removing combatants.
-- Serves the role of ROM's per-room fight list, organizing combatants so that `CombatRoundManager` can handle them as a group.
+Created by `CombatRoundManager` for a room when combat starts.
+- Tracks participants in that room and syncs them with the `CombatEngine`.
+- Replaces the old room-attached script and mirrors ROM's per-room fight list.
 
 ## CombatEngine
 

@@ -380,16 +380,15 @@ class TestCombatDeath(EvenniaTest):
         """NPC.on_death should handle a deleted combat script gracefully."""
         from evennia.utils import create
         from typeclasses.characters import NPC
-        from typeclasses.scripts import CombatScript
 
         player = self.char1
         npc = create.create_object(NPC, key="mob", location=self.room1)
         npc.db.drops = []
 
-        # create combat script then immediately stop it to mimic victory cleanup
-        self.room1.scripts.add(CombatScript, key="combat")
-        combat_script = self.room1.scripts.get("combat")[0]
-        combat_script.stop()
+        from combat.round_manager import CombatRoundManager
+        manager = CombatRoundManager.get()
+        instance = manager.add_instance(self.room1, fighters=[player, npc])
+        manager.remove_instance(self.room1)
 
         # should not raise when combat script has been removed
         npc.on_death(player)
