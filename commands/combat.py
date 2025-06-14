@@ -93,6 +93,10 @@ class CmdAttack(Command):
                 self.msg("You can't fight right now.")
             return
 
+        if getattr(target, "pk", None) is None:
+            self.msg(f"{target.get_display_name(self.caller)} is already dead.")
+            return
+
         self.caller.db.combat_target = target
         target.db.combat_target = self.caller
 

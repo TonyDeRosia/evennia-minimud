@@ -1273,6 +1273,8 @@ class NPC(Character):
 
         manager = CombatRoundManager.get()
         instance = manager.start_combat([self, target])
+        if getattr(target, "pk", None) is None:
+            return
         self.db.combat_target = target
         if self not in instance.combatants:
             return
