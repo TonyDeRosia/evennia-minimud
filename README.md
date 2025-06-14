@@ -430,6 +430,8 @@ with the manager when combat starts via
 `CombatRoundManager.get().add_instance(room)`, which returns a `CombatInstance`
 object and kicks off the automatic round loop. Instances are stored in
 `manager.instances_by_room` using the room's id as the key for quick lookups.
+If the underlying `CombatEngine` fails to initialize for any reason,
+`add_instance` will raise a `RuntimeError` to signal the error.
 
 For a deeper look at how this round system mirrors the classic ROM MUD
 functions like `violence_update` and `multi_hit`, see the documentation in
