@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import List, Iterable, Dict
-import logging
 import random
 from evennia.utils import delay
 from world.system import state_manager
@@ -20,8 +19,6 @@ from .combat_utils import (
     format_combat_message,
     calculate_initiative,
 )
-
-logger = logging.getLogger(__name__)
 from world.combat import get_health_description
 
 
@@ -279,7 +276,7 @@ class CombatEngine:
         Appends a :class:`CombatParticipant` to :attr:`participants` and
         calls ``actor.on_enter_combat`` if present.
         """
-        if hasattr(actor, "db") and getattr(actor, "pk", None) is not None:
+        if hasattr(actor, "db"):
             actor.db.in_combat = True
         self.participants.append(CombatParticipant(actor=actor))
         if hasattr(actor, "ndb"):
@@ -303,7 +300,7 @@ class CombatEngine:
         self.participants = [p for p in self.participants if p.actor is not actor]
         self.queue = [p for p in self.queue if p.actor is not actor]
 
-        if hasattr(actor, "db") and getattr(actor, "pk", None) is not None:
+        if hasattr(actor, "db"):
             actor.db.in_combat = False
 
         if hasattr(actor, "on_exit_combat"):
@@ -379,13 +376,7 @@ class CombatEngine:
         ------------
         Updates an internal aggro table used when awarding experience.
         """
-        if (
-            not target
-            or target is attacker
-            or getattr(target, "pk", None) is None
-            or getattr(attacker, "pk", None) is None
-        ):
-            logger.debug("Skipping aggro tracking for unsaved object(s).")
+        if not target or target is attacker:
             return
         from world.system import state_manager
 
@@ -461,12 +452,6 @@ class CombatEngine:
         int
             The actual damage dealt after hooks are processed.
         """
-
-        if target is None:
-            return 0
-
-        if getattr(target, "pk", None) is None:
-            logger.debug("Applying damage to unsaved object %s", target)
 
         if hasattr(target, "at_damage"):
             before = getattr(getattr(target, "traits", None), "health", None)
