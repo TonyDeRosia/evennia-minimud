@@ -289,10 +289,8 @@ class CmdDonate(Command):
         for obj in objs:
             obj.delete()
 
-        exp = self.caller.db.exp or 0
-        self.caller.db.exp = exp + total
         from world.system import state_manager
-        state_manager.check_level_up(self.caller)
+        state_manager.gain_xp(self.caller, total)
 
         self.msg(f"You exchange {obj_name} for {total} experience.")
 

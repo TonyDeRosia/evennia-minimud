@@ -32,10 +32,9 @@ def award_xp(killer, total_xp: int, participants: Iterable | None = None) -> Non
 
     share = max(int(total_xp / len(members)), int(total_xp * 0.10))
     for member in members:
-        member.db.exp = (member.db.exp or 0) + share
         if hasattr(member, "msg"):
             member.msg(f"You gain {share} experience points!")
-        state_manager.check_level_up(member)
+        state_manager.gain_xp(member, share)
 
 
 def calculate_initiative(combatant) -> int:

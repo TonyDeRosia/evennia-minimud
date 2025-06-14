@@ -23,7 +23,16 @@ class Dummy:
         self.traits = MagicMock()
         self.traits.get.return_value = MagicMock(value=init)
         self.traits.health = MagicMock(value=self.hp, max=self.hp)
-        self.db = type("DB", (), {"temp_bonuses": {}})()
+        self.db = type(
+            "DB",
+            (),
+            {
+                "temp_bonuses": {},
+                "experience": 0,
+                "tnl": settings.XP_PER_LEVEL,
+                "level": 1,
+            },
+        )()
         self.on_enter_combat = MagicMock()
         self.on_exit_combat = MagicMock()
         self.msg = MagicMock()
@@ -39,7 +48,17 @@ class NoHealth:
     def __init__(self):
         self.location = MagicMock()
         self.traits = MagicMock()
-        self.db = type("DB", (), {"temp_bonuses": {}, "combat_target": None})()
+        self.db = type(
+            "DB",
+            (),
+            {
+                "temp_bonuses": {},
+                "combat_target": None,
+                "experience": 0,
+                "tnl": settings.XP_PER_LEVEL,
+                "level": 1,
+            },
+        )()
         self.on_enter_combat = MagicMock()
         self.on_exit_combat = MagicMock()
         self.msg = MagicMock()
@@ -79,9 +98,9 @@ class TestCombatEngine(unittest.TestCase):
 
     def test_solo_gain_awards_exp(self):
         attacker = Dummy()
-        attacker.db = type("DB", (), {"exp": 0})()
+        attacker.db.experience = 0
         victim = Dummy()
-        victim.db = type("DB", (), {"exp_reward": 10})()
+        victim.db.exp_reward = 10
         with patch('world.system.state_manager.apply_regen'), \
              patch('world.system.state_manager.check_level_up'), \
              patch.object(attacker, 'msg') as mock_msg:
@@ -89,16 +108,16 @@ class TestCombatEngine(unittest.TestCase):
             engine.queue_action(attacker, KillAction(attacker, victim))
             engine.start_round()
             engine.process_round()
-            self.assertEqual(attacker.db.exp, 10)
+            self.assertEqual(attacker.db.experience, 10)
             mock_msg.assert_called()
 
     def test_group_gain_splits_exp(self):
         a = Dummy()
         b = Dummy()
         for obj in (a, b):
-            obj.db = type("DB", (), {"exp": 0})()
+            obj.db.experience = 0
         victim = Dummy()
-        victim.db = type("DB", (), {"exp_reward": 9})()
+        victim.db.exp_reward = 9
         with patch('world.system.state_manager.apply_regen'), \
              patch('world.system.state_manager.check_level_up'), \
              patch.object(a, 'msg') as msg_a, patch.object(b, 'msg') as msg_b:
@@ -107,17 +126,17 @@ class TestCombatEngine(unittest.TestCase):
             engine.queue_action(a, KillAction(a, victim))
             engine.start_round()
             engine.process_round()
-            self.assertEqual(a.db.exp, 4)
-            self.assertEqual(b.db.exp, 4)
+            self.assertEqual(a.db.experience, 4)
+            self.assertEqual(b.db.experience, 4)
             msg_a.assert_called()
             msg_b.assert_called()
 
     def test_group_gain_minimum_share(self):
         members = [Dummy() for _ in range(20)]
         for m in members:
-            m.db = type("DB", (), {"exp": 0})()
+            m.db.experience = 0
         victim = Dummy()
-        victim.db = type("DB", (), {"exp_reward": 100})()
+        victim.db.exp_reward = 100
         with patch('world.system.state_manager.apply_regen'), \
              patch('world.system.state_manager.check_level_up'):
             engine = CombatEngine(members + [victim], round_time=0)
@@ -126,7 +145,7 @@ class TestCombatEngine(unittest.TestCase):
             engine.start_round()
             engine.process_round()
             for m in members:
-                self.assertEqual(m.db.exp, 10)
+                self.assertEqual(m.db.experience, 10)
                 self.assertTrue(m.msg.called)
 
     def test_engine_stops_when_empty(self):
@@ -234,7 +253,7 @@ class TestCombatDeath(EvenniaTest):
         from typeclasses.characters import NPC
 
         player = self.char1
-        player.db.exp = 0
+        player.db.experience = 0
         npc = create.create_object(NPC, key="mob", location=self.room1)
         npc.db.drops = []
         npc.db.exp_reward = 5
@@ -255,7 +274,7 @@ class TestCombatDeath(EvenniaTest):
             engine.start_round()
             engine.process_round()
 
-        self.assertEqual(player.db.exp, 5)
+        self.assertEqual(player.db.experience, 5)
         self.assertEqual(to_copper(player.db.coins), to_copper({"silver": 3}))
         corpse = next(
             obj for obj in self.room1.contents
@@ -362,7 +381,7 @@ class TestCombatDeath(EvenniaTest):
         from typeclasses.characters import NPC
 
         player = self.char1
-        player.db.exp = 0
+        player.db.experience = 0
         npc = create.create_object(NPC, key="mob", location=self.room1)
         npc.db.drops = []
         npc.db.exp_reward = 7
@@ -370,14 +389,14 @@ class TestCombatDeath(EvenniaTest):
         with patch('world.system.state_manager.check_level_up'):
             npc.at_damage(player, npc.traits.health.current + 1)
 
-        self.assertEqual(player.db.exp, 7)
+        self.assertEqual(player.db.experience, 7)
 
     def test_default_exp_reward_based_on_level(self):
         from evennia.utils import create
         from typeclasses.characters import NPC
 
         player = self.char1
-        player.db.exp = 0
+        player.db.experience = 0
         npc = create.create_object(NPC, key="mob", location=self.room1)
         npc.db.drops = []
         npc.db.level = 3
@@ -390,7 +409,7 @@ class TestCombatDeath(EvenniaTest):
         with patch('world.system.state_manager.check_level_up'):
             npc.at_damage(player, npc.traits.health.current + 1)
 
-        self.assertEqual(player.db.exp, expected)
+        self.assertEqual(player.db.experience, expected)
 
 
 class TestCombatNPCTurn(EvenniaTest):

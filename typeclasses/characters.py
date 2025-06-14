@@ -255,6 +255,10 @@ class Character(ObjectParent, ClothedCharacter):
         self.db.spells = []
         self.db.training_points = 0
         self.db.practice_sessions = 0
+        from django.conf import settings
+        self.db.level = 1
+        self.db.experience = 0
+        self.db.tnl = settings.XP_PER_LEVEL
         self.db.sated = 5
 
     def at_post_puppet(self, **kwargs):
@@ -1088,10 +1092,9 @@ class NPC(Character):
         exp = int(exp_reward)
         if not attacker or not exp:
             return
-        attacker.db.exp = (attacker.db.exp or 0) + exp
         if hasattr(attacker, "msg"):
             attacker.msg(f"You gain {exp} experience.")
-        state_manager.check_level_up(attacker)
+        state_manager.gain_xp(attacker, exp)
 
     def on_death(self, attacker):
         """Handle character death cleanup."""
