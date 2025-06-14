@@ -8,7 +8,7 @@ from typing import Dict, List, Optional
 
 from evennia.utils import delay
 from evennia.utils.logger import log_trace
-from .combat_engine import _current_hp
+from .engine import _current_hp
 
 
 @dataclass
@@ -271,7 +271,7 @@ class CombatRoundManager:
 
         # Create combat engine
         try:
-            from .combat_engine import CombatEngine
+            from .engine import CombatEngine
             engine = CombatEngine(fighters, round_time=None)
         except ImportError:
             # Fallback for environments without the combat engine

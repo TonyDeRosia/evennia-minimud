@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
-from combat.combat_engine import CombatEngine
+from combat.engine import CombatEngine
 from combat.combat_actions import AttackAction
 from combat.damage_types import DamageType
 

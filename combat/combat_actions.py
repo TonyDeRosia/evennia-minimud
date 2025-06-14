@@ -33,7 +33,7 @@ class Action:
 
     Actions may define costs and requirements that must be satisfied
     before they can be executed. The :meth:`validate` method performs
-    these checks so the :class:`~combat.combat_engine.CombatEngine` can
+    these checks so the :class:`~combat.engine.CombatEngine` can
     decide whether to execute the action or not.
     """
 
