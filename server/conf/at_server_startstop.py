@@ -44,6 +44,23 @@ def _clear_caches():
     logger.log_info("Prototype cache cleared")
 
 
+def _migrate_experience():
+    """Copy old ``exp`` attributes to ``experience`` if needed."""
+
+    from typeclasses.characters import Character
+
+    migrated = 0
+    for char in Character.objects.all():
+        if char.attributes.has("exp"):
+            if not char.attributes.has("experience"):
+                char.db.experience = char.db.exp
+            char.attributes.remove("exp")
+            migrated += 1
+
+    if migrated:
+        logger.log_info(f"Migrated experience on {migrated} characters")
+
+
 def at_server_init():
     """Called as the service layer initializes."""
 
@@ -88,6 +105,8 @@ def at_server_start():
     for char in Character.objects.all():
         if not char.tags.has("tickable"):
             char.tags.add("tickable")
+
+    _migrate_experience()
 
     _build_caches()
     ServerConfig.objects.conf("server_start_time", time.time())

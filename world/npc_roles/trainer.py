@@ -11,7 +11,7 @@ class TrainerRole:
         from commands.skills import SKILL_DICT
         from world.system import stat_manager
 
-        xp = int(trainee.db.exp or 0)
+        xp = int(trainee.db.experience or 0)
         if xp <= 0:
             trainee.msg("You lack the experience to train right now.")
             return
@@ -28,7 +28,7 @@ class TrainerRole:
             )
             trait.proficiency = 25
 
-        trainee.db.exp = xp - 1
+        trainee.db.experience = xp - 1
         trait.base += 1
         stat_manager.refresh_stats(trainee)
         trainee.msg(f"{self.key} trains you in {skill}.")

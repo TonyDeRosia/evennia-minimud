@@ -123,7 +123,7 @@ Notes:
     - {hp}, {hpmax} - current and max health
     - {mp}, {mpmax} - current and max mana
     - {sp}, {spmax} - current and max stamina
-    - {level}, {xp} - your level and experience points
+    - {level}, {experience} - your level and experience points
     - {copper}, {silver}, {gold}, {platinum} - coins carried
     - {carry}, {capacity} - carry weight and capacity
     - {enc} - encumbrance level

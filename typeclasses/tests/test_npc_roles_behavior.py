@@ -104,13 +104,13 @@ class TestNPCRoleBehaviors(EvenniaTest):
 
     def test_trainer_trains_skill_and_consumes_xp(self):
         trainer = create.create_object(TrainerNPC, key="trainer", location=self.room1)
-        self.char1.db.exp = 5
+        self.char1.db.experience = 5
 
         trainer.train(self.char1, "smithing")
 
         self.assertIsNotNone(self.char1.traits.get("smithing"))
         self.assertEqual(getattr(self.char1.traits.smithing, "proficiency", 0), 25)
-        self.assertEqual(self.char1.db.exp, 4)
+        self.assertEqual(self.char1.db.experience, 4)
 
     def test_guildmaster_manages_membership(self):
         guild = Guild(name="Testers", ranks=[(0, "Member")], rank_thresholds={"Member": 0})
@@ -177,7 +177,7 @@ class TestNPCRoleBehaviors(EvenniaTest):
 
     def test_trainer_requires_experience(self):
         trainer = create.create_object(TrainerNPC, key="sensei", location=self.room1)
-        self.char1.db.exp = 0
+        self.char1.db.experience = 0
         trainer.train(self.char1, "alchemy")
         self.assertIsNone(self.char1.traits.get("alchemy"))
 

@@ -203,10 +203,10 @@ class CmdSetStat(Command):
             self.msg(get_display_scroll(target))
             return
 
-        if stat_key_low == "exp":
-            target.db.exp = value
+        if stat_key_low in {"exp", "experience"}:
+            target.db.experience = value
             stat_manager.refresh_stats(target)
-            self.msg(f"exp set to {value} on {target.key}.")
+            self.msg(f"experience set to {value} on {target.key}.")
             self.msg(get_display_scroll(target))
             return
 
