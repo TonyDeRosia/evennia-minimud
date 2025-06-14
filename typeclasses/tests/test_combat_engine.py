@@ -8,6 +8,7 @@ from utils.currency import from_copper, to_copper
 from combat.combat_utils import get_condition_msg
 from commands import npc_builder
 from django.conf import settings
+from django.test import override_settings
 
 
 class KillAction(Action):
@@ -219,6 +220,7 @@ class TestCombatEngine(unittest.TestCase):
             self.assertTrue(any(f"The {b.key} {expected}" in msg for msg in calls))
             room.reset_mock()
 
+    @override_settings(COMBAT_DEBUG_SUMMARY=True)
     def test_damage_summary_broadcast(self):
         class DamageAction(Action):
             def resolve(self):
