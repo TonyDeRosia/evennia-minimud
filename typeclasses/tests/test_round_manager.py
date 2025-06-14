@@ -17,14 +17,18 @@ class TestCombatRoundManager(EvenniaTest):
         self.manager.running = False
 
     def test_tick_schedules(self):
-        with patch("combat.round_manager.delay") as mock_delay:
+        with patch("combat.round_manager.delay") as mock_delay, \
+             patch("combat.round_manager.calculate_round_delay", return_value=1.5) as mock_calc:
             self.manager.add_instance(self.script)
-            mock_delay.assert_called_with(2, self.manager.tick)
+            mock_calc.assert_called()
+            mock_delay.assert_called_with(1.5, self.manager.tick)
             mock_delay.reset_mock()
+            mock_calc.reset_mock()
             with patch.object(CombatEngine, "process_round") as mock_proc:
                 self.manager.tick()
                 mock_proc.assert_called()
-            mock_delay.assert_called_with(2, self.manager.tick)
+            mock_calc.assert_called()
+            mock_delay.assert_called_with(1.5, self.manager.tick)
 
     def test_initiative_order(self):
         order = []
