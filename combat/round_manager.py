@@ -53,7 +53,9 @@ class CombatInstance:
             if hp <= 0:
                 continue
             # check combat status using the persistent db attribute
-            in_combat = getattr(fighter.db, "in_combat", False)
+            in_combat = False
+            if getattr(fighter, "pk", None) is not None:
+                in_combat = getattr(fighter.db, "in_combat", False)
             if in_combat:
                 active_fighters.append(fighter)
 
@@ -83,7 +85,10 @@ class CombatInstance:
             # Remove defeated combatants
             for actor in list(fighters):
                 if _current_hp(actor) <= 0:
-                    if hasattr(actor, "db"):
+                    if (
+                        hasattr(actor, "db")
+                        and getattr(actor, "pk", None) is not None
+                    ):
                         actor.db.in_combat = False
                     if hasattr(self.engine, "remove_participant"):
                         self.engine.remove_participant(actor)
@@ -96,7 +101,8 @@ class CombatInstance:
                     continue
 
                 if _current_hp(fighter) <= 0:
-                    fighter.db.in_combat = False
+                    if getattr(fighter, "pk", None) is not None:
+                        fighter.db.in_combat = False
                     continue
 
                 if not getattr(fighter, "in_combat", False):
@@ -196,7 +202,7 @@ class CombatInstance:
                 fighters = self.engine.fighters
 
             for fighter in fighters:
-                if fighter and hasattr(fighter, "db"):
+                if fighter and hasattr(fighter, "db") and getattr(fighter, "pk", None) is not None:
                     fighter.db.in_combat = False
 
         if reason:
