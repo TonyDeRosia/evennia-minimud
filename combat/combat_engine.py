@@ -276,7 +276,7 @@ class CombatEngine:
         Appends a :class:`CombatParticipant` to :attr:`participants` and
         calls ``actor.on_enter_combat`` if present.
         """
-        if hasattr(actor, "db"):
+        if hasattr(actor, "db") and getattr(actor, "pk", None) is not None:
             actor.db.in_combat = True
         self.participants.append(CombatParticipant(actor=actor))
         if hasattr(actor, "ndb"):
@@ -300,7 +300,7 @@ class CombatEngine:
         self.participants = [p for p in self.participants if p.actor is not actor]
         self.queue = [p for p in self.queue if p.actor is not actor]
 
-        if hasattr(actor, "db"):
+        if hasattr(actor, "db") and getattr(actor, "pk", None) is not None:
             actor.db.in_combat = False
 
         if hasattr(actor, "on_exit_combat"):
@@ -377,6 +377,8 @@ class CombatEngine:
         Updates an internal aggro table used when awarding experience.
         """
         if not target or target is attacker:
+            return
+        if getattr(target, "pk", None) is None or getattr(attacker, "pk", None) is None:
             return
         from world.system import state_manager
 
