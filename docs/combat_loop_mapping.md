@@ -10,6 +10,7 @@ File: `combat/round_manager.py`
   `instances_by_room` dictionary maps each room's id to its `CombatInstance`.
 - Ticks every few seconds to drive combat across rooms, much like ROM's `violence_update` that iterates over every character currently fighting.
 - Each tick triggers the associated `CombatEngine` to process a new round.
+- When `COMBAT_DEBUG_TICKS` is `True` in `server/conf/settings.py`, a debug log is emitted each tick.
 
 ## CombatInstance
 
