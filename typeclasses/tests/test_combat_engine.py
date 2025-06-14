@@ -584,3 +584,24 @@ def test_attacker_target_cleared_on_defeat():
         engine.process_round()
 
     assert attacker.db.combat_target is None
+
+
+def test_clearing_target_leaves_combat():
+    player = Dummy()
+    mob = Dummy()
+    player.location = mob.location
+    player.db.combat_target = mob
+    mob.db.combat_target = player
+
+    engine = CombatEngine([player, mob], round_time=0)
+
+    with patch("world.system.state_manager.apply_regen"), \
+         patch("combat.engine.damage_processor.delay"), \
+         patch("random.randint", return_value=0):
+        engine.start_round()
+        engine.process_round()
+
+        player.db.combat_target = None
+        engine.process_round()
+
+    assert player not in [p.actor for p in engine.participants]
