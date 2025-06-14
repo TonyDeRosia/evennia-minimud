@@ -165,6 +165,10 @@ builder:
 - **wander** – roam randomly through available exits.
 - **scripted** – runs the callback stored in ``npc.db.ai_script``.
 
+Custom behaviors may be added by registering a class with
+``combat.ai.register_ai``. Set ``npc.db.ai_type`` to the registered key
+to enable that behavior on an NPC.
+
 For scripted AI you must assign a callable to ``npc.db.ai_script``. This can be
 either a Python import path or a direct function reference. Callbacks must live
 under the ``scripts`` package. Example::
