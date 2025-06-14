@@ -2,6 +2,7 @@ from random import choice
 from evennia import CmdSet
 from evennia.utils import iter_to_str
 from evennia.utils.evtable import EvTable
+from combat.engine import _current_hp
 
 from .command import Command
 from typeclasses.gear import BareHand
@@ -85,7 +86,10 @@ class CmdAttack(Command):
         instance = CombatRoundManager.get().add_instance(location)
 
         if not instance.add_combatant(self.caller):
-            self.msg("You can't fight right now.")
+            if _current_hp(self.caller) <= 0:
+                self.msg("You are in no condition to fight.")
+            else:
+                self.msg("You can't fight right now.")
             return
 
         self.caller.db.combat_target = target
