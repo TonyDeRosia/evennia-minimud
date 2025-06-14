@@ -76,7 +76,6 @@ def at_server_start():
     from evennia.utils import create
     from evennia.scripts.models import ScriptDB
     from world.scripts.mob_db import get_mobdb
-    from scripts.sated_decay import SatedDecayScript
 
     script = ScriptDB.objects.filter(db_key="global_tick").first()
     if not script or script.typeclass_path != "typeclasses.scripts.GlobalTick":
@@ -89,12 +88,6 @@ def at_server_start():
         if script:
             script.delete()
         create.create_script("world.area_reset.AreaReset", key="area_reset")
-
-    script = ScriptDB.objects.filter(db_key="sated_decay").first()
-    if not script or script.typeclass_path != "scripts.sated_decay.SatedDecayScript":
-        if script:
-            script.delete()
-        create.create_script("scripts.sated_decay.SatedDecayScript", key="sated_decay")
 
     # Ensure mob database script exists
     get_mobdb()
