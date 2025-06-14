@@ -36,6 +36,8 @@ class CombatInstance:
         """Add ``combatant`` to this combat instance."""
         if not self.engine:
             return False
+        if _current_hp(combatant) <= 0:
+            return False
         current = {p.actor for p in self.engine.participants}
         if combatant in current:
             return True
