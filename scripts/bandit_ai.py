@@ -1,29 +1,19 @@
-from random import choice
-from typeclasses.scripts import Script
+from .combat_ai import BaseCombatAI
 
-class BanditAI(Script):
+class BanditAI(BaseCombatAI):
     """Roams around and attacks weaker players."""
 
     def at_script_creation(self):
+        super().at_script_creation()
         self.key = "bandit_ai"
         self.desc = "Bandit combat behavior"
-        self.interval = 5
-        self.persistent = True
 
-    def at_repeat(self):
+    def select_target(self):
         npc = self.obj
         if not npc or not npc.location:
-            return
-        if npc.in_combat:
-            return
-        # look for an easy target
+            return None
         for obj in npc.location.contents:
             if obj.has_account and obj.db.level and npc.db.level:
                 if obj.db.level < npc.db.level:
-                    npc.execute_cmd(f"kill {obj.key}")
-                    return
-        # wander if no target
-        exits = npc.location.contents_get(content_type="exit")
-        if exits:
-            exit_obj = choice(exits)
-            exit_obj.at_traverse(npc, exit_obj.destination)
+                    return obj
+        return None
