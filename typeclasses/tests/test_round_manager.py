@@ -1,6 +1,5 @@
 from unittest.mock import patch
 from evennia.utils.test_resources import EvenniaTest
-from django.conf import settings
 from combat.round_manager import CombatRoundManager, CombatInstance
 from combat.engine import CombatEngine
 
@@ -24,7 +23,7 @@ class TestCombatRoundManager(EvenniaTest):
         ):
             # Adding instance should schedule first tick
             self.manager.create_combat(combatants=[self.char1, self.char2])
-            mock_delay.assert_called_with(settings.COMBAT_TICK_DELAY, self.manager._tick)
+            mock_delay.assert_called_with(self.manager.tick_delay, self.manager._tick)
             
             # First tick should process round
             mock_proc.assert_called()
@@ -36,7 +35,7 @@ class TestCombatRoundManager(EvenniaTest):
             # Manual tick should process round and schedule next tick
             self.manager._tick()
             mock_proc.assert_called()
-            mock_delay.assert_called_with(settings.COMBAT_TICK_DELAY, self.manager._tick)
+            mock_delay.assert_called_with(self.manager.tick_delay, self.manager._tick)
 
     def test_initiative_order(self):
         """Test that initiative order is correctly maintained."""
@@ -109,7 +108,7 @@ class TestCombatRoundManager(EvenniaTest):
 
             self.assertIs(inst, inst2)
             mock_proc.assert_called_once()
-            mock_delay.assert_called_with(settings.COMBAT_TICK_DELAY, self.manager._tick)
+            mock_delay.assert_called_with(self.manager.tick_delay, self.manager._tick)
             self.assertTrue(self.manager.running)
 
     def test_remove_instance(self):

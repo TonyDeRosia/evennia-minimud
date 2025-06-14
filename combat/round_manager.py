@@ -230,8 +230,7 @@ class CombatRoundManager:
         self.combats: Dict[int, CombatInstance] = {}
         self.combatant_to_combat: Dict[object, int] = {}
         self.running = False
-        # Read delay from settings so combat pacing is configurable
-        self.tick_delay = getattr(settings, "COMBAT_TICK_DELAY", 2.0)
+        self.tick_delay = 2.0
         self._next_tick_scheduled = False
         self._next_id = 1
 
