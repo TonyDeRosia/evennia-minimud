@@ -341,6 +341,14 @@ class CmdRevive(Command):
                 return
             for target in targets:
                 target.revive(caller)
+                if target.tags.has("unconscious", category="status"):
+                    self.msg(
+                        f"You fail to revive {target.get_display_name(caller)}."
+                    )
+                else:
+                    self.msg(
+                        f"You revive {target.get_display_name(caller)}." 
+                    )
             return
 
         target = caller.search(arg)
@@ -352,6 +360,10 @@ class CmdRevive(Command):
             return
 
         target.revive(caller)
+        if target.tags.has("unconscious", category="status"):
+            self.msg(f"You fail to revive {target.get_display_name(caller)}.")
+        else:
+            self.msg(f"You revive {target.get_display_name(caller)}.")
 
 
 class CmdStatus(Command):
