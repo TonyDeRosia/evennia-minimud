@@ -417,6 +417,16 @@ with VNUM-based NPCs.
 - `auto_calc(stats)` and `auto_calc_secondary(stats)` – derive combat stats from
   primary values using `world.system.stat_manager`.
 
+### Combat Round Manager
+
+The `CombatRoundManager` singleton, found in `combat.round_manager`, manages all
+active `CombatScript` instances. It ticks every **2 seconds** by default (see
+`tick_delay` at line 214 of `combat/round_manager.py`). Rooms receive a
+`CombatScript` via `get_or_create_combat_script(room)`, which attaches a new
+script if one is not already present. Calling
+`CombatRoundManager.get().add_instance(script)` registers that script with the
+manager and begins the automatic round loop.
+
 
 ## Running the Tests
 
