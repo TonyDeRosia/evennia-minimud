@@ -8,7 +8,10 @@ import random
 from evennia.utils import delay
 from world.system import state_manager
 
+# For every ``HASTE_PER_EXTRA_ATTACK`` haste, an actor gains one additional
+# attack in a round (up to ``MAX_ATTACKS_PER_ROUND`` total).
 HASTE_PER_EXTRA_ATTACK = 50
+MAX_ATTACKS_PER_ROUND = 6
 
 from .combat_actions import Action, AttackAction, CombatResult
 from .damage_types import DamageType
@@ -273,6 +276,8 @@ class CombatEngine:
         Appends a :class:`CombatParticipant` to :attr:`participants` and
         calls ``actor.on_enter_combat`` if present.
         """
+        if hasattr(actor, "db"):
+            actor.db.in_combat = True
         self.participants.append(CombatParticipant(actor=actor))
         if hasattr(actor, "ndb"):
             actor.ndb.combat_engine = self
@@ -508,11 +513,24 @@ class CombatEngine:
             elif target:
                 queued = [AttackAction(actor, target)]
             else:
-                queued = []
+                # fallback: attack any valid enemy in the room
+                enemies = [
+                    p.actor
+                    for p in self.participants
+                    if p.actor is not actor and _current_hp(p.actor) > 0
+                ]
+                if enemies:
+                    queued = [AttackAction(actor, enemies[0])]
+                else:
+                    queued = []
+                    if hasattr(actor, "msg"):
+                        actor.msg("You hesitate, unsure of what to do.")
 
             # add extra attacks based on haste
             haste = state_manager.get_effective_stat(actor, "haste")
             extra = max(0, haste // HASTE_PER_EXTRA_ATTACK)
+            # limit total attacks to prevent runaway bursts
+            extra = min(extra, MAX_ATTACKS_PER_ROUND - 1)
             if extra and queued:
                 extras: list[Action] = []
                 for action in queued:
@@ -595,6 +613,5 @@ class CombatEngine:
                         actor.msg(msg)
 
         self.round += 1
-        if not self.participants or self.round_time is None:
-            return
-        delay(self.round_time, self.process_round)
+        if self.round_time is not None and any(_current_hp(p.actor) > 0 for p in self.participants):
+            delay(self.round_time, self.process_round)
