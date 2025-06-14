@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from django.test import override_settings
 from evennia.utils import create
 from evennia.utils.test_resources import EvenniaTest
@@ -30,4 +30,38 @@ class TestAttackCommand(EvenniaTest):
             for p in engine.participants
             for act in p.next_action
         )
+        self.assertTrue(queued)
+
+    def test_joining_combat_queues_immediately(self):
+        """Joining an ongoing fight should allow immediate actions."""
+        from typeclasses.characters import PlayerCharacter
+        from combat.round_manager import CombatRoundManager
+        from combat.combat_actions import AttackAction
+
+        with patch("combat.round_manager.delay"):
+            self.char1.execute_cmd("attack char2")
+
+        char3 = create.create_object(
+            PlayerCharacter,
+            key="Char3",
+            location=self.room1,
+            home=self.room1,
+        )
+        char3.msg = MagicMock()
+        char3.cmdset.add_default(CombatCmdSet)
+
+        with patch("combat.round_manager.delay"):
+            char3.execute_cmd("attack char2")
+
+        manager = CombatRoundManager.get()
+        engine = manager.instances[0].engine
+
+        self.assertIn(char3, [p.actor for p in engine.participants])
+        queued = [
+            act
+            for p in engine.participants
+            if p.actor is char3
+            for act in p.next_action
+            if isinstance(act, AttackAction)
+        ]
         self.assertTrue(queued)
