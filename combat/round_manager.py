@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List
 
+from world.system import state_manager
+
 from evennia.utils import delay
 
 from .combat_engine import CombatEngine
@@ -23,6 +25,19 @@ class CombatInstance:
             self.engine.add_participant(actor)
         for actor in current - fighters:
             self.engine.remove_participant(actor)
+
+
+def calculate_round_delay(instances: List[CombatInstance]) -> float:
+    """Return the delay between rounds based on participant haste."""
+    actors = [p.actor for inst in instances for p in inst.engine.participants]
+    if not actors:
+        return 2
+    total_haste = sum(
+        state_manager.get_effective_stat(actor, "haste") for actor in actors
+    )
+    avg_haste = total_haste / len(actors)
+    delay_val = 2 * (1 - avg_haste / 100)
+    return max(1.0, min(3.0, delay_val))
 
 
 class CombatRoundManager:
@@ -62,7 +77,7 @@ class CombatRoundManager:
 
     def _schedule_tick(self) -> None:
         """Schedule the next combat tick."""
-        delay(2, self.tick)
+        delay(calculate_round_delay(self.instances), self.tick)
 
     def tick(self) -> None:
         for inst in list(self.instances):
