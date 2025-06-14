@@ -230,6 +230,8 @@ class CombatRoundManager:
         # Check if instance already exists
         for inst in self.instances:
             if inst.script is script:
+                # ensure any new fighters are added immediately
+                inst.sync_participants()
                 return inst
 
         # Get fighters from script
