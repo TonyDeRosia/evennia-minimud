@@ -100,20 +100,23 @@ class TestCombatUtils(EvenniaTest):
     def test_format_combat_message_colors(self):
         from combat import combat_utils
 
-        levels = [
-            (60, "|R"),
-            (30, "|r"),
-            (15, "|y"),
-            (5, "|g"),
-            (0, "|w"),
-        ]
-        for dmg, code in levels:
-            msg = combat_utils.format_combat_message(
-                self.char1, self.char2, "hits", damage=dmg
-            )
-            self.assertTrue(msg.startswith(code))
-            self.assertIn(str(dmg), msg)
-            self.assertTrue(msg.endswith("|n"))
+        self.char1.db.level = 20
+        with patch("world.system.state_manager.get_effective_stat", return_value=0):
+            max_range = self.char1.db.level * 5
+            levels = [
+                (int(max_range * 0.95), "|R"),
+                (int(max_range * 0.65), "|r"),
+                (int(max_range * 0.35), "|y"),
+                (1, "|g"),
+                (0, "|w"),
+            ]
+            for dmg, code in levels:
+                msg = combat_utils.format_combat_message(
+                    self.char1, self.char2, "hits", damage=dmg
+                )
+                self.assertIn(f"{code}{dmg}|n", msg)
+                self.assertTrue(msg.startswith("Attacker"))
+                self.assertIn("damage", msg)
 
     def test_get_condition_msg(self):
         from combat.combat_utils import get_condition_msg
