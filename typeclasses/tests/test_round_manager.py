@@ -146,7 +146,7 @@ class TestCombatRoundManager(EvenniaTest):
     def test_force_end_all_combat(self):
         """Test that all combat can be force-ended."""
         with patch("combat.round_manager.delay"):
-            inst = self.manager.add_instance(self.room1)
+            inst = self.manager.start_combat([self.char1])
             self.assertTrue(self.manager.running)
             
             self.manager.force_end_all_combat()
