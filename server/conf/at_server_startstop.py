@@ -48,6 +48,7 @@ def _migrate_experience():
     """Copy old ``exp`` attributes to ``experience`` if needed."""
 
     from typeclasses.characters import Character
+    from typeclasses.npcs import BaseNPC
 
     migrated = 0
     for char in Character.objects.all():
@@ -83,6 +84,12 @@ def at_server_start():
             script.delete()
         create.create_script("typeclasses.scripts.GlobalTick", key="global_tick")
 
+    script = ScriptDB.objects.filter(db_key="global_npc_ai").first()
+    if not script or script.typeclass_path != "scripts.global_npc_ai.GlobalNPCAI":
+        if script:
+            script.delete()
+        create.create_script("scripts.global_npc_ai.GlobalNPCAI", key="global_npc_ai")
+
     script = ScriptDB.objects.filter(db_key="area_reset").first()
     if not script or script.typeclass_path != "world.area_reset.AreaReset":
         if script:
@@ -98,6 +105,12 @@ def at_server_start():
     for char in Character.objects.all():
         if not char.tags.has("tickable"):
             char.tags.add("tickable")
+
+    for npc in BaseNPC.objects.all():
+        ai_flags = npc.db.actflags or []
+        if npc.db.ai_type or ai_flags:
+            if not npc.tags.has("npc_ai"):
+                npc.tags.add("npc_ai")
 
     _migrate_experience()
 

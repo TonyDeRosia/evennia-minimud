@@ -5,27 +5,27 @@ from evennia.utils import create
 from evennia.utils.test_resources import EvenniaTest
 
 
-class TestNPCAIScript(EvenniaTest):
+class TestGlobalNPCAI(EvenniaTest):
     def test_script_calls_process_ai(self):
-        from scripts.npc_ai_script import NPCAIScript
+        from scripts.global_npc_ai import GlobalNPCAI
         from typeclasses.npcs import BaseNPC
 
         npc = create.create_object(BaseNPC, key="mob", location=self.room1)
         npc.db.ai_type = "aggressive"
-        npc.scripts.add(NPCAIScript, key="npc_ai", autostart=False)
-        script = npc.scripts.get("npc_ai")[0]
+        npc.tags.add("npc_ai")
+        script = GlobalNPCAI()
 
-        with patch("scripts.npc_ai_script.process_mob_ai") as mock_proc:
+        with patch("scripts.global_npc_ai.process_mob_ai") as mock_proc:
             script.at_repeat()
             mock_proc.assert_called_with(npc)
 
-    def test_base_npc_spawns_ai_script(self):
+    def test_base_npc_tagged_for_ai(self):
         from typeclasses.npcs import BaseNPC
 
         npc = create.create_object(BaseNPC, key="mob2", location=self.room1)
         npc.db.ai_type = "passive"
         npc.at_object_creation()
-        self.assertTrue(npc.scripts.get("npc_ai"))
+        self.assertTrue(npc.tags.get("npc_ai"))
 
     def test_scripted_ai_string_callback(self):
         from world.npc_handlers import ai
@@ -62,7 +62,7 @@ class TestNPCAIScript(EvenniaTest):
         npc.at_object_creation()
 
         self.assertEqual(npc.db.ai_type, "wander")
-        self.assertTrue(npc.scripts.get("npc_ai"))
+        self.assertTrue(npc.tags.get("npc_ai"))
 
 
 
@@ -158,9 +158,10 @@ class TestAIBehaviors(EvenniaTest):
             mock.assert_called_with(self.char1)
         self.assertTrue(self.room1.msg_contents.called)
 
-    def test_finalize_adds_ai_script_and_auto_attacks(self):
+    def test_finalize_adds_ai_tag_and_auto_attacks(self):
         from commands import npc_builder
         from typeclasses.npcs import BaseNPC
+        from scripts.global_npc_ai import GlobalNPCAI
 
         npc = create.create_object(BaseNPC, key="attacker", location=self.room1)
         npc.db.level = 1
@@ -169,10 +170,10 @@ class TestAIBehaviors(EvenniaTest):
 
         npc_builder.finalize_mob_prototype(self.char1, npc)
 
-        script = npc.scripts.get("npc_ai")[0]
-        self.assertTrue(script)
+        self.assertTrue(npc.tags.get("npc_ai"))
 
         self.char1.location = self.room1
+        script = GlobalNPCAI()
 
         with patch.object(npc, "enter_combat") as mock:
             script.at_repeat()

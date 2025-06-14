@@ -11,10 +11,7 @@ class BaseNPC(NPC):
         ai_flags = {"aggressive", "scavenger", "assist", "call_for_help"}
         flags = set(self.db.actflags or [])
         if self.db.ai_type or ai_flags.intersection(flags):
-            from scripts.npc_ai_script import NPCAIScript
-
-            if not self.scripts.get("npc_ai"):
-                self.scripts.add(NPCAIScript, key="npc_ai")
+            self.tags.add("npc_ai")
 
 from .merchant import MerchantNPC  # noqa: E402
 from .banker import BankerNPC  # noqa: E402

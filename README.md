@@ -435,6 +435,9 @@ initialize for any reason, `start_combat` will raise a `RuntimeError`.
 For a deeper look at how this round system mirrors the classic ROM MUD
 functions like `violence_update` and `multi_hit`, see the documentation in
 [`docs/combat_loop_mapping.md`](docs/combat_loop_mapping.md).
+The new global NPC AI system described in
+[`docs/global_npc_ai.md`](docs/global_npc_ai.md) shows how NPC behavior is
+processed once per tick.
 
 
 ## Running the Tests

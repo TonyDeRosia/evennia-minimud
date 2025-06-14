@@ -5,19 +5,20 @@ from evennia.utils import create
 from evennia.utils.test_resources import EvenniaTest
 
 from world.npc_handlers import mob_ai
+from scripts.global_npc_ai import GlobalNPCAI
 
 
 class TestMobAIScript(EvenniaTest):
     def test_script_calls_mob_ai(self):
-        from scripts.npc_ai_script import NPCAIScript
+        from scripts.global_npc_ai import GlobalNPCAI
         from typeclasses.npcs import BaseNPC
 
         npc = create.create_object(BaseNPC, key="mob", location=self.room1)
         npc.db.ai_type = "aggressive"
-        npc.scripts.add(NPCAIScript, key="npc_ai", autostart=False)
-        script = npc.scripts.get("npc_ai")[0]
+        npc.tags.add("npc_ai")
+        script = GlobalNPCAI()
 
-        with patch("scripts.npc_ai_script.process_mob_ai") as mock_proc:
+        with patch("scripts.global_npc_ai.process_mob_ai") as mock_proc:
             script.at_repeat()
             mock_proc.assert_called_with(npc)
 
@@ -54,8 +55,8 @@ class TestMobAIBehaviors(EvenniaTest):
         npc.db.actflags = ["aggressive"]
         npc.at_object_creation()
 
-        script = npc.scripts.get("npc_ai")[0]
-        self.assertTrue(script)
+        self.assertTrue(npc.tags.get("npc_ai"))
+        script = GlobalNPCAI()
 
         with patch.object(npc, "enter_combat") as mock:
             script.at_repeat()
