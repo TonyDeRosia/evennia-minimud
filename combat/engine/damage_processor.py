@@ -124,11 +124,26 @@ class DamageProcessor:
                     hook(target, attacker)
 
     def cleanup_environment(self) -> None:
+        """Remove combatants that are no longer able or willing to fight.
+
+        Participants are removed if they:
+        - have left the room,
+        - have no remaining health, or
+        - have cleared their ``db.combat_target`` and have nothing queued.
+
+        Clearing the target is treated as an explicit request to disengage, so
+        pending actions keep the fighter in combat until resolved.
+        """
         for participant in list(self.turn_manager.participants):
             actor = participant.actor
             hp = _current_hp(actor)
             target = getattr(getattr(actor, "db", None), "combat_target", None)
-            if getattr(actor, "location", None) is None or hp <= 0 or target is None:
+            should_remove = (
+                getattr(actor, "location", None) is None
+                or hp <= 0
+                or (target is None and not participant.next_action)
+            )
+            if should_remove:
                 self.turn_manager.remove_participant(actor)
 
     # -------------------------------------------------------------
