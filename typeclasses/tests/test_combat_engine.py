@@ -112,6 +112,23 @@ class TestCombatEngine(unittest.TestCase):
             msg_a.assert_called()
             msg_b.assert_called()
 
+    def test_group_gain_minimum_share(self):
+        members = [Dummy() for _ in range(20)]
+        for m in members:
+            m.db = type("DB", (), {"exp": 0})()
+        victim = Dummy()
+        victim.db = type("DB", (), {"exp_reward": 100})()
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.check_level_up'):
+            engine = CombatEngine(members + [victim], round_time=0)
+            engine.aggro[victim] = {m: 1 for m in members}
+            engine.queue_action(members[0], KillAction(members[0], victim))
+            engine.start_round()
+            engine.process_round()
+            for m in members:
+                self.assertEqual(m.db.exp, 10)
+                self.assertTrue(m.msg.called)
+
     def test_engine_stops_when_empty(self):
         a = Dummy()
         a.traits.health = MagicMock(value=a.hp)

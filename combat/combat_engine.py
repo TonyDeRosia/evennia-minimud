@@ -161,7 +161,7 @@ class CombatEngine:
         members = [m for m in members if m]
         if not members or not exp:
             return
-        share = max(1, int(exp / len(members)))
+        share = max(int(exp / len(members)), int(exp * 0.10))
         for member in members:
             member.db.exp = (member.db.exp or 0) + share
             if hasattr(member, "msg"):
