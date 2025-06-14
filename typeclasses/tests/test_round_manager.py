@@ -17,18 +17,14 @@ class TestCombatRoundManager(EvenniaTest):
         self.manager.running = False
 
     def test_tick_schedules(self):
-        with patch("combat.round_manager.delay") as mock_delay, \
-             patch("combat.round_manager.calculate_round_delay", return_value=1.5) as mock_calc:
+        with patch("combat.round_manager.delay") as mock_delay:
             self.manager.add_instance(self.script)
-            mock_calc.assert_called()
-            mock_delay.assert_called_with(1.5, self.manager.tick)
+            mock_delay.assert_called_with(self.manager.tick_delay, self.manager._tick)
             mock_delay.reset_mock()
-            mock_calc.reset_mock()
             with patch.object(CombatEngine, "process_round") as mock_proc:
-                self.manager.tick()
+                self.manager._tick()
                 mock_proc.assert_called()
-            mock_calc.assert_called()
-            mock_delay.assert_called_with(1.5, self.manager.tick)
+            mock_delay.assert_called_with(self.manager.tick_delay, self.manager._tick)
 
     def test_initiative_order(self):
         order = []
@@ -43,7 +39,7 @@ class TestCombatRoundManager(EvenniaTest):
              patch.object(CombatEngine, "start_round", new=start_round):
             mock_calc.side_effect = lambda c: 10 if c is self.char1 else 1
             self.manager.add_instance(self.script)
-            self.manager.tick()
+            self.manager._tick()
 
         self.assertEqual(order[0], self.char1)
         self.assertEqual(order[1], self.char2)
@@ -51,10 +47,9 @@ class TestCombatRoundManager(EvenniaTest):
     def test_tick_handles_deleted_script(self):
         with patch("combat.round_manager.delay"):
             self.manager.add_instance(self.script)
-            # deleting the script should not cause tick to fail
             self.script.delete()
             try:
-                self.manager.tick()
+                self.manager._tick()
             except Exception as err:  # pragma: no cover - fail fast if exception
                 self.fail(f"tick raised {err!r}")
 
@@ -63,5 +58,5 @@ class TestCombatRoundManager(EvenniaTest):
         with patch("combat.round_manager.delay"):
             inst = self.manager.add_instance(self.script)
             self.script.delete()
-            self.manager.tick()
+            self.manager._tick()
             self.assertNotIn(inst, self.manager.instances)
