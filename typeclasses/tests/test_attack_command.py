@@ -11,11 +11,23 @@ class TestAttackCommand(EvenniaTest):
     def setUp(self):
         super().setUp()
         self.char1.msg = MagicMock()
-        self.char1.attack = MagicMock()
         self.char1.cmdset.add_default(CombatCmdSet)
 
     def test_attack_without_can_attack(self):
         mob = create.create_object(BaseNPC, key="mob", location=self.room1)
         self.char1.execute_cmd("attack mob")
         self.assertEqual(self.char1.db.combat_target, mob)
-        self.char1.attack.assert_called()
+        self.assertEqual(mob.db.combat_target, self.char1)
+
+        from combat.round_manager import CombatRoundManager
+        from combat.combat_actions import AttackAction
+
+        manager = CombatRoundManager.get()
+        self.assertTrue(manager.instances)
+        engine = manager.instances[0].engine
+        queued = any(
+            isinstance(act, AttackAction)
+            for p in engine.participants
+            for act in p.next_action
+        )
+        self.assertTrue(queued)

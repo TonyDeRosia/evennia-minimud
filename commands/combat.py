@@ -81,7 +81,6 @@ class CmdAttack(Command):
 
         # it's all good! let's get started!
         combat_script = get_or_create_combat_script(location)
-        current_fighters = combat_script.fighters
 
         # adding a combatant to combat just returns True if they're already there, so this is safe
         if not combat_script.add_combatant(self.caller, enemy=target):
@@ -89,8 +88,13 @@ class CmdAttack(Command):
             return
 
         self.caller.db.combat_target = target
-        # execute the actual attack
-        self.caller.attack(target, weapon)
+        target.db.combat_target = self.caller
+
+        from combat import AttackAction
+        from combat.round_manager import CombatRoundManager
+
+        inst = CombatRoundManager.get().add_instance(combat_script)
+        inst.engine.queue_action(self.caller, AttackAction(self.caller, target))
 
 
     def at_post_cmd(self):
