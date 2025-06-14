@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Dict, List
 from evennia.utils import delay
+from django.conf import settings
 
 from .common import CombatParticipant, _current_hp
 from ..combat_utils import format_combat_message
@@ -190,6 +191,9 @@ class DamageProcessor:
                 self.handle_defeat(result.target, actor)
 
     def _summarize_damage(self, damage_totals: Dict[object, int]) -> None:
+        if not getattr(settings, "COMBAT_DEBUG_SUMMARY", False):
+            return
+
         summary_lines = [
             f"{getattr(att, 'key', att)} dealt {dmg} damage."
             for att, dmg in damage_totals.items()
