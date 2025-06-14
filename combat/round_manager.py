@@ -9,15 +9,13 @@ from typing import Dict, List, Optional
 from evennia.utils import delay
 from evennia.utils.logger import log_trace
 
-from .combat_engine import CombatEngine
-
 
 @dataclass
 class CombatInstance:
     """Container for a combat engine tied to a room."""
 
     script: object
-    engine: CombatEngine
+    engine: object  # CombatEngine
     round_time: float = 2.0
     round_number: int = 0
     last_round_time: float = field(default_factory=time.time)
@@ -27,51 +25,174 @@ class CombatInstance:
         """Return ``True`` if the underlying script is still active."""
         return (
             self.script
-            and getattr(self.script, "pk", None)
-            and bool(getattr(self.script, "active", False))
+            and hasattr(self.script, "pk")
+            and self.script.pk
+            and getattr(self.script, "active", False)
             and not self.combat_ended
         )
 
     def has_active_fighters(self) -> bool:
         """Return ``True`` if at least two participants can still fight."""
-        fighters = [p.actor for p in self.engine.participants]
-        active = [f for f in fighters if getattr(f, "hp", 0) > 0]
-        return len(active) >= 2
+        if not self.engine:
+            return False
+
+        # Handle both engine.participants (new style) and engine.fighters (old style)
+        if hasattr(self.engine, "participants"):
+            fighters = [p.actor for p in self.engine.participants]
+        elif hasattr(self.engine, "fighters"):
+            fighters = self.engine.fighters
+        else:
+            return False
+
+        active_fighters = []
+        for fighter in fighters:
+            if not fighter or not hasattr(fighter, "db"):
+                continue
+            if getattr(fighter.db, "hp", 0) > 0 and getattr(fighter.db, "in_combat", False):
+                active_fighters.append(fighter)
+
+        return len(active_fighters) >= 2
 
     def sync_participants(self) -> None:
-        """Keep engine participants aligned with ``script.fighters``."""
-        current = {p.actor for p in self.engine.participants}
-        fighters = set(self.script.fighters)
-        for actor in fighters - current:
-            self.engine.add_participant(actor)
-        for actor in current - fighters:
-            self.engine.remove_participant(actor)
-        # remove defeated combatants
-        for actor in list(fighters):
-            if getattr(actor, "hp", 0) <= 0:
-                self.engine.remove_participant(actor)
+        """Keep engine participants aligned with script fighters and remove defeated combatants."""
+        if not self.engine or not hasattr(self.script, "fighters"):
+            self.end_combat("No fighters available")
+            return
+
+        # Handle modern participant-based engines
+        if hasattr(self.engine, "participants"):
+            current = {p.actor for p in self.engine.participants}
+            fighters = set(self.script.fighters)
+            
+            # Add new fighters
+            for actor in fighters - current:
+                if hasattr(self.engine, "add_participant"):
+                    self.engine.add_participant(actor)
+            
+            # Remove fighters no longer in script
+            for actor in current - fighters:
+                if hasattr(self.engine, "remove_participant"):
+                    self.engine.remove_participant(actor)
+            
+            # Remove defeated combatants
+            for actor in list(fighters):
+                if getattr(actor, "hp", 0) <= 0:
+                    if hasattr(actor, "db"):
+                        actor.db.in_combat = False
+                    if hasattr(self.engine, "remove_participant"):
+                        self.engine.remove_participant(actor)
+        
+        # Handle legacy fighter-based engines
+        elif hasattr(self.engine, "fighters"):
+            valid_fighters = []
+            for fighter in list(self.engine.fighters):
+                if not fighter or not hasattr(fighter, "db"):
+                    continue
+
+                if getattr(fighter.db, "hp", 0) <= 0:
+                    fighter.db.in_combat = False
+                    continue
+
+                if not getattr(fighter.db, "in_combat", False):
+                    continue
+
+                valid_fighters.append(fighter)
+
+            self.engine.fighters = valid_fighters
+
+            # Check for combat end
+            if len(valid_fighters) <= 1:
+                winner = valid_fighters[0] if valid_fighters else None
+                self.end_combat(f"Combat ended - winner: {winner.key if winner else 'none'}")
 
     def process_round(self) -> None:
         """Process a single combat round for this instance."""
         if self.combat_ended:
             return
+
         self.round_number += 1
         self.last_round_time = time.time()
+
         try:
             self.sync_participants()
+
             if not self.has_active_fighters():
                 return
-            self.engine.process_round()
+
+            # Use engine's process_round if available
+            if hasattr(self.engine, "process_round"):
+                self.engine.process_round()
+            else:
+                self._manual_round_processing()
+
             self.sync_participants()
-        except Exception as err:  # pragma: no cover - defensive
+
+        except Exception as err:
             log_trace(f"Error in combat round processing: {err}")
             self.end_combat(f"Combat ended due to error: {err}")
 
+    def _manual_round_processing(self) -> None:
+        """Fallback round processing if engine doesn't have process_round."""
+        fighters = getattr(self.engine, "fighters", [])
+        
+        for fighter in list(fighters):
+            if not fighter or getattr(fighter.db, "hp", 0) <= 0:
+                continue
+
+            if not getattr(fighter.db, "in_combat", False):
+                continue
+
+            # Handle NPC auto-attacks
+            if not hasattr(fighter, "has_account") or not fighter.has_account:
+                self._npc_auto_attack(fighter)
+
+    def _npc_auto_attack(self, npc) -> None:
+        """Handle NPC automatic attacks."""
+        if not npc or not hasattr(npc, "location"):
+            return
+
+        fighters = getattr(self.engine, "fighters", [])
+        targets = []
+        
+        for fighter in fighters:
+            if (
+                fighter != npc
+                and hasattr(fighter, "has_account")
+                and fighter.has_account
+                and getattr(fighter.db, "hp", 0) > 0
+                and getattr(fighter.db, "in_combat", False)
+            ):
+                targets.append(fighter)
+
+        if not targets:
+            return
+
+        target = targets[0]
+        if hasattr(npc, "attack"):
+            try:
+                npc.attack(target)
+            except Exception as e:
+                log_trace(f"NPC {npc.key} attack failed: {e}")
+
     def end_combat(self, reason: str = "") -> None:
-        """Mark this instance as ended."""
+        """Mark this instance as ended and clean up fighter states."""
         if self.combat_ended:
             return
+
         self.combat_ended = True
+
+        # Clean up fighter states
+        if self.engine:
+            fighters = []
+            if hasattr(self.engine, "participants"):
+                fighters = [p.actor for p in self.engine.participants]
+            elif hasattr(self.engine, "fighters"):
+                fighters = self.engine.fighters
+
+            for fighter in fighters:
+                if fighter and hasattr(fighter, "db"):
+                    fighter.db.in_combat = False
+
         if reason:
             log_trace(f"Combat ended: {reason}")
 
@@ -100,15 +221,35 @@ class CombatRoundManager:
         self, script, round_time: Optional[float] = None
     ) -> CombatInstance:
         """Create or fetch a combat instance for ``script``."""
+        # Check if instance already exists
         for inst in self.instances:
             if inst.script is script:
                 return inst
-        engine = CombatEngine(script.fighters, round_time=None)
+
+        # Get fighters from script
+        fighters = getattr(script, "fighters", [])
+        if hasattr(script, "get_fighters"):
+            fighters = script.get_fighters()
+
+        # Create combat engine
+        try:
+            from .combat_engine import CombatEngine
+            engine = CombatEngine(fighters, round_time=None)
+        except ImportError:
+            # Fallback for environments without the combat engine
+            engine = None
+
+        # Create instance
         inst = CombatInstance(script, engine, round_time or self.tick_delay)
         self.instances.append(inst)
+
+        # Process initial round
         inst.process_round()
+
+        # Start ticking if not already running
         if not self.running:
             self.start_ticking()
+
         return inst
 
     def remove_instance(self, script) -> None:
@@ -140,24 +281,34 @@ class CombatRoundManager:
         self._next_tick_scheduled = False
         if not self.running:
             return
+
         remove: List[object] = []
+
         for inst in list(self.instances):
             try:
                 if not inst.is_valid():
                     remove.append(inst.script)
                     continue
+
                 if not inst.has_active_fighters():
                     inst.end_combat("No active fighters remaining")
                     remove.append(inst.script)
                     continue
+
                 inst.process_round()
+
                 if inst.combat_ended:
                     remove.append(inst.script)
-            except Exception as err:  # pragma: no cover - defensive
+
+            except Exception as err:
                 log_trace(f"Error processing combat instance: {err}")
                 remove.append(inst.script)
+
+        # Remove ended instances
         for script in remove:
             self.remove_instance(script)
+
+        # Schedule next tick if instances remain
         if self.instances and self.running:
             self._schedule_next_tick()
 
@@ -170,12 +321,21 @@ class CombatRoundManager:
             "total_instances": len(self.instances),
             "instances": [],
         }
+
         for inst in self.instances:
+            # Get fighter count based on engine type
+            fighter_count = 0
+            if inst.engine:
+                if hasattr(inst.engine, "participants"):
+                    fighter_count = len(inst.engine.participants)
+                elif hasattr(inst.engine, "fighters"):
+                    fighter_count = len(inst.engine.fighters)
+
             status["instances"].append(
                 {
                     "script": str(inst.script),
                     "round_number": inst.round_number,
-                    "fighters": len(inst.engine.participants),
+                    "fighters": fighter_count,
                     "valid": inst.is_valid(),
                     "has_active_fighters": inst.has_active_fighters(),
                     "ended": inst.combat_ended,
@@ -184,12 +344,14 @@ class CombatRoundManager:
         return status
 
     def force_end_all_combat(self) -> None:
+        """Force end all combat instances."""
         for inst in list(self.instances):
             inst.end_combat("Force ended by admin")
         self.instances.clear()
         self.stop_ticking()
 
     def debug_info(self) -> str:
+        """Return formatted debug information about the combat manager."""
         status = self.get_combat_status()
         lines = [
             "Combat Manager Status:",
@@ -197,6 +359,7 @@ class CombatRoundManager:
             f"  Active Instances: {status['total_instances']}",
             "",
         ]
+
         for i, inst in enumerate(status["instances"]):
             lines.extend(
                 [
@@ -210,4 +373,5 @@ class CombatRoundManager:
                     "",
                 ]
             )
+
         return "\n".join(lines)
