@@ -279,12 +279,27 @@ def maybe_start_combat(user, target):
     from .round_manager import CombatRoundManager
 
     mgr = CombatRoundManager.get()
+    if not getattr(user, "location", None):
+        mgr.last_error = "User has no location"
+        return None
+    if not getattr(target, "location", None):
+        mgr.last_error = "Target has no location"
+        return None
+
     inst_user = mgr.get_combatant_combat(user)
     inst_target = mgr.get_combatant_combat(target)
     if inst_user and inst_user is inst_target:
         return inst_user
 
     instance = mgr.start_combat([user, target])
+
+    if instance is None:
+        return None
+
+    if hasattr(user, "db"):
+        user.db.in_combat = True
+    if hasattr(target, "db"):
+        target.db.in_combat = True
 
     udb = getattr(user, "db", None)
     tdb = getattr(target, "db", None)
