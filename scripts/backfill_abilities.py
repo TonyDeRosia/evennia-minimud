@@ -22,6 +22,7 @@ def backfill():
         for lvl in range(1, level + 1):
             for ability in CLASS_ABILITY_TABLE.get(charclass, {}).get(lvl, []):
                 state_manager.grant_ability(char, ability, mark_new=False)
+        state_manager.grant_ability(char, "kick", proficiency=25, mark_new=False)
         post_skills = set(char.db.skills or [])
         post_spells = {
             s if isinstance(s, str) else getattr(s, "key", "")

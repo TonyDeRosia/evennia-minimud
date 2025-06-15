@@ -93,8 +93,37 @@ class Cleave(Skill):
         return CombatResult(actor=user, target=target, message=msg)
 
 
+class Kick(Skill):
+    """Simple unarmed kick scaling with Strength."""
+
+    name = "kick"
+    category = SkillCategory.MELEE
+    cooldown = 3
+
+    def resolve(self, user, target):
+        if not getattr(target, "is_alive", lambda: True)():
+            return CombatResult(actor=user, target=target, message="They are already down.")
+        if not stat_manager.check_hit(user, target):
+            return CombatResult(actor=user, target=target, message=f"{user.key}'s kick misses {target.key}.")
+        if roll_evade(user, target):
+            return CombatResult(actor=user, target=target, message=f"{target.key} evades {user.key}'s kick.")
+        str_val = stat_manager.get_effective_stat(user, "STR")
+        dmg = 5 + int(str_val * 0.2)
+        trait = getattr(user.traits, "kick", None) or user.traits.get("kick")
+        prof = getattr(trait, "proficiency", 0)
+        dmg = int(dmg * (1 + prof / 100))
+        target.hp = max(target.hp - dmg, 0)
+        return CombatResult(
+            actor=user,
+            target=target,
+            message=f"{user.key} kicks {target.key} for {dmg} damage!",
+            damage=dmg,
+        )
+
+
 # Mapping of available skill classes by key
 SKILL_CLASSES: Dict[str, type[Skill]] = {
     "shield bash": ShieldBash,
     "cleave": Cleave,
+    "kick": Kick,
 }
