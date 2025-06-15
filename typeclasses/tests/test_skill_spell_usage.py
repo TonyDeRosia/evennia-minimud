@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from evennia.utils.test_resources import EvenniaTest
 from combat.combat_skills import SKILL_CLASSES
 from world.spells import SPELLS
@@ -69,4 +69,39 @@ class TestSkillAndSpellUsage(EvenniaTest):
              patch.object(self.char1, "location"):
             self.char1.cast_spell("fireball", target=self.char2)
             mock_start.assert_called_with(self.char1, self.char2)
+
+    def test_maybe_start_combat_sets_targets(self):
+        """Starting combat should set combat_target on both combatants."""
+        from combat.combat_utils import maybe_start_combat
+
+        with patch("combat.combat_utils.CombatRoundManager.get") as mock_get:
+            manager = MagicMock()
+            mock_get.return_value = manager
+            manager.get_combatant_combat.return_value = None
+
+            maybe_start_combat(self.char1, self.char2)
+
+            manager.start_combat.assert_called_with([self.char1, self.char2])
+            self.assertEqual(self.char1.db.combat_target, self.char2)
+            self.assertEqual(self.char2.db.combat_target, self.char1)
+
+    def test_maybe_start_combat_preserves_existing_targets(self):
+        """Existing combat_target settings pointing elsewhere are kept."""
+        from combat.combat_utils import maybe_start_combat
+
+        other1 = MagicMock()
+        other2 = MagicMock()
+        self.char1.db.combat_target = other1
+        self.char2.db.combat_target = other2
+
+        with patch("combat.combat_utils.CombatRoundManager.get") as mock_get:
+            manager = MagicMock()
+            mock_get.return_value = manager
+            manager.get_combatant_combat.return_value = None
+
+            maybe_start_combat(self.char1, self.char2)
+
+            manager.start_combat.assert_called_with([self.char1, self.char2])
+            self.assertIs(self.char1.db.combat_target, other1)
+            self.assertIs(self.char2.db.combat_target, other2)
 
