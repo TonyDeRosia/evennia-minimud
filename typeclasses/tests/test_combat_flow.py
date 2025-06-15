@@ -13,6 +13,8 @@ from combat.combat_skills import ShieldBash
 from combat.damage_types import DamageType
 from combat.ai_combat import npc_take_turn
 from typeclasses.gear import BareHand
+from .base import AttackCommandTestBase
+from commands.combat import CombatCmdSet
 
 
 class Dummy:
@@ -290,4 +292,19 @@ def test_haste_grants_extra_attacks():
         engine.process_round()
 
     assert defender.hp == 8
+
+
+class TestCombatInitFailure(AttackCommandTestBase):
+    def setUp(self):
+        super().setUp()
+        self.char1.msg = MagicMock()
+        self.char1.cmdset.add_default(CombatCmdSet)
+
+    @patch("combat.round_manager.delay")
+    def test_player_receives_init_error(self, _):
+        with patch("combat.engine.CombatEngine", side_effect=RuntimeError("boom")):
+            self.char1.execute_cmd("attack char2")
+        msg = self.char1.msg.call_args[0][0]
+        assert "boom" in msg
+        assert "failed" in msg.lower()
 
