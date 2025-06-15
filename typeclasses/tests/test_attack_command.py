@@ -187,3 +187,17 @@ class TestAttackCommand(AttackCommandTestBase):
             mock_start.assert_called_with(self.char1, self.char2)
             mock_engine.queue_action.assert_called()
 
+    @patch("combat.round_manager.delay")
+    def test_attack_reports_manager_error(self, _):
+        """If combat fails to start, the manager error should be displayed."""
+        with patch("commands.combat.start_or_get_combat", return_value=None) as mock_start, patch(
+            "commands.combat.CombatRoundManager.get"
+        ) as mock_get:
+            manager = MagicMock(last_error="engine failure")
+            mock_get.return_value = manager
+            self.char1.execute_cmd("attack char2")
+            mock_start.assert_called_with(self.char1, self.char2)
+            self.char1.msg.assert_any_call(
+                "Error: Combat system failed to initialize: engine failure"
+            )
+

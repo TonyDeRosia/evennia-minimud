@@ -90,19 +90,13 @@ class CmdAttack(Command):
         manager = CombatRoundManager.get()
         instance = start_or_get_combat(self.caller, target)
 
-        # Final check - if combat still hasn't started, provide detailed error
+        # Final check - if combat still hasn't started, use manager error if available
         if not instance:
-            # Try to determine why combat isn't starting
-            if not hasattr(self.caller, "in_combat"):
-                self.msg("Error: Character lacks combat capabilities.")
-            elif not hasattr(target, "db") or not hasattr(target, "get_display_name"):
-                self.msg("Error: Invalid target for combat.")
+            err = getattr(manager, "last_error", "")
+            if err:
+                self.msg(f"Error: Combat system failed to initialize: {err}")
             else:
-                err = getattr(manager, "last_error", "")
-                if err:
-                    self.msg(f"Error: Combat system failed to initialize: {err}")
-                else:
-                    self.msg("Error: Combat system failed to initialize. Check combat configuration.")
+                self.msg("Error: Combat system failed to initialize.")
             return
 
         # Verify caller is actually in the combat instance
