@@ -84,19 +84,57 @@ class TestAttackCommand(AttackCommandTestBase):
         mob = create.create_object(BaseNPC, key="mob", location=self.room1)
         self.char1.execute_cmd("kill mob")
 
-        self.assertEqual(self.char1.db.combat_target, mob)
-        self.assertEqual(mob.db.combat_target, self.char1)
+        self._assert_combat_targets_set(self.char1, mob)
+        self._assert_combat_initiated()
 
+    @patch("combat.round_manager.delay")
+    def test_kill_alias_with_character_target(self, _):
+        """Issuing 'kill char2' should start combat and set targets."""
+        self.char1.execute_cmd("kill char2")
+
+        self._assert_combat_targets_set(self.char1, self.char2)
+        self._assert_combat_initiated()
+
+    @patch("combat.round_manager.delay")
+    def test_kill_and_attack_equivalence(self, _):
+        """Using attack and kill should result in the same combat state."""
+        # First start combat using attack
+        self.char1.execute_cmd("attack char2")
         from combat.round_manager import CombatRoundManager
-        from combat.combat_actions import AttackAction
 
         manager = CombatRoundManager.get()
-        self.assertTrue(manager.combats)
         engine = list(manager.combats.values())[0].engine
-        queued = any(
-            isinstance(act, AttackAction)
+        participants_attack = {p.actor for p in engine.participants}
+        queued_attack = {
+            p.actor: [type(a) for a in p.next_action]
             for p in engine.participants
-            for act in p.next_action
-        )
-        self.assertTrue(queued)
+        }
+
+        # reset combat
+        manager.combats.clear()
+        manager.combatant_to_combat.clear()
+        self.char1.db.combat_target = None
+        self.char2.db.combat_target = None
+
+        # Start combat again using kill
+        self.char1.execute_cmd("kill char2")
+        engine2 = list(manager.combats.values())[0].engine
+        participants_kill = {p.actor for p in engine2.participants}
+        queued_kill = {
+            p.actor: [type(a) for a in p.next_action]
+            for p in engine2.participants
+        }
+
+        self.assertEqual(participants_attack, participants_kill)
+        self.assertEqual(queued_attack, queued_kill)
+        self._assert_combat_targets_set(self.char1, self.char2)
+        self._assert_combat_initiated()
+
+    @patch("combat.round_manager.delay")
+    def test_k_short_alias_initiates_combat(self, _):
+        """The short 'k' alias should behave the same as kill."""
+        self.char1.execute_cmd("k char2")
+
+        self._assert_combat_targets_set(self.char1, self.char2)
+        self._assert_combat_initiated()
 
