@@ -445,7 +445,7 @@ class CmdCompleteQuest(Command):
 
         title = quest.title or quest_key
         if rewards:
-            self.msg(f"Quest '{title}' completed! You receive: {', '.join(rewards)}.")
+            self.msg(f"Quest '{title}' completed! You receive |Y{', '.join(rewards)}|n.")
         else:
             self.msg(f"Quest '{title}' completed!")
         if quest.complete_dialogue:

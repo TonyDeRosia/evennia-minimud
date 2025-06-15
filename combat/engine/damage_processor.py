@@ -64,7 +64,7 @@ class DamageProcessor:
         if not exp or not chara:
             return
         if hasattr(chara, "msg"):
-            chara.msg(f"You gain {exp} experience.")
+            chara.msg(f"You gain |Y{exp}|n experience points.")
         state_manager.gain_xp(chara, exp)
 
     def group_gain(self, members: List[object], exp: int) -> None:
@@ -74,7 +74,7 @@ class DamageProcessor:
         share = max(int(exp / len(members)), int(exp * 0.10))
         for member in members:
             if hasattr(member, "msg"):
-                member.msg(f"You gain {share} experience.")
+                member.msg(f"You gain |Y{share}|n experience points.")
             state_manager.gain_xp(member, share)
 
     def apply_damage(self, attacker, target, amount: int, damage_type: DamageType | None) -> int:

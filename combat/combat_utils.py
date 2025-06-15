@@ -33,7 +33,7 @@ def award_xp(killer, total_xp: int, participants: Iterable | None = None) -> Non
     share = max(int(total_xp / len(members)), int(total_xp * 0.10))
     for member in members:
         if hasattr(member, "msg"):
-            member.msg(f"You gain {share} experience points!")
+            member.msg(f"You gain |Y{share}|n experience points!")
         state_manager.gain_xp(member, share)
 
 
