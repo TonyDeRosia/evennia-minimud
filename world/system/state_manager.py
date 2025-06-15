@@ -32,6 +32,17 @@ def _save_effect_dict(chara, data):
     chara.db.active_effects = data
 
 
+def grant_ability(chara, key: str) -> None:
+    """Add ``key`` to ``chara.db.skills`` if not already present."""
+    skills = chara.db.skills or []
+    if key not in skills:
+        skills.append(key)
+        chara.db.skills = skills
+    profs = chara.db.proficiencies or {}
+    profs.setdefault(key, 0)
+    chara.db.proficiencies = profs
+
+
 def add_temp_stat_bonus(
     chara, stat: str, amount: int, duration: int, effect_key: str | None = None
 ):
