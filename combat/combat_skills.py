@@ -20,9 +20,9 @@ from .combat_states import CombatState
 from world.system import stat_manager
 
 
-@dataclass
+@dataclass(init=False)
 class Skill:
-    """Base skill definition."""
+    """Base skill definition used by combat."""
 
     name: str
     category: SkillCategory = SkillCategory.MELEE
@@ -30,6 +30,18 @@ class Skill:
     stamina_cost: int = 0
     cooldown: int = 0
     effects: List[CombatState] = field(default_factory=list)
+
+    def __init__(self, *, name: str | None = None, category: SkillCategory | None = None,
+                 damage: tuple[int, int] | None = None, stamina_cost: int | None = None,
+                 cooldown: int | None = None, effects: List[CombatState] | None = None) -> None:
+        """Initialize skill using subclass defaults when arguments are omitted."""
+        cls = self.__class__
+        self.name = name if name is not None else getattr(cls, "name", "")
+        self.category = category if category is not None else getattr(cls, "category", SkillCategory.MELEE)
+        self.damage = damage if damage is not None else getattr(cls, "damage", None)
+        self.stamina_cost = stamina_cost if stamina_cost is not None else getattr(cls, "stamina_cost", 0)
+        self.cooldown = cooldown if cooldown is not None else getattr(cls, "cooldown", 0)
+        self.effects = effects if effects is not None else list(getattr(cls, "effects", []))
 
     def resolve(self, user, target) -> CombatResult:
         return CombatResult(actor=user, target=target, message="Nothing happens.")
