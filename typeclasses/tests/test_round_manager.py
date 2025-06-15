@@ -265,3 +265,26 @@ class TestCombatRoundManager(EvenniaTest):
             self.manager._tick()
             mock_proc.assert_called()
 
+    def test_round_time_delay(self):
+        """A larger round_time should delay round processing."""
+        with (
+            patch("combat.round_manager.delay"),
+            patch.object(CombatEngine, "process_round") as mock_proc,
+            patch("combat.round_manager.time.time") as mock_time,
+        ):
+            mock_time.return_value = 0
+            inst = self.manager.create_combat(
+                combatants=[self.char1, self.char2], round_time=5.0
+            )
+            mock_proc.reset_mock()
+
+            # Not enough time has passed; round should not process
+            mock_time.return_value = 2
+            self.manager._tick()
+            mock_proc.assert_not_called()
+
+            # After sufficient time, round should process
+            mock_time.return_value = 6
+            self.manager._tick()
+            mock_proc.assert_called_once()
+
