@@ -108,12 +108,32 @@ class DamageProcessor:
         if getattr(target, "pk", None) is not None:
             self.update_pos(target)
 
-        if attacker and attacker.location:
-            attacker.location.msg_contents(f"{target.key} is defeated by {attacker.key}!")
+        if getattr(target, "db", None) is not None:
+            try:
+                target.db.in_combat = False
+                target.db.combat_target = None
+            except Exception:
+                pass
+
         if attacker and getattr(attacker, "db", None) is not None:
-            attacker.db.combat_target = None
+            try:
+                attacker.db.combat_target = None
+            except Exception:
+                pass
+
+        from combat.round_manager import CombatRoundManager
+
+        inst = CombatRoundManager.get().get_combatant_combat(target)
+        if inst:
+            inst.remove_combatant(target)
+
+        if attacker and attacker.location:
+            attacker.location.msg_contents(
+                f"{target.key} is defeated by {attacker.key}!"
+            )
 
         self.turn_manager.remove_participant(target)
+
         for participant in list(self.turn_manager.participants):
             ally = participant.actor
             if ally is target:
@@ -151,6 +171,11 @@ class DamageProcessor:
     # -------------------------------------------------------------
     def _execute_action(self, participant: CombatParticipant, action, damage_totals: Dict[object, int]) -> None:
         actor = participant.actor
+        target = getattr(action, "target", None)
+        if target and _current_hp(target) <= 0:
+            if action in participant.next_action:
+                participant.next_action.remove(action)
+            return
         valid, err = action.validate()
         if not valid:
             if hasattr(actor, "msg") and err:

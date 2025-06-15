@@ -84,6 +84,21 @@ class TestCombatEngineMinimal(unittest.TestCase):
         self.assertNotIn(defender, participants)
         defender.on_exit_combat.assert_called()
 
+    def test_action_skipped_if_target_dead(self):
+        attacker = Dummy(key="attacker")
+        defender = Dummy(hp=0, key="defender")
+        room = MagicMock()
+        attacker.location = defender.location = room
+        engine = CombatEngine([attacker, defender], round_time=0)
+        engine.queue_action(attacker, DamageAction(attacker, defender))
+        with patch("world.system.state_manager.apply_regen"), patch(
+            "combat.engine.damage_processor.delay"
+        ), patch("random.randint", return_value=0):
+            engine.start_round()
+            engine.process_round()
+
+        room.msg_contents.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()
