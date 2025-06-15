@@ -709,6 +709,8 @@ class Character(ObjectParent, ClothedCharacter):
         new_prof = proficiency_manager.record_use(self, srec)
         if new_prof != prev_prof:
             self.db.spells = known
+        if target:
+            combat_utils.maybe_start_combat(self, target)
         return True
 
     def get_display_status(self, looker, **kwargs):

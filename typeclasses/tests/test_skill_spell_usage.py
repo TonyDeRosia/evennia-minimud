@@ -63,3 +63,10 @@ class TestSkillAndSpellUsage(EvenniaTest):
             self.char1.use_skill("cleave", target=self.char2)
             mock_start.assert_called_with(self.char1, self.char2)
 
+    def test_spell_cast_starts_combat(self):
+        with patch("combat.combat_utils.maybe_start_combat") as mock_start, \
+             patch("world.system.state_manager.add_cooldown"), \
+             patch.object(self.char1, "location"):
+            self.char1.cast_spell("fireball", target=self.char2)
+            mock_start.assert_called_with(self.char1, self.char2)
+
