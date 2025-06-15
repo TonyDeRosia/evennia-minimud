@@ -84,8 +84,11 @@ class CmdAttack(Command):
         # it's all good! let's get started!
         from combat.round_manager import CombatRoundManager
 
+        # ensure combat has begun and combat_target attributes are set
+        maybe_start_combat(self.caller, target)
+
         manager = CombatRoundManager.get()
-        instance = manager.start_combat([self.caller, target])
+        instance = manager.get_combatant_combat(self.caller)
 
         if self.caller not in instance.combatants:
             if _current_hp(self.caller) <= 0:
@@ -98,13 +101,8 @@ class CmdAttack(Command):
             self.msg(f"{target.get_display_name(self.caller)} is already dead.")
             return
 
-        self.caller.db.combat_target = target
-        target.db.combat_target = self.caller
-
         from combat import AttackAction
         instance.engine.queue_action(self.caller, AttackAction(self.caller, target))
-        # ensure combat starts even if not already active
-        maybe_start_combat(self.caller, target)
 
 
     def at_post_cmd(self):
