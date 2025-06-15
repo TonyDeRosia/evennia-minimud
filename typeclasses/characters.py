@@ -666,7 +666,15 @@ class Character(ObjectParent, ClothedCharacter):
         srec = None
         for entry in known:
             if isinstance(entry, str) and entry == spell_key:
-                srec = Spell(spell.key, spell.stat, spell.mana_cost, spell.desc, 0)
+                srec = Spell(
+                    spell.key,
+                    spell.stat,
+                    spell.mana_cost,
+                    spell.desc,
+                    0,
+                    0,
+                    spell.cast_type,
+                )
                 idx = known.index(entry)
                 known[idx] = srec
                 self.db.spells = known
