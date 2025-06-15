@@ -15,7 +15,7 @@ class SkillCategory(str, Enum):
     MAGIC = "magic"
 
 from .combat_actions import CombatResult
-from .combat_utils import roll_damage, roll_evade
+from .combat_utils import roll_damage, roll_evade, maybe_start_combat
 from .combat_states import CombatState
 from world.system import stat_manager
 
@@ -68,6 +68,7 @@ class ShieldBash(Skill):
                 )
             dmg = roll_damage(self.damage)
             target.hp = max(target.hp - dmg, 0)
+            maybe_start_combat(user, target)
             return CombatResult(
                 actor=user,
                 target=target,
@@ -99,6 +100,7 @@ class Cleave(Skill):
             else:
                 dmg = roll_damage(self.damage)
                 target.hp = max(target.hp - dmg, 0)
+                maybe_start_combat(user, target)
                 msg = f"{user.key} cleaves {target.key} for {dmg} damage!"
         else:
             msg = f"{user.key}'s cleave misses {target.key}."
@@ -125,6 +127,7 @@ class Kick(Skill):
         prof = getattr(trait, "proficiency", 0)
         dmg = int(dmg * (1 + prof / 100))
         target.hp = max(target.hp - dmg, 0)
+        maybe_start_combat(user, target)
         return CombatResult(
             actor=user,
             target=target,
