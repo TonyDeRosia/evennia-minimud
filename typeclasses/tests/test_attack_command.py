@@ -1,3 +1,10 @@
+"""Tests for attack and kill commands.
+
+The :class:`TestAttackCommand` suite verifies that issuing ``attack`` or
+its ``kill``/``k`` aliases correctly initiates combat, queues actions and
+handles joining ongoing fights.
+"""
+
 from unittest.mock import MagicMock, patch
 from django.test import override_settings
 from evennia.utils import create
