@@ -21,7 +21,7 @@ class CmdWho(MuxCommand):
             return
 
         is_admin = caller.check_permstring("Admins")
-        headers = ["Character", "Title", "Idle"]
+        headers = ["Character", "Title", "Class (Race)", "Idle"]
         if is_admin:
             headers.insert(0, "Account")
         table = EvTable(*headers, border="cells")
@@ -35,9 +35,11 @@ class CmdWho(MuxCommand):
             idle = time_format(delta_cmd, 0)
             title = puppet.db.title if puppet else ""
             char = puppet.get_display_name(caller) if puppet else "None"
+            race = puppet.db.race or "Unknown" if puppet else "Unknown"
+            charclass = puppet.db.charclass or "Unknown" if puppet else "Unknown"
             if not puppet and not is_admin:
                 continue
-            row = [char, title, idle]
+            row = [char, title, f"{charclass} ({race})", idle]
             if is_admin:
                 row.insert(0, account.key)
             table.add_row(*row)

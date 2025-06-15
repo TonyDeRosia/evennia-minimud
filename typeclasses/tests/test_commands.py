@@ -98,6 +98,12 @@ class TestInfoCommands(EvenniaTest):
         self.assertIn("PRIMARY STATS", out)
         self.assertIn("+", out)
 
+    def test_score_shows_race_and_class(self):
+        self.char1.execute_cmd("score")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Race: Elf", out)
+        self.assertIn("Class: Mage", out)
+
     def test_score_shows_gear_bonus(self):
         from evennia.utils import create
         from world.system import stat_manager
@@ -436,6 +442,12 @@ class TestInfoCommands(EvenniaTest):
         out = self.char1.msg.call_args[0][0]
         self.assertIn(self.char1.key, out)
         self.assertNotIn(self.char1.account.key, out)
+
+    def test_who_shows_race_and_class(self):
+        self.char1.execute_cmd("who")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Elf", out)
+        self.assertIn("Mage", out)
 
 
 class TestBountySmall(EvenniaTest):
