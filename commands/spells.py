@@ -1,4 +1,4 @@
-from evennia import CmdSet
+from evennia import CmdSet, default_cmds
 from evennia.utils.evtable import EvTable
 from .command import Command
 from world.spells import SPELLS, Spell
@@ -68,67 +68,56 @@ class CmdSpellbook(Command):
         self.msg(str(table))
 
 
-class CmdCast(Command):
-    """Cast a learned spell.
+class CmdCastOrChant(default_cmds.MuxCommand):
+    """Cast or chant a learned spell.
 
     Usage:
-        cast <spell> [on <target>]
+        cast <spell> <target>
+        chant <spell> <target>
 
-    Example:
-        cast fireball on goblin
+    The command name must match the spell's ``cast_type`` attribute.
     """
 
     key = "cast"
-
-    def parse(self):
-        args = self.args.strip()
-        if " on " in args:
-            self.spellname, self.target = args.split(" on ", 1)
-        else:
-            self.spellname = args
-            self.target = None
+    aliases = ["chant"]
 
     def func(self):
-        if not self.spellname:
-            self.msg("Cast what?")
+        caller = self.caller
+        if not self.args:
+            caller.msg("Cast what?")
             return
-        spell_key = self.spellname.lower()
-        spell = SPELLS.get(spell_key)
-        if not spell:
-            self.msg("No such spell.")
-            return
-        known = self.caller.db.spells or []
-        spell_entry = None
+
+        spell_name, _, target_name = self.args.partition(" ")
+        spell_key = spell_name.lower()
+
+        known = caller.db.spells or []
+        spell = None
         for entry in known:
-            if (isinstance(entry, str) and entry == spell_key) or (
-                not isinstance(entry, str) and entry.key == spell_key
-            ):
-                spell_entry = entry
+            key = entry if isinstance(entry, str) else getattr(entry, "key", "")
+            if key == spell_key:
+                spell = SPELLS.get(spell_key)
                 break
-        if spell_entry is None:
-            self.msg("You have not learned that spell.")
+
+        if not spell:
+            caller.msg("You have not learned that spell.")
             return
-        if self.caller.traits.mana.current < spell.mana_cost:
-            self.msg("You do not have enough mana.")
+
+        if self.cmdstring != spell.cast_type:
+            caller.msg(f"You must {spell.cast_type} this spell.")
             return
+
         target = None
-        if self.target:
-            target = self.caller.search(self.target)
+        if target_name.strip():
+            target = caller.search(target_name.strip())
             if not target:
                 return
-        self.caller.traits.mana.current -= spell.mana_cost
-        if target:
-            self.caller.location.msg_contents(
-                f"{self.caller.get_display_name(self.caller)} casts {spell.key} at {target.get_display_name(self.caller)}!"
-            )
-        else:
-            self.caller.location.msg_contents(
-                f"{self.caller.get_display_name(self.caller)} casts {spell.key}!"
-            )
-        if isinstance(spell_entry, Spell):
-            if spell_entry.proficiency < 100:
-                spell_entry.proficiency = min(100, spell_entry.proficiency + 1)
-            self.caller.db.spells = known
+
+        result = caller.cast_spell(spell_key, target=target)
+        if not result:
+            if caller.traits.mana.current < spell.mana_cost:
+                caller.msg("You do not have enough mana.")
+            else:
+                caller.msg("Nothing happens.")
 
 
 class CmdLearnSpell(Command):
@@ -188,4 +177,4 @@ class SpellCmdSet(CmdSet):
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
         self.add(CmdSpellbook)
-        self.add(CmdCast)
+        self.add(CmdCastOrChant)
