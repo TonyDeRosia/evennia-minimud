@@ -6,6 +6,9 @@ from world.system import stat_manager
 from world.effects import EFFECTS
 from django.conf import settings
 from .constants import MAX_SATED, MAX_LEVEL
+from world.abilities import CLASS_ABILITY_TABLE
+from world.spells import SPELLS, Spell
+from commands.skills import SKILL_DICT
 
 
 def _get_bonus_dict(chara) -> Dict[str, List[dict]]:
@@ -297,6 +300,51 @@ def tick_all():
         tick_character(chara)
 
 
+def grant_ability(chara, ability: str, proficiency: int = 0, mark_new: bool = False) -> None:
+    """Give ``ability`` to ``chara`` if not already known."""
+    if ability in SPELLS:
+        known = chara.db.spells or []
+        keys = [a if isinstance(a, str) else getattr(a, "key", "") for a in known]
+        if ability in keys:
+            return
+        proto = SPELLS[ability]
+        known.append(Spell(proto.key, proto.stat, proto.mana_cost, proto.desc, proto.cooldown, proficiency))
+        chara.db.spells = known
+        if mark_new:
+            new_list = chara.db.new_spells or []
+            if ability not in new_list:
+                new_list.append(ability)
+                chara.db.new_spells = new_list
+    else:
+        skills = chara.db.skills or []
+        if ability not in skills:
+            skills.append(ability)
+            chara.db.skills = skills
+        trait = chara.traits.get(ability)
+        if not trait:
+            chara.traits.add(
+                ability,
+                trait_type="counter",
+                min=0,
+                max=100,
+                base=0,
+                stat=SKILL_DICT.get(ability),
+            )
+            trait = chara.traits.get(ability)
+        setattr(trait, "proficiency", proficiency)
+        if mark_new:
+            new_list = chara.db.new_skills or []
+            if ability not in new_list:
+                new_list.append(ability)
+                chara.db.new_skills = new_list
+
+
+def _grant_level_abilities(chara, level: int, mark_new: bool = True) -> None:
+    """Grant any abilities unlocked at ``level``."""
+    for ability in CLASS_ABILITY_TABLE.get(chara.db.charclass, {}).get(level, []):
+        grant_ability(chara, ability, mark_new=mark_new)
+
+
 def check_level_up(chara) -> bool:
     """Increase character level based on experience.
 
@@ -323,6 +371,7 @@ def check_level_up(chara) -> bool:
         leveled = True
         chara.db.practice_sessions = (chara.db.practice_sessions or 0) + 3
         chara.db.training_points = (chara.db.training_points or 0) + 1
+        _grant_level_abilities(chara, level)
 
     if leveled:
         chara.db.level = level
@@ -343,6 +392,7 @@ def level_up(chara, excess: int = 0) -> None:
     chara.db.level = level
     chara.db.practice_sessions = (chara.db.practice_sessions or 0) + 3
     chara.db.training_points = (chara.db.training_points or 0) + 1
+    _grant_level_abilities(chara, level)
     chara.db.tnl = settings.XP_TO_LEVEL(level)
     if not settings.XP_CARRY_OVER:
         chara.db.experience = (chara.db.experience or 0) - excess

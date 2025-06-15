@@ -10,6 +10,9 @@ from django.conf import settings
 from typeclasses.characters import PlayerCharacter, Character
 from world.scripts import races, classes
 from world.stats import CORE_STAT_KEYS, CORE_STATS, apply_stats
+from world.abilities import CLASS_ABILITY_TABLE
+from world.spells import SPELLS, Spell
+from world.system import state_manager
 
 CORE_BASE = {stat.key: stat.base for stat in CORE_STATS}
 
@@ -313,6 +316,11 @@ def menunode_finish(caller, **kwargs):
         char.traits.stamina.current = char.traits.stamina.max
     char.db.sated = MAX_SATED
     stat_manager.refresh_stats(char)
+
+    # grant starting abilities based on class
+    abilities = CLASS_ABILITY_TABLE.get(char.db.charclass, {}).get(1, [])
+    for ability in abilities:
+        state_manager.grant_ability(char, ability, proficiency=25, mark_new=False)
 
     # assign the newly created character to this account
     account = getattr(caller, "account", None) or getattr(caller, "dbobj", caller)
