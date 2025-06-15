@@ -45,7 +45,6 @@ class CmdKick(Command):
         if self.caller.traits.stamina.current < skill.stamina_cost:
             self.msg("You are too exhausted.")
             return
-        self.caller.traits.stamina.current -= skill.stamina_cost
         state_manager.add_cooldown(self.caller, skill.name, skill.cooldown)
         inst = maybe_start_combat(self.caller, target)
         inst.engine.queue_action(self.caller, SkillAction(self.caller, skill, target))
