@@ -1,6 +1,10 @@
 from random import choice
 from typeclasses.scripts import Script
 
+from combat.combat_utils import maybe_start_combat
+from combat.round_manager import CombatRoundManager
+from combat.combat_actions import AttackAction
+
 class BaseCombatAI(Script):
     """Base class for simple combat AI behavior."""
 
@@ -26,7 +30,12 @@ class BaseCombatAI(Script):
         npc = self.obj
         if not npc or not target:
             return
-        npc.execute_cmd(f"kill {target.key}")
+        # Ensure combat has started and queue an attack action directly
+        maybe_start_combat(npc, target)
+        manager = CombatRoundManager.get()
+        instance = manager.get_combatant_combat(npc)
+        if instance:
+            instance.engine.queue_action(npc, AttackAction(npc, target))
 
     def _adjacent_exit_to_target(self):
         """Return an exit leading to a room with a viable target, if any."""
