@@ -265,3 +265,15 @@ class TestCombatRoundManager(EvenniaTest):
             self.manager._tick()
             mock_proc.assert_called()
 
+    def test_round_time_passed_to_engine(self):
+        """create_combat should pass round_time to CombatEngine."""
+        with (
+            patch("combat.round_manager.delay"),
+            patch.object(CombatEngine, "process_round")
+        ):
+            inst = self.manager.create_combat(
+                combatants=[self.char1, self.char2], round_time=5
+            )
+
+        self.assertEqual(inst.engine.round_time, 5)
+
