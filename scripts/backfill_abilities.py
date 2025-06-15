@@ -1,10 +1,16 @@
 """One-time script to grant characters any missing level-based abilities."""
 
 import os
+import sys
 import django
 
 # 👇 Add this line to set the Django settings module
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
+
+# Include project root so "server" package is importable when run directly
+ROOT_DIR = os.path.dirname(os.path.dirname(__file__))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
 
 # 👇 Setup Django environment
 django.setup()
