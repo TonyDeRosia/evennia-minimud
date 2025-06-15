@@ -6,7 +6,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set
 
-from evennia.utils import delay
+from evennia.utils import delay, logger
 from evennia.utils.logger import log_trace
 from django.conf import settings
 from .engine import _current_hp
@@ -235,6 +235,7 @@ class CombatRoundManager:
         self.tick_delay = 2.0
         self._next_tick_scheduled = False
         self._next_id = 1
+        self.last_error: str = ""
 
     @classmethod
     def get(cls) -> "CombatRoundManager":
@@ -248,19 +249,24 @@ class CombatRoundManager:
 
     def create_combat(
         self, combatants: Optional[List[object]] = None, round_time: Optional[float] = None
-    ) -> CombatInstance:
+    ) -> Optional[CombatInstance]:
         """Create a new combat with ``combatants``."""
 
         fighters = combatants or []
+        self.last_error = ""
 
         try:
             from .engine import CombatEngine
-        except ImportError as err:
-            raise ImportError("Combat engine could not be imported") from err
+            engine = CombatEngine(fighters, round_time=None)
+        except Exception as err:
+            logger.log_err(f"CombatEngine initialization failed: {err}")
+            self.last_error = str(err)
+            return None
 
-        engine = CombatEngine(fighters, round_time=None)
         if not engine:
-            raise RuntimeError("CombatEngine failed to initialize")
+            self.last_error = "CombatEngine failed to initialize"
+            logger.log_err(self.last_error)
+            return None
 
         combat_id = self._next_id
         self._next_id += 1
@@ -294,7 +300,7 @@ class CombatRoundManager:
             return None
         return self.combats.get(cid)
 
-    def start_combat(self, combatants: List[object]) -> CombatInstance:
+    def start_combat(self, combatants: List[object]) -> Optional[CombatInstance]:
         """Start combat for the given ``combatants``."""
         for combatant in combatants:
             inst = self.get_combatant_combat(combatant)
