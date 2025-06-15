@@ -38,9 +38,14 @@ def grant_ability(chara, key: str) -> None:
     if key not in skills:
         skills.append(key)
         chara.db.skills = skills
+
     profs = chara.db.proficiencies or {}
     profs.setdefault(key, 0)
     chara.db.proficiencies = profs
+
+    uses = chara.db.skill_uses or {}
+    uses.setdefault(key, 0)
+    chara.db.skill_uses = uses
 
 
 def add_temp_stat_bonus(

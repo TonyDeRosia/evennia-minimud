@@ -18,6 +18,7 @@ from .combat_actions import CombatResult
 from .combat_utils import roll_damage, roll_evade
 from .combat_states import CombatState
 from world.system import stat_manager
+from world.skills.kick import Kick
 
 
 @dataclass
@@ -97,4 +98,5 @@ class Cleave(Skill):
 SKILL_CLASSES: Dict[str, type[Skill]] = {
     "shield bash": ShieldBash,
     "cleave": Cleave,
+    "kick": Kick,
 }
