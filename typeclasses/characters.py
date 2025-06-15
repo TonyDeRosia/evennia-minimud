@@ -248,6 +248,7 @@ class Character(ObjectParent, ClothedCharacter):
         self.db.training_points = 0
         self.db.practice_sessions = 0
         from django.conf import settings
+
         self.db.level = 1
         self.db.experience = 0
         self.db.tnl = settings.XP_TO_LEVEL(1)
@@ -358,7 +359,9 @@ class Character(ObjectParent, ClothedCharacter):
         # apply armor damage reduction with piercing
         reduction = self.defense(damage_type)
         if attacker:
-            reduction = max(0, reduction - state_manager.get_effective_stat(attacker, "piercing"))
+            reduction = max(
+                0, reduction - state_manager.get_effective_stat(attacker, "piercing")
+            )
         damage -= reduction
         damage = max(0, damage)
         if attacker:
@@ -383,13 +386,16 @@ class Character(ObjectParent, ClothedCharacter):
             damage = int(damage * get_damage_multiplier(resistances, dt))
 
         # magic resist mitigation
-        if dt and dt not in (DamageType.SLASHING, DamageType.PIERCING, DamageType.BLUDGEONING):
+        if dt and dt not in (
+            DamageType.SLASHING,
+            DamageType.PIERCING,
+            DamageType.BLUDGEONING,
+        ):
             mres = state_manager.get_effective_stat(self, "magic_resist")
             if attacker:
                 mres -= state_manager.get_effective_stat(attacker, "spell_penetration")
             if mres > 0:
                 damage = max(0, damage - mres)
-
 
         self.traits.health.current -= damage
         crit_prefix = "|rCritical!|n " if critical else ""
@@ -425,6 +431,7 @@ class Character(ObjectParent, ClothedCharacter):
             self.traits.health.rate = 0
             if self.in_combat:
                 from combat.round_manager import CombatRoundManager
+
                 manager = CombatRoundManager.get()
                 inst = manager.get_combatant_combat(self)
                 if inst and not inst.remove_combatant(self):
@@ -441,6 +448,7 @@ class Character(ObjectParent, ClothedCharacter):
             if utils.inherits_from(self, PlayerCharacter):
                 self.on_death(attacker)
         return damage
+
     def at_emote(self, message, **kwargs):
         """
         Execute a room emote as ourself.
@@ -604,6 +612,7 @@ class Character(ObjectParent, ClothedCharacter):
         Attempt to use a skill, applying any stat bonus as necessary.
         """
         from world.system import state_manager
+
         target = kwargs.get("target")
 
         # using an active combat skill if a target is provided
@@ -612,10 +621,14 @@ class Character(ObjectParent, ClothedCharacter):
 
             skill_cls = SKILL_CLASSES.get(skill_name)
             if not skill_cls:
-                return CombatResult(actor=self, target=target, message="Nothing happens.")
+                return CombatResult(
+                    actor=self, target=target, message="Nothing happens."
+                )
             skill = skill_cls()
             if not self.cooldowns.ready(skill.name):
-                return CombatResult(actor=self, target=self, message="Still recovering.")
+                return CombatResult(
+                    actor=self, target=self, message="Still recovering."
+                )
             if self.traits.stamina.current < skill.stamina_cost:
                 return CombatResult(actor=self, target=self, message="Too exhausted.")
             self.traits.stamina.current -= skill.stamina_cost
@@ -634,9 +647,9 @@ class Character(ObjectParent, ClothedCharacter):
         stat_bonus = 0
         if stat := getattr(skill_trait, "stat", None):
             stat_bonus = state_manager.get_effective_stat(self, stat)
-        prof = getattr(skill_trait, "proficiency", 0)
-        if prof < 100:
-            skill_trait.proficiency = min(100, prof + 1)
+        from world.system import proficiency_manager
+
+        proficiency_manager.record_use(self, skill_trait)
         return skill_trait.value + stat_bonus
 
     def cast_spell(self, spell_key, target=None):
@@ -675,8 +688,11 @@ class Character(ObjectParent, ClothedCharacter):
             self.location.msg_contents(
                 f"{self.get_display_name(self)} casts {spell.key}!"
             )
-        if srec.proficiency < 100:
-            srec.proficiency = min(100, srec.proficiency + 1)
+        from world.system import proficiency_manager
+
+        prev_prof = getattr(srec, "proficiency", 0)
+        new_prof = proficiency_manager.record_use(self, srec)
+        if new_prof != prev_prof:
             self.db.spells = known
         return True
 
@@ -822,7 +838,9 @@ class Character(ObjectParent, ClothedCharacter):
                 self.msg("You don't see your target.")
             return
 
-        if not getattr(target, "traits", None) or not callable(getattr(target, "at_damage", None)):
+        if not getattr(target, "traits", None) or not callable(
+            getattr(target, "at_damage", None)
+        ):
             if self.sessions.count():
                 self.msg("You can't attack that.")
             return
@@ -844,7 +862,6 @@ class Character(ObjectParent, ClothedCharacter):
 
         if hasattr(self, "check_triggers"):
             self.check_triggers("on_attack", target=target, weapon=weapon)
-
 
     def revive(self, reviver, **kwargs):
         """
@@ -886,7 +903,9 @@ class PlayerCharacter(Character):
         return f"|g{name}|n"
 
     def at_damage(self, attacker, damage, damage_type=None, critical=False):
-        dmg = super().at_damage(attacker, damage, damage_type=damage_type, critical=critical)
+        dmg = super().at_damage(
+            attacker, damage, damage_type=damage_type, critical=critical
+        )
         if self.traits.health.value < 50 and self.sessions.count():
             self.refresh_prompt()
         return dmg
@@ -900,6 +919,7 @@ class PlayerCharacter(Character):
         # deleted the combat script, so ensure it is valid before using it.
         if self.in_combat:
             from combat.round_manager import CombatRoundManager
+
             manager = CombatRoundManager.get()
             inst = manager.get_combatant_combat(self)
             if inst:
@@ -936,7 +956,6 @@ class PlayerCharacter(Character):
         self.at_death(attacker)
         self.award_xp_to(attacker)
 
-
     def respawn(self):
         """
         Resets the character back to the spawn point with full health.
@@ -962,7 +981,9 @@ class PlayerCharacter(Character):
         for slot, item in self.equipment.items():
             if not item:
                 continue
-            if not item.access(looker, "view") or not item.access(looker, "search", default=True):
+            if not item.access(looker, "view") or not item.access(
+                looker, "search", default=True
+            ):
                 continue
             if hasattr(looker, "can_see") and not looker.can_see(item):
                 continue
@@ -1027,7 +1048,7 @@ class NPC(Character):
                 chance = int(entry.get("chance", 100))
                 guaranteed = entry.get("guaranteed_after")
                 count = entry.get("_count", 0)
-                
+
                 roll = randint(1, 100)
                 if roll <= chance or (
                     guaranteed is not None and count >= int(guaranteed)
@@ -1036,7 +1057,9 @@ class NPC(Character):
                         amt = int(entry.get("amount", 1))
                         coin_loot[proto.lower()] = coin_loot.get(proto.lower(), 0) + amt
                     else:
-                        if isinstance(proto, int) or (isinstance(proto, str) and proto.isdigit()):
+                        if isinstance(proto, int) or (
+                            isinstance(proto, str) and proto.isdigit()
+                        ):
                             proto_data = load_prototype("object", int(proto))
                             if proto_data:
                                 drops.append(proto_data)
@@ -1084,6 +1107,7 @@ class NPC(Character):
     def award_xp_to(self, attacker):
         """Grant experience reward to ``attacker``."""
         from world.system import state_manager
+
         exp_reward = getattr(self.db, "exp_reward", 0)
         if exp_reward is None:
             exp_reward = 0
@@ -1105,6 +1129,7 @@ class NPC(Character):
         # cleaned up already, so verify it before using it.
         if self.in_combat:
             from combat.round_manager import CombatRoundManager
+
             manager = CombatRoundManager.get()
             inst = manager.get_combatant_combat(self)
             if inst:
@@ -1117,9 +1142,7 @@ class NPC(Character):
         self.at_death(attacker)
         if self.location:
             if attacker:
-                self.location.msg_contents(
-                    f"{self.key} is slain by {attacker.key}!"
-                )
+                self.location.msg_contents(f"{self.key} is slain by {attacker.key}!")
             else:
                 self.location.msg_contents(f"{self.key} dies.")
 
@@ -1223,7 +1246,9 @@ class NPC(Character):
         """
         Apply damage, after taking into account damage resistances.
         """
-        dmg = super().at_damage(attacker, damage, damage_type=damage_type, critical=critical)
+        dmg = super().at_damage(
+            attacker, damage, damage_type=damage_type, critical=critical
+        )
         self.check_triggers("on_attack", attacker=attacker, damage=dmg)
 
         if self.traits.health.value <= 0:
@@ -1235,6 +1260,7 @@ class NPC(Character):
             self.at_emote("flees!")
             self.db.fleeing = True
             from combat.round_manager import CombatRoundManager
+
             manager = CombatRoundManager.get()
             inst = manager.get_combatant_combat(self)
             if inst and not inst.remove_combatant(self):
@@ -1258,6 +1284,7 @@ class NPC(Character):
         else:
             self.db.combat_target = attacker
         return dmg
+
     def enter_combat(self, target, **kwargs):
         """
         initiate combat against another character
@@ -1284,6 +1311,7 @@ class NPC(Character):
 
         if engine:
             from combat.combat_actions import AttackAction
+
             engine.queue_action(self, AttackAction(self, target))
         else:
             self.attack(target, weapon)
@@ -1305,7 +1333,9 @@ class NPC(Character):
         """
         attack with your natural weapon
         """
-        if not getattr(target, "traits", None) or not callable(getattr(target, "at_damage", None)):
+        if not getattr(target, "traits", None) or not callable(
+            getattr(target, "at_damage", None)
+        ):
             if hasattr(wielder, "msg"):
                 wielder.msg("You can't attack that.")
             return

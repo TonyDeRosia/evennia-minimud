@@ -34,7 +34,11 @@ class CmdSpellbook(Command):
                     spell = SPELLS.get(spell_key)
                     if not spell:
                         continue
-                    prof = 0 if isinstance(entry, str) else getattr(entry, "proficiency", 0)
+                    prof = (
+                        0
+                        if isinstance(entry, str)
+                        else getattr(entry, "proficiency", 0)
+                    )
                     msg = (
                         f"|w{spell.key.capitalize()}|n\n"
                         f"  Mana Cost: |w{spell.mana_cost}|n\n"
@@ -73,6 +77,7 @@ class CmdCast(Command):
     Example:
         cast fireball on goblin
     """
+
     key = "cast"
 
     def parse(self):
@@ -128,6 +133,7 @@ class CmdCast(Command):
 
 class CmdLearnSpell(Command):
     """Learn a spell from a trainer."""
+
     key = "learn"
 
     def func(self):
@@ -145,14 +151,19 @@ class CmdLearnSpell(Command):
             ):
                 self.msg("You already know that spell.")
                 return
+        from world.system import proficiency_manager
+
         if (self.caller.db.practice_sessions or 0) <= 0:
             self.msg("You have no practice sessions left.")
             return
-        self.caller.db.practice_sessions -= 1
-        new_spell = Spell(spell.key, spell.stat, spell.mana_cost, spell.desc, 25)
-        known.append(new_spell)
-        self.caller.db.spells = known
-        self.msg(f"You learn the {spell.key} spell.")
+        new_spell = Spell(spell.key, spell.stat, spell.mana_cost, spell.desc, 0)
+        spent, prof = proficiency_manager.practice(self.caller, new_spell)
+        if spent:
+            known.append(new_spell)
+            self.caller.db.spells = known
+            self.msg(f"You learn the {spell.key} spell.")
+        else:
+            self.msg("You have no practice sessions left.")
 
 
 class SpellTrainCmdSet(CmdSet):
@@ -170,4 +181,3 @@ class SpellCmdSet(CmdSet):
         super().at_cmdset_creation()
         self.add(CmdSpellbook)
         self.add(CmdCast)
-

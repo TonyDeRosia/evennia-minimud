@@ -68,6 +68,7 @@ class RoomParent(ObjectParent):
         """
         super().at_object_leave(mover, destination, **kwargs)
         from combat.round_manager import CombatRoundManager
+
         manager = CombatRoundManager.get()
         if instance := manager.get_combatant_combat(mover):
             instance.remove_combatant(mover)
@@ -147,10 +148,7 @@ class RoomParent(ObjectParent):
             for obj in self.contents
             if obj != looker
             and obj.access(looker, "view")
-            and (
-                not hasattr(looker, "can_see")
-                or looker.can_see(obj)
-            )
+            and (not hasattr(looker, "can_see") or looker.can_see(obj))
         )
 
         env_objects, npcs, items, players = [], [], [], []
@@ -332,7 +330,7 @@ class XYGridTrain(XYGridRoom):
     def train_skill(self, char, levels):
         """Apply practice sessions and raise proficiency."""
         from commands.skills import SKILL_DICT
-        from world.system import stat_manager
+        from world.system import stat_manager, proficiency_manager
 
         valid, cost = self.check_training(char, levels)
         if valid is None or valid is False:
@@ -350,17 +348,7 @@ class XYGridTrain(XYGridRoom):
                 stat=SKILL_DICT.get(skill_key),
             )
             skill = char.traits.get(skill_key)
-            skill.proficiency = 25
-            char.db.practice_sessions -= 1
-            stat_manager.refresh_stats(char)
-            return True, 1, skill.proficiency
-        prof = getattr(skill, "proficiency", 0)
-        spent = 0
-        while spent < levels and prof < 75 and char.db.practice_sessions > 0:
-            prof = min(75, prof + 25)
-            spent += 1
-            char.db.practice_sessions -= 1
-        skill.proficiency = prof
+        spent, prof = proficiency_manager.practice(char, skill, sessions=levels)
         stat_manager.refresh_stats(char)
         return True, spent, prof
 
