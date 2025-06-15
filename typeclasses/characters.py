@@ -1066,7 +1066,8 @@ class NPC(Character):
                 wallet = killer.db.coins or {}
                 killer.db.coins = from_copper(to_copper(wallet) + total_copper)
                 if hasattr(killer, "msg"):
-                    killer.msg(f"You receive {format_wallet(from_copper(total_copper))}.")
+                    coins = format_wallet(from_copper(total_copper))
+                    killer.msg(f"You receive |Y{coins}|n.")
             else:
                 for coin, amt in from_copper(total_copper).items():
                     if amt:
@@ -1090,7 +1091,7 @@ class NPC(Character):
         if not attacker or not exp:
             return
         if hasattr(attacker, "msg"):
-            attacker.msg(f"You gain {exp} experience.")
+            attacker.msg(f"You gain |Y{exp}|n experience points.")
         state_manager.gain_xp(attacker, exp)
 
     def on_death(self, attacker):

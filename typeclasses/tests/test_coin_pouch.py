@@ -29,7 +29,7 @@ class TestCoinPouchCoins(EvenniaTest):
 
         self.assertEqual(to_copper(self.char1.db.coins), 20)
         self.assertIsNone(coin.pk)
-        self.char1.msg.assert_any_call("You receive 5 copper coins.")
+        self.char1.msg.assert_any_call("You receive |Y5 copper coins|n.")
 
     def test_give_coins_auto_deposit(self):
         self.char1.db.coins = from_copper(10)
@@ -48,7 +48,7 @@ class TestCoinPouchCoins(EvenniaTest):
         ]
         self.assertFalse(piles)
 
-        self.char2.msg.assert_any_call("You receive 5 copper coins.")
+        self.char2.msg.assert_any_call("You receive |Y5 copper coins|n.")
 
     def test_getall_auto_deposit(self):
         self.char1.db.coins = from_copper(30)
@@ -65,5 +65,5 @@ class TestCoinPouchCoins(EvenniaTest):
 
         self.assertEqual(to_copper(self.char1.db.coins), 30)
         self.assertIsNone(coin.pk)
-        self.char1.msg.assert_any_call("You receive 10 copper coins.")
+        self.char1.msg.assert_any_call("You receive |Y10 copper coins|n.")
 

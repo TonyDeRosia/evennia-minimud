@@ -412,7 +412,7 @@ class CoinPile(Object):
             wallet[ctype] = int(wallet.get(ctype, 0)) + int(self.db.amount or 0)
             dest.db.coins = wallet
             dest.msg(
-                f"You receive {self.db.amount} {ctype} coin{'s' if int(self.db.amount or 0) != 1 else ''}."
+                f"You receive |Y{self.db.amount} {ctype} coin{'s' if int(self.db.amount or 0) != 1 else ''}|n."
             )
             self.db.from_pouch = False
             # when picked up via `get`, Evennia will call `at_get` after this
