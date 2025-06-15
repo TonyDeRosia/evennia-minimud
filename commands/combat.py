@@ -91,12 +91,10 @@ class CmdAttack(Command):
         manager = CombatRoundManager.get()
         instance = manager.get_combatant_combat(self.caller)
 
-        # If no instance exists, try to start combat
+        # If no instance exists, try to start combat and capture the result
         if not instance:
             try:
-                # ensure combat has begun and combat_target attributes are set
-                maybe_start_combat(self.caller, target)
-                instance = manager.get_combatant_combat(self.caller)
+                instance = maybe_start_combat(self.caller, target)
             except Exception as e:
                 self.msg(f"Failed to initialize combat: {e}")
                 return

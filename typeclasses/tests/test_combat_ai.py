@@ -38,3 +38,14 @@ class TestBaseCombatAI(EvenniaTest):
             self.script.move()
             mock_move.assert_not_called()
 
+    def test_attack_target_uses_instance(self):
+        """attack_target should queue using the instance returned by maybe_start_combat."""
+        mock_engine = MagicMock()
+        inst = MagicMock(engine=mock_engine)
+        with patch(
+            "scripts.combat_ai.maybe_start_combat", return_value=inst
+        ) as mock_start, patch("scripts.combat_ai.AttackAction"):
+            self.script.attack_target(self.char1)
+            mock_start.assert_called_with(self.npc, self.char1)
+            mock_engine.queue_action.assert_called()
+

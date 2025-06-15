@@ -237,11 +237,18 @@ def get_condition_msg(hp: int, max_hp: int) -> str:
     return "is dead."
 
 
-def maybe_start_combat(user, target) -> None:
-    """Start combat between ``user`` and ``target`` if appropriate."""
+def maybe_start_combat(user, target):
+    """Start combat between ``user`` and ``target`` if appropriate.
+
+    Returns
+    -------
+    CombatInstance | None
+        The combat instance the two combatants are (or end up) in, or
+        ``None`` if combat could not be started.
+    """
 
     if not user or not target:
-        return
+        return None
 
     from .engine import _current_hp
 
@@ -258,16 +265,16 @@ def maybe_start_combat(user, target) -> None:
         target_alive = _current_hp(target) > 0
 
     if not user_alive or not target_alive:
-        return
+        return None
 
     if getattr(getattr(user, "db", object()), "decor", False) or getattr(
         user, "decor", False
     ):
-        return
+        return None
     if getattr(getattr(target, "db", object()), "decor", False) or getattr(
         target, "decor", False
     ):
-        return
+        return None
 
     from .round_manager import CombatRoundManager
 
@@ -275,9 +282,9 @@ def maybe_start_combat(user, target) -> None:
     inst_user = mgr.get_combatant_combat(user)
     inst_target = mgr.get_combatant_combat(target)
     if inst_user and inst_user is inst_target:
-        return
+        return inst_user
 
-    mgr.start_combat([user, target])
+    instance = mgr.start_combat([user, target])
 
     udb = getattr(user, "db", None)
     tdb = getattr(target, "db", None)
@@ -290,4 +297,6 @@ def maybe_start_combat(user, target) -> None:
                 tdb.combat_target = user
         except Exception:  # pragma: no cover - defensive
             pass
+
+    return instance
 
