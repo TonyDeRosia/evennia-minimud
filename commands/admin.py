@@ -19,6 +19,8 @@ from .building import (
 from world.stats import CORE_STAT_KEYS, ALL_STATS
 from world.system import stat_manager
 from world.system.constants import MAX_LEVEL
+from world.abilities import CLASS_ABILITY_TABLE
+from world.system import state_manager
 from utils.stats_utils import get_display_scroll, normalize_stat_key
 from utils import VALID_SLOTS, normalize_slot
 from .npc_builder import (
@@ -490,6 +492,59 @@ class CmdForceMobReport(Command):
         self.caller.location.msg_contents(
             f"|Y{target.key} status:|n {'  '.join(values)}"
         )
+
+
+class CmdUpdate(Command):
+    """Re-apply level-based abilities for a character."""
+
+    key = "update"
+    locks = "cmd:perm(Admin)"
+    help_category = "Admin"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: update <character>")
+            return
+
+        target = self.caller.search(self.args.strip(), global_search=True)
+        if not target or not target.is_typeclass(
+            "typeclasses.characters.Character", exact=False
+        ):
+            self.msg("Target must be a valid player character.")
+            return
+
+        if target.is_typeclass("typeclasses.npcs.NPC", exact=False):
+            self.msg("Cannot update NPCs.")
+            return
+
+        charclass = target.db.charclass
+        if not charclass:
+            self.msg(f"{target.key} has no class.")
+            return
+
+        level = int(target.db.level or 1)
+        pre_skills = set(target.db.skills or [])
+        pre_spells = {
+            s if isinstance(s, str) else getattr(s, "key", "")
+            for s in (target.db.spells or [])
+        }
+
+        for lvl in range(1, level + 1):
+            for ability in CLASS_ABILITY_TABLE.get(charclass, {}).get(lvl, []):
+                state_manager.grant_ability(target, ability, mark_new=False)
+
+        state_manager.grant_ability(target, "kick", proficiency=25, mark_new=False)
+
+        post_skills = set(target.db.skills or [])
+        post_spells = {
+            s if isinstance(s, str) else getattr(s, "key", "")
+            for s in (target.db.spells or [])
+        }
+        added = len(post_skills - pre_skills) + len(post_spells - pre_spells)
+
+        self.msg(f"|g{target.key} updated with {added} abilities.|n")
+        if target != self.caller:
+            target.msg("|YYour skills and spells have been updated by an admin.|n")
 
 
 def _create_gear(
@@ -1396,6 +1451,7 @@ class AdminCmdSet(CmdSet):
         self.add(CmdPurge)
         self.add(CmdPeace)
         self.add(CmdForceMobReport)
+        self.add(CmdUpdate)
         self.add(CmdScan)
 
 
