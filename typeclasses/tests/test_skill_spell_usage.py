@@ -1,8 +1,10 @@
 from unittest.mock import patch, MagicMock
+from django.test import override_settings
 from evennia.utils.test_resources import EvenniaTest
 from combat.combat_skills import SKILL_CLASSES
 from world.spells import SPELLS
 
+@override_settings(DEFAULT_HOME=None)
 class TestSkillAndSpellUsage(EvenniaTest):
     def setUp(self):
         super().setUp()
@@ -74,7 +76,7 @@ class TestSkillAndSpellUsage(EvenniaTest):
         """Starting combat should set combat_target on both combatants."""
         from combat.combat_utils import maybe_start_combat
 
-        with patch("combat.combat_utils.CombatRoundManager.get") as mock_get:
+        with patch("combat.round_manager.CombatRoundManager.get") as mock_get:
             manager = MagicMock()
             mock_get.return_value = manager
             manager.get_combatant_combat.return_value = None
@@ -94,7 +96,7 @@ class TestSkillAndSpellUsage(EvenniaTest):
         self.char1.db.combat_target = other1
         self.char2.db.combat_target = other2
 
-        with patch("combat.combat_utils.CombatRoundManager.get") as mock_get:
+        with patch("combat.round_manager.CombatRoundManager.get") as mock_get:
             manager = MagicMock()
             mock_get.return_value = manager
             manager.get_combatant_combat.return_value = None
@@ -112,7 +114,7 @@ class TestSkillAndSpellUsage(EvenniaTest):
         self.char1.db.combat_target = self.char2
         self.char2.db.combat_target = None
 
-        with patch("combat.combat_utils.CombatRoundManager.get") as mock_get:
+        with patch("combat.round_manager.CombatRoundManager.get") as mock_get:
             manager = MagicMock()
             mock_get.return_value = manager
             manager.get_combatant_combat.return_value = None
@@ -125,7 +127,7 @@ class TestSkillAndSpellUsage(EvenniaTest):
 
     def test_use_skill_sets_combat_targets(self):
         """Using a skill should set combat_target on both combatants."""
-        with patch("combat.combat_utils.CombatRoundManager.get") as mock_get, \
+        with patch("combat.round_manager.CombatRoundManager.get") as mock_get, \
              patch("world.system.stat_manager.check_hit", return_value=True), \
              patch("combat.combat_skills.roll_evade", return_value=False), \
              patch("combat.combat_skills.roll_damage", return_value=1):
@@ -138,4 +140,23 @@ class TestSkillAndSpellUsage(EvenniaTest):
             manager.start_combat.assert_called_with([self.char1, self.char2])
             self.assertEqual(self.char1.db.combat_target, self.char2)
             self.assertEqual(self.char2.db.combat_target, self.char1)
+
+    def test_maybe_start_combat_unset_other_target(self):
+        """If only one fighter has a combat_target set, both should after starting."""
+        from combat.combat_utils import maybe_start_combat
+
+        self.char1.db.combat_target = self.char2
+        # ensure the second combatant has no combat_target attribute
+        self.char2.attributes.remove("combat_target", raise_exception=False)
+
+        with patch("combat.round_manager.CombatRoundManager.get") as mock_get:
+            manager = MagicMock()
+            mock_get.return_value = manager
+            manager.get_combatant_combat.return_value = None
+
+            maybe_start_combat(self.char1, self.char2)
+
+            manager.start_combat.assert_called_with([self.char1, self.char2])
+            self.assertIs(self.char1.db.combat_target, self.char2)
+            self.assertIs(self.char2.db.combat_target, self.char1)
 
