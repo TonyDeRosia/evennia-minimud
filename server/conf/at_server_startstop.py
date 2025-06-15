@@ -62,6 +62,16 @@ def _migrate_experience():
         logger.log_info(f"Migrated experience on {migrated} characters")
 
 
+def _backfill_abilities():
+    """Ensure all characters know abilities for their current level."""
+    try:
+        from scripts.backfill_abilities import backfill
+    except Exception as err:
+        logger.log_err(f"Ability backfill failed to import: {err}")
+    else:
+        backfill()
+
+
 def at_server_init():
     """Called as the service layer initializes."""
 
@@ -113,6 +123,7 @@ def at_server_start():
                 npc.tags.add("npc_ai")
 
     _migrate_experience()
+    _backfill_abilities()
 
     _build_caches()
     ServerConfig.objects.conf("server_start_time", time.time())
