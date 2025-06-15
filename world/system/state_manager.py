@@ -308,7 +308,17 @@ def grant_ability(chara, ability: str, proficiency: int = 0, mark_new: bool = Fa
         if ability in keys:
             return
         proto = SPELLS[ability]
-        known.append(Spell(proto.key, proto.stat, proto.mana_cost, proto.desc, proto.cooldown, proficiency))
+        known.append(
+            Spell(
+                proto.key,
+                proto.stat,
+                proto.mana_cost,
+                proto.desc,
+                proto.cooldown,
+                proficiency,
+                proto.cast_type,
+            )
+        )
         chara.db.spells = known
         if mark_new:
             new_list = chara.db.new_spells or []

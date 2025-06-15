@@ -156,7 +156,15 @@ class CmdLearnSpell(Command):
         if (self.caller.db.practice_sessions or 0) <= 0:
             self.msg("You have no practice sessions left.")
             return
-        new_spell = Spell(spell.key, spell.stat, spell.mana_cost, spell.desc, 0)
+        new_spell = Spell(
+            spell.key,
+            spell.stat,
+            spell.mana_cost,
+            spell.desc,
+            0,
+            0,
+            spell.cast_type,
+        )
         spent, prof = proficiency_manager.practice(self.caller, new_spell)
         if spent:
             known.append(new_spell)
