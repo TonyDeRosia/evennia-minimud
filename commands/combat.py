@@ -93,6 +93,10 @@ class CmdAttack(Command):
         manager = CombatRoundManager.get()
         instance = manager.get_combatant_combat(self.caller)
 
+        if not instance:
+            self.msg("Combat has not been initialized.")
+            return
+
         if self.caller not in instance.combatants:
             if _current_hp(self.caller) <= 0:
                 self.msg("You are in no condition to fight.")
