@@ -409,6 +409,8 @@ Choose from `passive`, `aggressive`, `defensive`, `wander` or
 These options let builders quickly create enemies that fight or roam on
 their own. The combat command set includes `attack`, `wield`, `unwield`,
 `flee`, `berserk`, `respawn`, `revive` and `status`.
+Once learned, any skill may be triggered directly by its name, e.g.
+`kick goblin` will attempt to use the Kick ability on the target.
 
 ### Helper Utilities
 

@@ -6,6 +6,40 @@ from world.system import proficiency_manager
 from combat.combat_skills import SKILL_CLASSES
 from combat.round_manager import CombatRoundManager
 from combat.combat_actions import SkillAction
+from world.abilities import ABILITY_REGISTRY
+from .command import MuxCommand
+
+
+def iter_skill_commands():
+    """Yield dynamic MuxCommands for each registered skill ability."""
+    for ability in ABILITY_REGISTRY.values():
+        if getattr(ability, "class_type", "") != "skill":
+            continue
+        key = ability.name.lower()
+        class_name = "Cmd" + "".join(part.capitalize() for part in key.split())
+
+        def func(self, _skill=key):
+            caller = self.caller
+            if _skill not in (caller.db.skills or []):
+                self.msg("You do not know that ability.")
+                return
+            target_name = self.args.strip()
+            if target_name:
+                target = caller.search(target_name)
+                if not target:
+                    return
+            else:
+                target = caller.db.combat_target
+                if not target:
+                    self.msg("Use it on whom?")
+                    return
+            result = caller.use_skill(_skill, target=target)
+            if result and getattr(result, "message", None):
+                caller.location.msg_contents(result.message)
+
+        attrs = {"key": key, "help_category": "Combat", "func": func}
+        yield type(class_name, (MuxCommand,), attrs)
+
 
 
 class CmdSkills(Command):
@@ -113,3 +147,5 @@ class AbilityCmdSet(CmdSet):
         self.add(CmdSkills)
         self.add(CmdPractice)
         self.add(CmdUse)
+        for cmd in iter_skill_commands():
+            self.add(cmd())
