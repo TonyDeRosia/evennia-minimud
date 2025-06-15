@@ -4,25 +4,39 @@
         "desc": "A traveling merchant ready to trade goods.",
         "npc_type": "merchant",
         "typeclass": "typeclasses.npcs.MerchantNPC",
-        "roles": ["merchant"],
+        "roles": [
+            "merchant"
+        ],
         "ai_type": "passive",
         "gender": "neutral",
         "level": 1,
-        "actflags": ["call_for_help"],
-        "skills": ["appraise"],
-        "resistances": ["cold"]
+        "actflags": [
+            "call_for_help"
+        ],
+        "skills": [
+            "appraise"
+        ],
+        "resistances": [
+            "cold"
+        ]
     },
     "basic_questgiver": {
         "key": "quest giver",
         "desc": "A local seeking brave adventurers for help.",
         "npc_type": "questgiver",
         "typeclass": "typeclasses.npcs.QuestGiverNPC",
-        "roles": ["questgiver"],
+        "roles": [
+            "questgiver"
+        ],
         "ai_type": "passive",
         "gender": "neutral",
         "level": 1,
-        "actflags": ["call_for_help"],
-        "spells": ["cure light"],
+        "actflags": [
+            "call_for_help"
+        ],
+        "spells": [
+            "cure light"
+        ],
         "resistances": []
     },
     "basic_guard": {
@@ -30,13 +44,31 @@
         "desc": "A vigilant guard keeping watch over the streets.",
         "npc_type": "base",
         "typeclass": "typeclasses.npcs.CombatNPC",
-        "roles": ["guard"],
+        "roles": [
+            "guard"
+        ],
         "ai_type": "defensive",
         "gender": "male",
         "level": 1,
-        "actflags": ["assist", "call_for_help"],
-        "skills": ["shield bash"],
-        "spells": ["heal"],
-        "resistances": ["fire"]
+        "actflags": [
+            "assist",
+            "call_for_help"
+        ],
+        "skills": [
+            "shield bash"
+        ],
+        "spells": [
+            "heal"
+        ],
+        "resistances": [
+            "fire"
+        ]
+    },
+    "slime": {
+        "key": "slime",
+        "npc_type": "base",
+        "race": "human",
+        "level": 1,
+        "damage": 1
     }
 }
