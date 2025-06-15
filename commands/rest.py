@@ -97,6 +97,9 @@ class CmdLook(DefaultCmdLook):
 
     Example:
         look
+
+    Note:
+        If there are no rooms nearby, this command will not work.
     """
 
     aliases = ("l", "look in", "l in")
