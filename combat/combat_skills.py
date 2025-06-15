@@ -58,6 +58,8 @@ class ShieldBash(Skill):
     def resolve(self, user, target):
         if not getattr(target, "is_alive", lambda: True)():
             return CombatResult(actor=user, target=target, message="They are already down.")
+        # ensure combat starts before any hit or evade checks
+        maybe_start_combat(user, target)
         hit = stat_manager.check_hit(user, target)
         if hit:
             if roll_evade(user, target):
@@ -68,7 +70,6 @@ class ShieldBash(Skill):
                 )
             dmg = roll_damage(self.damage)
             target.hp = max(target.hp - dmg, 0)
-            maybe_start_combat(user, target)
             return CombatResult(
                 actor=user,
                 target=target,
@@ -94,13 +95,13 @@ class Cleave(Skill):
     def resolve(self, user, target):
         if not getattr(target, "is_alive", lambda: True)():
             return CombatResult(actor=user, target=target, message="They are already down.")
+        maybe_start_combat(user, target)
         if stat_manager.check_hit(user, target):
             if roll_evade(user, target):
                 msg = f"{user.key}'s cleave misses {target.key}."
             else:
                 dmg = roll_damage(self.damage)
                 target.hp = max(target.hp - dmg, 0)
-                maybe_start_combat(user, target)
                 msg = f"{user.key} cleaves {target.key} for {dmg} damage!"
         else:
             msg = f"{user.key}'s cleave misses {target.key}."
@@ -119,13 +120,13 @@ class Slash(Skill):
     def resolve(self, user, target):
         if not getattr(target, "is_alive", lambda: True)():
             return CombatResult(actor=user, target=target, message="They are already down.")
+        maybe_start_combat(user, target)
         if not stat_manager.check_hit(user, target):
             return CombatResult(actor=user, target=target, message=f"{user.key}'s slash misses {target.key}.")
         if roll_evade(user, target):
             return CombatResult(actor=user, target=target, message=f"{target.key} evades {user.key}'s slash.")
         dmg = roll_damage(self.damage)
         target.hp = max(target.hp - dmg, 0)
-        maybe_start_combat(user, target)
         return CombatResult(
             actor=user,
             target=target,
@@ -144,6 +145,7 @@ class Kick(Skill):
     def resolve(self, user, target):
         if not getattr(target, "is_alive", lambda: True)():
             return CombatResult(actor=user, target=target, message="They are already down.")
+        maybe_start_combat(user, target)
         if not stat_manager.check_hit(user, target):
             return CombatResult(actor=user, target=target, message=f"{user.key}'s kick misses {target.key}.")
         if roll_evade(user, target):
@@ -154,7 +156,6 @@ class Kick(Skill):
         prof = getattr(trait, "proficiency", 0)
         dmg = int(dmg * (1 + prof / 100))
         target.hp = max(target.hp - dmg, 0)
-        maybe_start_combat(user, target)
         return CombatResult(
             actor=user,
             target=target,
