@@ -44,6 +44,7 @@ class Character(ObjectParent, ClothedCharacter):
     spells = AttributeProperty([])
     training_points = AttributeProperty(0)
     practice_sessions = AttributeProperty(0)
+    ability_usage = AttributeProperty({})
 
     @property
     def in_combat(self):
@@ -635,6 +636,7 @@ class Character(ObjectParent, ClothedCharacter):
             state_manager.add_cooldown(self, skill.name, skill.cooldown)
             result = skill.resolve(self, target)
             from world.system import proficiency_manager
+
             skill_trait = self.traits.get(skill_name)
             proficiency_manager.record_use(self, skill_trait)
             for eff in skill.effects:
