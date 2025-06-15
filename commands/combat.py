@@ -4,7 +4,7 @@ from evennia import CmdSet
 from evennia.utils import iter_to_str
 from evennia.utils.evtable import EvTable
 from combat.engine import _current_hp
-from combat.combat_utils import maybe_start_combat
+from combat.combat_utils import start_or_get_combat
 
 from .command import Command
 from typeclasses.gear import BareHand
@@ -87,17 +87,8 @@ class CmdAttack(Command):
         # it's all good! let's get started!
         from combat.round_manager import CombatRoundManager
 
-        # Try to get existing combat instance first
         manager = CombatRoundManager.get()
-        instance = manager.get_combatant_combat(self.caller)
-
-        # If no instance exists, try to start combat and capture the result
-        if not instance:
-            try:
-                instance = maybe_start_combat(self.caller, target)
-            except Exception as e:
-                self.msg(f"Failed to initialize combat: {e}")
-                return
+        instance = start_or_get_combat(self.caller, target)
 
         # Final check - if combat still hasn't started, provide detailed error
         if not instance:

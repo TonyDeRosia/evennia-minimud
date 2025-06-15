@@ -1,8 +1,7 @@
 from random import choice
 from typeclasses.scripts import Script
 
-from combat.combat_utils import maybe_start_combat
-from combat.round_manager import CombatRoundManager
+from combat.combat_utils import start_or_get_combat
 from combat.combat_actions import AttackAction
 
 class BaseCombatAI(Script):
@@ -31,10 +30,7 @@ class BaseCombatAI(Script):
         if not npc or not target:
             return
         # Ensure combat has started and queue an attack action directly
-        instance = maybe_start_combat(npc, target)
-        if not instance:
-            manager = CombatRoundManager.get()
-            instance = manager.get_combatant_combat(npc)
+        instance = start_or_get_combat(npc, target)
         if instance:
             instance.engine.queue_action(npc, AttackAction(npc, target))
 
