@@ -104,6 +104,7 @@ class CombatInstance:
                         actor.db.in_combat = False
                     if hasattr(self.engine, "remove_participant"):
                         self.engine.remove_participant(actor)
+                    self.combatants.discard(actor)
         
         # Handle legacy fighter-based engines
         elif hasattr(self.engine, "fighters"):
@@ -114,6 +115,7 @@ class CombatInstance:
 
                 if _current_hp(fighter) <= 0:
                     fighter.db.in_combat = False
+                    self.combatants.discard(fighter)
                     continue
 
                 if not getattr(fighter, "in_combat", False):
