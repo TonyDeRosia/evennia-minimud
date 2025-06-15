@@ -21,6 +21,7 @@ from world.spells import Spell
 from combat.combat_actions import CombatResult
 from world.combat import get_health_description
 from combat import combat_utils
+from combat.combat_utils import maybe_start_combat
 
 from .objects import ObjectParent
 from world.mob_constants import BODYPARTS
@@ -694,6 +695,7 @@ class Character(ObjectParent, ClothedCharacter):
         self.traits.mana.current -= spell.mana_cost
         state_manager.add_cooldown(self, spell.key, spell.cooldown)
         if target:
+            maybe_start_combat(self, target)
             self.location.msg_contents(
                 f"{self.get_display_name(self)} casts {spell.key} at {target.get_display_name(self)}!"
             )

@@ -7,6 +7,7 @@ from typing import Optional, Iterable
 import logging
 
 from .actions.utils import calculate_damage, check_hit, apply_critical
+from .combat_utils import maybe_start_combat
 from world.system import stat_manager
 
 from evennia.utils import utils
@@ -117,6 +118,8 @@ class AttackAction(Action):
         target = self.target
         if not target:
             return CombatResult(self.actor, self.actor, "No target.")
+
+        maybe_start_combat(self.actor, target)
 
         weapon = self.actor
         if utils.inherits_from(self.actor, "typeclasses.characters.Character"):
