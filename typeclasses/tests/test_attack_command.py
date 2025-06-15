@@ -78,3 +78,25 @@ class TestAttackCommand(EvenniaTest):
             if isinstance(act, AttackAction)
         ]
         self.assertTrue(queued)
+
+    def test_kill_alias_starts_combat(self):
+        """Using the kill alias should initiate combat like attack."""
+        mob = create.create_object(BaseNPC, key="mob", location=self.room1)
+        self.char1.execute_cmd("kill mob")
+
+        self.assertEqual(self.char1.db.combat_target, mob)
+        self.assertEqual(mob.db.combat_target, self.char1)
+
+        from combat.round_manager import CombatRoundManager
+        from combat.combat_actions import AttackAction
+
+        manager = CombatRoundManager.get()
+        self.assertTrue(manager.combats)
+        engine = list(manager.combats.values())[0].engine
+        queued = any(
+            isinstance(act, AttackAction)
+            for p in engine.participants
+            for act in p.next_action
+        )
+        self.assertTrue(queued)
+
