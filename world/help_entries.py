@@ -3509,6 +3509,19 @@ Usage:
 """,
     },
     {
+        "key": "train",
+        "category": "General",
+        "text": """Help for train
+
+Spend practice sessions to improve a combat skill. Each session increases
+proficiency by 25% up to 75%. Skills improve from 75% to 100% through
+repeated use in combat.
+
+Usage:
+    train <sessions>
+""",
+    },
+    {
         "key": "spells",
         "category": "General",
         "text": """Help for spells
