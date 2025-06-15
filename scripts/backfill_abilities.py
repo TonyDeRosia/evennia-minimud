@@ -1,5 +1,11 @@
 """One-time script to grant characters any missing level-based abilities."""
 
+import os
+import django
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
+django.setup()
+
 from evennia.utils import logger
 from typeclasses.characters import Character
 from world.abilities import CLASS_ABILITY_TABLE
@@ -33,7 +39,4 @@ def backfill():
 
 
 if __name__ == "__main__":
-    import django
-
-    django.setup()
     backfill()
