@@ -634,6 +634,9 @@ class Character(ObjectParent, ClothedCharacter):
             self.traits.stamina.current -= skill.stamina_cost
             state_manager.add_cooldown(self, skill.name, skill.cooldown)
             result = skill.resolve(self, target)
+            from world.system import proficiency_manager
+            skill_trait = self.traits.get(skill_name)
+            proficiency_manager.record_use(self, skill_trait)
             for eff in skill.effects:
                 state_manager.add_status_effect(target, eff.key, eff.duration)
             return result
