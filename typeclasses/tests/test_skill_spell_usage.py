@@ -105,6 +105,24 @@ class TestSkillAndSpellUsage(EvenniaTest):
             self.assertIs(self.char1.db.combat_target, other1)
             self.assertIs(self.char2.db.combat_target, other2)
 
+    def test_maybe_start_combat_updates_missing_target(self):
+        """If only one fighter targets the other, both should after starting."""
+        from combat.combat_utils import maybe_start_combat
+
+        self.char1.db.combat_target = self.char2
+        self.char2.db.combat_target = None
+
+        with patch("combat.combat_utils.CombatRoundManager.get") as mock_get:
+            manager = MagicMock()
+            mock_get.return_value = manager
+            manager.get_combatant_combat.return_value = None
+
+            maybe_start_combat(self.char1, self.char2)
+
+            manager.start_combat.assert_called_with([self.char1, self.char2])
+            self.assertIs(self.char1.db.combat_target, self.char2)
+            self.assertIs(self.char2.db.combat_target, self.char1)
+
     def test_use_skill_sets_combat_targets(self):
         """Using a skill should set combat_target on both combatants."""
         with patch("combat.combat_utils.CombatRoundManager.get") as mock_get, \

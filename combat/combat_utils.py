@@ -285,9 +285,7 @@ def maybe_start_combat(user, target) -> None:
         try:
             u_cur = getattr(udb, "combat_target", None)
             t_cur = getattr(tdb, "combat_target", None)
-            if (u_cur is None and t_cur is None) or (
-                u_cur is target and t_cur is user
-            ):
+            if (u_cur in (None, target)) and (t_cur in (None, user)):
                 udb.combat_target = target
                 tdb.combat_target = user
         except Exception:  # pragma: no cover - defensive
