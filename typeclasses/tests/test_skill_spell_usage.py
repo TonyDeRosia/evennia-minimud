@@ -87,6 +87,8 @@ class TestSkillAndSpellUsage(EvenniaTest):
             self.assertIs(result, manager.start_combat.return_value)
             self.assertEqual(self.char1.db.combat_target, self.char2)
             self.assertEqual(self.char2.db.combat_target, self.char1)
+            self.assertTrue(self.char1.db.in_combat)
+            self.assertTrue(self.char2.db.in_combat)
 
     def test_maybe_start_combat_preserves_existing_targets(self):
         """Existing combat_target settings pointing elsewhere are kept."""
@@ -163,4 +165,32 @@ class TestSkillAndSpellUsage(EvenniaTest):
             self.assertIs(result, manager.start_combat.return_value)
             self.assertIs(self.char1.db.combat_target, self.char2)
             self.assertIs(self.char2.db.combat_target, self.char1)
+
+    def test_maybe_start_combat_records_missing_location(self):
+        """Missing user or target location should record an error."""
+        from combat.combat_utils import maybe_start_combat
+
+        with patch("combat.round_manager.CombatRoundManager.get") as mock_get:
+            manager = MagicMock()
+            mock_get.return_value = manager
+            manager.get_combatant_combat.return_value = None
+
+            self.char2.location = None
+            result = maybe_start_combat(self.char1, self.char2)
+
+            self.assertIsNone(result)
+            self.assertEqual(manager.last_error, "Target has no location")
+            manager.start_combat.assert_not_called()
+
+        with patch("combat.round_manager.CombatRoundManager.get") as mock_get:
+            manager = MagicMock()
+            mock_get.return_value = manager
+            manager.get_combatant_combat.return_value = None
+
+            self.char1.location = None
+            result = maybe_start_combat(self.char1, self.char2)
+
+            self.assertIsNone(result)
+            self.assertEqual(manager.last_error, "User has no location")
+            manager.start_combat.assert_not_called()
 
