@@ -257,7 +257,8 @@ class CombatRoundManager:
 
         try:
             from .engine import CombatEngine
-            engine = CombatEngine(fighters, round_time=None)
+            eng_round_time = self.tick_delay if round_time is None else round_time
+            engine = CombatEngine(fighters, round_time=eng_round_time)
         except Exception as err:
             logger.log_err(f"CombatEngine initialization failed: {err}")
             self.last_error = str(err)
@@ -271,7 +272,8 @@ class CombatRoundManager:
         combat_id = self._next_id
         self._next_id += 1
 
-        inst = CombatInstance(combat_id, engine, set(fighters), round_time or self.tick_delay)
+        inst_round_time = self.tick_delay if round_time is None else round_time
+        inst = CombatInstance(combat_id, engine, set(fighters), inst_round_time)
         self.combats[combat_id] = inst
         for fighter in fighters:
             self.combatant_to_combat[fighter] = combat_id
