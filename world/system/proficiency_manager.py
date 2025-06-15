@@ -55,23 +55,27 @@ def practice(chara, prof_obj: Any, sessions: int = 1) -> Tuple[int, int]:
 
 
 def record_use(chara, prof_obj: Any) -> int:
-    """Record usage of ``prof_obj`` and raise proficiency.
+    """Record usage of ``prof_obj`` and apply guaranteed gains."""
 
-    Args:
-        chara: Character using the skill or spell.
-        prof_obj: Object with a ``proficiency`` attribute.
-
-    Returns:
-        int: New proficiency value.
-    """
-
-    if prof_obj is None:
+    if not prof_obj:
         return 0
 
+    key = getattr(prof_obj, "key", getattr(prof_obj, "name", None))
+    if not key:
+        return _get_prof(prof_obj)
+
+    usage = chara.db.ability_usage or {}
+    count = usage.get(key, 0) + 1
+    usage[key] = count
+    chara.db.ability_usage = usage
+
     prof = _get_prof(prof_obj)
-    if prof >= USE_CAP:
-        return prof
-    gain = 1 + scaling_bonus(chara)
-    prof = min(USE_CAP, prof + gain)
-    _set_prof(prof_obj, prof)
+
+    if count >= 25:
+        if prof < USE_CAP:
+            prof = min(USE_CAP, prof + 1)
+            _set_prof(prof_obj, prof)
+        usage[key] = 0
+        chara.db.ability_usage = usage
+
     return prof
