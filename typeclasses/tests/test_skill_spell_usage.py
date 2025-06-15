@@ -42,3 +42,16 @@ class TestSkillAndSpellUsage(EvenniaTest):
         self.assertEqual(self.char2.hp, 10)
         self.assertIn("misses", result.message)
 
+    def test_use_skill_records_proficiency(self):
+        from world.system import state_manager
+        from combat.combat_actions import CombatResult
+        from combat.combat_skills import Cleave
+
+        state_manager.grant_ability(self.char1, "cleave", mark_new=False)
+
+        with patch("world.system.proficiency_manager.record_use") as mock_rec, \
+             patch.object(Cleave, "resolve", return_value=CombatResult(actor=self.char1, target=self.char2, message="hit")):
+            self.char1.use_skill("cleave", target=self.char2)
+            skill_trait = self.char1.traits.get("cleave")
+            mock_rec.assert_called_with(self.char1, skill_trait)
+
