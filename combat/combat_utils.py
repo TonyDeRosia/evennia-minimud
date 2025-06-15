@@ -280,19 +280,15 @@ def maybe_start_combat(user, target) -> None:
     mgr.start_combat([user, target])
 
     udb = getattr(user, "db", None)
-    if udb is not None:
-        try:
-            cur = getattr(udb, "combat_target", None)
-            if cur in (None, target):
-                udb.combat_target = target
-        except Exception:  # pragma: no cover - defensive
-            pass
-
     tdb = getattr(target, "db", None)
-    if tdb is not None:
+    if udb is not None and tdb is not None:
         try:
-            cur = getattr(tdb, "combat_target", None)
-            if cur in (None, user):
+            u_cur = getattr(udb, "combat_target", None)
+            t_cur = getattr(tdb, "combat_target", None)
+            if (u_cur is None and t_cur is None) or (
+                u_cur is target and t_cur is user
+            ):
+                udb.combat_target = target
                 tdb.combat_target = user
         except Exception:  # pragma: no cover - defensive
             pass

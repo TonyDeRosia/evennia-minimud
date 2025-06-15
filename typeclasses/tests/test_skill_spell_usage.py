@@ -105,3 +105,19 @@ class TestSkillAndSpellUsage(EvenniaTest):
             self.assertIs(self.char1.db.combat_target, other1)
             self.assertIs(self.char2.db.combat_target, other2)
 
+    def test_use_skill_sets_combat_targets(self):
+        """Using a skill should set combat_target on both combatants."""
+        with patch("combat.combat_utils.CombatRoundManager.get") as mock_get, \
+             patch("world.system.stat_manager.check_hit", return_value=True), \
+             patch("combat.combat_skills.roll_evade", return_value=False), \
+             patch("combat.combat_skills.roll_damage", return_value=1):
+            manager = MagicMock()
+            mock_get.return_value = manager
+            manager.get_combatant_combat.return_value = None
+
+            self.char1.use_skill("cleave", target=self.char2)
+
+            manager.start_combat.assert_called_with([self.char1, self.char2])
+            self.assertEqual(self.char1.db.combat_target, self.char2)
+            self.assertEqual(self.char2.db.combat_target, self.char1)
+
