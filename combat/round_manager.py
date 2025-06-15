@@ -342,7 +342,9 @@ class CombatRoundManager:
                     remove.append(cid)
                     continue
 
-                inst.process_round()
+                elapsed = time.time() - inst.last_round_time
+                if elapsed >= inst.round_time:
+                    inst.process_round()
 
                 if inst.combat_ended:
                     remove.append(cid)
