@@ -1,4 +1,5 @@
 from random import choice
+import re
 from evennia import CmdSet
 from evennia.utils import iter_to_str
 from evennia.utils.evtable import EvTable
@@ -29,15 +30,17 @@ class CmdAttack(Command):
         """
         self.args = self.args.strip()
 
-        # split on variations of "with"
-        if " with " in self.args:
-            self.target, self.weapon = self.args.split(" with ", maxsplit=1)
-        elif " w " in self.args:
-            self.target, self.weapon = self.args.split(" w ", maxsplit=1)
-        elif " w/" in self.args:
-            self.target, self.weapon = self.args.split(" w/", maxsplit=1)
+        target, sep, weapon = self.args.partition(" with ")
+        if sep:
+            self.target = target.strip()
+            self.weapon = weapon.strip()
+            return
+
+        match = re.match(r"^(?P<target>.+?)\s+w(?:/)?(?:\s+)?(?P<weapon>.+)$", self.args, re.I)
+        if match:
+            self.target = match.group("target").strip()
+            self.weapon = match.group("weapon").strip()
         else:
-            # no splitters, it's all target
             self.target = self.args
             self.weapon = None
 
