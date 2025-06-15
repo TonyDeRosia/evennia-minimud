@@ -3,6 +3,7 @@ from evennia import CmdSet
 from evennia.utils import iter_to_str
 from evennia.utils.evtable import EvTable
 from combat.engine import _current_hp
+from combat.combat_utils import maybe_start_combat
 
 from .command import Command
 from typeclasses.gear import BareHand
@@ -102,6 +103,8 @@ class CmdAttack(Command):
 
         from combat import AttackAction
         instance.engine.queue_action(self.caller, AttackAction(self.caller, target))
+        # ensure combat starts even if not already active
+        maybe_start_combat(self.caller, target)
 
 
     def at_post_cmd(self):
