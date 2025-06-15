@@ -45,6 +45,7 @@ from commands.admin import AdminCmdSet, BuilderCmdSet
 from commands.quests import QuestCmdSet
 from commands.achievements import AchievementCmdSet
 from commands.spells import SpellCmdSet
+from commands.abilities import AbilityCmdSet
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -74,6 +75,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(XYZGridCmdSet)
         self.add(CmdCraft)
         self.add(CombatCmdSet)
+        self.add(AbilityCmdSet)
         self.add(SkillCmdSet)
         self.add(SpellCmdSet)
         self.add(InteractCmdSet)
