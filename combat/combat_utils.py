@@ -315,3 +315,29 @@ def maybe_start_combat(user, target):
 
     return instance
 
+
+def start_or_get_combat(caller, target):
+    """Return an existing combat or start a new one.
+
+    Parameters
+    ----------
+    caller
+        Character attempting to engage in combat.
+    target
+        The intended opponent.
+
+    Returns
+    -------
+    CombatInstance | None
+        An active combat instance involving ``caller`` and ``target`` or
+        ``None`` if combat could not be started.
+    """
+
+    from .round_manager import CombatRoundManager
+
+    manager = CombatRoundManager.get()
+    instance = manager.get_combatant_combat(caller)
+    if instance:
+        return instance
+    return maybe_start_combat(caller, target)
+

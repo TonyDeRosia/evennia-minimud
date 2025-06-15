@@ -170,11 +170,11 @@ class TestAttackCommand(AttackCommandTestBase):
 
     @patch("combat.round_manager.delay")
     def test_attack_uses_returned_instance(self, _):
-        """Attack command should use the instance returned by maybe_start_combat."""
+        """Attack command should use the instance returned by start_or_get_combat."""
         mock_engine = MagicMock()
         inst = MagicMock(engine=mock_engine, combatants={self.char1, self.char2})
         with patch(
-            "commands.combat.maybe_start_combat", return_value=inst
+            "commands.combat.start_or_get_combat", return_value=inst
         ) as mock_start, patch("commands.combat.CombatRoundManager.get") as mock_get, patch(
             "commands.combat.AttackAction"
         ):
