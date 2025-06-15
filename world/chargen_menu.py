@@ -321,6 +321,8 @@ def menunode_finish(caller, **kwargs):
     abilities = CLASS_ABILITY_TABLE.get(char.db.charclass, {}).get(1, [])
     for ability in abilities:
         state_manager.grant_ability(char, ability, proficiency=25, mark_new=False)
+    # ensure everyone knows kick
+    state_manager.grant_ability(char, "kick", proficiency=25, mark_new=False)
 
     # assign the newly created character to this account
     account = getattr(caller, "account", None) or getattr(caller, "dbobj", caller)
