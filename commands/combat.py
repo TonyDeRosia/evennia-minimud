@@ -94,6 +94,11 @@ class CmdAttack(Command):
         instance = manager.get_combatant_combat(self.caller)
 
         if not instance:
+            # ensure combat starts for attack/kill aliases
+            maybe_start_combat(self.caller, target)
+            instance = manager.get_combatant_combat(self.caller)
+
+        if not instance:
             self.msg("Combat has not been initialized.")
             return
 
@@ -110,7 +115,6 @@ class CmdAttack(Command):
 
         from combat import AttackAction
         instance.engine.queue_action(self.caller, AttackAction(self.caller, target))
-
 
     def at_post_cmd(self):
         """
@@ -267,6 +271,7 @@ class CmdFlee(Command):
         flee_dir = choice(exits)
         self.execute_cmd(flee_dir.name)
 
+
 class CmdBerserk(Command):
     """Enter a furious rage, increasing your strength temporarily."""
 
@@ -388,8 +393,17 @@ class CmdRevive(Command):
 
 
 class CmdStatus(Command):
+    """
+    Display status information for yourself or a target.
+
+    Usage:
+        status
+        status <target>
+    """
+
     key = "status"
     aliases = ("hp", "stat")
+    help_category = "Combat"
 
     def func(self):
         if not self.args:
@@ -407,9 +421,16 @@ class CmdStatus(Command):
 
 
 class CombatCmdSet(CmdSet):
+    """
+    Command set containing all combat-related commands.
+    """
+
     key = "Combat CmdSet"
 
     def at_cmdset_creation(self):
+        """
+        Add all combat commands to the command set.
+        """
         super().at_cmdset_creation()
 
         self.add(CmdAttack)
