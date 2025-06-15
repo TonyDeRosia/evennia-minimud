@@ -9,20 +9,23 @@ from world.system import state_manager
 
 
 class CmdSkills(Command):
-    """List known skills and proficiency."""
+    """Display known skills and current proficiency."""
 
     key = "skills"
 
     def func(self):
-        known = self.caller.db.skills or []
+        caller = self.caller
+        known = caller.db.skills or []
         if not known:
-            self.msg("You do not know any skills.")
+            caller.msg("|rYou do not know any skills.|n")
             return
+
         table = EvTable("Skill", "Proficiency")
-        profs = self.caller.db.proficiencies or {}
-        for sk in known:
-            table.add_row(sk, f"{profs.get(sk, 0)}%")
-        self.msg(str(table))
+        profs = caller.db.proficiencies or {}
+        for skill in sorted(known):
+            table.add_row(skill, f"{profs.get(skill, 0)}%")
+
+        caller.msg(str(table))
 
 
 class CmdKick(Command):

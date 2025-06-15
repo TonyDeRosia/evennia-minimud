@@ -20,11 +20,11 @@ SKILL_DICT = {
 class CmdStatSheet(Command):
     """
     View your character's current stats and known skills.
-    (aliases: "sheet", "skills")
+    (alias: "sheet")
     """
 
     key = "stats"
-    aliases = ("sheet", "skills")
+    aliases = ("sheet",)
 
     def func(self):
         caller = self.caller
