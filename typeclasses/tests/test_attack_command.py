@@ -1,13 +1,13 @@
 from unittest.mock import MagicMock, patch
 from django.test import override_settings
 from evennia.utils import create
-from evennia.utils.test_resources import EvenniaTest
+from .base import AttackCommandTestBase
 from typeclasses.npcs import BaseNPC
 from commands.combat import CombatCmdSet
 
 
 @override_settings(DEFAULT_HOME=None)
-class TestAttackCommand(EvenniaTest):
+class TestAttackCommand(AttackCommandTestBase):
     def setUp(self):
         super().setUp()
         self.char1.msg = MagicMock()
