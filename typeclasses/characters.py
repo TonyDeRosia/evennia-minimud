@@ -695,7 +695,7 @@ class Character(ObjectParent, ClothedCharacter):
         self.traits.mana.current -= spell.mana_cost
         state_manager.add_cooldown(self, spell.key, spell.cooldown)
         if target:
-            maybe_start_combat(self, target)
+            instance = maybe_start_combat(self, target)
             self.location.msg_contents(
                 f"{self.get_display_name(self)} casts {spell.key} at {target.get_display_name(self)}!"
             )
@@ -710,7 +710,7 @@ class Character(ObjectParent, ClothedCharacter):
         if new_prof != prev_prof:
             self.db.spells = known
         if target:
-            combat_utils.maybe_start_combat(self, target)
+            instance2 = combat_utils.maybe_start_combat(self, target)
         return True
 
     def get_display_status(self, looker, **kwargs):

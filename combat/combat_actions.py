@@ -119,7 +119,7 @@ class AttackAction(Action):
         if not target:
             return CombatResult(self.actor, self.actor, "No target.")
 
-        maybe_start_combat(self.actor, target)
+        instance = maybe_start_combat(self.actor, target)
 
         weapon = self.actor
         if utils.inherits_from(self.actor, "typeclasses.characters.Character"):

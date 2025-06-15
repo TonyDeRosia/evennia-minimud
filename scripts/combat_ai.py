@@ -31,9 +31,10 @@ class BaseCombatAI(Script):
         if not npc or not target:
             return
         # Ensure combat has started and queue an attack action directly
-        maybe_start_combat(npc, target)
-        manager = CombatRoundManager.get()
-        instance = manager.get_combatant_combat(npc)
+        instance = maybe_start_combat(npc, target)
+        if not instance:
+            manager = CombatRoundManager.get()
+            instance = manager.get_combatant_combat(npc)
         if instance:
             instance.engine.queue_action(npc, AttackAction(npc, target))
 

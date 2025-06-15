@@ -81,9 +81,10 @@ class TestSkillAndSpellUsage(EvenniaTest):
             mock_get.return_value = manager
             manager.get_combatant_combat.return_value = None
 
-            maybe_start_combat(self.char1, self.char2)
+            result = maybe_start_combat(self.char1, self.char2)
 
             manager.start_combat.assert_called_with([self.char1, self.char2])
+            self.assertIs(result, manager.start_combat.return_value)
             self.assertEqual(self.char1.db.combat_target, self.char2)
             self.assertEqual(self.char2.db.combat_target, self.char1)
 
@@ -101,9 +102,10 @@ class TestSkillAndSpellUsage(EvenniaTest):
             mock_get.return_value = manager
             manager.get_combatant_combat.return_value = None
 
-            maybe_start_combat(self.char1, self.char2)
+            result = maybe_start_combat(self.char1, self.char2)
 
             manager.start_combat.assert_called_with([self.char1, self.char2])
+            self.assertIs(result, manager.start_combat.return_value)
             self.assertIs(self.char1.db.combat_target, other1)
             self.assertIs(self.char2.db.combat_target, other2)
 
@@ -119,9 +121,10 @@ class TestSkillAndSpellUsage(EvenniaTest):
             mock_get.return_value = manager
             manager.get_combatant_combat.return_value = None
 
-            maybe_start_combat(self.char1, self.char2)
+            result = maybe_start_combat(self.char1, self.char2)
 
             manager.start_combat.assert_called_with([self.char1, self.char2])
+            self.assertIs(result, manager.start_combat.return_value)
             self.assertIs(self.char1.db.combat_target, self.char2)
             self.assertIs(self.char2.db.combat_target, self.char1)
 
@@ -154,9 +157,10 @@ class TestSkillAndSpellUsage(EvenniaTest):
             mock_get.return_value = manager
             manager.get_combatant_combat.return_value = None
 
-            maybe_start_combat(self.char1, self.char2)
+            result = maybe_start_combat(self.char1, self.char2)
 
             manager.start_combat.assert_called_with([self.char1, self.char2])
+            self.assertIs(result, manager.start_combat.return_value)
             self.assertIs(self.char1.db.combat_target, self.char2)
             self.assertIs(self.char2.db.combat_target, self.char1)
 
