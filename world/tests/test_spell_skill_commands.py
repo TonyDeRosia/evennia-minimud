@@ -24,3 +24,11 @@ class TestSpellAndSkillCommands(EvenniaTest):
             self.char1.execute_cmd(f"kick {self.char2.key}")
             mock_use.assert_called_with("kick", target=self.char2)
             self.char1.location.msg_contents.assert_called_with("hit")
+
+    def test_auto_skill_command_generated_for_skill_classes(self):
+        self.char1.db.skills.append("cleave")
+        self.char1.location.msg_contents.reset_mock()
+        with patch.object(self.char1, "use_skill", return_value=MagicMock(message="hit")) as mock_use:
+            self.char1.execute_cmd(f"cleave {self.char2.key}")
+            mock_use.assert_called_with("cleave", target=self.char2)
+            self.char1.location.msg_contents.assert_called_with("hit")

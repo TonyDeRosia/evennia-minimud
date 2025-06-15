@@ -12,6 +12,7 @@ SKILL_DICT = {
     "swords": "STR",
     "cooking": "WIS",
     "carving": "STR",
+    "slash": "STR",
     "kick": "STR",
     "unarmed": "DEX",
     "leatherwork": "WIS",

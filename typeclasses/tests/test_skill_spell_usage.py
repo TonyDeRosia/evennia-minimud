@@ -55,3 +55,11 @@ class TestSkillAndSpellUsage(EvenniaTest):
             skill_trait = self.char1.traits.get("cleave")
             mock_rec.assert_called_with(self.char1, skill_trait)
 
+    def test_skill_use_starts_combat(self):
+        with patch("combat.combat_skills.maybe_start_combat") as mock_start, \
+             patch("world.system.stat_manager.check_hit", return_value=True), \
+             patch("combat.combat_skills.roll_evade", return_value=False), \
+             patch("combat.combat_skills.roll_damage", return_value=3):
+            self.char1.use_skill("cleave", target=self.char2)
+            mock_start.assert_called_with(self.char1, self.char2)
+

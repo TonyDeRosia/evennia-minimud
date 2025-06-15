@@ -107,6 +107,33 @@ class Cleave(Skill):
         return CombatResult(actor=user, target=target, message=msg)
 
 
+class Slash(Skill):
+    """Basic slashing attack."""
+
+    name = "slash"
+    category = SkillCategory.MELEE
+    damage = (2, 4)
+    stamina_cost = 10
+    cooldown = 4
+
+    def resolve(self, user, target):
+        if not getattr(target, "is_alive", lambda: True)():
+            return CombatResult(actor=user, target=target, message="They are already down.")
+        if not stat_manager.check_hit(user, target):
+            return CombatResult(actor=user, target=target, message=f"{user.key}'s slash misses {target.key}.")
+        if roll_evade(user, target):
+            return CombatResult(actor=user, target=target, message=f"{target.key} evades {user.key}'s slash.")
+        dmg = roll_damage(self.damage)
+        target.hp = max(target.hp - dmg, 0)
+        maybe_start_combat(user, target)
+        return CombatResult(
+            actor=user,
+            target=target,
+            message=f"{user.key} slashes {target.key} for {dmg} damage!",
+            damage=dmg,
+        )
+
+
 class Kick(Skill):
     """Simple unarmed kick scaling with Strength."""
 
@@ -140,5 +167,6 @@ class Kick(Skill):
 SKILL_CLASSES: Dict[str, type[Skill]] = {
     "shield bash": ShieldBash,
     "cleave": Cleave,
+    "slash": Slash,
     "kick": Kick,
 }

@@ -11,11 +11,13 @@ from .command import MuxCommand
 
 
 def iter_skill_commands():
-    """Yield dynamic MuxCommands for each registered skill ability."""
+    """Yield dynamic MuxCommands for each known combat skill."""
+    keys = set()
     for ability in ABILITY_REGISTRY.values():
-        if getattr(ability, "class_type", "") != "skill":
-            continue
-        key = ability.name.lower()
+        if getattr(ability, "class_type", "") == "skill":
+            keys.add(ability.name.lower())
+    keys.update(SKILL_CLASSES.keys())
+    for key in keys:
         class_name = "Cmd" + "".join(part.capitalize() for part in key.split())
 
         def func(self, _skill=key):
