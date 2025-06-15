@@ -87,34 +87,60 @@ class CmdAttack(Command):
         # it's all good! let's get started!
         from combat.round_manager import CombatRoundManager
 
-        # ensure combat has begun and combat_target attributes are set
-        maybe_start_combat(self.caller, target)
-
+        # Try to get existing combat instance first
         manager = CombatRoundManager.get()
         instance = manager.get_combatant_combat(self.caller)
 
+        # If no instance exists, try to start combat
         if not instance:
-            # ensure combat starts for attack/kill aliases
-            maybe_start_combat(self.caller, target)
-            instance = manager.get_combatant_combat(self.caller)
+            try:
+                # ensure combat has begun and combat_target attributes are set
+                maybe_start_combat(self.caller, target)
+                instance = manager.get_combatant_combat(self.caller)
+            except Exception as e:
+                self.msg(f"Failed to initialize combat: {e}")
+                return
 
+        # Final check - if combat still hasn't started, provide detailed error
         if not instance:
-            self.msg("Combat has not been initialized.")
+            # Try to determine why combat isn't starting
+            if not hasattr(self.caller, 'in_combat'):
+                self.msg("Error: Character lacks combat capabilities.")
+            elif not hasattr(target, 'db') or not hasattr(target, 'get_display_name'):
+                self.msg("Error: Invalid target for combat.")
+            else:
+                self.msg("Error: Combat system failed to initialize. Check combat configuration.")
             return
 
+        # Verify caller is actually in the combat instance
         if self.caller not in instance.combatants:
             if _current_hp(self.caller) <= 0:
                 self.msg("You are in no condition to fight.")
+                return
             else:
-                self.msg("You can't fight right now.")
-            return
+                # Try to add caller to combat if they're not already in it
+                try:
+                    if hasattr(instance, 'add_combatant'):
+                        instance.add_combatant(self.caller)
+                    else:
+                        self.msg("You can't fight right now.")
+                        return
+                except Exception:
+                    self.msg("You can't fight right now.")
+                    return
 
+        # Check if target is valid and alive
         if getattr(target, "pk", None) is None:
             self.msg(f"{target.get_display_name(self.caller)} is already dead.")
             return
 
-        from combat import AttackAction
-        instance.engine.queue_action(self.caller, AttackAction(self.caller, target))
+        # Queue the attack action
+        try:
+            from combat import AttackAction
+            instance.engine.queue_action(self.caller, AttackAction(self.caller, target))
+        except Exception as e:
+            self.msg(f"Failed to queue attack: {e}")
+            return
 
     def at_post_cmd(self):
         """
