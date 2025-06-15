@@ -291,3 +291,67 @@ def test_haste_grants_extra_attacks():
 
     assert defender.hp == 8
 
+
+def test_haste_extra_attack_not_per_action():
+    attacker = Dummy()
+    defender = Dummy()
+    attacker.location = defender.location
+    attacker.db.natural_weapon = {"damage": 1, "damage_type": DamageType.BLUDGEONING}
+
+    engine = CombatEngine([attacker, defender], round_time=0)
+    engine.queue_action(attacker, AttackAction(attacker, defender))
+    engine.queue_action(attacker, AttackAction(attacker, defender))
+
+    with (
+        patch("combat.combat_actions.utils.inherits_from", return_value=True),
+        patch("world.system.state_manager.apply_regen"),
+        patch("world.system.state_manager.get_effective_stat") as mock_get,
+        patch("evennia.utils.delay"),
+        patch("combat.combat_utils.roll_evade", return_value=False),
+        patch("world.system.stat_manager.randint", return_value=1),
+    ):
+
+        def getter(obj, stat):
+            if obj is attacker and stat == "haste":
+                return 55
+            return 0
+
+        mock_get.side_effect = getter
+
+        engine.start_round()
+        engine.process_round()
+
+    assert defender.hp == 7
+
+
+def test_haste_extra_attacks_capped_at_max():
+    attacker = Dummy()
+    defender = Dummy()
+    attacker.location = defender.location
+    attacker.db.natural_weapon = {"damage": 1, "damage_type": DamageType.BLUDGEONING}
+
+    engine = CombatEngine([attacker, defender], round_time=0)
+    for _ in range(3):
+        engine.queue_action(attacker, AttackAction(attacker, defender))
+
+    with (
+        patch("combat.combat_actions.utils.inherits_from", return_value=True),
+        patch("world.system.state_manager.apply_regen"),
+        patch("world.system.state_manager.get_effective_stat") as mock_get,
+        patch("evennia.utils.delay"),
+        patch("combat.combat_utils.roll_evade", return_value=False),
+        patch("world.system.stat_manager.randint", return_value=1),
+    ):
+
+        def getter(obj, stat):
+            if obj is attacker and stat == "haste":
+                return 300
+            return 0
+
+        mock_get.side_effect = getter
+
+        engine.start_round()
+        engine.process_round()
+
+    assert defender.hp == 4
+

@@ -74,6 +74,13 @@ class TurnManager:
     # action gathering
     # -------------------------------------------------------------
     def gather_actions(self) -> list[tuple[int, int, int, CombatParticipant, Action]]:
+        """Return a sorted list of actions for this round.
+
+        Extra attacks granted by the ``haste`` stat are calculated once per
+        participant and the total number of :class:`~combat.combat_actions.AttackAction`
+        instances will never exceed ``MAX_ATTACKS_PER_ROUND``.
+        """
+
         actions: list[tuple[int, int, int, CombatParticipant, Action]] = []
         for participant in list(self.queue):
             actor = participant.actor
@@ -98,16 +105,26 @@ class TurnManager:
                     if hasattr(actor, "msg"):
                         actor.msg("You hesitate, unsure of what to do.")
 
+            attack_actions = []
+            filtered: list[Action] = []
+            for action in queued:
+                if isinstance(action, AttackAction):
+                    if len(attack_actions) < MAX_ATTACKS_PER_ROUND:
+                        attack_actions.append(action)
+                        filtered.append(action)
+                else:
+                    filtered.append(action)
+
+            queued = filtered
+
             haste = state_manager.get_effective_stat(actor, "haste")
             extra = max(0, haste // HASTE_PER_EXTRA_ATTACK)
-            extra = min(extra, MAX_ATTACKS_PER_ROUND - 1)
-            if extra and queued:
-                extras: list[Action] = []
-                for action in queued:
-                    if isinstance(action, AttackAction):
-                        for _ in range(extra):
-                            extras.append(AttackAction(actor, action.target))
-                queued.extend(extras)
+            extra = min(extra, MAX_ATTACKS_PER_ROUND - len(attack_actions))
+
+            if extra and attack_actions:
+                targets = [a.target for a in attack_actions]
+                for i in range(extra):
+                    queued.append(AttackAction(actor, targets[i % len(targets)]))
 
             for idx, action in enumerate(queued):
                 actions.append(
