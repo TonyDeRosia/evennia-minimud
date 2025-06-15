@@ -3,13 +3,17 @@
 import os
 import django
 
+# 👇 Add this line to set the Django settings module
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
+
+# 👇 Setup Django environment
 django.setup()
 
+from evennia.utils import logger
 from typeclasses.characters import Character
 from world.abilities import CLASS_ABILITY_TABLE
 from world.system import state_manager
-from evennia.utils import logger  # <- move this below setup
+
 
 def backfill():
     """Grant abilities unlocked by level to all characters."""
