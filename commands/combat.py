@@ -117,6 +117,14 @@ class CmdAttack(Command):
         display_auto_prompt(self.account, self.caller, self.msg)
 
 
+class CmdKill(CmdAttack):
+    """Attack shortcut command using 'kill' syntax."""
+
+    key = "kill"
+    aliases = ("k",)
+    help_category = CmdAttack.help_category
+
+
 class CmdWield(Command):
     """
     Wield a weapon. Usage: wield <weapon> [in <hand>]
@@ -401,6 +409,7 @@ class CombatCmdSet(CmdSet):
         super().at_cmdset_creation()
 
         self.add(CmdAttack)
+        self.add(CmdKill)
         self.add(CmdFlee)
         self.add(CmdBerserk)
         self.add(CmdWield)
