@@ -145,3 +145,26 @@ class TestAttackCommand(AttackCommandTestBase):
         self._assert_combat_targets_set(self.char1, self.char2)
         self._assert_combat_initiated()
 
+    @patch("combat.round_manager.delay")
+    def test_attack_separator_variants(self, _):
+        """Separators 'with', 'w' and 'w/' should all parse correctly."""
+        weapon = create.create_object(
+            "typeclasses.gear.MeleeWeapon", key="sword", location=self.char1
+        )
+        weapon.tags.add("equipment", category="flag")
+        weapon.tags.add("identified", category="flag")
+
+        for sep in ("with", "w", "w/"):
+            cmd = f"attack char2 {sep} sword"
+            self.char1.execute_cmd(cmd)
+            self._assert_combat_targets_set(self.char1, self.char2)
+            self._assert_combat_initiated(actor=self.char1)
+
+            from combat.round_manager import CombatRoundManager
+
+            manager = CombatRoundManager.get()
+            manager.combats.clear()
+            manager.combatant_to_combat.clear()
+            self.char1.db.combat_target = None
+            self.char2.db.combat_target = None
+
