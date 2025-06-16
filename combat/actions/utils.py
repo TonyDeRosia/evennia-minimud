@@ -81,6 +81,22 @@ def calculate_damage(attacker, weapon, target) -> Tuple[int, object]:
 
         dmg += dmg_bonus
 
+        # Apply unarmed skill bonuses when no weapon is wielded
+        unarmed = not getattr(attacker, "wielding", [])
+        if unarmed:
+            from world.skills.unarmed_passive import Unarmed
+            from world.skills.hand_to_hand import HandToHand
+
+            dmg_bonus_pct = 0.0
+            skills = getattr(getattr(attacker, "db", None), "skills", []) or []
+            for cls in (Unarmed, HandToHand):
+                if cls.name in skills:
+                    skill = cls()
+                    dmg_bonus_pct += skill.damage_bonus(attacker)
+
+            if dmg_bonus_pct:
+                dmg = int(round(dmg * (1 + dmg_bonus_pct / 100)))
+
         # Scale with stats
         str_val = state_manager.get_effective_stat(attacker, "STR")
         dex_val = state_manager.get_effective_stat(attacker, "DEX")
