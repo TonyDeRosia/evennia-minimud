@@ -37,31 +37,31 @@ class TestMEditCommand(EvenniaTest):
         patcher3.start()
 
     def test_medit_opens_builder_with_proto(self):
-        prototype_manager.save_prototype("npc", {"key": "orc"}, vnum=5)
-        with patch("commands.medit.EvMenu") as mock_menu:
+        from utils.mob_proto import register_prototype
+
+        register_prototype({"key": "orc"}, vnum=5)
+        with patch("commands.rom_mob_editor.EvMenu") as mock_menu:
             self.char1.execute_cmd("medit 5")
             mock_menu.assert_called_with(
                 self.char1,
-                "commands.npc_builder",
-                startnode="menunode_desc",
-                cmd_on_exit=npc_builder._on_menu_exit,
+                "commands.rom_mob_editor",
+                startnode="menunode_main",
             )
-        data = self.char1.ndb.buildnpc
+        data = self.char1.ndb.mob_proto
         assert data["key"] == "orc"
         assert self.char1.ndb.mob_vnum == 5
 
     def test_medit_create(self):
-        with patch("commands.medit.EvMenu") as mock_menu, patch(
-            "commands.medit.get_template", return_value={"level": 2}
+        with patch("commands.rom_mob_editor.EvMenu") as mock_menu, patch(
+            "commands.rom_mob_editor.get_template", return_value={"level": 2}
         ):
             self.char1.execute_cmd("medit create 10")
             mock_menu.assert_called_with(
                 self.char1,
-                "commands.npc_builder",
-                startnode="menunode_desc",
-                cmd_on_exit=npc_builder._on_menu_exit,
+                "commands.rom_mob_editor",
+                startnode="menunode_main",
             )
-        data = self.char1.ndb.buildnpc
+        data = self.char1.ndb.mob_proto
         assert data["level"] == 2
         assert self.char1.ndb.mob_vnum == 10
 
@@ -69,15 +69,14 @@ class TestMEditCommand(EvenniaTest):
         from utils.mob_proto import register_prototype
 
         register_prototype({"key": "troll"}, vnum=7)
-        with patch("commands.medit.EvMenu") as mock_menu:
+        with patch("commands.rom_mob_editor.EvMenu") as mock_menu:
             self.char1.execute_cmd("medit 7")
             mock_menu.assert_called_with(
                 self.char1,
-                "commands.npc_builder",
-                startnode="menunode_desc",
-                cmd_on_exit=npc_builder._on_menu_exit,
+                "commands.rom_mob_editor",
+                startnode="menunode_main",
             )
-        data = self.char1.ndb.buildnpc
+        data = self.char1.ndb.mob_proto
         assert data["key"] == "troll"
         assert self.char1.ndb.mob_vnum == 7
 
