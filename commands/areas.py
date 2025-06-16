@@ -196,7 +196,7 @@ class CmdRList(Command):
             num = room.db.room_id if room.db.room_id is not None else room.id
             lines.append(f"{num}: {room.key}")
 
-        header = f"Rooms in {area_name}"
+        header = f"Rooms in {area.key} ({area.start}-{area.end})"
         self.msg("\n".join([header] + lines))
 
 
