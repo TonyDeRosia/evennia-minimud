@@ -71,7 +71,7 @@ class TestAttackCommand(EvenniaTest):
         from combat.round_manager import CombatRoundManager
         from combat.combat_actions import AttackAction
 
-        with patch.object(CombatInstance, "schedule_tick"):
+        with patch.object(CombatInstance, "start"):
             self.char1.execute_cmd("attack char2")
 
         char3 = create.create_object(
@@ -83,7 +83,7 @@ class TestAttackCommand(EvenniaTest):
         char3.msg = MagicMock()
         char3.cmdset.add_default(CombatCmdSet)
 
-        with patch.object(CombatInstance, "schedule_tick"):
+        with patch.object(CombatInstance, "start"):
             char3.execute_cmd("attack char2")
 
         manager = CombatRoundManager.get()
