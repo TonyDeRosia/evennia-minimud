@@ -13,6 +13,7 @@ from utils.vnum_registry import (
     validate_vnum,
     register_vnum,
     unregister_vnum,
+    VNUM_RANGES,
 )
 from world.areas import find_area_by_vnum, get_areas, update_area
 from .building import DIR_FULL, OPPOSITE
@@ -264,7 +265,11 @@ class CmdREdit(Command):
             return
         vnum = int(parts[1])
         if not validate_vnum(vnum, "room"):
-            self.msg("Invalid or already used VNUM.")
+            start, end = VNUM_RANGES["room"]
+            self.msg(
+                f"Invalid or already used VNUM. Rooms use {start}-{end}. "
+                "Try @nextvnum R."
+            )
             return
         register_vnum(vnum)
         proto = {"vnum": vnum, "key": f"Room {vnum}", "desc": "", "flags": [], "exits": {}}

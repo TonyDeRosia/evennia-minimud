@@ -405,6 +405,34 @@ Related:
 """,
     },
     {
+        "key": "redit",
+        "category": "Building",
+        "text": """Help for redit
+
+Edit room prototypes in a menu.
+
+Usage:
+    redit create <vnum>
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    None
+
+Notes:
+    - Valid VNUM range is 200000-299999.
+    - Use @nextvnum R to obtain a free number.
+    - This edits prototypes, not live rooms.
+
+Related:
+    help vnums
+""",
+    },
+    {
         "key": "ocreate",
         "category": "Building",
         "text": """
