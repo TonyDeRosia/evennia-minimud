@@ -253,6 +253,19 @@ class Character(ObjectParent, ClothedCharacter):
         self.db.tnl = settings.XP_TO_LEVEL(1)
         self.db.sated = 5
 
+        from world.system import state_manager
+        from world.system.class_skills import MELEE_CLASSES
+
+        state_manager.grant_ability(self, "Unarmed")
+        profs = self.db.proficiencies or {}
+        if profs.get("Unarmed", 0) < 25:
+            profs["Unarmed"] = 25
+        if self.db.charclass and self.db.charclass in MELEE_CLASSES:
+            state_manager.grant_ability(self, "Hand-to-Hand")
+            if profs.get("Hand-to-Hand", 0) < 25:
+                profs["Hand-to-Hand"] = 25
+        self.db.proficiencies = profs
+
     def at_post_puppet(self, **kwargs):
         """Ensure stats refresh when a character is controlled."""
         from world import stats

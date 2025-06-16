@@ -1,6 +1,6 @@
 from evennia import CmdSet
 from .command import Command
-from world.system.class_skills import get_class_skills
+from world.system.class_skills import get_class_skills, MELEE_CLASSES
 from world.system import state_manager
 
 
@@ -30,6 +30,13 @@ class CmdUpdate(Command):
             if skill not in existing:
                 learned.append(skill)
             state_manager.grant_ability(target, skill)
+
+        if charclass in MELEE_CLASSES:
+            state_manager.grant_ability(target, "Hand-to-Hand")
+            profs = target.db.proficiencies or {}
+            if profs.get("Hand-to-Hand", 0) < 25:
+                profs["Hand-to-Hand"] = 25
+            target.db.proficiencies = profs
         if learned:
             caller.msg(f"{target.key} learns: {', '.join(learned)}")
         else:

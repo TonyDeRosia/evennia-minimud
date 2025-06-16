@@ -40,10 +40,20 @@ class BareHand:
                 wielder.msg("You can't attack that.")
             return
         damage = self.damage
+        hit_bonus = 0.0
+        dmg_bonus = 0.0
+        from world.skills.unarmed_passive import Unarmed
+        from world.skills.hand_to_hand import HandToHand
+        for cls in (Unarmed, HandToHand):
+            if cls.name in (wielder.db.skills or []):
+                skill = cls()
+                skill.improve(wielder)
+                hit_bonus += skill.hit_bonus(wielder)
+                dmg_bonus += skill.damage_bonus(wielder)
         # subtract the stamina required to use this
         wielder.traits.stamina.current -= self.stamina_cost
 
-        if not stat_manager.check_hit(wielder, target):
+        if not stat_manager.check_hit(wielder, target, base=75 + int(hit_bonus)):
             wielder.at_emote(
                 f"$conj(swings) $pron(your) {self.name} at $you(target), but $conj(misses).",
                 mapping={"target": target},
@@ -70,6 +80,8 @@ class BareHand:
             crit = stat_manager.roll_crit(wielder, target)
             if crit:
                 damage = stat_manager.crit_damage(wielder, damage)
+            if dmg_bonus:
+                damage = int(round(damage * (1 + dmg_bonus / 100)))
             damage = combat_utils.apply_attack_power(wielder, damage)
             wielder.at_emote(
                 f"$conj(hits) $you(target) with $pron(your) {self.name}.",
