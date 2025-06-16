@@ -30,29 +30,6 @@ def calculate_damage(attacker, weapon, target) -> Tuple[int, object]:
     dmg = 0
     dtype = DamageType.BLUDGEONING
 
-    if weapon is None:
-        # fallback to basic unarmed damage scaled by Unarmed skill
-        prof = 0
-        prof = (getattr(getattr(attacker, "db", None), "proficiencies", {}) or {}).get(
-            "Unarmed", 0
-        )
-        virtual_weapon = {
-            "damage_dice": "1d4",
-            "damage_type": DamageType.BLUDGEONING,
-            "damage_bonus": 0,
-        }
-        if prof >= 75:
-            virtual_weapon["damage_dice"] = "1d6"
-            virtual_weapon["damage_bonus"] = 2
-        elif prof >= 50:
-            virtual_weapon["damage_dice"] = "1d5"
-            virtual_weapon["damage_bonus"] = 1
-        elif prof >= 25:
-            virtual_weapon["damage_dice"] = "1d4"
-        else:
-            virtual_weapon["damage_dice"] = "1d3"
-        weapon = virtual_weapon
-
     hp_trait = getattr(getattr(target, "traits", None), "health", None)
     if hasattr(target, "hp") or hp_trait:
         dmg_bonus = 0
@@ -80,15 +57,11 @@ def calculate_damage(attacker, weapon, target) -> Tuple[int, object]:
                 if db:
                     dmg_map = getattr(db, "damage", None)
                     if dmg_map:
-                        for i, (dt, formula) in enumerate(
-                            sorted(dmg_map.items(), key=lambda kv: str(kv[0]))
-                        ):
+                        for i, (dt, formula) in enumerate(sorted(dmg_map.items(), key=lambda kv: str(kv[0]))):
                             try:
                                 roll = roll_dice_string(str(formula))
                             except Exception:
-                                logger.error(
-                                    "Invalid damage formula '%s' on %s", formula, weapon
-                                )
+                                logger.error("Invalid damage formula '%s' on %s", formula, weapon)
                                 roll = 0
                             dmg = dmg + roll if dmg else roll
                             if i == 0:

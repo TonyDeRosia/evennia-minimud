@@ -101,14 +101,7 @@ def apply_proto_items(npc, proto_data: dict) -> None:
         item.location = npc
         slot_norm = normalize_slot(slot) or slot
         try:
-            if slot_norm in {
-                "mainhand",
-                "offhand",
-                "twohanded",
-                "mainhand/offhand",
-                "left",
-                "right",
-            }:
+            if slot_norm in {"mainhand", "offhand", "twohanded", "mainhand/offhand", "left", "right"}:
                 hand = None
                 if slot_norm in {"mainhand", "right"}:
                     hand = "right"
@@ -186,15 +179,6 @@ def spawn_from_vnum(vnum: int, location=None):
     npc.db.mobprogs = mobprogs
 
     apply_proto_items(npc, proto_data)
-
-    # ensure NPCs have basic unarmed skill
-    from world.system import state_manager
-
-    state_manager.grant_ability(npc, "Unarmed")
-    profs = npc.db.proficiencies or {}
-    if profs.get("Unarmed", 0) < 25:
-        profs["Unarmed"] = 25
-    npc.db.proficiencies = profs
 
     from commands.npc_builder import finalize_mob_prototype
 
