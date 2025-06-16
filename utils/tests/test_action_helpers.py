@@ -100,7 +100,7 @@ class TestActionUtils(unittest.TestCase):
         self.assertEqual(dtype, DamageType.BLUDGEONING)
 
     def test_damage_default_dice_and_bonus(self):
-        """Missing damage_dice should fallback to '1d2' and include bonus."""
+        """Missing damage_dice should fallback to '2d6' and include bonus."""
         from combat.actions import utils
 
         weapon = MagicMock()
@@ -118,7 +118,7 @@ class TestActionUtils(unittest.TestCase):
              ):
             dmg, dtype = utils.calculate_damage(self.attacker, weapon, self.target)
 
-        mock_roll.assert_called_once_with("1d2")
+        mock_roll.assert_called_once_with("2d6")
         self.assertEqual(dmg, 3)
         self.assertEqual(dtype, DamageType.BLUDGEONING)
 

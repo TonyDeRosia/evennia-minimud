@@ -36,10 +36,10 @@ class TestExtendedStats(EvenniaTest):
         self.char2.traits.armor.base = 0
         with patch("combat.combat_utils.random.randint", return_value=100), patch(
             "world.system.stat_manager.check_hit", return_value=True
-        ):
+        ), patch("typeclasses.gear.roll_dice_string", return_value=2):
             before = self.char2.traits.health.current
             BareHand().at_attack(self.char1, self.char2)
-            self.assertLess(self.char2.traits.health.current, before - BareHand().damage)
+            self.assertLess(self.char2.traits.health.current, before - 2)
 
     def test_piercing_reduces_armor(self):
         self.char1.traits.piercing.base = 5
