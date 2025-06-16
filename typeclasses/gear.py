@@ -40,23 +40,27 @@ class BareHand:
             if hasattr(wielder, "msg"):
                 wielder.msg("You can't attack that.")
             return
+        # Determine unarmed damage
         damage = self.damage
+        str_val = state_manager.get_effective_stat(wielder, "STR")
+        profs = getattr(wielder.db, "proficiencies", {}) or {}
+        knows_hth = "Hand-to-Hand" in (wielder.db.skills or [])
+        hth_prof = profs.get("Hand-to-Hand", 0)
         if damage is None:
             try:
-                damage = roll_dice_string(str(self.damage_dice))
+                if knows_hth:
+                    damage = roll_dice_string("1d3") + (str_val // 5) + (hth_prof // 10)
+                else:
+                    damage = roll_dice_string("1d2")
             except Exception:
-                logger.log_err(f"Invalid damage_dice '{self.damage_dice}' on BareHand")
+                logger.log_err("Invalid dice roll on BareHand")
                 damage = 0
-        hit_bonus = 0.0
-        dmg_bonus = 0.0
-        from world.skills.unarmed_passive import Unarmed
-        from world.skills.hand_to_hand import HandToHand
+        hit_bonus = hth_prof * 0.2 if knows_hth else 0.0
+
+        from world.skills.unarmed_passive import Unarmed, HandToHand
         for cls in (Unarmed, HandToHand):
             if cls.name in (wielder.db.skills or []):
-                skill = cls()
-                skill.improve(wielder)
-                hit_bonus += skill.hit_bonus(wielder)
-                dmg_bonus += skill.damage_bonus(wielder)
+                cls().improve(wielder)
         # subtract the stamina required to use this
         wielder.traits.stamina.current -= self.stamina_cost
 
@@ -87,8 +91,6 @@ class BareHand:
             crit = stat_manager.roll_crit(wielder, target)
             if crit:
                 damage = stat_manager.crit_damage(wielder, damage)
-            if dmg_bonus:
-                damage = int(round(damage * (1 + dmg_bonus / 100)))
             damage = combat_utils.apply_attack_power(wielder, damage)
             wielder.at_emote(
                 f"$conj(hits) $you(target) with $pron(your) {self.name}.",
