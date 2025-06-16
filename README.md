@@ -472,3 +472,7 @@ After installing the dependencies, execute the tests with:
 pytest -q
 ```
 
+
+## Area JSON Files
+
+Area definitions under `world/prototypes/areas` now store a `rooms` list of VNUMs belonging to that area. Older JSON files missing this field still load correctly but will not track individual rooms until updated. See [docs/area_json.md](docs/area_json.md) for details.

@@ -31,11 +31,13 @@ class Area:
             reset_interval=int(data.get("reset_interval", 0)),
             flags=data.get("flags", []),
             age=int(data.get("age", 0)),
-            rooms=[int(r) for r in data.get("rooms", [])],
+            rooms=sorted({int(r) for r in data.get("rooms", [])}),
         )
 
     def to_dict(self) -> Dict:
-        return asdict(self)
+        data = asdict(self)
+        data["rooms"] = sorted({int(r) for r in self.rooms})
+        return data
 
 
 _BASE_PATH = Path(settings.GAME_DIR) / "world" / "prototypes" / "areas"
@@ -113,5 +115,3 @@ def find_area_by_vnum(vnum: int) -> Area | None:
         if area.start <= vnum <= area.end:
             return area
     return None
-
-
