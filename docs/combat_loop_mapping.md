@@ -46,3 +46,58 @@ The following outlines how a single combat round flows through the system:
 5. Defeated combatants are removed and experience rewards granted as part of the processing.
 6. After returning, `CombatInstance.sync_participants` runs again to clean up and determine if the combat should end.
 
+
+## Example: Starting Combat
+
+The following snippet demonstrates a minimal fight between two characters. First create a combat and then queue actions for the round:
+
+```python
+from combat.round_manager import CombatRoundManager
+from combat.combat_actions import AttackAction
+
+# attacker and target are Character objects already in the same room
+CombatRoundManager.get().start_combat([attacker, target])
+
+engine = attacker.ndb.combat_engine
+engine.queue_action(attacker, AttackAction(attacker, target))
+
+# The round manager will call `process_round` automatically every tick
+# which resolves queued actions and broadcasts the results to the room.
+```
+
+When the round executes you will see messages such as
+``Attacker hits Target for 5 damage!`` and the combatants' HP updated.
+
+## Engine Class Reference
+
+```python
+from combat.engine import CombatEngine, TurnManager, AggroTracker, DamageProcessor, CombatMath, CombatParticipant
+```
+
+- **CombatEngine** – orchestrates rounds and exposes helpers:
+  ```python
+  engine = CombatEngine(participants)
+  ```
+- **TurnManager** – builds the queue each round:
+  ```python
+  manager = TurnManager(engine, participants)
+  ```
+- **AggroTracker** – records hostility and awards XP:
+  ```python
+  aggro = AggroTracker()
+  aggro.track(target, attacker)
+  ```
+- **DamageProcessor** – resolves actions and applies damage:
+  ```python
+  processor = DamageProcessor(engine, manager, aggro)
+  processor.apply_damage(attacker, target, 5, None)
+  ```
+- **CombatMath** – helpers for hit and damage calculations:
+  ```python
+  hit, _ = CombatMath.check_hit(attacker, target)
+  ```
+- **CombatParticipant** – dataclass representing a fighter:
+  ```python
+  participant = CombatParticipant(actor)
+  ```
+

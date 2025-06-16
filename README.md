@@ -24,6 +24,10 @@ You are absolutely correct!
 Since my goal was to write as little custom code as possible, most of the mechanics are as minimal as I could get away with. But the code is all here and free for the taking - if you like part of it but want it to be better, make it better!
 
 
+## Getting Started
+
+The combat system uses a round manager that processes queued actions each tick. See [docs/combat_loop_mapping.md](docs/combat_loop_mapping.md) for a walkthrough of starting combat and reading the results.
+
 ## Coins and Currency
 
 This game uses four types of coins. They convert as follows:
