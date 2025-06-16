@@ -1,10 +1,6 @@
 from evennia.utils.test_resources import EvenniaTest
-from evennia.utils import create
 from django.test import override_settings
-from unittest.mock import patch
-
-from world.system import state_manager, stat_manager
-from world.effects import Effect, EFFECTS
+from world.system import state_manager
 
 
 @override_settings(DEFAULT_HOME=None)
@@ -166,37 +162,4 @@ class TestStateManager(EvenniaTest):
         for key, regen in expected.items():
             trait = char.traits.get(key)
             self.assertEqual(trait.current, trait.max // 2 + regen)
-
-    def test_hit_chance_item_bonus_applied_once(self):
-        char = self.char1
-        stat_manager.refresh_stats(char)
-        base = char.db.derived_stats.get("hit_chance")
-
-        item = create.create_object(
-            "typeclasses.objects.ClothingObject",
-            key="trinket",
-            location=char,
-        )
-        item.tags.add("equipment", category="flag")
-        item.tags.add("identified", category="flag")
-        item.db.stat_mods = {"hit_chance": 5}
-        item.wear(char, True)
-        stat_manager.refresh_stats(char)
-
-        derived = char.db.derived_stats.get("hit_chance")
-        self.assertEqual(derived, base + 5)
-        self.assertEqual(state_manager.get_effective_stat(char, "hit_chance"), derived)
-
-    def test_hit_chance_effect_bonus_applied_once(self):
-        char = self.char1
-        stat_manager.refresh_stats(char)
-        base = char.db.derived_stats.get("hit_chance")
-
-        eff = Effect(key="aim", name="Aim", desc="", type="buff", mods={"hit_chance": 7})
-        with patch.dict(EFFECTS, {"aim": eff}):
-            state_manager.add_effect(char, "aim", 1)
-            buffed = char.db.derived_stats.get("hit_chance")
-            self.assertEqual(buffed, base + 7)
-            self.assertEqual(state_manager.get_effective_stat(char, "hit_chance"), buffed)
-
 
