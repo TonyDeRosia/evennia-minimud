@@ -63,7 +63,7 @@ def _migrate_experience():
 
 
 def _ensure_room_areas():
-    """Assign rooms without area to the default area."""
+    """Assign rooms without area to an appropriate area."""
 
     from django.conf import settings
     from typeclasses.rooms import Room
@@ -78,8 +78,21 @@ def _ensure_room_areas():
         area = Area(key=name, start=start, end=end)
         save_area(area)
 
+    # Ensure Limbo area exists if Limbo rooms are present
+    limbo_area_name = "Limbo"
+    idx, limbo_area = find_area(limbo_area_name)
+
     for room in Room.objects.all():
-        if not room.db.area:
+        if room.db.area:
+            continue
+
+        if room.key and room.key.lower() == "limbo":
+            if limbo_area is None:
+                # create a simple placeholder area for Limbo rooms
+                limbo_area = Area(key=limbo_area_name, start=0, end=0)
+                save_area(limbo_area)
+            room.set_area(limbo_area_name)
+        else:
             room.set_area(name)
 
 
