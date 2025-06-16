@@ -43,6 +43,10 @@ class CombatInstance:
             return False
         self.engine.remove_participant(combatant)
         self.combatants.discard(combatant)
+        try:
+            CombatRoundManager.get().combatant_to_combat.pop(combatant, None)
+        except Exception:  # pragma: no cover - safety
+            pass
         return True
 
     def is_valid(self) -> bool:

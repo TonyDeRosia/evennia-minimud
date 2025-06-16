@@ -165,6 +165,10 @@ class DamageProcessor:
             )
             if should_remove:
                 self.turn_manager.remove_participant(actor)
+                from combat.round_manager import CombatRoundManager
+                inst = CombatRoundManager.get().get_combatant_combat(actor)
+                if inst:
+                    inst.remove_combatant(actor)
 
     # -------------------------------------------------------------
     # action / round execution
