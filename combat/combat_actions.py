@@ -7,9 +7,6 @@ from typing import Optional, Iterable
 import logging
 
 from .engine.combat_math import CombatMath
-from world.system import stat_manager
-
-from evennia.utils import utils
 from world.system import state_manager
 
 logger = logging.getLogger(__name__)
@@ -113,22 +110,19 @@ class AttackAction(Action):
         return super().validate()
 
     def resolve(self) -> CombatResult:
-        """Carry out a basic weapon attack."""
+        """Carry out a basic weapon attack.
+
+        Returns
+        -------
+        CombatResult
+            Outcome of the attack execution.
+        """
         target = self.target
         if not target:
             return CombatResult(self.actor, self.actor, "No target.")
 
-        weapon = self.actor
-        if utils.inherits_from(self.actor, "typeclasses.characters.Character"):
-            if self.actor.wielding:
-                weapon = self.actor.wielding[0]
-            elif getattr(self.actor.db, "natural_weapon", None):
-                # Use natural weapon stats when unarmed
-                weapon = self.actor.db.natural_weapon
-            else:
-                from typeclasses.gear import BareHand
-                # Default to bare hands if no natural weapon is defined
-                weapon = BareHand()
+        weapon_getter = getattr(self.actor, "get_attack_weapon", None)
+        weapon = weapon_getter() if callable(weapon_getter) else self.actor
 
         logger.debug("AttackAction weapon=%s", getattr(weapon, "key", weapon))
 

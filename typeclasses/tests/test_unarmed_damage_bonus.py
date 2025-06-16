@@ -39,6 +39,14 @@ class Dummy:
         self.cast_spell = MagicMock()
         self.use_skill = MagicMock()
 
+    def get_attack_weapon(self):
+        if self.wielding:
+            return self.wielding[0]
+        if getattr(self.db, "natural_weapon", None):
+            return self.db.natural_weapon
+        from typeclasses.gear import BareHand
+        return BareHand()
+
 
 class TestUnarmedAutoAttack(unittest.TestCase):
     def test_unarmed_auto_attack_bonus_damage(self):
@@ -53,8 +61,7 @@ class TestUnarmedAutoAttack(unittest.TestCase):
 
         engine = CombatEngine([attacker, defender], round_time=0)
 
-        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
-             patch("world.system.state_manager.apply_regen"), \
+        with patch("world.system.state_manager.apply_regen"), \
              patch("world.system.state_manager.get_effective_stat", return_value=0), \
              patch("world.system.stat_manager.check_hit", return_value=True), \
              patch("combat.engine.combat_math.roll_evade", return_value=False), \
@@ -78,8 +85,7 @@ class TestUnarmedAutoAttack(unittest.TestCase):
         engine = CombatEngine([attacker, defender], round_time=0)
         engine.queue_action(attacker, AttackAction(attacker, defender))
 
-        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
-             patch("world.system.state_manager.apply_regen"), \
+        with patch("world.system.state_manager.apply_regen"), \
              patch("combat.engine.combat_math.CombatMath.check_hit", return_value=(True, "")) as mock_hit, \
              patch("combat.engine.combat_math.CombatMath.apply_critical", side_effect=lambda a, t, d: (d, False)), \
              patch("combat.engine.combat_math.roll_evade", return_value=False), \
@@ -105,8 +111,7 @@ class TestUnarmedAutoAttack(unittest.TestCase):
         engine = CombatEngine([attacker, defender], round_time=0)
         engine.queue_action(attacker, AttackAction(attacker, defender))
 
-        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
-             patch("world.system.state_manager.apply_regen"), \
+        with patch("world.system.state_manager.apply_regen"), \
              patch("combat.engine.combat_math.CombatMath.check_hit", return_value=(True, "")) as mock_hit, \
              patch("combat.engine.combat_math.CombatMath.apply_critical", side_effect=lambda a, t, d: (d, False)), \
              patch("combat.engine.combat_math.roll_evade", return_value=False), \

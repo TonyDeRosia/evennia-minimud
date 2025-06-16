@@ -45,6 +45,14 @@ class Dummy:
         self.cast_spell = MagicMock()
         self.use_skill = MagicMock()
 
+    def get_attack_weapon(self):
+        if self.wielding:
+            return self.wielding[0]
+        if getattr(self.db, "natural_weapon", None):
+            return self.db.natural_weapon
+        from typeclasses.gear import BareHand
+        return BareHand()
+
 
 class KillAction(Action):
     def resolve(self):
@@ -65,8 +73,7 @@ class TestAttackAction(unittest.TestCase):
 
         engine = CombatEngine([attacker, defender], round_time=0)
         engine.queue_action(attacker, AttackAction(attacker, defender))
-        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
-             patch("world.system.state_manager.apply_regen"), \
+        with patch("world.system.state_manager.apply_regen"), \
              patch("random.randint", return_value=0):
             engine.start_round()
             engine.process_round()
@@ -86,8 +93,7 @@ class TestAttackAction(unittest.TestCase):
 
         engine = CombatEngine([attacker, defender], round_time=0)
         engine.queue_action(attacker, AttackAction(attacker, defender))
-        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
-             patch("world.system.state_manager.apply_regen"), \
+        with patch("world.system.state_manager.apply_regen"), \
              patch("random.randint", return_value=0), \
              patch("world.system.state_manager.get_effective_stat") as mock_get:
             def getter(obj, stat):
@@ -116,8 +122,7 @@ class TestAttackAction(unittest.TestCase):
 
         engine = CombatEngine([attacker, defender], round_time=0)
         engine.queue_action(attacker, AttackAction(attacker, defender))
-        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
-             patch("world.system.state_manager.apply_regen"), \
+        with patch("world.system.state_manager.apply_regen"), \
              patch("world.system.state_manager.get_effective_stat", return_value=0), \
              patch("combat.engine.combat_math.roll_dice_string", return_value=3) as mock_roll:
             engine.start_round()
@@ -139,8 +144,7 @@ class TestAttackAction(unittest.TestCase):
 
         engine = CombatEngine([attacker, defender], round_time=0)
         engine.queue_action(attacker, AttackAction(attacker, defender))
-        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
-             patch("world.system.state_manager.apply_regen"), \
+        with patch("world.system.state_manager.apply_regen"), \
              patch("world.system.state_manager.get_effective_stat", return_value=0), \
              patch("random.randint", return_value=0), \
              patch("combat.combat_actions.roll_dice_string", side_effect=[2, 3]) as mock_roll:
@@ -159,8 +163,7 @@ class TestAttackAction(unittest.TestCase):
 
         engine = CombatEngine([attacker, defender], round_time=0)
         engine.queue_action(attacker, AttackAction(attacker, defender))
-        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
-             patch("world.system.state_manager.apply_regen"), \
+        with patch("world.system.state_manager.apply_regen"), \
              patch("world.system.stat_manager.check_hit", return_value=False), \
              patch("random.randint", return_value=0):
             engine.start_round()
@@ -183,8 +186,7 @@ def test_npc_attack_uses_natural_weapon(self):
     engine = CombatEngine([attacker, defender], round_time=0)
     engine.queue_action(attacker, AttackAction(attacker, defender))
 
-    with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
-         patch("world.system.state_manager.apply_regen"), \
+    with patch("world.system.state_manager.apply_regen"), \
          patch("world.system.state_manager.get_effective_stat", return_value=0), \
          patch("random.randint", return_value=0):
         engine.start_round()
@@ -256,8 +258,7 @@ def test_auto_attack_uses_combat_target():
 
     engine = CombatEngine([attacker, defender], round_time=0)
 
-    with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
-         patch("world.system.state_manager.apply_regen"), \
+    with patch("world.system.state_manager.apply_regen"), \
          patch("world.system.state_manager.get_effective_stat", return_value=0), \
          patch("evennia.utils.delay"), \
          patch("random.randint", return_value=0):
@@ -281,8 +282,7 @@ def test_haste_grants_extra_attacks():
 
     engine = CombatEngine([attacker, defender], round_time=0)
 
-    with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
-         patch("world.system.state_manager.apply_regen"), \
+    with patch("world.system.state_manager.apply_regen"), \
          patch("world.system.state_manager.get_effective_stat") as mock_get, \
          patch("evennia.utils.delay"), \
          patch("combat.combat_utils.roll_evade", return_value=False), \
@@ -312,8 +312,7 @@ def test_npc_damage_dice_with_bonus():
     engine = CombatEngine([attacker, defender], round_time=0)
     engine.queue_action(attacker, AttackAction(attacker, defender))
 
-    with patch("evennia.utils.utils.inherits_from", return_value=False), \
-         patch("world.system.state_manager.apply_regen"), \
+    with patch("world.system.state_manager.apply_regen"), \
          patch("world.system.state_manager.get_effective_stat", return_value=0), \
          patch("world.system.stat_manager.check_hit", return_value=True), \
          patch("world.system.stat_manager.roll_crit", return_value=False), \
@@ -338,8 +337,7 @@ def test_npc_damage_dice_fallback_to_2d6():
     engine = CombatEngine([attacker, defender], round_time=0)
     engine.queue_action(attacker, AttackAction(attacker, defender))
 
-    with patch("evennia.utils.utils.inherits_from", return_value=False), \
-         patch("world.system.state_manager.apply_regen"), \
+    with patch("world.system.state_manager.apply_regen"), \
          patch("world.system.state_manager.get_effective_stat", return_value=0), \
          patch("world.system.stat_manager.check_hit", return_value=True), \
          patch("world.system.stat_manager.roll_crit", return_value=False), \
