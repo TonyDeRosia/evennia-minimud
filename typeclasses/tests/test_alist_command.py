@@ -22,11 +22,13 @@ class TestAListCommand(EvenniaTest):
         self.char1.execute_cmd("alist")
         out = self.char1.msg.call_args[0][0]
         self.assertIn("Rooms", out)
+        self.assertIn("Vnums", out)
         self.assertIn("Mobs", out)
         row = next(line for line in out.splitlines() if line.startswith("| zone"))
         cols = [c.strip() for c in row.split("|")[1:-1]]
         self.assertEqual(cols[2], "2")
-        self.assertEqual(cols[3], "2")
+        self.assertEqual(cols[3], "1, 2")
+        self.assertEqual(cols[4], "2")
 
     @patch("commands.aedit.load_all_prototypes")
     @patch("commands.aedit.get_areas")
@@ -50,7 +52,8 @@ class TestAListCommand(EvenniaTest):
         cols = [c.strip() for c in row.split("|")[1:-1]]
         self.assertEqual(cols[1], "1-4")
         self.assertEqual(cols[2], "4")
-        self.assertEqual(cols[3], "1")
+        self.assertEqual(cols[3], "1, 2, 3, 4")
+        self.assertEqual(cols[4], "1")
 
     def test_current(self):
         self.char1.location = self.room1

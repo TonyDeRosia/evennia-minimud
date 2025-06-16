@@ -78,12 +78,15 @@ class CmdAList(Command):
                 info = area_data.setdefault(name, {"room_ids": [], "room_count": 0, "mob_count": 0})
                 info["mob_count"] += 1
             for name, info in area_data.items():
-                room_ids = [rid for rid in info["room_ids"] if rid is not None]
+                room_ids = sorted(
+                    {rid for rid in info["room_ids"] if rid is not None}
+                )
                 start = min(room_ids) if room_ids else 0
                 end = max(room_ids) if room_ids else 0
                 area = Area(key=name, start=start, end=end)
                 area._temp_room_count = info["room_count"]
                 area._temp_mob_count = info["mob_count"]
+                area._temp_room_ids = room_ids
                 areas.append(area)
             if not areas:
                 self.msg("No areas defined.")
@@ -92,6 +95,7 @@ class CmdAList(Command):
             "Name",
             "Range",
             "Rooms",
+            "Vnums",
             "Mobs",
             "Builders",
             "Flags",
@@ -103,6 +107,7 @@ class CmdAList(Command):
             if hasattr(area, "_temp_room_count"):
                 room_count = area._temp_room_count
                 mob_count = area._temp_mob_count
+                room_ids = getattr(area, "_temp_room_ids", [])
             else:
                 objs = ObjectDB.objects.filter(
                     db_attributes__db_key="area",
@@ -110,12 +115,23 @@ class CmdAList(Command):
                 )
                 rooms = [obj for obj in objs if obj.is_typeclass(Room, exact=False)]
                 room_count = len(rooms)
+                room_ids = []
+                for room in rooms:
+                    rid = room.attributes.get("room_id")
+                    if rid is not None:
+                        try:
+                            room_ids.append(int(rid))
+                        except (TypeError, ValueError):
+                            pass
+                room_ids = sorted(set(room_ids))
                 mob_count = len(area_npcs.get_area_npc_list(area.key))
+                area._temp_room_ids = room_ids
 
             table.add_row(
                 area.key,
                 f"{area.start}-{area.end}",
                 str(room_count),
+                ", ".join(str(r) for r in room_ids) if room_ids else "-",
                 str(mob_count),
                 ", ".join(area.builders),
                 ", ".join(area.flags),

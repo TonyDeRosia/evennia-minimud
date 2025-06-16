@@ -1410,8 +1410,8 @@ Related:
         "text": """
 Help for alist
 
-List defined areas including their vnum range, number of rooms, registered mob
-prototypes, builders, flags, current age and reset interval.
+List defined areas including their vnum range, list of room vnums, number of rooms,
+registered mob prototypes, builders, flags, current age and reset interval.
 
 Usage:
     alist
@@ -1427,7 +1427,7 @@ Examples:
     alist current
 
 Notes:
-    - None
+    - The Vnums column lists all room ids defined for the area.
 
 Related:
     help ansi
