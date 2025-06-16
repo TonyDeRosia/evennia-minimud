@@ -300,3 +300,57 @@ def test_haste_grants_extra_attacks():
 
     assert defender.hp == 8
 
+
+def test_npc_damage_dice_with_bonus():
+    attacker = Dummy()
+    defender = Dummy()
+    attacker.location = defender.location
+    attacker.db.damage_dice = "1d6"
+    attacker.db.damage_bonus = 2
+    attacker.damage_type = DamageType.BLUDGEONING
+
+    engine = CombatEngine([attacker, defender], round_time=0)
+    engine.queue_action(attacker, AttackAction(attacker, defender))
+
+    with patch("evennia.utils.utils.inherits_from", return_value=False), \
+         patch("world.system.state_manager.apply_regen"), \
+         patch("world.system.state_manager.get_effective_stat", return_value=0), \
+         patch("world.system.stat_manager.check_hit", return_value=True), \
+         patch("world.system.stat_manager.roll_crit", return_value=False), \
+         patch("combat.actions.utils.roll_evade", return_value=False), \
+         patch("combat.actions.utils.roll_parry", return_value=False), \
+         patch("combat.actions.utils.roll_block", return_value=False), \
+         patch("combat.actions.utils.roll_dice_string", return_value=4) as mock_roll, \
+         patch("evennia.utils.delay"):
+        engine.start_round()
+        engine.process_round()
+
+    assert defender.hp == 4
+
+
+def test_npc_damage_dice_fallback_to_1d2():
+    attacker = Dummy()
+    defender = Dummy()
+    attacker.location = defender.location
+    attacker.db.damage_bonus = 1
+    attacker.damage_type = DamageType.BLUDGEONING
+
+    engine = CombatEngine([attacker, defender], round_time=0)
+    engine.queue_action(attacker, AttackAction(attacker, defender))
+
+    with patch("evennia.utils.utils.inherits_from", return_value=False), \
+         patch("world.system.state_manager.apply_regen"), \
+         patch("world.system.state_manager.get_effective_stat", return_value=0), \
+         patch("world.system.stat_manager.check_hit", return_value=True), \
+         patch("world.system.stat_manager.roll_crit", return_value=False), \
+         patch("combat.actions.utils.roll_evade", return_value=False), \
+         patch("combat.actions.utils.roll_parry", return_value=False), \
+         patch("combat.actions.utils.roll_block", return_value=False), \
+         patch("combat.actions.utils.roll_dice_string", return_value=1) as mock_roll, \
+         patch("evennia.utils.delay"):
+        engine.start_round()
+        engine.process_round()
+
+    assert defender.hp == 8
+    mock_roll.assert_called_with("1d2")
+
