@@ -31,43 +31,56 @@ def calculate_damage(attacker, weapon, target) -> Tuple[int, object]:
 
     hp_trait = getattr(getattr(target, "traits", None), "health", None)
     if hasattr(target, "hp") or hp_trait:
+        dmg_bonus = 0
+
         if isinstance(weapon, dict):
             dmg = weapon.get("damage")
             dtype = weapon.get("damage_type", DamageType.BLUDGEONING)
+            if dmg is None:
+                dice = weapon.get("damage_dice")
+                if dice:
+                    try:
+                        num, sides = map(int, str(dice).lower().split("d"))
+                        dmg = roll_damage((num, sides))
+                    except (TypeError, ValueError):
+                        logger.error("Invalid damage_dice '%s' on %s", dice, weapon)
+                        dmg = 0
+            dmg_bonus = int(weapon.get("damage_bonus", 0) or 0)
+
         else:
             dmg = getattr(weapon, "damage", None)
             dtype = getattr(weapon, "damage_type", DamageType.BLUDGEONING)
 
-        if dmg is None:
-            db = getattr(weapon, "db", None)
-            if db:
-                dmg_map = getattr(db, "damage", None)
-                if dmg_map:
-                    for i, (dt, formula) in enumerate(
-                        sorted(dmg_map.items(), key=lambda kv: str(kv[0]))
-                    ):
+            if dmg is None:
+                db = getattr(weapon, "db", None)
+                if db:
+                    dmg_map = getattr(db, "damage", None)
+                    if dmg_map:
+                        for i, (dt, formula) in enumerate(sorted(dmg_map.items(), key=lambda kv: str(kv[0]))):
+                            try:
+                                roll = roll_dice_string(str(formula))
+                            except Exception:
+                                logger.error("Invalid damage formula '%s' on %s", formula, weapon)
+                                roll = 0
+                            dmg = dmg + roll if dmg else roll
+                            if i == 0:
+                                dtype = dt
+                    else:
+                        dice = getattr(db, "damage_dice", None) or "1d2"
                         try:
-                            roll = roll_dice_string(str(formula))
+                            dmg = roll_dice_string(str(dice))
                         except Exception:
-                            logger.error("Invalid damage formula '%s' on %s", formula, weapon)
-                            roll = 0
-                        dmg = dmg + roll if dmg else roll
-                        if i == 0:
-                            dtype = dt
-                else:
-                    dice = getattr(db, "damage_dice", None)
-                    dice = dice or "1d2"
-                    try:
-                        dmg = roll_dice_string(str(dice))
-                    except Exception:
-                        logger.error("Invalid damage_dice '%s' on %s", dice, weapon)
-                        dmg = int(getattr(db, "dmg", 0))
-                    bonus = getattr(db, "damage_bonus", 0)
-                    dmg += int(bonus)
+                            logger.error("Invalid damage_dice '%s' on %s", dice, weapon)
+                            dmg = int(getattr(db, "dmg", 0))
+                    dmg_bonus = int(getattr(db, "damage_bonus", 0) or 0)
 
+        # Final safety check
         if dmg is None:
             dmg = 0
 
+        dmg += dmg_bonus
+
+        # Scale with stats
         str_val = state_manager.get_effective_stat(attacker, "STR")
         dex_val = state_manager.get_effective_stat(attacker, "DEX")
         dmg = int(round(dmg * (1 + str_val * 0.012 + dex_val * 0.004)))

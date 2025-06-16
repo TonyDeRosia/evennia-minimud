@@ -362,7 +362,8 @@ ANGRY_BEAR = {
     "natural_weapon": {
         "name": "claws",
         "damage_type": "slash",
-        "damage": 10,
+        "damage_dice": "1d1",
+        "damage_bonus": 9,
         "speed": 8,
         "stamina_cost": 10,
     },
@@ -386,7 +387,8 @@ COUGAR = {
     "natural_weapon": {
         "name": "claws",
         "damage_type": "slash",
-        "damage": 10,
+        "damage_dice": "1d1",
+        "damage_bonus": 9,
         "speed": 8,
         "stamina_cost": 10,
     },
@@ -439,7 +441,8 @@ STAG_DEER = {
     "natural_weapon": {
         "name": "antlers",
         "damage_type": "pierce",
-        "damage": 10,
+        "damage_dice": "1d1",
+        "damage_bonus": 9,
         "speed": 10,
         "stamina_cost": 5,
     },

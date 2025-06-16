@@ -174,7 +174,11 @@ def test_npc_attack_uses_natural_weapon(self):
     defender = Dummy()
     attacker.wielding = []
     attacker.location = defender.location
-    attacker.db.natural_weapon = {"damage": 5, "damage_type": DamageType.PIERCING}
+    attacker.db.natural_weapon = {
+        "damage_dice": "1d1",
+        "damage_bonus": 4,
+        "damage_type": DamageType.PIERCING,
+    }
 
     engine = CombatEngine([attacker, defender], round_time=0)
     engine.queue_action(attacker, AttackAction(attacker, defender))
@@ -244,7 +248,10 @@ def test_auto_attack_uses_combat_target():
     attacker = Dummy()
     defender = Dummy(hp=2)
     attacker.location = defender.location
-    attacker.db.natural_weapon = {"damage": 1, "damage_type": DamageType.BLUDGEONING}
+    attacker.db.natural_weapon = {
+        "damage_dice": "1d1",
+        "damage_type": DamageType.BLUDGEONING,
+    }
     attacker.db.combat_target = defender
 
     engine = CombatEngine([attacker, defender], round_time=0)
@@ -266,7 +273,10 @@ def test_haste_grants_extra_attacks():
     attacker = Dummy()
     defender = Dummy()
     attacker.location = defender.location
-    attacker.db.natural_weapon = {"damage": 1, "damage_type": DamageType.BLUDGEONING}
+    attacker.db.natural_weapon = {
+        "damage_dice": "1d1",
+        "damage_type": DamageType.BLUDGEONING,
+    }
     attacker.db.combat_target = defender
 
     engine = CombatEngine([attacker, defender], round_time=0)
