@@ -13,7 +13,11 @@ from world.areas import (
 )
 from world import area_npcs
 from olc.base import OLCValidator
-from utils.prototype_manager import load_all_prototypes, load_prototype
+from utils.prototype_manager import (
+    load_all_prototypes,
+    load_prototype,
+    save_prototype,
+)
 
 
 class AreaValidator(OLCValidator):
@@ -301,12 +305,24 @@ class CmdAEdit(Command):
             if not proto:
                 self.msg("Room prototype not found.")
                 return
+
+            proto["area"] = area.key
+            proto.setdefault("room_id", room_vnum)
+
             if room_vnum not in area.rooms:
                 area.rooms.append(room_vnum)
-            if not (area.start <= room_vnum <= area.end):
+            out_of_range = not (area.start <= room_vnum <= area.end)
+            if out_of_range:
                 self.msg(
                     f"Warning: room {room_vnum} outside {area.key} range {area.start}-{area.end}."
                 )
+                if room_vnum < area.start:
+                    area.start = room_vnum
+                if room_vnum > area.end:
+                    area.end = room_vnum
+
+            save_prototype("room", proto, vnum=room_vnum)
+
             update_area(idx, area)
             self.msg(f"Room {room_vnum} added to {area.key}.")
             return
