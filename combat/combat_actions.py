@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Optional, Iterable
 import logging
 
-from .actions.utils import calculate_damage, check_hit, apply_critical
+from .engine.utils import calculate_damage, check_hit, apply_critical
 from world.system import stat_manager
 
 from evennia.utils import utils

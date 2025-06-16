@@ -57,9 +57,9 @@ class TestUnarmedAutoAttack(unittest.TestCase):
              patch("world.system.state_manager.apply_regen"), \
              patch("world.system.state_manager.get_effective_stat", return_value=0), \
              patch("world.system.stat_manager.check_hit", return_value=True), \
-             patch("combat.actions.utils.roll_evade", return_value=False), \
-             patch("combat.actions.utils.roll_parry", return_value=False), \
-             patch("combat.actions.utils.roll_block", return_value=False), \
+             patch("combat.engine.utils.roll_evade", return_value=False), \
+             patch("combat.engine.utils.roll_parry", return_value=False), \
+             patch("combat.engine.utils.roll_block", return_value=False), \
              patch("evennia.utils.delay"):
             engine.start_round()
             engine.process_round()
@@ -82,10 +82,10 @@ class TestUnarmedAutoAttack(unittest.TestCase):
              patch("world.system.state_manager.apply_regen"), \
              patch("combat.combat_actions.check_hit", return_value=(True, "")) as mock_hit, \
              patch("combat.combat_actions.apply_critical", side_effect=lambda a, t, d: (d, False)), \
-             patch("combat.actions.utils.roll_evade", return_value=False), \
-             patch("combat.actions.utils.roll_parry", return_value=False), \
-             patch("combat.actions.utils.roll_block", return_value=False), \
-             patch("combat.actions.utils.roll_dice_string", return_value=2), \
+             patch("combat.engine.utils.roll_evade", return_value=False), \
+             patch("combat.engine.utils.roll_parry", return_value=False), \
+             patch("combat.engine.utils.roll_block", return_value=False), \
+             patch("combat.engine.utils.roll_dice_string", return_value=2), \
              patch("world.system.state_manager.get_effective_stat", return_value=0), \
              patch("evennia.utils.delay"), \
              patch("random.randint", return_value=0):
@@ -109,10 +109,10 @@ class TestUnarmedAutoAttack(unittest.TestCase):
              patch("world.system.state_manager.apply_regen"), \
              patch("combat.combat_actions.check_hit", return_value=(True, "")) as mock_hit, \
              patch("combat.combat_actions.apply_critical", side_effect=lambda a, t, d: (d, False)), \
-             patch("combat.actions.utils.roll_evade", return_value=False), \
-             patch("combat.actions.utils.roll_parry", return_value=False), \
-             patch("combat.actions.utils.roll_block", return_value=False), \
-             patch("combat.actions.utils.roll_dice_string", return_value=3), \
+             patch("combat.engine.utils.roll_evade", return_value=False), \
+             patch("combat.engine.utils.roll_parry", return_value=False), \
+             patch("combat.engine.utils.roll_block", return_value=False), \
+             patch("combat.engine.utils.roll_dice_string", return_value=3), \
              patch("world.system.state_manager.get_effective_stat", return_value=20), \
              patch("evennia.utils.delay"), \
              patch("random.randint", return_value=0):
