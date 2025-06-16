@@ -143,14 +143,17 @@ class AttackAction(Action):
         unarmed = not getattr(self.actor, "wielding", [])
         hit_bonus = 0.0
         if unarmed:
-            from world.skills.unarmed_passive import Unarmed
-            from world.skills.hand_to_hand import HandToHand
+            from world.skills.unarmed_passive import Unarmed, HandToHand
 
             for cls in (Unarmed, HandToHand):
                 if cls.name in (getattr(self.actor.db, "skills", []) or []):
-                    skill = cls()
-                    skill.improve(self.actor)
-                    hit_bonus += skill.hit_bonus(self.actor)
+                    cls().improve(self.actor)
+
+            if "Hand-to-Hand" in (getattr(self.actor.db, "skills", []) or []):
+                prof = (getattr(self.actor.db, "proficiencies", {}) or {}).get(
+                    "Hand-to-Hand", 0
+                )
+                hit_bonus = prof * 0.2
 
         hit, outcome = check_hit(self.actor, target, bonus=hit_bonus)
         if not hit:

@@ -5,6 +5,7 @@ from typing import Tuple
 
 from ..damage_types import DamageType
 from ..combat_utils import roll_evade, roll_parry, roll_block
+from typeclasses.gear import BareHand
 from utils import roll_dice_string
 from world.system import state_manager, stat_manager
 
@@ -33,6 +34,26 @@ def calculate_damage(attacker, weapon, target) -> Tuple[int, object]:
     hp_trait = getattr(getattr(target, "traits", None), "health", None)
     if hasattr(target, "hp") or hp_trait:
         dmg_bonus = 0
+
+        # Unarmed damage when no weapon is wielded
+        if (
+            (isinstance(weapon, BareHand) or weapon is attacker)
+            and not getattr(attacker, "wielding", [])
+            and not getattr(getattr(attacker, "db", None), "natural_weapon", None)
+        ):
+            str_val = state_manager.get_effective_stat(attacker, "STR")
+            profs = getattr(getattr(attacker, "db", None), "proficiencies", {}) or {}
+            knows_hth = "Hand-to-Hand" in (getattr(attacker.db, "skills", []) or [])
+            hth_prof = profs.get("Hand-to-Hand", 0)
+            try:
+                if knows_hth:
+                    dmg = roll_dice_string("1d3") + (str_val // 5) + (hth_prof // 10)
+                else:
+                    dmg = roll_dice_string("1d2")
+            except Exception:
+                logger.error("Invalid dice roll for unarmed damage")
+                dmg = 0
+            return dmg, dtype
 
         if isinstance(weapon, dict):
             dmg = weapon.get("damage")
@@ -80,22 +101,6 @@ def calculate_damage(attacker, weapon, target) -> Tuple[int, object]:
             dmg = 0
 
         dmg += dmg_bonus
-
-        # Apply unarmed skill bonuses when no weapon is wielded
-        unarmed = not getattr(attacker, "wielding", [])
-        if unarmed:
-            from world.skills.unarmed_passive import Unarmed
-            from world.skills.hand_to_hand import HandToHand
-
-            dmg_bonus_pct = 0.0
-            skills = getattr(getattr(attacker, "db", None), "skills", []) or []
-            for cls in (Unarmed, HandToHand):
-                if cls.name in skills:
-                    skill = cls()
-                    dmg_bonus_pct += skill.damage_bonus(attacker)
-
-            if dmg_bonus_pct:
-                dmg = int(round(dmg * (1 + dmg_bonus_pct / 100)))
 
         # Scale with stats
         str_val = state_manager.get_effective_stat(attacker, "STR")

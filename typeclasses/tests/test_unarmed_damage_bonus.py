@@ -67,3 +67,57 @@ class TestUnarmedAutoAttack(unittest.TestCase):
         # Base damage of 4 should be increased by 25% from Unarmed proficiency
         # resulting in 5 damage dealt
         self.assertEqual(defender.hp, 5)
+
+    def test_barehand_damage_unskilled(self):
+        attacker = Dummy()
+        defender = Dummy()
+        attacker.location = defender.location
+        attacker.db.skills = []
+        attacker.db.proficiencies = {}
+
+        engine = CombatEngine([attacker, defender], round_time=0)
+        engine.queue_action(attacker, AttackAction(attacker, defender))
+
+        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
+             patch("world.system.state_manager.apply_regen"), \
+             patch("combat.combat_actions.check_hit", return_value=(True, "")) as mock_hit, \
+             patch("combat.combat_actions.apply_critical", side_effect=lambda a, t, d: (d, False)), \
+             patch("combat.actions.utils.roll_evade", return_value=False), \
+             patch("combat.actions.utils.roll_parry", return_value=False), \
+             patch("combat.actions.utils.roll_block", return_value=False), \
+             patch("combat.actions.utils.roll_dice_string", return_value=2), \
+             patch("world.system.state_manager.get_effective_stat", return_value=0), \
+             patch("evennia.utils.delay"), \
+             patch("random.randint", return_value=0):
+            engine.start_round()
+            engine.process_round()
+
+        self.assertEqual(defender.hp, 8)
+        mock_hit.assert_called_with(attacker, defender, bonus=0)
+
+    def test_barehand_damage_hand_to_hand(self):
+        attacker = Dummy()
+        defender = Dummy()
+        attacker.location = defender.location
+        attacker.db.skills = ["Hand-to-Hand"]
+        attacker.db.proficiencies = {"Hand-to-Hand": 30}
+
+        engine = CombatEngine([attacker, defender], round_time=0)
+        engine.queue_action(attacker, AttackAction(attacker, defender))
+
+        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
+             patch("world.system.state_manager.apply_regen"), \
+             patch("combat.combat_actions.check_hit", return_value=(True, "")) as mock_hit, \
+             patch("combat.combat_actions.apply_critical", side_effect=lambda a, t, d: (d, False)), \
+             patch("combat.actions.utils.roll_evade", return_value=False), \
+             patch("combat.actions.utils.roll_parry", return_value=False), \
+             patch("combat.actions.utils.roll_block", return_value=False), \
+             patch("combat.actions.utils.roll_dice_string", return_value=3), \
+             patch("world.system.state_manager.get_effective_stat", return_value=20), \
+             patch("evennia.utils.delay"), \
+             patch("random.randint", return_value=0):
+            engine.start_round()
+            engine.process_round()
+
+        self.assertEqual(defender.hp, 0)
+        mock_hit.assert_called_with(attacker, defender, bonus=6.0)
