@@ -15,7 +15,8 @@ class BareHand:
     A dummy "object" class that provides basic combat functionality for unarmed combat
     """
 
-    damage = 1
+    damage = None
+    damage_dice = "2d6"
     stamina_cost = 3
     skill = "unarmed"
     name = "fists"
@@ -40,6 +41,12 @@ class BareHand:
                 wielder.msg("You can't attack that.")
             return
         damage = self.damage
+        if damage is None:
+            try:
+                damage = roll_dice_string(str(self.damage_dice))
+            except Exception:
+                logger.log_err(f"Invalid damage_dice '{self.damage_dice}' on BareHand")
+                damage = 0
         hit_bonus = 0.0
         dmg_bonus = 0.0
         from world.skills.unarmed_passive import Unarmed

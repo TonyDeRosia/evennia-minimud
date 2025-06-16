@@ -67,7 +67,7 @@ def calculate_damage(attacker, weapon, target) -> Tuple[int, object]:
                             if i == 0:
                                 dtype = dt
                     else:
-                        dice = getattr(db, "damage_dice", None) or "1d2"
+                        dice = getattr(db, "damage_dice", None) or "2d6"
                         try:
                             dmg = roll_dice_string(str(dice))
                         except Exception:

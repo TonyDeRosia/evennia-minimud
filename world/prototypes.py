@@ -405,6 +405,7 @@ SQUIRREL = {
     "react_as": "timid",
     "gender": "neutral",
     "drops": lambda: ["RAW_MEAT"] * randint(0, 1),
+    "damage_dice": "1d2",
     "can_attack": True,
 }
 
@@ -415,6 +416,7 @@ PHEASANT = {
     "react_as": "timid",
     "gender": "neutral",
     "drops": lambda: ["RAW_MEAT"] * randint(0, 1),
+    "damage_dice": "1d2",
     "can_attack": True,
 }
 
@@ -426,6 +428,7 @@ DOE_DEER = {
     "react_as": "timid",
     "armor": 10,
     "DEX": 15,
+    "damage_dice": "1d2",
     "can_attack": True,
     # randomly generate a list of drop prototype keys when the mob is spawned
     "drops": lambda: ["DEER_MEAT"] * randint(1, 3) + ["ANIMAL_HIDE"] * randint(0, 3),

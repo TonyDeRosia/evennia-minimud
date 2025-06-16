@@ -328,7 +328,7 @@ def test_npc_damage_dice_with_bonus():
     assert defender.hp == 4
 
 
-def test_npc_damage_dice_fallback_to_1d2():
+def test_npc_damage_dice_fallback_to_2d6():
     attacker = Dummy()
     defender = Dummy()
     attacker.location = defender.location
@@ -352,5 +352,5 @@ def test_npc_damage_dice_fallback_to_1d2():
         engine.process_round()
 
     assert defender.hp == 8
-    mock_roll.assert_called_with("1d2")
+    mock_roll.assert_called_with("2d6")
 
