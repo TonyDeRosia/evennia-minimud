@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Optional, Iterable
 import logging
 
-from .engine.utils import calculate_damage, check_hit, apply_critical
+from .engine.combat_math import CombatMath
 from world.system import stat_manager
 
 from evennia.utils import utils
@@ -155,7 +155,7 @@ class AttackAction(Action):
                 )
                 hit_bonus = prof * 0.2
 
-        hit, outcome = check_hit(self.actor, target, bonus=hit_bonus)
+        hit, outcome = CombatMath.check_hit(self.actor, target, bonus=hit_bonus)
         if not hit:
             return CombatResult(
                 actor=self.actor,
@@ -163,8 +163,8 @@ class AttackAction(Action):
                 message=f"{attempt}\n{outcome}",
             )
 
-        dmg, dtype = calculate_damage(self.actor, weapon, target)
-        dmg, crit = apply_critical(self.actor, target, dmg)
+        dmg, dtype = CombatMath.calculate_damage(self.actor, weapon, target)
+        dmg, crit = CombatMath.apply_critical(self.actor, target, dmg)
 
         msg = f"{attempt}\n{self.actor.key} hits {target.key}!\n"
         if crit:
@@ -223,7 +223,7 @@ class SkillAction(Action):
             self.actor.traits.stamina.current -= self.stamina_cost
         result = self.skill.resolve(self.actor, self.target)
         if getattr(result, "damage", 0):
-            result.damage, crit = apply_critical(self.actor, result.target, result.damage)
+            result.damage, crit = CombatMath.apply_critical(self.actor, result.target, result.damage)
             if crit:
                 result.message += "\nCritical hit!"
         return result
@@ -268,7 +268,7 @@ class SpellAction(Action):
             message=f"{self.actor.key} casts {self.spell.key}!",
         )
         if getattr(result, "damage", 0):
-            result.damage, crit = apply_critical(self.actor, result.target, result.damage)
+            result.damage, crit = CombatMath.apply_critical(self.actor, result.target, result.damage)
             if crit:
                 result.message += "\nCritical hit!"
         return result
