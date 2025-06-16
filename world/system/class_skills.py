@@ -6,14 +6,23 @@ from typing import Dict, List
 
 # Mapping of class names to level->skills lists
 CLASS_SKILLS: Dict[str, Dict[int, List[str]]] = {
-    "Warrior": {
-        1: ["kick"],
-        2: ["cleave"],
-        3: ["shield bash"],
-    },
-    "Mage": {
-        1: ["kick"],
-    },
+    "Warrior": {1: ["kick"], 2: ["cleave"], 3: ["shield bash"]},
+    "Mystic": {1: ["kick"]},
+    "Wizard": {1: ["kick"]},
+    "Sorcerer": {1: ["kick"]},
+    "Mage": {1: ["kick"]},
+    "Battlemage": {1: ["kick"]},
+    "Necromancer": {1: ["kick"]},
+    "Spellbinder": {1: ["kick"]},
+    "Priest": {1: ["kick"]},
+    "Paladin": {1: ["kick"]},
+    "Druid": {1: ["kick"]},
+    "Shaman": {1: ["kick"]},
+    "Rogue": {1: ["kick"]},
+    "Ranger": {1: ["kick"]},
+    "Warlock": {1: ["kick"]},
+    "Bard": {1: ["kick"]},
+    "Swashbuckler": {1: ["kick"]},
 }
 
 
