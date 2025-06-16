@@ -4,4 +4,11 @@ Area definitions are stored under `world/prototypes/areas` as JSON. Each area fi
 
 As of the latest update, area data also includes a `rooms` list containing the VNUMs of rooms explicitly associated with the area. Older area files may not include this key. When loaded those entries will receive an empty list automatically and will continue to work.
 
-If you want to track which rooms belong to an area, use the `aedit add <area> <room_vnum>` command to populate the list and then save the area with `asave changed`.
+If you want to track which rooms belong to an area, use the `aedit add <area> <room_vnum>` command. This not only appends the room VNUM to the area's `rooms` list but also stores the area name on the room prototype. If the VNUM lies outside the area's current range, the command expands the range automatically. Remember to save your changes with `asave changed` when you are done.
+
+Example:
+
+```
+aedit add town 2001
+asave changed
+```
