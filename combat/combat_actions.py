@@ -84,7 +84,8 @@ class Action:
         if (
             self.range == 1
             and self.target
-            and getattr(actor, "location", None) is not getattr(self.target, "location", None)
+            and getattr(actor, "location", None)
+            is not getattr(self.target, "location", None)
         ):
             return False, "Target out of range."
         if self.requires_status and hasattr(actor, "tags"):
@@ -126,9 +127,8 @@ class AttackAction(Action):
                 # Use natural weapon stats when unarmed
                 weapon = self.actor.db.natural_weapon
             else:
-                from typeclasses.gear import BareHand
-                # Default to bare hands if no natural weapon is defined
-                weapon = BareHand()
+                # No weapon - rely on unarmed fallback in calculate_damage
+                weapon = None
 
         logger.debug("AttackAction weapon=%s", getattr(weapon, "key", weapon))
 
@@ -177,7 +177,6 @@ class AttackAction(Action):
         )
 
 
-
 class DefendAction(Action):
     """Assume a defensive stance to reduce incoming damage."""
 
@@ -220,7 +219,9 @@ class SkillAction(Action):
             self.actor.traits.stamina.current -= self.stamina_cost
         result = self.skill.resolve(self.actor, self.target)
         if getattr(result, "damage", 0):
-            result.damage, crit = apply_critical(self.actor, result.target, result.damage)
+            result.damage, crit = apply_critical(
+                self.actor, result.target, result.damage
+            )
             if crit:
                 result.message += "\nCritical hit!"
         return result
@@ -253,7 +254,9 @@ class SpellAction(Action):
     def resolve(self) -> CombatResult:
         """Invoke the stored spell and return its combat result."""
         if not self.spell:
-            return CombatResult(self.actor, self.target or self.actor, "Nothing happens.")
+            return CombatResult(
+                self.actor, self.target or self.actor, "Nothing happens."
+            )
         if self.mana_cost and hasattr(self.actor.traits, "mana"):
             self.actor.traits.mana.current -= self.mana_cost
         success = getattr(self.actor, "cast_spell", None)
@@ -265,7 +268,9 @@ class SpellAction(Action):
             message=f"{self.actor.key} casts {self.spell.key}!",
         )
         if getattr(result, "damage", 0):
-            result.damage, crit = apply_critical(self.actor, result.target, result.damage)
+            result.damage, crit = apply_critical(
+                self.actor, result.target, result.damage
+            )
             if crit:
                 result.message += "\nCritical hit!"
         return result
