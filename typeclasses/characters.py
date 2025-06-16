@@ -1275,6 +1275,8 @@ class NPC(Character):
         """
         initiate combat against another character
         """
+        if self.attributes.has("fleeing"):
+            del self.db.fleeing
         if weapons := self.wielding:
             weapon = weapons[0]
         else:

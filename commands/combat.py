@@ -77,6 +77,10 @@ class CmdAttack(Command):
             )
             return
 
+        # ensure the target is not marked as fleeing
+        if target.attributes.has("fleeing"):
+            del target.db.fleeing
+
         # if we were trying to flee, cancel that
         if self.caller.attributes.has("fleeing"):
             del self.caller.db.fleeing
