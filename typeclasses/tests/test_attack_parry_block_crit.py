@@ -36,6 +36,14 @@ class Dummy:
         self.cast_spell = MagicMock()
         self.use_skill = MagicMock()
 
+    def get_attack_weapon(self):
+        if self.wielding:
+            return self.wielding[0]
+        if getattr(self.db, "natural_weapon", None):
+            return self.db.natural_weapon
+        from typeclasses.gear import BareHand
+        return BareHand()
+
 
 class TestAttackReactions(unittest.TestCase):
     def setUp(self):
@@ -55,8 +63,7 @@ class TestAttackReactions(unittest.TestCase):
         engine.process_round()
 
     def test_attack_parried(self):
-        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
-             patch("world.system.state_manager.apply_regen"), \
+        with patch("world.system.state_manager.apply_regen"), \
              patch("world.system.state_manager.get_effective_stat", return_value=0), \
              patch("world.system.stat_manager.check_hit", return_value=True), \
              patch("combat.combat_utils.roll_evade", return_value=False), \
@@ -70,8 +77,7 @@ class TestAttackReactions(unittest.TestCase):
         mock_parry.assert_called()
 
     def test_attack_blocked(self):
-        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
-             patch("world.system.state_manager.apply_regen"), \
+        with patch("world.system.state_manager.apply_regen"), \
              patch("world.system.state_manager.get_effective_stat", return_value=0), \
              patch("world.system.stat_manager.check_hit", return_value=True), \
              patch("combat.combat_utils.roll_evade", return_value=False), \
@@ -86,8 +92,7 @@ class TestAttackReactions(unittest.TestCase):
         mb.assert_called()
 
     def test_attack_critical(self):
-        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
-             patch("world.system.state_manager.apply_regen"), \
+        with patch("world.system.state_manager.apply_regen"), \
              patch("world.system.state_manager.get_effective_stat", return_value=0), \
              patch("world.system.stat_manager.check_hit", return_value=True), \
              patch("combat.combat_utils.roll_evade", return_value=False), \

@@ -180,7 +180,6 @@ class TestCombatEngine(unittest.TestCase):
         b = Dummy()
         with patch('world.system.state_manager.apply_regen'), \
              patch('world.system.state_manager.get_effective_stat', return_value=0), \
-             patch('combat.combat_actions.utils.inherits_from', return_value=False), \
              patch('combat.engine.damage_processor.delay') as mock_delay, \
              patch('random.randint', return_value=0):
             engine = CombatEngine([a, b], round_time=0)
@@ -454,7 +453,6 @@ class TestCombatNPCTurn(EvenniaTest):
 
         with patch('world.system.state_manager.apply_regen'), \
              patch('world.system.state_manager.get_effective_stat', return_value=0), \
-             patch('combat.combat_actions.utils.inherits_from', return_value=True), \
              patch('random.randint', return_value=0), \
              patch('combat.engine.damage_processor.delay'), \
              patch.object(engine, 'queue_action', wraps=engine.queue_action) as mock_queue:
@@ -551,7 +549,6 @@ class TestUnsavedPrototypeCombat(unittest.TestCase):
         with patch("world.system.state_manager.apply_regen"), \
              patch("world.system.state_manager.check_level_up"), \
              patch("world.system.state_manager.get_effective_stat", return_value=0), \
-             patch("combat.combat_actions.utils.inherits_from", return_value=False), \
              patch("random.randint", return_value=0), \
              patch("combat.engine.damage_processor.delay"):
             engine.start_round()

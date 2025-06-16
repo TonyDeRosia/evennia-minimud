@@ -820,6 +820,22 @@ class Character(ObjectParent, ClothedCharacter):
         if self.sessions.count():
             self.msg(prompt=self.get_resource_prompt())
 
+    def get_attack_weapon(self):
+        """Return the weapon to use for an attack.
+
+        Returns
+        -------
+        object
+            A wielded weapon, a natural weapon mapping, or a
+            :class:`~typeclasses.gear.BareHand` instance if unarmed.
+        """
+        if self.wielding:
+            return self.wielding[0]
+        if getattr(self.db, "natural_weapon", None):
+            return self.db.natural_weapon
+        from typeclasses.gear import BareHand
+        return BareHand()
+
     def attack(self, target, weapon, **kwargs):
         """Execute an attack using ``weapon`` against ``target``."""
         if not self.in_combat or self.db.fleeing or self.tags.has("unconscious"):
