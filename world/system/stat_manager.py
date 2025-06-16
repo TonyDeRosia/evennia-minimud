@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Dict
+from typing import Dict, Optional, Mapping
 import re
 from random import randint
 import logging
@@ -422,26 +422,9 @@ def refresh_stats(obj) -> None:
 
     # compute hit chance using primary totals
     hc_bonus = gear_bonus.get("hit_chance", 0) + buff_bonus.get("hit_chance", 0)
-    derived["hit_chance"] = int(
-        max(
-            5,
-            min(
-                95,
-                round(
-                    50
-                    + primary_totals.get("DEX", 0) * 0.15
-                    + max(
-                        primary_totals.get("STR", 0),
-                        primary_totals.get("INT", 0),
-                        primary_totals.get("WIS", 0),
-                    )
-                    * 0.10
-                    + primary_totals.get("LUCK", 0) * 0.05
-                    + hc_bonus
-                ),
-            ),
-        )
-    )
+    hc = compute_hit_chance(obj, primary_totals)
+    hc = int(max(5, min(95, round(hc + hc_bonus))))
+    derived["hit_chance"] = hc
 
     # perception scales off primary stats but keeps its base value
     perception_trait = trait_get("perception")
@@ -522,16 +505,32 @@ def get_effective_stat(obj, key: str) -> int:
     return int(base)
 
 
-def compute_hit_chance(obj) -> int:
-    """Return the attacker's base hit chance."""
+def compute_hit_chance(obj, primary_totals: Optional[Mapping[str, int]] = None) -> int:
+    """Return the attacker's base hit chance.
 
-    dex = get_effective_stat(obj, "DEX")
-    luck = get_effective_stat(obj, "LUCK")
-    best = max(
-        get_effective_stat(obj, "STR"),
-        get_effective_stat(obj, "INT"),
-        get_effective_stat(obj, "WIS"),
-    )
+    If ``primary_totals`` is supplied, those values are used instead of
+    calling :func:`get_effective_stat` for the primary attributes.  The
+    mapping should provide totals for ``STR``, ``DEX``, ``INT``, ``WIS`` and
+    ``LUCK``.
+    """
+
+    if primary_totals is None:
+        dex = get_effective_stat(obj, "DEX")
+        luck = get_effective_stat(obj, "LUCK")
+        best = max(
+            get_effective_stat(obj, "STR"),
+            get_effective_stat(obj, "INT"),
+            get_effective_stat(obj, "WIS"),
+        )
+    else:
+        dex = primary_totals.get("DEX", 0)
+        luck = primary_totals.get("LUCK", 0)
+        best = max(
+            primary_totals.get("STR", 0),
+            primary_totals.get("INT", 0),
+            primary_totals.get("WIS", 0),
+        )
+
     chance = 50 + dex * 0.15 + best * 0.10 + luck * 0.05
     return int(max(5, min(95, round(chance))))
 
