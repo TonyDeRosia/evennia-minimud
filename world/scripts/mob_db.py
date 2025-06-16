@@ -18,7 +18,17 @@ class MobDB(DefaultScript):
     # ------------------------------------------------------------------
     def get_proto(self, vnum):
         """Return prototype dict for ``vnum`` or ``None``."""
-        return self.db.vnums.get(int(vnum))
+        try:
+            vnum_int = int(vnum)
+        except (TypeError, ValueError):
+            vnum_int = None
+
+        if vnum_int is not None:
+            proto = self.db.vnums.get(vnum_int)
+            if proto is not None:
+                return proto
+
+        return self.db.vnums.get(str(vnum))
 
     def add_proto(self, vnum, data):
         """Store ``data`` for ``vnum``. Ensure ``spawn_count`` key exists."""
@@ -28,19 +38,36 @@ class MobDB(DefaultScript):
         if "spawn_count" not in proto:
             proto["spawn_count"] = self.db.vnums.get(vnum, {}).get("spawn_count", 0)
         self.db.vnums[vnum] = proto
+        self.db.vnums[str(vnum)] = proto
 
     def increment_spawn_count(self, vnum):
         """Increase the stored spawn counter for ``vnum``."""
-        vnum = int(vnum)
-        proto = self.db.vnums.get(vnum)
+        try:
+            vnum_int = int(vnum)
+        except (TypeError, ValueError):
+            vnum_int = None
+
+        proto = self.get_proto(vnum_int if vnum_int is not None else str(vnum))
         if not proto:
             return
         proto["spawn_count"] = int(proto.get("spawn_count", 0)) + 1
-        self.db.vnums[vnum] = proto
+        if vnum_int is not None:
+            self.db.vnums[vnum_int] = proto
+            self.db.vnums[str(vnum_int)] = proto
+        else:
+            self.db.vnums[str(vnum)] = proto
 
     def delete_proto(self, vnum):
         """Remove ``vnum`` from the database."""
-        self.db.vnums.pop(int(vnum), None)
+        try:
+            vnum_int = int(vnum)
+        except (TypeError, ValueError):
+            vnum_int = None
+        if vnum_int is not None:
+            self.db.vnums.pop(vnum_int, None)
+            self.db.vnums.pop(str(vnum_int), None)
+        else:
+            self.db.vnums.pop(str(vnum), None)
 
     def next_vnum(self):
         """Return the next available vnum and increment the counter."""

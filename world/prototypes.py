@@ -675,8 +675,10 @@ def get_npc_prototypes(filter_by: Optional[dict] = None) -> Dict[str, dict]:
 
             def _zone_match(entry):
                 if isinstance(entry, (list, tuple)):
-                    return entry and entry[0] == zone and (
-                        len(entry) == 1 or entry[1] in {"zone", "area"}
+                    return (
+                        entry
+                        and entry[0] == zone
+                        and (len(entry) == 1 or entry[1] in {"zone", "area"})
                     )
                 return False
 
@@ -692,6 +694,8 @@ def register_npc_prototype(key: str, prototype: dict):
     registry = _load_npc_registry()
     _normalize_proto(prototype)
     registry[key] = prototype
+    if vnum := prototype.get("vnum"):
+        registry[str(int(vnum))] = prototype
     _save_npc_registry(registry)
 
 

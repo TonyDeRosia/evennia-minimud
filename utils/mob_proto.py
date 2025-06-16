@@ -69,9 +69,28 @@ def register_prototype(
     return vnum
 
 
-def get_prototype(vnum: int) -> Optional[dict]:
-    """Return the prototype stored for ``vnum`` or ``None``."""
-    return get_mobdb().get_proto(vnum)
+def get_prototype(vnum: int | str) -> Optional[dict]:
+    """Return the prototype stored for ``vnum`` or ``None``.
+
+    This helper accepts both integer and string VNUM keys and will
+    attempt to look up either form in the mob database.
+    """
+
+    mob_db = get_mobdb()
+
+    # try integer lookup first
+    try:
+        vnum_int = int(vnum)
+    except (TypeError, ValueError):
+        vnum_int = None
+
+    if vnum_int is not None:
+        proto = mob_db.get_proto(vnum_int)
+        if proto is not None:
+            return proto
+
+    # fall back to string key
+    return mob_db.db.vnums.get(str(vnum))
 
 
 def _spawn_item(vnum: int) -> Any | None:
@@ -109,7 +128,14 @@ def apply_proto_items(npc, proto_data: dict) -> None:
         item.location = npc
         slot_norm = normalize_slot(slot) or slot
         try:
-            if slot_norm in {"mainhand", "offhand", "twohanded", "mainhand/offhand", "left", "right"}:
+            if slot_norm in {
+                "mainhand",
+                "offhand",
+                "twohanded",
+                "mainhand/offhand",
+                "left",
+                "right",
+            }:
                 hand = None
                 if slot_norm in {"mainhand", "right"}:
                     hand = "right"

@@ -57,8 +57,9 @@ class TestMEditCommand(EvenniaTest):
         assert self.char1.ndb.mob_vnum == 5
 
     def test_medit_create(self):
-        with patch("commands.rom_mob_editor.EvMenu") as mock_menu, patch(
-            "commands.rom_mob_editor.get_template", return_value={"level": 2}
+        with (
+            patch("commands.rom_mob_editor.EvMenu") as mock_menu,
+            patch("commands.rom_mob_editor.get_template", return_value={"level": 2}),
         ):
             self.char1.execute_cmd("medit create 10")
             mock_menu.assert_called_with(
@@ -101,7 +102,9 @@ class TestMEditCommand(EvenniaTest):
         from commands import rom_mob_editor
 
         self.char1.ndb.mob_proto = {}
-        with patch("commands.rom_mob_editor.load_prototype", return_value={"key": "obj"}):
+        with patch(
+            "commands.rom_mob_editor.load_prototype", return_value={"key": "obj"}
+        ):
             rom_mob_editor._edit_inventory(self.char1, "add 100001")
             assert self.char1.ndb.mob_proto["inventory"] == [100001]
             rom_mob_editor._edit_inventory(self.char1, "remove 100001")
@@ -131,3 +134,36 @@ class TestMEditCommand(EvenniaTest):
         with path.open() as f:
             data = json.load(f)
         assert "ogre" in data
+
+    def test_medit_string_vnum_lookup(self):
+        """Editing should work if the prototype is stored under a string key."""
+        from world.scripts.mob_db import get_mobdb
+
+        mob_db = get_mobdb()
+        mob_db.db.vnums["5"] = {"key": "orc", "vnum": 5}
+
+        with patch("commands.rom_mob_editor.EvMenu") as mock_menu:
+            self.char1.execute_cmd("medit 5")
+            mock_menu.assert_called_with(
+                self.char1,
+                "commands.rom_mob_editor",
+                startnode="menunode_main",
+            )
+        assert self.char1.ndb.mob_vnum == 5
+        assert self.char1.ndb.mob_proto["key"] == "orc"
+
+    def test_medit_not_found_message(self):
+        """Missing prototypes should show a helpful message."""
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("medit 999")
+        out = self.char1.msg.call_args[0][0]
+        assert "Prototype 999 not found." in out
+
+    def test_medit_create_duplicate_vnum(self):
+        from utils.mob_proto import register_prototype
+
+        register_prototype({"key": "gob"}, vnum=10)
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("medit create 10")
+        out = self.char1.msg.call_args[0][0]
+        assert "Invalid or already used VNUM" in out
