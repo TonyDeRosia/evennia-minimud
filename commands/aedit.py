@@ -205,7 +205,18 @@ class CmdAEdit(Command):
             start_val, end_val = int(args[1]), int(args[2])
             for warn in AreaValidator().validate({"start": start_val, "end": end_val}):
                 self.msg(warn)
-            area.start, area.end = min(start_val, end_val), max(start_val, end_val)
+            start, end = min(start_val, end_val), max(start_val, end_val)
+            areas = get_areas()
+            for other in areas:
+                if other.key.lower() == area.key.lower():
+                    continue
+                if not (end < other.start or start > other.end):
+                    self.msg(
+                        f"Area '{name}' range overlaps with {other.key} ({other.start}-{other.end})"
+                    )
+                    return
+            area.start = start
+            area.end = end
             update_area(idx, area)
             self.msg("Range updated.")
             return
