@@ -152,6 +152,47 @@ class CmdRooms(Command):
         self.msg("\n".join([header] + lines))
 
 
+class CmdRList(Command):
+    """List rooms in an area."""
+
+    key = "rlist"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        area_name = self.args.strip()
+        if not area_name:
+            location = self.caller.location
+            if not location or not location.db.area:
+                self.msg("Usage: rlist <area>")
+                return
+            area_name = location.db.area
+
+        _, area = find_area(area_name)
+        if area is None:
+            self.msg("Unknown area.")
+            return
+
+        objs = ObjectDB.objects.filter(
+            db_attributes__db_key="area",
+            db_attributes__db_strvalue__iexact=area_name,
+        )
+        rooms = [obj for obj in objs if obj.is_typeclass(Room, exact=False)]
+        if not rooms:
+            self.msg(f"No rooms found in {area_name}.")
+            return
+
+        lines = []
+        for room in sorted(
+            rooms, key=lambda r: r.db.room_id if r.db.room_id is not None else r.id
+        ):
+            num = room.db.room_id if room.db.room_id is not None else room.id
+            lines.append(f"{num}: {room.key}")
+
+        header = f"Rooms in {area_name}"
+        self.msg("\n".join([header] + lines))
+
+
 class CmdRMake(Command):
     """Create an unlinked room in a registered area."""
 
@@ -377,6 +418,7 @@ class AreaCmdSet(CmdSet):
         self.add(CmdAMake)
         self.add(CmdASet)
         self.add(CmdRooms)
+        self.add(CmdRList)
         self.add(CmdRMake)
         self.add(CmdRName)
         self.add(CmdRDesc)
