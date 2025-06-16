@@ -34,10 +34,21 @@ def calculate_damage(attacker, weapon, target) -> Tuple[int, object]:
         if isinstance(weapon, dict):
             dmg = weapon.get("damage")
             dtype = weapon.get("damage_type", DamageType.BLUDGEONING)
+            if dmg is None:
+                dice = weapon.get("damage_dice")
+                if dice:
+                    try:
+                        num, sides = map(int, str(dice).lower().split("d"))
+                    except (TypeError, ValueError):
+                        logger.error("Invalid damage_dice '%s' on %s", dice, weapon)
+                        dmg = 0
+                    else:
+                        dmg = roll_damage((num, sides))
+            dmg_bonus = int(weapon.get("damage_bonus", 0) or 0)
         else:
             dmg = getattr(weapon, "damage", None)
             dtype = getattr(weapon, "damage_type", DamageType.BLUDGEONING)
-
+            
         if dmg is None:
             db = getattr(weapon, "db", None)
             if db:
@@ -66,9 +77,13 @@ def calculate_damage(attacker, weapon, target) -> Tuple[int, object]:
                             dmg = roll_damage((num, sides))
                     else:
                         dmg = int(getattr(db, "dmg", 0))
+                dmg_bonus = int(getattr(db, "damage_bonus", 0) or 0)
+            else:
+                dmg_bonus = 0
 
         if dmg is None:
             dmg = 0
+        dmg += dmg_bonus
 
         str_val = state_manager.get_effective_stat(attacker, "STR")
         dex_val = state_manager.get_effective_stat(attacker, "DEX")

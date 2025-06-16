@@ -69,6 +69,6 @@
         "npc_type": "base",
         "race": "human",
         "level": 1,
-        "damage": 1
+        "damage_dice": "1d2"
     }
 }
