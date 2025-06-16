@@ -119,13 +119,12 @@ class TestAttackAction(unittest.TestCase):
         with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
              patch("world.system.state_manager.apply_regen"), \
              patch("world.system.state_manager.get_effective_stat", return_value=0), \
-             patch("random.randint", return_value=0), \
-             patch("combat.combat_utils.roll_damage", return_value=3) as mock_roll:
+             patch("combat.actions.utils.roll_dice_string", return_value=3) as mock_roll:
             engine.start_round()
             engine.process_round()
 
         self.assertEqual(defender.hp, 3)
-        mock_roll.assert_called_with((1, 4))
+        mock_roll.assert_called_with("1d4")
 
     def test_attack_uses_db_damage_mapping(self):
         attacker = Dummy()
