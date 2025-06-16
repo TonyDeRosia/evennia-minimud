@@ -29,6 +29,14 @@ class CmdAList(Command):
     help_category = "Building"
 
     def func(self):
+        if self.args.strip().lower() == "current":
+            room = self.caller.location
+            if room and room.db.area:
+                self.msg(f"Current area: {room.db.area}")
+            else:
+                self.msg("This room is not within a registered area.")
+            return
+
         areas = get_areas()
         if not areas:
             area_data: dict[str, dict] = {}

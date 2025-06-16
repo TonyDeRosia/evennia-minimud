@@ -52,3 +52,9 @@ class TestAListCommand(EvenniaTest):
         self.assertEqual(cols[2], "4")
         self.assertEqual(cols[3], "1")
 
+    def test_current(self):
+        self.char1.location = self.room1
+        self.char1.execute_cmd("alist current")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Current area: zone", out)
+
