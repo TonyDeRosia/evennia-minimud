@@ -57,6 +57,8 @@ def register_prototype(
                 raise ValueError("VNUM outside area range")
         if validate_vnum(vnum, "npc"):
             register_vnum(vnum)
+    if area:
+        data["area"] = area
     mob_db.add_proto(vnum, data)
 
     key = data.get("key")

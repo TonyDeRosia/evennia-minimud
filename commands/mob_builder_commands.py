@@ -12,6 +12,7 @@ from utils.prototype_manager import load_all_prototypes
 from .command import Command
 from . import npc_builder
 from world import prototypes, area_npcs
+from world.areas import get_areas
 from world.mob_constants import (
     NPC_RACES,
     NPC_CLASSES,
@@ -474,6 +475,7 @@ class CmdMList(Command):
         table = evtable.EvTable(
             "VNUM",
             "Key",
+            "Area",
             "Status",
             "Lvl",
             "Class",
@@ -501,9 +503,21 @@ class CmdMList(Command):
                 finalized = True
             status = "yes" if finalized else "no"
             primary = roles[0] if roles else "-"
+            area_val = proto.get("area")
+            if not area_val:
+                for ar in get_areas():
+                    if key in area_npcs.get_area_npc_list(ar.key):
+                        area_val = ar.key
+                        break
+            if not area_val and vnum is not None:
+                for ar in get_areas():
+                    if ar.start <= int(vnum) <= ar.end:
+                        area_val = ar.key
+                        break
             table.add_row(
                 str(vnum) if vnum is not None else "-",
                 key,
+                area_val or "-",
                 status,
                 str(proto.get("level", "-")),
                 proto.get("npc_type", "-"),
