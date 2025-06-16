@@ -944,7 +944,7 @@ class CmdEditNPC(Command):
         data = self.caller.ndb.buildnpc
         mob_db = get_mobdb()
         vnum = data.get("vnum") or npc.db.vnum
-        finalized = vnum is not None and int(vnum) in mob_db.db.vnums
+        finalized = vnum is not None and str(vnum) in mob_db.db.vnums
         status = "✅" if finalized else "🚫"
         roles = data.get("roles") or []
         if isinstance(roles, str):
