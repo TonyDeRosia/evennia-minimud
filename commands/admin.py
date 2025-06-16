@@ -52,7 +52,7 @@ from .npc_builder import (
     CmdMobTemplate,
     CmdQuickMob,
 )
-from .rom_mob_editor import CmdMEdit as CmdRomMobEdit
+from .rom_mob_editor import CmdMEdit
 from .mob_builder_commands import CmdProtoEdit
 from .cmdmobbuilder import CmdMobProto
 from .nextvnum import CmdNextVnum
@@ -1442,7 +1442,7 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdQuickMob)
         self.add(CmdMSpawn)
         self.add(CmdMobPreview)
-        self.add(CmdRomMobEdit)
+        self.add(CmdMEdit)
         self.add(CmdProtoEdit)
         self.add(CmdMCreate)
         self.add(CmdMSet)
