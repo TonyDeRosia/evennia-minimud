@@ -35,3 +35,14 @@ File: `world/npc_handlers/mob_ai.py`
 
 Together these components recreate the familiar combat loop of a ROM MUD within Evennia while remaining fully scriptable.
 
+## Round Sequence
+
+The following outlines how a single combat round flows through the system:
+
+1. `CombatRoundManager._tick` calls `CombatInstance.process_round` for each active combat instance.
+2. `CombatInstance.process_round` synchronizes its participants and verifies at least two are still able to fight.
+3. If combat continues, it invokes `CombatEngine.process_round` which delegates to the `DamageProcessor`.
+4. `DamageProcessor.process_round` starts the round, gathers queued actions from the `TurnManager` and resolves them in initiative order.
+5. Defeated combatants are removed and experience rewards granted as part of the processing.
+6. After returning, `CombatInstance.sync_participants` runs again to clean up and determine if the combat should end.
+
