@@ -1,7 +1,10 @@
 from evennia.utils.evtable import EvTable
 from evennia import CmdSet
+from evennia.objects.models import ObjectDB
+from typeclasses.rooms import Room
 from .command import Command
 from world.areas import Area, get_areas, save_area, update_area, find_area
+from world import area_npcs
 from olc.base import OLCValidator
 
 
@@ -29,11 +32,32 @@ class CmdAList(Command):
         if not areas:
             self.msg("No areas defined.")
             return
-        table = EvTable("Name", "Range", "Builders", "Flags", "Age", "Interval", border="cells")
+        table = EvTable(
+            "Name",
+            "Range",
+            "Rooms",
+            "Mobs",
+            "Builders",
+            "Flags",
+            "Age",
+            "Interval",
+            border="cells",
+        )
         for area in areas:
+            objs = ObjectDB.objects.filter(
+                db_attributes__db_key="area",
+                db_attributes__db_strvalue__iexact=area.key,
+            )
+            rooms = [obj for obj in objs if obj.is_typeclass(Room, exact=False)]
+            room_count = len(rooms)
+
+            mob_count = len(area_npcs.get_area_npc_list(area.key))
+
             table.add_row(
                 area.key,
                 f"{area.start}-{area.end}",
+                str(room_count),
+                str(mob_count),
                 ", ".join(area.builders),
                 ", ".join(area.flags),
                 str(area.age),
