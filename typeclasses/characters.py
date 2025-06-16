@@ -370,10 +370,10 @@ class Character(ObjectParent, ClothedCharacter):
 
         # apply armor damage reduction with piercing
         reduction = self.defense(damage_type)
+        armor = max(0, reduction)
         if attacker:
-            reduction = max(0, reduction - state_manager.get_effective_stat(attacker, "piercing"))
-        damage -= reduction
-        damage = max(0, damage)
+            armor = max(0, armor - state_manager.get_effective_stat(attacker, "piercing"))
+        damage = int(max(0, round(damage * (1 - armor / 100))))
         if attacker:
             log = getattr(self.ndb, "damage_log", None) or {}
             log[attacker] = log.get(attacker, 0) + int(damage)

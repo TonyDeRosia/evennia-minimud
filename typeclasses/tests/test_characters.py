@@ -406,10 +406,10 @@ class TestCombatResists(EvenniaTest):
         self.assertFalse(char.tags.has("unconscious", category="status"))
 
     def test_armor_reduces_damage(self):
-        self.char2.traits.armor.base = 5
+        self.char2.traits.armor.base = 10
         base = self.char2.traits.health.current
         self.char2.at_damage(self.char1, 10)
-        self.assertEqual(self.char2.traits.health.current, base - 5)
+        self.assertEqual(self.char2.traits.health.current, base - 9)
 
     def test_evasion_prevents_weapon_damage(self):
         self.char2.traits.evasion.base = 100
