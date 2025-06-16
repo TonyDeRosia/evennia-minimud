@@ -35,11 +35,15 @@ class CmdKick(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Kick whom?")
-            return
-        target = self.caller.search(self.args.strip())
-        if not target:
-            return
+            if self.caller.in_combat and self.caller.db.combat_target:
+                target = self.caller.db.combat_target
+            else:
+                self.msg("Kick whom?")
+                return
+        else:
+            target = self.caller.search(self.args.strip())
+            if not target:
+                return
         skill = Kick()
         if not self.caller.cooldowns.ready(skill.name):
             self.msg("You are still recovering.")
