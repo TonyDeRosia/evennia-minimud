@@ -105,3 +105,11 @@ def get_area_vnum_range(name: str) -> Optional[tuple[int, int]]:
     return None
 
 
+def find_area_by_vnum(vnum: int) -> Area | None:
+    """Return the area whose range includes ``vnum``."""
+    for area in get_areas():
+        if area.start <= vnum <= area.end:
+            return area
+    return None
+
+

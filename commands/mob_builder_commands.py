@@ -13,6 +13,7 @@ from .command import Command
 from . import npc_builder
 from world import prototypes, area_npcs
 from world.areas import get_areas
+from world.areas import find_area_by_vnum
 from world.mob_constants import (
     NPC_RACES,
     NPC_CLASSES,
@@ -934,5 +935,8 @@ class CmdProtoEdit(Command):
 
         proto = dict(proto)
         proto[self.field] = val
-        register_prototype(proto, vnum=self.vnum)
+        area = find_area_by_vnum(self.vnum)
+        if area and "area" not in proto:
+            proto["area"] = area.key
+        register_prototype(proto, vnum=self.vnum, area=area.key if area else None)
         self.msg(f"{self.field} updated on {self.vnum}.")

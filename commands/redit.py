@@ -5,6 +5,7 @@ from __future__ import annotations
 from olc.base import OLCEditor, OLCState, OLCValidator
 from utils.prototype_manager import save_prototype
 from utils.vnum_registry import validate_vnum, register_vnum
+from world.areas import find_area_by_vnum
 from .building import DIR_FULL, OPPOSITE
 from .command import Command
 
@@ -211,7 +212,10 @@ class CmdREdit(Command):
             self.msg("Invalid or already used VNUM.")
             return
         register_vnum(vnum)
-        self.caller.ndb.room_protos = {vnum: {"vnum": vnum, "key": f"Room {vnum}", "desc": "", "flags": [], "exits": {}}}
+        proto = {"vnum": vnum, "key": f"Room {vnum}", "desc": "", "flags": [], "exits": {}}
+        if area := find_area_by_vnum(vnum):
+            proto["area"] = area.key
+        self.caller.ndb.room_protos = {vnum: proto}
         self.caller.ndb.current_vnum = vnum
         state = OLCState(data=self.caller.ndb.room_protos, vnum=vnum, original=dict(self.caller.ndb.room_protos))
         OLCEditor(
