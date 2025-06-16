@@ -79,6 +79,7 @@ def _parse_flags(text: str, enum_cls) -> list[str]:
 # Menu nodes
 # ----------------------------------------------------------------------
 
+
 def menunode_main(caller, raw_string="", **kwargs):
     text = "Choose an option:"
     options = [
@@ -380,7 +381,11 @@ def _edit_loot(caller, raw_string, **kwargs):
         proto = parts[0]
         if proto.isdigit():
             vnum = int(proto)
-            if not vnum_registry.VNUM_RANGES["object"][0] <= vnum <= vnum_registry.VNUM_RANGES["object"][1]:
+            if (
+                not vnum_registry.VNUM_RANGES["object"][0]
+                <= vnum
+                <= vnum_registry.VNUM_RANGES["object"][1]
+            ):
                 caller.msg("Invalid object VNUM.")
                 return "menunode_loot"
             if not load_prototype("object", vnum):
@@ -474,7 +479,11 @@ def _edit_inventory(caller, raw_string, **kwargs):
             caller.msg("Usage: add <vnum>")
             return "menunode_inventory"
         vnum = int(vnum_str)
-        if not vnum_registry.VNUM_RANGES["object"][0] <= vnum <= vnum_registry.VNUM_RANGES["object"][1]:
+        if (
+            not vnum_registry.VNUM_RANGES["object"][0]
+            <= vnum
+            <= vnum_registry.VNUM_RANGES["object"][1]
+        ):
             caller.msg("Invalid object VNUM.")
             return "menunode_inventory"
         if not load_prototype("object", vnum):
@@ -530,7 +539,11 @@ def _edit_equipment(caller, raw_string, **kwargs):
             caller.msg("Usage: add <vnum>")
             return "menunode_equipment"
         vnum = int(vnum_str)
-        if not vnum_registry.VNUM_RANGES["object"][0] <= vnum <= vnum_registry.VNUM_RANGES["object"][1]:
+        if (
+            not vnum_registry.VNUM_RANGES["object"][0]
+            <= vnum
+            <= vnum_registry.VNUM_RANGES["object"][1]
+        ):
             caller.msg("Invalid object VNUM.")
             return "menunode_equipment"
         if not load_prototype("object", vnum):
@@ -700,7 +713,7 @@ class CmdMEdit(Command):
                 caller.msg("Usage: medit create <vnum>")
                 return
             vnum = int(parts[1])
-            if not validate_vnum(vnum, "npc"):
+            if get_prototype(vnum) is not None or not validate_vnum(vnum, "npc"):
                 caller.msg("Invalid or already used VNUM.")
                 return
             register_vnum(vnum)
@@ -712,12 +725,11 @@ class CmdMEdit(Command):
                 caller.msg("Usage: medit <vnum> | medit create <vnum>")
                 return
             vnum = int(sub)
-            proto = get_prototype(vnum) or {}
+            proto = get_prototype(sub)
             if not proto:
-                caller.msg("Prototype not found. Use 'medit create <vnum>'.")
+                caller.msg(f"Prototype {sub} not found.")
                 return
         proto["vnum"] = vnum
         caller.ndb.mob_vnum = vnum
         caller.ndb.mob_proto = dict(proto)
         EvMenu(caller, "commands.rom_mob_editor", startnode="menunode_main")
-
