@@ -19,33 +19,33 @@ class TestActionUtils(unittest.TestCase):
         self.target = MagicMock(key="Target")
 
     def test_check_hit_miss(self):
-        from combat.engine import utils
-        with patch("combat.engine.utils.stat_manager.check_hit", return_value=False):
-            hit, msg = utils.check_hit(self.attacker, self.target)
+        from combat.engine import CombatMath
+        with patch("combat.engine.combat_math.stat_manager.check_hit", return_value=False):
+            hit, msg = CombatMath.check_hit(self.attacker, self.target)
         self.assertFalse(hit)
         self.assertIn("misses", msg)
 
     def test_check_hit_parry(self):
-        from combat.engine import utils
-        with patch("combat.engine.utils.stat_manager.check_hit", return_value=True), \
-             patch("combat.engine.utils.roll_evade", return_value=False), \
-             patch("combat.engine.utils.roll_parry", return_value=True):
-            hit, msg = utils.check_hit(self.attacker, self.target)
+        from combat.engine import CombatMath
+        with patch("combat.engine.combat_math.stat_manager.check_hit", return_value=True), \
+             patch("combat.engine.combat_math.roll_evade", return_value=False), \
+             patch("combat.engine.combat_math.roll_parry", return_value=True):
+            hit, msg = CombatMath.check_hit(self.attacker, self.target)
         self.assertFalse(hit)
         self.assertIn("parries", msg)
 
     def test_calculate_damage(self):
-        from combat.engine import utils
+        from combat.engine import CombatMath
         weapon = {"damage": 4, "damage_type": DamageType.SLASHING}
-        with patch("combat.engine.utils.state_manager.get_effective_stat") as mock_get:
+        with patch("combat.engine.combat_math.state_manager.get_effective_stat") as mock_get:
             mock_get.side_effect = lambda obj, stat: 10 if stat == "STR" else 0
-            dmg, dtype = utils.calculate_damage(self.attacker, weapon, self.target)
+            dmg, dtype = CombatMath.calculate_damage(self.attacker, weapon, self.target)
         self.assertEqual(dtype, DamageType.SLASHING)
         self.assertEqual(dmg, int(round(4 * (1 + 10 * 0.05))))
 
     def test_damage_mapping_stable_order(self):
         """Weapon damage mapping should produce consistent results regardless of key order."""
-        from combat.engine import utils
+        from combat.engine import CombatMath
 
         weapon = MagicMock()
         weapon.damage = None
@@ -63,22 +63,22 @@ class TestActionUtils(unittest.TestCase):
             DamageType.FIRE: "1",
         }
 
-        with patch("combat.engine.utils.roll_dice_string", return_value=1), \
-             patch("combat.engine.utils.state_manager.get_effective_stat", side_effect=lambda obj, stat: 0):
+        with patch("combat.engine.combat_math.roll_dice_string", return_value=1), \
+             patch("combat.engine.combat_math.state_manager.get_effective_stat", side_effect=lambda obj, stat: 0):
             weapon.db.damage = mapping1
-            dmg1, dtype1 = utils.calculate_damage(self.attacker, weapon, self.target)
+            dmg1, dtype1 = CombatMath.calculate_damage(self.attacker, weapon, self.target)
 
-        with patch("combat.engine.utils.roll_dice_string", return_value=1), \
-             patch("combat.engine.utils.state_manager.get_effective_stat", side_effect=lambda obj, stat: 0):
+        with patch("combat.engine.combat_math.roll_dice_string", return_value=1), \
+             patch("combat.engine.combat_math.state_manager.get_effective_stat", side_effect=lambda obj, stat: 0):
             weapon.db.damage = mapping2
-            dmg2, dtype2 = utils.calculate_damage(self.attacker, weapon, self.target)
+            dmg2, dtype2 = CombatMath.calculate_damage(self.attacker, weapon, self.target)
 
         self.assertEqual(dmg1, dmg2)
         self.assertEqual(dtype1, dtype2)
 
     def test_damage_bonus_applied_and_scaled(self):
         """Damage bonus should be added before stat scaling."""
-        from combat.engine import utils
+        from combat.engine import CombatMath
 
         weapon = MagicMock()
         weapon.damage = None
@@ -88,12 +88,12 @@ class TestActionUtils(unittest.TestCase):
         weapon.db.damage_dice = "1d4"
         weapon.db.damage_bonus = 5
 
-        with patch("combat.engine.utils.roll_dice_string", return_value=2), \
+        with patch("combat.engine.combat_math.roll_dice_string", return_value=2), \
              patch(
-                 "combat.engine.utils.state_manager.get_effective_stat",
+                 "combat.engine.combat_math.state_manager.get_effective_stat",
                  side_effect=lambda obj, stat: 10 if stat == "STR" else 0,
              ):
-            dmg, dtype = utils.calculate_damage(self.attacker, weapon, self.target)
+            dmg, dtype = CombatMath.calculate_damage(self.attacker, weapon, self.target)
 
         expected = int(round((2 + 5) * (1 + 10 * 0.05)))
         self.assertEqual(dmg, expected)
@@ -101,7 +101,7 @@ class TestActionUtils(unittest.TestCase):
 
     def test_damage_default_dice_and_bonus(self):
         """Missing damage_dice should fallback to '2d6' and include bonus."""
-        from combat.engine import utils
+        from combat.engine import CombatMath
 
         weapon = MagicMock()
         weapon.damage = None
@@ -111,22 +111,22 @@ class TestActionUtils(unittest.TestCase):
         weapon.db.damage_dice = None
         weapon.db.damage_bonus = 1
 
-        with patch("combat.engine.utils.roll_dice_string", return_value=2) as mock_roll, \
+        with patch("combat.engine.combat_math.roll_dice_string", return_value=2) as mock_roll, \
              patch(
-                 "combat.engine.utils.state_manager.get_effective_stat",
+                 "combat.engine.combat_math.state_manager.get_effective_stat",
                  side_effect=lambda obj, stat: 0,
              ):
-            dmg, dtype = utils.calculate_damage(self.attacker, weapon, self.target)
+            dmg, dtype = CombatMath.calculate_damage(self.attacker, weapon, self.target)
 
         mock_roll.assert_called_once_with("2d6")
         self.assertEqual(dmg, 3)
         self.assertEqual(dtype, DamageType.BLUDGEONING)
 
     def test_apply_critical(self):
-        from combat.engine import utils
-        with patch("combat.engine.utils.stat_manager.roll_crit", return_value=True), \
-             patch("combat.engine.utils.stat_manager.crit_damage", return_value=8):
-            dmg, crit = utils.apply_critical(self.attacker, self.target, 5)
+        from combat.engine import CombatMath
+        with patch("combat.engine.combat_math.stat_manager.roll_crit", return_value=True), \
+             patch("combat.engine.combat_math.stat_manager.crit_damage", return_value=8):
+            dmg, crit = CombatMath.apply_critical(self.attacker, self.target, 5)
         self.assertTrue(crit)
         self.assertEqual(dmg, 8)
 

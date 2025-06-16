@@ -119,7 +119,7 @@ class TestAttackAction(unittest.TestCase):
         with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
              patch("world.system.state_manager.apply_regen"), \
              patch("world.system.state_manager.get_effective_stat", return_value=0), \
-             patch("combat.engine.utils.roll_dice_string", return_value=3) as mock_roll:
+             patch("combat.engine.combat_math.roll_dice_string", return_value=3) as mock_roll:
             engine.start_round()
             engine.process_round()
 
@@ -317,10 +317,10 @@ def test_npc_damage_dice_with_bonus():
          patch("world.system.state_manager.get_effective_stat", return_value=0), \
          patch("world.system.stat_manager.check_hit", return_value=True), \
          patch("world.system.stat_manager.roll_crit", return_value=False), \
-         patch("combat.engine.utils.roll_evade", return_value=False), \
-         patch("combat.engine.utils.roll_parry", return_value=False), \
-         patch("combat.engine.utils.roll_block", return_value=False), \
-         patch("combat.engine.utils.roll_dice_string", return_value=4) as mock_roll, \
+         patch("combat.engine.combat_math.roll_evade", return_value=False), \
+         patch("combat.engine.combat_math.roll_parry", return_value=False), \
+         patch("combat.engine.combat_math.roll_block", return_value=False), \
+         patch("combat.engine.combat_math.roll_dice_string", return_value=4) as mock_roll, \
          patch("evennia.utils.delay"):
         engine.start_round()
         engine.process_round()
@@ -343,10 +343,10 @@ def test_npc_damage_dice_fallback_to_2d6():
          patch("world.system.state_manager.get_effective_stat", return_value=0), \
          patch("world.system.stat_manager.check_hit", return_value=True), \
          patch("world.system.stat_manager.roll_crit", return_value=False), \
-         patch("combat.engine.utils.roll_evade", return_value=False), \
-         patch("combat.engine.utils.roll_parry", return_value=False), \
-         patch("combat.engine.utils.roll_block", return_value=False), \
-         patch("combat.engine.utils.roll_dice_string", return_value=1) as mock_roll, \
+         patch("combat.engine.combat_math.roll_evade", return_value=False), \
+         patch("combat.engine.combat_math.roll_parry", return_value=False), \
+         patch("combat.engine.combat_math.roll_block", return_value=False), \
+         patch("combat.engine.combat_math.roll_dice_string", return_value=1) as mock_roll, \
          patch("evennia.utils.delay"):
         engine.start_round()
         engine.process_round()

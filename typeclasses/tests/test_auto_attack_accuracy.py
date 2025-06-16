@@ -2,7 +2,7 @@ import unittest
 from itertools import cycle
 from unittest.mock import patch
 
-from combat.engine.utils import check_hit
+from combat.engine.combat_math import CombatMath
 
 
 class Dummy:
@@ -36,7 +36,7 @@ class TestAutoAttackAccuracy(unittest.TestCase):
              patch("world.system.stat_manager.get_effective_stat", side_effect=get_stat), \
              patch("world.system.state_manager.get_effective_stat", side_effect=get_stat):
             for _ in range(trials):
-                success, _ = check_hit(attacker, defender)
+                success, _ = CombatMath.check_hit(attacker, defender)
                 if success:
                     hits += 1
 
