@@ -14,6 +14,7 @@ from utils.mob_proto import register_prototype, get_prototype
 from utils.vnum_registry import validate_vnum, register_vnum
 from world.templates.mob_templates import get_template
 from .command import Command
+import re
 
 VALID_STATS = {"STR", "CON", "DEX", "INT", "WIS", "LUCK"}
 
@@ -33,6 +34,16 @@ def _summary(caller) -> str:
     if race := proto.get("race"):
         lines.append(f"Race: {race}")
     skills = proto.get("skills") or {}
+    if isinstance(skills, list):
+        new_skills: dict[str, int] = {}
+        for item in skills:
+            match = re.match(r"^([^()]+)(?:\((\d+)%\))?$", str(item).strip())
+            if match:
+                name = match.group(1).strip()
+                chance = int(match.group(2)) if match.group(2) else 100
+                new_skills[name] = chance
+        proto["skills"] = new_skills
+        skills = new_skills
     if skills:
         parts = ", ".join(f"{k}({v}%)" for k, v in skills.items())
         lines.append(f"Skills: {parts}")
