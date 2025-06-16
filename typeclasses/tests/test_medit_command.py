@@ -28,13 +28,18 @@ class TestMEditCommand(EvenniaTest):
         patcher3 = mock.patch.object(
             vnum_registry, "_REG_PATH", Path(self.tmp.name) / "vnums.json"
         )
+        patcher4 = mock.patch.object(
+            settings, "PROTOTYPE_NPC_FILE", Path(self.tmp.name) / "npcs.json"
+        )
         self.addCleanup(self.tmp.cleanup)
         self.addCleanup(patcher1.stop)
         self.addCleanup(patcher2.stop)
         self.addCleanup(patcher3.stop)
+        self.addCleanup(patcher4.stop)
         patcher1.start()
         patcher2.start()
         patcher3.start()
+        patcher4.start()
 
     def test_medit_opens_builder_with_proto(self):
         from utils.mob_proto import register_prototype
@@ -106,3 +111,23 @@ class TestMEditCommand(EvenniaTest):
             assert self.char1.ndb.mob_proto["equipment"] == [100002]
             rom_mob_editor._edit_equipment(self.char1, "remove 100002")
             assert self.char1.ndb.mob_proto["equipment"] == []
+
+    def test_menu_save_writes_script_and_json(self):
+        from commands import rom_mob_editor
+        from world.scripts.mob_db import get_mobdb
+        import json
+
+        proto = {"key": "ogre", "desc": "big"}
+        self.char1.ndb.mob_proto = dict(proto)
+        self.char1.ndb.mob_vnum = 42
+
+        result = rom_mob_editor.menunode_done(self.char1)
+        assert result is None
+
+        mob_db = get_mobdb()
+        assert mob_db.get_proto(42)["key"] == "ogre"
+
+        path = Path(settings.PROTOTYPE_NPC_FILE)
+        with path.open() as f:
+            data = json.load(f)
+        assert "ogre" in data
