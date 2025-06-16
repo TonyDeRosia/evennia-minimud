@@ -77,7 +77,9 @@ class CmdASet(Command):
         area_name, prop, value = parts
         idx, area = find_area(area_name)
         if area is None:
-            self.msg("Unknown area.")
+            self.msg(
+                f"Area '{area_name}' not found. Use 'alist' to view available areas."
+            )
             return
         prop = prop.lower()
         if prop in ("name", "key"):
@@ -173,7 +175,9 @@ class CmdRList(Command):
 
         _, area = find_area(area_name)
         if area is None:
-            self.msg("Unknown area.")
+            self.msg(
+                f"Area '{area_name}' not found. Use 'alist' to view available areas."
+            )
             return
 
         objs = ObjectDB.objects.filter(
@@ -215,7 +219,9 @@ class CmdRMake(Command):
         room_id = int(num_str)
         _, area = find_area(area_name)
         if area is None:
-            self.msg("Unknown area.")
+            self.msg(
+                f"Area '{area_name}' not found. Use 'alist' to view available areas."
+            )
             return
         if not (area.start <= room_id <= area.end):
             self.msg("Number outside area range.")
@@ -386,7 +392,9 @@ class CmdRReg(Command):
 
         _, area = find_area(area_name)
         if area is None:
-            self.msg("Unknown area.")
+            self.msg(
+                f"Area '{area_name}' not found. Use 'alist' to view available areas."
+            )
             return
         if not (area.start <= room_id <= area.end):
             self.msg("Number outside area range.")

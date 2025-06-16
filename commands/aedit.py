@@ -200,7 +200,9 @@ class CmdAEdit(Command):
             name = args[0]
             idx, area = find_area(name)
             if area is None:
-                self.msg("Unknown area.")
+                self.msg(
+                    f"Area '{name}' not found. Use 'alist' to view available areas."
+                )
                 return
             start_val, end_val = int(args[1]), int(args[2])
             for warn in AreaValidator().validate({"start": start_val, "end": end_val}):
@@ -228,7 +230,9 @@ class CmdAEdit(Command):
             name, builders = args[0], args[1]
             idx, area = find_area(name)
             if area is None:
-                self.msg("Unknown area.")
+                self.msg(
+                    f"Area '{name}' not found. Use 'alist' to view available areas."
+                )
                 return
             area.builders = [b.strip() for b in builders.split(',') if b.strip()]
             update_area(idx, area)
@@ -242,7 +246,9 @@ class CmdAEdit(Command):
             name, val = args[0], int(args[1])
             idx, area = find_area(name)
             if area is None:
-                self.msg("Unknown area.")
+                self.msg(
+                    f"Area '{name}' not found. Use 'alist' to view available areas."
+                )
                 return
             area.reset_interval = val
             update_area(idx, area)
@@ -256,7 +262,9 @@ class CmdAEdit(Command):
             name, flags = args[0], args[1]
             idx, area = find_area(name)
             if area is None:
-                self.msg("Unknown area.")
+                self.msg(
+                    f"Area '{name}' not found. Use 'alist' to view available areas."
+                )
                 return
             area.flags = [f.strip().lower() for f in flags.split(',') if f.strip()]
             update_area(idx, area)
@@ -276,9 +284,12 @@ class CmdAreaReset(Command):
         if not self.args:
             self.msg("Usage: reset <area>")
             return
-        idx, area = find_area(self.args.strip())
+        area_name = self.args.strip()
+        idx, area = find_area(area_name)
         if area is None:
-            self.msg("Unknown area.")
+            self.msg(
+                f"Area '{area_name}' not found. Use 'alist' to view available areas."
+            )
             return
         area.age = 0
         update_area(idx, area)
@@ -293,15 +304,17 @@ class CmdAreaAge(Command):
     help_category = "Building"
 
     def func(self):
-        target = self.args.strip()
-        if not target and self.caller.location:
-            target = self.caller.location.db.area or ""
-        if not target:
+        area_name = self.args.strip()
+        if not area_name and self.caller.location:
+            area_name = self.caller.location.db.area or ""
+        if not area_name:
             self.msg("Usage: age <area>")
             return
-        _, area = find_area(target)
+        _, area = find_area(area_name)
         if area is None:
-            self.msg("Unknown area.")
+            self.msg(
+                f"Area '{area_name}' not found. Use 'alist' to view available areas."
+            )
             return
         self.msg(f"{area.key} age: {area.age}")
 
