@@ -19,5 +19,5 @@ class TestParseStatMods(EvenniaTest):
         self.assertEqual(mods, {"crit_chance": 2})
 
     def test_negative_modifier(self):
-        mods, _ = parse_stat_mods("accuracy-3")
-        self.assertEqual(mods, {"accuracy": -3})
+        mods, _ = parse_stat_mods("hit_chance-3")
+        self.assertEqual(mods, {"hit_chance": -3})

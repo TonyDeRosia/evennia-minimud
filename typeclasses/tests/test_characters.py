@@ -355,7 +355,7 @@ class TestCombatResists(EvenniaTest):
 
     def test_status_resist_prevents_effect(self):
         from world.system import stat_manager
-        self.char1.db.stat_overrides = {"accuracy": 100}
+        self.char1.db.stat_overrides = {"hit_chance": 100}
         self.char2.db.stat_overrides = {"status_resist": 60}
         stat_manager.refresh_stats(self.char1)
         stat_manager.refresh_stats(self.char2)
@@ -372,7 +372,7 @@ class TestCombatResists(EvenniaTest):
     def test_crit_resist_reduces_crit_damage(self):
         from world.system import stat_manager
         self.char1.db.stat_overrides = {
-            "accuracy": 100,
+            "hit_chance": 100,
             "crit_chance": 50,
             "crit_bonus": 100,
         }

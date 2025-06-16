@@ -51,7 +51,7 @@ OFFENSE_STATS: List[Stat] = [
     Stat("spell_power", "Spell Power", stat="INT"),
     Stat("crit_chance", "Critical Chance", stat="LUCK"),
     Stat("crit_bonus", "Critical Damage Bonus", stat="STR"),
-    Stat("accuracy", "Accuracy", stat="DEX"),
+    Stat("hit_chance", "Hit Chance"),
     Stat("piercing", "Armor Penetration", stat="STR"),
     Stat("spell_penetration", "Spell Penetration", stat="INT"),
 ]

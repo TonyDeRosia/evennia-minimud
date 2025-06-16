@@ -197,7 +197,7 @@ class TestAdminCommands(EvenniaTest):
         """Weapon creation supports stat modifiers and description parsing."""
 
         self.char1.execute_cmd(
-            "cweapon longsword mainhand 3d10 5 STR+2, Attack Power+5, Accuracy+3 A vicious longsword."
+            "cweapon longsword mainhand 3d10 5 STR+2, Attack Power+5, Hit Chance+3 A vicious longsword."
         )
         weapon = next(
             (
@@ -211,7 +211,7 @@ class TestAdminCommands(EvenniaTest):
         self.assertEqual(weapon.db.weight, 5)
         self.assertEqual(
             weapon.db.stat_mods,
-            {"str": 2, "attack_power": 5, "accuracy": 3},
+            {"str": 2, "attack_power": 5, "hit_chance": 3},
         )
         self.assertEqual(weapon.db.desc, "A vicious longsword.")
 

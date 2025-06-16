@@ -25,7 +25,7 @@ class TestAutoAttackAccuracy(unittest.TestCase):
             return next(evade_rng)
 
         def get_stat(obj, stat):
-            if obj is attacker and stat == "accuracy":
+            if obj is attacker and stat == "hit_chance":
                 return 12
             return 0
 
