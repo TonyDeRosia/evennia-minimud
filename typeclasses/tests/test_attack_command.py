@@ -32,6 +32,16 @@ class TestAttackCommand(EvenniaTest):
         )
         self.assertTrue(queued)
 
+    def test_attack_ambiguous_names_auto_selects_first(self):
+        slime1 = create.create_object(BaseNPC, key="slime", location=self.room1)
+        slime2 = create.create_object(BaseNPC, key="slime", location=self.room1)
+
+        self.char1.execute_cmd("attack slime")
+        self.assertEqual(self.char1.db.combat_target, slime1)
+
+        self.char1.execute_cmd("attack slime-2")
+        self.assertEqual(self.char1.db.combat_target, slime2)
+
     def test_attack_when_not_fleeing(self):
         """Attacking without a fleeing flag should not raise errors."""
         mob = create.create_object(BaseNPC, key="mob", location=self.room1)
