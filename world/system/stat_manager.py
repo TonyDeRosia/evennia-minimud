@@ -22,7 +22,7 @@ from world.scripts import races, classes
 
 # Primary and secondary stat keys
 PRIMARY_STATS = stats.CORE_STAT_KEYS
-SECONDARY_STATS = ["HP", "MP", "SP", "ATK", "DEF", "ACC", "EVA", "haste"]
+SECONDARY_STATS = ["HP", "MP", "SP", "ATK", "DEF", "hit_chance", "EVA", "haste"]
 
 # Mapping of derived stat keys to weighted primary stats
 STAT_SCALING: Dict[str, Dict[str, float]] = {
@@ -31,7 +31,7 @@ STAT_SCALING: Dict[str, Dict[str, float]] = {
     "SP": {"CON": 5, "DEX": 5},
     "ATK": {"STR": 2, "DEX": 1},
     "DEF": {"CON": 2},
-    "ACC": {"DEX": 1, "LUCK": 0.5},
+    "hit_chance": {},
     "EVA": {"DEX": 1, "LUCK": 0.5},
     # Defense stats
     "armor": {"CON": 0.3, "STR": 0.2},
@@ -46,7 +46,7 @@ STAT_SCALING: Dict[str, Dict[str, float]] = {
     "spell_power": {"INT": 1.5, "WIS": 0.2},
     "crit_chance": {"LUCK": 0.3, "perception": 0.1},
     "crit_bonus": {"LUCK": 0.2},
-    "accuracy": {"DEX": 0.3, "perception": 0.4},
+    "hit_chance": {},
     "piercing": {"STR": 0.1, "LUCK": 0.1},
     "spell_penetration": {"INT": 0.2},
     # Regeneration & sustain
@@ -417,6 +417,29 @@ def refresh_stats(obj) -> None:
         result = int(round(value))
         derived[dkey] = result
 
+    # compute hit chance using primary totals
+    hc_bonus = gear_bonus.get("hit_chance", 0) + buff_bonus.get("hit_chance", 0)
+    derived["hit_chance"] = int(
+        max(
+            5,
+            min(
+                95,
+                round(
+                    50
+                    + primary_totals.get("DEX", 0) * 0.15
+                    + max(
+                        primary_totals.get("STR", 0),
+                        primary_totals.get("INT", 0),
+                        primary_totals.get("WIS", 0),
+                    )
+                    * 0.10
+                    + primary_totals.get("LUCK", 0) * 0.05
+                    + hc_bonus
+                ),
+            ),
+        )
+    )
+
     # perception scales off primary stats but keeps its base value
     perception_trait = trait_get("perception")
     if perception_trait:
@@ -496,11 +519,25 @@ def get_effective_stat(obj, key: str) -> int:
     return int(base)
 
 
-def check_hit(attacker, target, base: int = 75) -> bool:
-    """Return True if an attack hits based on accuracy vs dodge."""
-    acc = get_effective_stat(attacker, "accuracy")
+def compute_hit_chance(obj) -> int:
+    """Return the attacker's base hit chance."""
+
+    dex = get_effective_stat(obj, "DEX")
+    luck = get_effective_stat(obj, "LUCK")
+    best = max(
+        get_effective_stat(obj, "STR"),
+        get_effective_stat(obj, "INT"),
+        get_effective_stat(obj, "WIS"),
+    )
+    chance = 50 + dex * 0.15 + best * 0.10 + luck * 0.05
+    return int(max(5, min(95, round(chance))))
+
+
+def check_hit(attacker, target, base: int = 0) -> bool:
+    """Return True if an attack hits based on hit chance vs dodge."""
+    acc = get_effective_stat(attacker, "hit_chance") + base
     dodge = get_effective_stat(target, "dodge")
-    chance = max(5, min(95, base + acc - dodge))
+    chance = max(5, min(95, acc - dodge))
     return randint(1, 100) <= chance
 
 

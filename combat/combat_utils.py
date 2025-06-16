@@ -82,7 +82,7 @@ def roll_evade(attacker, target, base: int = 50) -> bool:
     """Return ``True`` if ``target`` evades an attack from ``attacker``."""
 
     evade = state_manager.get_effective_stat(target, "evasion")
-    acc = state_manager.get_effective_stat(attacker, "accuracy")
+    acc = state_manager.get_effective_stat(attacker, "hit_chance")
     chance = max(5, min(95, base + evade - acc))
     roll = random.randint(1, 100)
     result = roll <= chance
@@ -99,7 +99,7 @@ def roll_block(attacker, target, base: int = 0) -> bool:
     """Return ``True`` if ``target`` blocks an attack from ``attacker``."""
 
     block = state_manager.get_effective_stat(target, "block_rate")
-    acc = state_manager.get_effective_stat(attacker, "accuracy")
+    acc = state_manager.get_effective_stat(attacker, "hit_chance")
     chance = max(0, min(95, base + block - acc))
     roll = random.randint(1, 100)
     result = roll <= chance
@@ -111,7 +111,7 @@ def roll_parry(attacker, target, base: int = 0) -> bool:
     """Return ``True`` if ``target`` parries an attack from ``attacker``."""
 
     parry = state_manager.get_effective_stat(target, "parry_rate")
-    acc = state_manager.get_effective_stat(attacker, "accuracy")
+    acc = state_manager.get_effective_stat(attacker, "hit_chance")
     chance = max(0, min(95, base + parry - acc))
     roll = random.randint(1, 100)
     result = roll <= chance

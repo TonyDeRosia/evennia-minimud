@@ -13,7 +13,7 @@ ALIAS_MAP = {
     "stamina": "SP",
     "atk": "ATK",
     "def": "DEF",
-    "acc": "ACC",
+    "acc": "hit_chance",
     "eva": "EVA",
     "haste": "haste",
     "per": "perception",

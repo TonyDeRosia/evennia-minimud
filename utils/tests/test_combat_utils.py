@@ -6,17 +6,17 @@ from world.system import stat_manager
 
 @override_settings(DEFAULT_HOME=None)
 class TestCombatCalculations(EvenniaTest):
-    def test_check_hit_uses_accuracy_and_dodge(self):
-        self.char1.db.stat_overrides = {"accuracy": 100}
+    def test_check_hit_uses_hit_chance_and_dodge(self):
+        self.char1.db.stat_overrides = {"hit_chance": 100}
         self.char2.db.stat_overrides = {"dodge": 0}
         stat_manager.refresh_stats(self.char1)
         stat_manager.refresh_stats(self.char2)
         with patch("world.system.stat_manager.randint", return_value=100):
-            self.assertFalse(stat_manager.check_hit(self.char1, self.char2, base=50))
+            self.assertFalse(stat_manager.check_hit(self.char1, self.char2))
         self.char2.db.stat_overrides = {"dodge": 200}
         stat_manager.refresh_stats(self.char2)
         with patch("world.system.stat_manager.randint", return_value=1):
-            self.assertTrue(stat_manager.check_hit(self.char1, self.char2, base=50))
+            self.assertTrue(stat_manager.check_hit(self.char1, self.char2))
 
     def test_roll_crit_respects_resist(self):
         self.char1.db.stat_overrides = {"crit_chance": 50}
@@ -67,7 +67,7 @@ class TestCombatUtils(EvenniaTest):
     def test_roll_evade(self):
         from combat import combat_utils
 
-        self.char1.db.stat_overrides = {"accuracy": 0}
+        self.char1.db.stat_overrides = {"hit_chance": 0}
         self.char2.db.stat_overrides = {"evasion": 40}
         stat_manager.refresh_stats(self.char1)
         stat_manager.refresh_stats(self.char2)
