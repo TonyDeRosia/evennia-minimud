@@ -412,6 +412,7 @@ Related:
 Edit room prototypes in a menu.
 
 Usage:
+    redit <vnum>
     redit create <vnum>
 
 Switches:

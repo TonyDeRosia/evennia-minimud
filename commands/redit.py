@@ -214,6 +214,30 @@ class CmdREdit(Command):
         parts = self.args.split()
         sub = parts[0].lower()
 
+        if len(parts) == 1 and parts[0].isdigit():
+            vnum = int(parts[0])
+            proto = load_prototype("room", vnum)
+            if proto is None:
+                self.msg(
+                    f"Room VNUM {vnum} not found. Use `redit create {vnum}` to make a new room."
+                )
+                return
+            self.caller.ndb.room_protos = {vnum: proto}
+            self.caller.ndb.current_vnum = vnum
+            state = OLCState(
+                data=self.caller.ndb.room_protos,
+                vnum=vnum,
+                original=dict(self.caller.ndb.room_protos),
+            )
+            OLCEditor(
+                self.caller,
+                "commands.redit",
+                startnode="menunode_main",
+                state=state,
+                validator=OLCValidator(),
+            ).start()
+            return
+
         if sub == "vnum" and len(parts) == 3:
             old_str, new_str = parts[1], parts[2]
             if not (old_str.isdigit() and new_str.isdigit()):
