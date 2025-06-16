@@ -89,4 +89,6 @@ class TestMEditCommand(EvenniaTest):
         _, options = rom_mob_editor.menunode_main(self.char1)
         gotos = [opt.get("goto") for opt in options]
         assert "menunode_loot" in gotos
+        assert "menunode_skills" in gotos
+        assert "menunode_spells" in gotos
         assert gotos[-2:] == ["menunode_cancel", "menunode_done"]

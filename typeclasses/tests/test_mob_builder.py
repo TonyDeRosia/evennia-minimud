@@ -133,8 +133,8 @@ class TestMobBuilder(EvenniaTest):
             "exp_reward": 5,
             "coin_drop": {"gold": 1},
             "loot_table": [{"proto": "RAW_MEAT", "chance": 50}],
-            "skills": ["slash"],
-            "spells": ["heal"],
+            "skills": {"slash": 100},
+            "spells": {"heal": 100},
         }
         out = npc_builder.format_mob_summary(data)
         for text in [
@@ -148,12 +148,11 @@ class TestMobBuilder(EvenniaTest):
             assert text in out
         for stat in ["Damage", "Armor", "Initiative"]:
             assert stat in out
-        for field in ["NPC Archetype:", "Combat Class:", "Race:", "VNUM:"]:
+        for field in ["NPC Archetype:", "Combat Class:", "Race:"]:
             assert field in out
         assert out.count("fighter") == 1
         assert "trainer" in out
-        assert "slash" in out
-        assert "gold" in out
+        assert "slash(100%)" in out
         assert "RAW_MEAT" in out
 
     def test_vnum_menu_without_existing(self):

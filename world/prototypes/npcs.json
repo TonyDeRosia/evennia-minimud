@@ -13,9 +13,7 @@
         "actflags": [
             "call_for_help"
         ],
-        "skills": [
-            "appraise"
-        ],
+        "skills": {"appraise": 100},
         "resistances": [
             "cold"
         ]
@@ -34,9 +32,7 @@
         "actflags": [
             "call_for_help"
         ],
-        "spells": [
-            "cure light"
-        ],
+        "spells": {"cure light": 100},
         "resistances": []
     },
     "basic_guard": {
@@ -54,12 +50,8 @@
             "assist",
             "call_for_help"
         ],
-        "skills": [
-            "shield bash"
-        ],
-        "spells": [
-            "heal"
-        ],
+        "skills": {"shield bash": 100},
+        "spells": {"heal": 100},
         "resistances": [
             "fire"
         ]
