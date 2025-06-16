@@ -921,6 +921,7 @@ class TestRListCommand(EvenniaTest):
         self.char1.execute_cmd("rlist")
         out = self.char1.msg.call_args[0][0]
         self.assertIn("Rooms in zone", out)
+        self.assertIn("(1-3)", out)
         self.assertIn("1:", out)
         self.assertIn("2:", out)
 
@@ -930,6 +931,7 @@ class TestRListCommand(EvenniaTest):
         self.char1.execute_cmd("rlist zone")
         out = self.char1.msg.call_args[0][0]
         self.assertIn("Rooms in zone", out)
+        self.assertIn("(1-3)", out)
         self.assertIn("1:", out)
         self.assertIn("2:", out)
 
