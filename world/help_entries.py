@@ -427,7 +427,7 @@ Examples:
 Notes:
     - Valid VNUM range is 200000-299999.
     - Use @nextvnum R to obtain a free number.
-    - This edits prototypes, not live rooms.
+    - redit create immediately spawns a usable room and registers it to the area.
 
 Related:
     help vnums

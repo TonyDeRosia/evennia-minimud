@@ -16,6 +16,8 @@ from utils.vnum_registry import (
     VNUM_RANGES,
 )
 from world.areas import find_area_by_vnum, get_areas, update_area
+from evennia.prototypes import spawner
+from world.areas import find_area
 from .building import DIR_FULL, OPPOSITE
 from .command import Command
 
@@ -298,9 +300,35 @@ class CmdREdit(Command):
             )
             return
         register_vnum(vnum)
-        proto = {"vnum": vnum, "key": f"Room {vnum}", "desc": "", "flags": [], "exits": {}}
-        if area := find_area_by_vnum(vnum):
-            proto["area"] = area.key
+        proto = load_prototype("room", vnum)
+        if proto is None:
+            proto = {
+                "typeclass": "typeclasses.rooms.Room",
+                "key": f"Room {vnum}",
+                "desc": "",
+                "exits": {},
+            }
+            if area := find_area_by_vnum(vnum):
+                proto["area"] = area.key
+            save_prototype("room", proto, vnum=vnum)
+        area = None
+        idx = -1
+        if self.caller.location and self.caller.location.db.area:
+            idx, area = find_area(self.caller.location.db.area)
+        if area is None:
+            area = find_area_by_vnum(vnum)
+            if area:
+                idx, _ = find_area(area.key)
+        room = spawner.spawn(proto)[0]
+        room.db.room_id = vnum
+        if area:
+            room.set_area(area.key, vnum)
+            if vnum not in area.rooms:
+                area.rooms.append(vnum)
+                update_area(idx, area)
+            self.msg(f"Room {vnum} created and registered to area '{area.key}'")
+        else:
+            self.msg(f"Room {vnum} created.")
         self.caller.ndb.room_protos = {vnum: proto}
         self.caller.ndb.current_vnum = vnum
         state = OLCState(data=self.caller.ndb.room_protos, vnum=vnum, original=dict(self.caller.ndb.room_protos))
