@@ -58,6 +58,14 @@ def register_prototype(
         if validate_vnum(vnum, "npc"):
             register_vnum(vnum)
     mob_db.add_proto(vnum, data)
+
+    key = data.get("key")
+    if key:
+        try:
+            prototypes.register_npc_prototype(key, dict(data))
+        except Exception:
+            logger.log_err(f"Failed to register NPC prototype '{key}'")
+
     return vnum
 
 

@@ -1,8 +1,11 @@
 from unittest.mock import MagicMock, patch
 from django.test import override_settings
+from django.conf import settings
 from evennia.utils.test_resources import EvenniaTest
 from commands.admin import BuilderCmdSet
 from scripts.builder_autosave import BuilderAutosave
+from tempfile import TemporaryDirectory
+from pathlib import Path
 
 
 @override_settings(DEFAULT_HOME=None)
@@ -11,6 +14,13 @@ class TestBuilderAutosave(EvenniaTest):
         super().setUp()
         self.char1.msg = MagicMock()
         self.char1.cmdset.add_default(BuilderCmdSet)
+        self.tmp = TemporaryDirectory()
+        patcher = patch.object(
+            settings, "PROTOTYPE_NPC_FILE", Path(self.tmp.name) / "npcs.json"
+        )
+        self.addCleanup(self.tmp.cleanup)
+        self.addCleanup(patcher.stop)
+        patcher.start()
 
     def test_restore_cnpc_session(self):
         with patch("commands.npc_builder.EvMenu") as mock_menu:
