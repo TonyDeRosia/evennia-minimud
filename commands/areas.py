@@ -325,9 +325,15 @@ class CmdRSet(Command):
         prop, value = parts
         prop = prop.lower()
         if prop == "area":
-            area = value.strip()
-            room.set_area(area)
-            self.msg(f"Room assigned to area {area}.")
+            area_name = value.strip()
+            _, area = find_area(area_name)
+            if area is None:
+                self.msg(
+                    f"Area '{area_name}' not found. Use 'alist' to view available areas."
+                )
+                return
+            room.set_area(area_name)
+            self.msg(f"Room assigned to area {area_name}.")
         elif prop == "id":
             if not value.isdigit():
                 self.msg("Room id must be numeric.")
