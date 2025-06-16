@@ -57,7 +57,8 @@ class BareHand:
                 damage = 0
         hit_bonus = hth_prof * 0.2 if knows_hth else 0.0
 
-        from world.skills.unarmed_passive import Unarmed, HandToHand
+        from world.skills.unarmed_passive import Unarmed
+        from world.skills.hand_to_hand import HandToHand
         for cls in (Unarmed, HandToHand):
             if cls.name in (wielder.db.skills or []):
                 cls().improve(wielder)

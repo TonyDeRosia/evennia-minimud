@@ -4,7 +4,7 @@ import logging
 from typing import Tuple
 
 from ..damage_types import DamageType
-from ..combat_utils import roll_evade, roll_parry, roll_block
+from ..combat_utils import roll_evade, roll_parry, roll_block, roll_damage
 from typeclasses.gear import BareHand
 from utils import roll_dice_string
 from world.system import state_manager, stat_manager
@@ -14,6 +14,23 @@ logger = logging.getLogger(__name__)
 
 class CombatMath:
     """Helper methods for calculating hit chance and damage."""
+
+    @staticmethod
+    def calculate_unarmed_hit(attacker) -> int:
+        """Return the hit chance percentage for an unarmed attack."""
+
+        dex = state_manager.get_effective_stat(attacker, "DEX")
+        luck = state_manager.get_effective_stat(attacker, "LUCK")
+        best = max(
+            state_manager.get_effective_stat(attacker, "STR"),
+            state_manager.get_effective_stat(attacker, "INT"),
+            state_manager.get_effective_stat(attacker, "WIS"),
+        )
+        profs = getattr(getattr(attacker, "db", None), "proficiencies", {}) or {}
+        prof_bonus = max(profs.get("Unarmed", 0), profs.get("Hand-to-Hand", 0))
+
+        chance = 50 + dex * 0.15 + best * 0.10 + luck * 0.10 + prof_bonus
+        return int(max(5, min(95, round(chance))))
 
     @staticmethod
     def check_hit(attacker, target, bonus: float = 0.0) -> Tuple[bool, str]:
@@ -40,26 +57,19 @@ class CombatMath:
             dmg_bonus = 0
 
             # Unarmed damage when no weapon is wielded
-            if (
+            unarmed_attack = (
                 (isinstance(weapon, BareHand) or weapon is attacker)
                 and not getattr(attacker, "wielding", [])
                 and not getattr(getattr(attacker, "db", None), "natural_weapon", None)
-            ):
-                str_val = state_manager.get_effective_stat(attacker, "STR")
-                profs = getattr(getattr(attacker, "db", None), "proficiencies", {}) or {}
-                knows_hth = "Hand-to-Hand" in (getattr(attacker.db, "skills", []) or [])
-                hth_prof = profs.get("Hand-to-Hand", 0)
+            )
+
+            if unarmed_attack:
                 try:
-                    if knows_hth:
-                        dmg = roll_dice_string("1d3") + (str_val // 5) + (hth_prof // 10)
-                    else:
-                        dmg = roll_dice_string("1d2")
+                    dmg = roll_dice_string("1d6")
                 except Exception:
                     logger.error("Invalid dice roll for unarmed damage")
                     dmg = 0
-                return dmg, dtype
-
-            if isinstance(weapon, dict):
+            elif isinstance(weapon, dict):
                 dmg = weapon.get("damage")
                 dtype = weapon.get("damage_type") or DamageType.BLUDGEONING
                 if dmg is None:
@@ -102,11 +112,26 @@ class CombatMath:
                                 dmg = int(getattr(db, "dmg", 0))
                         dmg_bonus = int(getattr(db, "damage_bonus", 0) or 0)
 
+
             # Final safety check
             if dmg is None:
                 dmg = 0
 
             dmg += dmg_bonus
+
+            # Apply unarmed proficiency scaling if not wielding a weapon
+            if not getattr(attacker, "wielding", []):
+                from world.skills.unarmed_passive import Unarmed
+                from world.skills.hand_to_hand import HandToHand
+
+                skills = getattr(attacker.db, "skills", []) or []
+                profs = getattr(attacker.db, "proficiencies", {}) or {}
+                bonus_pct = 0.0
+                for cls in (HandToHand, Unarmed):
+                    if cls.name in skills:
+                        pct = profs.get(cls.name, 0) * cls.dmg_scale
+                        bonus_pct = max(bonus_pct, pct)
+                dmg = int(round(dmg * (1 + bonus_pct / 100)))
 
             # Scale with stats
             str_val = state_manager.get_effective_stat(attacker, "STR")
