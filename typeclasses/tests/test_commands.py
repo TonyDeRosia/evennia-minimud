@@ -546,6 +546,24 @@ class TestReturnAppearance(EvenniaTest):
         out = self.char1.return_appearance(self.char2)
         self.assertIn("They are not wearing any equipment.", out)
 
+    def test_room_combat_status_tags(self):
+        from evennia.utils import create
+        from typeclasses.npcs import BaseNPC
+
+        npc = create.create_object(BaseNPC, key="mob", location=self.room1)
+
+        # no combat - no tags
+        out = self.room1.return_appearance(self.char1)
+        self.assertNotIn("[idle]", out)
+        self.assertNotIn("[fighting", out)
+
+        # start combat for player only
+        self.char2.db.in_combat = True
+        self.char2.db.combat_target = npc
+        out = self.room1.return_appearance(self.char1)
+        self.assertIn(f"[fighting {npc.get_display_name(self.char1)}]", out)
+        self.assertIn("[idle]", out)
+
 
 class TestRestCommands(EvenniaTest):
     def setUp(self):

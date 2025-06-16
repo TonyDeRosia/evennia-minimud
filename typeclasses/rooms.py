@@ -142,7 +142,7 @@ class RoomParent(ObjectParent):
         if exits:
             text += f"\n{exits}"
 
-        visible = (
+        visible = [
             obj
             for obj in self.contents
             if obj != looker
@@ -151,16 +151,37 @@ class RoomParent(ObjectParent):
                 not hasattr(looker, "can_see")
                 or looker.can_see(obj)
             )
-        )
+        ]
+
+        characters = [
+            obj
+            for obj in visible
+            if obj.is_typeclass("typeclasses.npcs.NPC", exact=False)
+            or obj.is_typeclass("typeclasses.characters.Character", exact=False)
+        ]
+        in_combat_present = any(getattr(c, "in_combat", False) for c in characters)
 
         env_objects, npcs, items, players = [], [], [], []
         for obj in visible:
             if obj.db.display_priority == "environment":
                 env_objects.append(obj.get_display_name(looker))
-            elif obj.is_typeclass("typeclasses.npcs.NPC", exact=False):
-                npcs.append(obj.return_appearance(looker, room=True))
+                continue
+
+            tag = ""
+            if in_combat_present and (
+                obj.is_typeclass("typeclasses.npcs.NPC", exact=False)
+                or obj.is_typeclass("typeclasses.characters.Character", exact=False)
+            ):
+                if getattr(obj, "in_combat", False) and obj.db.combat_target:
+                    target_name = obj.db.combat_target.get_display_name(looker)
+                    tag = f" [fighting {target_name}]"
+                else:
+                    tag = " [idle]"
+
+            if obj.is_typeclass("typeclasses.npcs.NPC", exact=False):
+                npcs.append(f"{obj.return_appearance(looker, room=True)}{tag}")
             elif obj.is_typeclass("typeclasses.characters.Character", exact=False):
-                players.append(obj.get_display_name(looker))
+                players.append(f"{obj.get_display_name(looker)}{tag}")
             else:
                 items.append(obj.get_display_name(looker))
 
