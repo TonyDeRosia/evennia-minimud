@@ -2,7 +2,7 @@ import unittest
 from itertools import cycle
 from unittest.mock import patch
 
-from combat.actions.utils import check_hit
+from combat.engine.utils import check_hit
 
 
 class Dummy:
