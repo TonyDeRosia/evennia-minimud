@@ -94,6 +94,7 @@ class TestMListCommand(EvenniaTest):
         self.char1.execute_cmd("@mlist")
         out = self.char1.msg.call_args[0][0]
         assert "VNUM" in out
+        assert "Area" in out
         assert "5" in out
 
     def test_mlist_finalized_vnums_display(self):
