@@ -163,8 +163,11 @@ class CmdRList(Command):
         area_name = self.args.strip()
         if not area_name:
             location = self.caller.location
-            if not location or not location.db.area:
+            if not location:
                 self.msg("Usage: rlist <area>")
+                return
+            if not location.db.area:
+                self.msg("No area information found for this room.")
                 return
             area_name = location.db.area
 

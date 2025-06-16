@@ -933,6 +933,14 @@ class TestRListCommand(EvenniaTest):
         self.assertIn("1:", out)
         self.assertIn("2:", out)
 
+    def test_rlist_no_area_info(self):
+        self.char1.location.db.area = None
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("rlist")
+        self.char1.msg.assert_called_with(
+            "No area information found for this room."
+        )
+
 
 class TestAdminCommands(EvenniaTest):
     def setUp(self):
