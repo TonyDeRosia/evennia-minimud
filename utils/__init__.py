@@ -52,8 +52,13 @@ def auto_search(caller, search, **kwargs):
     if len(results) == 1:
         return results[0]
     # ignore auto-selection when specifying a numbered alias
-    if re.match(r"^\d+-", search.strip()):
-        return results[0]
+    if re.search(r"(^\d+-|-\d+$)", search.strip()):
+        numbered = caller.search(search.strip(), quiet=True, **kwargs)
+        if not numbered:
+            return None
+        if isinstance(numbered, list):
+            return numbered[0]
+        return numbered
     visible = [obj for obj in results if getattr(caller, "can_see", lambda o: True)(obj)]
     living = [obj for obj in visible if not (hasattr(obj, "tags") and obj.tags.has("unconscious", category="status"))]
     matches = living or visible or results

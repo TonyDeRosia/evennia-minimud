@@ -93,3 +93,28 @@ class TestKickSkill(EvenniaTest):
         msg = f"{self.char1.key} kicks {self.char2.key} for {expected} damage!"
         self.room1.msg_contents.assert_called_with(msg)
 
+    def test_kick_numbered_target(self):
+        """Ensure numbered aliases target the correct enemy."""
+        from evennia.utils import create
+        from typeclasses.npcs import BaseNPC
+
+        slime1 = create.create_object(BaseNPC, key="slime", location=self.room1)
+        slime2 = create.create_object(BaseNPC, key="slime", location=self.room1)
+
+        class DummyEngine:
+            def queue_action(self, actor, action):
+                action.resolve()
+
+        class DummyCombat:
+            def __init__(self):
+                self.engine = DummyEngine()
+
+        with patch("commands.abilities.maybe_start_combat", return_value=DummyCombat()), \
+             patch.object(stat_manager, "check_hit", return_value=True), \
+             patch("combat.combat_utils.roll_evade", return_value=False), \
+             patch.object(stat_manager, "get_effective_stat", return_value=10), \
+             patch("world.skills.skill.random", return_value=0):
+            self.char1.execute_cmd("kick slime-2")
+
+        self.assertEqual(self.char1.db.combat_target, slime2)
+
