@@ -41,8 +41,8 @@ class TestAutoAttackAccuracy(unittest.TestCase):
                     hits += 1
 
         rate = hits / trials
-        self.assertGreaterEqual(rate, 0.70)
-        self.assertLessEqual(rate, 0.80)
+        self.assertGreaterEqual(rate, 0.85)
+        self.assertLessEqual(rate, 0.90)
 
 
 if __name__ == "__main__":
