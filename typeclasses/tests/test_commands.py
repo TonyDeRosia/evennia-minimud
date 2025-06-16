@@ -787,6 +787,13 @@ class TestExtendedDigTeleport(EvenniaTest):
         self.char1.execute_cmd("tp test:6")
         self.assertEqual(self.char1.location, start)
 
+    def test_teleport_by_vnum(self):
+        start = self.char1.location
+        self.char1.execute_cmd("dig west=test:4")
+        target = start.db.exits.get("west")
+        self.char1.execute_cmd("tp 4")
+        self.assertEqual(self.char1.location, target)
+
 
 class TestDelDirCommand(EvenniaTest):
     def test_deldir_removes_exits(self):

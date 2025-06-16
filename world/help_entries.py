@@ -1672,11 +1672,13 @@ Related:
         "text": """
 Help for @teleport (tp)
 
-Teleport directly to a room. Usage: @teleport <area>:<number>
+Teleport directly to a room. Usage: @teleport <area>:<number> or <number>
 
 Usage:
     @teleport <area>:<number>
     tp <area>:<number>
+    @teleport <number>
+    tp <number>
 
 Switches:
     None
