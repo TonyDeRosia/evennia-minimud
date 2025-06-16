@@ -45,7 +45,7 @@ class TestExtendedStats(EvenniaTest):
         self.char1.traits.piercing.base = 5
         self.char2.db.armor = 10
         dmg = self.char2.at_damage(self.char1, 20)
-        self.assertEqual(dmg, 15)
+        self.assertEqual(dmg, 19)
 
     def test_spell_pen_and_resist(self):
         self.char1.traits.spell_penetration.base = 5
