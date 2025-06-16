@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from evennia.utils.test_resources import EvenniaTest
 from combat.combat_actions import Action, CombatResult
-from combat.round_manager import CombatRoundManager
+from combat.round_manager import CombatRoundManager, CombatInstance
 
 
 class DamageAction(Action):
@@ -19,7 +19,7 @@ class DamageAction(Action):
 
 class TestCombatFullFight(EvenniaTest):
     def test_fight_runs_until_defeat(self):
-        with patch("combat.round_manager.delay"):
+        with patch.object(CombatInstance, "schedule_tick"):
             manager = CombatRoundManager.get()
             instance = manager.start_combat([self.char1, self.char2])
             engine = instance.engine
