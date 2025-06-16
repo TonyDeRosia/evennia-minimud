@@ -18,6 +18,7 @@ class Area:
     reset_interval: int = 0
     flags: List[str] = field(default_factory=list)
     age: int = 0
+    rooms: List[int] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, data: Dict) -> "Area":
@@ -30,6 +31,7 @@ class Area:
             reset_interval=int(data.get("reset_interval", 0)),
             flags=data.get("flags", []),
             age=int(data.get("age", 0)),
+            rooms=[int(r) for r in data.get("rooms", [])],
         )
 
     def to_dict(self) -> Dict:

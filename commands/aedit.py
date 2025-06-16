@@ -3,10 +3,17 @@ from evennia import CmdSet
 from evennia.objects.models import ObjectDB
 from typeclasses.rooms import Room
 from .command import Command
-from world.areas import Area, get_areas, save_area, update_area, find_area
+from world.areas import (
+    Area,
+    get_areas,
+    save_area,
+    update_area,
+    find_area,
+    find_area_by_vnum,
+)
 from world import area_npcs
 from olc.base import OLCValidator
-from utils.prototype_manager import load_all_prototypes
+from utils.prototype_manager import load_all_prototypes, load_prototype
 
 
 class AreaValidator(OLCValidator):
@@ -269,6 +276,39 @@ class CmdAEdit(Command):
             area.flags = [f.strip().lower() for f in flags.split(',') if f.strip()]
             update_area(idx, area)
             self.msg("Flags updated.")
+            return
+        if sub == "add":
+            args = rest.split()
+            if len(args) != 2 or not args[1].isdigit():
+                self.msg("Usage: aedit add <area> <room_vnum>")
+                return
+            area_arg, vnum_str = args
+            room_vnum = int(vnum_str)
+            if area_arg.isdigit():
+                area = find_area_by_vnum(int(area_arg))
+                if area:
+                    idx, _ = find_area(area.key)
+                else:
+                    idx = -1
+            else:
+                idx, area = find_area(area_arg)
+            if area is None:
+                self.msg(
+                    f"Area '{area_arg}' not found. Use 'alist' to view available areas."
+                )
+                return
+            proto = load_prototype("room", room_vnum)
+            if not proto:
+                self.msg("Room prototype not found.")
+                return
+            if room_vnum not in area.rooms:
+                area.rooms.append(room_vnum)
+            if not (area.start <= room_vnum <= area.end):
+                self.msg(
+                    f"Warning: room {room_vnum} outside {area.key} range {area.start}-{area.end}."
+                )
+            update_area(idx, area)
+            self.msg(f"Room {room_vnum} added to {area.key}.")
             return
         self.msg("Unknown subcommand.")
 
