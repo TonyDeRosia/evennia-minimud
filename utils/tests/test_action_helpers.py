@@ -41,7 +41,7 @@ class TestActionUtils(unittest.TestCase):
             mock_get.side_effect = lambda obj, stat: 10 if stat == "STR" else 0
             dmg, dtype = utils.calculate_damage(self.attacker, weapon, self.target)
         self.assertEqual(dtype, DamageType.SLASHING)
-        self.assertEqual(dmg, int(round(4 * (1 + 10 * 0.012))))
+        self.assertEqual(dmg, int(round(4 * (1 + 10 * 0.05))))
 
     def test_damage_mapping_stable_order(self):
         """Weapon damage mapping should produce consistent results regardless of key order."""
@@ -95,7 +95,7 @@ class TestActionUtils(unittest.TestCase):
              ):
             dmg, dtype = utils.calculate_damage(self.attacker, weapon, self.target)
 
-        expected = int(round((2 + 5) * (1 + 10 * 0.012)))
+        expected = int(round((2 + 5) * (1 + 10 * 0.05)))
         self.assertEqual(dmg, expected)
         self.assertEqual(dtype, DamageType.BLUDGEONING)
 
