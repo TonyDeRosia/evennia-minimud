@@ -150,7 +150,7 @@ class CmdDig(Command):
 
 class CmdTeleport(Command):
     """
-    Teleport directly to a room. Usage: @teleport <area>:<number>
+    Teleport directly to a room. Usage: @teleport <area>:<number> or <number>
 
     Usage:
         @teleport
@@ -166,26 +166,37 @@ class CmdTeleport(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: @teleport <area>:<number>")
+            self.msg("Usage: @teleport <area>:<number> or <number>")
             return
 
-        area_part, sep, num_part = self.args.strip().partition(":")
-        if not sep or not area_part or not num_part:
-            self.msg("Usage: @teleport <area>:<number>")
-            return
-        if not num_part.isdigit():
-            self.msg("Room number must be numeric.")
-            return
-        room_id = int(num_part)
-        _, area = find_area(area_part)
-        if area:
-            if not (area.start <= room_id <= area.end):
+        args = self.args.strip()
+        area_part: str | None = None
+        room_id: int | None = None
+
+        if args.isdigit():
+            room_id = int(args)
+            area = find_area_by_vnum(room_id)
+            area_part = area.key if area else None
+        else:
+            area_part, sep, num_part = args.partition(":")
+            if not sep or not area_part or not num_part:
+                self.msg("Usage: @teleport <area>:<number> or <number>")
+                return
+            if not num_part.isdigit():
+                self.msg("Room number must be numeric.")
+                return
+            room_id = int(num_part)
+            _, area = find_area(area_part)
+            if area and not (area.start <= room_id <= area.end):
                 self.msg("Number outside area range.")
                 return
-        objs = ObjectDB.objects.filter(db_attributes__db_key="area", db_attributes__db_strvalue__iexact=area_part)
+
+        objs = ObjectDB.objects.filter(db_attributes__db_key="room_id", db_attributes__db_value=room_id)
+        if area_part:
+            objs = [obj for obj in objs if (obj.db.area or "").lower() == area_part.lower()]
         room = None
         for obj in objs:
-            if obj.db.room_id == room_id and obj.is_typeclass(Room, exact=False):
+            if obj.is_typeclass(Room, exact=False):
                 room = obj
                 break
         if not room:
