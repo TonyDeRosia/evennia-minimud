@@ -8,7 +8,8 @@ File: `combat/round_manager.py`
 
 - Maintains a registry of all active combat instances keyed by a unique combat id.
 - Tracks which combat each combatant belongs to for quick lookup.
-- Ticks every few seconds to drive all active combats, much like ROM's `violence_update` that iterates over every character currently fighting.
+- Each `CombatInstance` schedules a tick every few seconds, much like ROM's
+  `violence_update` that iterates over every character currently fighting.
 - Each tick triggers the associated `CombatEngine` to process a new round.
 - When `COMBAT_DEBUG_TICKS` is `True` in `server/conf/settings.py`, a debug log is emitted each tick.
 
@@ -39,7 +40,7 @@ Together these components recreate the familiar combat loop of a ROM MUD within 
 
 The following outlines how a single combat round flows through the system:
 
-1. `CombatRoundManager._tick` calls `CombatInstance.process_round` for each active combat instance.
+1. `CombatInstance._tick` calls `process_round` for its own encounter.
 2. `CombatInstance.process_round` synchronizes its participants and verifies at least two are still able to fight.
 3. If combat continues, it invokes `CombatEngine.process_round` which delegates to the `DamageProcessor`.
 4. `DamageProcessor.process_round` starts the round, gathers queued actions from the `TurnManager` and resolves them in initiative order.
