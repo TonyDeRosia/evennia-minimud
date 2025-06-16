@@ -181,14 +181,20 @@ def get_temp_bonus(chara, stat: str) -> int:
 
 
 def get_effective_stat(chara, stat: str) -> int:
-    """Return ``stat`` value including temporary bonuses."""
+    """Return ``stat`` value including temporary bonuses.
+
+    Gear and persistent buff modifiers are incorporated by
+    :func:`stat_manager.refresh_stats`, so this helper only adds any
+    outstanding temporary bonuses on top of the cached trait value.
+    """
+
     if not hasattr(chara, "traits"):
         return 0
 
-    base = stats.sum_bonus(chara, stat)
+    trait = chara.traits.get(stat)
+    base = trait.value if trait else 0
     base += get_temp_bonus(chara, stat)
-    base += get_effect_mods(chara).get(stat, 0)
-    return base
+    return int(base)
 
 
 def apply_regen(chara):
