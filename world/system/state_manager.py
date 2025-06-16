@@ -115,6 +115,12 @@ def has_status(chara, status: str) -> bool:
     return status in statuses
 
 
+def is_on_cooldown(chara, key: str) -> bool:
+    """Return True if ``key`` cooldown is active on ``chara``."""
+
+    return not chara.cooldowns.ready(key)
+
+
 def add_cooldown(chara, key: str, duration: int):
     """Wrapper to add a cooldown to ``chara``."""
     reduction = get_effective_stat(chara, "cooldown_reduction")
@@ -385,4 +391,3 @@ def gain_xp(chara, amount: int) -> None:
             chara.db.tnl -= excess
         else:
             chara.db.tnl = settings.XP_TO_LEVEL(int(chara.db.level or 1))
-

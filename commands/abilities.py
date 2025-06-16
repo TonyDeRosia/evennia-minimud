@@ -42,11 +42,12 @@ class CmdKick(Command):
                 return
         else:
             from utils import auto_search
+
             target = auto_search(self.caller, self.args.strip())
             if not target:
                 return
         skill = Kick()
-        if not self.caller.cooldowns.ready(skill.name):
+        if state_manager.is_on_cooldown(self.caller, skill.name):
             self.msg("You are still recovering.")
             return
         if self.caller.traits.stamina.current < skill.stamina_cost:
