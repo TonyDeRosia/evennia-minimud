@@ -10,16 +10,16 @@ class TestCombatRoundManager(EvenniaTest):
         self.manager = CombatRoundManager.get()
         self.manager.combats.clear()
         self.manager.combatant_to_combat.clear()
-        with patch.object(CombatInstance, "schedule_tick"):
+        with patch.object(CombatInstance, "start"):
             self.instance = self.manager.create_combat(combatants=[self.char1, self.char2])
 
     def test_create_schedules_tick(self):
-        with patch.object(CombatInstance, "schedule_tick") as mock_sched:
+        with patch.object(CombatInstance, "start") as mock_sched:
             self.manager.create_combat(combatants=[self.char1, self.char2])
             mock_sched.assert_called_once_with()
 
     def test_tick_processes_and_reschedules(self):
-        with patch.object(CombatInstance, "schedule_tick") as mock_sched, patch.object(CombatEngine, "process_round") as mock_proc:
+        with patch.object(CombatInstance, "_schedule_tick") as mock_sched, patch.object(CombatEngine, "process_round") as mock_proc:
             inst = self.manager.create_combat(combatants=[self.char1, self.char2])
             mock_sched.reset_mock()
             inst._tick()
@@ -27,13 +27,13 @@ class TestCombatRoundManager(EvenniaTest):
             mock_sched.assert_called_once()
 
     def test_instances_schedule_independently(self):
-        with patch.object(CombatInstance, "schedule_tick") as mock_sched:
+        with patch.object(CombatInstance, "start") as mock_sched:
             self.manager.create_combat(combatants=[self.char1, self.char2])
             self.manager.create_combat(combatants=[self.char2, self.char1])
             self.assertEqual(mock_sched.call_count, 2)
 
     def test_start_combat_reuses_instance(self):
-        with patch.object(CombatInstance, "schedule_tick"):
+        with patch.object(CombatInstance, "start"):
             inst1 = self.manager.start_combat([self.char1, self.char2])
             inst2 = self.manager.start_combat([self.char1])
         self.assertIs(inst1, inst2)
@@ -44,7 +44,7 @@ class TestCombatRoundManager(EvenniaTest):
         self.assertEqual(len(self.manager.combats), 0)
 
     def test_force_end_all_combat(self):
-        with patch.object(CombatInstance, "schedule_tick"):
+        with patch.object(CombatInstance, "start"):
             inst = self.manager.create_combat(combatants=[self.char1])
         self.manager.force_end_all_combat()
         self.assertTrue(inst.combat_ended)

@@ -52,7 +52,12 @@ class CombatInstance:
     # ------------------------------------------------------------------
     # ticking helpers
     # ------------------------------------------------------------------
-    def schedule_tick(self) -> None:
+
+    def start(self) -> None:
+        """Begin automatic round processing."""
+        self._schedule_tick()
+
+    def _schedule_tick(self) -> None:
         """Schedule the next combat round."""
         if self.combat_ended or self.tick_handle:
             return
@@ -156,7 +161,7 @@ class CombatInstance:
                 self.end_combat("No active fighters remaining")
                 return
 
-            self.schedule_tick()
+            self._schedule_tick()
 
         except Exception as err:
             log_trace(f"Error in combat round processing: {err}")
@@ -234,7 +239,6 @@ class CombatRoundManager:
     def __init__(self) -> None:
         self.combats: Dict[int, CombatInstance] = {}
         self.combatant_to_combat: Dict[object, int] = {}
-        self.tick_delay = 2.0
         self._next_id = 1
 
     @classmethod
@@ -266,12 +270,12 @@ class CombatRoundManager:
         combat_id = self._next_id
         self._next_id += 1
 
-        inst = CombatInstance(combat_id, engine, set(fighters), round_time or self.tick_delay)
+        inst = CombatInstance(combat_id, engine, set(fighters), round_time or 2.0)
         self.combats[combat_id] = inst
         for fighter in fighters:
             self.combatant_to_combat[fighter] = combat_id
 
-        inst.schedule_tick()
+        inst.start()
 
         return inst
 
@@ -299,7 +303,7 @@ class CombatRoundManager:
                     if c not in inst.combatants:
                         inst.add_combatant(c)
                         self.combatant_to_combat[c] = inst.combat_id
-                inst.schedule_tick()
+                inst.start()
                 return inst
         return self.create_combat(combatants)
 

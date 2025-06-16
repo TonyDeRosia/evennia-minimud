@@ -19,7 +19,7 @@ class DamageAction(Action):
 
 class TestCombatFullFight(EvenniaTest):
     def test_fight_runs_until_defeat(self):
-        with patch.object(CombatInstance, "schedule_tick"):
+        with patch.object(CombatInstance, "start"):
             manager = CombatRoundManager.get()
             instance = manager.start_combat([self.char1, self.char2])
             engine = instance.engine
