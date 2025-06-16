@@ -6,13 +6,16 @@ from world.system import stat_manager
 
 @override_settings(DEFAULT_HOME=None)
 class TestCombatCalculations(EvenniaTest):
-    def test_check_hit_uses_hit_chance(self):
-        self.char1.db.stat_overrides = {"hit_chance": 75}
+    def test_check_hit_uses_hit_chance_and_dodge(self):
+        self.char1.db.stat_overrides = {"hit_chance": 100}
+        self.char2.db.stat_overrides = {"dodge": 0}
         stat_manager.refresh_stats(self.char1)
         stat_manager.refresh_stats(self.char2)
-        with patch("world.system.stat_manager.randint", return_value=76):
+        with patch("world.system.stat_manager.randint", return_value=100):
             self.assertFalse(stat_manager.check_hit(self.char1, self.char2))
-        with patch("world.system.stat_manager.randint", return_value=50):
+        self.char2.db.stat_overrides = {"dodge": 200}
+        stat_manager.refresh_stats(self.char2)
+        with patch("world.system.stat_manager.randint", return_value=1):
             self.assertTrue(stat_manager.check_hit(self.char1, self.char2))
 
     def test_roll_crit_respects_resist(self):
