@@ -208,7 +208,7 @@ class CmdREdit(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: redit create <vnum> | redit vnum <old> <new>")
+            self.msg("Usage: redit <vnum> | redit create <vnum> | redit vnum <old> <new>")
             return
 
         parts = self.args.split()
@@ -241,7 +241,9 @@ class CmdREdit(Command):
         if sub == "vnum" and len(parts) == 3:
             old_str, new_str = parts[1], parts[2]
             if not (old_str.isdigit() and new_str.isdigit()):
-                self.msg("Usage: redit vnum <old> <new>")
+                self.msg(
+                    "Usage: redit <vnum> | redit create <vnum> | redit vnum <old> <new>"
+                )
                 return
             old_vnum, new_vnum = int(old_str), int(new_str)
             proto = load_prototype("room", old_vnum)
@@ -281,7 +283,7 @@ class CmdREdit(Command):
             return
 
         if sub != "create" or len(parts) != 2:
-            self.msg("Usage: redit create <vnum> | redit vnum <old> <new>")
+            self.msg("Usage: redit <vnum> | redit create <vnum> | redit vnum <old> <new>")
             return
 
         if not parts[1].isdigit():
