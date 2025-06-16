@@ -51,8 +51,9 @@ class CmdAttack(Command):
             return
 
         # if we specified a weapon, find it first
+        from utils import auto_search
         if self.weapon:
-            weapon = self.caller.search(self.weapon)
+            weapon = auto_search(self.caller, self.weapon)
             if not weapon:
                 # no valid match
                 return
@@ -65,7 +66,7 @@ class CmdAttack(Command):
                 weapon = BareHand()
 
         # find our enemy!
-        target = self.caller.search(self.target)
+        target = auto_search(self.caller, self.target)
         if not target:
             # no valid match
             return
@@ -163,7 +164,8 @@ class CmdWield(Command):
         else:
             hand = None
 
-        weapon = caller.search(self.weapon, location=caller)
+        from utils import auto_search
+        weapon = auto_search(caller, self.weapon, location=caller)
         if not weapon:
             # no valid object found
             return
@@ -196,7 +198,8 @@ class CmdUnwield(Command):
     def func(self):
         caller = self.caller
 
-        weapon = caller.search(self.args, candidates=caller.wielding)
+        from utils import auto_search
+        weapon = auto_search(caller, self.args, candidates=caller.wielding)
         if not weapon:
             # no valid object found
             return
@@ -356,7 +359,8 @@ class CmdRevive(Command):
                     )
             return
 
-        target = caller.search(arg)
+        from utils import auto_search
+        target = auto_search(caller, arg)
         if not target:
             return
 
@@ -382,7 +386,8 @@ class CmdStatus(Command):
             target = self.caller
             display_auto_prompt(self.account, target, self.msg, force=True)
         else:
-            target = self.caller.search(self.args.strip())
+            from utils import auto_search
+            target = auto_search(self.caller, self.args.strip())
             if not target:
                 # no valid object found
                 return

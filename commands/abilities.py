@@ -41,7 +41,8 @@ class CmdKick(Command):
                 self.msg("Kick whom?")
                 return
         else:
-            target = self.caller.search(self.args.strip())
+            from utils import auto_search
+            target = auto_search(self.caller, self.args.strip())
             if not target:
                 return
         skill = Kick()
