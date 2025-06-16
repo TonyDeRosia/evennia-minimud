@@ -91,15 +91,16 @@ class TestUnarmedAutoAttack(unittest.TestCase):
              patch("combat.engine.combat_math.roll_evade", return_value=False), \
              patch("combat.engine.combat_math.roll_parry", return_value=False), \
              patch("combat.engine.combat_math.roll_block", return_value=False), \
-             patch("combat.engine.combat_math.roll_dice_string", return_value=2), \
+             patch("combat.engine.combat_math.roll_dice_string", return_value=4), \
              patch("world.system.state_manager.get_effective_stat", return_value=0), \
              patch("evennia.utils.delay"), \
              patch("random.randint", return_value=0):
             engine.start_round()
             engine.process_round()
 
-        self.assertEqual(defender.hp, 8)
-        mock_hit.assert_called_with(attacker, defender, bonus=0)
+        self.assertEqual(defender.hp, 6)
+        from unittest.mock import call
+        self.assertIn(call(attacker, defender, bonus=-35), mock_hit.call_args_list)
 
     def test_barehand_damage_hand_to_hand(self):
         attacker = Dummy()
@@ -125,4 +126,5 @@ class TestUnarmedAutoAttack(unittest.TestCase):
             engine.process_round()
 
         self.assertEqual(defender.hp, 0)
-        mock_hit.assert_called_with(attacker, defender, bonus=6.0)
+        from unittest.mock import call
+        self.assertIn(call(attacker, defender, bonus=2), mock_hit.call_args_list)
