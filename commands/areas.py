@@ -9,32 +9,6 @@ from .aedit import CmdAEdit, CmdAList, CmdASave, CmdAreaReset, CmdAreaAge
 from typeclasses.rooms import Room
 
 
-class CmdAreas(Command):
-    """
-    List all registered areas and their number ranges.
-
-    Usage:
-        alist
-
-    See |whelp alist|n for details.
-    """
-
-    key = "alist"
-    aliases = ("areas",)
-    locks = "cmd:perm(Builder)"
-    help_category = "Building"
-
-    def func(self):
-        areas = get_areas()
-        if not areas:
-            self.msg("No areas registered.")
-            return
-        table = EvTable("Name", "Range", border="cells")
-        for area in areas:
-            table.add_row(area.key, f"{area.start}-{area.end}")
-        self.msg(str(table))
-
-
 class CmdAMake(Command):
     """
     Register a new area. Usage: amake <name> <start>-<end>
