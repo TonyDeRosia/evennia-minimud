@@ -5,6 +5,7 @@ import re
 from evennia.utils.ansi import strip_ansi
 from .command import Command
 from .info import CmdScan
+from .update import CmdUpdate
 from .building import (
     CmdSetDesc,
     CmdSetWeight,
@@ -1396,6 +1397,7 @@ class AdminCmdSet(CmdSet):
         self.add(CmdPurge)
         self.add(CmdPeace)
         self.add(CmdForceMobReport)
+        self.add(CmdUpdate)
         self.add(CmdScan)
 
 
