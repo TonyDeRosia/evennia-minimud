@@ -497,7 +497,7 @@ class CmdMList(Command):
                 or proto.get("vnum")
             )
             finalized = False
-            if vnum is not None and int(vnum) in mob_db.db.vnums:
+            if vnum is not None and str(vnum) in mob_db.db.vnums:
                 finalized = True
             elif key in finalized_lookup or proto.get("key") in finalized_lookup:
                 finalized = True
@@ -528,7 +528,7 @@ class CmdMList(Command):
 
         lines = [str(table)]
         if not (area or filter_by or rangestr or show_room or show_area):
-            finalized = sorted(mob_db.db.vnums)
+            finalized = sorted(str(v) for v in mob_db.db.vnums)
             lines.append("\n|wFinalized VNUMs|n")
             if finalized:
                 lines.append(", ".join(str(v) for v in finalized))
