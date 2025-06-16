@@ -3,9 +3,18 @@
 from __future__ import annotations
 
 from olc.base import OLCEditor, OLCState, OLCValidator
-from utils.prototype_manager import save_prototype
-from utils.vnum_registry import validate_vnum, register_vnum
-from world.areas import find_area_by_vnum
+from utils.prototype_manager import (
+    save_prototype,
+    load_prototype,
+    load_all_prototypes,
+    CATEGORY_DIRS,
+)
+from utils.vnum_registry import (
+    validate_vnum,
+    register_vnum,
+    unregister_vnum,
+)
+from world.areas import find_area_by_vnum, get_areas, update_area
 from .building import DIR_FULL, OPPOSITE
 from .command import Command
 
@@ -198,12 +207,58 @@ class CmdREdit(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: redit create <vnum>")
+            self.msg("Usage: redit create <vnum> | redit vnum <old> <new>")
             return
+
         parts = self.args.split()
-        if len(parts) != 2 or parts[0].lower() != "create":
-            self.msg("Usage: redit create <vnum>")
+        sub = parts[0].lower()
+
+        if sub == "vnum" and len(parts) == 3:
+            old_str, new_str = parts[1], parts[2]
+            if not (old_str.isdigit() and new_str.isdigit()):
+                self.msg("Usage: redit vnum <old> <new>")
+                return
+            old_vnum, new_vnum = int(old_str), int(new_str)
+            proto = load_prototype("room", old_vnum)
+            if proto is None:
+                self.msg("Prototype not found.")
+                return
+            if not validate_vnum(new_vnum, "room"):
+                self.msg("Invalid or already used VNUM.")
+                return
+            save_prototype("room", proto, vnum=new_vnum)
+            old_path = CATEGORY_DIRS["room"] / f"{old_vnum}.json"
+            if old_path.exists():
+                old_path.unlink()
+            unregister_vnum(old_vnum, "room")
+            register_vnum(new_vnum)
+
+            # update exits in other room prototypes
+            protos = load_all_prototypes("room")
+            for vnum, p in protos.items():
+                exits = p.get("exits", {})
+                changed = False
+                for dirkey, dest in list(exits.items()):
+                    if dest == old_vnum:
+                        exits[dirkey] = new_vnum
+                        changed = True
+                if changed:
+                    save_prototype("room", p, vnum=vnum)
+
+            # update area room lists
+            areas = get_areas()
+            for idx, area in enumerate(areas):
+                if old_vnum in area.rooms:
+                    area.rooms = [new_vnum if r == old_vnum else r for r in area.rooms]
+                    update_area(idx, area)
+
+            self.msg(f"Room prototype {old_vnum} moved to {new_vnum}.")
             return
+
+        if sub != "create" or len(parts) != 2:
+            self.msg("Usage: redit create <vnum> | redit vnum <old> <new>")
+            return
+
         if not parts[1].isdigit():
             self.msg("VNUM must be numeric.")
             return
