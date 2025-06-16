@@ -13,14 +13,14 @@ logger = logging.getLogger(__name__)
 
 def check_hit(attacker, target, bonus: float = 0.0) -> Tuple[bool, str]:
     """Return ``(True, '')`` on hit or ``(False, message)`` on failure."""
-    base = 75 + int(bonus)
+    base = 85 + int(bonus)
     if not stat_manager.check_hit(attacker, target, base=base):
         return False, f"{attacker.key} misses."
-    if roll_evade(attacker, target):
+    if roll_evade(attacker, target, base=20):
         return False, f"{target.key} evades the attack!"
-    if roll_parry(attacker, target):
+    if roll_parry(attacker, target, base=20):
         return False, f"{target.key} parries the attack!"
-    if roll_block(attacker, target):
+    if roll_block(attacker, target, base=20):
         return False, f"{target.key} blocks the attack!"
     return True, ""
 
