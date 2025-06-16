@@ -331,7 +331,7 @@ Usage:
     rmake <area> <number>
 
 Switches:
-    None
+    --force
 
 Arguments:
     None
@@ -341,7 +341,9 @@ Examples:
 
 Notes:
     - The number must fall within the area's range.
+    - The room is spawned from a saved prototype.
     - The room is not automatically linked to any others.
+    - Use --force to replace an existing room at that VNUM.
 
 Related:
     help ansi

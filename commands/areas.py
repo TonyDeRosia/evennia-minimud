@@ -1,12 +1,14 @@
 from evennia.objects.models import ObjectDB
 from evennia.utils.evtable import EvTable
-from evennia import CmdSet, create_object
+from evennia import CmdSet
+from evennia.prototypes import spawner
 
 from .command import Command
 from scripts.area_spawner import AreaSpawner
 from world.areas import Area, get_areas, save_area, update_area, find_area
 from .aedit import CmdAEdit, CmdAList, CmdASave, CmdAreaReset, CmdAreaAge
 from typeclasses.rooms import Room
+from utils.prototype_manager import load_prototype
 
 
 class CmdAMake(Command):
@@ -208,35 +210,63 @@ class CmdRMake(Command):
     help_category = "Building"
 
     def func(self):
+        force = False
+        if "--force" in self.switches:
+            force = True
+            self.switches.remove("--force")
+
         if not self.args:
             self.msg("Usage: rmake <area> <number>")
             return
+
         parts = self.args.split()
         if len(parts) != 2 or not parts[1].isdigit():
             self.msg("Usage: rmake <area> <number>")
             return
+
         area_name, num_str = parts
         room_id = int(num_str)
-        _, area = find_area(area_name)
+
+        idx, area = find_area(area_name)
         if area is None:
             self.msg(
                 f"Area '{area_name}' not found. Use 'alist' to view available areas."
             )
             return
+
         if not (area.start <= room_id <= area.end):
             self.msg("Number outside area range.")
             return
+
+        proto = load_prototype("room", room_id)
+        if proto is None:
+            self.msg(f"Room prototype {room_id} not found.")
+            return
+
         objs = ObjectDB.objects.filter(
             db_attributes__db_key="area",
-            db_attributes__db_strvalue__iexact=area_name,
+            db_attributes__db_strvalue__iexact=area.key,
         )
+        existing = None
         for obj in objs:
             if obj.db.room_id == room_id and obj.is_typeclass(Room, exact=False):
+                existing = obj
+                break
+
+        if existing:
+            if force:
+                existing.delete()
+            else:
                 self.msg("Room already exists.")
                 return
-        new_room = create_object(Room, key="Room")
-        new_room.set_area(area_name, room_id)
-        self.msg(f"Room {room_id} created in area {area_name}.")
+
+        new_room = spawner.spawn(proto)[0]
+        new_room.set_area(area.key, room_id)
+        if room_id not in area.rooms:
+            area.rooms.append(room_id)
+        update_area(idx, area)
+
+        self.msg(f"Room {room_id} created in area {area.key}.")
 
 
 class CmdRName(Command):
