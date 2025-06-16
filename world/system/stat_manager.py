@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Dict
 import re
 from random import randint
+import logging
 
 from utils.stats_utils import normalize_stat_key
 
@@ -19,6 +20,8 @@ from .constants import (
     MAX_LUCK,
 )
 from world.scripts import races, classes
+
+logger = logging.getLogger(__name__)
 
 # Primary and secondary stat keys
 PRIMARY_STATS = stats.CORE_STAT_KEYS
@@ -534,11 +537,20 @@ def compute_hit_chance(obj) -> int:
 
 
 def check_hit(attacker, target, base: int = 0) -> bool:
-    """Return True if an attack hits based on hit chance vs dodge."""
-    acc = get_effective_stat(attacker, "hit_chance") + base
-    dodge = get_effective_stat(target, "dodge")
-    chance = max(5, min(95, acc - dodge))
-    return randint(1, 100) <= chance
+    """Return ``True`` if ``attacker`` lands a hit on ``target``."""
+
+    chance = get_effective_stat(attacker, "hit_chance") + base
+    chance = max(5, min(95, chance))
+    roll = randint(1, 100)
+    logger.debug(
+        "%s hit chance: %s, roll: %s, vs %s evasion: %s",
+        getattr(attacker, "key", attacker),
+        chance,
+        roll,
+        getattr(target, "key", target),
+        state_manager.get_effective_stat(target, "evasion"),
+    )
+    return roll <= chance
 
 
 def roll_crit(attacker, target) -> bool:
