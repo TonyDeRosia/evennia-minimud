@@ -377,6 +377,34 @@ Related:
 """,
     },
     {
+        "key": "rlist",
+        "category": "Building",
+        "text": """"
+Help for rlist
+
+List rooms in an area showing VNUM and name.
+
+Usage:
+    rlist [<area>]
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    rlist
+    rlist town
+
+Notes:
+    - Without an argument the command uses your current area's name.
+
+Related:
+    help ansi
+""",
+    },
+    {
         "key": "ocreate",
         "category": "Building",
         "text": """

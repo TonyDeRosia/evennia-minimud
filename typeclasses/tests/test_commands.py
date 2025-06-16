@@ -909,6 +909,31 @@ class TestRoomRegCommand(EvenniaTest):
         self.assertEqual(target.db.room_id, 4)
 
 
+class TestRListCommand(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.msg = MagicMock()
+        self.char1.execute_cmd("amake zone 1-3")
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("rmake zone 2")
+
+    def test_rlist_current_area(self):
+        self.char1.execute_cmd("rlist")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Rooms in zone", out)
+        self.assertIn("1:", out)
+        self.assertIn("2:", out)
+
+    def test_rlist_by_name(self):
+        self.char1.location.db.area = None
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("rlist zone")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Rooms in zone", out)
+        self.assertIn("1:", out)
+        self.assertIn("2:", out)
+
+
 class TestAdminCommands(EvenniaTest):
     def setUp(self):
         super().setUp()
