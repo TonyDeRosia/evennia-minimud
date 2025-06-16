@@ -4,6 +4,17 @@ from __future__ import annotations
 
 from typing import Dict, List
 
+# Classes considered melee-oriented for granting Hand-to-Hand.
+MELEE_CLASSES = {
+    "Warrior",
+    "Paladin",
+    "Rogue",
+    "Ranger",
+    "Swashbuckler",
+    "Battlemage",
+    "Mystic",
+}
+
 # Mapping of class names to level->skills lists
 CLASS_SKILLS: Dict[str, Dict[int, List[str]]] = {
     "Warrior": {1: ["kick"], 2: ["cleave"], 3: ["shield bash"]},
@@ -41,5 +52,5 @@ def get_class_skills(charclass: str, level: int) -> List[str]:
     return list(dict.fromkeys(skills))
 
 
-__all__ = ["CLASS_SKILLS", "get_class_skills"]
+__all__ = ["CLASS_SKILLS", "get_class_skills", "MELEE_CLASSES"]
 

@@ -11,9 +11,10 @@ from world.system import state_manager, stat_manager
 logger = logging.getLogger(__name__)
 
 
-def check_hit(attacker, target) -> Tuple[bool, str]:
+def check_hit(attacker, target, bonus: float = 0.0) -> Tuple[bool, str]:
     """Return ``(True, '')`` on hit or ``(False, message)`` on failure."""
-    if not stat_manager.check_hit(attacker, target):
+    base = 75 + int(bonus)
+    if not stat_manager.check_hit(attacker, target, base=base):
         return False, f"{attacker.key} misses."
     if roll_evade(attacker, target):
         return False, f"{target.key} evades the attack!"
