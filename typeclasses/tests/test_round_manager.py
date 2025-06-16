@@ -265,3 +265,37 @@ class TestCombatRoundManager(EvenniaTest):
             self.manager._tick()
             mock_proc.assert_called()
 
+    def test_multi_fighter_combat_lifecycle(self):
+        """Combat starts, processes and ends with three fighters."""
+        from evennia.utils import create
+        from typeclasses.characters import PlayerCharacter
+
+        with (
+            patch("combat.round_manager.delay"),
+            patch.object(CombatEngine, "process_round") as mock_proc,
+        ):
+            char3 = create.create_object(
+                PlayerCharacter,
+                key="Char3",
+                location=self.room1,
+                home=self.room1,
+            )
+
+            inst = self.manager.start_combat([self.char1, self.char2, char3])
+
+            self.assertEqual(len(inst.combatants), 3)
+            self.assertTrue(self.manager.running)
+            self.assertTrue(all(c.db.in_combat for c in [self.char1, self.char2, char3]))
+
+            mock_proc.reset_mock()
+            self.char2.db.hp = 0
+            char3.db.hp = 0
+
+            self.manager._tick()
+
+            mock_proc.assert_not_called()
+            self.assertTrue(inst.combat_ended)
+            self.assertFalse(self.manager.combats)
+            for char in (self.char1, self.char2, char3):
+                self.assertFalse(getattr(char.db, "in_combat", False))
+

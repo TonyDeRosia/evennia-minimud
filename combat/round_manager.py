@@ -58,13 +58,7 @@ class CombatInstance:
         if not self.engine:
             return False
 
-        # Handle both engine.participants (new style) and engine.fighters (old style)
-        if hasattr(self.engine, "participants"):
-            fighters = [p.actor for p in self.engine.participants]
-        elif hasattr(self.engine, "fighters"):
-            fighters = self.engine.fighters
-        else:
-            return False
+        fighters = [p.actor for p in self.engine.participants]
 
         active_fighters = []
         for fighter in fighters:
@@ -88,51 +82,23 @@ class CombatInstance:
 
         fighters = set(self.combatants)
 
-        if hasattr(self.engine, "participants"):
-            current = {p.actor for p in self.engine.participants}
-            
-            # Add new fighters
-            for actor in fighters - current:
-                if hasattr(self.engine, "add_participant"):
-                    self.engine.add_participant(actor)
-            
-            # Remove fighters no longer present in the room
-            for actor in current - fighters:
-                if hasattr(self.engine, "remove_participant"):
-                    self.engine.remove_participant(actor)
-            
-            # Remove defeated combatants
-            for actor in list(fighters):
-                if _current_hp(actor) <= 0:
-                    if hasattr(actor, "db"):
-                        actor.db.in_combat = False
-                    if hasattr(self.engine, "remove_participant"):
-                        self.engine.remove_participant(actor)
-                    self.combatants.discard(actor)
-        
-        # Handle legacy fighter-based engines
-        elif hasattr(self.engine, "fighters"):
-            valid_fighters = []
-            for fighter in list(self.engine.fighters):
-                if not fighter:
-                    continue
+        current = {p.actor for p in self.engine.participants}
 
-                if _current_hp(fighter) <= 0:
-                    fighter.db.in_combat = False
-                    self.combatants.discard(fighter)
-                    continue
+        # Add new fighters
+        for actor in fighters - current:
+            self.engine.add_participant(actor)
 
-                if not getattr(fighter, "in_combat", False):
-                    continue
+        # Remove fighters no longer present in the combatants set
+        for actor in current - fighters:
+            self.engine.remove_participant(actor)
 
-                valid_fighters.append(fighter)
-
-            self.engine.fighters = valid_fighters
-
-            # Check for combat end
-            if len(valid_fighters) <= 1:
-                winner = valid_fighters[0] if valid_fighters else None
-                self.end_combat(f"Combat ended - winner: {winner.key if winner else 'none'}")
+        # Remove defeated combatants
+        for actor in list(fighters):
+            if _current_hp(actor) <= 0:
+                if hasattr(actor, "db"):
+                    actor.db.in_combat = False
+                self.engine.remove_participant(actor)
+                self.combatants.discard(actor)
 
     def process_round(self) -> None:
         """Process a single combat round for this instance."""
@@ -162,7 +128,7 @@ class CombatInstance:
 
     def _manual_round_processing(self) -> None:
         """Fallback round processing if engine doesn't have process_round."""
-        fighters = getattr(self.engine, "fighters", [])
+        fighters = [p.actor for p in self.engine.participants]
         
         for fighter in list(fighters):
             if not fighter or _current_hp(fighter) <= 0:
@@ -180,7 +146,7 @@ class CombatInstance:
         if not npc or not hasattr(npc, "location"):
             return
 
-        fighters = getattr(self.engine, "fighters", [])
+        fighters = [p.actor for p in self.engine.participants]
         targets = []
         
         for fighter in fighters:
@@ -213,11 +179,7 @@ class CombatInstance:
 
         # Clean up fighter states
         if self.engine:
-            fighters = []
-            if hasattr(self.engine, "participants"):
-                fighters = [p.actor for p in self.engine.participants]
-            elif hasattr(self.engine, "fighters"):
-                fighters = self.engine.fighters
+            fighters = [p.actor for p in self.engine.participants]
 
             for fighter in fighters:
                 if fighter and hasattr(fighter, "db"):
@@ -387,13 +349,7 @@ class CombatRoundManager:
         }
 
         for inst in self.combats.values():
-            # Get fighter count based on engine type
-            fighter_count = 0
-            if inst.engine:
-                if hasattr(inst.engine, "participants"):
-                    fighter_count = len(inst.engine.participants)
-                elif hasattr(inst.engine, "fighters"):
-                    fighter_count = len(inst.engine.fighters)
+            fighter_count = len(inst.engine.participants) if inst.engine else 0
 
             status["instances"].append(
                 {
@@ -440,23 +396,3 @@ class CombatRoundManager:
             )
 
         return "\n".join(lines)
-
-
-def cleanup_legacy_room_combat() -> None:
-    """Clean up any leftover room-based combat stored in `instances_by_room`."""
-    mgr = CombatRoundManager._instance
-    if not mgr:
-        return
-    # Older revisions stored combats in `instances_by_room`. Remove any that remain.
-    if hasattr(mgr, "instances_by_room"):
-        for inst in list(getattr(mgr, "instances_by_room", {}).values()):
-            try:
-                inst.end_combat("Migrated to ID-based combat")
-            except Exception:
-                pass
-        mgr.instances_by_room.clear()
-        if hasattr(mgr, "instances"):
-            mgr.instances.clear()
-
-
-cleanup_legacy_room_combat()
