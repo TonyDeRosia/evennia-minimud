@@ -1382,7 +1382,8 @@ Related:
         "text": """
 Help for alist
 
-List all registered areas and their number ranges.
+List defined areas including their vnum range, builders, flags, current age and
+reset interval.
 
 Usage:
     alist
