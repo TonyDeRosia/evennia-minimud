@@ -2,7 +2,7 @@ from evennia import create_object
 from evennia.objects.models import ObjectDB
 from .command import Command
 from typeclasses.rooms import Room
-from world.areas import find_area
+from world.areas import find_area, find_area_by_vnum
 from utils import VALID_SLOTS, normalize_slot
 
 
