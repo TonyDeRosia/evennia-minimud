@@ -8,7 +8,6 @@ from typing import Dict, List, Optional, Set
 
 from evennia.utils import delay
 from evennia.utils.logger import log_trace
-from django.conf import settings
 from .engine import _current_hp
 
 
@@ -23,6 +22,7 @@ class CombatInstance:
     round_number: int = 0
     last_round_time: float = field(default_factory=time.time)
     combat_ended: bool = False
+    tick_handle: Optional[object] = field(default=None, init=False, repr=False)
 
     def add_combatant(self, combatant, **kwargs) -> bool:
         """Add ``combatant`` to this combat instance."""
@@ -48,6 +48,35 @@ class CombatInstance:
         except Exception:  # pragma: no cover - safety
             pass
         return True
+
+    # ------------------------------------------------------------------
+    # ticking helpers
+    # ------------------------------------------------------------------
+    def schedule_tick(self) -> None:
+        """Schedule the next combat round."""
+        if self.combat_ended or self.tick_handle:
+            return
+        self.tick_handle = delay(self.round_time, self._tick)
+
+    def cancel_tick(self) -> None:
+        """Cancel any pending tick."""
+        if self.tick_handle:
+            try:
+                self.tick_handle.cancel()
+            except Exception:  # pragma: no cover - safety
+                pass
+            self.tick_handle = None
+
+    def _tick(self) -> None:
+        """Process a round and schedule the next one."""
+        self.tick_handle = None
+        if not self.is_valid():
+            self.end_combat("Invalid combat instance")
+            return
+        if not self.has_active_fighters():
+            self.end_combat("No active fighters remaining")
+            return
+        self.process_round()
 
     def is_valid(self) -> bool:
         """Return ``True`` if this instance is still active."""
@@ -112,6 +141,7 @@ class CombatInstance:
             self.sync_participants()
 
             if not self.has_active_fighters():
+                self.end_combat("No active fighters remaining")
                 return
 
             # Use engine's process_round if available
@@ -121,6 +151,12 @@ class CombatInstance:
                 self._manual_round_processing()
 
             self.sync_participants()
+
+            if not self.has_active_fighters():
+                self.end_combat("No active fighters remaining")
+                return
+
+            self.schedule_tick()
 
         except Exception as err:
             log_trace(f"Error in combat round processing: {err}")
@@ -175,6 +211,7 @@ class CombatInstance:
             return
 
         self.combat_ended = True
+        self.cancel_tick()
         CombatRoundManager.get().remove_combat(self.combat_id)
 
         # Clean up fighter states
@@ -197,9 +234,7 @@ class CombatRoundManager:
     def __init__(self) -> None:
         self.combats: Dict[int, CombatInstance] = {}
         self.combatant_to_combat: Dict[object, int] = {}
-        self.running = False
         self.tick_delay = 2.0
-        self._next_tick_scheduled = False
         self._next_id = 1
 
     @classmethod
@@ -236,10 +271,7 @@ class CombatRoundManager:
         for fighter in fighters:
             self.combatant_to_combat[fighter] = combat_id
 
-        inst.process_round()
-
-        if not self.running:
-            self.start_ticking()
+        inst.schedule_tick()
 
         return inst
 
@@ -250,8 +282,6 @@ class CombatRoundManager:
             return
         for fighter in list(inst.combatants):
             self.combatant_to_combat.pop(fighter, None)
-        if not self.combats:
-            self.stop_ticking()
 
     def get_combatant_combat(self, combatant) -> Optional[CombatInstance]:
         """Return the combat instance ``combatant`` is part of."""
@@ -269,81 +299,16 @@ class CombatRoundManager:
                     if c not in inst.combatants:
                         inst.add_combatant(c)
                         self.combatant_to_combat[c] = inst.combat_id
-                if not self.running:
-                    self.start_ticking()
+                inst.schedule_tick()
                 return inst
         return self.create_combat(combatants)
 
-    # ------------------------------------------------------------------
-    # ticking logic
-    # ------------------------------------------------------------------
-    def start_ticking(self) -> None:
-        if self.running:
-            return
-        self.running = True
-        self._schedule_next_tick()
-
-    def stop_ticking(self) -> None:
-        self.running = False
-        self._next_tick_scheduled = False
-
-    def _schedule_next_tick(self) -> None:
-        if not self.running or self._next_tick_scheduled:
-            return
-        self._next_tick_scheduled = True
-        delay(self.tick_delay, self._tick)
-
-    def _process_combats(self) -> List[int]:
-        """Process all combats and return those to remove."""
-        remove: List[int] = []
-
-        for cid, inst in list(self.combats.items()):
-            try:
-                if not inst.is_valid():
-                    remove.append(cid)
-                    continue
-
-                if not inst.has_active_fighters():
-                    inst.end_combat("No active fighters remaining")
-                    remove.append(cid)
-                    continue
-
-                inst.process_round()
-
-                if inst.combat_ended:
-                    remove.append(cid)
-
-            except Exception as err:
-                log_trace(f"Error processing combat instance: {err}")
-                remove.append(cid)
-
-        return remove
-
-    def _cleanup_combats(self, combat_ids: List[int]) -> None:
-        """Remove combats whose ids are in ``combat_ids``."""
-        for cid in combat_ids:
-            self.remove_combat(cid)
-
-    def _tick(self) -> None:
-        self._next_tick_scheduled = False
-        if getattr(settings, "COMBAT_DEBUG_TICKS", False):
-            log_trace("CombatRoundManager tick")
-        if not self.running:
-            return
-
-        remove = self._process_combats()
-        self._cleanup_combats(remove)
-
-        # Schedule next tick if instances remain
-        if self.combats and self.running:
-            self._schedule_next_tick()
 
     # ------------------------------------------------------------------
     # debugging helpers
     # ------------------------------------------------------------------
     def get_combat_status(self) -> Dict:
         status = {
-            "running": self.running,
             "total_instances": len(self.combats),
             "instances": [],
         }
@@ -369,14 +334,12 @@ class CombatRoundManager:
             inst.end_combat("Force ended by admin")
         self.combats.clear()
         self.combatant_to_combat.clear()
-        self.stop_ticking()
 
     def debug_info(self) -> str:
         """Return formatted debug information about the combat manager."""
         status = self.get_combat_status()
         lines = [
             "Combat Manager Status:",
-            f"  Running: {status['running']}",
             f"  Active Instances: {status['total_instances']}",
             "",
         ]

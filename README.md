@@ -26,7 +26,10 @@ Since my goal was to write as little custom code as possible, most of the mechan
 
 ## Getting Started
 
-The combat system uses a round manager that processes queued actions each tick. See [docs/combat_loop_mapping.md](docs/combat_loop_mapping.md) for a walkthrough of starting combat and reading the results.
+The combat system uses a round manager that processes queued actions once per
+tick for each ongoing battle. See
+[docs/combat_loop_mapping.md](docs/combat_loop_mapping.md) for a walkthrough of
+starting combat and reading the results.
 
 ## Coins and Currency
 
@@ -428,8 +431,8 @@ with VNUM-based NPCs.
 ### Combat Round Manager
 
 The `CombatRoundManager` singleton, found in `combat.round_manager`, manages all
-active combat encounters. It ticks every **2 seconds** by default (see
-`tick_delay` at line 214 of `combat/round_manager.py`). Call
+active combat encounters. Each `CombatInstance` schedules its own tick every
+**2 seconds** by default (see the ``round_time`` attribute). Call
 `CombatRoundManager.get().start_combat([fighter1, fighter2])` to create a combat
 with those combatants. The manager stores each combat instance by a unique ID
 and uses the `combatant_to_combat` dictionary to map combatants back to their
