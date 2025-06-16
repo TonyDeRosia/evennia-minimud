@@ -9,17 +9,11 @@ class TestStateManager(EvenniaTest):
         char = self.char1
         state_manager.add_temp_stat_bonus(char, "STR", 5, 2)
         base = char.traits.STR.value
-        self.assertEqual(
-            state_manager.get_effective_stat(char, "STR"), base + 5
-        )
+        self.assertEqual(state_manager.get_effective_stat(char, "STR"), base + 5)
         state_manager.tick_all()
-        self.assertEqual(
-            state_manager.get_effective_stat(char, "STR"), base + 5
-        )
+        self.assertEqual(state_manager.get_effective_stat(char, "STR"), base + 5)
         state_manager.tick_all()
-        self.assertEqual(
-            state_manager.get_effective_stat(char, "STR"), base
-        )
+        self.assertEqual(state_manager.get_effective_stat(char, "STR"), base)
 
     def test_status_effects(self):
         char = self.char1
@@ -122,6 +116,20 @@ class TestStateManager(EvenniaTest):
             trait = char.traits.get(key)
             self.assertEqual(trait.current, trait.max // 2 + regen)
 
+    def test_independent_skill_cooldowns(self):
+        char = self.char1
+        state_manager.add_cooldown(char, "kick", 5)
+        self.assertTrue(state_manager.is_on_cooldown(char, "kick"))
+        self.assertFalse(state_manager.is_on_cooldown(char, "cleave"))
+
+        state_manager.add_cooldown(char, "cleave", 5)
+        self.assertTrue(state_manager.is_on_cooldown(char, "kick"))
+        self.assertTrue(state_manager.is_on_cooldown(char, "cleave"))
+
+        state_manager.remove_cooldown(char, "kick")
+        self.assertFalse(state_manager.is_on_cooldown(char, "kick"))
+        self.assertTrue(state_manager.is_on_cooldown(char, "cleave"))
+
     def test_apply_regen_scales_with_status(self):
         char = self.char1
         for key in ("health", "mana", "stamina"):
@@ -162,4 +170,3 @@ class TestStateManager(EvenniaTest):
         for key, regen in expected.items():
             trait = char.traits.get(key)
             self.assertEqual(trait.current, trait.max // 2 + regen)
-
