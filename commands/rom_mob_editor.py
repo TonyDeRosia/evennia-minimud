@@ -32,6 +32,14 @@ def _summary(caller) -> str:
         lines.append(f"Level: {lvl}")
     if race := proto.get("race"):
         lines.append(f"Race: {race}")
+    skills = proto.get("skills") or {}
+    if skills:
+        parts = ", ".join(f"{k}({v}%)" for k, v in skills.items())
+        lines.append(f"Skills: {parts}")
+    spells = proto.get("spells") or {}
+    if spells:
+        parts = ", ".join(f"{k}({v}%)" for k, v in spells.items())
+        lines.append(f"Spells: {parts}")
     return "\n".join(lines)
 
 
@@ -87,6 +95,8 @@ def menunode_main(caller, raw_string="", **kwargs):
         {"desc": "Edit loot", "goto": "menunode_loot"},
         {"desc": "Edit inventory", "goto": "menunode_inventory"},
         {"desc": "Edit equipment", "goto": "menunode_equipment"},
+        {"desc": "Edit skills", "goto": "menunode_skills"},
+        {"desc": "Edit spells", "goto": "menunode_spells"},
         {"desc": "Edit actflags", "goto": "menunode_actflags"},
         {"desc": "Edit affects", "goto": "menunode_affects"},
         {"desc": "Edit attacks", "goto": "menunode_attacks"},
@@ -446,6 +456,96 @@ def menunode_equipment(caller, raw_string="", **kwargs):
     """Placeholder for equipment editing."""
     caller.msg("Equipment editing not yet implemented.")
     return "menunode_main"
+
+
+def menunode_skills(caller, raw_string="", **kwargs):
+    """Menu for editing skill chances."""
+    skills = caller.ndb.mob_proto.get("skills", {})
+    text = "|wEdit Skills|n\n"
+    if skills:
+        for name, chance in skills.items():
+            text += f" - {name} ({chance}%)\n"
+    else:
+        text += "None\n"
+    text += "Commands:\n  add <name> [chance]\n  remove <name>\n  done/back - return"
+    options = {"key": "_default", "goto": _edit_skills}
+    return _with_summary(caller, text), options
+
+
+def _edit_skills(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    table = caller.ndb.mob_proto.setdefault("skills", {})
+    if string.lower() in ("back", "done", "finish", ""):
+        return "menunode_main"
+    if string.lower().startswith("add "):
+        parts = string[4:].split()
+        if not parts:
+            caller.msg("Usage: add <name> [chance]")
+            return "menunode_skills"
+        name = parts[0]
+        chance = 100
+        if len(parts) > 1:
+            if not parts[1].isdigit():
+                caller.msg("Chance must be a number.")
+                return "menunode_skills"
+            chance = int(parts[1])
+        table[name] = chance
+        caller.msg(f"Added {name} ({chance}%).")
+        return "menunode_skills"
+    if string.lower().startswith("remove "):
+        name = string[7:].strip()
+        if table.pop(name, None) is not None:
+            caller.msg(f"Removed {name}.")
+        else:
+            caller.msg("Entry not found.")
+        return "menunode_skills"
+    caller.msg("Unknown command.")
+    return "menunode_skills"
+
+
+def menunode_spells(caller, raw_string="", **kwargs):
+    """Menu for editing spell chances."""
+    spells = caller.ndb.mob_proto.get("spells", {})
+    text = "|wEdit Spells|n\n"
+    if spells:
+        for name, chance in spells.items():
+            text += f" - {name} ({chance}%)\n"
+    else:
+        text += "None\n"
+    text += "Commands:\n  add <name> [chance]\n  remove <name>\n  done/back - return"
+    options = {"key": "_default", "goto": _edit_spells}
+    return _with_summary(caller, text), options
+
+
+def _edit_spells(caller, raw_string, **kwargs):
+    string = raw_string.strip()
+    table = caller.ndb.mob_proto.setdefault("spells", {})
+    if string.lower() in ("back", "done", "finish", ""):
+        return "menunode_main"
+    if string.lower().startswith("add "):
+        parts = string[4:].split()
+        if not parts:
+            caller.msg("Usage: add <name> [chance]")
+            return "menunode_spells"
+        name = parts[0]
+        chance = 100
+        if len(parts) > 1:
+            if not parts[1].isdigit():
+                caller.msg("Chance must be a number.")
+                return "menunode_spells"
+            chance = int(parts[1])
+        table[name] = chance
+        caller.msg(f"Added {name} ({chance}%).")
+        return "menunode_spells"
+    if string.lower().startswith("remove "):
+        name = string[7:].strip()
+        if table.pop(name, None) is not None:
+            caller.msg(f"Removed {name}.")
+        else:
+            caller.msg("Entry not found.")
+        return "menunode_spells"
+    caller.msg("Unknown command.")
+    return "menunode_spells"
 
 
 def menunode_ai_flags(caller, raw_string="", **kwargs):

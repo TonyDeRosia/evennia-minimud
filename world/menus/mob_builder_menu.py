@@ -1013,17 +1013,18 @@ def _set_behavior(caller, raw_string, **kwargs):
 
 
 def menunode_skills(caller, raw_string="", **kwargs):
-    skills = caller.ndb.buildnpc.get("skills", [])
-    default = ", ".join(skills)
+    skills = caller.ndb.buildnpc.get("skills", {})
     npc_type = caller.ndb.buildnpc.get("npc_type", NPCType.BASE)
     suggested = ", ".join(get_skills_for_class(npc_type))
-    text = "|wList any skills or attacks (comma separated)|n"
-    if default:
-        text += f" [default: {default}]"
-    text += f"\nSuggested for {npc_type}: {suggested}"
-    text += "\nExample: |wfireball, slash, heal|n"
-    text += "\n(back to go back, skip for default)"
-    options = add_back_skip({"key": "_default", "goto": _set_skills}, _set_skills)
+    text = "|wEdit Skills|n\n"
+    if skills:
+        for name, chance in skills.items():
+            text += f" - {name} ({chance}%)\n"
+    else:
+        text += "None\n"
+    text += f"Suggested for {npc_type}: {suggested}\n"
+    text += "Commands:\n  add <name> [chance]\n  remove <name>\n  done - finish\n  back - previous step"
+    options = add_back_skip({"key": "_default", "goto": _edit_skills}, _edit_skills)
     return with_summary(caller, text), options
 
 
@@ -1031,23 +1032,45 @@ def _set_skills(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
         return "menunode_behavior"
-    if not string or string.lower() == "skip":
-        skills = caller.ndb.buildnpc.get("skills", [])
-    else:
-        skills = [s.strip() for s in string.split(",") if s.strip()]
-    caller.ndb.buildnpc["skills"] = skills
-    return _next_node(caller, "menunode_spells")
+    table = caller.ndb.buildnpc.setdefault("skills", {})
+    if not string or string.lower() in ("skip", "done", "finish"):
+        return _next_node(caller, "menunode_spells")
+    if string.lower().startswith("add "):
+        parts = string[4:].split()
+        if not parts:
+            caller.msg("Usage: add <name> [chance]")
+            return "menunode_skills"
+        name = parts[0]
+        chance = 100
+        if len(parts) > 1:
+            if not parts[1].isdigit():
+                caller.msg("Chance must be a number.")
+                return "menunode_skills"
+            chance = int(parts[1])
+        table[name] = chance
+        caller.msg(f"Added {name} ({chance}%).")
+        return "menunode_skills"
+    if string.lower().startswith("remove "):
+        name = string[7:].strip()
+        if table.pop(name, None) is not None:
+            caller.msg(f"Removed {name}.")
+        else:
+            caller.msg("Entry not found.")
+        return "menunode_skills"
+    caller.msg("Unknown command.")
+    return "menunode_skills"
 
 
 def menunode_spells(caller, raw_string="", **kwargs):
-    spells = caller.ndb.buildnpc.get("spells", [])
-    default = ", ".join(spells)
-    text = "|wList any spells (comma separated)|n"
-    if default:
-        text += f" [default: {default}]"
-    text += "\nExample: |wfireball, heal|n"
-    text += "\n(back to go back, skip for default)"
-    options = add_back_skip({"key": "_default", "goto": _set_spells}, _set_spells)
+    spells = caller.ndb.buildnpc.get("spells", {})
+    text = "|wEdit Spells|n\n"
+    if spells:
+        for name, chance in spells.items():
+            text += f" - {name} ({chance}%)\n"
+    else:
+        text += "None\n"
+    text += "Commands:\n  add <name> [chance]\n  remove <name>\n  done - finish\n  back - previous step"
+    options = add_back_skip({"key": "_default", "goto": _edit_spells}, _edit_spells)
     return with_summary(caller, text), options
 
 
@@ -1055,12 +1078,33 @@ def _set_spells(caller, raw_string, **kwargs):
     string = raw_string.strip()
     if string.lower() == "back":
         return "menunode_skills"
-    if not string or string.lower() == "skip":
-        spells = caller.ndb.buildnpc.get("spells", [])
-    else:
-        spells = [s.strip() for s in string.split(",") if s.strip()]
-    caller.ndb.buildnpc["spells"] = spells
-    return _next_node(caller, "menunode_ai")
+    table = caller.ndb.buildnpc.setdefault("spells", {})
+    if not string or string.lower() in ("skip", "done", "finish"):
+        return _next_node(caller, "menunode_ai")
+    if string.lower().startswith("add "):
+        parts = string[4:].split()
+        if not parts:
+            caller.msg("Usage: add <name> [chance]")
+            return "menunode_spells"
+        name = parts[0]
+        chance = 100
+        if len(parts) > 1:
+            if not parts[1].isdigit():
+                caller.msg("Chance must be a number.")
+                return "menunode_spells"
+            chance = int(parts[1])
+        table[name] = chance
+        caller.msg(f"Added {name} ({chance}%).")
+        return "menunode_spells"
+    if string.lower().startswith("remove "):
+        name = string[7:].strip()
+        if table.pop(name, None) is not None:
+            caller.msg(f"Removed {name}.")
+        else:
+            caller.msg("Entry not found.")
+        return "menunode_spells"
+    caller.msg("Unknown command.")
+    return "menunode_spells"
 
 
 def menunode_ai(caller, raw_string="", **kwargs):

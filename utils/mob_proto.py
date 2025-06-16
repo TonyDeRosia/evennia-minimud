@@ -38,6 +38,12 @@ def register_prototype(
                 raise ValueError(f"Typeclass {tc} does not inherit from NPC")
         else:
             raise ValueError("typeclass must be a dotted path string or class object")
+
+    # convert legacy skill/spell lists to dicts
+    if isinstance(data.get("skills"), list):
+        data["skills"] = {name: 100 for name in data["skills"]}
+    if isinstance(data.get("spells"), list):
+        data["spells"] = {name: 100 for name in data["spells"]}
     if vnum is None:
         vnum = get_next_vnum("npc")
         if area:
@@ -126,6 +132,10 @@ def spawn_from_vnum(vnum: int, location=None):
         raise ValueError(err)
     proto_data = dict(proto)
     prototypes._normalize_proto(proto_data)
+    if isinstance(proto_data.get("skills"), list):
+        proto_data["skills"] = {name: 100 for name in proto_data["skills"]}
+    if isinstance(proto_data.get("spells"), list):
+        proto_data["spells"] = {name: 100 for name in proto_data["spells"]}
     if "typeclass" not in proto_data:
         proto_data["typeclass"] = "typeclasses.npcs.BaseNPC"
 

@@ -262,7 +262,7 @@ def format_mob_summary(data: dict) -> str:
         """Format the given value for display."""
 
         if isinstance(value, dict):
-            return ", ".join(f"{k}:{v}" for k, v in value.items())
+            return ", ".join(f"{k}({v}%)" for k, v in value.items())
         if isinstance(value, (list, tuple)):
             return ", ".join(str(v) for v in value)
         return str(value)
@@ -637,8 +637,8 @@ def _gather_npc_data(npc):
         "initiative": getattr(npc.traits.get("initiative"), "base", 0),
         "primary_stats": npc.db.base_primary_stats or {},
         "behavior": npc.db.behavior or "",
-        "skills": npc.db.skills or [],
-        "spells": npc.db.spells or [],
+        "skills": npc.db.skills or {},
+        "spells": npc.db.spells or {},
         "ai_type": meta.get("ai_type") or npc.db.ai_type or "",
         "actflags": npc.db.actflags or [],
         "affected_by": npc.db.affected_by or [],
