@@ -46,7 +46,7 @@ Arguments:
     None
 
 Examples:
-    None
+    alist current
 
 Notes:
     - # subtopics
@@ -1415,15 +1415,16 @@ prototypes, builders, flags, current age and reset interval.
 
 Usage:
     alist
+    alist current
 
 Switches:
     None
 
 Arguments:
-    None
+    current - show only the area you are currently in
 
 Examples:
-    None
+    alist current
 
 Notes:
     - None

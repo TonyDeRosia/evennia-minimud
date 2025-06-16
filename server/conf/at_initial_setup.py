@@ -12,6 +12,7 @@ from evennia import create_object
 from evennia.utils import logger, search
 from evennia.accounts.models import AccountDB
 from world.areas import Area, save_area
+from django.conf import settings
 
 
 def _create_start_room():
@@ -26,6 +27,7 @@ def _create_start_room():
         key="Town Square",
     )
     room.db.desc = "The bustling center of town where new adventurers gather."
+    room.set_area(settings.DEFAULT_AREA_NAME, settings.DEFAULT_AREA_START)
     logger.log_info("Created starting room: Town Square")
     return room
 
@@ -52,9 +54,13 @@ def _create_admin_account(start_room):
 def _create_default_area():
     """Create a basic starting area entry."""
 
-    area = Area(key="Starter Zone", start=200000, end=200999)
+    area = Area(
+        key=settings.DEFAULT_AREA_NAME,
+        start=settings.DEFAULT_AREA_START,
+        end=settings.DEFAULT_AREA_END,
+    )
     save_area(area)
-    logger.log_info("Registered starting area 'Starter Zone'")
+    logger.log_info(f"Registered starting area '{settings.DEFAULT_AREA_NAME}'")
 
 
 def at_initial_setup():

@@ -62,6 +62,27 @@ def _migrate_experience():
         logger.log_info(f"Migrated experience on {migrated} characters")
 
 
+def _ensure_room_areas():
+    """Assign rooms without area to the default area."""
+
+    from django.conf import settings
+    from typeclasses.rooms import Room
+    from world.areas import Area, find_area, save_area
+
+    name = getattr(settings, "DEFAULT_AREA_NAME", "Starter Zone")
+    start = getattr(settings, "DEFAULT_AREA_START", 200000)
+    end = getattr(settings, "DEFAULT_AREA_END", 200999)
+
+    _, area = find_area(name)
+    if area is None:
+        area = Area(key=name, start=start, end=end)
+        save_area(area)
+
+    for room in Room.objects.all():
+        if not room.db.area:
+            room.set_area(name)
+
+
 def at_server_init():
     """Called as the service layer initializes."""
 
@@ -115,6 +136,7 @@ def at_server_start():
     _migrate_experience()
 
     _build_caches()
+    _ensure_room_areas()
     ServerConfig.objects.conf("server_start_time", time.time())
 
 

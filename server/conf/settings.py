@@ -48,6 +48,11 @@ XP_TO_LEVEL = lambda level: 100 + (level ** 2 * 20)
 # Whether excess XP carries over when leveling
 XP_CARRY_OVER = False
 
+# Default area to assign rooms that lack one
+DEFAULT_AREA_NAME = "Starter Zone"
+DEFAULT_AREA_START = 200000
+DEFAULT_AREA_END = 200999
+
 ######################################################################
 # Config for contrib packages
 ######################################################################
