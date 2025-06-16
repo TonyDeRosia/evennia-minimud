@@ -4,7 +4,6 @@ from evennia.utils.evtable import EvTable
 from .command import Command
 from world.skills.kick import Kick
 from world.skills.utils import maybe_start_combat
-from combat.combat_actions import SkillAction
 from world.system import state_manager
 
 
@@ -48,9 +47,15 @@ class CmdKick(Command):
         if self.caller.traits.stamina.current < skill.stamina_cost:
             self.msg("You are too exhausted.")
             return
+        # Apply costs and start combat if necessary
         state_manager.add_cooldown(self.caller, skill.name, skill.cooldown)
-        inst = maybe_start_combat(self.caller, target)
-        inst.engine.queue_action(self.caller, SkillAction(self.caller, skill, target))
+        self.caller.traits.stamina.current -= skill.stamina_cost
+        maybe_start_combat(self.caller, target)
+
+        # Resolve the skill immediately instead of queuing an action
+        result = skill.resolve(self.caller, target)
+        if result.message and self.caller.location:
+            self.caller.location.msg_contents(result.message)
 
 
 class AbilityCmdSet(CmdSet):
