@@ -4,7 +4,7 @@ import logging
 from typing import Tuple
 
 from ..damage_types import DamageType
-from ..combat_utils import roll_damage, roll_evade, roll_parry, roll_block
+from ..combat_utils import roll_evade, roll_parry, roll_block
 from utils import roll_dice_string
 from world.system import state_manager, stat_manager
 
@@ -56,16 +56,14 @@ def calculate_damage(attacker, weapon, target) -> Tuple[int, object]:
                             dtype = dt
                 else:
                     dice = getattr(db, "damage_dice", None)
-                    if dice:
-                        try:
-                            num, sides = map(int, str(dice).lower().split("d"))
-                        except (TypeError, ValueError):
-                            logger.error("Invalid damage_dice '%s' on %s", dice, weapon)
-                            dmg = int(getattr(db, "dmg", 0))
-                        else:
-                            dmg = roll_damage((num, sides))
-                    else:
+                    dice = dice or "1d2"
+                    try:
+                        dmg = roll_dice_string(str(dice))
+                    except Exception:
+                        logger.error("Invalid damage_dice '%s' on %s", dice, weapon)
                         dmg = int(getattr(db, "dmg", 0))
+                    bonus = getattr(db, "damage_bonus", 0)
+                    dmg += int(bonus)
 
         if dmg is None:
             dmg = 0
