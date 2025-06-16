@@ -447,15 +447,115 @@ def _edit_loot(caller, raw_string, **kwargs):
 
 
 def menunode_inventory(caller, raw_string="", **kwargs):
-    """Placeholder for inventory editing."""
-    caller.msg("Inventory editing not yet implemented.")
-    return "menunode_main"
+    """Menu for editing starting inventory VNUMs."""
+    items = caller.ndb.mob_proto.get("inventory", [])
+    text = "|wEdit Inventory|n\n"
+    if items:
+        for vnum in items:
+            text += f" - {vnum}\n"
+    else:
+        text += "None\n"
+    text += "Commands:\n  add <vnum>\n  remove <vnum>\n  done/back - return"
+    options = {"key": "_default", "goto": _edit_inventory}
+    return _with_summary(caller, text), options
+
+
+def _edit_inventory(caller, raw_string, **kwargs):
+    from utils.prototype_manager import load_prototype
+    from utils import vnum_registry
+
+    string = raw_string.strip()
+    table = caller.ndb.mob_proto.setdefault("inventory", [])
+    if string.lower() in ("back", "done", "finish", ""):
+        return "menunode_main"
+    if string.lower().startswith("add "):
+        vnum_str = string[4:].strip()
+        if not vnum_str.isdigit():
+            caller.msg("Usage: add <vnum>")
+            return "menunode_inventory"
+        vnum = int(vnum_str)
+        if not vnum_registry.VNUM_RANGES["object"][0] <= vnum <= vnum_registry.VNUM_RANGES["object"][1]:
+            caller.msg("Invalid object VNUM.")
+            return "menunode_inventory"
+        if not load_prototype("object", vnum):
+            caller.msg("Unknown object VNUM.")
+            return "menunode_inventory"
+        if vnum not in table:
+            table.append(vnum)
+            caller.msg(f"Added {vnum}.")
+        else:
+            caller.msg("VNUM already present.")
+        return "menunode_inventory"
+    if string.lower().startswith("remove "):
+        vnum_str = string[7:].strip()
+        if not vnum_str.isdigit():
+            caller.msg("Usage: remove <vnum>")
+            return "menunode_inventory"
+        vnum = int(vnum_str)
+        if vnum in table:
+            table.remove(vnum)
+            caller.msg(f"Removed {vnum}.")
+        else:
+            caller.msg("Entry not found.")
+        return "menunode_inventory"
+    caller.msg("Unknown command.")
+    return "menunode_inventory"
 
 
 def menunode_equipment(caller, raw_string="", **kwargs):
-    """Placeholder for equipment editing."""
-    caller.msg("Equipment editing not yet implemented.")
-    return "menunode_main"
+    """Menu for editing equipped item VNUMs."""
+    items = caller.ndb.mob_proto.get("equipment", [])
+    text = "|wEdit Equipment|n\n"
+    if items:
+        for vnum in items:
+            text += f" - {vnum}\n"
+    else:
+        text += "None\n"
+    text += "Commands:\n  add <vnum>\n  remove <vnum>\n  done/back - return"
+    options = {"key": "_default", "goto": _edit_equipment}
+    return _with_summary(caller, text), options
+
+
+def _edit_equipment(caller, raw_string, **kwargs):
+    from utils.prototype_manager import load_prototype
+    from utils import vnum_registry
+
+    string = raw_string.strip()
+    table = caller.ndb.mob_proto.setdefault("equipment", [])
+    if string.lower() in ("back", "done", "finish", ""):
+        return "menunode_main"
+    if string.lower().startswith("add "):
+        vnum_str = string[4:].strip()
+        if not vnum_str.isdigit():
+            caller.msg("Usage: add <vnum>")
+            return "menunode_equipment"
+        vnum = int(vnum_str)
+        if not vnum_registry.VNUM_RANGES["object"][0] <= vnum <= vnum_registry.VNUM_RANGES["object"][1]:
+            caller.msg("Invalid object VNUM.")
+            return "menunode_equipment"
+        if not load_prototype("object", vnum):
+            caller.msg("Unknown object VNUM.")
+            return "menunode_equipment"
+        if vnum not in table:
+            table.append(vnum)
+            caller.msg(f"Added {vnum}.")
+        else:
+            caller.msg("VNUM already present.")
+        return "menunode_equipment"
+    if string.lower().startswith("remove "):
+        vnum_str = string[7:].strip()
+        if not vnum_str.isdigit():
+            caller.msg("Usage: remove <vnum>")
+            return "menunode_equipment"
+        vnum = int(vnum_str)
+        if vnum in table:
+            table.remove(vnum)
+            caller.msg(f"Removed {vnum}.")
+        else:
+            caller.msg("Entry not found.")
+        return "menunode_equipment"
+    caller.msg("Unknown command.")
+    return "menunode_equipment"
 
 
 def menunode_skills(caller, raw_string="", **kwargs):
@@ -583,7 +683,8 @@ class CmdMEdit(Command):
     help_category = "Building"
     help_text = (
         "Edit or create an NPC prototype.\n\n"
-        "Usage:\n    medit <vnum>\n    medit create <vnum>"
+        "Usage:\n    medit <vnum>\n    medit create <vnum>\n\n"
+        "Inventory and equipment entries accept object VNUMs."
     )
 
     def func(self):

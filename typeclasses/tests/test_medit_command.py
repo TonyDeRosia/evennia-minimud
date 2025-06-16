@@ -91,3 +91,18 @@ class TestMEditCommand(EvenniaTest):
         assert "menunode_skills" in gotos
         assert "menunode_spells" in gotos
         assert gotos[-2:] == ["menunode_cancel", "menunode_done"]
+
+    def test_inventory_and_equipment_editors(self):
+        from commands import rom_mob_editor
+
+        self.char1.ndb.mob_proto = {}
+        with patch("commands.rom_mob_editor.load_prototype", return_value={"key": "obj"}):
+            rom_mob_editor._edit_inventory(self.char1, "add 100001")
+            assert self.char1.ndb.mob_proto["inventory"] == [100001]
+            rom_mob_editor._edit_inventory(self.char1, "remove 100001")
+            assert self.char1.ndb.mob_proto["inventory"] == []
+
+            rom_mob_editor._edit_equipment(self.char1, "add 100002")
+            assert self.char1.ndb.mob_proto["equipment"] == [100002]
+            rom_mob_editor._edit_equipment(self.char1, "remove 100002")
+            assert self.char1.ndb.mob_proto["equipment"] == []
