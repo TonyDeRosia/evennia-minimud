@@ -28,3 +28,27 @@ class TestAListCommand(EvenniaTest):
         self.assertEqual(cols[2], "2")
         self.assertEqual(cols[3], "2")
 
+    @patch("commands.aedit.load_all_prototypes")
+    @patch("commands.aedit.get_areas")
+    def test_fallback_from_rooms_and_prototypes(self, mock_get_areas, mock_load):
+        mock_get_areas.return_value = []
+
+        def _load(category):
+            if category == "room":
+                return {
+                    3: {"area": "zone", "room_id": 3},
+                    4: {"area": "zone", "room_id": 4},
+                }
+            if category == "npc":
+                return {10: {"area": "zone"}}
+            return {}
+
+        mock_load.side_effect = _load
+        self.char1.execute_cmd("alist")
+        out = self.char1.msg.call_args[0][0]
+        row = next(line for line in out.splitlines() if line.startswith("| zone"))
+        cols = [c.strip() for c in row.split("|")[1:-1]]
+        self.assertEqual(cols[1], "1-4")
+        self.assertEqual(cols[2], "4")
+        self.assertEqual(cols[3], "1")
+

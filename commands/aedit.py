@@ -6,6 +6,7 @@ from .command import Command
 from world.areas import Area, get_areas, save_area, update_area, find_area
 from world import area_npcs
 from olc.base import OLCValidator
+from utils.prototype_manager import load_all_prototypes
 
 
 class AreaValidator(OLCValidator):
@@ -30,8 +31,55 @@ class CmdAList(Command):
     def func(self):
         areas = get_areas()
         if not areas:
-            self.msg("No areas defined.")
-            return
+            area_data: dict[str, dict] = {}
+            # gather from existing rooms
+            objs = ObjectDB.objects.filter(db_attributes__db_key="area")
+            for obj in objs:
+                if not obj.is_typeclass(Room, exact=False):
+                    continue
+                name = obj.attributes.get("area")
+                if not name:
+                    continue
+                info = area_data.setdefault(name, {"room_ids": [], "room_count": 0, "mob_count": 0})
+                info["room_count"] += 1
+                room_id = obj.attributes.get("room_id")
+                if room_id is not None:
+                    try:
+                        info["room_ids"].append(int(room_id))
+                    except (TypeError, ValueError):
+                        pass
+            # gather from room and npc prototypes
+            room_protos = load_all_prototypes("room")
+            npc_protos = load_all_prototypes("npc")
+            for proto in room_protos.values():
+                name = proto.get("area")
+                if not name:
+                    continue
+                info = area_data.setdefault(name, {"room_ids": [], "room_count": 0, "mob_count": 0})
+                info["room_count"] += 1
+                room_id = proto.get("room_id")
+                if room_id is not None:
+                    try:
+                        info["room_ids"].append(int(room_id))
+                    except (TypeError, ValueError):
+                        pass
+            for proto in npc_protos.values():
+                name = proto.get("area")
+                if not name:
+                    continue
+                info = area_data.setdefault(name, {"room_ids": [], "room_count": 0, "mob_count": 0})
+                info["mob_count"] += 1
+            for name, info in area_data.items():
+                room_ids = [rid for rid in info["room_ids"] if rid is not None]
+                start = min(room_ids) if room_ids else 0
+                end = max(room_ids) if room_ids else 0
+                area = Area(key=name, start=start, end=end)
+                area._temp_room_count = info["room_count"]
+                area._temp_mob_count = info["mob_count"]
+                areas.append(area)
+            if not areas:
+                self.msg("No areas defined.")
+                return
         table = EvTable(
             "Name",
             "Range",
@@ -44,14 +92,17 @@ class CmdAList(Command):
             border="cells",
         )
         for area in areas:
-            objs = ObjectDB.objects.filter(
-                db_attributes__db_key="area",
-                db_attributes__db_strvalue__iexact=area.key,
-            )
-            rooms = [obj for obj in objs if obj.is_typeclass(Room, exact=False)]
-            room_count = len(rooms)
-
-            mob_count = len(area_npcs.get_area_npc_list(area.key))
+            if hasattr(area, "_temp_room_count"):
+                room_count = area._temp_room_count
+                mob_count = area._temp_mob_count
+            else:
+                objs = ObjectDB.objects.filter(
+                    db_attributes__db_key="area",
+                    db_attributes__db_strvalue__iexact=area.key,
+                )
+                rooms = [obj for obj in objs if obj.is_typeclass(Room, exact=False)]
+                room_count = len(rooms)
+                mob_count = len(area_npcs.get_area_npc_list(area.key))
 
             table.add_row(
                 area.key,
