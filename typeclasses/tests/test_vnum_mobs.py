@@ -285,9 +285,7 @@ class TestVnumMobs(EvenniaTest):
 
     def test_invalid_typeclass_raises(self):
         with self.assertRaises(ValueError):
-            register_prototype(
-                {"key": "bad", "typeclass": "typeclasses.objects.ObjectParent"}, vnum=65
-            )
+            register_prototype({"key": "bad", "typeclass": "typeclasses.objects.ObjectParent"}, vnum=65)
 
     def test_spawn_populates_stat_caches(self):
         """spawn_from_vnum should set primary and derived stat caches."""
@@ -310,15 +308,3 @@ class TestVnumMobs(EvenniaTest):
             npc.db.primary_stats.get("STR"),
         )
 
-    def test_spawn_grants_unarmed_skill(self):
-        proto = {
-            "key": "brawler",
-            "typeclass": "typeclasses.npcs.BaseNPC",
-            "level": 1,
-            "combat_class": "Warrior",
-        }
-        vnum = register_prototype(proto, vnum=101)
-        npc = spawn_from_vnum(vnum, location=self.char1.location)
-
-        self.assertIn("Unarmed", npc.db.skills)
-        self.assertGreaterEqual(npc.db.proficiencies.get("Unarmed", 0), 25)

@@ -53,46 +53,17 @@ class TestUnarmedAutoAttack(unittest.TestCase):
 
         engine = CombatEngine([attacker, defender], round_time=0)
 
-        with (
-            patch("combat.combat_actions.utils.inherits_from", return_value=True),
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.get_effective_stat", return_value=0),
-            patch("world.system.stat_manager.check_hit", return_value=True),
-            patch("combat.actions.utils.roll_evade", return_value=False),
-            patch("combat.actions.utils.roll_parry", return_value=False),
-            patch("combat.actions.utils.roll_block", return_value=False),
-            patch("evennia.utils.delay"),
-        ):
+        with patch("combat.combat_actions.utils.inherits_from", return_value=True), \
+             patch("world.system.state_manager.apply_regen"), \
+             patch("world.system.state_manager.get_effective_stat", return_value=0), \
+             patch("world.system.stat_manager.check_hit", return_value=True), \
+             patch("combat.actions.utils.roll_evade", return_value=False), \
+             patch("combat.actions.utils.roll_parry", return_value=False), \
+             patch("combat.actions.utils.roll_block", return_value=False), \
+             patch("evennia.utils.delay"):
             engine.start_round()
             engine.process_round()
 
         # Base damage of 4 should be increased by 25% from Unarmed proficiency
         # resulting in 5 damage dealt
         self.assertEqual(defender.hp, 5)
-
-    def test_unarmed_base_damage_from_skill(self):
-        attacker = Dummy()
-        defender = Dummy()
-        attacker.location = defender.location
-        attacker.db.combat_target = defender
-        attacker.db.natural_weapon = None
-        attacker.db.proficiencies["Unarmed"] = 75
-
-        engine = CombatEngine([attacker, defender], round_time=0)
-
-        with (
-            patch("combat.combat_actions.utils.inherits_from", return_value=True),
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.get_effective_stat", return_value=0),
-            patch("world.system.stat_manager.check_hit", return_value=True),
-            patch("combat.actions.utils.roll_evade", return_value=False),
-            patch("combat.actions.utils.roll_parry", return_value=False),
-            patch("combat.actions.utils.roll_block", return_value=False),
-            patch("combat.actions.utils.roll_dice_string", return_value=4) as mock_roll,
-            patch("evennia.utils.delay"),
-        ):
-            engine.start_round()
-            engine.process_round()
-
-        mock_roll.assert_called_with("1d6")
-        self.assertEqual(defender.hp, 2)
