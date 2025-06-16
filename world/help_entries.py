@@ -1463,6 +1463,44 @@ Related:
 """,
     },
     {
+        "key": "aedit",
+        "category": "Building",
+        "text": """Help for aedit
+
+Edit or create area metadata.
+
+Usage:
+    aedit create <name> <start> <end>
+    aedit range <name> <start> <end>
+    aedit builders <name> <list>
+    aedit flags <name> <list>
+    aedit interval <name> <ticks>
+    aedit add <area|vnum> <room_vnum>
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    aedit create dungeon 1 99
+    aedit range town 200 299
+    aedit builders town Alice,Bob
+    aedit flags dungeon dark,safe
+    aedit interval dungeon 60
+    aedit add dungeon 5
+
+Notes:
+    - Builders and flags are comma separated lists.
+    - The interval value is given in ticks.
+    - Adding by room VNUM updates the area's range if needed.
+
+Related:
+    help ansi
+""",
+    },
+    {
         "key": "amake",
         "category": "Building",
         "text": """
