@@ -12,6 +12,7 @@ from utils.menu_utils import (
 )
 from utils import vnum_registry
 from utils.prototype_manager import load_prototype
+from world.areas import find_area_by_vnum
 from evennia.utils import dedent
 import re
 
@@ -282,6 +283,8 @@ def _set_vnum(caller, raw_string, **kwargs):
         vnum_registry.unregister_vnum(int(old), "npc")
 
     data["vnum"] = val
+    if area := find_area_by_vnum(val):
+        data.setdefault("area", area.key)
     caller.ndb.buildnpc = data
     return _next_node(caller, "menunode_creature_type")
 

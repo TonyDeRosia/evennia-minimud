@@ -13,6 +13,7 @@ from utils.mob_proto import (
     register_prototype,
     spawn_from_vnum,
 )
+from world.areas import find_area_by_vnum
 from world.scripts.mob_db import get_mobdb
 from typeclasses.npcs import BaseNPC
 from scripts import BuilderAutosave
@@ -67,7 +68,11 @@ class CmdMobProto(Command):
         if get_prototype(vnum):
             caller.msg("Prototype already exists.")
             return
-        register_prototype({"key": name}, vnum=vnum)
+        area = find_area_by_vnum(vnum)
+        proto = {"key": name}
+        if area:
+            proto["area"] = area.key
+        register_prototype(proto, vnum=vnum, area=area.key if area else None)
         caller.msg(f"Prototype {vnum} created.")
 
     def _sub_set(self, rest: str):

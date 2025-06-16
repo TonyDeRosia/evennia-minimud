@@ -12,6 +12,7 @@ from world.mob_constants import (
 )
 from utils.mob_proto import register_prototype, get_prototype
 from utils.vnum_registry import validate_vnum, register_vnum
+from world.areas import find_area_by_vnum
 from world.templates.mob_templates import get_template
 from .command import Command
 import re
@@ -681,8 +682,11 @@ def menunode_ai_flags(caller, raw_string="", **kwargs):
 def menunode_done(caller, raw_string="", **kwargs):
     proto = caller.ndb.mob_proto or {}
     vnum = caller.ndb.mob_vnum
+    area = find_area_by_vnum(vnum)
+    if area and "area" not in proto:
+        proto["area"] = area.key
     try:
-        register_prototype(proto, vnum=vnum)
+        register_prototype(proto, vnum=vnum, area=area.key if area else None)
     except ValueError as err:
         caller.msg(str(err))
         return "menunode_main"
@@ -731,6 +735,8 @@ class CmdMEdit(Command):
             proto = get_template("warrior") or {}
             proto.setdefault("key", f"mob_{vnum}")
             proto.setdefault("level", 1)
+            if area := find_area_by_vnum(vnum):
+                proto.setdefault("area", area.key)
         else:
             if not sub.isdigit():
                 caller.msg("Usage: medit <vnum> | medit create <vnum>")
@@ -740,6 +746,9 @@ class CmdMEdit(Command):
             if not proto:
                 caller.msg(f"Prototype {sub} not found.")
                 return
+            if "area" not in proto:
+                if area := find_area_by_vnum(vnum):
+                    proto["area"] = area.key
         proto["vnum"] = vnum
         caller.ndb.mob_vnum = vnum
         caller.ndb.mob_proto = dict(proto)
