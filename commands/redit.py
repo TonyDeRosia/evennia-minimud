@@ -277,13 +277,32 @@ def menunode_done(caller, raw_string="", **kwargs):
             "key": proto.get("key") or f"Room {vnum}",
             "desc": proto.get("desc", ""),
         }
+
+        area_key = proto.get("area")
+        if not area_key:
+            objs = ObjectDB.objects.filter(
+                db_attributes__db_key="room_id",
+                db_attributes__db_value=vnum,
+            )
+            room_obj = next(
+                (o for o in objs if o.is_typeclass(Room, exact=False)), None
+            )
+            if room_obj:
+                area_key = room_obj.attributes.get("area")
+                if area_key:
+                    proto["area"] = area_key
+        if not area_key:
+            caller.msg(
+                "Error: This room has no area assigned. Cannot save prototype."
+            )
+            return menunode_main(caller)
         if proto.get("flags"):
             data["tags"] = [(f, "room_flag") for f in proto["flags"]]
         if proto.get("exits"):
             data["exits"] = proto["exits"]
         save_prototype("room", data, vnum=vnum)
 
-        idx, area = find_area(proto.get("area"))
+        idx, area = find_area(area_key)
         if area and vnum not in area.rooms:
             area.rooms.append(vnum)
             update_area(idx, area)
@@ -373,6 +392,22 @@ class CmdREdit(Command):
                     )
                     _clear_state()
                     return
+            else:
+                if "area" not in proto:
+                    objs = ObjectDB.objects.filter(
+                        db_attributes__db_key="room_id",
+                        db_attributes__db_value=vnum,
+                    )
+                    room_obj = next(
+                        (
+                            o
+                            for o in objs
+                            if o.is_typeclass(Room, exact=False)
+                        ),
+                        None,
+                    )
+                    if room_obj and room_obj.db.area:
+                        proto["area"] = room_obj.db.area
             self.caller.ndb.room_protos = {vnum: proto}
             self.caller.ndb.current_vnum = vnum
             state = OLCState(
