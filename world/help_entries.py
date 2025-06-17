@@ -3837,14 +3837,14 @@ Usage:
 Examples:
     @mset wolf loot_table "[{\"proto\": 100001, \"chance\": 75}]"
     @mset bandit loot_table "[{\"proto\": \"IRON_SWORD\", \"chance\": 25}]"
-    @mset goblin loot_table "[{\"proto\": \"gold\", \"chance\": 100, \"amount\": 5}]"
+    @mset goblin loot_table "[{\"proto\": \"gold\", \"chance\": 100, \"amount\": \"1d4+1\"}]"
 
 Notes:
     - ``chance`` is a percent from 1-100.
     - Items with 100% chance always drop.
     - ``guaranteed_after`` optionally guarantees the item will drop after the
       given number of failed attempts.
-    - ``amount`` may be used with coin drops to give more than one coin.
+    - ``amount`` may be a number or dice string when dropping coins.
 
 Related:
     help cnpc

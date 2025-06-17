@@ -1045,6 +1045,7 @@ class NPC(Character):
         """Create a corpse and deposit any drops and coins."""
         from utils.currency import COIN_VALUES
         from utils.prototype_manager import load_prototype
+        from utils.dice import roll_dice_string
 
         drops = list(self.db.drops or [])
         coin_loot: dict[str, int] = {}
@@ -1062,7 +1063,14 @@ class NPC(Character):
                     guaranteed is not None and count >= int(guaranteed)
                 ):
                     if isinstance(proto, str) and proto.lower() in COIN_VALUES:
-                        amt = int(entry.get("amount", 1))
+                        amount = entry.get("amount", 1)
+                        if isinstance(amount, str) and not amount.isdigit():
+                            try:
+                                amt = roll_dice_string(amount)
+                            except Exception:
+                                amt = 0
+                        else:
+                            amt = int(amount)
                         coin_loot[proto.lower()] = coin_loot.get(proto.lower(), 0) + amt
                     else:
                         if isinstance(proto, int) or (isinstance(proto, str) and proto.isdigit()):
