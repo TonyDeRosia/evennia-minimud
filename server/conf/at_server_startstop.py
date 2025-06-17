@@ -116,25 +116,39 @@ def at_server_start():
     if not script or script.typeclass_path != "typeclasses.scripts.GlobalTick":
         if script:
             script.delete()
-        create.create_script("typeclasses.scripts.GlobalTick", key="global_tick")
+        script = create.create_script(
+            "typeclasses.scripts.GlobalTick", key="global_tick"
+        )
+    elif not script.is_active:
+        script.start()
 
     script = ScriptDB.objects.filter(db_key="global_npc_ai").first()
     if not script or script.typeclass_path != "scripts.global_npc_ai.GlobalNPCAI":
         if script:
             script.delete()
-        create.create_script("scripts.global_npc_ai.GlobalNPCAI", key="global_npc_ai")
+        script = create.create_script(
+            "scripts.global_npc_ai.GlobalNPCAI", key="global_npc_ai"
+        )
+    elif not script.is_active:
+        script.start()
 
     script = ScriptDB.objects.filter(db_key="area_reset").first()
     if not script or script.typeclass_path != "world.area_reset.AreaReset":
         if script:
             script.delete()
-        create.create_script("world.area_reset.AreaReset", key="area_reset")
+        script = create.create_script("world.area_reset.AreaReset", key="area_reset")
+    elif not script.is_active:
+        script.start()
 
     script = ScriptDB.objects.filter(db_key="spawn_manager").first()
     if not script or script.typeclass_path != "scripts.spawn_manager.SpawnManager":
         if script:
             script.delete()
-        script = create.create_script("scripts.spawn_manager.SpawnManager", key="spawn_manager")
+        script = create.create_script(
+            "scripts.spawn_manager.SpawnManager", key="spawn_manager"
+        )
+    elif not script.is_active:
+        script.start()
     if hasattr(script, "reload_spawns"):
         script.reload_spawns()
 
