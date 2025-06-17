@@ -175,7 +175,7 @@ class CmdRList(Command):
                 return
             area_name = location.db.area
 
-        _, area = find_area(area_name)
+        idx, area = find_area(area_name)
         if area is None:
             self.msg(
                 f"Area '{area_name}' not found. Use 'alist' to view available areas."
@@ -426,7 +426,7 @@ class CmdRReg(Command):
             return
         room_id = int(num_str)
 
-        _, area = find_area(area_name)
+        idx, area = find_area(area_name)
         if area is None:
             self.msg(
                 f"Area '{area_name}' not found. Use 'alist' to view available areas."
@@ -448,6 +448,9 @@ class CmdRReg(Command):
                 return
 
         room.set_area(area_name, room_id)
+        if room_id not in area.rooms:
+            area.rooms.append(room_id)
+            update_area(idx, area)
         name = room.key if room != self.caller.location else "Room"
         self.msg(f"{name} registered as {area_name} #{room_id}.")
 
