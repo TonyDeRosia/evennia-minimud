@@ -80,6 +80,46 @@ class TestREditCommand(EvenniaTest):
         assert room.tags.has("safe", category="room_flag")
         assert not room.tags.has("dark", category="room_flag")
 
+    def test_live_subcommand(self):
+        from evennia.utils import create
+        from typeclasses.rooms import Room
+
+        room = create.create_object(
+            Room,
+            key="Live Room",
+            location=self.char1.location,
+            home=self.char1.location,
+        )
+        room.db.room_id = 7
+        room.db.desc = "Live desc"
+        room.db.area = "zone"
+        room.tags.add("dark", category="room_flag")
+
+        with (
+            patch("commands.redit.load_prototype") as mock_load,
+            patch("commands.redit.ObjectDB.objects.filter", return_value=[room]),
+            patch("commands.redit.OLCEditor") as mock_editor,
+        ):
+            self.char1.execute_cmd("redit live 7")
+            mock_load.assert_not_called()
+            mock_editor.assert_called()
+
+        proto = self.char1.ndb.room_protos[7]
+        assert proto["key"] == "Live Room"
+        assert proto["desc"] == "Live desc"
+        assert proto["area"] == "zone"
+        assert proto["flags"] == ["dark"]
+
+    def test_live_not_found(self):
+        with (
+            patch("commands.redit.load_prototype") as mock_load,
+            patch("commands.redit.ObjectDB.objects.filter", return_value=[]),
+        ):
+            self.char1.msg.reset_mock()
+            self.char1.execute_cmd("redit live 99")
+        mock_load.assert_not_called()
+        self.char1.msg.assert_called_with("Room VNUM 99 not found.")
+
     def test_menu_missing_state(self):
         from commands import redit
 

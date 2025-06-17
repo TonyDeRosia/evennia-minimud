@@ -328,7 +328,7 @@ class CmdREdit(Command):
 
         if not self.args:
             self.msg(
-                "Usage: redit <vnum> | redit create <vnum> | redit here <vnum> | redit vnum <old> <new>"
+                "Usage: redit <vnum> | redit create <vnum> | redit here <vnum> | redit live <vnum> | redit vnum <old> <new>"
             )
             _clear_state()
             return
@@ -375,7 +375,7 @@ class CmdREdit(Command):
             old_str, new_str = parts[1], parts[2]
             if not (old_str.isdigit() and new_str.isdigit()):
                 self.msg(
-                    "Usage: redit <vnum> | redit create <vnum> | redit here <vnum> | redit vnum <old> <new>"
+                    "Usage: redit <vnum> | redit create <vnum> | redit here <vnum> | redit live <vnum> | redit vnum <old> <new>"
                 )
                 _clear_state()
                 return
@@ -494,9 +494,37 @@ class CmdREdit(Command):
             ).start()
             return
 
+        if sub == "live" and len(parts) == 2 and parts[1].isdigit():
+            vnum = int(parts[1])
+            objs = ObjectDB.objects.filter(
+                db_attributes__db_key="room_id",
+                db_attributes__db_value=vnum,
+            )
+            room = next((o for o in objs if o.is_typeclass(Room, exact=False)), None)
+            if not room:
+                self.msg(f"Room VNUM {vnum} not found.")
+                _clear_state()
+                return
+            proto = proto_from_room(room)
+            self.caller.ndb.room_protos = {vnum: proto}
+            self.caller.ndb.current_vnum = vnum
+            state = OLCState(
+                data=self.caller.ndb.room_protos,
+                vnum=vnum,
+                original=dict(self.caller.ndb.room_protos),
+            )
+            OLCEditor(
+                self.caller,
+                "commands.redit",
+                startnode="menunode_main",
+                state=state,
+                validator=OLCValidator(),
+            ).start()
+            return
+
         if sub != "create" or len(parts) != 2:
             self.msg(
-                "Usage: redit <vnum> | redit create <vnum> | redit here <vnum> | redit vnum <old> <new>"
+                "Usage: redit <vnum> | redit create <vnum> | redit here <vnum> | redit live <vnum> | redit vnum <old> <new>"
             )
             _clear_state()
             return
