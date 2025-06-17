@@ -9,7 +9,7 @@ from world.areas import (
     save_area,
     update_area,
     find_area,
-    find_area_by_vnum,
+    parse_area_identifier,
 )
 from world import area_npcs
 from olc.base import OLCValidator
@@ -288,14 +288,11 @@ class CmdAEdit(Command):
                 return
             area_arg, vnum_str = args
             room_vnum = int(vnum_str)
-            if area_arg.isdigit():
-                area = find_area_by_vnum(int(area_arg))
-                if area:
-                    idx, _ = find_area(area.key)
-                else:
-                    idx = -1
+            area = parse_area_identifier(area_arg)
+            if area:
+                idx, _ = find_area(area.key)
             else:
-                idx, area = find_area(area_arg)
+                idx = -1
             if area is None:
                 self.msg(
                     f"Area '{area_arg}' not found. Use 'alist' to view available areas."

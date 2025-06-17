@@ -206,3 +206,17 @@ def find_area_by_vnum(vnum: int) -> Area | None:
         return area
 
     return None
+
+
+def parse_area_identifier(identifier: str) -> Area | None:
+    """Return an area by name or numeric index."""
+
+    ident = identifier.strip()
+    if ident.isdigit():
+        index = int(ident) - 1
+        areas = get_areas()
+        if 0 <= index < len(areas):
+            return areas[index]
+        return None
+    _, area = find_area(ident)
+    return area

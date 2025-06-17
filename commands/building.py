@@ -2,7 +2,7 @@ from evennia import create_object
 from evennia.objects.models import ObjectDB
 from .command import Command
 from typeclasses.rooms import Room
-from world.areas import find_area, find_area_by_vnum
+from world.areas import find_area, parse_area_identifier, find_area_by_vnum
 from utils import VALID_SLOTS, normalize_slot
 
 
@@ -186,7 +186,7 @@ class CmdTeleport(Command):
                 self.msg("Room number must be numeric.")
                 return
             room_id = int(num_part)
-            _, area = find_area(area_part)
+            area = parse_area_identifier(area_part)
             if area and not (area.start <= room_id <= area.end):
                 self.msg("Number outside area range.")
                 return
