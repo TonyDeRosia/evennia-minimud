@@ -1,7 +1,6 @@
 from evennia import CmdSet
 from evennia.scripts.models import ScriptDB
 from ..command import Command
-from evennia.scripts.models import ScriptDB
 
 
 class CmdSpawnReload(Command):
@@ -13,8 +12,10 @@ class CmdSpawnReload(Command):
 
     def func(self):
         script = ScriptDB.objects.filter(db_key="spawn_manager").first()
-        if script:
-            script.reload_spawns()
+        if not script or not hasattr(script, "reload_spawns"):
+            self.msg("Spawn manager not found.")
+            return
+        script.reload_spawns()
         self.msg("Spawn entries reloaded from prototypes.")
 
 
@@ -32,8 +33,10 @@ class CmdForceRespawn(Command):
             return
         room_vnum = int(arg)
         script = ScriptDB.objects.filter(db_key="spawn_manager").first()
-        if script:
-            script.force_respawn(room_vnum)
+        if not script or not hasattr(script, "force_respawn"):
+            self.msg("Spawn manager not found.")
+            return
+        script.force_respawn(room_vnum)
         self.msg(f"Respawn check run for room {room_vnum}.")
 
 
@@ -73,8 +76,10 @@ class CmdShowSpawns(Command):
                 rid = room
             else:
                 rid = None
+
             if rid != target_vnum:
                 continue
+
             obj = script._get_room(entry)
             live = script._live_count(entry.get("prototype"), obj) if obj else 0
             lines.append(
