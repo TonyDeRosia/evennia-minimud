@@ -376,9 +376,9 @@ keeps rooms populated accordingly.
 
 Use `@spawnreload` to reload all spawn data from disk. Run
 `@forcerespawn <room_vnum>` to immediately repopulate a specific room,
-and `@showspawns [vnum]` to view the configured entries. After editing a
-room with `redit`, choose **Edit spawns** then call `@spawnreload` so the
-manager notices your changes.
+and `@showspawns [vnum]` to view the configured entries. Room prototypes
+saved through `redit` or with `asave changed` automatically update the
+manager and respawn mobs, so manual reloads are rarely needed.
 
 ## Weapon Creation and Inspection
 
