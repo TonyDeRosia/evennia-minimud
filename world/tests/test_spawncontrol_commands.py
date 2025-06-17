@@ -26,3 +26,17 @@ class TestSpawnControlCommands(TestCase):
             cmd.func()
             script.force_respawn.assert_called_with(5)
             cmd.msg.assert_called_with("Respawn check run for room 5.")
+
+    def test_force_respawn_defaults_to_current_room(self):
+        cmd = CmdForceRespawn()
+        cmd.caller = mock.Mock()
+        cmd.caller.location = mock.Mock()
+        cmd.caller.location.db.room_id = 3
+        cmd.args = ""
+        cmd.msg = mock.Mock()
+        with mock.patch("commands.admin.spawncontrol.ScriptDB") as mock_sdb:
+            script = mock.Mock()
+            mock_sdb.objects.filter.return_value.first.return_value = script
+            cmd.func()
+            script.force_respawn.assert_called_with(3)
+            cmd.msg.assert_called_with("Respawn check run for room 3.")

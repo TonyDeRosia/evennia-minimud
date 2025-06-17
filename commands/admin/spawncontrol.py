@@ -28,14 +28,22 @@ class CmdForceRespawn(Command):
 
     def func(self):
         arg = self.args.strip()
-        if not arg.isdigit():
-            self.msg("Usage: @forcerespawn <room_vnum>")
-            return
-        room_vnum = int(arg)
         script = ScriptDB.objects.filter(db_key="spawn_manager").first()
         if not script or not hasattr(script, "force_respawn"):
             self.msg("Spawn manager not found.")
             return
+
+        if arg:
+            if not arg.isdigit():
+                self.msg("Usage: @forcerespawn <room_vnum>")
+                return
+            room_vnum = int(arg)
+        else:
+            room_vnum = getattr(self.caller.location.db, "room_id", None)
+            if room_vnum is None:
+                self.msg("Current room has no VNUM.")
+                return
+
         script.force_respawn(room_vnum)
         self.msg(f"Respawn check run for room {room_vnum}.")
 
