@@ -1,4 +1,5 @@
 from evennia import CmdSet
+from evennia.scripts.models import ScriptDB
 from ..command import Command
 from evennia.scripts.models import ScriptDB
 
@@ -36,6 +37,56 @@ class CmdForceRespawn(Command):
         self.msg(f"Respawn check run for room {room_vnum}.")
 
 
+class CmdShowSpawns(Command):
+    """Display spawn entries for a room."""
+
+    key = "@showspawns"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        arg = self.args.strip()
+        script = ScriptDB.objects.filter(db_key="spawn_manager").first()
+        if not script:
+            self.msg("Spawn manager not found.")
+            return
+
+        if arg:
+            if not arg.isdigit():
+                self.msg("Usage: @showspawns [room_vnum]")
+                return
+            target_vnum = int(arg)
+        else:
+            target_vnum = getattr(self.caller.location.db, "room_id", None)
+            if target_vnum is None:
+                self.msg("Current room has no VNUM.")
+                return
+
+        lines = []
+        for entry in script.db.entries:
+            room = entry.get("room")
+            if hasattr(room, "dbref"):
+                rid = getattr(room.db, "room_id", None)
+            elif isinstance(room, str) and room.isdigit():
+                rid = int(room)
+            elif isinstance(room, int):
+                rid = room
+            else:
+                rid = None
+            if rid != target_vnum:
+                continue
+            obj = script._get_room(entry)
+            live = script._live_count(entry.get("prototype"), obj) if obj else 0
+            lines.append(
+                f"{entry.get('prototype')} (max {entry.get('max_count')}, respawn {entry.get('respawn_rate')}s, live {live})"
+            )
+
+        if lines:
+            self.msg("Spawn entries:\n" + "\n".join(lines))
+        else:
+            self.msg("No spawn entries found.")
+
+
 class SpawnControlCmdSet(CmdSet):
     key = "SpawnControlCmdSet"
 
@@ -43,3 +94,4 @@ class SpawnControlCmdSet(CmdSet):
         super().at_cmdset_creation()
         self.add(CmdSpawnReload)
         self.add(CmdForceRespawn)
+        self.add(CmdShowSpawns)
