@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-"""Simple spawn management for area resets."""
+"""Spawn manager that supports persistent and live area-based mob spawning."""
 
-from dataclasses import dataclass, asdict
-from typing import List, Dict
+from dataclasses import dataclass, asdict, field
+from typing import List, Dict, Any
 
 from evennia.server.models import ServerConfig
 from evennia.objects.models import ObjectDB
 from evennia.prototypes import spawner
-from evennia.utils import logger
+from evennia.utils import logger, delay
 
 from world import prototypes
 from utils.mob_proto import spawn_from_vnum, apply_proto_items
@@ -16,15 +16,19 @@ from commands.npc_builder import finalize_mob_prototype
 from typeclasses.npcs import BaseNPC
 
 
+_REGISTRY_KEY = "spawn_registry"
+
+
 @dataclass
 class SpawnEntry:
-    """Data container representing a spawn entry."""
-
+    """Data container representing a mob spawn entry."""
     area: str
     proto: str
     room: int
     initial_count: int = 1
     max_count: int = 1
+    respawn_rate: int = 300  # seconds
+    npcs: List[Any] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, data: Dict) -> "SpawnEntry":
@@ -34,101 +38,139 @@ class SpawnEntry:
             room=int(data.get("room", 0)),
             initial_count=int(data.get("initial_count", 1)),
             max_count=int(data.get("max_count", 1)),
+            respawn_rate=int(data.get("respawn_rate", 300)),
         )
 
     def to_dict(self) -> Dict:
         return asdict(self)
 
 
-_REGISTRY_KEY = "spawn_registry"
-
-
 class SpawnManager:
-    """Utility class for accessing spawn entries."""
+    """Manages NPC spawning across areas."""
 
-    @staticmethod
-    def _load_registry() -> List[Dict]:
-        return ServerConfig.objects.conf(_REGISTRY_KEY, default=list)
+    _instance: SpawnManager | None = None
 
-    @staticmethod
-    def _save_registry(registry: List[Dict]):
-        ServerConfig.objects.conf(_REGISTRY_KEY, value=registry)
+    def __init__(self):
+        self.entries: List[SpawnEntry] = []
 
-    @staticmethod
-    def get_entries(area: str | None = None) -> List[SpawnEntry]:
-        entries = [SpawnEntry.from_dict(d) for d in SpawnManager._load_registry()]
-        if area:
-            area = area.lower()
-            entries = [e for e in entries if e.area.lower() == area]
-        return entries
+    @classmethod
+    def get(cls) -> SpawnManager:
+        if not cls._instance:
+            cls._instance = cls()
+        return cls._instance
 
-    @staticmethod
-    def reset_area(area_key: str) -> None:
-        """Repopulate all spawn entries for ``area_key``."""
+    def reset(self):
+        self.entries.clear()
 
-        area = area_key.lower()
-        entries = SpawnManager.get_entries(area)
-        if not entries:
+    def register_prototype(self, proto: Dict[str, Any]):
+        meta = proto.get("metadata", {}).get("spawn")
+        if not meta:
             return
+        entry = SpawnEntry(
+            area=meta.get("area", "").lower(),
+            proto=str(proto.get("prototype_key") or proto.get("vnum") or ""),
+            room=meta.get("room", 0),
+            initial_count=int(meta.get("initial_count", 1)),
+            max_count=int(meta.get("max_count", 1)),
+            respawn_rate=int(meta.get("respawn_rate", 300)),
+        )
+        self.entries.append(entry)
 
-        for entry in entries:
-            room = None
-            objs = ObjectDB.objects.filter(
-                db_attributes__db_key="area",
-                db_attributes__db_strvalue__iexact=entry.area,
-            )
-            for obj in objs:
-                if obj.db.room_id == entry.room and obj.is_typeclass(
-                    "typeclasses.rooms.Room", exact=False
-                ):
-                    room = obj
-                    break
-            if not room:
-                continue
+    def start(self):
+        for entry in self.entries:
+            self._spawn_initial(entry)
+            self._schedule(entry)
 
-            existing = [
-                obj
-                for obj in room.contents
-                if obj.is_typeclass(BaseNPC, exact=False)
-                and str(obj.db.prototype_key or obj.db.vnum or "") == entry.proto
-            ]
-            to_spawn = entry.initial_count - len(existing)
-            if to_spawn <= 0:
-                continue
-            to_spawn = min(to_spawn, entry.max_count - len(existing))
-            for _ in range(to_spawn):
-                npc = None
-                if entry.proto.isdigit():
+    def _spawn_initial(self, entry: SpawnEntry):
+        for _ in range(entry.initial_count):
+            npc = self._spawn(entry)
+            if npc:
+                entry.npcs.append(npc)
+
+    def _spawn(self, entry: SpawnEntry):
+        room = self._find_room(entry)
+        if not room:
+            return None
+        try:
+            if entry.proto.isdigit():
+                npc = spawn_from_vnum(int(entry.proto), location=room)
+            else:
+                proto = prototypes.get_npc_prototypes().get(entry.proto)
+                if not proto:
+                    return None
+                proto_data = dict(proto)
+                npc = spawner.spawn(proto_data)[0]
+                npc.location = room
+                npc.db.prototype_key = entry.proto
+                apply_proto_items(npc, proto_data)
+            finalize_mob_prototype(npc, npc)
+            npc.db.area_tag = entry.area
+            npc.db.spawn_room = room
+            npc.db.spawn_entry = entry
+            return npc
+        except Exception as err:
+            logger.log_err(f"Error spawning NPC from proto {entry.proto}: {err}")
+            return None
+
+    def _schedule(self, entry: SpawnEntry):
+        delay(entry.respawn_rate, self._check_entry, entry)
+
+    def _check_entry(self, entry: SpawnEntry):
+        room = self._find_room(entry)
+        if not room:
+            return
+        alive = [npc for npc in entry.npcs if npc.location == room]
+        entry.npcs = alive
+        missing = max(0, entry.max_count - len(alive))
+        for _ in range(missing):
+            npc = self._spawn(entry)
+            if npc:
+                entry.npcs.append(npc)
+        self._schedule(entry)
+
+    def notify_removed(self, npc):
+        entry = getattr(npc.db, "spawn_entry", None)
+        if not entry:
+            return
+        try:
+            entry.npcs.remove(npc)
+        except ValueError:
+            pass
+
+    def repopulate_area(self, area_key: str):
+        area = area_key.lower()
+        for entry in self.entries:
+            if entry.area == area:
+                for npc in list(entry.npcs):
                     try:
-                        npc = spawn_from_vnum(int(entry.proto), location=room)
-                    except ValueError as err:
-                        logger.log_err(str(err))
-                        continue
-                else:
-                    proto = prototypes.get_npc_prototypes().get(entry.proto)
-                    if not proto:
-                        continue
-                    proto_data = dict(proto)
-                    base_cls = proto_data.get("typeclass", "typeclasses.npcs.BaseNPC")
-                    if isinstance(base_cls, str):
-                        module, clsname = base_cls.rsplit(".", 1)
-                        base_cls = getattr(__import__(module, fromlist=[clsname]), clsname)
+                        npc.delete()
+                    except Exception:
+                        pass
+                entry.npcs.clear()
+                for _ in range(entry.max_count):
+                    npc = self._spawn(entry)
+                    if npc:
+                        entry.npcs.append(npc)
 
-                    from typeclasses.characters import NPC as BaseChar
+    def _find_room(self, entry: SpawnEntry):
+        objs = ObjectDB.objects.filter(
+            db_attributes__db_key="area",
+            db_attributes__db_strvalue__iexact=entry.area,
+        )
+        for obj in objs:
+            if obj.db.room_id == entry.room and obj.is_typeclass(
+                "typeclasses.rooms.Room", exact=False
+            ):
+                return obj
+        return None
 
-                    if not issubclass(base_cls, BaseChar):
-                        logger.log_warn(
-                            f"Prototype {entry.proto}: {base_cls} is not a subclass of NPC; using BaseNPC."
-                        )
-                        from typeclasses.npcs import BaseNPC as DefaultNPC
+    def load_registry(self):
+        self.entries = [
+            SpawnEntry.from_dict(d) for d in ServerConfig.objects.conf(_REGISTRY_KEY, default=list)
+        ]
 
-                        base_cls = DefaultNPC
-
-                    proto_data["typeclass"] = base_cls
-                    npc = spawner.spawn(proto_data)[0]
-                    npc.location = room
-                    npc.db.prototype_key = entry.proto
-                    apply_proto_items(npc, proto_data)
-                finalize_mob_prototype(npc, npc)
-                npc.db.area_tag = entry.area
-                npc.db.spawn_room = room
+    def save_registry(self):
+        ServerConfig.objects.conf(
+            _REGISTRY_KEY,
+            value=[entry.to_dict() for entry in self.entries]
+        )
