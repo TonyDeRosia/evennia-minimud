@@ -62,6 +62,15 @@ def proto_from_room(room) -> dict:
     if flags:
         proto["flags"] = list(flags)
 
+    try:
+        existing = load_prototype("room", room.db.room_id) or {}
+    except json.JSONDecodeError:
+        existing = {}
+
+    for key in ("spawns", "xyz"):
+        if key in existing:
+            proto[key] = existing[key]
+
     return proto
 
 
@@ -118,7 +127,10 @@ def menunode_main(caller, raw_string="", **kwargs):
         {"desc": "Edit flags", "goto": "menunode_flags"},
         {"desc": "Edit exits", "goto": "menunode_exits"},
         {"desc": "Edit spawns", "goto": "menunode_spawns"},
-        {"desc": "View saved prototype for this room", "goto": "menunode_view_prototype"},
+        {
+            "desc": "View saved prototype for this room",
+            "goto": "menunode_view_prototype",
+        },
         {"desc": "Browse area prototypes", "goto": "menunode_list_prototypes"},
         {"desc": "Save & quit", "goto": "menunode_done"},
         {"desc": "Cancel", "goto": "menunode_cancel"},
@@ -160,6 +172,7 @@ def menunode_view_prototype(caller, raw_string="", **kwargs):
 
     caller.msg("\n".join(lines))
     return kwargs.get("return_node", "menunode_main")
+
 
 # alias for backward compatibility
 menunode_show = menunode_view_prototype
@@ -212,6 +225,7 @@ def menunode_list_prototypes(caller, raw_string="", **kwargs):
 
     options = {"key": "_default", "goto": menunode_list_prototypes}
     return text, options
+
 
 # alias for backward compatibility
 menunode_rlist = menunode_list_prototypes
@@ -368,9 +382,7 @@ def menunode_spawns(caller, raw_string="", **kwargs):
             lines.append(f"  {proto_key}: max {maxc} every {rate}s")
     else:
         lines.append("  None")
-    lines.append(
-        "Commands:\n  add <proto> <max> <rate>\n  remove <proto>\n  done"
-    )
+    lines.append("Commands:\n  add <proto> <max> <rate>\n  remove <proto>\n  done")
     text = "\n".join(lines)
     options = {"key": "_default", "goto": _handle_spawn_cmd}
     return text, options
@@ -488,9 +500,7 @@ def menunode_done(caller, raw_string="", **kwargs):
             if area_key:
                 proto["area"] = area_key
         if not area_key:
-            caller.msg(
-                "Error: This room has no area assigned. Cannot save prototype."
-            )
+            caller.msg("Error: This room has no area assigned. Cannot save prototype.")
             return menunode_main(caller)
         if "flags" in proto:
             data["tags"] = [(f, "room_flag") for f in proto.get("flags", [])]
@@ -517,7 +527,10 @@ def menunode_done(caller, raw_string="", **kwargs):
             if "flags" in proto:
                 flags = proto.get("flags", [])
             elif isinstance(existing.get("tags"), list):
-                flags = [t[0] if isinstance(t, (list, tuple)) else t for t in existing["tags"]]
+                flags = [
+                    t[0] if isinstance(t, (list, tuple)) else t
+                    for t in existing["tags"]
+                ]
 
             if flags is not None:
                 room.tags.clear(category="room_flag")
@@ -542,6 +555,7 @@ def menunode_done(caller, raw_string="", **kwargs):
                 room.db.exits = exits
 
         from evennia.scripts.models import ScriptDB
+
         script = ScriptDB.objects.filter(db_key="spawn_manager").first()
         if script and hasattr(script, "register_room_spawn"):
             script.register_room_spawn(proto)
@@ -616,11 +630,7 @@ class CmdREdit(Command):
                         db_attributes__db_value=vnum,
                     )
                     room_obj = next(
-                        (
-                            o
-                            for o in objs
-                            if o.is_typeclass(Room, exact=False)
-                        ),
+                        (o for o in objs if o.is_typeclass(Room, exact=False)),
                         None,
                     )
                     if room_obj and room_obj.db.area:
