@@ -458,18 +458,15 @@ def menunode_done(caller, raw_string="", **kwargs):
         existing_exits = existing.get("exits", {})
         base_exits = {**existing_exits, **current_exits}
 
-        proto_exits = proto.get("exits")
-        if proto_exits is not None:
-            if proto_exits == existing_exits:
-                final_exits = base_exits
-            else:
-                final_exits = base_exits.copy()
-                for dirkey in set(existing_exits) - set(proto_exits):
-                    final_exits.pop(dirkey, None)
-                final_exits.update(proto_exits)
-        else:
+    proto_exits = proto.get("exits")
+    if proto_exits is not None:
+        if proto_exits == existing_exits:
             final_exits = base_exits
-
+        else:
+            final_exits = base_exits.copy()
+            for dirkey in set(existing_exits) - set(proto_exits):
+                final_exits.pop(dirkey, None)
+            final_exits.update(proto_exits)
         proto["exits"] = final_exits
 
         data = dict(existing)

@@ -5,6 +5,7 @@ from typeclasses.rooms import Room
 from world.areas import find_area, parse_area_identifier, find_area_by_vnum, update_area
 from utils import vnum_registry
 from utils import VALID_SLOTS, normalize_slot
+from utils.prototype_manager import CATEGORY_DIRS
 
 
 DIR_FULL = {
@@ -406,6 +407,60 @@ class CmdDelRoom(Command):
         self.unlink_room(target_room)
         target_room.delete()
         self.msg("Room deleted.")
+
+
+class CmdRDel(Command):
+    """Delete a room by VNUM and remove its prototype."""
+
+    key = "rdel"
+    locks = "cmd:perm(Admin) or perm(Builder)"
+    help_category = "Building"
+
+    def unlink_room(self, room):
+        for other in ObjectDB.objects.filter(db_attributes__db_key="exits"):
+            if not other.is_typeclass(Room, exact=False):
+                continue
+            exits = other.db.exits or {}
+            changed = False
+            for direc, target in list(exits.items()):
+                if target == room:
+                    exits.pop(direc, None)
+                    changed = True
+            if changed:
+                other.db.exits = exits
+        room.db.exits = {}
+
+    def func(self):
+        if not (self.args and self.args.strip().isdigit()):
+            self.msg("Usage: rdel <vnum>")
+            return
+
+        vnum = int(self.args.strip())
+        objs = ObjectDB.objects.filter(
+            db_attributes__db_key="room_id",
+            db_attributes__db_value=vnum,
+        )
+        room = next((o for o in objs if o.is_typeclass(Room, exact=False)), None)
+        if not room:
+            self.msg(f"Room VNUM {vnum} not found.")
+            return
+
+        self.unlink_room(room)
+        room.delete()
+
+        path = CATEGORY_DIRS["room"] / f"{vnum}.json"
+        if path.exists():
+            path.unlink()
+        vnum_registry.unregister_vnum(vnum, "room")
+
+        area = room.db.area
+        if area:
+            idx, area_obj = find_area(area)
+            if area_obj and vnum in area_obj.rooms:
+                area_obj.rooms.remove(vnum)
+                update_area(idx, area_obj)
+
+        self.msg(f"Room {vnum} deleted.")
 
 
 class CmdSetDesc(Command):

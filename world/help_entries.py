@@ -66,6 +66,33 @@ Related:
 """,
     },
     {
+        "key": "rdel",
+        "category": "Building",
+        "text": """Help for rdel
+
+Delete a room by its VNUM and remove the saved prototype.
+
+Usage:
+    rdel <vnum>
+
+Switches:
+    None
+
+Arguments:
+    vnum - room VNUM to delete
+
+Examples:
+    rdel 200001
+
+Notes:
+    - Removes any exits to or from the room.
+    - Deletes the prototype file if present.
+
+Related:
+    help delroom
+""",
+    },
+    {
         "key": "building",
         "category": "Building",
         "text": """
@@ -1195,6 +1222,22 @@ Arguments:
 Examples:
     @showspawns
     @showspawns 200001
+""",
+    },
+    {
+        "key": "mob spawn setup",
+        "aliases": ["mobspawns"],
+        "category": "Building",
+        "text": """Help for mob spawn setup
+
+This describes how to make NPCs automatically appear in a room.
+
+1. Create or edit a mob prototype using |wcnpc|n or |wmobbuilder|n.
+2. Save the prototype with a VNUM.
+3. Use |wredit <room_vnum>|n and choose |wEdit spawns|n to add the prototype,
+   max count and respawn interval.
+4. Save the room prototype and run |w@spawnreload|n or |wasave changed|n.
+5. Check spawns with |w@showspawns <room_vnum>|n.
 """,
     },
     {
