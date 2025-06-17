@@ -46,6 +46,7 @@ class SpawnManager(Script):
 
         self.db.entries = []
         room_protos = load_all_prototypes("room")
+        npc_registry = prototypes.get_npc_prototypes()
         for proto in room_protos.values():
             spawns = proto.get("spawns") or []
             if not spawns:
@@ -53,6 +54,11 @@ class SpawnManager(Script):
             for entry in spawns:
                 proto_key = entry.get("prototype") or entry.get("proto")
                 if not proto_key:
+                    continue
+                if str(proto_key) not in npc_registry:
+                    logger.log_err(
+                        f"SpawnManager: missing NPC prototype '{proto_key}' for room spawn"
+                    )
                     continue
                 room_loc = entry.get("location") or proto.get("vnum") or proto.get("room_id")
                 data = {
