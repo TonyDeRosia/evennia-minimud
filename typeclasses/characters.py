@@ -349,9 +349,9 @@ class Character(ObjectParent, ClothedCharacter):
         if self.traits.stamina:
             self.traits.stamina.current = max(self.traits.stamina.current - cost, 0)
 
-        # check if we have auto-prompt in settings
-        if self.account and (settings := self.account.db.settings):
-            if settings.get("auto prompt"):
+        # check if we have auto-prompt in account settings
+        if self.account and (acct_settings := self.account.db.settings):
+            if acct_settings.get("auto prompt"):
                 status = self.get_display_status(self)
                 self.msg(prompt=status)
 
