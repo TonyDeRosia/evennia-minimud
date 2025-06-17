@@ -360,6 +360,72 @@ class CmdAEdit(Command):
             update_area(idx, area)
             self.msg(f"Room {room_vnum} added to {area.key}.")
             return
+        if sub == "assign":
+            args = rest.split()
+            if len(args) != 2 or not args[1].isdigit():
+                self.msg("Usage: aedit assign <area> <room_vnum>")
+                return
+            area_arg, vnum_str = args
+            room_vnum = int(vnum_str)
+            area = parse_area_identifier(area_arg)
+            if area:
+                idx, _ = find_area(area.key)
+            else:
+                idx = -1
+            if area is None:
+                self.msg(
+                    f"Area '{area_arg}' not found. Use 'alist' to view available areas."
+                )
+                return
+            proto = load_prototype("room", room_vnum)
+            if not proto:
+                self.msg("Room prototype not found.")
+                return
+
+            proto["area"] = area.key
+            proto.setdefault("room_id", room_vnum)
+
+            if room_vnum not in area.rooms:
+                area.rooms.append(room_vnum)
+            out_of_range = not (area.start <= room_vnum <= area.end)
+            if out_of_range:
+                self.msg(
+                    f"Warning: room {room_vnum} outside {area.key} range {area.start}-{area.end}."
+                )
+                if room_vnum < area.start:
+                    area.start = room_vnum
+                if room_vnum > area.end:
+                    area.end = room_vnum
+
+            save_prototype("room", proto, vnum=room_vnum)
+
+            update_area(idx, area)
+            self.msg(f"Room {room_vnum} assigned to {area.key}.")
+            return
+        if sub == "remove":
+            args = rest.split()
+            if len(args) != 2 or not args[1].isdigit():
+                self.msg("Usage: aedit remove <area> <room_vnum>")
+                return
+            area_arg, vnum_str = args
+            room_vnum = int(vnum_str)
+            area = parse_area_identifier(area_arg)
+            if area:
+                idx, _ = find_area(area.key)
+            else:
+                idx = -1
+            if area is None:
+                self.msg(
+                    f"Area '{area_arg}' not found. Use 'alist' to view available areas."
+                )
+                return
+            if room_vnum in area.rooms:
+                area.rooms.remove(room_vnum)
+                update_area(idx, area)
+                self.msg(f"Room {room_vnum} removed from {area.key}.")
+            else:
+                self.msg("Room VNUM not found in area.")
+            return
         self.msg("Unknown subcommand.")
 
 
