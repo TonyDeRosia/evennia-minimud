@@ -1134,6 +1134,70 @@ Related:
 """,
     },
     {
+        "key": "@spawnreload",
+        "category": "Admin",
+        "text": """Help for @spawnreload
+
+Reload all spawn entries from room prototype files.
+
+Usage:
+    @spawnreload
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    @spawnreload
+
+Notes:
+    - Run this after editing room spawns so the SpawnManager picks up the changes.
+""",
+    },
+    {
+        "key": "@forcerespawn",
+        "category": "Admin",
+        "text": """Help for @forcerespawn
+
+Immediately run spawn checks for a room.
+
+Usage:
+    @forcerespawn <room_vnum>
+
+Switches:
+    None
+
+Arguments:
+    <room_vnum> - room VNUM to respawn
+
+Examples:
+    @forcerespawn 200001
+""",
+    },
+    {
+        "key": "@showspawns",
+        "category": "Building",
+        "text": """Help for @showspawns
+
+List spawn entries for your current room or the given VNUM.
+
+Usage:
+    @showspawns [room_vnum]
+
+Switches:
+    None
+
+Arguments:
+    room_vnum - optional room VNUM
+
+Examples:
+    @showspawns
+    @showspawns 200001
+""",
+    },
+    {
         "key": "revive",
         "aliases": ["resurrect"],
         "category": "Combat",
