@@ -1,0 +1,11 @@
+{
+    "vnum": 200002,
+    "key": "Training Grounds",
+    "desc": "A dusty clearing used for sparring.",
+    "typeclass": "typeclasses.rooms.Room",
+    "area": "townsburg",
+    "spawns": [
+        {"proto": "basic_guard", "initial_count": 1, "max_count": 2, "respawn_rate": 120},
+        {"proto": "basic_merchant", "initial_count": 1, "max_count": 1, "respawn_rate": 300}
+    ]
+}

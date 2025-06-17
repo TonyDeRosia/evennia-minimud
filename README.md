@@ -358,10 +358,16 @@ Example:
 
 ## Spawn Control
 
-`@spawnreload` reloads all spawn entries from saved NPC prototypes.
+`@spawnreload` reloads all spawn entries from room prototype files.
 Use `@forcerespawn <room_vnum>` to immediately run the spawn
 logic for a specific room. Use `@showspawns [vnum]` to list
 entries for your current room or the given VNUM.
+
+Room spawns are defined in JSON files under `world/prototypes/rooms/`.
+Each room file can include a `spawns` list describing which NPC
+prototypes should repopulate there. Edit a room with `redit <vnum>`
+and choose **Edit spawns** to modify this list. After saving, run
+`@spawnreload` so the SpawnManager picks up the changes.
 
 ## Weapon Creation and Inspection
 
