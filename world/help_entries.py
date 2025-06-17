@@ -441,9 +441,10 @@ Related:
 Edit room prototypes in a menu.
 
 Usage:
-    redit <vnum>
-    redit create <vnum>
-    redit here <vnum>
+    redit <vnum> – edit a prototype or fallback to the live room
+    redit create <vnum> – create a new prototype
+    redit vnum <old> <new> – change prototype VNUM
+    redit live <vnum> – force edit of an existing room object
 
 Switches:
     None
