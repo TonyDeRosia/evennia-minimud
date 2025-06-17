@@ -6,7 +6,7 @@ Rooms are simple containers that has no location of their own.
 """
 
 from evennia import create_object
-from evennia.utils import iter_to_str, logger, lazy_property, search
+from evennia.utils import iter_to_str, logger, lazy_property
 from evennia.objects.objects import DefaultRoom
 from evennia.contrib.grid.xyzgrid.xyzroom import XYZRoom
 from evennia.contrib.grid.wilderness.wilderness import WildernessRoom
@@ -252,47 +252,33 @@ class Room(RoomParent, DefaultRoom):
             str: The generated ASCII map.
         """
 
-        exits = self.db.exits or {}
         coord = self.db.coord
         if not coord:
-            north = "^" if "north" in exits else " "
-            south = "v" if "south" in exits else " "
-            west = "<" if "west" in exits else " "
-            east = ">" if "east" in exits else " "
-
-            map_lines = [
-                f"  {north}  ",
-                f"{west} [X] {east}",
-                f"  {south}  ",
-            ]
-            return "\n".join(map_lines)
+            return "[X] (no map)"
 
         x, y = coord
-        neighbors = {}
-        for dx in (-1, 0, 1):
-            for dy in (-1, 0, 1):
-                if dx == 0 and dy == 0:
-                    neighbors[(dx, dy)] = True
-                    continue
-                objs = search.search_object_attribute(key="coord", value=(x + dx, y + dy))
-                neighbors[(dx, dy)] = bool(objs)
-
-        def cell(dx, dy):
-            if dx == 0 and dy == 0:
-                return "[X]"
-            return "[ ]" if neighbors.get((dx, dy)) else "   "
+        room_map = {}
+        for dx in range(-1, 2):
+            for dy in range(-1, 2):
+                check_coord = (x + dx, y + dy)
+                for obj in (self.location.contents if self.location else self.__class__.objects.all()):
+                    if obj.db.coord == check_coord:
+                        room_map[(dx, dy)] = obj
+                        break
+                else:
+                    room_map[(dx, dy)] = None
 
         lines = []
-        lines.append("".join(cell(dx, 1) for dx in (-1, 0, 1)))
-        lines.append("   {}   ".format("|" if "north" in exits and neighbors.get((0, 1)) else " "))
-        center = cell(-1, 0)
-        center += "-" if "west" in exits and neighbors.get((-1, 0)) else " "
-        center += cell(0, 0)
-        center += "-" if "east" in exits and neighbors.get((1, 0)) else " "
-        center += cell(1, 0)
-        lines.append(center)
-        lines.append("   {}   ".format("|" if "south" in exits and neighbors.get((0, -1)) else " "))
-        lines.append("".join(cell(dx, -1) for dx in (-1, 0, 1)))
+        for dy in reversed(range(-1, 2)):
+            row = []
+            for dx in range(-1, 2):
+                if dx == 0 and dy == 0:
+                    row.append("[X]")
+                elif room_map.get((dx, dy)):
+                    row.append("[ ]")
+                else:
+                    row.append("   ")
+            lines.append("".join(row))
 
         return "\n".join(lines)
 
