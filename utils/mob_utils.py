@@ -104,8 +104,16 @@ def make_corpse(npc):
         return existing[0]
 
     attrs = [("corpse_of", npc.key), ("corpse_of_id", npc.dbref), ("is_corpse", True)]
-    if decay := getattr(npc.db, "corpse_decay_time", None):
-        attrs.append(("decay_time", decay))
+    decay = getattr(npc.db, "corpse_decay_time", None)
+    if decay is None:
+        from django.conf import settings
+        from random import randint
+
+        decay = randint(
+            getattr(settings, "CORPSE_DECAY_MIN", 5),
+            getattr(settings, "CORPSE_DECAY_MAX", 10),
+        )
+    attrs.append(("decay_time", decay))
     corpse = create_object(
         "typeclasses.objects.Corpse",
         key=f"corpse of {npc.key}",

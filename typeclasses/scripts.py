@@ -1,7 +1,8 @@
 """Custom script typeclasses used by the game."""
 
 from random import randint, choice
-from evennia.utils import logger
+from evennia.utils import logger, inherits_from
+from django.conf import settings
 from evennia.scripts.scripts import DefaultScript
 from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
 from evennia.prototypes.spawner import spawn
@@ -103,4 +104,41 @@ class AutoDecayScript(Script):
         obj = self.obj
         if obj:
             obj.delete()
+        self.stop()
+
+
+class CorpseDecayScript(Script):
+    """Handle timed decomposition of corpse objects."""
+
+    def at_script_creation(self):
+        self.key = "corpse_decay"
+        self.desc = "Decay a corpse after a delay"
+        self.persistent = True
+        # check how often to repeat; once per interval until deleted
+        self.repeats = -1
+        self.db.allow_inventory_decay = getattr(
+            settings, "ALLOW_CORPSE_DECAY_IN_INVENTORY", False
+        )
+
+    def at_repeat(self):
+        corpse = self.obj
+        if not corpse:
+            self.stop()
+            return
+
+        allow_inv = self.db.allow_inventory_decay
+        location = corpse.location
+        if location and not allow_inv:
+            # only decay if lying in a room
+            from typeclasses.rooms import Room
+
+            if not inherits_from(location, Room):
+                return
+
+        if location:
+            name = corpse.db.corpse_of or corpse.key
+            location.msg_contents(
+                f"|gThe corpse of {name} decomposes and crumbles to dust.|n"
+            )
+        corpse.delete()
         self.stop()
