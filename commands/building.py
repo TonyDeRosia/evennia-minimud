@@ -64,6 +64,45 @@ SHORT = {
     "out": "o",
 }
 
+# Coordinate offsets for automatic mapping. Only horizontal directions
+# affect coordinates; other directions are ignored.
+COORD_OFFSETS = {
+    "north": (0, 1),
+    "south": (0, -1),
+    "east": (1, 0),
+    "west": (-1, 0),
+    "northeast": (1, 1),
+    "northwest": (-1, 1),
+    "southeast": (1, -1),
+    "southwest": (-1, -1),
+}
+
+
+def _auto_coords(source: Room, dest: Room, direction: str):
+    """Assign coordinates to ``source`` and ``dest`` if missing."""
+
+    offset = COORD_OFFSETS.get(direction)
+    if not offset:
+        return
+    dx, dy = offset
+
+    s_coord = source.db.coord
+    d_coord = dest.db.coord
+
+    if s_coord is None and d_coord is None:
+        source.db.coord = (0, 0)
+        dest.db.coord = (dx, dy)
+        return
+
+    if s_coord is None and d_coord is not None:
+        sx, sy = d_coord
+        source.db.coord = (sx - dx, sy - dy)
+        return
+
+    if s_coord is not None and d_coord is None:
+        sx, sy = s_coord
+        dest.db.coord = (sx + dx, sy + dy)
+
 
 class CmdDig(MuxCommand):
     """
@@ -131,6 +170,8 @@ class CmdDig(MuxCommand):
         if not norev and opposite:
             new_room.db.exits = new_room.db.exits or {}
             new_room.db.exits[opposite] = current
+
+        _auto_coords(current, new_room, direction)
 
         caller.msg(f"Created room {vnum} {direction} of here.")
 
@@ -292,6 +333,8 @@ class CmdLink(MuxCommand):
             if opposite:
                 target.db.exits = target.db.exits or {}
                 target.db.exits[opposite] = current
+
+        _auto_coords(current, target, direction)
 
         self.msg(f"Exit {direction} linked to room {vnum}.")
 
