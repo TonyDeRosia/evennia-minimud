@@ -106,6 +106,17 @@ class RoomParent(ObjectParent):
         """Return the room id inside its area."""
         return self.db.room_id
 
+    def set_coord(self, x, y):
+        """Set this room's map coordinates."""
+        try:
+            self.db.coord = (int(x), int(y))
+        except (TypeError, ValueError):  # pragma: no cover - guard
+            self.db.coord = None
+
+    def get_coord(self):
+        """Return this room's map coordinates."""
+        return self.db.coord
+
     # -----------------------------------------------------------------
     # display helpers
 
@@ -223,6 +234,11 @@ class RoomParent(ObjectParent):
 class Room(RoomParent, DefaultRoom):
     """Basic indoor room with simple area metadata."""
 
+    def at_object_creation(self):
+        super().at_object_creation()
+        if self.db.coord is None:
+            self.db.coord = (0, 0)
+
     def generate_map(self, looker):
         """Return a small ASCII map centered on the caller.
 
@@ -297,6 +313,14 @@ class OverworldRoom(RoomParent, WildernessRoom):
 
 class XYGridRoom(RoomParent, XYZRoom):
     """Room used inside the XYZGrid system."""
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        x, y, _ = self.xyz
+        try:
+            self.db.coord = (int(x), int(y))
+        except (TypeError, ValueError):  # pragma: no cover - guard
+            self.db.coord = None
 
     def get_display_header(self, looker, **kwargs):
         """Return the room's XYZ coordinates."""

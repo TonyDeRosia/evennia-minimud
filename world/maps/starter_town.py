@@ -70,18 +70,21 @@ LEGEND = {
 
 PROTOTYPES = {
     (6, 3): {
+        "coord": (6, 3),
         "prototype_parent": "xyz_room",
         "tags": [("townsburg", "zone")],
         "key": "West half of a plaza",
         "desc": "The central plaza in Townsburg is wide-open, with at least as many livestock as people.",
     },
     (7, 3): {
+        "coord": (7, 3),
         "prototype_parent": "xyz_room",
         "tags": [("townsburg", "zone")],
         "key": "East half of a plaza",
         "desc": "The central plaza in Townsburg is wide-open, with at least as many livestock as people.",
     },
     (9, 4): {
+        "coord": (9, 4),
         "typeclass": "typeclasses.rooms.XYGridShop",
         "key": "A tavern",
         "desc": "A bustling tavern, with food and drink for sale.",
@@ -90,6 +93,7 @@ PROTOTYPES = {
         ],
     },
     (6, 4): {
+        "coord": (6, 4),
         "typeclass": "typeclasses.rooms.XYGridShop",
         "key": "General Store",
         "desc": "Stuff! and Things",
@@ -101,24 +105,28 @@ PROTOTYPES = {
         ],
     },
     (4, 4): {
+        "coord": (4, 4),
         "typeclass": "typeclasses.rooms.XYGridTrain",
         "key": "Boxing R Us",
         "desc": "It looks like the perfect place for learning how to punch things.",
         "skill_training": "unarmed",
     },
     (6, 2): {
+        "coord": (6, 2),
         "typeclass": "typeclasses.rooms.XYGridTrain",
         "key": "Rogue's Guild",
         "desc": "I dunno you can train daggers here.",
         "skill_training": "daggers",
     },
     (8, 2): {
+        "coord": (8, 2),
         "typeclass": "typeclasses.rooms.XYGridTrain",
         "key": "Fencing studio",
         "desc": "Fencing dummies and practice swords are plentiful.",
         "skill_training": "swords",
     },
     (9, 2): {
+        "coord": (9, 2),
         "prototype_parent": "xyz_room",
         "typeclass": "typeclasses.rooms.XYZShopNTrain",
         "tags": [("townsburg", "zone")],
@@ -132,6 +140,7 @@ PROTOTYPES = {
         ],
     },
     (10, 4): {
+        "coord": (10, 4),
         "prototype_parent": "xyz_room",
         "typeclass": "typeclasses.rooms.XYZShopNTrain",
         "tags": [("townsburg", "zone")],
@@ -144,6 +153,7 @@ PROTOTYPES = {
         ],
     },
     (11, 4): {
+        "coord": (11, 4),
         "prototype_parent": "xyz_room",
         "typeclass": "typeclasses.rooms.XYGridTrain",
         "tags": [("townsburg", "zone")],
@@ -152,6 +162,7 @@ PROTOTYPES = {
         "skill_training": "leatherwork",
     },
     (11, 2): {
+        "coord": (11, 2),
         "prototype_parent": "xyz_room",
         "typeclass": "typeclasses.rooms.XYGridTrain",
         "tags": [("townsburg", "zone")],
