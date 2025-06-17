@@ -71,10 +71,12 @@ class SpawnManager(Script):
                     )
                     continue
                 room_loc = entry.get("location") or proto.get("vnum") or proto.get("room_id")
+                rid = self._normalize_room_id(room_loc)
                 data = {
                     "area": (proto.get("area") or "").lower(),
                     "prototype": proto_key,
                     "room": room_loc,
+                    "room_id": rid,
                     "max_count": int(entry.get("max_spawns", entry.get("max_count", 1))),
                     "respawn_rate": int(entry.get("spawn_interval", entry.get("respawn_rate", 60))),
                     "last_spawn": 0.0,
@@ -84,9 +86,7 @@ class SpawnManager(Script):
     def record_spawn(self, prototype: Any, room: Any) -> None:
         """Update the last spawn time for ``prototype`` in ``room``."""
         for entry in self.db.entries:
-            if entry.get("prototype") == prototype and self._room_match(
-                entry.get("room"), room
-            ):
+            if entry.get("prototype") == prototype and self._room_match(entry, room):
                 entry["last_spawn"] = time.time()
                 break
 
@@ -96,24 +96,18 @@ class SpawnManager(Script):
         if not spawns:
             return
         room_id = proto.get("room_id") or proto.get("vnum")
-        rid = (
-            int(room_id)
-            if isinstance(room_id, str) and room_id.isdigit()
-            else room_id
-        )
-        self.db.entries = [
-            e
-            for e in self.db.entries
-            if self._normalize_room_id(e.get("room")) != rid
-        ]
+        rid = self._normalize_room_id(room_id)
+        self.db.entries = [e for e in self.db.entries if self._normalize_room_id(e) != rid]
         for entry in spawns:
             proto_key = entry.get("prototype") or entry.get("proto")
             if not proto_key:
                 continue
+            room_val = entry.get("location") or room_id
             data = {
                 "area": (proto.get("area") or "").lower(),
                 "prototype": proto_key,
-                "room": entry.get("location") or room_id,
+                "room": room_val,
+                "room_id": self._normalize_room_id(room_val),
                 "max_count": int(entry.get("max_spawns", entry.get("max_count", 1))),
                 "respawn_rate": int(entry.get("spawn_interval", entry.get("respawn_rate", 60))),
                 "last_spawn": 0.0,
@@ -124,7 +118,7 @@ class SpawnManager(Script):
         """Immediately respawn all entries for ``room_vnum``."""
         now = time.time()
         for entry in self.db.entries:
-            if self._normalize_room_id(entry.get("room")) != room_vnum:
+            if self._normalize_room_id(entry) != room_vnum:
                 continue
             room = self._get_room(entry)
             if not room:
@@ -148,7 +142,7 @@ class SpawnManager(Script):
         # Force an immediate respawn in every room after reloading. This helps
         # during debugging so changes to prototypes are reflected right away.
         for entry in self.db.entries:
-            room_vnum = self._normalize_room_id(entry.get("room"))
+            room_vnum = self._normalize_room_id(entry)
             if room_vnum is not None:
                 self.force_respawn(room_vnum)
 
@@ -156,6 +150,10 @@ class SpawnManager(Script):
     # internal helpers
     # ------------------------------------------------------------
     def _normalize_room_id(self, room: Any) -> int | None:
+        if isinstance(room, dict):
+            if "room_id" in room:
+                return room.get("room_id")
+            room = room.get("room")
         if hasattr(room, "dbref"):
             return getattr(room.db, "room_id", None)
         if isinstance(room, int):
@@ -168,16 +166,15 @@ class SpawnManager(Script):
         return None
 
     def _room_match(self, stored: Any, room: Any) -> bool:
+        if isinstance(stored, dict):
+            rid = stored.get("room_id")
+            stored = stored.get("room")
+        else:
+            rid = None
         if hasattr(stored, "dbref"):
             return stored == room
-        rid = None
-        if isinstance(stored, int):
-            rid = stored
-        elif isinstance(stored, str):
-            if stored.startswith("#") and stored[1:].isdigit():
-                rid = int(stored[1:])
-            elif stored.isdigit():
-                rid = int(stored)
+        if rid is None:
+            rid = self._normalize_room_id(stored)
         if rid is not None:
             return room.id == rid or getattr(room.db, "room_id", None) == rid
         return False
@@ -186,22 +183,27 @@ class SpawnManager(Script):
         room = entry.get("room")
         if hasattr(room, "dbref"):
             return room
-        rid = None
-        if isinstance(room, int):
-            rid = room
-        elif isinstance(room, str):
-            if room.startswith("#") and room[1:].isdigit():
-                obj = ObjectDB.objects.filter(id=int(room[1:])).first()
-                if obj:
-                    return obj
+        rid = entry.get("room_id")
+        if isinstance(room, str) and room.startswith("#") and room[1:].isdigit():
+            obj = ObjectDB.objects.filter(id=int(room[1:])).first()
+            if obj:
+                entry["room"] = obj
+                return obj
+            if rid is None:
                 rid = int(room[1:])
-            elif room.isdigit():
-                rid = int(room)
+        elif rid is None:
+            rid = self._normalize_room_id(room)
         if rid is not None:
             objs = ObjectDB.objects.get_by_attribute(key="room_id", value=rid)
-            return objs[0] if objs else None
+            obj = objs[0] if objs else None
+            if obj:
+                entry["room"] = obj
+            return obj
         objs = search.search_object(room)
-        return objs[0] if objs else None
+        obj = objs[0] if objs else None
+        if obj:
+            entry["room"] = obj
+        return obj
 
     def _live_count(self, proto: Any, room: Any) -> int:
         return len(

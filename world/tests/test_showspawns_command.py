@@ -13,6 +13,7 @@ class TestShowSpawns(TestCase):
         script.db.entries = [{"room": "#1", "prototype": "goblin", "max_count": 2, "respawn_rate": 30}]
         script._get_room.return_value = cmd.caller.location
         script._live_count.return_value = 1
+        script._normalize_room_id.return_value = 1
         with mock.patch("commands.admin.spawncontrol.ScriptDB") as mock_sdb:
             mock_sdb.objects.filter.return_value.first.return_value = script
             cmd.func()
