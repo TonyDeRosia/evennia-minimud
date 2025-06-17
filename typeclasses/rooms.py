@@ -253,9 +253,9 @@ class Room(RoomParent, DefaultRoom):
             str: The generated ASCII map.
         """
 
+        # ``coord`` is optional for this minimalist map. If coordinates are not
+        # defined we still want to show the boxed room with exits.
         coord = self.db.coord
-        if not coord:
-            return "[X] (no map)"
 
         exits = self.db.exits or {}
 
