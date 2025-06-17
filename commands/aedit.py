@@ -21,6 +21,41 @@ from utils.prototype_manager import (
 )
 
 
+def _gather_room_ids(area: Area) -> list[int]:
+    """Return all known room vnums for ``area``."""
+
+    ids = {int(r) for r in area.rooms if isinstance(r, int)}
+
+    objs = ObjectDB.objects.filter(
+        db_attributes__db_key="area",
+        db_attributes__db_strvalue__iexact=area.key,
+    )
+    for obj in objs:
+        if not obj.is_typeclass(Room, exact=False):
+            continue
+        rid = obj.attributes.get("room_id")
+        if rid is not None:
+            try:
+                ids.add(int(rid))
+            except (TypeError, ValueError):
+                pass
+
+    protos = load_all_prototypes("room")
+    for num, proto in protos.items():
+        if not proto:
+            continue
+        name = proto.get("area")
+        if not name or name.lower() != area.key.lower():
+            continue
+        rid = proto.get("room_id", num)
+        try:
+            ids.add(int(rid))
+        except (TypeError, ValueError):
+            continue
+
+    return sorted(ids)
+
+
 class AreaValidator(OLCValidator):
     """Simple validator for area data."""
 
@@ -214,7 +249,7 @@ class CmdAEdit(Command):
     def func(self):
         if not self.args:
             self.msg(
-                "Usage: aedit create <name> <start> <end> | "
+                "Usage: aedit list | aedit show <area> | aedit create <name> <start> <end> | "
                 "aedit range <name> <start> <end> | "
                 "aedit builders <name> <list> | aedit flags <name> <list> | "
                 "aedit interval <name> <ticks>"
@@ -223,6 +258,48 @@ class CmdAEdit(Command):
         parts = self.args.split(None, 1)
         sub = parts[0].lower()
         rest = parts[1].strip() if len(parts) > 1 else ""
+        if sub == "list":
+            areas = get_areas()
+            if not areas:
+                self.msg("No areas defined.")
+                return
+            table = EvTable("|cName|n", "|cRange|n", "|cRooms|n", border="cells")
+            for area in areas:
+                room_ids = _gather_room_ids(area)
+                table.add_row(
+                    area.key,
+                    f"{area.start}-{area.end}",
+                    str(len(room_ids)),
+                )
+            self.msg(str(table))
+            return
+        if sub == "show":
+            area_name = rest.strip()
+            if not area_name:
+                self.msg("Usage: aedit show <area>")
+                return
+            _, area = find_area(area_name)
+            if area is None:
+                self.msg(
+                    f"Area '{area_name}' not found. Use 'alist' to view available areas."
+                )
+                return
+            room_ids = _gather_room_ids(area)
+            lines = [f"|wArea|n {area.key}"]
+            lines.append(f"|wRange|n {area.start}-{area.end}")
+            if area.builders:
+                lines.append("|wBuilders|n " + ", ".join(area.builders))
+            if area.flags:
+                lines.append("|wFlags|n " + ", ".join(area.flags))
+            lines.append(f"|wReset Interval|n {area.reset_interval}")
+            lines.append(f"|wAge|n {area.age}")
+            if area.desc:
+                lines.append(f"|wDesc|n {area.desc}")
+            lines.append(
+                "|wRooms|n " + (", ".join(str(v) for v in room_ids) if room_ids else "-")
+            )
+            self.msg("\n".join(lines))
+            return
         if sub == "create":
             args = rest.split()
             if len(args) != 3 or not args[1].isdigit() or not args[2].isdigit():
