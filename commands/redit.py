@@ -82,6 +82,9 @@ def _summary(caller) -> str:
         return ""
     lines = [f"|wEditing room {data.get('vnum', caller.ndb.current_vnum)}|n"]
     lines.append(f"Name: {data.get('key', '')}")
+    area = data.get("area")
+    if area:
+        lines.append(f"Area: {area}")
     desc = data.get("desc", "")
     if desc:
         lines.append(f"Desc: {desc}")
