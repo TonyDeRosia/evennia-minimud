@@ -13,7 +13,8 @@ aedit add town 2001
 asave changed
 ```
 
-Rooms intended for grid-based maps should also include an `xyz` coordinate.
-This triplet `(x, y, "area")` determines where the room appears on the 3×3
-minimap shown when players `look`. Set `xyz` on the prototype or through
-`redit` to ensure the room is placed correctly.
+Rooms intended for grid-based maps can optionally include an `xyz`
+coordinate. This triplet `(x, y, "area")` lets other tools know where the
+room sits on a larger grid. It is not required for the boxed minimap to
+display, but setting it via `redit` or on the prototype keeps future map
+features consistent.

@@ -61,19 +61,25 @@ bank transfer <amount [coin]> <player>
 
 ## Minimap
 
-Looking at a room shows a small 3×3 map above the description. Arrows mark
-available exits while `[X]` marks your location. Example:
+Looking at a room displays a small minimap above the description. The current
+room appears as `[X]` inside a box with exit arrows and compass directions
+around it.
 
 ```
-  ^
-< [X] >
-  v
+     N
+  __^__
+ |     |
+W<| [X] |>E
+ |____|
+     v
+     S
 ```
 
-Rooms in grid-based areas must define `xyz` coordinates so they appear on the
-map. Set the `xyz` field in `redit` or on the room prototype using
-`(x, y, "area")`. See [docs/area_json.md](docs/area_json.md) for more on area
-files and room placement.
+Rooms in grid-based areas can define optional `xyz` coordinates
+with `(x, y, "area")` for more advanced mapping. The boxed minimap
+works even without coordinates, but setting them through `redit` or a
+prototype allows other systems to locate the room on a larger map. See
+[docs/area_json.md](docs/area_json.md) for more details.
 
 
 ## Installation and Setup
