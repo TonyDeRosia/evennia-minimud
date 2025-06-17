@@ -16,7 +16,13 @@
         "skills": {"appraise": 100},
         "resistances": [
             "cold"
-        ]
+        ],
+        "spawn": {
+            "room_vnum": 200002,
+            "initial_count": 2,
+            "max_count": 5,
+            "respawn_rate": 300
+        }
     },
     "basic_questgiver": {
         "key": "quest giver",
@@ -33,7 +39,13 @@
             "call_for_help"
         ],
         "spells": {"cure light": 100},
-        "resistances": []
+        "resistances": [],
+        "spawn": {
+            "room_vnum": 200002,
+            "initial_count": 2,
+            "max_count": 5,
+            "respawn_rate": 300
+        }
     },
     "basic_guard": {
         "key": "town guard",
@@ -54,13 +66,25 @@
         "spells": {"heal": 100},
         "resistances": [
             "fire"
-        ]
+        ],
+        "spawn": {
+            "room_vnum": 200002,
+            "initial_count": 2,
+            "max_count": 5,
+            "respawn_rate": 300
+        }
     },
     "slime": {
         "key": "slime",
         "npc_type": "base",
         "race": "human",
         "level": 1,
-        "damage_dice": "1d2"
+        "damage_dice": "1d2",
+        "spawn": {
+            "room_vnum": 200002,
+            "initial_count": 2,
+            "max_count": 5,
+            "respawn_rate": 300
+        }
     }
 }

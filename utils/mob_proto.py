@@ -44,6 +44,9 @@ def register_prototype(
         data["skills"] = {name: 100 for name in data["skills"]}
     if isinstance(data.get("spells"), list):
         data["spells"] = {name: 100 for name in data["spells"]}
+    if "spawn" in data and not isinstance(data["spawn"], dict):
+        data["spawn"] = dict(data["spawn"])
+
     if vnum is None:
         vnum = get_next_vnum("npc")
         if area:
