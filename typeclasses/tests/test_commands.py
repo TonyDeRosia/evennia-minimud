@@ -437,6 +437,12 @@ class TestInfoCommands(EvenniaTest):
         self.assertIn(self.char1.key, out)
         self.assertNotIn(self.char1.account.key, out)
 
+    def test_who_displays_race_class(self):
+        self.char1.execute_cmd("who")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("|cElf|n", out)
+        self.assertIn("|cMage|n", out)
+
 
 class TestBountySmall(EvenniaTest):
     def setUp(self):

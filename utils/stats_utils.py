@@ -177,6 +177,11 @@ def get_display_scroll(chara):
         name += f" - {title}"
     lines.append(name)
 
+    race = _db_get(chara, "race", "Unknown") or "Unknown"
+    charclass = _db_get(chara, "charclass", "Unknown") or "Unknown"
+    lines.append(f"|cRace:|n {race}")
+    lines.append(f"|cClass:|n {charclass}")
+
     level = _db_get(chara, "level", 1)
     xp = getattr(chara.db, "experience", 0) or 0
     tnl = getattr(chara.db, "tnl", 0) or 0
