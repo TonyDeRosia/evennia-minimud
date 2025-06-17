@@ -178,7 +178,8 @@ Edit
 "spawns": [
   {"proto": "mob_goblin", "max_spawns": 2, "spawn_interval": 300}
 ]
-SpawnManager checks only those rooms and spreads load using batch_size. Use:
+SpawnManager automatically registers spawns when a room prototype is saved. If
+spawns appear to be missing (for example after a server restart), use:
 
 bash
 Copy

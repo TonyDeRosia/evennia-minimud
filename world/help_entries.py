@@ -1180,7 +1180,8 @@ Examples:
     @spawnreload
 
 Notes:
-    - Run this after editing room spawns so the SpawnManager picks up the changes.
+    - Room spawns are automatically registered when prototypes are saved. Use
+      this command if spawns fail to appear or after manually editing files.
 """,
     },
     {
@@ -1236,7 +1237,8 @@ This describes how to make NPCs automatically appear in a room.
 2. Save the prototype with a VNUM.
 3. Use |wredit <room_vnum>|n and choose |wEdit spawns|n to add the prototype,
    max count and respawn interval.
-4. Save the room prototype and run |w@spawnreload|n or |wasave changed|n.
+4. Save the room prototype. Spawns are registered automatically, but you can
+   use |w@spawnreload|n or |wasave changed|n to refresh them manually.
 5. Check spawns with |w@showspawns <room_vnum>|n.
 """,
     },
