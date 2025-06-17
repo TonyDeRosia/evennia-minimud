@@ -1,3 +1,18 @@
+
+"""Global NPC spawning manager.
+
+This script loads room spawn definitions from prototype files and handles
+timed respawning of NPCs. It runs as a single persistent script started at
+server boot via ``at_server_start`` and keeps track of what NPCs should exist
+in each room.
+
+Commands interacting with this manager include ``@spawnreload`` to reload all
+spawn entries, ``@forcerespawn`` for immediate checks, ``@showspawns`` to view
+configured spawns, ``@resetworld`` to repopulate all areas and ``areas.reset``
+for individual areas. Saving room spawns through ``redit`` automatically
+registers them with the manager as well.
+"""
+
 from __future__ import annotations
 
 import time
