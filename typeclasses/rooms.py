@@ -242,8 +242,9 @@ class Room(RoomParent, DefaultRoom):
     def generate_map(self, looker):
         """Return a small ASCII map centered on the caller.
 
-        The map shows the available exits north, south, east and west
-        relative to this room. The current room is marked with ``[X]``.
+        The map shows a framed box with ``[X]`` marking the current room.
+        Arrows and compass directions are added for exits in each of the
+        cardinal directions.
 
         Args:
             looker (Object): The object viewing the room.
@@ -256,31 +257,36 @@ class Room(RoomParent, DefaultRoom):
         if not coord:
             return "[X] (no map)"
 
-        x, y = coord
-        room_map = {}
-        for dx in range(-1, 2):
-            for dy in range(-1, 2):
-                check_coord = (x + dx, y + dy)
-                for obj in (self.location.contents if self.location else self.__class__.objects.all()):
-                    if obj.db.coord == check_coord:
-                        room_map[(dx, dy)] = obj
-                        break
-                else:
-                    room_map[(dx, dy)] = None
+        exits = self.db.exits or {}
 
-        lines = []
-        for dy in reversed(range(-1, 2)):
-            row = []
-            for dx in range(-1, 2):
-                if dx == 0 and dy == 0:
-                    row.append("[X]")
-                elif room_map.get((dx, dy)):
-                    row.append("[ ]")
-                else:
-                    row.append("   ")
-            lines.append("".join(row))
+        north = "north" in exits
+        south = "south" in exits
+        east = "east" in exits
+        west = "west" in exits
 
-        return "\n".join(lines)
+        map_lines = []
+
+        # north label/arrow
+        if north:
+            map_lines.append("     N")
+            map_lines.append("  __^__")
+
+        map_lines.append(" |     |")
+
+        center = "[X]"
+        mid = ""
+        mid += "W<| " if west else "   | "
+        mid += center
+        mid += " |>E" if east else " |  "
+        map_lines.append(mid.rstrip())
+
+        map_lines.append(" |____|")
+
+        if south:
+            map_lines.append("     v")
+            map_lines.append("     S")
+
+        return "\n".join(map_lines)
 
     def return_appearance(self, looker):
         """Prefix the normal room appearance with a minimap."""
