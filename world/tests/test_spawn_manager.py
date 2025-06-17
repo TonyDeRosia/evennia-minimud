@@ -132,6 +132,7 @@ class TestSpawnManager(EvenniaTest):
     def test_get_room_caches_lookup(self):
         entry = {"room": "#1"}
         fake_room = mock.Mock(dbref="#1")
+        fake_room.is_typeclass.return_value = True
         with mock.patch("scripts.spawn_manager.ObjectDB.objects.filter") as m_filter:
             m_filter.return_value.first.return_value = fake_room
             room1 = self.script._get_room(entry)
@@ -171,3 +172,25 @@ class TestSpawnManager(EvenniaTest):
         with mock.patch("scripts.spawn_manager.time.time", return_value=10):
             self.script.at_repeat()
             m_spawn.assert_called_once()
+
+    def test_get_room_falls_back_to_room_id_when_dbref_not_room(self):
+        dummy = create_object("typeclasses.objects.Object", key="dummy")
+        self.script.db.entries = [
+            {
+                "area": "testarea",
+                "prototype": "basic_merchant",
+                "room": f"#{dummy.id}",
+                "room_id": 1,
+                "max_count": 1,
+                "respawn_rate": 5,
+                "last_spawn": 0,
+            }
+        ]
+        npc = create_object(BaseNPC, key="basic_merchant")
+        with mock.patch(
+            "scripts.spawn_manager.prototypes.get_npc_prototypes",
+            return_value={"basic_merchant": {"key": "basic_merchant"}},
+        ), mock.patch("evennia.prototypes.spawner.spawn", return_value=[npc]):
+            self.script.force_respawn(1)
+
+        self.assertEqual(npc.location, self.room)
