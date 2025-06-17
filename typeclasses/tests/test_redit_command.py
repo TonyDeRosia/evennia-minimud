@@ -34,6 +34,21 @@ class TestREditCommand(EvenniaTest):
             "Room VNUM 99 not found. Use `redit create 99` to make a new room."
         )
 
+    def test_malformed_proto_message(self):
+        import json
+
+        err = json.JSONDecodeError("bad", "", 0)
+        with (
+            patch("commands.redit.load_prototype", side_effect=err),
+            patch("commands.redit.OLCEditor") as mock_editor,
+        ):
+            self.char1.msg.reset_mock()
+            self.char1.execute_cmd("redit 200000")
+            mock_editor.assert_not_called()
+        self.char1.msg.assert_called_with(
+            "Error loading prototype for room 200000. Try 'redit create 200000'."
+        )
+
     def test_edit_live_room(self):
         from evennia.utils import create
         from typeclasses.rooms import Room

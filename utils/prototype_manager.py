@@ -54,8 +54,10 @@ def load_prototype(category: str, vnum: int) -> Optional[dict]:
             return json.load(f)
     except FileNotFoundError:
         return None
-    except json.JSONDecodeError:
-        return None
+    except json.JSONDecodeError as err:
+        # Propagate decode errors so callers can differentiate between an
+        # unreadable file and one that simply does not exist.
+        raise err
 
 
 def load_all_prototypes(category: str) -> Dict[int, dict]:

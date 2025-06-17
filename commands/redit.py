@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from olc.base import OLCEditor, OLCState, OLCValidator
+import json
 from utils.prototype_manager import (
     save_prototype,
     load_prototype,
@@ -338,7 +339,14 @@ class CmdREdit(Command):
 
         if len(parts) == 1 and parts[0].isdigit():
             vnum = int(parts[0])
-            proto = load_prototype("room", vnum)
+            try:
+                proto = load_prototype("room", vnum)
+            except json.JSONDecodeError:
+                self.msg(
+                    f"Error loading prototype for room {vnum}. Try 'redit create {vnum}'."
+                )
+                _clear_state()
+                return
             if proto is None:
                 objs = ObjectDB.objects.filter(
                     db_attributes__db_key="room_id",
