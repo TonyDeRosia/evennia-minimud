@@ -3,10 +3,10 @@ from evennia.objects.models import ObjectDB
 import shlex
 import re
 from evennia.utils.ansi import strip_ansi
-from .command import Command
-from .info import CmdScan
-from .update import CmdUpdate
-from .building import (
+from ..command import Command
+from ..info import CmdScan
+from ..update import CmdUpdate
+from ..building import (
     CmdSetDesc,
     CmdSetWeight,
     CmdSetSlot,
@@ -22,7 +22,7 @@ from world.system import stat_manager
 from world.system.constants import MAX_LEVEL
 from utils.stats_utils import get_display_scroll, normalize_stat_key
 from utils import VALID_SLOTS, normalize_slot
-from .npc_builder import (
+from ..npc_builder import (
     CmdCNPC,
     CmdEditNPC,
     CmdDeleteNPC,
@@ -31,7 +31,7 @@ from .npc_builder import (
     CmdListNPCs,
     CmdDupNPC,
 )
-from .mob_builder_commands import (
+from ..mob_builder_commands import (
     CmdMCreate,
     CmdMSet,
     CmdMakeShop,
@@ -44,7 +44,7 @@ from .mob_builder_commands import (
     CmdRepairStat,
     CmdMobValidate,
 )
-from .npc_builder import (
+from ..npc_builder import (
     CmdMSpawn,
     CmdMobPreview,
     CmdMStat,
@@ -52,14 +52,15 @@ from .npc_builder import (
     CmdMobTemplate,
     CmdQuickMob,
 )
-from .rom_mob_editor import CmdMEdit
-from .mob_builder_commands import CmdProtoEdit
-from .cmdmobbuilder import CmdMobProto
-from .nextvnum import CmdNextVnum
-from .builder_types import CmdBuilderTypes
-from .hedit import CmdHEdit
-from .opedit import CmdOPEdit
-from .rpedit import CmdRPEdit
+from ..rom_mob_editor import CmdMEdit
+from ..mob_builder_commands import CmdProtoEdit
+from ..cmdmobbuilder import CmdMobProto
+from ..nextvnum import CmdNextVnum
+from ..builder_types import CmdBuilderTypes
+from ..hedit import CmdHEdit
+from ..opedit import CmdOPEdit
+from ..rpedit import CmdRPEdit
+from .resetworld import CmdResetWorld
 
 
 def _safe_split(text):
@@ -1398,6 +1399,7 @@ class AdminCmdSet(CmdSet):
         self.add(CmdPeace)
         self.add(CmdForceMobReport)
         self.add(CmdUpdate)
+        self.add(CmdResetWorld)
         self.add(CmdScan)
 
 
