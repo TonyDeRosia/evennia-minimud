@@ -1202,6 +1202,7 @@ class CmdMSpawn(Command):
             except ValueError as err:
                 self.msg(str(err))
                 return
+            proto_key = vnum
         else:
             mob_db = get_mobdb()
             vmatch = next((num for num, p in mob_db.db.vnums.items() if p.get("key") == arg), None)
@@ -1211,11 +1212,13 @@ class CmdMSpawn(Command):
                 except ValueError as err:
                     self.msg(str(err))
                     return
+                proto_key = vmatch
             else:
                 from world import prototypes
 
                 registry = prototypes.get_npc_prototypes()
-                proto = registry.get(arg) or registry.get(f"mob_{arg}")
+                proto_key = arg if arg in registry else f"mob_{arg}"
+                proto = registry.get(proto_key)
                 if not proto:
                     self.msg("Prototype not found.")
                     return
@@ -1231,6 +1234,13 @@ class CmdMSpawn(Command):
                     obj.db.vnum = proto["vnum"]
                     obj.tags.add(f"M{proto['vnum']}", category="vnum")
                 apply_proto_items(obj, proto)
+        obj.db.spawn_room = self.caller.location
+        obj.db.prototype_key = proto_key
+
+        from evennia.scripts.models import ScriptDB
+        script = ScriptDB.objects.filter(db_key="spawn_manager").first()
+        if script and hasattr(script, "record_spawn"):
+            script.record_spawn(proto_key, self.caller.location)
 
         self.msg(f"Spawned {obj.key}.")
 

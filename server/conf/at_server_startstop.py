@@ -130,6 +130,15 @@ def at_server_start():
             script.delete()
         create.create_script("world.area_reset.AreaReset", key="area_reset")
 
+    script = ScriptDB.objects.filter(db_key="spawn_manager").first()
+    if not script or script.typeclass_path != "scripts.spawn_manager.SpawnManager":
+        if script:
+            script.delete()
+        script = create.create_script("scripts.spawn_manager.SpawnManager", key="spawn_manager")
+    from scripts.spawn_manager import SpawnManager  # type: ignore
+    if hasattr(script, "load_spawn_data"):
+        script.load_spawn_data()
+
     # Ensure mob database script exists
     get_mobdb()
 
