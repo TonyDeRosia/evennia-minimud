@@ -443,6 +443,7 @@ Edit room prototypes in a menu.
 Usage:
     redit <vnum>
     redit create <vnum>
+    redit here <vnum>
 
 Switches:
     None
@@ -457,6 +458,7 @@ Notes:
     - Valid VNUM range is 200000-299999.
     - Use @nextvnum R to obtain a free number.
     - redit create immediately spawns a usable room and registers it to the area.
+    - redit here <vnum> assigns the current room to that VNUM and opens the editor.
 
 Related:
     help vnums
