@@ -1,4 +1,5 @@
 from typeclasses.scripts import Script
+from world.system import state_manager
 
 
 class SatedDecayScript(Script):
@@ -13,21 +14,5 @@ class SatedDecayScript(Script):
     def at_repeat(self):
         from typeclasses.characters import Character
 
-        thresholds = {50: "You feel a bit peckish.",
-                      20: "You are getting hungry.",
-                      1: "You are starving!"}
-
         for char in Character.objects.all():
-            sated = getattr(char.db, "sated", None)
-            if sated is None or sated <= 0:
-                continue
-            old = sated
-            char.db.sated = max(sated - 1, 0)
-            new_val = char.db.sated
-            for threshold, msg in thresholds.items():
-                if old >= threshold > new_val:
-                    if hasattr(char, "msg"):
-                        char.msg(msg)
-                    break
-            # end inner for
-        # end outer for
+            state_manager.tick_character(char)
