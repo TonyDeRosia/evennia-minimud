@@ -5,7 +5,14 @@ from evennia.prototypes import spawner
 
 from .command import Command, MuxCommand
 from scripts.area_spawner import AreaSpawner
-from world.areas import Area, get_areas, save_area, update_area, find_area
+from world.areas import (
+    Area,
+    get_areas,
+    save_area,
+    update_area,
+    find_area,
+    parse_area_identifier,
+)
 from .aedit import CmdAEdit, CmdAList, CmdASave, CmdAreaReset, CmdAreaAge
 from typeclasses.rooms import Room
 from utils.prototype_manager import load_prototype, load_all_prototypes
@@ -184,7 +191,7 @@ class CmdRList(Command):
 
         objs = ObjectDB.objects.filter(
             db_attributes__db_key="area",
-            db_attributes__db_strvalue__iexact=area_name,
+            db_attributes__db_strvalue__iexact=area.key,
         )
         rooms = [obj for obj in objs if obj.is_typeclass(Room, exact=False)]
         if not rooms:
@@ -227,7 +234,11 @@ class CmdRMake(MuxCommand):
         area_name, num_str = parts
         room_id = int(num_str)
 
-        idx, area = find_area(area_name)
+        area = parse_area_identifier(area_name)
+        if area:
+            idx, _ = find_area(area.key)
+        else:
+            idx = -1
         if area is None:
             self.msg(
                 f"Area '{area_name}' not found. Use 'alist' to view available areas."
@@ -426,7 +437,11 @@ class CmdRReg(Command):
             return
         room_id = int(num_str)
 
-        idx, area = find_area(area_name)
+        area = parse_area_identifier(area_name)
+        if area:
+            idx, _ = find_area(area.key)
+        else:
+            idx = -1
         if area is None:
             self.msg(
                 f"Area '{area_name}' not found. Use 'alist' to view available areas."
@@ -447,12 +462,12 @@ class CmdRReg(Command):
                 self.msg("Room already exists.")
                 return
 
-        room.set_area(area_name, room_id)
+        room.set_area(area.key, room_id)
         if room_id not in area.rooms:
             area.rooms.append(room_id)
             update_area(idx, area)
         name = room.key if room != self.caller.location else "Room"
-        self.msg(f"{name} registered as {area_name} #{room_id}.")
+        self.msg(f"{name} registered as {area.key} #{room_id}.")
 
 
 class CmdRRegAll(Command):

@@ -15,10 +15,10 @@ class TestAEditAdd(EvenniaTest):
     @patch("commands.aedit.update_area")
     @patch("commands.aedit.save_prototype")
     @patch("commands.aedit.load_prototype")
-    @patch("commands.aedit.find_area")
-    def test_add_room(self, mock_find_area, mock_load_proto, mock_save, mock_update):
+    @patch("commands.aedit.parse_area_identifier")
+    def test_add_room(self, mock_parse, mock_load_proto, mock_save, mock_update):
         area = Area(key="zone", start=1, end=5)
-        mock_find_area.return_value = (0, area)
+        mock_parse.return_value = area
         mock_load_proto.return_value = {"vnum": 3}
         cmd = aedit.CmdAEdit()
         cmd.caller = self.char1
@@ -34,10 +34,10 @@ class TestAEditAdd(EvenniaTest):
     @patch("commands.aedit.update_area")
     @patch("commands.aedit.save_prototype")
     @patch("commands.aedit.load_prototype")
-    @patch("commands.aedit.find_area")
-    def test_range_updates_end(self, mock_find_area, mock_load_proto, mock_save, mock_update):
+    @patch("commands.aedit.parse_area_identifier")
+    def test_range_updates_end(self, mock_parse, mock_load_proto, mock_save, mock_update):
         area = Area(key="zone", start=5, end=10)
-        mock_find_area.return_value = (0, area)
+        mock_parse.return_value = area
         mock_load_proto.return_value = {"vnum": 12}
         cmd = aedit.CmdAEdit()
         cmd.caller = self.char1
@@ -50,10 +50,10 @@ class TestAEditAdd(EvenniaTest):
     @patch("commands.aedit.update_area")
     @patch("commands.aedit.save_prototype")
     @patch("commands.aedit.load_prototype")
-    @patch("commands.aedit.find_area")
-    def test_range_updates_start(self, mock_find_area, mock_load_proto, mock_save, mock_update):
+    @patch("commands.aedit.parse_area_identifier")
+    def test_range_updates_start(self, mock_parse, mock_load_proto, mock_save, mock_update):
         area = Area(key="zone", start=5, end=10)
-        mock_find_area.return_value = (0, area)
+        mock_parse.return_value = area
         mock_load_proto.return_value = {"vnum": 2}
         cmd = aedit.CmdAEdit()
         cmd.caller = self.char1
