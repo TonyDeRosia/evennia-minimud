@@ -69,4 +69,12 @@ class TestDisplayScroll(EvenniaTest):
         sheet = get_display_scroll(self.char1)
         self.assertIn("Haste", sheet)
 
+    def test_race_and_class_displayed(self):
+        char = self.char1
+        char.db.race = "Orc"
+        char.db.charclass = "Warrior"
+        sheet = get_display_scroll(char)
+        self.assertIn("|cRace:|n Orc", sheet)
+        self.assertIn("|cClass:|n Warrior", sheet)
+
 

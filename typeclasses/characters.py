@@ -1147,7 +1147,7 @@ class NPC(Character):
         if self.location:
             if attacker:
                 self.location.msg_contents(
-                    f"{self.key} is slain by {attacker.key}!"
+                    f"{self.key} is |Rslain|n by |C{attacker.key}|n!"
                 )
             else:
                 self.location.msg_contents(f"{self.key} dies.")
