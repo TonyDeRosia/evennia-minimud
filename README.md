@@ -59,6 +59,22 @@ bank withdraw <amount [coin]>
 bank transfer <amount [coin]> <player>
 ```
 
+## Minimap
+
+Looking at a room shows a small 3×3 map above the description. Arrows mark
+available exits while `[X]` marks your location. Example:
+
+```
+  ^
+< [X] >
+  v
+```
+
+Rooms in grid-based areas must define `xyz` coordinates so they appear on the
+map. Set the `xyz` field in `redit` or on the room prototype using
+`(x, y, "area")`. See [docs/area_json.md](docs/area_json.md) for more on area
+files and room placement.
+
 
 ## Installation and Setup
 
