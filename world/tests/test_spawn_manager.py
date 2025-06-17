@@ -50,3 +50,18 @@ class TestSpawnManager(EvenniaTest):
         self.assertEqual(len(self.script.db.entries), 1)
         self.assertEqual(self.script.db.entries[0]["prototype"], "valid_proto")
         m_log.assert_called_once()
+
+    def test_reload_spawns_forces_respawn(self):
+        """reload_spawns should trigger force_respawn for each room."""
+        self.script.db.entries = [
+            {"room": 1},
+            {"room": 2},
+        ]
+        with mock.patch.object(self.script, "load_spawn_data"), \
+             mock.patch.object(self.script, "at_start") as mock_start, \
+             mock.patch.object(self.script, "force_respawn") as mock_force:
+            self.script.reload_spawns()
+            mock_start.assert_called_once()
+            mock_force.assert_any_call(1)
+            mock_force.assert_any_call(2)
+            self.assertEqual(mock_force.call_count, 2)
