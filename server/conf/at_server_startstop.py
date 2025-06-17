@@ -23,6 +23,7 @@ import time
 from evennia.utils import logger
 from evennia.server.models import ServerConfig
 from utils.prototype_manager import load_all_prototypes
+from utils.script_utils import resume_paused_scripts
 
 
 _PROTOTYPE_CACHE = {}
@@ -184,6 +185,7 @@ def at_server_start():
 
     _build_caches()
     _ensure_room_areas()
+    resume_paused_scripts()
     ServerConfig.objects.conf("server_start_time", time.time())
 
 
