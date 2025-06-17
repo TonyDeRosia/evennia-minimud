@@ -86,4 +86,6 @@ def get_mobdb():
     if script.typeclass_path != "world.scripts.mob_db.MobDB":
         script.delete()
         script = create.create_script("world.scripts.mob_db.MobDB", key="mob_db")
+    if hasattr(script, "pause"):
+        script.pause(False)
     return script
