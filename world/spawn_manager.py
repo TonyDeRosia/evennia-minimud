@@ -201,3 +201,43 @@ class SpawnManager:
         """Return all unique area keys from registered spawns."""
         registry = cls._load_registry()
         return sorted({str(d.get("area", "")).lower() for d in registry if d.get("area")})
+
+    @classmethod
+    def reload_spawns(cls) -> None:
+        """Reload spawn entries from NPC prototypes."""
+        manager = cls.get()
+        manager.entries.clear()
+        from world import prototypes
+
+        for proto in prototypes.get_npc_prototypes().values():
+            spawn = proto.get("spawn") or {}
+            if not spawn:
+                continue
+
+            room = spawn.get("room_vnum") or spawn.get("room")
+            if room is None:
+                continue
+
+            entry = SpawnEntry(
+                area=str(spawn.get("area", "")).lower(),
+                proto=str(proto.get("vnum") or proto.get("key") or ""),
+                room=int(room),
+                initial_count=int(spawn.get("initial_count", 1)),
+                max_count=int(spawn.get("max_count", 1)),
+                respawn_rate=int(spawn.get("respawn_rate", 300)),
+            )
+            manager.entries.append(entry)
+
+        cls._save_registry([e.to_dict() for e in manager.entries])
+
+    @classmethod
+    def force_respawn(cls, room_vnum: int) -> None:
+        """Immediately run spawn checks for ``room_vnum``."""
+        manager = cls.get()
+        if not manager.entries:
+            manager.entries = [SpawnEntry.from_dict(d) for d in cls._load_registry()]
+
+        for entry in manager.entries:
+            if entry.room == int(room_vnum):
+                manager._check_entry(entry)
+                break
