@@ -372,13 +372,19 @@ the NPC `prototype` (or `proto`), how many can exist via `max_spawns`
 room.
 
 The persistent **SpawnManager** script loads these lists on start and
-keeps rooms populated accordingly.
+keeps rooms populated accordingly. Rooms with spawn data are cached and
+only those locations are checked each tick. The manager processes this
+cache in batches which reduces the workload for large games. You can set
+the optional `batch_size` attribute on the script to control how many
+rooms are evaluated per tick for tuning performance.
 
 Use `@spawnreload` to reload all spawn data from disk. Run
 `@forcerespawn <room_vnum>` to immediately repopulate a specific room,
 and `@showspawns [vnum]` to view the configured entries. Room prototypes
 saved through `redit` or with `asave changed` automatically update the
-manager and respawn mobs, so manual reloads are rarely needed.
+manager and respawn mobs, so manual reloads are rarely needed. These
+commands continue to operate exactly as they did before batching was
+introduced.
 
 ## Weapon Creation and Inspection
 
