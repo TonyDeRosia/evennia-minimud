@@ -223,6 +223,45 @@ class RoomParent(ObjectParent):
 class Room(RoomParent, DefaultRoom):
     """Basic indoor room with simple area metadata."""
 
+    def generate_map(self, looker):
+        """Return a small ASCII map centered on the caller.
+
+        The map shows the available exits north, south, east and west
+        relative to this room. The current room is marked with ``[X]``.
+
+        Args:
+            looker (Object): The object viewing the room.
+
+        Returns:
+            str: The generated ASCII map.
+        """
+
+        exits = self.db.exits or {}
+        north = "^" if "north" in exits else " "
+        south = "v" if "south" in exits else " "
+        west = "<" if "west" in exits else " "
+        east = ">" if "east" in exits else " "
+
+        map_lines = [
+            f"  {north}  ",
+            f"{west} [X] {east}",
+            f"  {south}  ",
+        ]
+
+        return "\n".join(map_lines)
+
+    def return_appearance(self, looker):
+        """Prefix the normal room appearance with a minimap."""
+
+        appearance = super().return_appearance(looker)
+        if not looker:
+            return appearance
+
+        minimap = self.generate_map(looker)
+        if minimap:
+            return f"{minimap}\n{appearance}"
+        return appearance
+
     def get_display_header(self, looker, **kwargs):
         """Show the area name/room id if available."""
         area = self.get_area()
