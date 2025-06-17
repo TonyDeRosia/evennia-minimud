@@ -95,6 +95,16 @@ def _summary(caller) -> str:
     if exits:
         exit_lines = [f"  {dir} -> {v}" for dir, v in exits.items()]
         lines.append("Exits:\n" + "\n".join(exit_lines))
+    spawns = data.get("spawns", [])
+    if spawns:
+        spawn_lines = []
+        for entry in spawns:
+            proto = entry.get("proto")
+            init = entry.get("initial_count", 0)
+            maxc = entry.get("max_count", 0)
+            rate = entry.get("respawn_rate", 0)
+            spawn_lines.append(f"  {proto}: {init}/{maxc} every {rate}s")
+        lines.append("Spawns:\n" + "\n".join(spawn_lines))
     return "\n".join(lines)
 
 
@@ -108,6 +118,7 @@ def menunode_main(caller, raw_string="", **kwargs):
         {"desc": "Edit description", "goto": "menunode_desc"},
         {"desc": "Edit flags", "goto": "menunode_flags"},
         {"desc": "Edit exits", "goto": "menunode_exits"},
+        {"desc": "Edit spawns", "goto": "menunode_spawns"},
         {"desc": "View saved prototype for this room", "goto": "menunode_view_prototype"},
         {"desc": "Browse area prototypes", "goto": "menunode_list_prototypes"},
         {"desc": "Save & quit", "goto": "menunode_done"},
@@ -341,6 +352,89 @@ def _handle_exit_cmd(caller, raw_string, **kwargs):
     return "menunode_exits"
 
 
+def menunode_spawns(caller, raw_string="", **kwargs):
+    """Menu node for editing NPC spawn data."""
+
+    if not _state_exists(caller):
+        caller.msg("Room editing state missing. Exiting.")
+        return None
+    proto = caller.ndb.room_protos[caller.ndb.current_vnum]
+    spawns = proto.get("spawns", [])
+    lines = ["Current spawns:"]
+    if spawns:
+        for entry in spawns:
+            proto_key = entry.get("proto")
+            init = entry.get("initial_count", 0)
+            maxc = entry.get("max_count", 0)
+            rate = entry.get("respawn_rate", 0)
+            lines.append(f"  {proto_key}: {init}/{maxc} every {rate}s")
+    else:
+        lines.append("  None")
+    lines.append(
+        "Commands:\n  add <proto> <initial> <max> <rate>\n  remove <proto>\n  done"
+    )
+    text = "\n".join(lines)
+    options = {"key": "_default", "goto": _handle_spawn_cmd}
+    return text, options
+
+
+def _handle_spawn_cmd(caller, raw_string, **kwargs):
+    if not _state_exists(caller):
+        caller.msg("Room editing state missing. Exiting.")
+        return None
+    string = raw_string.strip()
+    proto = caller.ndb.room_protos[caller.ndb.current_vnum]
+    spawns = proto.setdefault("spawns", [])
+    if not string or string.lower() in {"done", "back"}:
+        return "menunode_main"
+    if string.lower().startswith("add "):
+        parts = string.split()
+        if len(parts) != 5:
+            caller.msg("Usage: add <proto> <initial> <max> <rate>")
+            return "menunode_spawns"
+        proto_key = parts[1]
+        if proto_key.isdigit():
+            proto_key = int(proto_key)
+        try:
+            init = int(parts[2])
+            maxc = int(parts[3])
+            rate = int(parts[4])
+        except ValueError:
+            caller.msg("Counts and rate must be numbers.")
+            return "menunode_spawns"
+        for entry in spawns:
+            if entry.get("proto") == proto_key:
+                entry.update(
+                    {
+                        "initial_count": init,
+                        "max_count": maxc,
+                        "respawn_rate": rate,
+                    }
+                )
+                break
+        else:
+            spawns.append(
+                {
+                    "proto": proto_key,
+                    "initial_count": init,
+                    "max_count": maxc,
+                    "respawn_rate": rate,
+                }
+            )
+        return "menunode_spawns"
+    if string.lower().startswith("remove "):
+        proto_key = string.split(None, 1)[1].strip()
+        if proto_key.isdigit():
+            proto_key = int(proto_key)
+        for entry in list(spawns):
+            if entry.get("proto") == proto_key:
+                spawns.remove(entry)
+                break
+        return "menunode_spawns"
+    caller.msg("Unknown command.")
+    return "menunode_spawns"
+
+
 def menunode_done(caller, raw_string="", **kwargs):
     if not _state_exists(caller):
         caller.msg("Room editing state missing. Exiting.")
@@ -374,6 +468,8 @@ def menunode_done(caller, raw_string="", **kwargs):
             data["tags"] = [(f, "room_flag") for f in proto["flags"]]
         if proto.get("exits"):
             data["exits"] = proto["exits"]
+        if proto.get("spawns"):
+            data["spawns"] = proto["spawns"]
         save_prototype("room", data, vnum=vnum)
 
         idx, area = find_area(area_key)
