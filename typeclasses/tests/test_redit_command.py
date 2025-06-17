@@ -68,7 +68,9 @@ class TestREditCommand(EvenniaTest):
         with (
             patch("commands.redit.load_prototype", return_value=None),
             patch("commands.redit.OLCEditor") as mock_editor,
-            patch("commands.redit.ObjectDB.objects.filter", return_value=[room]),
+            patch(
+                "commands.redit.ObjectDB.objects.filter", return_value=[room]
+            ),
         ):
             self.char1.execute_cmd("redit 5")
             mock_editor.assert_called()
@@ -112,7 +114,9 @@ class TestREditCommand(EvenniaTest):
 
         with (
             patch("commands.redit.load_prototype") as mock_load,
-            patch("commands.redit.ObjectDB.objects.filter", return_value=[room]),
+            patch(
+                "commands.redit.ObjectDB.objects.filter", return_value=[room]
+            ),
             patch("commands.redit.OLCEditor") as mock_editor,
         ):
             self.char1.execute_cmd("redit live 7")
@@ -144,7 +148,9 @@ class TestREditCommand(EvenniaTest):
 
         result = redit.menunode_name(self.char1)
         assert result is None
-        self.char1.msg.assert_called_with("Room editing state missing. Exiting.")
+        self.char1.msg.assert_called_with(
+            "Room editing state missing. Exiting."
+        )
 
     def test_command_abort_clears_state(self):
         self.char1.ndb.room_protos = {5: {"vnum": 5}}
@@ -153,3 +159,52 @@ class TestREditCommand(EvenniaTest):
             self.char1.execute_cmd("redit 99")
         assert self.char1.ndb.room_protos is None
         assert self.char1.ndb.current_vnum is None
+
+    def test_redit_here_saves_room(self):
+        """Editing the current room should update live object and prototype."""
+        from evennia.utils import create
+        from typeclasses.rooms import Room
+        from commands import redit
+
+        room = create.create_object(
+            Room,
+            key="Start Room",
+            location=self.char1.location,
+            home=self.char1.location,
+        )
+        room.db.desc = "Old desc"
+        self.char1.location = room
+        vnum = 200001
+
+        with (
+            patch("commands.redit.validate_vnum", return_value=True),
+            patch("commands.redit.register_vnum"),
+            patch("commands.redit.save_prototype") as mock_save,
+            patch("commands.redit.OLCEditor") as mock_editor,
+        ):
+            self.char1.execute_cmd(f"redit here {vnum}")
+            mock_editor.assert_called()
+
+        proto = self.char1.ndb.room_protos[vnum]
+        assert proto["key"] == "Start Room"
+        assert proto["desc"] == "Old desc"
+
+        proto["key"] = "New Room"
+        proto["desc"] = "New desc"
+        self.char1.ndb.room_protos[vnum] = proto
+
+        with (
+            patch("commands.redit.save_prototype") as mock_save,
+            patch(
+                "commands.redit.ObjectDB.objects.filter",
+                return_value=[room],
+            ),
+        ):
+            redit.menunode_done(self.char1)
+            mock_save.assert_called()
+            saved = mock_save.call_args[0][1]
+            assert saved["key"] == "New Room"
+            assert saved["desc"] == "New desc"
+
+        assert room.key == "New Room"
+        assert room.db.desc == "New desc"
