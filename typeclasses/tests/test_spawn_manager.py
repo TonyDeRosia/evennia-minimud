@@ -39,6 +39,18 @@ class TestSpawnManager(EvenniaTest):
         npcs = [o for o in self.room1.contents if o.key == "goblin"]
         self.assertEqual(len(npcs), 2)
 
+    def test_at_start_only_spawns_missing(self):
+        with patch("evennia.prototypes.spawner.spawn", side_effect=self._fake_spawn), patch(
+            "evennia.utils.delay", lambda t, func, *a, **kw: None
+        ):
+            self.script.register_room_spawn(self.room_proto)
+            npc = create_object(BaseNPC, key="goblin", location=self.room1)
+            npc.db.prototype_key = "goblin"
+            npc.db.spawn_room = self.room1
+            self.script.at_start()
+        npcs = [o for o in self.room1.contents if o.key == "goblin"]
+        self.assertEqual(len(npcs), 2)
+
     def test_respawn_after_removal(self):
         with patch("evennia.prototypes.spawner.spawn", side_effect=self._fake_spawn), patch(
             "evennia.utils.delay", lambda t, func, *a, **kw: None
