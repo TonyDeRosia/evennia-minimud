@@ -426,7 +426,7 @@ def _handle_spawn_cmd(caller, raw_string, **kwargs):
                     "prototype": proto_key,
                     "max_spawns": maxc,
                     "spawn_interval": rate,
-                    "location": f"#{caller.ndb.current_vnum}",
+                    "location": caller.ndb.current_vnum,
                 }
             )
         return "menunode_spawns"
