@@ -458,15 +458,17 @@ def menunode_done(caller, raw_string="", **kwargs):
         existing_exits = existing.get("exits", {})
         base_exits = {**existing_exits, **current_exits}
 
-    proto_exits = proto.get("exits")
-    if proto_exits is not None:
-        if proto_exits == existing_exits:
-            final_exits = base_exits
+        proto_exits = proto.get("exits")
+        if proto_exits is not None:
+            if proto_exits == existing_exits:
+                final_exits = base_exits
+            else:
+                final_exits = base_exits.copy()
+                for dirkey in set(existing_exits) - set(proto_exits):
+                    final_exits.pop(dirkey, None)
+                final_exits.update(proto_exits)
         else:
-            final_exits = base_exits.copy()
-            for dirkey in set(existing_exits) - set(proto_exits):
-                final_exits.pop(dirkey, None)
-            final_exits.update(proto_exits)
+            final_exits = base_exits
         proto["exits"] = final_exits
 
         data = dict(existing)
@@ -538,12 +540,13 @@ def menunode_done(caller, raw_string="", **kwargs):
                     if dest_obj and dest_obj.is_typeclass(Room, exact=False):
                         exits[dirkey] = dest_obj
                 room.db.exits = exits
-    from evennia.scripts.models import ScriptDB
-    script = ScriptDB.objects.filter(db_key="spawn_manager").first()
-    if script and hasattr(script, "register_room_spawn"):
-        script.register_room_spawn(proto)
-        if hasattr(script, "force_respawn"):
-            script.force_respawn(vnum)
+
+        from evennia.scripts.models import ScriptDB
+        script = ScriptDB.objects.filter(db_key="spawn_manager").first()
+        if script and hasattr(script, "register_room_spawn"):
+            script.register_room_spawn(proto)
+            if hasattr(script, "force_respawn"):
+                script.force_respawn(vnum)
     caller.msg("Room prototype(s) saved.")
     caller.ndb.room_protos = None
     caller.ndb.current_vnum = None
