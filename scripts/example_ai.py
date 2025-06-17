@@ -11,3 +11,4 @@ def patrol_ai(npc):
     if exits:
         exit_obj = choice(exits)
         exit_obj.at_traverse(npc, exit_obj.destination)
+# end patrol_ai
