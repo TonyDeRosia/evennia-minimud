@@ -139,3 +139,41 @@ class TestSpawnManager(EvenniaTest):
             self.script._spawn("orc", self.room)
 
         self.assertEqual(m_fin.call_count, 1)
+
+    def test_batch_size_processes_on_tick(self):
+        room2 = create_object(Room, key="room2")
+        room2.set_area("testarea", 2)
+        self.script.db.entries = [
+            {
+                "area": "testarea",
+                "prototype": "goblin",
+                "room": 1,
+                "max_count": 1,
+                "respawn_rate": 0,
+                "last_spawn": 0,
+            },
+            {
+                "area": "testarea",
+                "prototype": "orc",
+                "room": 2,
+                "max_count": 1,
+                "respawn_rate": 0,
+                "last_spawn": 0,
+            },
+        ]
+        self.script.db.batch_size = 2
+        self.script.db.tick_count = 0
+
+        with mock.patch.object(self.script, "_spawn") as m_spawn, mock.patch(
+            "scripts.spawn_manager.time.time", return_value=1000
+        ):
+            self.script.at_repeat()
+            self.assertEqual(m_spawn.call_count, 1)
+            m_spawn.assert_called_with("goblin", self.room)
+
+        with mock.patch.object(self.script, "_spawn") as m_spawn, mock.patch(
+            "scripts.spawn_manager.time.time", return_value=1000
+        ):
+            self.script.at_repeat()
+            self.assertEqual(m_spawn.call_count, 1)
+            m_spawn.assert_called_with("orc", room2)
