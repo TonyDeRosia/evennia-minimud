@@ -65,3 +65,34 @@ class TestSpawnManager(EvenniaTest):
             mock_force.assert_any_call(1)
             mock_force.assert_any_call(2)
             self.assertEqual(mock_force.call_count, 2)
+
+    def test_spawn_numeric_finalized_once(self):
+        npc = create_object(BaseNPC, key="num")
+        with mock.patch("scripts.spawn_manager.spawn_from_vnum") as m_spawn, \
+             mock.patch("commands.npc_builder.finalize_mob_prototype") as m_fin:
+
+            def side(vnum, location=None):
+                npc.location = location
+                m_fin(npc, npc)
+                return npc
+
+            m_spawn.side_effect = side
+            self.script._spawn(5, self.room)
+
+        self.assertEqual(m_fin.call_count, 1)
+
+    def test_spawn_key_finalized_once(self):
+        npc = create_object(BaseNPC, key="orc")
+        with mock.patch(
+            "scripts.spawn_manager.prototypes.get_npc_prototypes",
+            return_value={"orc": {"key": "orc"}},
+        ), mock.patch(
+            "evennia.prototypes.spawner.spawn", return_value=[npc]
+        ), mock.patch(
+            "scripts.spawn_manager.apply_proto_items"
+        ), mock.patch(
+            "commands.npc_builder.finalize_mob_prototype"
+        ) as m_fin:
+            self.script._spawn("orc", self.room)
+
+        self.assertEqual(m_fin.call_count, 1)
