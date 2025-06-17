@@ -120,21 +120,27 @@ class CmdAList(Command):
                 mob_count = area._temp_mob_count
                 room_ids = getattr(area, "_temp_room_ids", [])
             else:
-                objs = ObjectDB.objects.filter(
-                    db_attributes__db_key="area",
-                    db_attributes__db_strvalue__iexact=area.key,
-                )
-                rooms = [obj for obj in objs if obj.is_typeclass(Room, exact=False)]
-                room_count = len(rooms)
-                room_ids = []
-                for room in rooms:
-                    rid = room.attributes.get("room_id")
-                    if rid is not None:
-                        try:
-                            room_ids.append(int(rid))
-                        except (TypeError, ValueError):
-                            pass
-                room_ids = sorted(set(room_ids))
+                if area.rooms:
+                    room_ids = sorted(set(area.rooms))
+                    room_count = len(room_ids)
+                else:
+                    objs = ObjectDB.objects.filter(
+                        db_attributes__db_key="area",
+                        db_attributes__db_strvalue__iexact=area.key,
+                    )
+                    rooms = [
+                        obj for obj in objs if obj.is_typeclass(Room, exact=False)
+                    ]
+                    room_count = len(rooms)
+                    room_ids = []
+                    for room in rooms:
+                        rid = room.attributes.get("room_id")
+                        if rid is not None:
+                            try:
+                                room_ids.append(int(rid))
+                            except (TypeError, ValueError):
+                                pass
+                    room_ids = sorted(set(room_ids))
                 mob_count = len(area_npcs.get_area_npc_list(area.key))
                 area._temp_room_ids = room_ids
 

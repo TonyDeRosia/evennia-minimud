@@ -55,6 +55,21 @@ class TestAListCommand(EvenniaTest):
         self.assertEqual(cols[3], "1, 2, 3, 4")
         self.assertEqual(cols[4], "1")
 
+    @patch("commands.aedit.ObjectDB.objects.filter", return_value=[])
+    @patch("commands.aedit.get_areas")
+    @patch("commands.aedit.area_npcs.get_area_npc_list")
+    def test_counts_from_metadata(self, mock_npcs, mock_get_areas, mock_filter):
+        area = Area(key="zone", start=1, end=5, rooms=[1, 2, 3])
+        mock_get_areas.return_value = [area]
+        mock_npcs.return_value = ["orc"]
+        self.char1.execute_cmd("alist")
+        out = self.char1.msg.call_args[0][0]
+        row = next(line for line in out.splitlines() if line.startswith("| zone"))
+        cols = [c.strip() for c in row.split("|")[1:-1]]
+        self.assertEqual(cols[2], "3")
+        self.assertEqual(cols[3], "1, 2, 3")
+        self.assertEqual(cols[4], "1")
+
     def test_current(self):
         self.char1.location = self.room1
         self.char1.execute_cmd("alist current")
