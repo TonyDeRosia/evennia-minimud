@@ -4,6 +4,7 @@ from typing import List, Dict, Optional
 from pathlib import Path
 import json
 from django.conf import settings
+from utils.prototype_manager import load_all_prototypes
 
 
 @dataclass
@@ -92,12 +93,63 @@ def update_area(index: int, area: Area):
 
 
 def find_area(name: str) -> tuple[int, Optional[Area]]:
-    """Return index and area matching ``name`` (case-insensitive)."""
+    """Return index and area matching ``name``.
+
+    The search is case-insensitive. If the area is not stored on disk,
+    loaded room and NPC prototypes will be scanned for ``area`` fields
+    and a temporary :class:`Area` instance constructed if a match is
+    found.
+    """
+
+    key = name.lower()
     registry, _ = _load_registry()
     for i, data in enumerate(registry):
         area = Area.from_dict(data)
-        if area.key.lower() == name.lower():
+        if area.key.lower() == key:
             return i, area
+
+    # fallback to prototypes
+    room_protos = load_all_prototypes("room")
+    npc_protos = load_all_prototypes("npc")
+
+    rooms: list[int] = []
+    start: int | None = None
+    end: int | None = None
+    found = False
+
+    for proto in room_protos.values():
+        area_name = proto.get("area")
+        if not area_name or area_name.lower() != key:
+            continue
+        found = True
+        rid = proto.get("room_id")
+        try:
+            rid_int = int(rid)
+        except (TypeError, ValueError):
+            continue
+        rooms.append(rid_int)
+        if start is None or rid_int < start:
+            start = rid_int
+        if end is None or rid_int > end:
+            end = rid_int
+
+    # also check NPC prototypes for the area name
+    if not found:
+        for proto in npc_protos.values():
+            area_name = proto.get("area")
+            if area_name and area_name.lower() == key:
+                found = True
+                break
+
+    if found:
+        area = Area(
+            key=name,
+            start=start or 0,
+            end=end or 0,
+            rooms=sorted(set(rooms)),
+        )
+        return -1, area
+
     return -1, None
 
 
@@ -110,8 +162,47 @@ def get_area_vnum_range(name: str) -> Optional[tuple[int, int]]:
 
 
 def find_area_by_vnum(vnum: int) -> Area | None:
-    """Return the area whose range includes ``vnum``."""
+    """Return the area whose range includes ``vnum``.
+
+    If no registered area covers ``vnum``, room and NPC prototypes are
+    searched for a matching ``area`` field. If found, a temporary
+    :class:`Area` is returned.
+    """
+
     for area in get_areas():
         if area.start <= vnum <= area.end:
             return area
+
+    room_protos = load_all_prototypes("room")
+    npc_protos = load_all_prototypes("npc")
+
+    area_name: str | None = None
+
+    proto = room_protos.get(int(vnum))
+    if proto and proto.get("area"):
+        area_name = proto.get("area")
+    else:
+        for p in room_protos.values():
+            rid = p.get("room_id")
+            try:
+                if int(rid) == vnum:
+                    area_name = p.get("area")
+                    break
+            except (TypeError, ValueError):
+                continue
+
+    if area_name is None:
+        for p in npc_protos.values():
+            rid = p.get("vnum")
+            try:
+                if rid is not None and int(rid) == vnum and p.get("area"):
+                    area_name = p.get("area")
+                    break
+            except (TypeError, ValueError):
+                continue
+
+    if area_name:
+        _, area = find_area(area_name)
+        return area
+
     return None
