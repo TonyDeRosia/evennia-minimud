@@ -1,6 +1,7 @@
 from evennia.utils.evtable import EvTable
 from evennia import CmdSet
 from evennia.objects.models import ObjectDB
+from evennia.server.models import ServerConfig
 from typeclasses.rooms import Room
 from .command import Command
 from world.areas import (
@@ -49,6 +50,11 @@ class CmdAList(Command):
             return
 
         areas = get_areas()
+        spawn_entries = ServerConfig.objects.conf("spawn_registry", default=list)
+        spawn_counts: dict[str, int] = {}
+        for entry in spawn_entries:
+            key = str(entry.get("area", "")).lower()
+            spawn_counts[key] = spawn_counts.get(key, 0) + 1
         if not areas:
             area_data: dict[str, dict] = {}
             # gather from existing rooms
@@ -108,6 +114,7 @@ class CmdAList(Command):
             "Rooms",
             "Vnums",
             "Mobs",
+            "Mob Spawns",
             "Builders",
             "Flags",
             "Age",
@@ -144,12 +151,14 @@ class CmdAList(Command):
                 mob_count = len(area_npcs.get_area_npc_list(area.key))
                 area._temp_room_ids = room_ids
 
+            spawn_count = spawn_counts.get(area.key.lower(), 0)
             table.add_row(
                 area.key,
                 f"{area.start}-{area.end}",
                 str(room_count),
                 ", ".join(str(r) for r in room_ids) if room_ids else "-",
                 str(mob_count),
+                str(spawn_count),
                 ", ".join(area.builders),
                 ", ".join(area.flags),
                 str(area.age),

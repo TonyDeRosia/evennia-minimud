@@ -440,13 +440,23 @@ def menunode_done(caller, raw_string="", **kwargs):
         caller.msg("Room editing state missing. Exiting.")
         return None
     for vnum, proto in caller.ndb.room_protos.items():
-        data = {
-            "typeclass": "typeclasses.rooms.Room",
-            "key": proto.get("key") or f"Room {vnum}",
-            "desc": proto.get("desc", ""),
-        }
+        try:
+            existing = load_prototype("room", vnum) or {}
+        except json.JSONDecodeError:
+            existing = {}
 
-        area_key = proto.get("area")
+        data = dict(existing)
+        data.update(
+            {
+                "typeclass": "typeclasses.rooms.Room",
+                "key": proto.get("key") or existing.get("key") or f"Room {vnum}",
+                "desc": proto.get("desc", existing.get("desc", "")),
+            }
+        )
+
+        area_key = proto.get("area") or existing.get("area")
+        if area_key and "area" not in proto:
+            proto["area"] = area_key
         if not area_key:
             objs = ObjectDB.objects.filter(
                 db_attributes__db_key="room_id",
@@ -464,12 +474,12 @@ def menunode_done(caller, raw_string="", **kwargs):
                 "Error: This room has no area assigned. Cannot save prototype."
             )
             return menunode_main(caller)
-        if proto.get("flags"):
-            data["tags"] = [(f, "room_flag") for f in proto["flags"]]
-        if proto.get("exits"):
-            data["exits"] = proto["exits"]
-        if proto.get("spawns"):
-            data["spawns"] = proto["spawns"]
+        if "flags" in proto:
+            data["tags"] = [(f, "room_flag") for f in proto.get("flags", [])]
+        if "exits" in proto:
+            data["exits"] = proto.get("exits") or {}
+        if "spawns" in proto:
+            data["spawns"] = proto.get("spawns") or []
         save_prototype("room", data, vnum=vnum)
 
         idx, area = find_area(area_key)
@@ -488,18 +498,34 @@ def menunode_done(caller, raw_string="", **kwargs):
             room.db.desc = data["desc"]
             if proto.get("area") is not None:
                 room.db.area = proto["area"]
-            room.tags.clear(category="room_flag")
-            for flag in proto.get("flags", []):
-                room.tags.add(flag, category="room_flag")
-            exits = {}
-            for dirkey, dest in (proto.get("exits") or {}).items():
-                dest_obj = ObjectDB.objects.filter(
-                    db_attributes__db_key="room_id",
-                    db_attributes__db_value=dest,
-                ).first()
-                if dest_obj and dest_obj.is_typeclass(Room, exact=False):
-                    exits[dirkey] = dest_obj
-            room.db.exits = exits
+
+            flags = None
+            if "flags" in proto:
+                flags = proto.get("flags", [])
+            elif isinstance(existing.get("tags"), list):
+                flags = [t[0] if isinstance(t, (list, tuple)) else t for t in existing["tags"]]
+
+            if flags is not None:
+                room.tags.clear(category="room_flag")
+                for flag in flags:
+                    room.tags.add(flag, category="room_flag")
+
+            exits_data = None
+            if "exits" in proto:
+                exits_data = proto.get("exits") or {}
+            elif existing.get("exits"):
+                exits_data = existing["exits"]
+
+            if exits_data is not None:
+                exits = {}
+                for dirkey, dest in exits_data.items():
+                    dest_obj = ObjectDB.objects.filter(
+                        db_attributes__db_key="room_id",
+                        db_attributes__db_value=dest,
+                    ).first()
+                    if dest_obj and dest_obj.is_typeclass(Room, exact=False):
+                        exits[dirkey] = dest_obj
+                room.db.exits = exits
     caller.msg("Room prototype(s) saved.")
     caller.ndb.room_protos = None
     caller.ndb.current_vnum = None
