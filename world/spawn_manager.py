@@ -174,3 +174,30 @@ class SpawnManager:
             _REGISTRY_KEY,
             value=[entry.to_dict() for entry in self.entries]
         )
+
+    # ------------------------------------------------------------------
+    # class helpers for persistent registry access
+    # ------------------------------------------------------------------
+
+    @classmethod
+    def _load_registry(cls) -> List[Dict]:
+        """Return the stored spawn registry."""
+        return ServerConfig.objects.conf(_REGISTRY_KEY, default=list)
+
+    @classmethod
+    def _save_registry(cls, registry: List[Dict]) -> None:
+        """Persist ``registry`` to ServerConfig."""
+        ServerConfig.objects.conf(_REGISTRY_KEY, value=registry)
+
+    @classmethod
+    def reset_area(cls, area_key: str) -> None:
+        """Despawn and respawn all spawns for ``area_key``."""
+        manager = cls.get()
+        manager.entries = [SpawnEntry.from_dict(d) for d in cls._load_registry()]
+        manager.repopulate_area(area_key)
+
+    @classmethod
+    def get_area_keys(cls) -> List[str]:
+        """Return all unique area keys from registered spawns."""
+        registry = cls._load_registry()
+        return sorted({str(d.get("area", "")).lower() for d in registry if d.get("area")})
