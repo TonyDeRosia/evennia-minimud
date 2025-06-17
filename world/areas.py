@@ -92,6 +92,32 @@ def update_area(index: int, area: Area):
         json.dump(area.to_dict(), f, indent=4)
 
 
+def delete_area(name: str) -> bool:
+    """Remove area ``name`` from disk and unassign its rooms.
+
+    The comparison is case-insensitive. Returns ``True`` if an area file
+    was removed.
+    """
+
+    path = _file_path(name)
+    removed = False
+    if path.exists():
+        path.unlink()
+        removed = True
+
+    # clear area from any rooms currently assigned to it
+    from evennia.objects.models import ObjectDB
+    from typeclasses.rooms import Room
+
+    objs = ObjectDB.objects.filter(db_attributes__db_key="area",
+                                   db_attributes__db_strvalue__iexact=name)
+    for obj in objs:
+        if obj.is_typeclass(Room, exact=False):
+            obj.attributes.remove("area")
+
+    return removed
+
+
 def find_area(name: str) -> tuple[int, Optional[Area]]:
     """Return index and area matching ``name``.
 
