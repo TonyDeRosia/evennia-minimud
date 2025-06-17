@@ -1,4 +1,5 @@
 from typeclasses.scripts import Script
+from evennia.utils import logger
 
 
 class SatedDecayScript(Script):
@@ -18,6 +19,9 @@ class SatedDecayScript(Script):
                       1: "You are starving!"}
 
         for char in Character.objects.all():
+            if char.locks.check("dummy:perm(Admin) or perm(Builder)"):
+                logger.log_debug(f"Skipping {char.key} (admin/builder) in sated_decay")
+                continue
             sated = getattr(char.db, "sated", None)
             if sated is None or sated <= 0:
                 continue

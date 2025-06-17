@@ -125,6 +125,9 @@ def at_server_start():
             script.start()
         elif getattr(script.db, "_paused_time", None):
             script.unpause()
+    # ensure not manually paused
+    if hasattr(script, "pause"):
+        script.pause(False)
 
     script = ScriptDB.objects.filter(db_key="global_npc_ai").first()
     if not script or script.typeclass_path != "scripts.global_npc_ai.GlobalNPCAI":
@@ -138,6 +141,8 @@ def at_server_start():
             script.start()
         elif getattr(script.db, "_paused_time", None):
             script.unpause()
+    if hasattr(script, "pause"):
+        script.pause(False)
 
     script = ScriptDB.objects.filter(db_key="area_reset").first()
     if not script or script.typeclass_path != "world.area_reset.AreaReset":
@@ -149,6 +154,8 @@ def at_server_start():
             script.start()
         elif getattr(script.db, "_paused_time", None):
             script.unpause()
+    if hasattr(script, "pause"):
+        script.pause(False)
 
     script = ScriptDB.objects.filter(db_key="spawn_manager").first()
     if not script or script.typeclass_path != "scripts.spawn_manager.SpawnManager":
@@ -162,8 +169,25 @@ def at_server_start():
             script.start()
         elif getattr(script.db, "_paused_time", None):
             script.unpause()
+    if hasattr(script, "pause"):
+        script.pause(False)
     if hasattr(script, "reload_spawns"):
         script.reload_spawns()
+
+    script = ScriptDB.objects.filter(db_key="sated_decay").first()
+    if not script or script.typeclass_path != "scripts.sated_decay.SatedDecayScript":
+        if script:
+            script.delete()
+        script = create.create_script(
+            "scripts.sated_decay.SatedDecayScript", key="sated_decay"
+        )
+    else:
+        if not script.is_active:
+            script.start()
+        elif getattr(script.db, "_paused_time", None):
+            script.unpause()
+    if hasattr(script, "pause"):
+        script.pause(False)
 
     # Ensure mob database script exists
     get_mobdb()
