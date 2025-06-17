@@ -6,6 +6,7 @@ from typing import Any, Dict, List
 from evennia.prototypes import spawner
 from evennia.objects.models import ObjectDB
 from evennia.utils import logger, search
+from typeclasses.rooms import Room
 
 from typeclasses.scripts import Script
 from utils.mob_proto import apply_proto_items, spawn_from_vnum
@@ -157,7 +158,7 @@ class SpawnManager(Script):
         rid = entry.get("room_id")
         if isinstance(room, str) and room.startswith("#") and room[1:].isdigit():
             obj = ObjectDB.objects.filter(id=int(room[1:])).first()
-            if obj:
+            if obj and obj.is_typeclass(Room, exact=False):
                 entry["room"] = obj
                 return obj
             if rid is None:
