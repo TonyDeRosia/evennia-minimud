@@ -1,8 +1,14 @@
 from __future__ import annotations
 
-"""Utility for executing simple mob program commands."""
+"""Utility for executing simple mob program commands.
+
+The ``mpcall`` command can invoke a Python callback by dotted path. Only
+modules listed in :data:`ALLOWED_MPCALL_MODULES` may be imported unless the
+callback is registered in :data:`MPCALL_REGISTRY` using :func:`register_mpcall`.
+"""
 
 from importlib import import_module
+from typing import Callable, Dict
 
 from evennia import create_object
 from evennia.utils import delay
@@ -12,6 +18,22 @@ from utils.mob_proto import spawn_from_vnum
 from utils.prototype_manager import load_prototype
 from utils.eval_utils import eval_safe
 from world.system import state_manager
+
+# Modules that can be imported for ``mpcall``.
+ALLOWED_MPCALL_MODULES = ("scripts",)
+
+# Registry of callable hooks for ``mpcall``.
+MPCALL_REGISTRY: Dict[str, Callable] = {}
+
+
+def register_mpcall(path: str):
+    """Decorator to register a callable for use with ``mpcall``."""
+
+    def decorator(func: Callable) -> Callable:
+        MPCALL_REGISTRY[path] = func
+        return func
+
+    return decorator
 
 __all__ = ["execute_mpcommand"]
 
@@ -129,9 +151,16 @@ def _run_single(mob, command: str) -> None:
     if subcmd == "mpcall":
         path = arg.strip()
         if path:
+            if path in MPCALL_REGISTRY:
+                MPCALL_REGISTRY[path](mob)
+                return
             module, func = path.rsplit(".", 1)
-            mod = import_module(module)
-            getattr(mod, func)(mob)
+            if any(
+                module == allowed or module.startswith(f"{allowed}.")
+                for allowed in ALLOWED_MPCALL_MODULES
+            ):
+                mod = import_module(module)
+                getattr(mod, func)(mob)
         return
 
     if subcmd == "kill":

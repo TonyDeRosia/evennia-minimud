@@ -54,9 +54,18 @@ class TestMPCommands(EvenniaTest):
         module = MagicMock()
         module.cb = func
         with patch("world.mpcommands.import_module", return_value=module) as mod:
-            execute_mpcommand(self.mob, "mpcall mod.cb")
-            mod.assert_called_with("mod")
+            execute_mpcommand(self.mob, "mpcall scripts.mod.cb")
+            mod.assert_called_with("scripts.mod")
             func.assert_called_with(self.mob)
+
+    def test_mpcall_invalid_module(self):
+        func = MagicMock()
+        module = MagicMock()
+        module.cb = func
+        with patch("world.mpcommands.import_module", return_value=module) as mod:
+            execute_mpcommand(self.mob, "mpcall bad.mod.cb")
+            mod.assert_not_called()
+            func.assert_not_called()
 
     def test_conditionals(self):
         self.room1.msg_contents = MagicMock()
