@@ -31,6 +31,26 @@ class TestSpawnManager(EvenniaTest):
         self.assertEqual(len(npcs), 1)
         self.assertEqual(npcs[0].db.prototype_key, "basic_merchant")
 
+    def test_load_spawn_data_skips_missing_proto(self):
+        with mock.patch("utils.prototype_manager.load_all_prototypes") as m_load, \
+             mock.patch("world.prototypes.get_npc_prototypes") as m_npcs, \
+             mock.patch("evennia.utils.logger.log_err") as m_log:
+            m_load.return_value = {
+                1: {
+                    "vnum": 1,
+                    "area": "testarea",
+                    "spawns": [
+                        {"prototype": "valid_proto"},
+                        {"prototype": "missing_proto"},
+                    ],
+                }
+            }
+            m_npcs.return_value = {"valid_proto": {}}
+            self.script.load_spawn_data()
+        self.assertEqual(len(self.script.db.entries), 1)
+        self.assertEqual(self.script.db.entries[0]["prototype"], "valid_proto")
+        m_log.assert_called_once()
+
     def test_reload_spawns_forces_respawn(self):
         """reload_spawns should trigger force_respawn for each room."""
         self.script.db.entries = [
