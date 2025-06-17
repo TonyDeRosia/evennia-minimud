@@ -71,6 +71,16 @@ class SpawnManager(Script):
         room_id = proto.get("room_id") or proto.get("vnum")
         if room_id is None:
             return
+        rid = (
+            int(room_id)
+            if isinstance(room_id, str) and room_id.isdigit()
+            else room_id
+        )
+        self.db.entries = [
+            e
+            for e in self.db.entries
+            if self._normalize_room_id(e.get("room")) != rid
+        ]
         for entry in spawns:
             proto_key = (
                 entry.get("prototype")
@@ -122,6 +132,15 @@ class SpawnManager(Script):
     # ------------------------------------------------------------
     # internal helpers
     # ------------------------------------------------------------
+    def _normalize_room_id(self, room: Any) -> int | None:
+        if hasattr(room, "dbref"):
+            return getattr(room.db, "room_id", None)
+        if isinstance(room, int):
+            return room
+        if isinstance(room, str) and room.isdigit():
+            return int(room)
+        return None
+
     def _room_match(self, stored: Any, room: Any) -> bool:
         if hasattr(stored, "dbref"):
             return stored == room
