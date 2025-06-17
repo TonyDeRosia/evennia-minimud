@@ -616,6 +616,11 @@ def _normalize_proto(proto: dict) -> None:
     proto.setdefault("race", "human")
     proto.setdefault("level", 1)
     proto.setdefault("damage", 1)
+    if "spawn" in proto:
+        if not isinstance(proto["spawn"], dict):
+            proto["spawn"] = dict(proto["spawn"])
+    else:
+        proto["spawn"] = {}
 
 
 def _save_npc_registry(registry: Dict[str, dict]):
