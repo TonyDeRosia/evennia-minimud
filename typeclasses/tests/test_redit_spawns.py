@@ -30,10 +30,10 @@ class TestReditSpawns(EvenniaTest):
         proto = self.char1.ndb.room_protos[5]
         assert proto["exits"] == {"north": 6}
         proto.setdefault("spawns", []).append({
-            "proto": "goblin",
-            "initial_count": 1,
-            "max_count": 2,
-            "respawn_rate": 10,
+            "prototype": "goblin",
+            "max_spawns": 2,
+            "spawn_interval": 10,
+            "location": "#5",
         })
         self.char1.ndb.room_protos[5] = proto
 

@@ -1,5 +1,6 @@
 {
     "basic_merchant": {
+        "prototype_key": "basic_merchant",
         "key": "merchant",
         "desc": "A traveling merchant ready to trade goods.",
         "npc_type": "merchant",
@@ -19,6 +20,7 @@
         ]
     },
     "basic_questgiver": {
+        "prototype_key": "basic_questgiver",
         "key": "quest giver",
         "desc": "A local seeking brave adventurers for help.",
         "npc_type": "questgiver",
@@ -36,6 +38,7 @@
         "resistances": []
     },
     "basic_guard": {
+        "prototype_key": "basic_guard",
         "key": "town guard",
         "desc": "A vigilant guard keeping watch over the streets.",
         "npc_type": "base",
@@ -57,6 +60,7 @@
         ]
     },
     "slime": {
+        "prototype_key": "slime",
         "key": "slime",
         "npc_type": "base",
         "race": "human",
@@ -64,6 +68,7 @@
         "damage_dice": "1d2"
     },
     "goblin_grunt": {
+        "prototype_key": "goblin_grunt",
         "key": "Goblin Grunt",
         "desc": "A small, angry goblin snarls at you.",
         "npc_type": "base",

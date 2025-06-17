@@ -99,11 +99,10 @@ def _summary(caller) -> str:
     if spawns:
         spawn_lines = []
         for entry in spawns:
-            proto = entry.get("proto")
-            init = entry.get("initial_count", 0)
-            maxc = entry.get("max_count", 0)
-            rate = entry.get("respawn_rate", 0)
-            spawn_lines.append(f"  {proto}: {init}/{maxc} every {rate}s")
+            proto = entry.get("prototype") or entry.get("proto")
+            maxc = entry.get("max_spawns", entry.get("max_count", 0))
+            rate = entry.get("spawn_interval", entry.get("respawn_rate", 0))
+            spawn_lines.append(f"  {proto}: max {maxc} every {rate}s")
         lines.append("Spawns:\n" + "\n".join(spawn_lines))
     return "\n".join(lines)
 
@@ -363,15 +362,14 @@ def menunode_spawns(caller, raw_string="", **kwargs):
     lines = ["Current spawns:"]
     if spawns:
         for entry in spawns:
-            proto_key = entry.get("proto")
-            init = entry.get("initial_count", 0)
-            maxc = entry.get("max_count", 0)
-            rate = entry.get("respawn_rate", 0)
-            lines.append(f"  {proto_key}: {init}/{maxc} every {rate}s")
+            proto_key = entry.get("prototype") or entry.get("proto")
+            maxc = entry.get("max_spawns", entry.get("max_count", 0))
+            rate = entry.get("spawn_interval", entry.get("respawn_rate", 0))
+            lines.append(f"  {proto_key}: max {maxc} every {rate}s")
     else:
         lines.append("  None")
     lines.append(
-        "Commands:\n  add <proto> <initial> <max> <rate>\n  remove <proto>\n  done"
+        "Commands:\n  add <proto> <max> <rate>\n  remove <proto>\n  done"
     )
     text = "\n".join(lines)
     options = {"key": "_default", "goto": _handle_spawn_cmd}
@@ -389,36 +387,34 @@ def _handle_spawn_cmd(caller, raw_string, **kwargs):
         return "menunode_main"
     if string.lower().startswith("add "):
         parts = string.split()
-        if len(parts) != 5:
-            caller.msg("Usage: add <proto> <initial> <max> <rate>")
+        if len(parts) != 4:
+            caller.msg("Usage: add <proto> <max> <rate>")
             return "menunode_spawns"
         proto_key = parts[1]
         if proto_key.isdigit():
             proto_key = int(proto_key)
         try:
-            init = int(parts[2])
-            maxc = int(parts[3])
-            rate = int(parts[4])
+            maxc = int(parts[2])
+            rate = int(parts[3])
         except ValueError:
             caller.msg("Counts and rate must be numbers.")
             return "menunode_spawns"
         for entry in spawns:
-            if entry.get("proto") == proto_key:
+            if (entry.get("prototype") or entry.get("proto")) == proto_key:
                 entry.update(
                     {
-                        "initial_count": init,
-                        "max_count": maxc,
-                        "respawn_rate": rate,
+                        "max_spawns": maxc,
+                        "spawn_interval": rate,
                     }
                 )
                 break
         else:
             spawns.append(
                 {
-                    "proto": proto_key,
-                    "initial_count": init,
-                    "max_count": maxc,
-                    "respawn_rate": rate,
+                    "prototype": proto_key,
+                    "max_spawns": maxc,
+                    "spawn_interval": rate,
+                    "location": f"#{caller.ndb.current_vnum}",
                 }
             )
         return "menunode_spawns"
@@ -427,7 +423,7 @@ def _handle_spawn_cmd(caller, raw_string, **kwargs):
         if proto_key.isdigit():
             proto_key = int(proto_key)
         for entry in list(spawns):
-            if entry.get("proto") == proto_key:
+            if (entry.get("prototype") or entry.get("proto")) == proto_key:
                 spawns.remove(entry)
                 break
         return "menunode_spawns"
@@ -549,10 +545,8 @@ def menunode_done(caller, raw_string="", **kwargs):
     script = ScriptDB.objects.filter(db_key="spawn_manager").first()
     if script and hasattr(script, "register_room_spawn"):
         script.register_room_spawn(proto)
-        for entry in proto.get("spawns", []):
-            if int(entry.get("initial_count", 0)) > 0 and hasattr(script, "force_respawn"):
-                script.force_respawn(vnum)
-                break
+        if hasattr(script, "force_respawn"):
+            script.force_respawn(vnum)
     caller.msg("Room prototype(s) saved.")
     caller.ndb.room_protos = None
     caller.ndb.current_vnum = None
