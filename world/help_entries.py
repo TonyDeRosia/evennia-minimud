@@ -376,6 +376,33 @@ Notes:
 
 Related:
     help ansi
+    """,
+    },
+    {
+        "key": "rregall",
+        "category": "Building",
+        "text": """Help for rregall
+
+Scan all stored room prototypes and create any missing rooms.
+
+Usage:
+    rregall
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    rregall
+
+Notes:
+    - Only prototypes with an 'area' value are considered.
+    - Existing rooms are left untouched.
+
+Related:
+    help ansi
 """,
     },
     {
