@@ -19,6 +19,7 @@ from world.areas import find_area_by_vnum, get_areas, update_area
 from evennia.prototypes import spawner
 from world.areas import find_area
 from evennia.objects.models import ObjectDB
+from typeclasses.rooms import Room
 from .building import DIR_FULL, OPPOSITE
 from .command import Command
 
@@ -223,10 +224,36 @@ class CmdREdit(Command):
             vnum = int(parts[0])
             proto = load_prototype("room", vnum)
             if proto is None:
-                self.msg(
-                    f"Room VNUM {vnum} not found. Use `redit create {vnum}` to make a new room."
+                objs = ObjectDB.objects.filter(
+                    db_attributes__db_key="room_id",
+                    db_attributes__db_value=vnum,
                 )
-                return
+                room_obj = None
+                for obj in objs:
+                    if obj.is_typeclass(Room, exact=False):
+                        room_obj = obj
+                        break
+                if room_obj:
+                    proto = {
+                        "key": room_obj.key,
+                        "desc": room_obj.db.desc or "",
+                        "exits": {},
+                    }
+                    if room_obj.db.area:
+                        proto["area"] = room_obj.db.area
+                    exits = room_obj.db.exits or {}
+                    for dirkey, target in exits.items():
+                        dest_id = getattr(target.db, "room_id", None)
+                        if isinstance(dest_id, int):
+                            proto["exits"][dirkey] = dest_id
+                    flags = room_obj.tags.get(category="room_flag", return_list=True) or []
+                    if flags:
+                        proto["flags"] = list(flags)
+                else:
+                    self.msg(
+                        f"Room VNUM {vnum} not found. Use `redit create {vnum}` to make a new room."
+                    )
+                    return
             self.caller.ndb.room_protos = {vnum: proto}
             self.caller.ndb.current_vnum = vnum
             state = OLCState(
