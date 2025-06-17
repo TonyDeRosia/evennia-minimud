@@ -428,6 +428,8 @@ Examples:
 
 Notes:
     - Without an argument the command uses your current area's name.
+    - Room prototypes and area room lists are included; missing rooms
+      are shown as (unbuilt).
 
 Related:
     help ansi

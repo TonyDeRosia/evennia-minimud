@@ -193,17 +193,34 @@ class CmdRList(Command):
             db_attributes__db_key="area",
             db_attributes__db_strvalue__iexact=area.key,
         )
-        rooms = [obj for obj in objs if obj.is_typeclass(Room, exact=False)]
-        if not rooms:
+        rooms = {
+            (obj.db.room_id if obj.db.room_id is not None else obj.id): obj
+            for obj in objs
+            if obj.is_typeclass(Room, exact=False)
+        }
+
+        protos = load_all_prototypes("room")
+        proto_nums = set()
+        for num, proto in protos.items():
+            proto_area = proto.get("area")
+            if proto_area and proto_area.lower() == area.key.lower():
+                rid = proto.get("room_id", num)
+                try:
+                    proto_nums.add(int(rid))
+                except (TypeError, ValueError):
+                    continue
+
+        vnums = set(area.rooms) | set(rooms.keys()) | proto_nums
+        if not vnums:
             self.msg(f"No rooms found in {area_name}.")
             return
 
         lines = []
-        for room in sorted(
-            rooms, key=lambda r: r.db.room_id if r.db.room_id is not None else r.id
-        ):
-            num = room.db.room_id if room.db.room_id is not None else room.id
-            lines.append(f"{num}: {room.key}")
+        for num in sorted(vnums):
+            if num in rooms:
+                lines.append(f"{num}: {rooms[num].key}")
+            else:
+                lines.append(f"{num}: (unbuilt)")
 
         header = f"Rooms in {area.key} ({area.start}-{area.end})"
         self.msg("\n".join([header] + lines))
