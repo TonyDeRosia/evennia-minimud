@@ -1,4 +1,7 @@
 from evennia.server.sessionhandler import SESSIONS
+from evennia.utils.evtable import EvTable
+from evennia.utils.utils import time_format
+import time
 
 from .command import MuxCommand
 
@@ -18,7 +21,12 @@ class CmdWho(MuxCommand):
             return
 
         is_admin = caller.check_permstring("Admins")
-        lines = []
+
+        headers = []
+        if is_admin:
+            headers.append("|cAccount|n")
+        headers.extend(["|cCharacter|n", "|cTitle|n", "|cRace|n", "|cClass|n", "|cIdle|n"])
+        table = EvTable(*headers, border="cells")
 
         for sess in sessions:
             if not sess.logged_in:
@@ -28,17 +36,19 @@ class CmdWho(MuxCommand):
             if not puppet and not is_admin:
                 continue
 
-            name = puppet.get_display_name(caller) if puppet else "None"
-            title = puppet.db.title or "" if puppet else ""
-            race = getattr(puppet.db, "race", "Unknown") or "Unknown" if puppet else "Unknown"
-            cls = getattr(puppet.db, "charclass", "Unknown") or "Unknown" if puppet else "Unknown"
+            charname = puppet.get_display_name(caller) if puppet else "None"
+            title = puppet.db.title or "None" if puppet else "None"
+            race = getattr(puppet.db, "race", None) if puppet else None
+            cls = getattr(puppet.db, "charclass", None) if puppet else None
+            race = f"|c{race}|n" if race else "|cUnknown|n"
+            cls = f"|c{cls}|n" if cls else "|cUnknown|n"
 
-            if title:
-                name = f"{name} {title}"
+            idle = time_format(time.time() - sess.cmd_last, 0)
 
-            line = f"{name} (|c{race}|n / |c{cls}|n)"
+            row = []
             if is_admin:
-                line = f"{account.key}: {line}"
-            lines.append(line)
+                row.append(account.key)
+            row.extend([charname, title, race, cls, idle])
+            table.add_row(*row)
 
-        caller.msg("\n".join(lines))
+        caller.msg(str(table))
