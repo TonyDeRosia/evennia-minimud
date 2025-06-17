@@ -15,15 +15,28 @@ find your modules.
 
 ## Dig Command
 
-The `dig` command creates a new room in the given compass direction and
-links exits between the current location and the new room. Usage:
+The `@dig` command creates and links a new room by VNUM.
 
 ```
-dig <direction>
+@dig <direction> <vnum>
 ```
 
-For example, `dig north` will make a new room north of the current one
-and also create a south exit back.
+By default the reverse exit back to the origin is also created. Use
+`--noreverse` to skip that.
+
+Example: `@dig east 200005` creates room `200005` east of you and links
+its west exit back here.
+
+## Link Command
+
+The `@link` command connects two existing rooms.
+
+```
+@link <direction> <vnum>
+```
+
+This sets the exit in the chosen direction to the target room and, unless
+`--noreverse` is given, also links the reverse direction back.
 
 ## Room Editing Commands
 

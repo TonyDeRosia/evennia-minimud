@@ -67,103 +67,72 @@ SHORT = {
 
 class CmdDig(Command):
     """
-    Create a new room in a direction. Usage: dig <direction> [<area>:<number>]
+    Create and link a new room.
 
     Usage:
-        dig
+        @dig <direction> <vnum>
+
+    Creates a new room with ``<vnum>`` in the given ``<direction>`` and
+    automatically links the reverse exit. Use the ``--noreverse`` switch to
+    skip the back link.
 
     See |whelp dig|n for details.
     """
 
-    key = "dig"
+    key = "@dig"
+    aliases = ["dig"]
     locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
     help_category = "Building"
 
     def func(self):
         caller = self.caller
-        argstr = self.args.strip()
-        if not argstr:
-            caller.msg("Usage: dig <direction>=<area>:<number>")
+        norev = "--noreverse" in self.switches
+        if norev:
+            self.switches.remove("--noreverse")
+
+        parts = self.args.split()
+        if len(parts) != 2 or not parts[1].isdigit():
+            caller.msg("Usage: @dig <direction> <vnum>")
             return
-        area = caller.location.db.area
-        room_id = None
 
-        if "=" in argstr:
-            dir_part, rhs = (p.strip() for p in argstr.split("=", 1))
-            direction = DIR_FULL.get(dir_part.lower())
-            if not direction:
-                caller.msg("Unknown direction.")
-                return
-            if ":" in rhs:
-                area_part, num_part = (p.strip() for p in rhs.split(":", 1))
-                if area_part:
-                    area = area_part
-                if num_part:
-                    if num_part.isdigit():
-                        room_id = int(num_part)
-                    else:
-                        caller.msg("Room id must be numeric.")
-                        return
-            else:
-                if rhs:
-                    area = rhs
-        else:
-            parts = argstr.split()
-            direction = DIR_FULL.get(parts[0].lower())
-            if not direction:
-                caller.msg("Unknown direction.")
-                return
-            if len(parts) > 1:
-                area = parts[1]
-            if len(parts) > 2:
-                if parts[2].isdigit():
-                    room_id = int(parts[2])
-                else:
-                    caller.msg("Room id must be numeric.")
-                    return
+        direction = DIR_FULL.get(parts[0].lower())
+        if not direction:
+            caller.msg("Unknown direction.")
+            return
 
-        idx = -1
-        if area:
-            idx, area_data = find_area(area)
-            if area_data:
-                if room_id is None:
-                    try:
-                        room_id = vnum_registry.get_next_vnum_for_area(
-                            area_data.key,
-                            "room",
-                            builder=caller.key,
-                        )
-                    except Exception:
-                        room_id = None
-                if room_id is not None and not (area_data.start <= room_id <= area_data.end):
-                    caller.msg("Number outside area range.")
-                    return
-            if room_id is not None:
-                objs = ObjectDB.objects.filter(
-                    db_attributes__db_key="area",
-                    db_attributes__db_strvalue__iexact=area,
-                )
-                for obj in objs:
-                    if obj.db.room_id == room_id:
-                        caller.msg("Room already exists.")
-                        return
-        opposite = OPPOSITE[direction]
+        vnum = int(parts[1])
+        area_data = find_area_by_vnum(vnum)
+        if not area_data:
+            caller.msg("No area found for that VNUM.")
+            return
+        objs = ObjectDB.objects.filter(
+            db_attributes__db_key="area",
+            db_attributes__db_strvalue__iexact=area_data.key,
+        )
+        for obj in objs:
+            if obj.db.room_id == vnum and obj.is_typeclass(Room, exact=False):
+                caller.msg("Room already exists.")
+                return
 
         new_room = create_object(Room, key="Room")
-        if area:
-            new_room.set_area(area, room_id)
-            if idx >= 0 and area_data and room_id is not None:
-                if room_id not in area_data.rooms:
-                    area_data.rooms.append(room_id)
-                    update_area(idx, area_data)
+        new_room.set_area(area_data.key, vnum)
 
-        # add exits in both directions
-        caller.location.db.exits = caller.location.db.exits or {}
-        new_room.db.exits = new_room.db.exits or {}
-        caller.location.db.exits[direction] = new_room
-        new_room.db.exits[opposite] = caller.location
+        idx, area_entry = find_area(area_data.key)
+        if idx >= 0 and area_entry:
+            if vnum not in area_entry.rooms:
+                area_entry.rooms.append(vnum)
+                update_area(idx, area_entry)
 
-        caller.msg(f"You dig {direction} and create a new room.")
+        current = caller.location
+        opposite = OPPOSITE.get(direction)
+        current.db.exits = current.db.exits or {}
+        current.db.exits[direction] = new_room
+
+        if not norev and opposite:
+            new_room.db.exits = new_room.db.exits or {}
+            new_room.db.exits[opposite] = current
+
+        caller.msg(f"Created room {vnum} {direction} of here.")
 
 
 class CmdTeleport(Command):
@@ -265,6 +234,66 @@ class CmdDelDir(Command):
                 target.db.exits = other_exits
 
         self.msg(f"Exit {direction} removed.")
+
+
+class CmdLink(Command):
+    """Link the current room to another by VNUM."""
+
+    key = "@link"
+    aliases = ["link"]
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def func(self):
+        norev = "--noreverse" in self.switches
+        if norev:
+            self.switches.remove("--noreverse")
+
+        parts = self.args.split()
+        if len(parts) != 2 or not parts[1].isdigit():
+            self.msg("Usage: @link <direction> <vnum>")
+            return
+
+        direction = DIR_FULL.get(parts[0].lower())
+        if not direction:
+            self.msg("Unknown direction.")
+            return
+
+        vnum = int(parts[1])
+        area = find_area_by_vnum(vnum)
+        if not area:
+            self.msg("No area found for that VNUM.")
+            return
+
+        objs = ObjectDB.objects.filter(
+            db_attributes__db_key="area",
+            db_attributes__db_strvalue__iexact=area.key,
+        )
+        target = None
+        for obj in objs:
+            if obj.db.room_id == vnum and obj.is_typeclass(Room, exact=False):
+                target = obj
+                break
+
+        if not target:
+            self.msg("That room does not exist.")
+            return
+
+        current = self.caller.location
+        if not current:
+            self.msg("You have no location.")
+            return
+
+        current.db.exits = current.db.exits or {}
+        current.db.exits[direction] = target
+
+        if not norev:
+            opposite = OPPOSITE.get(direction)
+            if opposite:
+                target.db.exits = target.db.exits or {}
+                target.db.exits[opposite] = current
+
+        self.msg(f"Exit {direction} linked to room {vnum}.")
 
 
 class CmdDelRoom(Command):
