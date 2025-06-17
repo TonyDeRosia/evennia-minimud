@@ -250,3 +250,42 @@ class TestREditCommand(EvenniaTest):
 
         assert room.key == "New Room"
         assert room.db.desc == "New desc"
+
+    def test_save_live_room_no_area_error(self):
+        """Saving a live room with no area should show an error instead of crashing."""
+        from evennia.utils import create
+        from typeclasses.rooms import Room
+        from commands import redit
+
+        room = create.create_object(
+            Room,
+            key="Lonely Room",
+            location=self.char1.location,
+            home=self.char1.location,
+        )
+        room.db.room_id = 9
+        # no area assigned
+        self.char1.location = room
+
+        with (
+            patch("commands.redit.load_prototype", return_value=None),
+            patch("commands.redit.OLCEditor") as mock_editor,
+            patch("commands.redit.ObjectDB.objects.filter", return_value=[room]),
+        ):
+            self.char1.execute_cmd("redit 9")
+            mock_editor.assert_called()
+
+        proto = self.char1.ndb.room_protos[9]
+        assert "area" not in proto
+
+        self.char1.msg.reset_mock()
+        with (
+            patch("commands.redit.save_prototype") as mock_save,
+            patch("commands.redit.ObjectDB.objects.filter", return_value=[room]),
+        ):
+            redit.menunode_done(self.char1)
+            mock_save.assert_not_called()
+
+        self.char1.msg.assert_called_with(
+            "Error: This room has no area assigned. Cannot save prototype."
+        )
