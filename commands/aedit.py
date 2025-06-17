@@ -178,8 +178,25 @@ class CmdASave(Command):
         if self.args.strip().lower() != "changed":
             self.msg("Usage: asave changed")
             return
-        # prototypes are written immediately on edit, so nothing to do
-        self.msg("All areas saved.")
+        from commands.redit import proto_from_room
+        from utils.prototype_manager import save_prototype
+        updated = 0
+        for idx, area in enumerate(get_areas()):
+            for room_vnum in area.rooms:
+                objs = ObjectDB.objects.filter(
+                    db_attributes__db_key="room_id",
+                    db_attributes__db_value=room_vnum,
+                )
+                room = next(
+                    (o for o in objs if o.is_typeclass(Room, exact=False)), None
+                )
+                if not room:
+                    continue
+                proto = proto_from_room(room)
+                save_prototype("room", proto, vnum=room_vnum)
+                updated += 1
+            update_area(idx, area)
+        self.msg(f"All areas saved. {updated} room prototypes updated.")
 
 
 class CmdAEdit(Command):
