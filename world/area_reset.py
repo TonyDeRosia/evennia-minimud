@@ -1,5 +1,6 @@
 from evennia.scripts.scripts import DefaultScript
 from world.areas import get_areas, update_area
+from world import spawn_manager
 
 class AreaReset(DefaultScript):
     """Global script that increments area ages and performs resets."""
@@ -16,4 +17,5 @@ class AreaReset(DefaultScript):
             area.age += 1
             if area.reset_interval and area.age >= area.reset_interval:
                 area.age = 0
+                spawn_manager.SpawnManager.reset_area(area.key)
             update_area(idx, area)

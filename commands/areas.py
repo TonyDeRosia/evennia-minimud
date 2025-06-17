@@ -14,6 +14,7 @@ from world.areas import (
     parse_area_identifier,
 )
 from .aedit import CmdAEdit, CmdAList, CmdASave, CmdAreaReset, CmdAreaAge
+from world import spawn_manager
 from typeclasses.rooms import Room
 from utils.prototype_manager import load_prototype, load_all_prototypes
 
@@ -527,6 +528,28 @@ class CmdRRegAll(Command):
         self.msg(f"Created {created} room{'s' if created != 1 else ''}.")
 
 
+class CmdAreasReset(Command):
+    """Repopulate spawn entries for an area."""
+
+    key = "areas.reset"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: areas.reset <area>")
+            return
+        area_name = self.args.strip()
+        _, area = find_area(area_name)
+        if area is None:
+            self.msg(
+                f"Area '{area_name}' not found. Use 'alist' to view available areas."
+            )
+            return
+        spawn_manager.SpawnManager.reset_area(area.key)
+        self.msg(f"Spawn entries reset for {area.key}.")
+
+
 class AreaCmdSet(CmdSet):
     key = "Area CmdSet"
 
@@ -537,6 +560,7 @@ class AreaCmdSet(CmdSet):
         self.add(CmdAEdit)
         self.add(CmdAreaReset)
         self.add(CmdAreaAge)
+        self.add(CmdAreasReset)
         self.add(CmdAMake)
         self.add(CmdASet)
         self.add(CmdRooms)
