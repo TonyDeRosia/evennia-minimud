@@ -3,7 +3,7 @@ from evennia.utils.test_resources import EvenniaTest
 from evennia import create_object
 
 from typeclasses.npcs import BaseNPC
-from scripts.spawn_manager import SpawnManager
+from world.scripts.spawn import SpawnManager
 from world.area_reset import AreaReset
 from world.areas import Area
 

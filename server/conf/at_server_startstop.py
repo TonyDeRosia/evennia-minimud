@@ -150,11 +150,11 @@ def at_server_start():
             script.unpause()
 
     script = ScriptDB.objects.filter(db_key="spawn_manager").first()
-    if not script or script.typeclass_path != "scripts.spawn_manager.SpawnManager":
+    if not script or script.typeclass_path != "world.scripts.spawn.SpawnManager":
         if script:
             script.delete()
         script = create.create_script(
-            "scripts.spawn_manager.SpawnManager", key="spawn_manager"
+            "world.scripts.spawn.SpawnManager", key="spawn_manager"
         )
     else:
         if not script.is_active:

@@ -4,7 +4,7 @@ from evennia import create_object
 
 from typeclasses.rooms import Room
 from typeclasses.npcs import BaseNPC
-from scripts.spawn_manager import SpawnManager
+from world.scripts.spawn import SpawnManager
 
 
 class TestSpawnManager(EvenniaTest):
