@@ -362,18 +362,23 @@ Example:
 @mobproto spawn 1
 ```
 
-## Spawn Control
+## NPC Spawn Manager
 
-`@spawnreload` reloads all spawn entries from room prototype files.
-Use `@forcerespawn <room_vnum>` to immediately run the spawn
-logic for a specific room. Use `@showspawns [vnum]` to list
-entries for your current room or the given VNUM.
+Room prototypes in `world/prototypes/rooms/` may include a `spawns` list
+describing which NPCs should repopulate the room. Each entry specifies
+the NPC `prototype` (or `proto`), how many can exist via `max_spawns`
+(or `max_count`) and how often to repopulate with `spawn_interval` (or
+`respawn_rate`). An optional `location` can spawn the NPC in another
+room.
 
-Room spawns are defined in JSON files under `world/prototypes/rooms/`.
-Each room file can include a `spawns` list describing which NPC
-prototypes should repopulate there. Edit a room with `redit <vnum>`
-and choose **Edit spawns** to modify this list. After saving, run
-`@spawnreload` so the SpawnManager picks up the changes.
+The persistent **SpawnManager** script loads these lists on start and
+keeps rooms populated accordingly.
+
+Use `@spawnreload` to reload all spawn data from disk. Run
+`@forcerespawn <room_vnum>` to immediately repopulate a specific room,
+and `@showspawns [vnum]` to view the configured entries. After editing a
+room with `redit`, choose **Edit spawns** then call `@spawnreload` so the
+manager notices your changes.
 
 ## Weapon Creation and Inspection
 
