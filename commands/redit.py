@@ -445,6 +445,37 @@ def menunode_done(caller, raw_string="", **kwargs):
         except json.JSONDecodeError:
             existing = {}
 
+        # reload current room exits so changes outside the editor are kept
+        objs = ObjectDB.objects.filter(
+            db_attributes__db_key="room_id",
+            db_attributes__db_value=vnum,
+        )
+        room_obj = next((o for o in objs if o.is_typeclass(Room, exact=False)), None)
+
+        current_exits = {}
+        if room_obj:
+            for dirkey, target in (room_obj.db.exits or {}).items():
+                dest_id = getattr(target.db, "room_id", None)
+                if isinstance(dest_id, int):
+                    current_exits[dirkey] = dest_id
+
+        existing_exits = existing.get("exits", {})
+        base_exits = {**existing_exits, **current_exits}
+
+        proto_exits = proto.get("exits")
+        if proto_exits is not None:
+            if proto_exits == existing_exits:
+                final_exits = base_exits
+            else:
+                final_exits = base_exits.copy()
+                for dirkey in set(existing_exits) - set(proto_exits):
+                    final_exits.pop(dirkey, None)
+                final_exits.update(proto_exits)
+        else:
+            final_exits = base_exits
+
+        proto["exits"] = final_exits
+
         data = dict(existing)
         data.update(
             {
@@ -457,18 +488,10 @@ def menunode_done(caller, raw_string="", **kwargs):
         area_key = proto.get("area") or existing.get("area")
         if area_key and "area" not in proto:
             proto["area"] = area_key
-        if not area_key:
-            objs = ObjectDB.objects.filter(
-                db_attributes__db_key="room_id",
-                db_attributes__db_value=vnum,
-            )
-            room_obj = next(
-                (o for o in objs if o.is_typeclass(Room, exact=False)), None
-            )
-            if room_obj:
-                area_key = room_obj.attributes.get("area")
-                if area_key:
-                    proto["area"] = area_key
+        if not area_key and room_obj:
+            area_key = room_obj.attributes.get("area")
+            if area_key:
+                proto["area"] = area_key
         if not area_key:
             caller.msg(
                 "Error: This room has no area assigned. Cannot save prototype."
@@ -488,11 +511,7 @@ def menunode_done(caller, raw_string="", **kwargs):
             update_area(idx, area)
 
         # update live room object if it exists
-        objs = ObjectDB.objects.filter(
-            db_attributes__db_key="room_id",
-            db_attributes__db_value=vnum,
-        )
-        room = next((o for o in objs if o.is_typeclass(Room, exact=False)), None)
+        room = room_obj
         if room:
             room.key = data["key"]
             room.db.desc = data["desc"]
