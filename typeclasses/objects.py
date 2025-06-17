@@ -450,10 +450,11 @@ class Corpse(Object):
         if (decay := self.db.decay_time):
             # start auto-decay timer in minutes
             self.scripts.add(
-                "typeclasses.scripts.AutoDecayScript",
-                key="auto_decay",
+                "typeclasses.scripts.CorpseDecayScript",
+                key="corpse_decay",
                 interval=int(decay) * 60,
                 start_delay=True,
+                repeats=-1,
             )
 
     def at_object_post_creation(self):

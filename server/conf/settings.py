@@ -53,6 +53,18 @@ DEFAULT_AREA_NAME = "Starter Zone"
 DEFAULT_AREA_START = 200000
 DEFAULT_AREA_END = 200999
 
+# ----------------------------------------------------------------------
+# Corpse decay settings
+# ----------------------------------------------------------------------
+# Minimum and maximum minutes before an NPC corpse decays. The exact
+# duration is chosen randomly for each corpse within this range.
+CORPSE_DECAY_MIN = 5
+CORPSE_DECAY_MAX = 10
+
+# When ``True`` a corpse will decay even if being carried in someone's
+# inventory. Set to ``False`` to only allow decay when lying in a room.
+ALLOW_CORPSE_DECAY_IN_INVENTORY = False
+
 ######################################################################
 # Config for contrib packages
 ######################################################################

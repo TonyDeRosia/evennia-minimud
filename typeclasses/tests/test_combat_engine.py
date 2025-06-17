@@ -372,7 +372,7 @@ class TestCombatDeath(EvenniaTest):
             for obj in self.room1.contents
             if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
         )
-        script = corpse.scripts.get("auto_decay")[0]
+        script = corpse.scripts.get("corpse_decay")[0]
         self.assertEqual(script.interval, 60)
         script.at_repeat()
         self.assertNotIn(corpse, self.room1.contents)
