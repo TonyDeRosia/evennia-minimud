@@ -1618,25 +1618,53 @@ Related:
     {
         "key": "dig",
         "category": "Building",
-        "text": """
-Help for dig
+        "text": """Help for dig
 
-Create a new room in a direction. Usage: dig <direction> [<area>:<number>]
+Create and link a new room.
 
 Usage:
-    dig <direction> [<area>:<number>]
+    @dig <direction> <vnum>
+    dig <direction> <vnum>
 
 Switches:
-    None
+    --noreverse - skip the reverse exit
 
 Arguments:
     None
 
 Examples:
-    None
+    @dig east 200005
 
 Notes:
-    - None
+    - The VNUM must belong to a registered area.
+
+Related:
+    help ansi
+""",
+    },
+    {
+        "key": "@link",
+        "aliases": ["link"],
+        "category": "Building",
+        "text": """Help for @link
+
+Link one room to another by VNUM.
+
+Usage:
+    @link <direction> <vnum>
+    link <direction> <vnum>
+
+Switches:
+    --noreverse - skip the reverse exit
+
+Arguments:
+    None
+
+Examples:
+    @link north 3002
+
+Notes:
+    - The target room must already exist.
 
 Related:
     help ansi
