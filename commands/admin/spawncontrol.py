@@ -4,7 +4,7 @@ from ..command import Command
 
 
 class CmdSpawnReload(Command):
-    """Reload all spawn entries from NPC prototypes."""
+    """Reload all spawn entries from room prototypes."""
 
     key = "@spawnreload"
     locks = "cmd:perm(Admin)"
