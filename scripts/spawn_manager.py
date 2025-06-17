@@ -36,6 +36,10 @@ class SpawnManager(Script):
         self.interval = 60
         self.persistent = True
         self.db.entries = self.db.entries or []
+        # number of entries to process each tick
+        self.db.batch_size = self.db.batch_size or 1
+        # tick counter used for batching
+        self.db.tick_count = self.db.tick_count or 0
 
     # ------------------------------------------------------------
     # public API
@@ -283,8 +287,16 @@ class SpawnManager(Script):
                     )
 
     def at_repeat(self):
+        # increment tick counter for batching
+        self.db.tick_count = (self.db.tick_count or 0) + 1
         now = time.time()
+        batch_size = int(self.db.batch_size or 1)
+        tick_mod = self.db.tick_count % batch_size
         for entry in self.db.entries:
+            rid = self._normalize_room_id(entry.get("room"))
+            hash_value = rid if rid is not None else hash(str(entry.get("room")))
+            if batch_size > 1 and hash_value % batch_size != tick_mod:
+                continue
             room = self._get_room(entry)
             proto = entry.get("prototype")
             if not room:

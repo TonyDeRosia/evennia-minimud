@@ -372,7 +372,10 @@ the NPC `prototype` (or `proto`), how many can exist via `max_spawns`
 room.
 
 The persistent **SpawnManager** script loads these lists on start and
-keeps rooms populated accordingly.
+keeps rooms populated accordingly. Spawn checks can be batched by setting
+the script's `batch_size` attribute. Entries are hashed by their room id
+and only processed when `(hash % batch_size)` matches the current tick,
+so a larger value spreads spawn checks across multiple repeats.
 
 Use `@spawnreload` to reload all spawn data from disk. Run
 `@forcerespawn <room_vnum>` to immediately repopulate a specific room,
