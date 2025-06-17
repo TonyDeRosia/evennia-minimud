@@ -9,6 +9,7 @@ from world.areas import (
     get_areas,
     save_area,
     update_area,
+    rename_area,
     find_area,
     parse_area_identifier,
 )
@@ -317,6 +318,19 @@ class CmdAEdit(Command):
             area.flags = [f.strip().lower() for f in flags.split(',') if f.strip()]
             update_area(idx, area)
             self.msg("Flags updated.")
+            return
+        if sub == "rename":
+            args = rest.split()
+            if len(args) != 2:
+                self.msg("Usage: aedit rename <old> <new>")
+                return
+            old, new = args
+            try:
+                rename_area(old, new)
+            except ValueError as err:
+                self.msg(str(err))
+                return
+            self.msg(f"|gArea '{old}' renamed to '{new}'.|n")
             return
         if sub == "add":
             args = rest.split()

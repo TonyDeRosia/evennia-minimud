@@ -4,7 +4,7 @@ from typing import List, Dict, Optional
 from pathlib import Path
 import json
 from django.conf import settings
-from utils.prototype_manager import load_all_prototypes
+from utils.prototype_manager import load_all_prototypes, save_prototype
 
 
 @dataclass
@@ -90,6 +90,35 @@ def update_area(index: int, area: Area):
     _BASE_PATH.mkdir(parents=True, exist_ok=True)
     with path.open("w") as f:
         json.dump(area.to_dict(), f, indent=4)
+
+
+def rename_area(old: str, new: str) -> None:
+    """Rename area ``old`` to ``new``.
+
+    The area's JSON file is renamed and all room prototypes
+    referencing the area are updated.
+    """
+
+    idx, area = find_area(old)
+    if area is None or idx == -1:
+        raise ValueError("Area not found")
+    if find_area(new)[1]:
+        raise ValueError("Area with that name already exists")
+
+    old_path = _file_path(area.key)
+    new_path = _file_path(new)
+    if old_path.exists():
+        new_path.parent.mkdir(parents=True, exist_ok=True)
+        old_path.rename(new_path)
+
+    area.key = new
+    save_area(area)
+
+    room_protos = load_all_prototypes("room")
+    for vnum, proto in room_protos.items():
+        if str(proto.get("area", "")).lower() == old.lower():
+            proto["area"] = new
+            save_prototype("room", proto, vnum=vnum)
 
 
 def find_area(name: str) -> tuple[int, Optional[Area]]:

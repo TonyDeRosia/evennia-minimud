@@ -1616,6 +1616,7 @@ Usage:
     aedit builders <name> <list>
     aedit flags <name> <list>
     aedit interval <name> <ticks>
+    aedit rename <old> <new>
     aedit add <area|vnum> <room_vnum>
 
 Switches:
@@ -1630,6 +1631,7 @@ Examples:
     aedit builders town Alice,Bob
     aedit flags dungeon dark,safe
     aedit interval dungeon 60
+    aedit rename oldarea newarea
     aedit add dungeon 5
 
 Notes:
