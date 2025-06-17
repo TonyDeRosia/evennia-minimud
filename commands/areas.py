@@ -3,7 +3,7 @@ from evennia.utils.evtable import EvTable
 from evennia import CmdSet
 from evennia.prototypes import spawner
 
-from .command import Command
+from .command import Command, MuxCommand
 from scripts.area_spawner import AreaSpawner
 from world.areas import Area, get_areas, save_area, update_area, find_area
 from .aedit import CmdAEdit, CmdAList, CmdASave, CmdAreaReset, CmdAreaAge
@@ -202,7 +202,7 @@ class CmdRList(Command):
         self.msg("\n".join([header] + lines))
 
 
-class CmdRMake(Command):
+class CmdRMake(MuxCommand):
     """Create an unlinked room in a registered area."""
 
     key = "rmake"
