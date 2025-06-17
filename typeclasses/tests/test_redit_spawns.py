@@ -33,7 +33,7 @@ class TestReditSpawns(EvenniaTest):
             "prototype": "goblin",
             "max_spawns": 2,
             "spawn_interval": 10,
-            "location": "#5",
+            "location": 5,
         })
         self.char1.ndb.room_protos[5] = proto
 
