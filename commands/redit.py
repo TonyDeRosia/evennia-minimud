@@ -109,7 +109,7 @@ def menunode_main(caller, raw_string="", **kwargs):
         {"desc": "Edit flags", "goto": "menunode_flags"},
         {"desc": "Edit exits", "goto": "menunode_exits"},
         {"desc": "Show prototype", "goto": "menunode_show"},
-        {"desc": "List prototypes", "goto": "menunode_rlist"},
+        {"desc": "List prototypes", "goto": "menunode_list_prototypes"},
         {"desc": "Save & quit", "goto": "menunode_done"},
         {"desc": "Cancel", "goto": "menunode_cancel"},
     ]
@@ -124,13 +124,29 @@ def menunode_show(caller, raw_string="", **kwargs):
     return "menunode_main"
 
 
-def menunode_rlist(caller, raw_string="", **kwargs):
+def menunode_list_prototypes(caller, raw_string="", **kwargs):
     if not _state_exists(caller):
         caller.msg("Room editing state missing. Exiting.")
         return None
-    lines = [f"{v}: {data.get('key', '')}" for v, data in caller.ndb.room_protos.items()]
-    caller.msg("\n".join(lines) or "No prototypes.")
+
+    current = caller.ndb.room_protos.get(caller.ndb.current_vnum, {})
+    area_name = current.get("area")
+    if not area_name:
+        caller.msg("No prototypes found for this room or area.")
+        return "menunode_main"
+
+    protos = load_all_prototypes("room")
+    lines = [
+        f"{vnum}: {proto.get('key', '')}"
+        for vnum, proto in sorted(protos.items())
+        if proto.get("area") == area_name
+    ]
+
+    caller.msg("\n".join(lines) or "No prototypes found for this room or area.")
     return "menunode_main"
+
+# alias for backward compatibility
+menunode_rlist = menunode_list_prototypes
 
 
 def menunode_name(caller, raw_string="", **kwargs):
