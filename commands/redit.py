@@ -108,23 +108,56 @@ def menunode_main(caller, raw_string="", **kwargs):
         {"desc": "Edit description", "goto": "menunode_desc"},
         {"desc": "Edit flags", "goto": "menunode_flags"},
         {"desc": "Edit exits", "goto": "menunode_exits"},
-        {"desc": "Show prototype", "goto": "menunode_show"},
-        {"desc": "List prototypes", "goto": "menunode_list_prototypes"},
+        {"desc": "View saved prototype for this room", "goto": "menunode_view_prototype"},
+        {"desc": "Browse area prototypes", "goto": "menunode_list_prototypes"},
         {"desc": "Save & quit", "goto": "menunode_done"},
         {"desc": "Cancel", "goto": "menunode_cancel"},
     ]
     return text, options
 
 
-def menunode_show(caller, raw_string="", **kwargs):
+def menunode_view_prototype(caller, raw_string="", **kwargs):
+    """Display the saved prototype for a room."""
+
     if not _state_exists(caller):
         caller.msg("Room editing state missing. Exiting.")
         return None
-    caller.msg(_summary(caller))
-    return "menunode_main"
+
+    vnum = kwargs.get("vnum", caller.ndb.current_vnum)
+    try:
+        proto = load_prototype("room", vnum)
+    except json.JSONDecodeError:
+        caller.msg(f"Error loading prototype for room {vnum}.")
+        return "menunode_main"
+
+    if not proto:
+        caller.msg("This room does not have a saved prototype.")
+        return "menunode_main"
+
+    lines = [f"|wPrototype {vnum}|n"]
+    if key := proto.get("key"):
+        lines.append(f"Name: {key}")
+    if area := proto.get("area"):
+        lines.append(f"Area: {area}")
+    if desc := proto.get("desc"):
+        lines.append(f"Desc: {desc}")
+    if flags := proto.get("flags"):
+        lines.append("Flags: " + ", ".join(flags))
+    exits = proto.get("exits") or {}
+    if exits:
+        exit_lines = [f"  {d} -> {dest}" for d, dest in exits.items()]
+        lines.append("Exits:\n" + "\n".join(exit_lines))
+
+    caller.msg("\n".join(lines))
+    return kwargs.get("return_node", "menunode_main")
+
+# alias for backward compatibility
+menunode_show = menunode_view_prototype
 
 
 def menunode_list_prototypes(caller, raw_string="", **kwargs):
+    """Browse all prototypes in the current room's area."""
+
     if not _state_exists(caller):
         caller.msg("Room editing state missing. Exiting.")
         return None
@@ -135,15 +168,40 @@ def menunode_list_prototypes(caller, raw_string="", **kwargs):
         caller.msg("No prototypes found for this room or area.")
         return "menunode_main"
 
-    protos = load_all_prototypes("room")
-    lines = [
-        f"{vnum}: {proto.get('key', '')}"
-        for vnum, proto in sorted(protos.items())
+    protos = {
+        vnum: proto
+        for vnum, proto in load_all_prototypes("room").items()
         if proto.get("area") == area_name
-    ]
+    }
 
-    caller.msg("\n".join(lines) or "No prototypes found for this room or area.")
-    return "menunode_main"
+    if raw_string:
+        choice = raw_string.strip().lower()
+        if choice in {"b", "back"}:
+            return "menunode_main"
+        if choice.isdigit() and int(choice) in protos:
+            return menunode_view_prototype(
+                caller,
+                vnum=int(choice),
+                return_node="menunode_list_prototypes",
+            )
+        caller.msg("Invalid selection.")
+        return "menunode_list_prototypes"
+
+    if not protos:
+        caller.msg("No prototypes found for this room or area.")
+        return "menunode_main"
+
+    lines = [f"Prototypes in {area_name}:"]
+    for vnum, proto in sorted(protos.items()):
+        summary = proto.get("desc", "").splitlines()[0] or proto.get("key", "")
+        if len(summary) > 40:
+            summary = summary[:37] + "..."
+        lines.append(f"{vnum}: {proto.get('key', '')} - \"{summary}\"")
+    lines.append("Enter VNUM to preview or 'back' to return.")
+    text = "\n".join(lines)
+
+    options = {"key": "_default", "goto": menunode_list_prototypes}
+    return text, options
 
 # alias for backward compatibility
 menunode_rlist = menunode_list_prototypes
