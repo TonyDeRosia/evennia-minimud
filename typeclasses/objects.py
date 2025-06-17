@@ -460,6 +460,14 @@ class Corpse(Object):
         super().at_object_post_creation()
         name = self.db.corpse_of or self.key or "someone"
         self.db.desc = f"The corpse of {name} lies here."
+        decay = self.db.decay_time
+        if decay and not self.scripts.get("corpse_decay"):
+            self.scripts.add(
+                "typeclasses.scripts.CorpseDecayScript",
+                key="corpse_decay",
+                interval=int(decay) * 60,
+                start_delay=True,
+            )
 
     def get_display_name(self, looker, **kwargs):
         name = self.db.corpse_of or self.key or "corpse"

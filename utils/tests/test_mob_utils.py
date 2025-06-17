@@ -8,6 +8,7 @@ from utils.mob_utils import (
     add_to_mlist,
     auto_calc,
     auto_calc_secondary,
+    make_corpse,
 )
 from world.scripts.mob_db import get_mobdb
 from world.system import stat_manager
@@ -37,3 +38,14 @@ class TestMobUtils(EvenniaTest):
         self.assertEqual(derived["HP"], expected_hp)
         sec = auto_calc_secondary(prims)
         self.assertNotIn("HP", sec)
+
+    def test_make_corpse_adds_decay_script(self):
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.corpse_decay_time = 1
+
+        corpse = make_corpse(npc)
+        script = corpse.scripts.get("corpse_decay")[0]
+        self.assertEqual(script.interval, 60)
