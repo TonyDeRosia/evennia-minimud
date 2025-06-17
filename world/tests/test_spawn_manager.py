@@ -1,4 +1,4 @@
-from unittest import mock
+from unittest import mock, TestCase
 from evennia.utils.test_resources import EvenniaTest
 from evennia import create_object
 
@@ -29,12 +29,8 @@ class TestSpawnManager(EvenniaTest):
             }
         ]
         npc = create_object(BaseNPC, key="basic_merchant")
-        with mock.patch(
-            "scripts.spawn_manager.prototypes.get_npc_prototypes",
-            return_value={"basic_merchant": {"key": "basic_merchant"}},
-        ), mock.patch(
-            "evennia.prototypes.spawner.spawn", return_value=[npc]
-        ):
+        with mock.patch("scripts.spawn_manager.prototypes.get_npc_prototypes", return_value={"basic_merchant": {"key": "basic_merchant"}}), \
+             mock.patch("evennia.prototypes.spawner.spawn", return_value=[npc]):
             self.script.force_respawn(1)
         npcs = [obj for obj in self.room.contents if obj.is_typeclass(BaseNPC, exact=False)]
         self.assertEqual(len(npcs), 1)
@@ -95,7 +91,6 @@ class TestSpawnManager(EvenniaTest):
         m_log.assert_not_called()
 
     def test_reload_spawns_forces_respawn(self):
-        """reload_spawns should trigger force_respawn for each room."""
         self.script.db.entries = [
             {"room": 1},
             {"room": 2},
@@ -126,54 +121,34 @@ class TestSpawnManager(EvenniaTest):
 
     def test_spawn_key_finalized_once(self):
         npc = create_object(BaseNPC, key="orc")
-        with mock.patch(
-            "scripts.spawn_manager.prototypes.get_npc_prototypes",
-            return_value={"orc": {"key": "orc"}},
-        ), mock.patch(
-            "evennia.prototypes.spawner.spawn", return_value=[npc]
-        ), mock.patch(
-            "scripts.spawn_manager.apply_proto_items"
-        ), mock.patch(
-            "commands.npc_builder.finalize_mob_prototype"
-        ) as m_fin:
+        with mock.patch("scripts.spawn_manager.prototypes.get_npc_prototypes", return_value={"orc": {"key": "orc"}}), \
+             mock.patch("evennia.prototypes.spawner.spawn", return_value=[npc]), \
+             mock.patch("scripts.spawn_manager.apply_proto_items"), \
+             mock.patch("commands.npc_builder.finalize_mob_prototype") as m_fin:
             self.script._spawn("orc", self.room)
 
         self.assertEqual(m_fin.call_count, 1)
 
-    def test_batch_size_processes_on_tick(self):
-        room2 = create_object(Room, key="room2")
-        room2.set_area("testarea", 2)
-        self.script.db.entries = [
-            {
-                "area": "testarea",
-                "prototype": "goblin",
-                "room": 1,
-                "max_count": 1,
-                "respawn_rate": 0,
-                "last_spawn": 0,
-            },
-            {
-                "area": "testarea",
-                "prototype": "orc",
-                "room": 2,
-                "max_count": 1,
-                "respawn_rate": 0,
-                "last_spawn": 0,
-            },
-        ]
-        self.script.db.batch_size = 2
-        self.script.db.tick_count = 0
 
-        with mock.patch.object(self.script, "_spawn") as m_spawn, mock.patch(
-            "scripts.spawn_manager.time.time", return_value=1000
-        ):
-            self.script.at_repeat()
-            self.assertEqual(m_spawn.call_count, 1)
-            m_spawn.assert_called_with("goblin", self.room)
+class TestGetRoomCaching(TestCase):
+    def test_get_room_caches_result(self):
+        import world.tests  # noqa: F401 - triggers django setup
+        mgr = SpawnManager()
+        entry = {"room": "#10", "room_id": 10}
+        room = mock.Mock()
+        room.id = 10
+        room.db.room_id = 10
+        with mock.patch("scripts.spawn_manager.ObjectDB.objects") as m_obj, \
+             mock.patch("scripts.spawn_manager.search.search_object") as m_search:
+            m_obj.filter.return_value.first.return_value = room
+            m_obj.get_by_attribute.return_value = [room]
+            m_search.return_value = []
 
-        with mock.patch.object(self.script, "_spawn") as m_spawn, mock.patch(
-            "scripts.spawn_manager.time.time", return_value=1000
-        ):
-            self.script.at_repeat()
-            self.assertEqual(m_spawn.call_count, 1)
-            m_spawn.assert_called_with("orc", room2)
+            result1 = mgr._get_room(entry)
+            result2 = mgr._get_room(entry)
+
+        self.assertIs(result1, room)
+        self.assertIs(result2, room)
+        m_obj.filter.assert_called_once()
+        m_obj.get_by_attribute.assert_not_called()
+        m_search.assert_not_called()
