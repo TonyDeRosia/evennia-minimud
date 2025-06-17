@@ -454,7 +454,6 @@ class Corpse(Object):
                 key="corpse_decay",
                 interval=int(decay) * 60,
                 start_delay=True,
-                repeats=-1,
             )
 
     def at_object_post_creation(self):
