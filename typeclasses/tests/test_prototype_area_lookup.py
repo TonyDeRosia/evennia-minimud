@@ -98,3 +98,28 @@ class TestPrototypeAreaLookup(EvenniaTest):
 
         self.assertEqual(self.char1.location, target)
 
+    @patch("world.areas._load_registry", return_value=([], []))
+    @patch("world.areas.load_all_prototypes")
+    def test_rlist(self, mock_load_all, _):
+        """`rlist` lists prototypes when no rooms exist."""
+
+        def _load(category):
+            if category == "room":
+                return {
+                    1: {"area": "proto", "room_id": 1},
+                    2: {"area": "proto", "room_id": 2},
+                }
+            if category == "npc":
+                return {}
+            return {}
+
+        mock_load_all.side_effect = _load
+
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("rlist proto")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Rooms in proto", out)
+        self.assertIn("1:", out)
+        self.assertIn("2:", out)
+        self.assertIn("(unbuilt)", out)
+
