@@ -79,3 +79,22 @@ class TestREditCommand(EvenniaTest):
         assert room.db.desc == "New desc"
         assert room.tags.has("safe", category="room_flag")
         assert not room.tags.has("dark", category="room_flag")
+
+    def test_menu_missing_state(self):
+        from commands import redit
+
+        self.char1.ndb.room_protos = None
+        self.char1.ndb.current_vnum = None
+        self.char1.msg.reset_mock()
+
+        result = redit.menunode_name(self.char1)
+        assert result is None
+        self.char1.msg.assert_called_with("Room editing state missing. Exiting.")
+
+    def test_command_abort_clears_state(self):
+        self.char1.ndb.room_protos = {5: {"vnum": 5}}
+        self.char1.ndb.current_vnum = 5
+        with patch("commands.redit.load_prototype", return_value=None):
+            self.char1.execute_cmd("redit 99")
+        assert self.char1.ndb.room_protos is None
+        assert self.char1.ndb.current_vnum is None
