@@ -14,5 +14,13 @@ dependencies = [
 [tool.setuptools]
 py-modules = []
 
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = [
+    "build*",
+    "docs*",
+    "*.egg-info",
+]
+
 [project.urls]
 repository = "https://github.com/InspectorCaracal/evennia-minimud"
