@@ -579,18 +579,8 @@ class AreaCmdSet(CmdSet):
         self.add(CmdRSet)
         self.add(CmdRReg)
         self.add(CmdRRegAll)
-        self.add(CmdRSpawner)
         from .redit import CmdREdit
         self.add(CmdREdit)
 
 
 
-class CmdRSpawner(Command):
-    """Configure NPC respawning for the current room."""
-
-    key = "@rspawner"
-    locks = "cmd:perm(Builder)"
-    help_category = "Building"
-
-    def func(self):
-        self.msg("AreaSpawner is deprecated. Use 'redit spawns' to configure room spawns.")
