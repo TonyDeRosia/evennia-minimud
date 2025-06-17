@@ -33,28 +33,22 @@ class SpawnManager(Script):
         room_protos = load_all_prototypes("room")
         for proto in room_protos.values():
             spawns = proto.get("spawns") or []
-            room_id = proto.get("room_id") or proto.get("vnum")
-            if not spawns or room_id is None:
+            if not spawns:
                 continue
             for entry in spawns:
-                proto_key = (
-                    entry.get("prototype")
-                    or entry.get("proto")
-                    or entry.get("vnum")
-                )
-                if proto_key is None:
+                proto_key = entry.get("prototype") or entry.get("proto")
+                if not proto_key:
                     continue
-                self.db.entries.append(
-                    {
-                        "area": (proto.get("area") or "").lower(),
-                        "prototype": proto_key,
-                        "room": int(room_id),
-                        "initial_count": int(entry.get("initial_count", 0)),
-                        "max_count": int(entry.get("max_count", 1)),
-                        "respawn_rate": int(entry.get("respawn_rate", 60)),
-                        "last_spawn": 0.0,
-                    }
-                )
+                room_loc = entry.get("location") or proto.get("vnum") or proto.get("room_id")
+                data = {
+                    "area": (proto.get("area") or "").lower(),
+                    "prototype": proto_key,
+                    "room": room_loc,
+                    "max_count": int(entry.get("max_spawns", entry.get("max_count", 1))),
+                    "respawn_rate": int(entry.get("spawn_interval", entry.get("respawn_rate", 60))),
+                    "last_spawn": 0.0,
+                }
+                self.db.entries.append(data)
 
     def record_spawn(self, prototype: Any, room: Any) -> None:
         """Update the last spawn time for ``prototype`` in ``room``."""
@@ -68,9 +62,9 @@ class SpawnManager(Script):
     def register_room_spawn(self, proto: Dict[str, Any]) -> None:
         """Register spawn data from a single room prototype."""
         spawns = proto.get("spawns") or []
-        room_id = proto.get("room_id") or proto.get("vnum")
-        if room_id is None:
+        if not spawns:
             return
+        room_id = proto.get("room_id") or proto.get("vnum")
         rid = (
             int(room_id)
             if isinstance(room_id, str) and room_id.isdigit()
@@ -82,20 +76,15 @@ class SpawnManager(Script):
             if self._normalize_room_id(e.get("room")) != rid
         ]
         for entry in spawns:
-            proto_key = (
-                entry.get("prototype")
-                or entry.get("proto")
-                or entry.get("vnum")
-            )
-            if proto_key is None:
+            proto_key = entry.get("prototype") or entry.get("proto")
+            if not proto_key:
                 continue
             data = {
                 "area": (proto.get("area") or "").lower(),
                 "prototype": proto_key,
-                "room": int(room_id),
-                "initial_count": int(entry.get("initial_count", 0)),
-                "max_count": int(entry.get("max_count", 1)),
-                "respawn_rate": int(entry.get("respawn_rate", 60)),
+                "room": entry.get("location") or room_id,
+                "max_count": int(entry.get("max_spawns", entry.get("max_count", 1))),
+                "respawn_rate": int(entry.get("spawn_interval", entry.get("respawn_rate", 60))),
                 "last_spawn": 0.0,
             }
             self.db.entries.append(data)
@@ -104,10 +93,7 @@ class SpawnManager(Script):
         """Immediately respawn all entries for ``room_vnum``."""
         now = time.time()
         for entry in self.db.entries:
-            rid = entry.get("room")
-            if isinstance(rid, str) and rid.isdigit():
-                rid = int(rid)
-            if rid != room_vnum:
+            if self._normalize_room_id(entry.get("room")) != room_vnum:
                 continue
             room = self._get_room(entry)
             if not room:
@@ -137,8 +123,11 @@ class SpawnManager(Script):
             return getattr(room.db, "room_id", None)
         if isinstance(room, int):
             return room
-        if isinstance(room, str) and room.isdigit():
-            return int(room)
+        if isinstance(room, str):
+            if room.startswith("#") and room[1:].isdigit():
+                return int(room[1:])
+            if room.isdigit():
+                return int(room)
         return None
 
     def _room_match(self, stored: Any, room: Any) -> bool:
@@ -147,10 +136,13 @@ class SpawnManager(Script):
         rid = None
         if isinstance(stored, int):
             rid = stored
-        elif isinstance(stored, str) and stored.isdigit():
-            rid = int(stored)
+        elif isinstance(stored, str):
+            if stored.startswith("#") and stored[1:].isdigit():
+                rid = int(stored[1:])
+            elif stored.isdigit():
+                rid = int(stored)
         if rid is not None:
-            return getattr(room.db, "room_id", None) == rid
+            return room.id == rid or getattr(room.db, "room_id", None) == rid
         return False
 
     def _get_room(self, entry: Dict) -> Any | None:
@@ -160,8 +152,14 @@ class SpawnManager(Script):
         rid = None
         if isinstance(room, int):
             rid = room
-        elif isinstance(room, str) and room.isdigit():
-            rid = int(room)
+        elif isinstance(room, str):
+            if room.startswith("#") and room[1:].isdigit():
+                obj = ObjectDB.objects.filter(id=int(room[1:])).first()
+                if obj:
+                    return obj
+                rid = int(room[1:])
+            elif room.isdigit():
+                rid = int(room)
         if rid is not None:
             objs = ObjectDB.objects.get_by_attribute(key="room_id", value=rid)
             return objs[0] if objs else None
@@ -220,9 +218,9 @@ class SpawnManager(Script):
                 continue
             proto = entry.get("prototype")
             existing = self._live_count(proto, room)
-            to_spawn = max(0, entry.get("initial_count", 0) - existing)
+            to_spawn = max(0, entry.get("max_count", 1) - existing)
             for _ in range(to_spawn):
-                if self._live_count(proto, room) < entry.get("max_count", 0):
+                if self._live_count(proto, room) < entry.get("max_count", 1):
                     self._spawn(proto, room)
                     entry["last_spawn"] = time.time()
                     logger.log_info(

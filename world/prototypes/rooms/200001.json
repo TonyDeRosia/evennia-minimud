@@ -5,6 +5,11 @@
     "typeclass": "typeclasses.rooms.Room",
     "area": "townsburg",
     "spawns": [
-        {"proto": "goblin_grunt", "initial_count": 1, "max_count": 3, "respawn_rate": 60}
+        {
+            "prototype": "goblin_grunt",
+            "spawn_interval": 60,
+            "max_spawns": 3,
+            "location": "#200001"
+        }
     ]
 }

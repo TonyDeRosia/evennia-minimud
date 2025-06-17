@@ -19,9 +19,9 @@ class TestSpawnManager(EvenniaTest):
             "spawns": [
                 {
                     "prototype": "goblin",
-                    "initial_count": 2,
-                    "max_count": 3,
-                    "respawn_rate": 5,
+                    "max_spawns": 3,
+                    "spawn_interval": 5,
+                    "location": f"#{self.room1.db.room_id}",
                 }
             ],
         }

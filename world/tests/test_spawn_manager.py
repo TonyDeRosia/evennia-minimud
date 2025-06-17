@@ -21,7 +21,6 @@ class TestSpawnManager(EvenniaTest):
                 "area": "testarea",
                 "prototype": "basic_merchant",
                 "room": 1,
-                "initial_count": 1,
                 "max_count": 2,
                 "respawn_rate": 5,
                 "last_spawn": 0,

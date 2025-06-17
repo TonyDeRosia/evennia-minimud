@@ -67,17 +67,7 @@ class CmdShowSpawns(Command):
 
         lines = []
         for entry in script.db.entries:
-            room = entry.get("room")
-            if hasattr(room, "dbref"):
-                rid = getattr(room.db, "room_id", None)
-            elif isinstance(room, str) and room.isdigit():
-                rid = int(room)
-            elif isinstance(room, int):
-                rid = room
-            else:
-                rid = None
-
-            if rid != target_vnum:
+            if script._normalize_room_id(entry.get("room")) != target_vnum:
                 continue
 
             obj = script._get_room(entry)

@@ -5,7 +5,17 @@
     "typeclass": "typeclasses.rooms.Room",
     "area": "townsburg",
     "spawns": [
-        {"proto": "basic_guard", "initial_count": 1, "max_count": 2, "respawn_rate": 120},
-        {"proto": "basic_merchant", "initial_count": 1, "max_count": 1, "respawn_rate": 300}
+        {
+            "prototype": "basic_guard",
+            "spawn_interval": 120,
+            "max_spawns": 2,
+            "location": "#200002"
+        },
+        {
+            "prototype": "basic_merchant",
+            "spawn_interval": 300,
+            "max_spawns": 1,
+            "location": "#200002"
+        }
     ]
 }
