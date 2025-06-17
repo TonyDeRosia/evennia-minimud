@@ -29,5 +29,5 @@ class SatedDecayScript(Script):
                     if hasattr(char, "msg"):
                         char.msg(msg)
                     break
-
-
+            # end inner for
+        # end outer for

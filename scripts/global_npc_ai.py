@@ -23,3 +23,4 @@ class GlobalNPCAI(Script):
                 process_mob_ai(npc)
             except Exception as err:  # pragma: no cover - log errors
                 logger.log_err(f"GlobalNPCAI error on {npc}: {err}")
+        # end npc loop

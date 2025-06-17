@@ -75,3 +75,5 @@ class AreaSpawner(Script):
         finalize_mob_prototype(npc, npc)
         npc.db.area_tag = area
         npc.db.spawn_room = room
+
+
