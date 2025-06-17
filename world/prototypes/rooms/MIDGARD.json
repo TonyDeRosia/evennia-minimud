@@ -1,0 +1,272 @@
+[
+  {
+    "prototype_key": "room_200050",
+    "key": "|YMidgard Town Square|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "Cobblestone paths intersect beneath a weathered fountain. Lanterns hang from iron poles, flickering against the fading dusk.",
+    "area": "midgard",
+    "xyz": [5, 5, "midgard"],
+    "room_id": 200050,
+    "exits": {
+      "north": 200051,
+      "south": 200058,
+      "east": 200053,
+      "west": 200060,
+      "southwest": 200059
+    }
+  },
+  {
+    "prototype_key": "room_200051",
+    "key": "|WTemple Steppes|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "Broad stairs climb toward a marble archway. Devotees murmur hymns as they ascend.",
+    "area": "midgard",
+    "xyz": [5, 6, "midgard"],
+    "room_id": 200051,
+    "exits": {
+      "south": 200050,
+      "north": 200052
+    }
+  },
+  {
+    "prototype_key": "room_200052",
+    "key": "|CTemple of Light|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "Pillars etched with sunbursts rise to a vaulted ceiling. Candles burn steadily, casting warm halos.",
+    "area": "midgard",
+    "xyz": [5, 7, "midgard"],
+    "room_id": 200052,
+    "exits": {
+      "south": 200051,
+      "north": 200068
+    }
+  },
+  {
+    "prototype_key": "room_200053",
+    "key": "|GClass Square|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "Chalkboards and training dummies line an open plaza. Students gather in clusters to practice.",
+    "area": "midgard",
+    "xyz": [6, 5, "midgard"],
+    "room_id": 200053,
+    "exits": {
+      "west": 200050,
+      "north": 200054,
+      "south": 200066
+    }
+  },
+  {
+    "prototype_key": "room_200054",
+    "key": "|MSwashbuckler Hall|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "Banners of crossed sabers adorn the walls. The air smells of oiled leather and daring tales.",
+    "area": "midgard",
+    "xyz": [6, 6, "midgard"],
+    "room_id": 200054,
+    "exits": {
+      "south": 200053,
+      "north": 200055
+    }
+  },
+  {
+    "prototype_key": "room_200055",
+    "key": "|CKnight Hall|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "Polished shields reflect torchlight along this orderly chamber. Heavy footsteps echo with discipline.",
+    "area": "midgard",
+    "xyz": [6, 7, "midgard"],
+    "room_id": 200055,
+    "exits": {
+      "south": 200054,
+      "north": 200056
+    }
+  },
+  {
+    "prototype_key": "room_200056",
+    "key": "|WCleric Hall|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "Rows of pews face an altar draped in white linen. Incense curls lazily through the quiet.",
+    "area": "midgard",
+    "xyz": [6, 8, "midgard"],
+    "room_id": 200056,
+    "exits": {
+      "south": 200055,
+      "north": 200057
+    }
+  },
+  {
+    "prototype_key": "room_200057",
+    "key": "|RMage Hall|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "Shelves laden with tomes surround a circle of runes. A faint hum of power lingers in the air.",
+    "area": "midgard",
+    "xyz": [6, 9, "midgard"],
+    "room_id": 200057,
+    "exits": {
+      "south": 200056
+    }
+  },
+  {
+    "prototype_key": "room_200058",
+    "key": "|GTraining Grounds|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "Wooden targets stand amid churned earth. Novices practice strikes under a watchful instructor.",
+    "area": "midgard",
+    "xyz": [5, 4, "midgard"],
+    "room_id": 200058,
+    "exits": {
+      "north": 200050,
+      "south": 200065,
+      "east": 200066,
+      "west": 200067
+    }
+  },
+  {
+    "prototype_key": "room_200059",
+    "key": "|yThe Roasted Root|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "A food stall sizzles with roasting vegetables. Merchants hawk simple meals to passing travelers.",
+    "area": "midgard",
+    "xyz": [4, 4, "midgard"],
+    "room_id": 200059,
+    "exits": {
+      "northeast": 200050,
+      "north": 200060
+    }
+  },
+  {
+    "prototype_key": "room_200060",
+    "key": "|rBlacksmith's Forge|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "The ring of hammer on anvil resounds here. Sparks fly as metal is shaped by expert hands.",
+    "area": "midgard",
+    "xyz": [4, 5, "midgard"],
+    "room_id": 200060,
+    "exits": {
+      "east": 200050,
+      "north": 200061,
+      "south": 200059
+    }
+  },
+  {
+    "prototype_key": "room_200061",
+    "key": "|gStorage Room|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "Stacks of crates and barrels fill this dim space. The scent of oil and metal lingers in the air.",
+    "area": "midgard",
+    "xyz": [4, 6, "midgard"],
+    "room_id": 200061,
+    "exits": {
+      "south": 200060,
+      "east": 200051,
+      "northwest": 200062
+    }
+  },
+  {
+    "prototype_key": "room_200062",
+    "key": "|YTown Bulletin Board|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "A large wooden board displays messages and notices for all to read.",
+    "area": "midgard",
+    "xyz": [3, 7, "midgard"],
+    "room_id": 200062,
+    "exits": {
+      "southeast": 200061,
+      "north": 200063,
+      "east": 200064
+    }
+  },
+  {
+    "prototype_key": "room_200063",
+    "key": "|YWatchtower|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "From atop the tower, one can survey the countryside. Flags flutter in the brisk wind.",
+    "area": "midgard",
+    "xyz": [3, 8, "midgard"],
+    "room_id": 200063,
+    "exits": {
+      "south": 200062,
+      "east": 200069
+    }
+  },
+  {
+    "prototype_key": "room_200064",
+    "key": "|cQuiet Shrine|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "Stone lanterns guard a modest shrine. Prayer ribbons flutter gently from nearby trees.",
+    "area": "midgard",
+    "xyz": [4, 7, "midgard"],
+    "room_id": 200064,
+    "exits": {
+      "west": 200062,
+      "south": 200061,
+      "north": 200069
+    }
+  },
+  {
+    "prototype_key": "room_200065",
+    "key": "|gSecluded Courtyard|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "Low walls enclose a peaceful courtyard where weeds push between worn flagstones.",
+    "area": "midgard",
+    "xyz": [5, 3, "midgard"],
+    "room_id": 200065,
+    "exits": {
+      "north": 200058
+    }
+  },
+  {
+    "prototype_key": "room_200066",
+    "key": "|gOld Cobbled Alley|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "The narrow alley winds between buildings, its cobbles slick from countless footsteps.",
+    "area": "midgard",
+    "xyz": [6, 4, "midgard"],
+    "room_id": 200066,
+    "exits": {
+      "north": 200053,
+      "west": 200058
+    }
+  },
+  {
+    "prototype_key": "room_200067",
+    "key": "|mTraveler's Rest Inn|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "The inn's common room smells of stew and smoke. A worn sign promises cheap lodgings.",
+    "area": "midgard",
+    "xyz": [4, 3, "midgard"],
+    "room_id": 200067,
+    "exits": {
+      "east": 200058,
+      "north": 200059
+    }
+  },
+  {
+    "prototype_key": "room_200068",
+    "key": "|GSunlit Garden|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "Beds of vibrant flowers bask in shafts of sunlight. A serene hush pervades the garden.",
+    "area": "midgard",
+    "xyz": [5, 8, "midgard"],
+    "room_id": 200068,
+    "exits": {
+      "south": 200052,
+      "west": 200069,
+      "east": 200056
+    }
+  },
+  {
+    "prototype_key": "room_200069",
+    "key": "|gWooded Path|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "A narrow path winds through young trees, leading out toward the wild hills beyond.",
+    "area": "midgard",
+    "xyz": [4, 8, "midgard"],
+    "room_id": 200069,
+    "exits": {
+      "east": 200068,
+      "west": 200063,
+      "south": 200064
+    }
+  }
+]
