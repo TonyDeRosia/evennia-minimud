@@ -1,0 +1,10 @@
+{
+    "vnum": 200001,
+    "key": "Verdant Field",
+    "desc": "Tall grasses whisper in the breeze.",
+    "typeclass": "typeclasses.rooms.Room",
+    "area": "townsburg",
+    "spawns": [
+        {"proto": "goblin_grunt", "initial_count": 1, "max_count": 3, "respawn_rate": 60}
+    ]
+}
