@@ -1,6 +1,6 @@
 from evennia import CmdSet
 from ..command import Command
-from world import spawn_manager
+from evennia.scripts.models import ScriptDB
 
 
 class CmdSpawnReload(Command):
@@ -11,7 +11,11 @@ class CmdSpawnReload(Command):
     help_category = "Admin"
 
     def func(self):
-        spawn_manager.SpawnManager.reload_spawns()
+        script = ScriptDB.objects.filter(db_key="spawn_manager").first()
+        if not script or not hasattr(script, "reload_spawns"):
+            self.msg("Spawn manager not found.")
+            return
+        script.reload_spawns()
         self.msg("Spawn entries reloaded from prototypes.")
 
 
@@ -28,7 +32,11 @@ class CmdForceRespawn(Command):
             self.msg("Usage: @forcerespawn <room_vnum>")
             return
         room_vnum = int(arg)
-        spawn_manager.SpawnManager.force_respawn(room_vnum)
+        script = ScriptDB.objects.filter(db_key="spawn_manager").first()
+        if not script or not hasattr(script, "force_respawn"):
+            self.msg("Spawn manager not found.")
+            return
+        script.force_respawn(room_vnum)
         self.msg(f"Respawn check run for room {room_vnum}.")
 
 
