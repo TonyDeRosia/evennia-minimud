@@ -370,7 +370,7 @@ def menunode_loot(caller, raw_string="", **kwargs):
         text += "None\n"
     text += (
         "Commands:\n  add <proto> [chance] [amount] [guaranteed]\n  remove <proto>\n  "
-        "done - return\n  back - return\nExample: |wadd 100001 50|n, |wadd gold 100 5|n"
+        "done - return\n  back - return\nExample: |wadd 100001 50|n, |wadd gold 1d4+1|n"
     )
     options = {"key": "_default", "goto": _edit_loot}
     return _with_summary(caller, text), options
@@ -380,6 +380,7 @@ def _edit_loot(caller, raw_string, **kwargs):
     from utils.currency import COIN_VALUES
     from utils.prototype_manager import load_prototype
     from utils import vnum_registry
+    from utils.dice import roll_dice_string
 
     string = raw_string.strip()
     table = caller.ndb.mob_proto.setdefault("loot_table", [])
@@ -413,10 +414,16 @@ def _edit_loot(caller, raw_string, **kwargs):
                 return "menunode_loot"
             chance = int(parts[1])
         if isinstance(proto, str) and proto.lower() in COIN_VALUES and len(parts) > 2:
-            if not parts[2].isdigit():
-                caller.msg("Amount must be a number.")
-                return "menunode_loot"
-            amount = int(parts[2])
+            amt = parts[2]
+            if amt.isdigit():
+                amount = int(amt)
+            else:
+                try:
+                    roll_dice_string(amt)
+                except Exception:
+                    caller.msg("Amount must be a number or dice string.")
+                    return "menunode_loot"
+                amount = amt
             if len(parts) > 3:
                 if not parts[3].isdigit():
                     caller.msg("Guaranteed count must be a number.")

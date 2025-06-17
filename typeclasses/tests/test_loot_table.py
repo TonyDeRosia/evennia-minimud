@@ -64,3 +64,16 @@ class TestNPCLootTable(EvenniaTest):
             npc.at_damage(self.char1, 2)
         self.assertEqual(to_copper(self.char1.db.coins), to_copper({"gold": 5}))
 
+    def test_loot_table_coin_dice_amount(self):
+        from typeclasses.characters import NPC
+
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+        npc.db.loot_table = [{"proto": "gold", "chance": 100, "amount": "2d6"}]
+        npc.traits.health.current = 1
+        self.char1.db.coins = from_copper(0)
+        with patch("evennia.prototypes.spawner.spawn", return_value=[]), \
+             patch("utils.dice.roll_dice_string", return_value=7):
+            npc.at_damage(self.char1, 2)
+        self.assertEqual(to_copper(self.char1.db.coins), to_copper({"gold": 7}))
+
