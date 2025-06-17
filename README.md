@@ -344,7 +344,8 @@ Example:
 
 `@spawnreload` reloads all spawn entries from saved NPC prototypes.
 Use `@forcerespawn <room_vnum>` to immediately run the spawn
-logic for a specific room.
+logic for a specific room. Use `@showspawns [vnum]` to list
+entries for your current room or the given VNUM.
 
 ## Weapon Creation and Inspection
 
