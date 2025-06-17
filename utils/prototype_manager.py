@@ -12,6 +12,8 @@ from pathlib import Path
 import json
 from typing import Dict, Optional
 
+from evennia.utils import logger
+
 from django.conf import settings
 
 from .vnum_registry import (
@@ -70,7 +72,11 @@ def load_all_prototypes(category: str) -> Dict[int, dict]:
         try:
             with file.open("r") as f:
                 proto = json.load(f)
-            result[int(file.stem)] = proto
+            try:
+                result[int(file.stem)] = proto
+            except ValueError:
+                logger.log_info(f"Skipped non-numeric prototype file: {file.name}")
+                continue
         except json.JSONDecodeError:
             continue
     return result
