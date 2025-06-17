@@ -129,6 +129,12 @@ class SpawnManager(Script):
         """Reload spawn data from prototypes and spawn initial mobs."""
         self.load_spawn_data()
         self.at_start()
+        # Force an immediate respawn in every room after reloading. This helps
+        # during debugging so changes to prototypes are reflected right away.
+        for entry in self.db.entries:
+            room_vnum = self._normalize_room_id(entry.get("room"))
+            if room_vnum is not None:
+                self.force_respawn(room_vnum)
 
     # ------------------------------------------------------------
     # internal helpers
