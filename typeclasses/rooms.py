@@ -106,6 +106,29 @@ class RoomParent(ObjectParent):
         """Return the room id inside its area."""
         return self.db.room_id
 
+    # -----------------------------------------------------------------
+    # display helpers
+
+    def get_display_name(self, looker, **kwargs):
+        """Return the room name with optional area and vnum."""
+
+        name = self.key
+        room_id = self.get_room_id()
+        if (
+            room_id is not None
+            and looker
+            and (
+                looker.check_permstring("Builder")
+                or looker.check_permstring("Admin")
+            )
+        ):
+            area = self.get_area()
+            if area:
+                name = f"{name} ({area}) - {room_id}"
+            else:
+                name = f"{name} - {room_id}"
+        return name
+
     def get_display_footer(self, looker, **kwargs):
         """
         Shows a list of commands available here to the viewer.
@@ -135,7 +158,7 @@ class RoomParent(ObjectParent):
         if not looker:
             return ""
 
-        text = f"|c{self.key}|n\n"
+        text = f"|c{self.get_display_name(looker)}|n\n"
         text += f"{self.db.desc}\n"
 
         exits = self.get_display_exits(looker)

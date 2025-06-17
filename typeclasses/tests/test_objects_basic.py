@@ -200,6 +200,27 @@ class TestRoomHeaders(EvenniaTest):
         self.assertIn("(2, 3, zone)", header)
 
 
+class TestRoomDisplayName(EvenniaTest):
+    def test_display_name_builder_shows_vnum(self):
+        from typeclasses.rooms import Room
+
+        room = create_object(Room, key="field")
+        room.set_area("verdant_overgrowth", 200004)
+        self.char1.permissions.add("Builder")
+
+        name = room.get_display_name(self.char1)
+        self.assertEqual(name, "field (verdant_overgrowth) - 200004")
+
+    def test_display_name_player_no_vnum(self):
+        from typeclasses.rooms import Room
+
+        room = create_object(Room, key="field")
+        room.set_area("verdant_overgrowth", 200004)
+
+        name = room.get_display_name(self.char1)
+        self.assertEqual(name, "field")
+
+
 class TestMeleeWeaponAtAttack(EvenniaTest):
     def test_damage_dice_only(self):
         weapon = create_object(
