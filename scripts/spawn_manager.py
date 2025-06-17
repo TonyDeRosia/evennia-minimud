@@ -19,7 +19,8 @@ class SpawnManager(Script):
     def at_script_creation(self):
         self.key = "spawn_manager"
         self.desc = "Handles mob respawning for rooms"
-        self.interval = 60
+        # run frequently so short spawn intervals are respected
+        self.interval = 5
         self.persistent = True
         self.db.entries = self.db.entries or []
         self.db.batch_size = self.db.batch_size or 1
