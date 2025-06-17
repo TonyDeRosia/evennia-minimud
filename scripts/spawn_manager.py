@@ -43,10 +43,12 @@ class SpawnManager(Script):
     def load_spawn_data(self):
         """Load spawn entries from room prototypes."""
         from utils.prototype_manager import load_all_prototypes
+        from world.scripts.mob_db import get_mobdb
 
         self.db.entries = []
         room_protos = load_all_prototypes("room")
         npc_registry = prototypes.get_npc_prototypes()
+        mob_db = get_mobdb()
         for proto in room_protos.values():
             spawns = proto.get("spawns") or []
             if not spawns:
@@ -55,7 +57,15 @@ class SpawnManager(Script):
                 proto_key = entry.get("prototype") or entry.get("proto")
                 if not proto_key:
                     continue
-                if str(proto_key) not in npc_registry:
+                if isinstance(proto_key, int) or (
+                    isinstance(proto_key, str) and proto_key.isdigit()
+                ):
+                    if not mob_db.get_proto(int(proto_key)):
+                        logger.log_err(
+                            f"SpawnManager: missing NPC prototype '{proto_key}' for room spawn"
+                        )
+                        continue
+                elif str(proto_key) not in npc_registry:
                     logger.log_err(
                         f"SpawnManager: missing NPC prototype '{proto_key}' for room spawn"
                     )

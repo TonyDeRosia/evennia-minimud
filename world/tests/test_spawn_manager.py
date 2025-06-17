@@ -9,11 +9,13 @@ from scripts.spawn_manager import SpawnManager
 
 class TestSpawnManager(EvenniaTest):
     def setUp(self):
+        from django.conf import settings
+        settings.TEST_ENVIRONMENT = True
         super().setUp()
         self.room = create_object(Room, key="room")
         self.room.set_area("testarea", 1)
-        self.script = SpawnManager()
-        self.script.at_script_creation()
+        from evennia.utils import create
+        self.script = create.create_script(SpawnManager, key="spawn_manager")
 
     def test_reset_area_spawns_npc(self):
         self.script.db.entries = [
@@ -26,7 +28,14 @@ class TestSpawnManager(EvenniaTest):
                 "last_spawn": 0,
             }
         ]
-        self.script.force_respawn(1)
+        npc = create_object(BaseNPC, key="basic_merchant")
+        with mock.patch(
+            "scripts.spawn_manager.prototypes.get_npc_prototypes",
+            return_value={"basic_merchant": {"key": "basic_merchant"}},
+        ), mock.patch(
+            "evennia.prototypes.spawner.spawn", return_value=[npc]
+        ):
+            self.script.force_respawn(1)
         npcs = [obj for obj in self.room.contents if obj.is_typeclass(BaseNPC, exact=False)]
         self.assertEqual(len(npcs), 1)
         self.assertEqual(npcs[0].db.prototype_key, "basic_merchant")
@@ -50,6 +59,40 @@ class TestSpawnManager(EvenniaTest):
         self.assertEqual(len(self.script.db.entries), 1)
         self.assertEqual(self.script.db.entries[0]["prototype"], "valid_proto")
         m_log.assert_called_once()
+
+    def test_load_spawn_data_numeric_proto(self):
+        obj = create_object(BaseNPC, key="num")
+        with mock.patch("utils.prototype_manager.load_all_prototypes") as m_load, \
+             mock.patch("world.prototypes.get_npc_prototypes", return_value={}) as m_npcs, \
+             mock.patch("world.scripts.mob_db.get_mobdb") as m_db, \
+             mock.patch("scripts.spawn_manager.spawn_from_vnum") as m_spawn, \
+             mock.patch("evennia.utils.logger.log_err") as m_log:
+            m_load.return_value = {
+                1: {
+                    "vnum": 1,
+                    "area": "testarea",
+                    "spawns": [{"prototype": 5}],
+                }
+            }
+            fake = mock.Mock()
+            fake.get_proto.return_value = {"key": "num"}
+            m_db.return_value = fake
+
+            def side(vnum, location=None):
+                obj.location = location
+                return obj
+
+            m_spawn.side_effect = side
+
+            self.script.load_spawn_data()
+            self.script.force_respawn(1)
+
+        self.assertEqual(len(self.script.db.entries), 1)
+        self.assertEqual(self.script.db.entries[0]["prototype"], 5)
+        self.assertEqual(obj.location, self.room)
+        fake.get_proto.assert_called_with(5)
+        m_spawn.assert_called_with(5, location=self.room)
+        m_log.assert_not_called()
 
     def test_reload_spawns_forces_respawn(self):
         """reload_spawns should trigger force_respawn for each room."""
