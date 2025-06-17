@@ -3,10 +3,10 @@ from ..command import Command
 from evennia.scripts.models import ScriptDB
 
 class CmdResetWorld(Command):
-    """Reset all areas by despawning and respawning spawns."""
+    """Trigger respawn checks for all areas without despawning existing mobs."""
 
     key = "@resetworld"
-    aliases = ["@refreshworld"]
+    aliases = ["@refreshworld", "@respawnworld"]
     locks = "cmd:perm(Builder)"
     help_category = "Admin"
 
