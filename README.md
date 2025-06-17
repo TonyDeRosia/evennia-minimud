@@ -340,6 +340,12 @@ Example:
 @mobproto spawn 1
 ```
 
+## Spawn Control
+
+`@spawnreload` reloads all spawn entries from saved NPC prototypes.
+Use `@forcerespawn <room_vnum>` to immediately run the spawn
+logic for a specific room.
+
 ## Weapon Creation and Inspection
 
 Builders can quickly create melee weapons with the `cweapon` command.
