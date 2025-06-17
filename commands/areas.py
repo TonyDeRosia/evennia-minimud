@@ -8,7 +8,7 @@ from scripts.area_spawner import AreaSpawner
 from world.areas import Area, get_areas, save_area, update_area, find_area
 from .aedit import CmdAEdit, CmdAList, CmdASave, CmdAreaReset, CmdAreaAge
 from typeclasses.rooms import Room
-from utils.prototype_manager import load_prototype
+from utils.prototype_manager import load_prototype, load_all_prototypes
 
 
 class CmdAMake(Command):
@@ -452,6 +452,46 @@ class CmdRReg(Command):
         self.msg(f"{name} registered as {area_name} #{room_id}.")
 
 
+class CmdRRegAll(Command):
+    """Spawn and register all room prototypes."""
+
+    key = "rregall"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        created = 0
+        protos = load_all_prototypes("room")
+        for vnum, proto in protos.items():
+            area_name = proto.get("area")
+            if not area_name:
+                continue
+            idx, area = find_area(area_name)
+            if area is None:
+                continue
+            room_id = int(vnum)
+            objs = ObjectDB.objects.filter(
+                db_attributes__db_key="area",
+                db_attributes__db_strvalue__iexact=area_name,
+            )
+            exists = False
+            for obj in objs:
+                if obj.db.room_id == room_id and obj.is_typeclass(Room, exact=False):
+                    exists = True
+                    break
+            if exists:
+                continue
+
+            new_room = spawner.spawn(proto)[0]
+            new_room.set_area(area_name, room_id)
+            if room_id not in area.rooms:
+                area.rooms.append(room_id)
+            update_area(idx, area)
+            created += 1
+
+        self.msg(f"Created {created} room{'s' if created != 1 else ''}.")
+
+
 class AreaCmdSet(CmdSet):
     key = "Area CmdSet"
 
@@ -471,6 +511,7 @@ class AreaCmdSet(CmdSet):
         self.add(CmdRDesc)
         self.add(CmdRSet)
         self.add(CmdRReg)
+        self.add(CmdRRegAll)
         self.add(CmdRSpawner)
         from .redit import CmdREdit
         self.add(CmdREdit)
