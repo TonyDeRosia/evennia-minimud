@@ -1,5 +1,6 @@
 from evennia import CmdSet
 from evennia.commands.default.general import CmdLook as DefaultCmdLook
+from utils import auto_search
 
 from .command import Command
 
@@ -103,13 +104,20 @@ class CmdLook(DefaultCmdLook):
 
     def parse(self):
         super().parse()
+        self.looking_in = False
         if self.args and self.args.lower().startswith("in "):
+            self.looking_in = True
             self.args = self.args[3:].strip()
 
     def func(self):
         if self.caller.tags.has("sleeping", category="status"):
             self.caller.msg("You can't see anything with your eyes closed.")
             return
+        if self.args and not self.looking_in:
+            target = auto_search(self.caller, self.args)
+            if target:
+                self.caller.msg(target.return_appearance(self.caller))
+                return
         super().func()
 
 
