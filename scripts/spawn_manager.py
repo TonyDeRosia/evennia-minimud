@@ -204,8 +204,11 @@ class SpawnManager(Script):
 
     def _spawn(self, proto: Any, room: Any) -> None:
         npc = None
+        proto_is_digit = isinstance(proto, int) or (
+            isinstance(proto, str) and str(proto).isdigit()
+        )
         try:
-            if isinstance(proto, int) or (isinstance(proto, str) and str(proto).isdigit()):
+            if proto_is_digit:
                 npc = spawn_from_vnum(int(proto), location=room)
                 npc.db.prototype_key = int(proto)
             else:
@@ -232,11 +235,12 @@ class SpawnManager(Script):
         if npc:
             npc.db.spawn_room = room
             npc.db.area_tag = room.db.area
-            try:
-                from commands.npc_builder import finalize_mob_prototype  # lazy import
-                finalize_mob_prototype(npc, npc)
-            except Exception as err:  # pragma: no cover - log errors
-                logger.log_err(f"Finalize error on {npc}: {err}")
+            if not proto_is_digit:
+                try:
+                    from commands.npc_builder import finalize_mob_prototype  # lazy import
+                    finalize_mob_prototype(npc, npc)
+                except Exception as err:  # pragma: no cover - log errors
+                    logger.log_err(f"Finalize error on {npc}: {err}")
 
     # ------------------------------------------------------------
     # script hooks
