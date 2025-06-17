@@ -10,6 +10,7 @@ from evennia.utils import iter_to_str, logger, lazy_property
 from evennia.objects.objects import DefaultRoom
 from evennia.contrib.grid.xyzgrid.xyzroom import XYZRoom
 from evennia.contrib.grid.wilderness.wilderness import WildernessRoom
+from evennia.objects.models import ObjectDB
 
 from .objects import ObjectParent
 from .scripts import RestockScript
@@ -240,11 +241,11 @@ class Room(RoomParent, DefaultRoom):
             self.db.coord = (0, 0)
 
     def generate_map(self, looker):
-        """Return a small ASCII map centered on the caller.
+        """Return a 3x3 ASCII grid centered on this room.
 
-        The map shows a framed box with ``[X]`` marking the current room.
-        Arrows and compass directions are added for exits in each of the
-        cardinal directions.
+        The room's coordinates are read from ``self.db.coord``. Adjacent
+        coordinates are checked for existing rooms and displayed as ``[ ]``
+        if present. The current room is always shown as ``[X]``.
 
         Args:
             looker (Object): The object viewing the room.
@@ -253,38 +254,30 @@ class Room(RoomParent, DefaultRoom):
             str: The generated ASCII map.
         """
 
-        # ``coord`` is optional for this minimalist map. If coordinates are not
-        # defined we still want to show the boxed room with exits.
         coord = self.db.coord
+        if coord is None:
+            # some legacy rooms may not have coordinates set
+            coord = (0, 0)
+            self.db.coord = coord
 
-        exits = self.db.exits or {}
-
-        north = "north" in exits
-        south = "south" in exits
-        east = "east" in exits
-        west = "west" in exits
-
+        x, y = coord
         map_lines = []
 
-        # north label/arrow
-        if north:
-            map_lines.append("     N")
-            map_lines.append("  __^__")
-
-        map_lines.append(" |     |")
-
-        center = "[X]"
-        mid = ""
-        mid += "W<| " if west else "   | "
-        mid += center
-        mid += " |>E" if east else " |  "
-        map_lines.append(mid.rstrip())
-
-        map_lines.append(" |____|")
-
-        if south:
-            map_lines.append("     v")
-            map_lines.append("     S")
+        for row_y in range(y + 1, y - 2, -1):
+            row = []
+            for col_x in range(x - 1, x + 2):
+                if (col_x, row_y) == (x, y):
+                    row.append("[X]")
+                elif (row_y == y and abs(col_x - x) == 1) or (
+                    col_x == x and abs(row_y - y) == 1
+                ):
+                    room_exists = bool(
+                        ObjectDB.objects.get_by_attribute(key="coord", value=(col_x, row_y))
+                    )
+                    row.append("[ ]" if room_exists else "   ")
+                else:
+                    row.append("   ")
+            map_lines.append("".join(row))
 
         return "\n".join(map_lines)
 
