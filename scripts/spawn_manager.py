@@ -199,6 +199,9 @@ class SpawnManager(Script):
             else:
                 p_data = prototypes.get_npc_prototypes().get(str(proto))
                 if not p_data:
+                    logger.log_warn(
+                        f"SpawnManager: prototype {proto} not found for room {getattr(room, 'dbref', room)}"
+                    )
                     return
                 data = dict(p_data)
                 base_cls = data.get("typeclass", "typeclasses.npcs.BaseNPC")
@@ -229,13 +232,22 @@ class SpawnManager(Script):
     def at_start(self):
         for entry in self.db.entries:
             room = self._get_room(entry)
-            if not room:
-                continue
             proto = entry.get("prototype")
+            if not room:
+                logger.log_warn(
+                    f"SpawnManager: room {entry.get('room')} not found for {proto}"
+                )
+                continue
             existing = self._live_count(proto, room)
-            to_spawn = max(0, entry.get("max_count", 1) - existing)
+            max_count = entry.get("max_count", 1)
+            if existing >= max_count:
+                logger.log_info(
+                    f"SpawnManager: skipping spawn in room {room.dbref} for {proto}; capacity {existing}/{max_count}"
+                )
+                continue
+            to_spawn = max(0, max_count - existing)
             for _ in range(to_spawn):
-                if self._live_count(proto, room) < entry.get("max_count", 1):
+                if self._live_count(proto, room) < max_count:
                     self._spawn(proto, room)
                     entry["last_spawn"] = time.time()
                     logger.log_info(
@@ -246,13 +258,17 @@ class SpawnManager(Script):
         now = time.time()
         for entry in self.db.entries:
             room = self._get_room(entry)
-            if not room:
-                continue
             proto = entry.get("prototype")
+            if not room:
+                logger.log_warn(
+                    f"SpawnManager: room {entry.get('room')} not found for {proto}"
+                )
+                continue
             live = self._live_count(proto, room)
-            if live >= entry.get("max_count", 0):
+            max_count = entry.get("max_count", 0)
+            if live >= max_count:
                 logger.log_info(
-                    f"SpawnManager: limit reached in room {room.dbref} for {proto}"
+                    f"SpawnManager: skipping spawn in room {room.dbref} for {proto}; capacity {live}/{max_count}"
                 )
                 continue
             last = entry.get("last_spawn", 0)
