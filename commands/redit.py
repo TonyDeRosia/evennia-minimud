@@ -18,6 +18,7 @@ from utils.vnum_registry import (
 from world.areas import find_area_by_vnum, get_areas, update_area
 from evennia.prototypes import spawner
 from world.areas import find_area
+from evennia.objects.models import ObjectDB
 from .building import DIR_FULL, OPPOSITE
 from .command import Command
 
@@ -210,7 +211,9 @@ class CmdREdit(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: redit <vnum> | redit create <vnum> | redit vnum <old> <new>")
+            self.msg(
+                "Usage: redit <vnum> | redit create <vnum> | redit here <vnum> | redit vnum <old> <new>"
+            )
             return
 
         parts = self.args.split()
@@ -244,7 +247,7 @@ class CmdREdit(Command):
             old_str, new_str = parts[1], parts[2]
             if not (old_str.isdigit() and new_str.isdigit()):
                 self.msg(
-                    "Usage: redit <vnum> | redit create <vnum> | redit vnum <old> <new>"
+                    "Usage: redit <vnum> | redit create <vnum> | redit here <vnum> | redit vnum <old> <new>"
                 )
                 return
             old_vnum, new_vnum = int(old_str), int(new_str)
@@ -284,8 +287,82 @@ class CmdREdit(Command):
             self.msg(f"Room prototype {old_vnum} moved to {new_vnum}.")
             return
 
+        if sub == "here" and len(parts) == 2 and parts[1].isdigit():
+            vnum = int(parts[1])
+            room = self.caller.location
+            if not room:
+                self.msg("You have no location.")
+                return
+            if not validate_vnum(vnum, "room"):
+                start, end = VNUM_RANGES["room"]
+                self.msg(
+                    f"Invalid or already used VNUM. Rooms use {start}-{end}. "
+                    "Try @nextvnum R."
+                )
+                return
+            area_name = room.db.area
+            area = None
+            idx = -1
+            if area_name:
+                idx, area = find_area(area_name)
+                if area and not (area.start <= vnum <= area.end):
+                    self.msg("Number outside area range.")
+                    return
+                objs = ObjectDB.objects.filter(
+                    db_attributes__db_key="area",
+                    db_attributes__db_strvalue__iexact=area_name,
+                )
+                for obj in objs:
+                    if obj == room:
+                        continue
+                    if obj.db.room_id == vnum and obj.is_typeclass(Room, exact=False):
+                        self.msg("Room already exists.")
+                        return
+
+            register_vnum(vnum)
+            proto = {
+                "typeclass": "typeclasses.rooms.Room",
+                "key": room.key,
+                "desc": room.db.desc or "",
+                "exits": {},
+            }
+            if area_name:
+                proto["area"] = area_name
+            exits = room.db.exits or {}
+            for dirkey, target in exits.items():
+                dest_id = getattr(target.db, "room_id", None)
+                if isinstance(dest_id, int):
+                    proto["exits"][dirkey] = dest_id
+            flags = room.tags.get(category="room_flag", return_list=True) or []
+            if flags:
+                proto["flags"] = list(flags)
+            save_prototype("room", proto, vnum=vnum)
+
+            room.set_area(area_name, vnum)
+            if area and vnum not in area.rooms:
+                area.rooms.append(vnum)
+                update_area(idx, area)
+
+            self.caller.ndb.room_protos = {vnum: proto}
+            self.caller.ndb.current_vnum = vnum
+            state = OLCState(
+                data=self.caller.ndb.room_protos,
+                vnum=vnum,
+                original=dict(self.caller.ndb.room_protos),
+            )
+            OLCEditor(
+                self.caller,
+                "commands.redit",
+                startnode="menunode_main",
+                state=state,
+                validator=OLCValidator(),
+            ).start()
+            return
+
         if sub != "create" or len(parts) != 2:
-            self.msg("Usage: redit <vnum> | redit create <vnum> | redit vnum <old> <new>")
+            self.msg(
+                "Usage: redit <vnum> | redit create <vnum> | redit here <vnum> | redit vnum <old> <new>"
+            )
             return
 
         if not parts[1].isdigit():

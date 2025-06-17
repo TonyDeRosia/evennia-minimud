@@ -2,7 +2,8 @@ from evennia import create_object
 from evennia.objects.models import ObjectDB
 from .command import Command
 from typeclasses.rooms import Room
-from world.areas import find_area, parse_area_identifier, find_area_by_vnum
+from world.areas import find_area, parse_area_identifier, find_area_by_vnum, update_area
+from utils import vnum_registry
 from utils import VALID_SLOTS, normalize_slot
 
 
@@ -121,14 +122,27 @@ class CmdDig(Command):
                     caller.msg("Room id must be numeric.")
                     return
 
+        idx = -1
         if area:
-            _, area_data = find_area(area)
+            idx, area_data = find_area(area)
             if area_data:
+                if room_id is None:
+                    try:
+                        room_id = vnum_registry.get_next_vnum_for_area(
+                            area_data.key,
+                            "room",
+                            builder=caller.key,
+                        )
+                    except Exception:
+                        room_id = None
                 if room_id is not None and not (area_data.start <= room_id <= area_data.end):
                     caller.msg("Number outside area range.")
                     return
             if room_id is not None:
-                objs = ObjectDB.objects.filter(db_attributes__db_key="area", db_attributes__db_strvalue__iexact=area)
+                objs = ObjectDB.objects.filter(
+                    db_attributes__db_key="area",
+                    db_attributes__db_strvalue__iexact=area,
+                )
                 for obj in objs:
                     if obj.db.room_id == room_id:
                         caller.msg("Room already exists.")
@@ -138,6 +152,10 @@ class CmdDig(Command):
         new_room = create_object(Room, key="Room")
         if area:
             new_room.set_area(area, room_id)
+            if idx >= 0 and area_data and room_id is not None:
+                if room_id not in area_data.rooms:
+                    area_data.rooms.append(room_id)
+                    update_area(idx, area_data)
 
         # add exits in both directions
         caller.location.db.exits = caller.location.db.exits or {}
