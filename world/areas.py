@@ -98,7 +98,6 @@ def rename_area(old: str, new: str) -> None:
     The area's JSON file is renamed and all room prototypes
     referencing the area are updated.
     """
-
     idx, area = find_area(old)
     if area is None or idx == -1:
         raise ValueError("Area not found")
@@ -119,6 +118,31 @@ def rename_area(old: str, new: str) -> None:
         if str(proto.get("area", "")).lower() == old.lower():
             proto["area"] = new
             save_prototype("room", proto, vnum=vnum)
+
+
+def delete_area(name: str) -> bool:
+    """Remove area ``name`` from disk and unassign its rooms.
+
+    The comparison is case-insensitive. Returns ``True`` if an area file
+    was removed.
+    """
+    path = _file_path(name)
+    removed = False
+    if path.exists():
+        path.unlink()
+        removed = True
+
+    # clear area from any rooms currently assigned to it
+    from evennia.objects.models import ObjectDB
+    from typeclasses.rooms import Room
+
+    objs = ObjectDB.objects.filter(db_attributes__db_key="area",
+                                   db_attributes__db_strvalue__iexact=name)
+    for obj in objs:
+        if obj.is_typeclass(Room, exact=False):
+            obj.attributes.remove("area")
+
+    return removed
 
 
 def find_area(name: str) -> tuple[int, Optional[Area]]:

@@ -3,7 +3,7 @@ from evennia import CmdSet
 from evennia.objects.models import ObjectDB
 from evennia.server.models import ServerConfig
 from typeclasses.rooms import Room
-from .command import Command
+from .command import Command, MuxCommand
 from world.areas import (
     Area,
     get_areas,
@@ -11,6 +11,7 @@ from world.areas import (
     update_area,
     rename_area,
     find_area,
+    delete_area,
     parse_area_identifier,
 )
 from world import area_npcs
@@ -423,6 +424,39 @@ class CmdAreaAge(Command):
         self.msg(f"{area.key} age: {area.age}")
 
 
+class CmdADel(MuxCommand):
+    """Delete an area and unassign its rooms."""
+
+    key = "adel"
+    locks = "cmd:perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        force = False
+        if "--force" in self.switches:
+            force = True
+            self.switches.remove("--force")
+
+        if not self.args:
+            self.msg("Usage: adel <area>")
+            return
+
+        name = self.args.strip()
+        idx, area = find_area(name)
+        if area is None or idx == -1:
+            self.msg(f"Area '{name}' not found.")
+            return
+
+        if not force:
+            confirm = yield (f"Delete {area.key}? Yes/No")
+            if confirm.strip().lower() not in ("yes", "y"):
+                self.msg("Cancelled.")
+                return
+
+        delete_area(area.key)
+        self.msg(f"Area {area.key} deleted.")
+
+
 class AreaEditCmdSet(CmdSet):
     """CmdSet adding area editing commands."""
 
@@ -433,6 +467,7 @@ class AreaEditCmdSet(CmdSet):
         self.add(CmdAList)
         self.add(CmdASave)
         self.add(CmdAEdit)
+        self.add(CmdADel)
         self.add(CmdAreaReset)
         self.add(CmdAreaAge)
 
