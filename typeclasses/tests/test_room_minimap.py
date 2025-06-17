@@ -35,9 +35,13 @@ class TestRoomMinimap(EvenniaTest):
         map_output = room.generate_map(self.char1)
 
         expected = [
-            "   [ ]   ",
-            "[ ][X][ ]",
-            "   [ ]   "
+            "     N",
+            "  __^__",
+            " |     |",
+            "W<| [X] |>E",
+            " |____|",
+            "     v",
+            "     S",
         ]
 
         self.assertEqual(map_output.splitlines(), expected)
@@ -78,11 +82,15 @@ class TestRoomMinimap(EvenniaTest):
         east.db.exits = {"west": center}
         west.db.exits = {"east": center}
 
-        # Expected 3x3 grid
+        # Expected boxed map with exits
         expected_map = "\n".join([
-            "   [ ]   ",
-            "[ ][X][ ]",
-            "   [ ]   "
+            "     N",
+            "  __^__",
+            " |     |",
+            "W<| [X] |>E",
+            " |____|",
+            "     v",
+            "     S",
         ])
 
         generated_map = center.generate_map(self.char1)

@@ -14,6 +14,6 @@ asave changed
 ```
 
 Rooms intended for grid-based maps should also include an `xyz` coordinate.
-This triplet `(x, y, "area")` determines where the room appears on the 3×3
+This triplet `(x, y, "area")` determines where the room appears on the
 minimap shown when players `look`. Set `xyz` on the prototype or through
 `redit` to ensure the room is placed correctly.
