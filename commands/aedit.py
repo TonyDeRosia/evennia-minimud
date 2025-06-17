@@ -180,8 +180,10 @@ class CmdASave(Command):
             return
         from commands.redit import proto_from_room
         from utils.prototype_manager import save_prototype
+        from commands.building import refresh_coordinates
         updated = 0
         for idx, area in enumerate(get_areas()):
+            rooms = []
             for room_vnum in area.rooms:
                 objs = ObjectDB.objects.filter(
                     db_attributes__db_key="room_id",
@@ -190,10 +192,13 @@ class CmdASave(Command):
                 room = next(
                     (o for o in objs if o.is_typeclass(Room, exact=False)), None
                 )
-                if not room:
-                    continue
+                if room:
+                    rooms.append(room)
+            if rooms:
+                refresh_coordinates(rooms)
+            for room in rooms:
                 proto = proto_from_room(room)
-                save_prototype("room", proto, vnum=room_vnum)
+                save_prototype("room", proto, vnum=room.db.room_id)
                 updated += 1
             update_area(idx, area)
         self.msg(f"All areas saved. {updated} room prototypes updated.")

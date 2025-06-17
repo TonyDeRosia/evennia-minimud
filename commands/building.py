@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from evennia import create_object
 from evennia.objects.models import ObjectDB
 from .command import Command, MuxCommand
@@ -103,6 +105,42 @@ def _auto_coords(source: Room, dest: Room, direction: str):
     if s_coord is not None and d_coord is None:
         sx, sy = s_coord
         dest.db.coord = (sx + dx, sy + dy)
+
+
+def refresh_coordinates(rooms: Iterable[Room]) -> None:
+    """Recalculate coordinates for ``rooms`` based on their exits."""
+
+    room_list = [r for r in rooms if r]
+    room_set = set(room_list)
+    visited: set[Room] = set()
+
+    for room in room_list:
+        if room in visited:
+            continue
+        if room.db.coord is None:
+            room.db.coord = (0, 0)
+        queue = [room]
+        visited.add(room)
+        while queue:
+            current = queue.pop(0)
+            coord = current.db.coord
+            if coord is None:
+                continue
+            exits = current.db.exits or {}
+            for direc, target in exits.items():
+                if target not in room_set:
+                    continue
+                offset = COORD_OFFSETS.get(direc)
+                if not offset:
+                    continue
+                dx, dy = offset
+                x, y = coord
+                new_coord = (x + dx, y + dy)
+                if target.db.coord != new_coord:
+                    target.db.coord = new_coord
+                if target not in visited:
+                    visited.add(target)
+                    queue.append(target)
 
 
 class CmdDig(MuxCommand):
