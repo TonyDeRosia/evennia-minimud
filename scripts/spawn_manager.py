@@ -218,12 +218,15 @@ class SpawnManager(Script):
             room = self._get_room(entry)
             if not room:
                 continue
-            for _ in range(entry.get("initial_count", 0)):
-                if self._live_count(entry.get("prototype"), room) < entry.get("max_count", 0):
-                    self._spawn(entry.get("prototype"), room)
+            proto = entry.get("prototype")
+            existing = self._live_count(proto, room)
+            to_spawn = max(0, entry.get("initial_count", 0) - existing)
+            for _ in range(to_spawn):
+                if self._live_count(proto, room) < entry.get("max_count", 0):
+                    self._spawn(proto, room)
                     entry["last_spawn"] = time.time()
                     logger.log_info(
-                        f"SpawnManager: spawned {entry.get('prototype')} in room {room.dbref}"
+                        f"SpawnManager: spawned {proto} in room {room.dbref}"
                     )
 
     def at_repeat(self):
