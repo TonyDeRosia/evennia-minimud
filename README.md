@@ -1,71 +1,53 @@
-# Evennia: The RPG
+Evennia: The RPG
+What is this?
+Evennia is a game engine/framework for creating online multiplayer text games, such as MUDs.
 
+This project is a compact, fully-functional RPG-style MUD built using Evennia, with minimal custom code and heavy use of community-contributed packages.
 
-### What is this?
+Why?
+I wanted to see how feasible it is for a new developer to build and launch a complete game using Evennia. This project serves both as a personal experiment and as a reference for anyone interested in creating their own game.
 
-Evennia is a game engine/framework for making online multiplayer text games, such as MUDs.
+Evennia is powerful and flexible, but intentionally unopinionated. That makes it great for custom work—but a bit sparse out of the box. The community contribs, however, are plug-and-play systems that can rapidly enhance your game. If they fit your needs, just drop them in.
 
-*This* game is an attempt to make a small but fully-functional RPG-style MUD with as little custom code as possible, relying as much as possible on the existing community-contributed packages. 
+Can I use this as a base for my own game?
+Yes! Please do. Installation instructions are below, and additional documentation can be found on the Evennia website.
 
-### Okay... but why?
+Getting Started
+This project uses a round-based combat system that processes queued actions each tick. Refer to docs/combat_loop_mapping.md for a full walkthrough of combat.
 
-I wanted to see just how doable it would be for a brand new game developer to get a typical full game out the door - both for my own curiosity, and to show to other people who might want to make their own games!
+Currency
+There are four coin types:
 
-One of the selling points of Evennia, besides how flexible and easy to customize it is, is the fact that you can have a server set up and online within minutes. But part of that "flexible and easy to customize" angle means that it tries to be as unopinionated as possible and have as few of the kinds of mechanics that make a game unique defined out of the box. The community contribs, on the other hand, are stand-alone add-ons that can be as opinionated as the contributors want, so if they suit your game vision, you can just put them right in.
+Copy
+Edit
+1 Silver   = 100 Copper
+1 Gold     = 10 Silver   = 1,000 Copper
+1 Platinum = 100 Gold    = 100,000 Copper
+Typical usage:
 
-### Can I use this to make my own game?
+Copper – meals, basic supplies.
 
-Yes!! Please do! There's installation instructions further down, and be sure to check out the [Evennia website](https://evennia.com).
+Silver – standard gear and services.
 
-### This game is okay but it would be better if it had <something else>....
+Gold – premium items, mounts, property.
 
-You are absolutely correct!
+Platinum – rare transactions or guild-level assets.
 
-Since my goal was to write as little custom code as possible, most of the mechanics are as minimal as I could get away with. But the code is all here and free for the taking - if you like part of it but want it to be better, make it better!
+Use the bank command near a banker:
 
-
-## Getting Started
-
-The combat system uses a round manager that processes queued actions once per
-tick for each ongoing battle. See
-[docs/combat_loop_mapping.md](docs/combat_loop_mapping.md) for a walkthrough of
-starting combat and reading the results.
-
-## Coins and Currency
-
-This game uses four types of coins. They convert as follows:
-
-```
-1 Silver = 100 Copper
-1 Gold  = 10 Silver  = 1,000 Copper
-1 Platinum = 100 Gold = 1,000 Silver = 100,000 Copper
-```
-
-Typical uses for each coin are roughly:
-
-- **Copper** – everyday expenses like a meal or a night at a cheap inn.
-- **Silver** – standard goods, basic gear or routine services.
-- **Gold** – quality equipment or costly services such as a house or mount.
-- **Platinum** – rare, high value purchases or very large transactions.
-
-Bankers can hold your coins for safekeeping. When near one, use the `bank`
-command to check your balance, deposit or withdraw funds, or transfer money to
-another player:
-
-```
+php-template
+Copy
+Edit
 bank balance
 bank deposit <amount [coin]>
 bank withdraw <amount [coin]>
 bank transfer <amount [coin]> <player>
-```
+Minimap
+Rooms display a visual minimap:
 
-## Minimap
-
-Looking at a room displays a small minimap above the description. The current
-room appears as `[X]` inside a box with exit arrows and compass directions
-around it.
-
-```
+mathematica
+Copy
+Edit
      N
   __^__
  |     |
@@ -73,27 +55,18 @@ W<| [X] |>E
  |____|
      v
      S
-```
+Rooms can optionally store (x, y, "area") coordinates for use with xyzgrid mapping.
 
-Rooms in grid-based areas can define optional `xyz` coordinates
-with `(x, y, "area")` for more advanced mapping. The boxed minimap
-works even without coordinates, but setting them through `redit` or a
-prototype allows other systems to locate the room on a larger map. See
-[docs/area_json.md](docs/area_json.md) for more details.
+Installation
+Requirements
+Python 3.12+
 
+Git
 
-## Installation and Setup
-
-I set this up to make it reasonably easy to install and set up, but I had to make a decision between "write a bunch more code" and "add a couple more steps" and since my goal was to write *less* code.... Well, you've got a couple more steps.
-
-First, make sure **Python 3.12 or newer** and git are available on your command line. If your system ships with an older Python, upgrade before continuing. Windows installers can be found on the [Python downloads page](https://www.python.org/downloads/). Linux and Mac users can install through their package manager (for example `sudo apt install python3.12 python3.12-venv` or `brew install python@3.12`) or by using [pyenv](https://github.com/pyenv/pyenv).
-
-Once Python 3.12 is installed, cd to your programming folder (or make one and cd in) and follow these steps to download and install:
-
-*(If you know what any of the steps do and want to do them differently, feel free.)*
-
-#### Windows
-```
+Windows
+bash
+Copy
+Edit
 git clone https://github.com/InspectorCaracal/evennia-minimud.git
 cd evennia-minimud
 py -m venv .venv
@@ -102,423 +75,148 @@ pip install .
 py -m evennia
 evennia migrate
 evennia start
-```
-
-#### Linux & Mac
-```
+Linux / macOS
+bash
+Copy
+Edit
 git clone https://github.com/InspectorCaracal/evennia-minimud.git
 cd evennia-minimud
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install .
 evennia migrate
 evennia start
-```
+Follow the prompt to create your superuser account.
 
-That last step will prompt you to set up an initial admin, or superuser, account for the game. It also creates an initial test character.
-
-*If you forget your password, you can change it from outside the game with `evennia changepassword youraccount` at any time - just make sure to reload the game with `evennia reload` so it will take effect.*
-
-Once you've done that and it finishes starting up, set up the XYZGrid map plugin and the starter town with the following:
-
-```
+Setup Continued
+bash
+Copy
+Edit
 evennia xyzgrid init
 evennia xyzgrid add world.maps.starter_town
 evennia xyzgrid spawn
-```
+evennia reload
+Then, in-game:
 
-Enter `Y` to start the map building, wait a bit for that to finish, then:
+bash
+Copy
+Edit
+ic
+batchcmd initial_build
+Creating NPCs
+Use:
 
-    evennia reload
-		
-Finally, open your web browser and go to `localhost:4001` to get to the game's webpage, log in, and then click the big `Play in the browser!` button....
+bash
+Copy
+Edit
+cnpc start <key>
+This launches the builder menu. Choose an NPC type:
 
-You're connected to the game! Use the `ic` command to connect to your test character in order to finish the last piece of setup. Once you're in Limbo, enter:
+merchant, banker, trainer, wanderer, combatant
 
-    batchcmd initial_build
+Combatants use CombatNPC and require a class from world.scripts.classes.
 
-to create the "overworld" map and do some finishing touches to the town's set-up.
+Trigger syntax is flexible:
 
-## Building your Own Game
+json
+Copy
+Edit
+{
+  "on_enter": [
+    {"match": "", "responses": ["say Hello", "emote waves"]}
+  ]
+}
+You can also run mob commands such as:
 
-You want to make your own game? Awesome! The code here should help give you something to start from, but you should also check out the excellent Evennia docs - especially the [tutorial walkthrough](https://www.evennia.com/docs/latest/Howtos/Beginner-Tutorial/Beginner-Tutorial-Overview.html). It covers working with Evennia, developing within Evennia, and a walkthrough of building a full game within Evennia. (It's still in-progress but is *mostly* complete.)
+mob mpdamage <target> <amount> [type]
 
-If you wind up having any issues or questions working with Evennia, [the Discord community](https://discord.gg/AJJpcRUhtF) is small but active and there's almost always someone around who's happy to help newcomers.
+mob mpapply <target> <effect> [duration]
 
-### NPC Creation Menu
+mob mpcall <module.func>
 
-You can quickly set up non-player characters using `cnpc start <key>` (alias
-`createnpc`). This opens an interactive menu where you enter the key,
-description, type, level and other details. Follow the prompts, review the summary at the end
-and confirm to create your NPC. You can later update them with `cnpc edit
-<npc>`.
+To respawn, clone, or list:
 
-See the `cnpc` help entry for a full breakdown of every menu option.
+bash
+Copy
+Edit
+@spawnnpc <proto>
+@clonenpc <existing> [= new_name]
+@deletenpc <npc>
+@listnpcs [area]
+To assign AI:
 
-The builder lets you choose an NPC type such as `merchant`, `banker`,
-`trainer`, `wanderer` or `combatant`. These map to the typeclasses under
-`typeclasses.npcs`. When you select the `combatant` type you'll be asked
-for a combat class from `world.scripts.classes`; this sets
-`npc.db.charclass` on the spawned NPC. Combatants use the
-`typeclasses.npcs.combat.CombatNPC` class which automatically sets
-`npc.db.can_attack = True`.
+passive, aggressive, defensive, wander, scripted
 
-While editing, there's a step to manage triggers using a numbered menu. Choose
-`Add trigger` to create a new reaction, `Delete trigger` to remove one, `List
-triggers` to review them and `Finish` when done. Multiple trigger entries can be
-added for the same event. When entering a reaction you may separate several
-commands with commas or semicolons to store them as multiple responses. See the
-`triggers` help entry for the list of events and possible reactions.
+Mob Builder & MEdit
+Use mobbuilder or quickmob:
 
-### NPC Roles and AI
+bash
+Copy
+Edit
+@quickmob goblin warrior
+Use medit <vnum> to edit a numeric prototype or:
 
-The builder lets you assign one or more roles and basic AI scripts. Roles are
-mixins found under `world.npc_roles`:
+bash
+Copy
+Edit
+medit create <vnum>
+Set stats, then save as a prototype. Mobs saved with mobbuilder use the prefix mob_.
 
-- **merchant** – sells items to players.
-- **banker** – handles deposits and withdrawals.
-- **trainer** – teaches skills.
-- **guildmaster** – manages guild business.
-- **guild_receptionist** – greets visitors for a guild.
-- **questgiver** – offers quests to players.
-- **guard** – protects areas or important figures.
-- **combat_trainer** – spars to improve combat ability.
-- **event_npc** – starts or manages special events.
-
-AI behaviors come from `world.npc_handlers.ai` and can be selected in the
-builder:
-
-- **passive** – take no automatic actions.
-- **aggressive** – attack the first player seen.
-- **defensive** – fight back only when in combat.
-- **wander** – roam randomly through available exits.
-- **scripted** – runs the callback stored in ``npc.db.ai_script``.
-
-Custom behaviors may be added by registering a class with
-``combat.ai.register_ai``. Set ``npc.db.ai_type`` to the registered key
-to enable that behavior on an NPC.
-
-For scripted AI you must assign a callable to ``npc.db.ai_script``. This can be
-either a Python import path or a direct function reference. Callbacks must live
-under the ``scripts`` package. Example::
-
-    npc.db.ai_script = "scripts.example_ai.patrol_ai"
-
-You can also attach full Script typeclasses to mobs. After selecting languages in
-the mob builder you will be prompted for a script path such as
-``scripts.bandit_ai.BanditAI``. When saved as a prototype this is stored under
-``scripts`` and automatically started when the mob spawns.
-
-### Trigger Syntax
-
-NPC triggers use a dictionary mapping events to one or more reaction entries. A
-reaction may specify a `match` text and single or multiple `responses` to run::
-
-    {
-        "on_enter": [
-            {"match": "", "responses": ["say Hello", "emote waves"]}
-        ]
-    }
-
-During the builder you can add triggers one at a time. The example above shows
-how multiple responses can be combined in your prototype file or entered during
-the builder by separating commands with commas or semicolons.
-
-To spawn an NPC saved with an AI type and triggers, use:
-
-```text
-@spawnnpc my_npc_proto
-```
-
-There are also helper commands for managing NPCs after creation:
-`@editnpc <npc>` reopens the builder on an existing NPC, `@clonenpc <npc> [= <new_name>]`
-duplicates one, `@deletenpc <npc>` removes it (with confirmation) and
-`@spawnnpc <proto>` spawns a saved prototype from `world/prototypes/npcs.json`.
-You can organize prototypes by area with `@listnpcs <area>`, spawn them with
-`@spawnnpc <area>/<proto>` and duplicate them using
-`@dupnpc <area>/<proto> [= <new_key>]`. Saving a prototype while standing in a
-room that has an `area` set automatically adds it to that area's list.
-
-Several basic NPC prototypes are included out of the box. Try `cnpc dev_spawn basic_merchant`
-or `@spawnnpc basic_merchant` to quickly create a merchant, or `basic_questgiver` for a quest
-giver.
-
-Body part prototypes such as `HEAD_PART` or `ARMS_PART` are also provided in
-`world/prototypes.py`. These are used when player corpses are created and can be
-spawned in your own areas or loot tables.
-
-### Mob Program Commands
-
-Triggers can run mob program commands to control NPCs. Useful actions include:
-
-- `mob mpdamage <target> <amount> [type]` – deal damage to a target.
-- `mob mpapply <target> <effect> [duration]` – apply a timed status effect.
-- `mob mpcall <module.func>` – invoke a Python callback.
-
-Conditional logic is also available using `if`, `else` and `endif` along with
-`break` and `return` to control flow::
-
-    if rand(50)
-        mob echo Lucky!
-    else
-        mob echo Unlucky...
-    endif
-
-### Object and Room Programs
-
-Objects and rooms can have simple programs attached as well. The `opedit`
-and `rpedit` commands add an entry to an object or room prototype by VNUM.
-After entering the number you specify the event name and the command to run.
-For example::
-
-    opedit 100001
-    on_use
-    say It glows brightly.
-
-Programs are saved under `objprogs` or `roomprogs` on the prototype and are
-converted to triggers when the object or room spawns.
-
-### NPC Prototypes
-
-A prototype is a JSON record stored in `world/prototypes/npcs.json` describing
-all of an NPC's settings such as stats, roles, triggers and AI. When you finish
-the builder, selecting **Yes** spawns the NPC in your current location.
-Choosing **Yes & Save Prototype** spawns the NPC and writes the prototype to
-that file so you can recreate it later. In this context **prototype** means the
-saved blueprint of the NPC. The **archetype**, set by the `NPCType` field in the
-builder, defines the NPC's overall role or behavior such as *merchant* or
-*combatant*.
-
-You can spawn a saved prototype at any time with `@spawnnpc <key>`. Prototypes
-made with `mobbuilder` are automatically given the `mob_` prefix. Use
-`@mspawn mob_<key>` or `@mspawn M<vn>` to create additional copies of those
-mobs when a VNUM has been assigned.
-
-### Mob Builder
-
-`mobbuilder` is now an alias for the unified `cnpc` command. It launches the
-same menu with mob defaults and immediately spawns the NPC once you confirm.
-Choosing **Yes & Save Prototype** will also store the entry in
-`world/prototypes/npcs.json` with the `mob_` prefix so you can reuse it with
-`@mspawn <prototype>` or ``M<number>``. The final summary now shows any mob
-specific fields such as act flags and resistances.
-If you assign a VNUM when saving, the prototype is automatically registered
-for use with ``@mspawn M<number>``.
-Before launching `cnpc` or `mobbuilder` you can pre-load a baseline with `@mobtemplate <template>`. This fills the builder with default stats for the chosen template. Run `@mobtemplate list` to view the available presets for all seventeen combat classes such as `warrior`, `mystic`, `wizard`, `ranger` or `swashbuckler` as well as the utility `merchant` template.
-
-Only NPCs with `can_attack` set to `True` can be attacked. The new `CombatNPC` class (used for the `combatant` type) sets this flag automatically so mobs are immediately ready for battle.
-
-Example::
-
-    cnpc start goblin
-    [follow the prompts]
-    [choose **Yes & Save Prototype**]
-    @mspawn mob_goblin
-    @mspawn M200001
-
-### Quick Mob
-
-`@quickmob <key> [template]` loads a mob template from
-`world.templates.mob_templates` and immediately launches the builder on the
-review screen. A VNUM is reserved for you so after tweaking any fields you can
-select **Continue** followed by **Yes & Save Prototype** to spawn the NPC and
-store the prototype for future use. You can then respawn it anytime with
-``@mspawn M<number>``.
-
-Example::
-
-    @quickmob goblin warrior
-    [review summary]
-    [choose **Continue**]
-    [choose **Yes & Save Prototype**]
-    @mspawn M<number>
-
-### MEdit
-
-Use `medit <vnum>` to edit an existing numeric prototype. The command
-`medit create <vnum>` reserves the number, loads a basic template and opens the
-builder from the beginning. The reserved VNUM is pre-filled so the VNUM step in
-the builder is skipped. After setting the desired values choose
-**Yes & Save Prototype** to spawn the NPC and register the prototype.
-
-## Mob Prototype Manager
-
-`@mobproto` works with numeric VNUMs to store and spawn NPCs. Newly
-created entries are added to `@mlist` automatically so you can see them
-alongside area prototypes. Common subcommands are:
-
-```text
-@mobproto create <vnum> <name>
-@mobproto set <vnum> <field> <value>
-@mobproto list
-@mobproto spawn <vnum>
-```
-
-Example:
-
-```text
+Mob Prototype Manager
+bash
+Copy
+Edit
 @mobproto create 1 goblin
 @mobproto set 1 level 3
 @mobproto spawn 1
-```
+Spawning and Room Systems
+Room JSONs may include:
 
-## NPC Spawn Manager
+json
+Copy
+Edit
+"spawns": [
+  {"proto": "mob_goblin", "max_spawns": 2, "spawn_interval": 300}
+]
+SpawnManager checks only those rooms and spreads load using batch_size. Use:
 
-Room prototypes in `world/prototypes/rooms/` may include a `spawns` list
-describing which NPCs should repopulate the room. Each entry specifies
-the NPC `prototype` (or `proto`), how many can exist via `max_spawns`
-(or `max_count`) and how often to repopulate with `spawn_interval` (or
-`respawn_rate`). An optional `location` can spawn the NPC in another
-room.
+bash
+Copy
+Edit
+@spawnreload
+@forcerespawn <vnum>
+@showspawns [vnum]
+Weapon Creation
+bash
+Copy
+Edit
+cweapon "longsword" mainhand 1d8 4 STR+2 A reliable longsword.
+inspect longsword-1
+Supports flat or dice damage (e.g. 2d6). Add /unidentified to hide stats.
 
-The persistent **SpawnManager** script loads these lists on start and
-keeps rooms populated accordingly. Rooms with spawn data are cached and
-only those locations are checked each tick. The manager processes this
-cache in batches which reduces the workload for large games. You can set
-the optional `batch_size` attribute on the script to control how many
-rooms are evaluated per tick for tuning performance.
+Combat System
+Modular combat using a 2-second tick:
 
-Use `@spawnreload` to reload all spawn data from disk. Run
-`@forcerespawn <room_vnum>` to immediately repopulate a specific room,
-and `@showspawns [vnum]` to view the configured entries. Room prototypes
-saved through `redit` or with `asave changed` automatically update the
-manager and respawn mobs, so manual reloads are rarely needed. These
-commands continue to operate exactly as they did before batching was
-introduced.
+CombatRoundManager.get().start_combat([fighter1, fighter2])
 
-## Weapon Creation and Inspection
+Supports action queues, status effects, resistances
 
-Builders can quickly create melee weapons with the `cweapon` command.
+Fully pluggable and extendable
 
-```
-cweapon [/unidentified] <name> <slot> <damage> [weight] [stat_mods] <description>
-```
+Running Tests
+Install test dependencies:
 
-Damage may be a flat number or an `NdN` dice value. The item's key never
-changes, even if multiple weapons share the same name. Instead, a lowercase
-alias and a numbered alias like `name-1`, `name-2`, and so on are added
-silently.
-
-These aliases let you reference duplicates. For example:
-
-```text
-cweapon "epee" mainhand 1d4 2 STR+1 A sharp epee.
-cweapon "epee" offhand 2d6 3 STR+1, Attack Power+2 A balanced offhand blade.
-inspect epee-2
-```
-
-Modifiers use the form `Stat+Value` or `Stat-Value` separated by commas. Quote names that
-contain spaces or ANSI colour codes, as shown above.
-
-Add `/unidentified` before the name to create the weapon unidentified.
-
-When a weapon is identified, `inspect` shows its damage, slot, any bonuses and
-effects, so `inspect epee-2` will display the full details of the second
-"Epee" you created.
-## Combat System
-
-A modular combat engine is provided under the `combat/` package. It implements
-round-based processing, action queues and a sample `ShieldBash` skill. The
-system is designed to plug into Evennia characters and rooms for dynamic fights.
-
-### Damage Types and Resistances
-
-Damage dealt in combat is categorized by `DamageType`. Characters may hold
-resistance flags in their `db.resistances` attribute. During damage resolution the
-engine consults a resistance matrix to modify incoming damage. For example:
-
-```python
-from combat.damage_types import DamageType, ResistanceType, get_damage_multiplier
-
-mult = get_damage_multiplier([ResistanceType.FIRE], DamageType.FIRE)
-print(mult)  # 0.5
-```
-
-Resistances can be assigned via the mob builder menu when creating NPCs.
-
-### Status Effects
-
-Many combat abilities apply temporary status conditions. Effects like
-`stunned` or `defending` last a set number of combat ticks and may alter
-stats or restrict actions. Use the `affects` command or `status` to view
-your current buffs and conditions. Effects expire automatically when
-their duration reaches zero.
-
-### Hunger & Thirst
-
-If a character's `sated` value reaches zero they gain the `hungry_thirsty`
-status effect. Each tick removes 5% of their maximum health, mana and stamina
-while this status is active, rather than a single point from each resource.
-
-### Looting Corpses
-
-Defeated enemies leave a corpse containing any gear they carried. Use `loot` or `get all corpse` to quickly grab everything before the body decays.
-
-### AI Settings
-
-NPC behavior is configured by an AI type during `cnpc` or `mobbuilder`.
-Choose from `passive`, `aggressive`, `defensive`, `wander` or
-`scripted`. Scripted AI runs the callable stored on `npc.db.ai_script`.
-These options let builders quickly create enemies that fight or roam on
-their own. The combat command set includes `attack`, `wield`, `unwield`,
-`flee`, `berserk`, `respawn`, `revive` and `status`.
-
-### Helper Utilities
-
-Convenience functions in `utils.mob_utils` provide building blocks for working
-with VNUM-based NPCs.
-
-- `assign_next_vnum(category)` – fetches and reserves the next free VNUM.
-- `add_to_mlist(vnum, proto)` – records a prototype in the mob database so it
-  appears in `@mlist`.
-- `auto_calc(stats)` and `auto_calc_secondary(stats)` – derive combat stats from
-  primary values using `world.system.stat_manager`.
-
-### Combat Round Manager
-
-The `CombatRoundManager` singleton, found in `combat.round_manager`, manages all
-active combat encounters. Each `CombatInstance` schedules its own tick every
-**2 seconds** by default (see the ``round_time`` attribute). Call
-`CombatRoundManager.get().start_combat([fighter1, fighter2])` to create a combat
-with those combatants. The manager stores each combat instance by a unique ID
-and uses the `combatant_to_combat` dictionary to map combatants back to their
-current combat for quick lookups. If the underlying `CombatEngine` fails to
-initialize for any reason, `start_combat` will raise a `RuntimeError`.
-
-For a deeper look at how this round system mirrors the classic ROM MUD
-functions like `violence_update` and `multi_hit`, see the documentation in
-[`docs/combat_loop_mapping.md`](docs/combat_loop_mapping.md).
-The new global NPC AI system described in
-[`docs/global_npc_ai.md`](docs/global_npc_ai.md) shows how NPC behavior is
-processed once per tick.
-
-
-## Running the Tests
-
-The test suite relies on Evennia (with its optional **extras**) and Django in
-addition to `pytest`. Make sure these packages are installed before invoking the
-test runner. The easiest way is to use the provided requirements file, which
-installs compatible versions of all three dependencies:
-
-```bash
-python -m pip install --upgrade pip
+bash
+Copy
+Edit
 pip install -r requirements-test.txt
-# Install the project itself so tests can import it
 pip install -e .
-```
+Then run:
 
-Ensure these requirements are installed before running `pytest` so that Django
-and the full Evennia extras are available to the test suite.
-
-You can also run `scripts/setup_test_env.sh` to automate the above steps.
-
-After installing the dependencies, execute the tests with:
-
-```bash
+bash
+Copy
+Edit
 pytest -q
-```
+Area JSON Format
+Room VNUMs now tracked in world/prototypes/areas/*.json under a rooms list. See docs/area_json.md for format details.
 
-
-## Area JSON Files
-
-Area definitions under `world/prototypes/areas` now store a `rooms` list of VNUMs belonging to that area. Older JSON files missing this field still load correctly but will not track individual rooms until updated. See [docs/area_json.md](docs/area_json.md) for details.

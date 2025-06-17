@@ -1,4 +1,4 @@
-from unittest import mock
+from unittest import mock, TestCase
 from evennia.utils.test_resources import EvenniaTest
 from evennia import create_object
 
@@ -29,12 +29,8 @@ class TestSpawnManager(EvenniaTest):
             }
         ]
         npc = create_object(BaseNPC, key="basic_merchant")
-        with mock.patch(
-            "scripts.spawn_manager.prototypes.get_npc_prototypes",
-            return_value={"basic_merchant": {"key": "basic_merchant"}},
-        ), mock.patch(
-            "evennia.prototypes.spawner.spawn", return_value=[npc]
-        ):
+        with mock.patch("scripts.spawn_manager.prototypes.get_npc_prototypes", return_value={"basic_merchant": {"key": "basic_merchant"}}), \
+             mock.patch("evennia.prototypes.spawner.spawn", return_value=[npc]):
             self.script.force_respawn(1)
         npcs = [obj for obj in self.room.contents if obj.is_typeclass(BaseNPC, exact=False)]
         self.assertEqual(len(npcs), 1)
@@ -95,7 +91,6 @@ class TestSpawnManager(EvenniaTest):
         m_log.assert_not_called()
 
     def test_reload_spawns_forces_respawn(self):
-        """reload_spawns should trigger force_respawn for each room."""
         self.script.db.entries = [
             {"room": 1},
             {"room": 2},
@@ -126,16 +121,53 @@ class TestSpawnManager(EvenniaTest):
 
     def test_spawn_key_finalized_once(self):
         npc = create_object(BaseNPC, key="orc")
-        with mock.patch(
-            "scripts.spawn_manager.prototypes.get_npc_prototypes",
-            return_value={"orc": {"key": "orc"}},
-        ), mock.patch(
-            "evennia.prototypes.spawner.spawn", return_value=[npc]
-        ), mock.patch(
-            "scripts.spawn_manager.apply_proto_items"
-        ), mock.patch(
-            "commands.npc_builder.finalize_mob_prototype"
-        ) as m_fin:
+        with mock.patch("scripts.spawn_manager.prototypes.get_npc_prototypes", return_value={"orc": {"key": "orc"}}), \
+             mock.patch("evennia.prototypes.spawner.spawn", return_value=[npc]), \
+             mock.patch("scripts.spawn_manager.apply_proto_items"), \
+             mock.patch("commands.npc_builder.finalize_mob_prototype") as m_fin:
             self.script._spawn("orc", self.room)
 
         self.assertEqual(m_fin.call_count, 1)
+
+    def test_get_room_caches_lookup(self):
+        entry = {"room": "#1"}
+        fake_room = mock.Mock(dbref="#1")
+        with mock.patch("scripts.spawn_manager.ObjectDB.objects.filter") as m_filter:
+            m_filter.return_value.first.return_value = fake_room
+            room1 = self.script._get_room(entry)
+            room2 = self.script._get_room(entry)
+        self.assertIs(room1, fake_room)
+        self.assertIs(room2, fake_room)
+        self.assertIs(entry["room"], fake_room)
+        m_filter.assert_called_once()
+
+    def test_batch_processing_spawns_by_tick(self):
+        self.script.db.batch_size = 2
+        self.script.db.tick_count = 0
+        self.script.db.entries = [
+            {
+                "prototype": "a",
+                "room": self.room,
+                "room_id": 1,
+                "max_count": 1,
+                "respawn_rate": 5,
+                "last_spawn": 0,
+            },
+            {
+                "prototype": "b",
+                "room": self.room,
+                "room_id": 2,
+                "max_count": 1,
+                "respawn_rate": 5,
+                "last_spawn": 0,
+            },
+        ]
+        with mock.patch.object(self.script, "_spawn") as m_spawn, \
+             mock.patch("scripts.spawn_manager.time.time", return_value=10):
+            self.script.at_repeat()
+            m_spawn.assert_called_once()
+
+        m_spawn.reset_mock()
+        with mock.patch("scripts.spawn_manager.time.time", return_value=10):
+            self.script.at_repeat()
+            m_spawn.assert_called_once()
