@@ -1,6 +1,6 @@
 from evennia import create_object
 from evennia.objects.models import ObjectDB
-from .command import Command
+from .command import Command, MuxCommand
 from typeclasses.rooms import Room
 from world.areas import find_area, parse_area_identifier, find_area_by_vnum, update_area
 from utils import vnum_registry
@@ -65,7 +65,7 @@ SHORT = {
 }
 
 
-class CmdDig(Command):
+class CmdDig(MuxCommand):
     """
     Create and link a new room.
 
@@ -236,7 +236,7 @@ class CmdDelDir(Command):
         self.msg(f"Exit {direction} removed.")
 
 
-class CmdLink(Command):
+class CmdLink(MuxCommand):
     """Link the current room to another by VNUM."""
 
     key = "@link"
