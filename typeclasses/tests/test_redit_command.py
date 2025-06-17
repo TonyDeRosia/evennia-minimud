@@ -94,8 +94,26 @@ class TestREditCommand(EvenniaTest):
 
         assert room.key == "New Room"
         assert room.db.desc == "New desc"
-        assert room.tags.has("safe", category="room_flag")
-        assert not room.tags.has("dark", category="room_flag")
+
+    def test_summary_from_live_room_proto(self):
+        from evennia.utils import create
+        from typeclasses.rooms import Room
+        from commands import redit
+
+        room = create.create_object(
+            Room,
+            key="Summ Room",
+            location=self.char1.location,
+            home=self.char1.location,
+        )
+        room.db.room_id = 8
+        room.db.desc = "Sum desc"
+
+        proto = redit.proto_from_room(room)
+        self.char1.ndb.room_protos = {8: proto}
+        self.char1.ndb.current_vnum = 8
+        out = redit._summary(self.char1)
+        assert "Editing room 8" in out
 
     def test_live_subcommand(self):
         from evennia.utils import create

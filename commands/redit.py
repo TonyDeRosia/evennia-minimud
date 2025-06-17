@@ -46,6 +46,7 @@ def proto_from_room(room) -> dict:
         "key": room.key,
         "desc": room.db.desc or "",
         "exits": {},
+        "vnum": room.db.room_id,
     }
 
     if area := room.db.area:
@@ -79,7 +80,7 @@ def _summary(caller) -> str:
     data = caller.ndb.room_protos.get(caller.ndb.current_vnum)
     if not data:
         return ""
-    lines = [f"|wEditing room {data['vnum']}|n"]
+    lines = [f"|wEditing room {data.get('vnum', caller.ndb.current_vnum)}|n"]
     lines.append(f"Name: {data.get('key', '')}")
     desc = data.get("desc", "")
     if desc:
