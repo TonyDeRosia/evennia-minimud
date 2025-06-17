@@ -1,4 +1,4 @@
-from unittest import mock
+from unittest import mock, TestCase
 from evennia.utils.test_resources import EvenniaTest
 from evennia import create_object
 
@@ -124,6 +124,8 @@ class TestSpawnManager(EvenniaTest):
 
         self.assertEqual(m_fin.call_count, 1)
 
+
+
     def test_spawn_key_finalized_once(self):
         npc = create_object(BaseNPC, key="orc")
         with mock.patch(
@@ -139,3 +141,27 @@ class TestSpawnManager(EvenniaTest):
             self.script._spawn("orc", self.room)
 
         self.assertEqual(m_fin.call_count, 1)
+
+
+class TestGetRoomCaching(TestCase):
+    def test_get_room_caches_result(self):
+        import world.tests  # noqa: F401 - triggers django setup
+        mgr = SpawnManager()
+        entry = {"room": "#10", "room_id": 10}
+        room = mock.Mock()
+        room.id = 10
+        room.db.room_id = 10
+        with mock.patch("scripts.spawn_manager.ObjectDB.objects") as m_obj, \
+             mock.patch("scripts.spawn_manager.search.search_object") as m_search:
+            m_obj.filter.return_value.first.return_value = room
+            m_obj.get_by_attribute.return_value = [room]
+            m_search.return_value = []
+
+            result1 = mgr._get_room(entry)
+            result2 = mgr._get_room(entry)
+
+        self.assertIs(result1, room)
+        self.assertIs(result2, room)
+        m_obj.filter.assert_called_once()
+        m_obj.get_by_attribute.assert_not_called()
+        m_search.assert_not_called()

@@ -75,7 +75,7 @@ class CmdShowSpawns(Command):
 
         lines = []
         for entry in script.db.entries:
-            if script._normalize_room_id(entry.get("room")) != target_vnum:
+            if script._normalize_room_id(entry) != target_vnum:
                 continue
 
             obj = script._get_room(entry)
