@@ -279,6 +279,11 @@ def menunode_done(caller, raw_string="", **kwargs):
             data["exits"] = proto["exits"]
         save_prototype("room", data, vnum=vnum)
 
+        idx, area = find_area(proto.get("area"))
+        if area and vnum not in area.rooms:
+            area.rooms.append(vnum)
+            update_area(idx, area)
+
         # update live room object if it exists
         objs = ObjectDB.objects.filter(
             db_attributes__db_key="room_id",
