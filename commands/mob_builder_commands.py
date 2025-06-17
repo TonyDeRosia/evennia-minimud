@@ -5,6 +5,7 @@ from django.conf import settings
 
 from typeclasses.npcs import BaseNPC
 from evennia.utils import evtable
+from evennia.server.models import ServerConfig
 from evennia.objects.models import ObjectDB
 from world.scripts.mob_db import get_mobdb
 from utils.prototype_manager import load_all_prototypes
@@ -457,6 +458,14 @@ class CmdMList(Command):
                 for key in keys
             }
 
+        spawn_entries = ServerConfig.objects.conf("spawn_registry", default=list)
+        spawn_lookup: dict[str, list[int]] = {}
+        for entry in spawn_entries:
+            proto_val = str(entry.get("proto"))
+            room_val = entry.get("room")
+            if proto_val and room_val is not None:
+                spawn_lookup.setdefault(proto_val, []).append(int(room_val))
+
         if not keys:
             self.msg("No prototypes found.")
             return
@@ -483,6 +492,7 @@ class CmdMList(Command):
             "Primary",
             "Roles",
             "Count",
+            "Spawn Rooms",
             border="cells",
         )
         for key in keys:
@@ -515,6 +525,10 @@ class CmdMList(Command):
                     if ar.start <= int(vnum) <= ar.end:
                         area_val = ar.key
                         break
+            rooms = list(spawn_lookup.get(str(key), []))
+            if vnum is not None:
+                rooms += spawn_lookup.get(str(vnum), [])
+            room_str = ", ".join(str(r) for r in sorted(set(rooms))) if rooms else "-"
             table.add_row(
                 str(vnum) if vnum is not None else "-",
                 key,
@@ -525,6 +539,7 @@ class CmdMList(Command):
                 primary,
                 ", ".join(roles) if roles else "-",
                 str(counts.get(key, 0)),
+                room_str,
             )
 
         lines = [str(table)]
