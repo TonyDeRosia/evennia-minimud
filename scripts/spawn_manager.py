@@ -36,6 +36,10 @@ class SpawnManager(Script):
         self.interval = 60
         self.persistent = True
         self.db.entries = self.db.entries or []
+        # number of batches to split spawn processing into each repeat cycle
+        self.db.batch_size = self.db.batch_size or 1
+        # ndb attribute tracking which batch tick we are on
+        self.ndb.batch_index = -1
 
     # ------------------------------------------------------------
     # public API
@@ -199,9 +203,15 @@ class SpawnManager(Script):
                 rid = int(room)
         if rid is not None:
             objs = ObjectDB.objects.get_by_attribute(key="room_id", value=rid)
-            return objs[0] if objs else None
+            obj = objs[0] if objs else None
+            if obj:
+                entry["room"] = obj
+            return obj
         objs = search.search_object(room)
-        return objs[0] if objs else None
+        obj = objs[0] if objs else None
+        if obj:
+            entry["room"] = obj
+        return obj
 
     def _live_count(self, proto: Any, room: Any) -> int:
         return len(
@@ -282,7 +292,11 @@ class SpawnManager(Script):
 
     def at_repeat(self):
         now = time.time()
-        for entry in self.db.entries:
+        batch_size = max(1, int(self.db.batch_size or 1))
+        self.ndb.batch_index = (getattr(self.ndb, "batch_index", -1) + 1) % batch_size
+        for idx, entry in enumerate(self.db.entries):
+            if idx % batch_size != self.ndb.batch_index:
+                continue
             room = self._get_room(entry)
             proto = entry.get("prototype")
             if not room:

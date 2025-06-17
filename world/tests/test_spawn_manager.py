@@ -139,3 +139,50 @@ class TestSpawnManager(EvenniaTest):
             self.script._spawn("orc", self.room)
 
         self.assertEqual(m_fin.call_count, 1)
+
+    def test_get_room_caches_lookup(self):
+        entry = {"room": "#1"}
+        fake_room = mock.Mock(dbref="#1")
+        with mock.patch(
+            "scripts.spawn_manager.ObjectDB.objects.filter"
+        ) as m_filter:
+            m_filter.return_value.first.return_value = fake_room
+            room1 = self.script._get_room(entry)
+            room2 = self.script._get_room(entry)
+        self.assertIs(room1, fake_room)
+        self.assertIs(room2, fake_room)
+        self.assertIs(entry["room"], fake_room)
+        m_filter.assert_called_once()
+
+    def test_batch_processing_spawns_by_tick(self):
+        self.script.db.batch_size = 2
+        self.script.db.entries = [
+            {
+                "prototype": "a",
+                "room": self.room,
+                "max_count": 1,
+                "respawn_rate": 5,
+                "last_spawn": 0,
+            },
+            {
+                "prototype": "b",
+                "room": self.room,
+                "max_count": 1,
+                "respawn_rate": 5,
+                "last_spawn": 0,
+            },
+        ]
+        with mock.patch.object(self.script, "_spawn") as m_spawn, mock.patch(
+            "scripts.spawn_manager.time.time",
+            return_value=10,
+        ):
+            self.script.at_repeat()
+        m_spawn.assert_called_once_with("a", self.room)
+
+        m_spawn.reset_mock()
+        with mock.patch(
+            "scripts.spawn_manager.time.time",
+            return_value=10,
+        ):
+            self.script.at_repeat()
+        m_spawn.assert_called_once_with("b", self.room)
