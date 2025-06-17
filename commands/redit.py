@@ -363,6 +363,7 @@ class CmdREdit(Command):
                 )
                 if room:
                     proto = proto_from_room(room)
+                    self.msg(f"Editing live room #{vnum} (no prototype found).")
                 else:
                     self.msg(
                         f"Room VNUM {vnum} not found. Use `redit create {vnum}` to make a new room."
