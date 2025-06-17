@@ -18,7 +18,7 @@ class SpawnManager(Script):
     def at_script_creation(self):
         self.key = "spawn_manager"
         self.desc = "Handles mob respawning for rooms"
-        self.interval = 60
+        self.interval = 15
         self.persistent = True
         self.db.entries = self.db.entries or []
 
@@ -46,6 +46,7 @@ class SpawnManager(Script):
                     continue
                 self.db.entries.append(
                     {
+                        "area": (proto.get("area") or "").lower(),
                         "prototype": proto_key,
                         "room": int(room_id),
                         "initial_count": int(entry.get("initial_count", 0)),
@@ -63,6 +64,60 @@ class SpawnManager(Script):
             ):
                 entry["last_spawn"] = time.time()
                 break
+
+    def register_room_spawn(self, proto: Dict[str, Any]) -> None:
+        """Register spawn data from a single room prototype."""
+        spawns = proto.get("spawns") or []
+        room_id = proto.get("room_id") or proto.get("vnum")
+        if room_id is None:
+            return
+        for entry in spawns:
+            proto_key = (
+                entry.get("prototype")
+                or entry.get("proto")
+                or entry.get("vnum")
+            )
+            if proto_key is None:
+                continue
+            data = {
+                "area": (proto.get("area") or "").lower(),
+                "prototype": proto_key,
+                "room": int(room_id),
+                "initial_count": int(entry.get("initial_count", 0)),
+                "max_count": int(entry.get("max_count", 1)),
+                "respawn_rate": int(entry.get("respawn_rate", 60)),
+                "last_spawn": 0.0,
+            }
+            self.db.entries.append(data)
+
+    def force_respawn(self, room_vnum: int) -> None:
+        """Immediately respawn all entries for ``room_vnum``."""
+        now = time.time()
+        for entry in self.db.entries:
+            rid = entry.get("room")
+            if isinstance(rid, str) and rid.isdigit():
+                rid = int(rid)
+            if rid != room_vnum:
+                continue
+            room = self._get_room(entry)
+            if not room:
+                continue
+            proto = entry.get("prototype")
+            count = self._live_count(proto, room)
+            missing = max(0, entry.get("max_count", 0) - count)
+            if missing <= 0:
+                logger.log_info(
+                    f"SpawnManager: room {room_vnum} at max population for {proto}"
+                )
+                continue
+            for _ in range(missing):
+                self._spawn(proto, room)
+            entry["last_spawn"] = now
+
+    def reload_spawns(self) -> None:
+        """Reload spawn data from prototypes and spawn initial mobs."""
+        self.load_spawn_data()
+        self.at_start()
 
     # ------------------------------------------------------------
     # internal helpers
@@ -148,6 +203,9 @@ class SpawnManager(Script):
                 if self._live_count(entry.get("prototype"), room) < entry.get("max_count", 0):
                     self._spawn(entry.get("prototype"), room)
                     entry["last_spawn"] = time.time()
+                    logger.log_info(
+                        f"SpawnManager: spawned {entry.get('prototype')} in room {room.dbref}"
+                    )
 
     def at_repeat(self):
         now = time.time()
@@ -156,10 +214,17 @@ class SpawnManager(Script):
             if not room:
                 continue
             proto = entry.get("prototype")
-            if self._live_count(proto, room) >= entry.get("max_count", 0):
+            live = self._live_count(proto, room)
+            if live >= entry.get("max_count", 0):
+                logger.log_info(
+                    f"SpawnManager: limit reached in room {room.dbref} for {proto}"
+                )
                 continue
             last = entry.get("last_spawn", 0)
             if now - last >= entry.get("respawn_rate", self.interval):
                 self._spawn(proto, room)
                 entry["last_spawn"] = now
+                logger.log_info(
+                    f"SpawnManager: spawned {proto} in room {room.dbref}"
+                )
 

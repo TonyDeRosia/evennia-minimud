@@ -4,7 +4,6 @@ from evennia import CmdSet
 from evennia.prototypes import spawner
 
 from .command import Command, MuxCommand
-from scripts.area_spawner import AreaSpawner
 from world.areas import (
     Area,
     get_areas,
@@ -14,7 +13,7 @@ from world.areas import (
     parse_area_identifier,
 )
 from .aedit import CmdAEdit, CmdAList, CmdASave, CmdAreaReset, CmdAreaAge
-from world import spawn_manager
+from evennia.scripts.models import ScriptDB
 from typeclasses.rooms import Room
 from utils.prototype_manager import load_prototype, load_all_prototypes
 
@@ -546,7 +545,16 @@ class CmdAreasReset(Command):
                 f"Area '{area_name}' not found. Use 'alist' to view available areas."
             )
             return
-        spawn_manager.SpawnManager.reset_area(area.key)
+        script = ScriptDB.objects.filter(db_key="spawn_manager").first()
+        if not script or not hasattr(script, "force_respawn"):
+            self.msg("Spawn manager not found.")
+            return
+        for entry in script.db.entries:
+            if entry.get("area") == area.key.lower():
+                rid = entry.get("room")
+                if isinstance(rid, str) and rid.isdigit():
+                    rid = int(rid)
+                script.force_respawn(rid)
         self.msg(f"Spawn entries reset for {area.key}.")
 
 
@@ -585,55 +593,4 @@ class CmdRSpawner(Command):
     help_category = "Building"
 
     def func(self):
-        room = self.caller.location
-        if not room:
-            self.msg("You have no location.")
-            return
-        if not self.args:
-            script = room.scripts.get("area_spawner")
-            if not script:
-                self.msg("No AreaSpawner on this room.")
-                return
-            script = script[0]
-            self.msg(
-                f"Interval: {script.db.respawn_interval}s, Max: {script.db.max_population}, Chance: {script.db.spawn_chance}%"
-            )
-            return
-        parts = self.args.split(None, 1)
-        if len(parts) != 2:
-            self.msg("Usage: @rspawner <interval|max|chance> <value>")
-            return
-        field, value = parts
-        script = room.scripts.get("area_spawner")
-        if not script:
-            script = room.scripts.add(AreaSpawner, key="area_spawner")
-        else:
-            script = script[0]
-        field = field.lower()
-        if field in ("interval", "respawn_interval"):
-            try:
-                val = int(value)
-            except ValueError:
-                self.msg("Interval must be an integer.")
-                return
-            script.db.respawn_interval = val
-            script.interval = val
-        elif field in ("max", "max_population"):
-            try:
-                val = int(value)
-            except ValueError:
-                self.msg("Max population must be an integer.")
-                return
-            script.db.max_population = val
-        elif field in ("chance", "spawn_chance"):
-            try:
-                val = int(value)
-            except ValueError:
-                self.msg("Chance must be an integer.")
-                return
-            val = max(0, min(val, 100))
-            script.db.spawn_chance = val
-        else:
-            self.msg("Usage: @rspawner <interval|max|chance> <value>")
-            return
-        self.msg(f"Spawner {field} set to {val}.")
+        self.msg("AreaSpawner is deprecated. Use 'redit spawns' to configure room spawns.")

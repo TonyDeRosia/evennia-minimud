@@ -526,6 +526,14 @@ def menunode_done(caller, raw_string="", **kwargs):
                     if dest_obj and dest_obj.is_typeclass(Room, exact=False):
                         exits[dirkey] = dest_obj
                 room.db.exits = exits
+    from evennia.scripts.models import ScriptDB
+    script = ScriptDB.objects.filter(db_key="spawn_manager").first()
+    if script and hasattr(script, "register_room_spawn"):
+        script.register_room_spawn(proto)
+        for entry in proto.get("spawns", []):
+            if int(entry.get("initial_count", 0)) > 0 and hasattr(script, "force_respawn"):
+                script.force_respawn(vnum)
+                break
     caller.msg("Room prototype(s) saved.")
     caller.ndb.room_protos = None
     caller.ndb.current_vnum = None

@@ -9,7 +9,9 @@ class TestAreaReset(EvenniaTest):
         areas = [area]
         with mock.patch("world.area_reset.get_areas", return_value=areas), \
              mock.patch("world.area_reset.update_area") as mock_update, \
-             mock.patch("world.area_reset.spawn_manager.SpawnManager.reset_area") as mock_reset:
+             mock.patch("world.area_reset.ScriptDB") as mock_sdb:
+            mock_script = mock.MagicMock()
+            mock_sdb.objects.filter.return_value.first.return_value = mock_script
             script = AreaReset()
             script.at_script_creation()
             script.at_repeat()
@@ -17,5 +19,5 @@ class TestAreaReset(EvenniaTest):
             script.at_repeat()
             self.assertEqual(area.age, 0)
             self.assertTrue(mock_update.called)
-            mock_reset.assert_called_with("town")
+            self.assertTrue(mock_script.force_respawn.called)
 

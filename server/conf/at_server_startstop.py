@@ -135,9 +135,8 @@ def at_server_start():
         if script:
             script.delete()
         script = create.create_script("scripts.spawn_manager.SpawnManager", key="spawn_manager")
-    from scripts.spawn_manager import SpawnManager  # type: ignore
-    if hasattr(script, "load_spawn_data"):
-        script.load_spawn_data()
+    if hasattr(script, "reload_spawns"):
+        script.reload_spawns()
 
     # Ensure mob database script exists
     get_mobdb()
