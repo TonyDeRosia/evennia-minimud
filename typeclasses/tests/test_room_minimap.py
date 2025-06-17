@@ -34,10 +34,13 @@ class TestRoomMinimap(EvenniaTest):
 
         map_output = room.generate_map(self.char1)
 
-        self.assertIn("[X]", map_output)
-        self.assertIn("[ ]", map_output)
-        self.assertIn("-", map_output)
-        self.assertIn("|", map_output)
+        expected = [
+            "   [ ]   ",
+            "[ ][X][ ]",
+            "   [ ]   "
+        ]
+
+        self.assertEqual(map_output.splitlines(), expected)
 
     def test_map_in_return_appearance(self):
         room = self.room1
@@ -75,15 +78,15 @@ class TestRoomMinimap(EvenniaTest):
         east.db.exits = {"west": center}
         west.db.exits = {"east": center}
 
-        # Expected simplified map layout
+        # Expected 3x3 grid
         expected_map = "\n".join([
-            "  ^  ",
-            "<[X]>",
-            "  v  "
+            "   [ ]   ",
+            "[ ][X][ ]",
+            "   [ ]   "
         ])
 
         generated_map = center.generate_map(self.char1)
-        self.assertEqual(generated_map.strip(), expected_map)
+        self.assertEqual(generated_map, expected_map)
 
         appearance = center.return_appearance(self.char1)
         self.assertTrue(appearance.startswith(expected_map))
