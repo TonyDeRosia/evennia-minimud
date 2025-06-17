@@ -63,7 +63,18 @@ def proto_from_room(room) -> dict:
     return proto
 
 
+def _state_exists(caller) -> bool:
+    """Return ``True`` if the caller has a valid editing state."""
+    if not getattr(caller.ndb, "room_protos", None):
+        return False
+    if getattr(caller.ndb, "current_vnum", None) not in caller.ndb.room_protos:
+        return False
+    return True
+
+
 def _summary(caller) -> str:
+    if not _state_exists(caller):
+        return ""
     data = caller.ndb.room_protos.get(caller.ndb.current_vnum)
     if not data:
         return ""
@@ -83,6 +94,9 @@ def _summary(caller) -> str:
 
 
 def menunode_main(caller, raw_string="", **kwargs):
+    if not _state_exists(caller):
+        caller.msg("Room editing state missing. Exiting.")
+        return None
     text = _summary(caller)
     options = [
         {"desc": "Edit name", "goto": "menunode_name"},
@@ -98,19 +112,26 @@ def menunode_main(caller, raw_string="", **kwargs):
 
 
 def menunode_show(caller, raw_string="", **kwargs):
+    if not _state_exists(caller):
+        caller.msg("Room editing state missing. Exiting.")
+        return None
     caller.msg(_summary(caller))
     return "menunode_main"
 
 
 def menunode_rlist(caller, raw_string="", **kwargs):
-    lines = [
-        f"{v}: {data.get('key', '')}" for v, data in caller.ndb.room_protos.items()
-    ]
+    if not _state_exists(caller):
+        caller.msg("Room editing state missing. Exiting.")
+        return None
+    lines = [f"{v}: {data.get('key', '')}" for v, data in caller.ndb.room_protos.items()]
     caller.msg("\n".join(lines) or "No prototypes.")
     return "menunode_main"
 
 
 def menunode_name(caller, raw_string="", **kwargs):
+    if not _state_exists(caller):
+        caller.msg("Room editing state missing. Exiting.")
+        return None
     default = caller.ndb.room_protos[caller.ndb.current_vnum].get("key", "")
     text = f"|wRoom name|n [current: {default}]"
     options = {"key": "_default", "goto": _set_name}
@@ -118,6 +139,9 @@ def menunode_name(caller, raw_string="", **kwargs):
 
 
 def _set_name(caller, raw_string, **kwargs):
+    if not _state_exists(caller):
+        caller.msg("Room editing state missing. Exiting.")
+        return None
     if not raw_string.strip():
         caller.msg("Name unchanged.")
     else:
@@ -126,6 +150,9 @@ def _set_name(caller, raw_string, **kwargs):
 
 
 def menunode_desc(caller, raw_string="", **kwargs):
+    if not _state_exists(caller):
+        caller.msg("Room editing state missing. Exiting.")
+        return None
     default = caller.ndb.room_protos[caller.ndb.current_vnum].get("desc", "")
     text = f"|wRoom description|n [current: {default}]"
     options = {"key": "_default", "goto": _set_desc}
@@ -133,11 +160,17 @@ def menunode_desc(caller, raw_string="", **kwargs):
 
 
 def _set_desc(caller, raw_string, **kwargs):
+    if not _state_exists(caller):
+        caller.msg("Room editing state missing. Exiting.")
+        return None
     caller.ndb.room_protos[caller.ndb.current_vnum]["desc"] = raw_string.strip()
     return "menunode_main"
 
 
 def menunode_flags(caller, raw_string="", **kwargs):
+    if not _state_exists(caller):
+        caller.msg("Room editing state missing. Exiting.")
+        return None
     current = ", ".join(
         caller.ndb.room_protos[caller.ndb.current_vnum].get("flags", [])
     )
@@ -149,6 +182,9 @@ def menunode_flags(caller, raw_string="", **kwargs):
 
 
 def _set_flags(caller, raw_string, **kwargs):
+    if not _state_exists(caller):
+        caller.msg("Room editing state missing. Exiting.")
+        return None
     flags = [f.strip().lower() for f in raw_string.split(",") if f.strip()]
     invalid = [f for f in flags if f not in VALID_ROOM_FLAGS]
     if invalid:
@@ -159,6 +195,9 @@ def _set_flags(caller, raw_string, **kwargs):
 
 
 def menunode_exits(caller, raw_string="", **kwargs):
+    if not _state_exists(caller):
+        caller.msg("Room editing state missing. Exiting.")
+        return None
     exits = caller.ndb.room_protos[caller.ndb.current_vnum].get("exits", {})
     lines = ["Current exits:"]
     for d, v in exits.items():
@@ -172,6 +211,9 @@ def menunode_exits(caller, raw_string="", **kwargs):
 
 
 def _handle_exit_cmd(caller, raw_string, **kwargs):
+    if not _state_exists(caller):
+        caller.msg("Room editing state missing. Exiting.")
+        return None
     args = raw_string.strip().split()
     if not args:
         return "menunode_main"
@@ -221,6 +263,9 @@ def _handle_exit_cmd(caller, raw_string, **kwargs):
 
 
 def menunode_done(caller, raw_string="", **kwargs):
+    if not _state_exists(caller):
+        caller.msg("Room editing state missing. Exiting.")
+        return None
     for vnum, proto in caller.ndb.room_protos.items():
         data = {
             "typeclass": "typeclasses.rooms.Room",
@@ -277,10 +322,15 @@ class CmdREdit(Command):
     help_category = "Building"
 
     def func(self):
+        def _clear_state():
+            self.caller.ndb.room_protos = None
+            self.caller.ndb.current_vnum = None
+
         if not self.args:
             self.msg(
                 "Usage: redit <vnum> | redit create <vnum> | redit here <vnum> | redit vnum <old> <new>"
             )
+            _clear_state()
             return
 
         parts = self.args.split()
@@ -303,6 +353,7 @@ class CmdREdit(Command):
                     self.msg(
                         f"Room VNUM {vnum} not found. Use `redit create {vnum}` to make a new room."
                     )
+                    _clear_state()
                     return
             self.caller.ndb.room_protos = {vnum: proto}
             self.caller.ndb.current_vnum = vnum
@@ -326,14 +377,17 @@ class CmdREdit(Command):
                 self.msg(
                     "Usage: redit <vnum> | redit create <vnum> | redit here <vnum> | redit vnum <old> <new>"
                 )
+                _clear_state()
                 return
             old_vnum, new_vnum = int(old_str), int(new_str)
             proto = load_prototype("room", old_vnum)
             if proto is None:
                 self.msg("Prototype not found.")
+                _clear_state()
                 return
             if not validate_vnum(new_vnum, "room"):
                 self.msg("Invalid or already used VNUM.")
+                _clear_state()
                 return
             save_prototype("room", proto, vnum=new_vnum)
             old_path = CATEGORY_DIRS["room"] / f"{old_vnum}.json"
@@ -369,6 +423,7 @@ class CmdREdit(Command):
             room = self.caller.location
             if not room:
                 self.msg("You have no location.")
+                _clear_state()
                 return
             if not validate_vnum(vnum, "room"):
                 start, end = VNUM_RANGES["room"]
@@ -376,6 +431,7 @@ class CmdREdit(Command):
                     f"Invalid or already used VNUM. Rooms use {start}-{end}. "
                     "Try @nextvnum R."
                 )
+                _clear_state()
                 return
             area_name = room.db.area
             area = None
@@ -384,6 +440,7 @@ class CmdREdit(Command):
                 idx, area = find_area(area_name)
                 if area and not (area.start <= vnum <= area.end):
                     self.msg("Number outside area range.")
+                    _clear_state()
                     return
                 objs = ObjectDB.objects.filter(
                     db_attributes__db_key="area",
@@ -394,6 +451,7 @@ class CmdREdit(Command):
                         continue
                     if obj.db.room_id == vnum and obj.is_typeclass(Room, exact=False):
                         self.msg("Room already exists.")
+                        _clear_state()
                         return
 
             register_vnum(vnum)
@@ -440,10 +498,12 @@ class CmdREdit(Command):
             self.msg(
                 "Usage: redit <vnum> | redit create <vnum> | redit here <vnum> | redit vnum <old> <new>"
             )
+            _clear_state()
             return
 
         if not parts[1].isdigit():
             self.msg("VNUM must be numeric.")
+            _clear_state()
             return
         vnum = int(parts[1])
         if not validate_vnum(vnum, "room"):
@@ -452,6 +512,7 @@ class CmdREdit(Command):
                 f"Invalid or already used VNUM. Rooms use {start}-{end}. "
                 "Try @nextvnum R."
             )
+            _clear_state()
             return
         register_vnum(vnum)
         proto = load_prototype("room", vnum)
