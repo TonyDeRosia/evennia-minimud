@@ -61,7 +61,7 @@ from ..hedit import CmdHEdit
 from ..opedit import CmdOPEdit
 from ..rpedit import CmdRPEdit
 from .resetworld import CmdResetWorld
-from .spawncontrol import CmdSpawnReload, CmdForceRespawn
+from .spawncontrol import CmdSpawnReload, CmdForceRespawn, CmdShowSpawns
 
 
 def _safe_split(text):
@@ -1403,6 +1403,7 @@ class AdminCmdSet(CmdSet):
         self.add(CmdResetWorld)
         self.add(CmdSpawnReload)
         self.add(CmdForceRespawn)
+        self.add(CmdShowSpawns)
         self.add(CmdScan)
 
 
@@ -1469,3 +1470,4 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdRPEdit)
         self.add(CmdSpawnReload)
         self.add(CmdForceRespawn)
+        self.add(CmdShowSpawns)

@@ -80,3 +80,8 @@ class TestSpawnManager(EvenniaTest):
             script.at_repeat()
         npcs = [o for o in self.room1.contents if o.key == "goblin"]
         self.assertEqual(len(npcs), 3)
+
+    def test_register_twice_keeps_single_entry(self):
+        self.script.register_room_spawn(self.room_proto)
+        self.script.register_room_spawn(self.room_proto)
+        self.assertEqual(len(self.script.db.entries), 1)
