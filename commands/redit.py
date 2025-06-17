@@ -19,6 +19,7 @@ from world.areas import find_area_by_vnum, get_areas, update_area
 from evennia.prototypes import spawner
 from world.areas import find_area
 from evennia.objects.models import ObjectDB
+from typeclasses.rooms import Room
 from .building import DIR_FULL, OPPOSITE
 from .command import Command
 
@@ -36,19 +37,45 @@ VALID_ROOM_FLAGS = (
 )
 
 
+def proto_from_room(room) -> dict:
+    """Return a prototype dict generated from ``room``."""
+
+    proto = {
+        "typeclass": room.typeclass_path,
+        "key": room.key,
+        "desc": room.db.desc or "",
+        "exits": {},
+    }
+
+    if area := room.db.area:
+        proto["area"] = area
+
+    exits = room.db.exits or {}
+    for dirkey, target in exits.items():
+        dest_id = getattr(target.db, "room_id", None)
+        if isinstance(dest_id, int):
+            proto["exits"][dirkey] = dest_id
+
+    flags = room.tags.get(category="room_flag", return_list=True) or []
+    if flags:
+        proto["flags"] = list(flags)
+
+    return proto
+
+
 def _summary(caller) -> str:
     data = caller.ndb.room_protos.get(caller.ndb.current_vnum)
     if not data:
         return ""
     lines = [f"|wEditing room {data['vnum']}|n"]
     lines.append(f"Name: {data.get('key', '')}")
-    desc = data.get('desc', '')
+    desc = data.get("desc", "")
     if desc:
         lines.append(f"Desc: {desc}")
-    flags = ", ".join(data.get('flags', []))
+    flags = ", ".join(data.get("flags", []))
     if flags:
         lines.append(f"Flags: {flags}")
-    exits = data.get('exits', {})
+    exits = data.get("exits", {})
     if exits:
         exit_lines = [f"  {dir} -> {v}" for dir, v in exits.items()]
         lines.append("Exits:\n" + "\n".join(exit_lines))
@@ -76,7 +103,9 @@ def menunode_show(caller, raw_string="", **kwargs):
 
 
 def menunode_rlist(caller, raw_string="", **kwargs):
-    lines = [f"{v}: {data.get('key', '')}" for v, data in caller.ndb.room_protos.items()]
+    lines = [
+        f"{v}: {data.get('key', '')}" for v, data in caller.ndb.room_protos.items()
+    ]
     caller.msg("\n".join(lines) or "No prototypes.")
     return "menunode_main"
 
@@ -109,7 +138,9 @@ def _set_desc(caller, raw_string, **kwargs):
 
 
 def menunode_flags(caller, raw_string="", **kwargs):
-    current = ", ".join(caller.ndb.room_protos[caller.ndb.current_vnum].get("flags", []))
+    current = ", ".join(
+        caller.ndb.room_protos[caller.ndb.current_vnum].get("flags", [])
+    )
     text = "|wRoom flags|n (comma separated). Valid: " + ", ".join(VALID_ROOM_FLAGS)
     if current:
         text += f" [current: {current}]"
@@ -118,7 +149,7 @@ def menunode_flags(caller, raw_string="", **kwargs):
 
 
 def _set_flags(caller, raw_string, **kwargs):
-    flags = [f.strip().lower() for f in raw_string.split(',') if f.strip()]
+    flags = [f.strip().lower() for f in raw_string.split(",") if f.strip()]
     invalid = [f for f in flags if f not in VALID_ROOM_FLAGS]
     if invalid:
         caller.msg("Invalid flags: " + ", ".join(invalid))
@@ -132,7 +163,9 @@ def menunode_exits(caller, raw_string="", **kwargs):
     lines = ["Current exits:"]
     for d, v in exits.items():
         lines.append(f"  {d} -> {v}")
-    lines.append("Enter 'set <dir> <vnum>' to add/edit, 'del <dir>' to remove, 'dig <dir> <vnum>' to make new room.")
+    lines.append(
+        "Enter 'set <dir> <vnum>' to add/edit, 'del <dir>' to remove, 'dig <dir> <vnum>' to make new room."
+    )
     text = "\n".join(lines)
     options = {"key": "_default", "goto": _handle_exit_cmd}
     return text, options
@@ -148,14 +181,18 @@ def _handle_exit_cmd(caller, raw_string, **kwargs):
         if not dirkey:
             caller.msg("Unknown direction.")
             return "menunode_exits"
-        caller.ndb.room_protos[caller.ndb.current_vnum].get("exits", {}).pop(dirkey, None)
+        caller.ndb.room_protos[caller.ndb.current_vnum].get("exits", {}).pop(
+            dirkey, None
+        )
         return "menunode_exits"
     if cmd == "set" and len(args) == 3:
         dirkey = DIR_FULL.get(args[1].lower())
         if not dirkey or not args[2].isdigit():
             caller.msg("Usage: set <dir> <vnum>")
             return "menunode_exits"
-        caller.ndb.room_protos[caller.ndb.current_vnum].setdefault("exits", {})[dirkey] = int(args[2])
+        caller.ndb.room_protos[caller.ndb.current_vnum].setdefault("exits", {})[
+            dirkey
+        ] = int(args[2])
         return "menunode_exits"
     if cmd == "dig" and len(args) == 3:
         dirkey = DIR_FULL.get(args[1].lower())
@@ -169,7 +206,13 @@ def _handle_exit_cmd(caller, raw_string, **kwargs):
         register_vnum(vnum)
         current_vnum = caller.ndb.current_vnum
         caller.ndb.room_protos[current_vnum].setdefault("exits", {})[dirkey] = vnum
-        new_proto = {"vnum": vnum, "key": f"Room {vnum}", "desc": "", "flags": [], "exits": {OPPOSITE[dirkey]: current_vnum}}
+        new_proto = {
+            "vnum": vnum,
+            "key": f"Room {vnum}",
+            "desc": "",
+            "flags": [],
+            "exits": {OPPOSITE[dirkey]: current_vnum},
+        }
         caller.ndb.room_protos[vnum] = new_proto
         caller.ndb.current_vnum = vnum
         return "menunode_main"
@@ -189,6 +232,30 @@ def menunode_done(caller, raw_string="", **kwargs):
         if proto.get("exits"):
             data["exits"] = proto["exits"]
         save_prototype("room", data, vnum=vnum)
+
+        # update live room object if it exists
+        objs = ObjectDB.objects.filter(
+            db_attributes__db_key="room_id",
+            db_attributes__db_value=vnum,
+        )
+        room = next((o for o in objs if o.is_typeclass(Room, exact=False)), None)
+        if room:
+            room.key = data["key"]
+            room.db.desc = data["desc"]
+            if proto.get("area") is not None:
+                room.db.area = proto["area"]
+            room.tags.clear(category="room_flag")
+            for flag in proto.get("flags", []):
+                room.tags.add(flag, category="room_flag")
+            exits = {}
+            for dirkey, dest in (proto.get("exits") or {}).items():
+                dest_obj = ObjectDB.objects.filter(
+                    db_attributes__db_key="room_id",
+                    db_attributes__db_value=dest,
+                ).first()
+                if dest_obj and dest_obj.is_typeclass(Room, exact=False):
+                    exits[dirkey] = dest_obj
+            room.db.exits = exits
     caller.msg("Room prototype(s) saved.")
     caller.ndb.room_protos = None
     caller.ndb.current_vnum = None
@@ -223,10 +290,20 @@ class CmdREdit(Command):
             vnum = int(parts[0])
             proto = load_prototype("room", vnum)
             if proto is None:
-                self.msg(
-                    f"Room VNUM {vnum} not found. Use `redit create {vnum}` to make a new room."
+                objs = ObjectDB.objects.filter(
+                    db_attributes__db_key="room_id",
+                    db_attributes__db_value=vnum,
                 )
-                return
+                room = next(
+                    (o for o in objs if o.is_typeclass(Room, exact=False)), None
+                )
+                if room:
+                    proto = proto_from_room(room)
+                else:
+                    self.msg(
+                        f"Room VNUM {vnum} not found. Use `redit create {vnum}` to make a new room."
+                    )
+                    return
             self.caller.ndb.room_protos = {vnum: proto}
             self.caller.ndb.current_vnum = vnum
             state = OLCState(
@@ -408,7 +485,11 @@ class CmdREdit(Command):
             self.msg(f"Room {vnum} created.")
         self.caller.ndb.room_protos = {vnum: proto}
         self.caller.ndb.current_vnum = vnum
-        state = OLCState(data=self.caller.ndb.room_protos, vnum=vnum, original=dict(self.caller.ndb.room_protos))
+        state = OLCState(
+            data=self.caller.ndb.room_protos,
+            vnum=vnum,
+            original=dict(self.caller.ndb.room_protos),
+        )
         OLCEditor(
             self.caller,
             "commands.redit",
@@ -416,4 +497,3 @@ class CmdREdit(Command):
             state=state,
             validator=OLCValidator(),
         ).start()
-
