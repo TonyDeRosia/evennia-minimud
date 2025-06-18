@@ -92,17 +92,13 @@ class DamageProcessor:
         return 0
 
     def handle_defeat(self, target, attacker) -> None:
-        if getattr(target, "pk", None) is None:
-            self.turn_manager.remove_participant(target)
-            return
-
         if hasattr(target, "on_exit_combat"):
             target.on_exit_combat()
 
         if hasattr(target, "at_defeat"):
             target.at_defeat(attacker)
 
-        if getattr(target, "pk", None) is not None and hasattr(target, "on_death"):
+        if hasattr(target, "on_death"):
             target.on_death(attacker)
 
         if getattr(target, "pk", None) is not None:

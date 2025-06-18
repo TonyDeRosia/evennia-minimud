@@ -4,7 +4,7 @@ from evennia.utils import create
 from evennia.utils.test_resources import EvenniaTest
 from typeclasses.npcs import BaseNPC
 from typeclasses.objects import Corpse
-from world.corpse import make_corpse  # Adjust import based on your project
+from utils.mob_utils import make_corpse
 
 @override_settings(DEFAULT_HOME=None)
 class TestLookCommand(EvenniaTest):

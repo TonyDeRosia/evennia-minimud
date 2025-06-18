@@ -449,6 +449,33 @@ class TestCombatDeath(EvenniaTest):
             self.assertIsNone(npc.location)
             mock_delete.assert_called_once()
 
+    def test_unsaved_npc_death_creates_corpse_and_awards_xp(self):
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        player = self.char1
+        player.db.experience = 0
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+        npc.db.exp_reward = 2
+        npc.pk = None
+
+        engine = CombatEngine([player, npc], round_time=0)
+        engine.queue_action(player, KillAction(player, npc))
+
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.check_level_up'):
+            engine.start_round()
+            engine.process_round()
+
+        self.assertEqual(player.db.experience, 2)
+        corpse = next(
+            obj
+            for obj in self.room1.contents
+            if obj.is_typeclass('typeclasses.objects.Corpse', exact=False)
+        )
+        self.assertEqual(corpse.db.corpse_of, npc.key)
+
 
 class TestCombatNPCTurn(EvenniaTest):
     def test_at_combat_turn_auto_attack(self):
