@@ -65,3 +65,20 @@ class TestSkillAndSpellUsage(EvenniaTest):
         self.assertTrue(self.char1.cooldowns.time_left("fireball", use_int=True))
         self.char1.msg.assert_called_with("You fail to cast the spell.")
 
+
+    def test_costs_and_cooldowns_on_success_and_failure(self):
+        skill_cls = SKILL_CLASSES["cleave"]
+        mana_before = self.char1.traits.mana.current
+        stamina_before = self.char1.traits.stamina.current
+        with patch("utils.hit_chance.calculate_hit_success", side_effect=[True, False]):
+            spell_result = self.char1.cast_spell("fireball", target=self.char2)
+            skill_result = self.char1.use_skill("cleave", target=self.char2)
+        self.assertTrue(spell_result)
+        self.assertEqual(skill_result.message, "You miss your strike.")
+        self.assertEqual(self.char1.traits.mana.current,
+                         mana_before - SPELLS["fireball"].mana_cost)
+        self.assertEqual(self.char1.traits.stamina.current,
+                         stamina_before - skill_cls().stamina_cost)
+        self.assertTrue(self.char1.cooldowns.time_left("fireball", use_int=True))
+        self.assertTrue(self.char1.cooldowns.time_left("cleave", use_int=True))
+
