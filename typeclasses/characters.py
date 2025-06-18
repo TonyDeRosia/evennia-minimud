@@ -46,6 +46,15 @@ class Character(ObjectParent, ClothedCharacter):
     practice_sessions = AttributeProperty(0)
 
     @property
+    def proficiencies(self):
+        """Mapping of combat proficiencies."""
+        return self.db.proficiencies or {}
+
+    @proficiencies.setter
+    def proficiencies(self, value):
+        self.db.proficiencies = value
+
+    @property
     def in_combat(self):
         """Return True if in combat, otherwise False"""
         return bool(getattr(self.db, "in_combat", False))
@@ -257,14 +266,14 @@ class Character(ObjectParent, ClothedCharacter):
         from world.system.class_skills import MELEE_CLASSES
 
         state_manager.grant_ability(self, "Unarmed")
-        profs = self.db.proficiencies or {}
+        profs = self.proficiencies
         if profs.get("Unarmed", 0) < 25:
             profs["Unarmed"] = 25
         if self.db.charclass and self.db.charclass in MELEE_CLASSES:
             state_manager.grant_ability(self, "Hand-to-Hand")
             if profs.get("Hand-to-Hand", 0) < 25:
                 profs["Hand-to-Hand"] = 25
-        self.db.proficiencies = profs
+        self.proficiencies = profs
 
     def at_post_puppet(self, **kwargs):
         """Ensure stats refresh when a character is controlled."""
@@ -613,88 +622,16 @@ class Character(ObjectParent, ClothedCharacter):
         return freed
 
     def use_skill(self, skill_name, *args, **kwargs):
-        """
-        Attempt to use a skill, applying any stat bonus as necessary.
-        """
-        from world.system import state_manager
-        target = kwargs.get("target")
+        """Attempt to use a skill."""
+        from world import abilities
 
-        # using an active combat skill if a target is provided
-        if target is not None:
-            from combat.combat_skills import SKILL_CLASSES
-
-            skill_cls = SKILL_CLASSES.get(skill_name)
-            if not skill_cls:
-                return CombatResult(actor=self, target=target, message="Nothing happens.")
-            skill = skill_cls()
-            if not self.cooldowns.ready(skill.name):
-                return CombatResult(actor=self, target=self, message="Still recovering.")
-            if self.traits.stamina.current < skill.stamina_cost:
-                return CombatResult(actor=self, target=self, message="Too exhausted.")
-            self.traits.stamina.current -= skill.stamina_cost
-            state_manager.add_cooldown(self, skill.name, skill.cooldown)
-            result = skill.resolve(self, target)
-            for eff in skill.effects:
-                state_manager.add_status_effect(target, eff.key, eff.duration)
-            return result
-
-        # passive skill usage
-        if not skill_name:
-            return 1
-        if not (skill_trait := self.traits.get(skill_name)):
-            return 0
-
-        stat_bonus = 0
-        if stat := getattr(skill_trait, "stat", None):
-            stat_bonus = state_manager.get_effective_stat(self, stat)
-        prof = getattr(skill_trait, "proficiency", 0)
-        if prof < 100:
-            skill_trait.proficiency = min(100, prof + 1)
-        return skill_trait.value + stat_bonus
+        return abilities.use_skill(self, skill_name, *args, **kwargs)
 
     def cast_spell(self, spell_key, target=None):
-        """Cast a known spell, spending mana."""
-        from world.spells import SPELLS
-        from world.system import state_manager
+        """Cast a known spell."""
+        from world import abilities
 
-        spell = SPELLS.get(spell_key)
-        if not spell:
-            return False
-        if not self.cooldowns.ready(spell.key):
-            return False
-        known = self.db.spells or []
-        if isinstance(known, Mapping):
-            known = list(known.keys())
-            self.db.spells = known
-        srec = None
-        for entry in known:
-            if isinstance(entry, str) and entry == spell_key:
-                srec = Spell(spell.key, spell.stat, spell.mana_cost, spell.desc, 0)
-                idx = known.index(entry)
-                known[idx] = srec
-                self.db.spells = known
-                break
-            if hasattr(entry, "key") and entry.key == spell_key:
-                srec = entry
-                break
-        if not srec:
-            return False
-        if self.traits.mana.current < spell.mana_cost:
-            return False
-        self.traits.mana.current -= spell.mana_cost
-        state_manager.add_cooldown(self, spell.key, spell.cooldown)
-        if target:
-            self.location.msg_contents(
-                f"{self.get_display_name(self)} casts {spell.key} at {target.get_display_name(self)}!"
-            )
-        else:
-            self.location.msg_contents(
-                f"{self.get_display_name(self)} casts {spell.key}!"
-            )
-        if srec.proficiency < 100:
-            srec.proficiency = min(100, srec.proficiency + 1)
-            self.db.spells = known
-        return True
+        return abilities.cast_spell(self, spell_key, target=target)
 
     def get_display_status(self, looker, **kwargs):
         """

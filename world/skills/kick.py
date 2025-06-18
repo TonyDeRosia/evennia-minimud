@@ -18,7 +18,12 @@ class Kick(Skill):
 
         self.improve(user)
 
-        if not stat_manager.check_hit(user, target) or roll_evade(user, target):
+        profs = user.db.proficiencies or {}
+        prof = profs.get(self.name, 0)
+        dex = stat_manager.get_effective_stat(user, "DEX")
+        chance = stat_manager.proficiency_hit(prof, dex)
+
+        if not stat_manager.check_hit(user, target, base=chance) or roll_evade(user, target):
             return CombatResult(
                 actor=user,
                 target=target,

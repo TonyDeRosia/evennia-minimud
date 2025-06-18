@@ -94,6 +94,8 @@ VNUM_REGISTRY_FILE = Path(GAME_DIR) / "world" / "vnum_registry.json"
 COMBAT_DEBUG_TICKS = False
 # When True, include a damage summary at the end of each combat round
 COMBAT_DEBUG_SUMMARY = False
+# When True, show calculated hit chance on ability messages
+COMBAT_SHOW_HIT = False
 
 # Clothing - https://www.evennia.com/docs/latest/Contribs/Contrib-Clothing.html#configuration
 CLOTHING_WEARSTYLE_MAXLENGTH = 40
