@@ -63,19 +63,19 @@ class DamageProcessor:
     def solo_gain(self, chara, exp: int) -> None:
         if not exp or not chara:
             return
-        if hasattr(chara, "msg"):
-            chara.msg(f"You gain |Y{exp}|n experience points.")
-        state_manager.gain_xp(chara, exp)
+        from combat.combat_utils import award_xp
+
+        award_xp(chara, exp)
 
     def group_gain(self, members: List[object], exp: int) -> None:
         members = [m for m in members if m]
         if not members or not exp:
             return
+        from combat.combat_utils import award_xp
+
         share = max(int(exp / len(members)), int(exp * 0.10))
         for member in members:
-            if hasattr(member, "msg"):
-                member.msg(f"You gain |Y{share}|n experience points.")
-            state_manager.gain_xp(member, share)
+            award_xp(member, share)
 
     def apply_damage(self, attacker, target, amount: int, damage_type: DamageType | None) -> int:
         if hasattr(target, "at_damage"):

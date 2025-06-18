@@ -51,8 +51,9 @@ class SkillRecipe(CraftingRecipe):
         crafter.traits.mana.current -= 5
         # you should get the experience reward regardless of success
         if self.exp_gain:
-            from world.system import state_manager
-            state_manager.gain_xp(crafter, self.exp_gain)
+            from combat.combat_utils import award_xp
+
+            award_xp(crafter, self.exp_gain)
         # implement some randomness - the higher the difference, the lower the chance of failure
         if not randint(0, success_rate):
             self.msg("It doesn't seem to work out. Maybe you should try again?")
