@@ -8,8 +8,12 @@ from collections.abc import Iterable as AbcIterable
 from random import random
 import re
 
+import logging
 from .combat_utils import check_distance
 from world.system import state_manager
+from world import abilities
+
+logger = logging.getLogger(__name__)
 
 from .combat_actions import AttackAction, SkillAction, SpellAction
 from .engine import CombatEngine
@@ -85,10 +89,16 @@ def _default_behaviors(npc) -> Iterable[Behavior]:
         def check(engine, n, t):
             if random() > chance / 100:
                 return False
-            if state_manager.has_status(n, "stunned") or state_manager.has_status(n, "silenced"):
+            if state_manager.has_status(n, "stunned") or state_manager.has_status(
+                n, "silenced"
+            ):
                 return False
             mana = getattr(n.traits, "mana", None)
-            if not (mana and mana.current >= spell.mana_cost and n.cooldowns.ready(spell.key)):
+            if not (
+                mana
+                and mana.current >= spell.mana_cost
+                and n.cooldowns.ready(spell.key)
+            ):
                 return False
             action = SpellAction(n, spell_key, t)
             if not check_distance(n, t, action.range):
@@ -99,7 +109,14 @@ def _default_behaviors(npc) -> Iterable[Behavior]:
             if engine:
                 engine.queue_action(n, SpellAction(n, spell_key, t))
             else:
-                n.cast_spell(spell_key, target=t)
+                result = abilities.cast_spell(n, spell_key, target=t)
+                logger.debug(
+                    "NPC %s casts %s on %s - %s",
+                    getattr(n, "key", n),
+                    spell_key,
+                    getattr(t, "key", t),
+                    "hit" if result else "miss",
+                )
 
         return Behavior(30, check, act)
 
@@ -115,10 +132,16 @@ def _default_behaviors(npc) -> Iterable[Behavior]:
         def check(engine, n, t):
             if random() > chance / 100:
                 return False
-            if state_manager.has_status(n, "stunned") or state_manager.has_status(n, "silenced"):
+            if state_manager.has_status(n, "stunned") or state_manager.has_status(
+                n, "silenced"
+            ):
                 return False
             stam = getattr(n.traits, "stamina", None)
-            if not (stam and stam.current >= skill.stamina_cost and n.cooldowns.ready(skill.name)):
+            if not (
+                stam
+                and stam.current >= skill.stamina_cost
+                and n.cooldowns.ready(skill.name)
+            ):
                 return False
             action = SkillAction(n, skill, t)
             if not check_distance(n, t, action.range):
@@ -129,7 +152,7 @@ def _default_behaviors(npc) -> Iterable[Behavior]:
             if engine:
                 engine.queue_action(n, SkillAction(n, skill, t))
             else:
-                n.use_skill(skill.name, target=t)
+                abilities.use_skill(n, skill.name, target=t)
 
         return Behavior(20, check, act)
 
@@ -165,8 +188,12 @@ def npc_take_turn(engine: CombatEngine | None, npc, target) -> None:
 
     # check for low health hook
     if hasattr(npc, "on_low_hp"):
-        cur = getattr(getattr(npc.traits, "health", None), "value", getattr(npc, "hp", 0))
-        max_hp = getattr(getattr(npc.traits, "health", None), "max", getattr(npc, "max_hp", cur))
+        cur = getattr(
+            getattr(npc.traits, "health", None), "value", getattr(npc, "hp", 0)
+        )
+        max_hp = getattr(
+            getattr(npc.traits, "health", None), "max", getattr(npc, "max_hp", cur)
+        )
         if max_hp and cur / max_hp <= 0.3:
             npc.on_low_hp(engine)
 
@@ -175,4 +202,3 @@ def npc_take_turn(engine: CombatEngine | None, npc, target) -> None:
         if beh.check(engine, npc, target):
             beh.act(engine, npc, target)
             break
-
