@@ -34,7 +34,8 @@ class TestMidgardArea(EvenniaTest):
             "world.scripts.create_midgard_area.load_all_prototypes",
             return_value=proto,
         ):
-            create_midgard_area.create()
+            result = create_midgard_area.create()
+            assert "Created" in result
 
         cmd = CmdTeleport()
         cmd.caller = self.char1

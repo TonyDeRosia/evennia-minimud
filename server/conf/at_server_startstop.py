@@ -24,6 +24,7 @@ from evennia.utils import logger
 from evennia.server.models import ServerConfig
 from utils.prototype_manager import load_all_prototypes
 from utils.script_utils import resume_paused_scripts
+from world.scripts import create_midgard_area
 
 
 _PROTOTYPE_CACHE = {}
@@ -185,6 +186,16 @@ def at_server_start():
 
     _build_caches()
     _ensure_room_areas()
+    from typeclasses.rooms import Room
+    if not (
+        Room.objects.filter(db_tags__db_key__iexact="midgard").exists()
+        or Room.objects.filter(
+            db_attributes__db_key="area",
+            db_attributes__db_strvalue__iexact="midgard",
+        ).exists()
+    ):
+        create_midgard_area.create()
+        logger.log_info("Populated Midgard area")
     resume_paused_scripts()
     ServerConfig.objects.conf("server_start_time", time.time())
 
