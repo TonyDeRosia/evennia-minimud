@@ -3,9 +3,13 @@
     "prototype_key": "room_200050",
     "key": "|YMidgard Town Square|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "Cobblestone paths intersect beneath a weathered fountain. Lanterns hang from iron poles, flickering against the fading dusk.",
+    "desc": "Cobblestone paths intersect beneath a weathered fountain. Lanterns hang from iron poles, flickering against the fading dusk. Prayer flags flutter gently overhead. A sense of history permeates the stones.",
     "area": "midgard",
-    "xyz": [5, 5, "midgard"],
+    "xyz": [
+      5,
+      5,
+      "midgard"
+    ],
     "room_id": 200050,
     "exits": {
       "north": 200051,
@@ -13,15 +17,25 @@
       "east": 200053,
       "west": 200060,
       "southwest": 200059
-    }
+    },
+    "tags": [
+      [
+        "starting_room",
+        "area"
+      ]
+    ]
   },
   {
     "prototype_key": "room_200051",
     "key": "|WTemple Steppes|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "Broad stairs climb toward a marble archway. Devotees murmur hymns as they ascend.",
+    "desc": "Broad stairs climb toward a marble archway. Devotees murmur hymns as they ascend. A sense of history permeates the stones. Vendors shout about today's wares.",
     "area": "midgard",
-    "xyz": [5, 6, "midgard"],
+    "xyz": [
+      5,
+      6,
+      "midgard"
+    ],
     "room_id": 200051,
     "exits": {
       "south": 200050,
@@ -32,9 +46,13 @@
     "prototype_key": "room_200052",
     "key": "|CTemple of Light|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "Pillars etched with sunbursts rise to a vaulted ceiling. Candles burn steadily, casting warm halos.",
+    "desc": "Pillars etched with sunbursts rise to a vaulted ceiling. Candles burn steadily, casting warm halos. Vendors shout about today's wares. People bustle past on their evening errands.",
     "area": "midgard",
-    "xyz": [5, 7, "midgard"],
+    "xyz": [
+      5,
+      7,
+      "midgard"
+    ],
     "room_id": 200052,
     "exits": {
       "south": 200051,
@@ -45,9 +63,13 @@
     "prototype_key": "room_200053",
     "key": "|GClass Square|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "Chalkboards and training dummies line an open plaza. Students gather in clusters to practice.",
+    "desc": "Chalkboards and training dummies line an open plaza. Students gather in clusters to practice. People bustle past on their evening errands. Prayer flags flutter gently overhead.",
     "area": "midgard",
-    "xyz": [6, 5, "midgard"],
+    "xyz": [
+      6,
+      5,
+      "midgard"
+    ],
     "room_id": 200053,
     "exits": {
       "west": 200050,
@@ -59,9 +81,13 @@
     "prototype_key": "room_200054",
     "key": "|MSwashbuckler Hall|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "Banners of crossed sabers adorn the walls. The air smells of oiled leather and daring tales.",
+    "desc": "Banners of crossed sabers adorn the walls. The air smells of oiled leather and daring tales. Prayer flags flutter gently overhead. A sense of history permeates the stones.",
     "area": "midgard",
-    "xyz": [6, 6, "midgard"],
+    "xyz": [
+      6,
+      6,
+      "midgard"
+    ],
     "room_id": 200054,
     "exits": {
       "south": 200053,
@@ -72,9 +98,13 @@
     "prototype_key": "room_200055",
     "key": "|CKnight Hall|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "Polished shields reflect torchlight along this orderly chamber. Heavy footsteps echo with discipline.",
+    "desc": "Polished shields reflect torchlight along this orderly chamber. Heavy footsteps echo with discipline. A sense of history permeates the stones. Vendors shout about today's wares.",
     "area": "midgard",
-    "xyz": [6, 7, "midgard"],
+    "xyz": [
+      6,
+      7,
+      "midgard"
+    ],
     "room_id": 200055,
     "exits": {
       "south": 200054,
@@ -85,9 +115,13 @@
     "prototype_key": "room_200056",
     "key": "|WCleric Hall|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "Rows of pews face an altar draped in white linen. Incense curls lazily through the quiet.",
+    "desc": "Rows of pews face an altar draped in white linen. Incense curls lazily through the quiet. Vendors shout about today's wares. People bustle past on their evening errands.",
     "area": "midgard",
-    "xyz": [6, 8, "midgard"],
+    "xyz": [
+      6,
+      8,
+      "midgard"
+    ],
     "room_id": 200056,
     "exits": {
       "south": 200055,
@@ -98,9 +132,13 @@
     "prototype_key": "room_200057",
     "key": "|RMage Hall|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "Shelves laden with tomes surround a circle of runes. A faint hum of power lingers in the air.",
+    "desc": "Shelves laden with tomes surround a circle of runes. A faint hum of power lingers in the air. People bustle past on their evening errands. Prayer flags flutter gently overhead.",
     "area": "midgard",
-    "xyz": [6, 9, "midgard"],
+    "xyz": [
+      6,
+      9,
+      "midgard"
+    ],
     "room_id": 200057,
     "exits": {
       "south": 200056
@@ -110,9 +148,13 @@
     "prototype_key": "room_200058",
     "key": "|GTraining Grounds|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "Wooden targets stand amid churned earth. Novices practice strikes under a watchful instructor.",
+    "desc": "Wooden targets stand amid churned earth. Novices practice strikes under a watchful instructor. Prayer flags flutter gently overhead. A sense of history permeates the stones.",
     "area": "midgard",
-    "xyz": [5, 4, "midgard"],
+    "xyz": [
+      5,
+      4,
+      "midgard"
+    ],
     "room_id": 200058,
     "exits": {
       "north": 200050,
@@ -125,36 +167,60 @@
     "prototype_key": "room_200059",
     "key": "|yThe Roasted Root|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "A food stall sizzles with roasting vegetables. Merchants hawk simple meals to passing travelers.",
+    "desc": "A food stall sizzles with roasting vegetables. Merchants hawk simple meals to passing travelers. A sense of history permeates the stones. Vendors shout about today's wares.",
     "area": "midgard",
-    "xyz": [4, 4, "midgard"],
+    "xyz": [
+      4,
+      4,
+      "midgard"
+    ],
     "room_id": 200059,
     "exits": {
       "northeast": 200050,
       "north": 200060
-    }
+    },
+    "tags": [
+      [
+        "vendor",
+        "area"
+      ]
+    ]
   },
   {
     "prototype_key": "room_200060",
     "key": "|rBlacksmith's Forge|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "The ring of hammer on anvil resounds here. Sparks fly as metal is shaped by expert hands.",
+    "desc": "The ring of hammer on anvil resounds here. Sparks fly as metal is shaped by expert hands. Vendors shout about today's wares. People bustle past on their evening errands.",
     "area": "midgard",
-    "xyz": [4, 5, "midgard"],
+    "xyz": [
+      4,
+      5,
+      "midgard"
+    ],
     "room_id": 200060,
     "exits": {
       "east": 200050,
       "north": 200061,
       "south": 200059
-    }
+    },
+    "tags": [
+      [
+        "vendor",
+        "area"
+      ]
+    ]
   },
   {
     "prototype_key": "room_200061",
     "key": "|gStorage Room|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "Stacks of crates and barrels fill this dim space. The scent of oil and metal lingers in the air.",
+    "desc": "Stacks of crates and barrels fill this dim space. The scent of oil and metal lingers in the air. People bustle past on their evening errands. Prayer flags flutter gently overhead.",
     "area": "midgard",
-    "xyz": [4, 6, "midgard"],
+    "xyz": [
+      4,
+      6,
+      "midgard"
+    ],
     "room_id": 200061,
     "exits": {
       "south": 200060,
@@ -166,9 +232,13 @@
     "prototype_key": "room_200062",
     "key": "|YTown Bulletin Board|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "A large wooden board displays messages and notices for all to read.",
+    "desc": "A large wooden board displays messages and notices for all to read. People bustle past on their evening errands. Prayer flags flutter gently overhead. A sense of history permeates the stones.",
     "area": "midgard",
-    "xyz": [3, 7, "midgard"],
+    "xyz": [
+      3,
+      7,
+      "midgard"
+    ],
     "room_id": 200062,
     "exits": {
       "southeast": 200061,
@@ -180,9 +250,13 @@
     "prototype_key": "room_200063",
     "key": "|YWatchtower|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "From atop the tower, one can survey the countryside. Flags flutter in the brisk wind.",
+    "desc": "From atop the tower, one can survey the countryside. Flags flutter in the brisk wind. A sense of history permeates the stones. Vendors shout about today's wares.",
     "area": "midgard",
-    "xyz": [3, 8, "midgard"],
+    "xyz": [
+      3,
+      8,
+      "midgard"
+    ],
     "room_id": 200063,
     "exits": {
       "south": 200062,
@@ -193,9 +267,13 @@
     "prototype_key": "room_200064",
     "key": "|cQuiet Shrine|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "Stone lanterns guard a modest shrine. Prayer ribbons flutter gently from nearby trees.",
+    "desc": "Stone lanterns guard a modest shrine. Prayer ribbons flutter gently from nearby trees. Vendors shout about today's wares. People bustle past on their evening errands.",
     "area": "midgard",
-    "xyz": [4, 7, "midgard"],
+    "xyz": [
+      4,
+      7,
+      "midgard"
+    ],
     "room_id": 200064,
     "exits": {
       "west": 200062,
@@ -207,9 +285,13 @@
     "prototype_key": "room_200065",
     "key": "|gSecluded Courtyard|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "Low walls enclose a peaceful courtyard where weeds push between worn flagstones.",
+    "desc": "Low walls enclose a peaceful courtyard where weeds push between worn flagstones. Vendors shout about today's wares. People bustle past on their evening errands. Prayer flags flutter gently overhead.",
     "area": "midgard",
-    "xyz": [5, 3, "midgard"],
+    "xyz": [
+      5,
+      3,
+      "midgard"
+    ],
     "room_id": 200065,
     "exits": {
       "north": 200058
@@ -219,9 +301,13 @@
     "prototype_key": "room_200066",
     "key": "|gOld Cobbled Alley|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "The narrow alley winds between buildings, its cobbles slick from countless footsteps.",
+    "desc": "The narrow alley winds between buildings, its cobbles slick from countless footsteps. People bustle past on their evening errands. Prayer flags flutter gently overhead. A sense of history permeates the stones.",
     "area": "midgard",
-    "xyz": [6, 4, "midgard"],
+    "xyz": [
+      6,
+      4,
+      "midgard"
+    ],
     "room_id": 200066,
     "exits": {
       "north": 200053,
@@ -232,9 +318,13 @@
     "prototype_key": "room_200067",
     "key": "|mTraveler's Rest Inn|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "The inn's common room smells of stew and smoke. A worn sign promises cheap lodgings.",
+    "desc": "The inn's common room smells of stew and smoke. A worn sign promises cheap lodgings. A sense of history permeates the stones. Vendors shout about today's wares.",
     "area": "midgard",
-    "xyz": [4, 3, "midgard"],
+    "xyz": [
+      4,
+      3,
+      "midgard"
+    ],
     "room_id": 200067,
     "exits": {
       "east": 200058,
@@ -245,9 +335,13 @@
     "prototype_key": "room_200068",
     "key": "|GSunlit Garden|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "Beds of vibrant flowers bask in shafts of sunlight. A serene hush pervades the garden.",
+    "desc": "Beds of vibrant flowers bask in shafts of sunlight. A serene hush pervades the garden. Vendors shout about today's wares. People bustle past on their evening errands.",
     "area": "midgard",
-    "xyz": [5, 8, "midgard"],
+    "xyz": [
+      5,
+      8,
+      "midgard"
+    ],
     "room_id": 200068,
     "exits": {
       "south": 200052,
@@ -259,14 +353,1557 @@
     "prototype_key": "room_200069",
     "key": "|gWooded Path|n",
     "typeclass": "typeclasses.rooms.Room",
-    "desc": "A narrow path winds through young trees, leading out toward the wild hills beyond.",
+    "desc": "A narrow path winds through young trees, leading out toward the wild hills beyond. Vendors shout about today's wares. People bustle past on their evening errands. Prayer flags flutter gently overhead.",
     "area": "midgard",
-    "xyz": [4, 8, "midgard"],
+    "xyz": [
+      4,
+      8,
+      "midgard"
+    ],
     "room_id": 200069,
     "exits": {
       "east": 200068,
       "west": 200063,
       "south": 200064
     }
+  },
+  {
+    "prototype_key": "room_200070",
+    "key": "|cWinding Way 200070|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200070 in Midgard. It passes by several stalls. The pavement shows signs of long use. Distant chatter mixes with the rustling leaves.",
+    "area": "midgard",
+    "xyz": [
+      7,
+      8,
+      "midgard"
+    ],
+    "room_id": 200070,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200071",
+    "key": "|cNarrow Way 200071|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200071 in Midgard. It passes by several stalls. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      8,
+      9,
+      "midgard"
+    ],
+    "room_id": 200071,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200072",
+    "key": "|cLively Way 200072|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200072 in Midgard. It passes by several gardens. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      9,
+      10,
+      "midgard"
+    ],
+    "room_id": 200072,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200073",
+    "key": "|cHidden Way 200073|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200073 in Midgard. It passes by several houses. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      10,
+      11,
+      "midgard"
+    ],
+    "room_id": 200073,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200074",
+    "key": "|cWinding Way 200074|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200074 in Midgard. It passes by several shrines. The pavement shows signs of long use. Children laugh somewhere nearby.",
+    "area": "midgard",
+    "xyz": [
+      11,
+      12,
+      "midgard"
+    ],
+    "room_id": 200074,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200075",
+    "key": "|cBustling Way 200075|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200075 in Midgard. It passes by several houses. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      12,
+      13,
+      "midgard"
+    ],
+    "room_id": 200075,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200076",
+    "key": "|cBroad Way 200076|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200076 in Midgard. It passes by several houses. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      13,
+      14,
+      "midgard"
+    ],
+    "room_id": 200076,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200077",
+    "key": "|cShaded Way 200077|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200077 in Midgard. It passes by several fountains. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      14,
+      15,
+      "midgard"
+    ],
+    "room_id": 200077,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200078",
+    "key": "|cWinding Way 200078|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200078 in Midgard. It passes by several shrines. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      15,
+      16,
+      "midgard"
+    ],
+    "room_id": 200078,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200079",
+    "key": "|cHidden Way 200079|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200079 in Midgard. It passes by several stalls. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      16,
+      17,
+      "midgard"
+    ],
+    "room_id": 200079,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200080",
+    "key": "|cBroad Way 200080|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200080 in Midgard. It passes by several gardens. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      17,
+      18,
+      "midgard"
+    ],
+    "room_id": 200080,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200081",
+    "key": "|cBroad Way 200081|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200081 in Midgard. It passes by several fountains. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      18,
+      19,
+      "midgard"
+    ],
+    "room_id": 200081,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200082",
+    "key": "|cSteep Way 200082|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200082 in Midgard. It passes by several taverns. The pavement shows signs of long use. Distant chatter mixes with the rustling leaves.",
+    "area": "midgard",
+    "xyz": [
+      19,
+      20,
+      "midgard"
+    ],
+    "room_id": 200082,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200083",
+    "key": "|cQuiet Way 200083|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200083 in Midgard. It passes by several houses. The pavement shows signs of long use. Distant chatter mixes with the rustling leaves.",
+    "area": "midgard",
+    "xyz": [
+      20,
+      21,
+      "midgard"
+    ],
+    "room_id": 200083,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200084",
+    "key": "|cWinding Way 200084|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200084 in Midgard. It passes by several gardens. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      21,
+      22,
+      "midgard"
+    ],
+    "room_id": 200084,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200085",
+    "key": "|cShaded Way 200085|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200085 in Midgard. It passes by several barracks. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      22,
+      23,
+      "midgard"
+    ],
+    "room_id": 200085,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200086",
+    "key": "|cHidden Way 200086|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200086 in Midgard. It passes by several gardens. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      23,
+      24,
+      "midgard"
+    ],
+    "room_id": 200086,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200087",
+    "key": "|cSteep Way 200087|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200087 in Midgard. It passes by several gardens. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      24,
+      25,
+      "midgard"
+    ],
+    "room_id": 200087,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200088",
+    "key": "|cHidden Way 200088|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200088 in Midgard. It passes by several warehouses. The pavement shows signs of long use. Children laugh somewhere nearby.",
+    "area": "midgard",
+    "xyz": [
+      25,
+      26,
+      "midgard"
+    ],
+    "room_id": 200088,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200089",
+    "key": "|cWinding Way 200089|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200089 in Midgard. It passes by several fountains. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      26,
+      27,
+      "midgard"
+    ],
+    "room_id": 200089,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200090",
+    "key": "|cHidden Way 200090|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200090 in Midgard. It passes by several warehouses. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      27,
+      28,
+      "midgard"
+    ],
+    "room_id": 200090,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200091",
+    "key": "|cSteep Way 200091|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200091 in Midgard. It passes by several stalls. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      28,
+      29,
+      "midgard"
+    ],
+    "room_id": 200091,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200092",
+    "key": "|cBustling Way 200092|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200092 in Midgard. It passes by several gardens. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      29,
+      30,
+      "midgard"
+    ],
+    "room_id": 200092,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200093",
+    "key": "|cQuiet Way 200093|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200093 in Midgard. It passes by several fountains. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      30,
+      31,
+      "midgard"
+    ],
+    "room_id": 200093,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200094",
+    "key": "|cBroad Way 200094|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200094 in Midgard. It passes by several warehouses. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      31,
+      32,
+      "midgard"
+    ],
+    "room_id": 200094,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200095",
+    "key": "|cQuiet Way 200095|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200095 in Midgard. It passes by several gardens. The pavement shows signs of long use. Children laugh somewhere nearby.",
+    "area": "midgard",
+    "xyz": [
+      32,
+      33,
+      "midgard"
+    ],
+    "room_id": 200095,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200096",
+    "key": "|cBroad Way 200096|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200096 in Midgard. It passes by several courtyards. The pavement shows signs of long use. Children laugh somewhere nearby.",
+    "area": "midgard",
+    "xyz": [
+      33,
+      34,
+      "midgard"
+    ],
+    "room_id": 200096,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200097",
+    "key": "|cLively Way 200097|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200097 in Midgard. It passes by several shops. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      34,
+      35,
+      "midgard"
+    ],
+    "room_id": 200097,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200098",
+    "key": "|cNarrow Way 200098|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200098 in Midgard. It passes by several taverns. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      35,
+      36,
+      "midgard"
+    ],
+    "room_id": 200098,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200099",
+    "key": "|cWinding Way 200099|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200099 in Midgard. It passes by several gardens. The pavement shows signs of long use. Children laugh somewhere nearby.",
+    "area": "midgard",
+    "xyz": [
+      36,
+      37,
+      "midgard"
+    ],
+    "room_id": 200099,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200100",
+    "key": "|cHidden Way 200100|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200100 in Midgard. It passes by several shops. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      37,
+      38,
+      "midgard"
+    ],
+    "room_id": 200100,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200101",
+    "key": "|cNarrow Way 200101|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200101 in Midgard. It passes by several shops. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      38,
+      39,
+      "midgard"
+    ],
+    "room_id": 200101,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200102",
+    "key": "|cLively Way 200102|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200102 in Midgard. It passes by several courtyards. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      39,
+      40,
+      "midgard"
+    ],
+    "room_id": 200102,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200103",
+    "key": "|cQuiet Way 200103|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200103 in Midgard. It passes by several gardens. The pavement shows signs of long use. Distant chatter mixes with the rustling leaves.",
+    "area": "midgard",
+    "xyz": [
+      40,
+      41,
+      "midgard"
+    ],
+    "room_id": 200103,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200104",
+    "key": "|cNarrow Way 200104|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200104 in Midgard. It passes by several barracks. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      41,
+      42,
+      "midgard"
+    ],
+    "room_id": 200104,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200105",
+    "key": "|cBustling Way 200105|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200105 in Midgard. It passes by several barracks. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      42,
+      43,
+      "midgard"
+    ],
+    "room_id": 200105,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200106",
+    "key": "|cHidden Way 200106|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200106 in Midgard. It passes by several taverns. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      43,
+      44,
+      "midgard"
+    ],
+    "room_id": 200106,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200107",
+    "key": "|cNarrow Way 200107|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200107 in Midgard. It passes by several shops. The pavement shows signs of long use. Distant chatter mixes with the rustling leaves.",
+    "area": "midgard",
+    "xyz": [
+      44,
+      45,
+      "midgard"
+    ],
+    "room_id": 200107,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200108",
+    "key": "|cNarrow Way 200108|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200108 in Midgard. It passes by several fountains. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      45,
+      46,
+      "midgard"
+    ],
+    "room_id": 200108,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200109",
+    "key": "|cNarrow Way 200109|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200109 in Midgard. It passes by several stalls. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      46,
+      47,
+      "midgard"
+    ],
+    "room_id": 200109,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200110",
+    "key": "|cSteep Way 200110|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200110 in Midgard. It passes by several warehouses. The pavement shows signs of long use. Distant chatter mixes with the rustling leaves.",
+    "area": "midgard",
+    "xyz": [
+      47,
+      48,
+      "midgard"
+    ],
+    "room_id": 200110,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200111",
+    "key": "|cDusty Way 200111|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200111 in Midgard. It passes by several shrines. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      48,
+      49,
+      "midgard"
+    ],
+    "room_id": 200111,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200112",
+    "key": "|cNarrow Way 200112|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200112 in Midgard. It passes by several warehouses. The pavement shows signs of long use. Children laugh somewhere nearby.",
+    "area": "midgard",
+    "xyz": [
+      49,
+      50,
+      "midgard"
+    ],
+    "room_id": 200112,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200113",
+    "key": "|cNarrow Way 200113|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200113 in Midgard. It passes by several shrines. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      50,
+      51,
+      "midgard"
+    ],
+    "room_id": 200113,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200114",
+    "key": "|cNarrow Way 200114|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200114 in Midgard. It passes by several warehouses. The pavement shows signs of long use. Children laugh somewhere nearby.",
+    "area": "midgard",
+    "xyz": [
+      51,
+      52,
+      "midgard"
+    ],
+    "room_id": 200114,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200115",
+    "key": "|cWinding Way 200115|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200115 in Midgard. It passes by several warehouses. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      52,
+      53,
+      "midgard"
+    ],
+    "room_id": 200115,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200116",
+    "key": "|cQuiet Way 200116|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200116 in Midgard. It passes by several shrines. The pavement shows signs of long use. Children laugh somewhere nearby.",
+    "area": "midgard",
+    "xyz": [
+      53,
+      54,
+      "midgard"
+    ],
+    "room_id": 200116,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200117",
+    "key": "|cWinding Way 200117|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200117 in Midgard. It passes by several courtyards. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      54,
+      55,
+      "midgard"
+    ],
+    "room_id": 200117,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200118",
+    "key": "|cSteep Way 200118|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200118 in Midgard. It passes by several gardens. The pavement shows signs of long use. Distant chatter mixes with the rustling leaves.",
+    "area": "midgard",
+    "xyz": [
+      55,
+      56,
+      "midgard"
+    ],
+    "room_id": 200118,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200119",
+    "key": "|cShaded Way 200119|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200119 in Midgard. It passes by several courtyards. The pavement shows signs of long use. Children laugh somewhere nearby.",
+    "area": "midgard",
+    "xyz": [
+      56,
+      57,
+      "midgard"
+    ],
+    "room_id": 200119,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200120",
+    "key": "|cWinding Way 200120|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200120 in Midgard. It passes by several warehouses. The pavement shows signs of long use. Children laugh somewhere nearby.",
+    "area": "midgard",
+    "xyz": [
+      57,
+      58,
+      "midgard"
+    ],
+    "room_id": 200120,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200121",
+    "key": "|cSteep Way 200121|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200121 in Midgard. It passes by several barracks. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      58,
+      59,
+      "midgard"
+    ],
+    "room_id": 200121,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200122",
+    "key": "|cSteep Way 200122|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200122 in Midgard. It passes by several courtyards. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      59,
+      60,
+      "midgard"
+    ],
+    "room_id": 200122,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200123",
+    "key": "|cBroad Way 200123|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200123 in Midgard. It passes by several gardens. The pavement shows signs of long use. Children laugh somewhere nearby.",
+    "area": "midgard",
+    "xyz": [
+      60,
+      61,
+      "midgard"
+    ],
+    "room_id": 200123,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200124",
+    "key": "|cLively Way 200124|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200124 in Midgard. It passes by several barracks. The pavement shows signs of long use. Distant chatter mixes with the rustling leaves.",
+    "area": "midgard",
+    "xyz": [
+      61,
+      62,
+      "midgard"
+    ],
+    "room_id": 200124,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200125",
+    "key": "|cHidden Way 200125|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200125 in Midgard. It passes by several stalls. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      62,
+      63,
+      "midgard"
+    ],
+    "room_id": 200125,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200126",
+    "key": "|cShaded Way 200126|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200126 in Midgard. It passes by several taverns. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      63,
+      64,
+      "midgard"
+    ],
+    "room_id": 200126,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200127",
+    "key": "|cShaded Way 200127|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200127 in Midgard. It passes by several warehouses. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      64,
+      65,
+      "midgard"
+    ],
+    "room_id": 200127,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200128",
+    "key": "|cHidden Way 200128|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200128 in Midgard. It passes by several gardens. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      65,
+      66,
+      "midgard"
+    ],
+    "room_id": 200128,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200129",
+    "key": "|cShaded Way 200129|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200129 in Midgard. It passes by several courtyards. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      66,
+      67,
+      "midgard"
+    ],
+    "room_id": 200129,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200130",
+    "key": "|cBroad Way 200130|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200130 in Midgard. It passes by several stalls. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      67,
+      68,
+      "midgard"
+    ],
+    "room_id": 200130,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200131",
+    "key": "|cBustling Way 200131|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200131 in Midgard. It passes by several stalls. The pavement shows signs of long use. Distant chatter mixes with the rustling leaves.",
+    "area": "midgard",
+    "xyz": [
+      68,
+      69,
+      "midgard"
+    ],
+    "room_id": 200131,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200132",
+    "key": "|cNarrow Way 200132|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200132 in Midgard. It passes by several shrines. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      69,
+      70,
+      "midgard"
+    ],
+    "room_id": 200132,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200133",
+    "key": "|cQuiet Way 200133|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200133 in Midgard. It passes by several houses. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      70,
+      71,
+      "midgard"
+    ],
+    "room_id": 200133,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200134",
+    "key": "|cShaded Way 200134|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200134 in Midgard. It passes by several shrines. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      71,
+      72,
+      "midgard"
+    ],
+    "room_id": 200134,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200135",
+    "key": "|cBustling Way 200135|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200135 in Midgard. It passes by several houses. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      72,
+      73,
+      "midgard"
+    ],
+    "room_id": 200135,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200136",
+    "key": "|cNarrow Way 200136|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200136 in Midgard. It passes by several gardens. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      73,
+      74,
+      "midgard"
+    ],
+    "room_id": 200136,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200137",
+    "key": "|cBustling Way 200137|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200137 in Midgard. It passes by several warehouses. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      74,
+      75,
+      "midgard"
+    ],
+    "room_id": 200137,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200138",
+    "key": "|cBroad Way 200138|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200138 in Midgard. It passes by several shrines. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      75,
+      76,
+      "midgard"
+    ],
+    "room_id": 200138,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200139",
+    "key": "|cBustling Way 200139|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200139 in Midgard. It passes by several shops. The pavement shows signs of long use. Children laugh somewhere nearby.",
+    "area": "midgard",
+    "xyz": [
+      76,
+      77,
+      "midgard"
+    ],
+    "room_id": 200139,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200140",
+    "key": "|cWinding Way 200140|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200140 in Midgard. It passes by several courtyards. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      77,
+      78,
+      "midgard"
+    ],
+    "room_id": 200140,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200141",
+    "key": "|cSteep Way 200141|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200141 in Midgard. It passes by several courtyards. The pavement shows signs of long use. Children laugh somewhere nearby.",
+    "area": "midgard",
+    "xyz": [
+      78,
+      79,
+      "midgard"
+    ],
+    "room_id": 200141,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200142",
+    "key": "|cShaded Way 200142|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200142 in Midgard. It passes by several barracks. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      79,
+      80,
+      "midgard"
+    ],
+    "room_id": 200142,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200143",
+    "key": "|cBustling Way 200143|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200143 in Midgard. It passes by several gardens. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      80,
+      81,
+      "midgard"
+    ],
+    "room_id": 200143,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200144",
+    "key": "|cNarrow Way 200144|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200144 in Midgard. It passes by several taverns. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      81,
+      82,
+      "midgard"
+    ],
+    "room_id": 200144,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200145",
+    "key": "|cNarrow Way 200145|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200145 in Midgard. It passes by several houses. The pavement shows signs of long use. Distant chatter mixes with the rustling leaves.",
+    "area": "midgard",
+    "xyz": [
+      82,
+      83,
+      "midgard"
+    ],
+    "room_id": 200145,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200146",
+    "key": "|cShaded Way 200146|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200146 in Midgard. It passes by several fountains. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      83,
+      84,
+      "midgard"
+    ],
+    "room_id": 200146,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200147",
+    "key": "|cBustling Way 200147|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200147 in Midgard. It passes by several barracks. The pavement shows signs of long use. Birdsong filters down from the rooftops.",
+    "area": "midgard",
+    "xyz": [
+      84,
+      85,
+      "midgard"
+    ],
+    "room_id": 200147,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200148",
+    "key": "|cBroad Way 200148|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200148 in Midgard. It passes by several shops. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      85,
+      86,
+      "midgard"
+    ],
+    "room_id": 200148,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200149",
+    "key": "|cShaded Way 200149|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200149 in Midgard. It passes by several shrines. The pavement shows signs of long use. Footsteps echo softly on the stones.",
+    "area": "midgard",
+    "xyz": [
+      86,
+      87,
+      "midgard"
+    ],
+    "room_id": 200149,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
+  },
+  {
+    "prototype_key": "room_200150",
+    "key": "|cNarrow Way 200150|n",
+    "typeclass": "typeclasses.rooms.Room",
+    "desc": "This corridor marks room 200150 in Midgard. It passes by several gardens. The pavement shows signs of long use. A gentle breeze carries city scents.",
+    "area": "midgard",
+    "xyz": [
+      87,
+      88,
+      "midgard"
+    ],
+    "room_id": 200150,
+    "tags": [
+      [
+        "midgard",
+        "area"
+      ]
+    ]
   }
 ]
