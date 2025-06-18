@@ -26,6 +26,16 @@ class Command(BaseCommand):
             session = to_obj.sessions.get() if to_obj != self.caller else self.session
         to_obj.msg(text, from_obj=from_obj, session=session, **kwargs)
 
+    def at_pre_cmd(self):
+        """Proxy commands when ghost-puppeting another character."""
+        proxy = getattr(self.caller.ndb, "puppet_proxy", None)
+        if proxy and self.cmdstring != "@puppet":
+            self.caller.msg(f"[PUPPETING {proxy.key}]")
+            proxy.execute_cmd(self.raw_string, session=self.session)
+            self.caller.msg("[END PUPPET]")
+            return True
+        return super().at_pre_cmd()
+
     def at_post_cmd(self):
         """Hook called after command execution."""
         super().at_post_cmd()
