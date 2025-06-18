@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
-"""Utility to cleanly start the Evennia server using `evennia start`.
+"""Utility to cleanly start the Evennia server using ``evennia start``.
 
 This script checks for lingering processes or files that might prevent
 Evennia from launching. It removes stale PID files and temporary
-directories and frees the default port before executing ``evennia start``.
+directories and frees the configured port before executing
+``evennia start``. The port defaults to ``4005`` but can be overridden by
+setting the ``EVENNIA_PORT`` environment variable or by passing
+``--port`` on the command line.
 """
 
+import argparse
 import glob
 import os
 import shutil
@@ -14,6 +18,16 @@ import subprocess
 import sys
 
 PORT = 4005
+
+
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Cleanly start Evennia")
+    parser.add_argument(
+        "--port",
+        type=int,
+        help="TCP port to free before starting",
+    )
+    return parser.parse_args()
 
 
 def _twistd_processes():
@@ -74,6 +88,9 @@ def _is_running() -> bool:
 
 
 def main() -> None:
+    args = _parse_args()
+    port = args.port if args.port is not None else int(os.getenv("EVENNIA_PORT", PORT))
+
     procs = _twistd_processes()
     _kill_defunct_parents(procs)
 
@@ -82,7 +99,7 @@ def main() -> None:
         return
 
     _cleanup_files()
-    _kill_port(PORT)
+    _kill_port(port)
 
     try:
         subprocess.run(["evennia", "start"], check=True)

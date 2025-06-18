@@ -221,8 +221,10 @@ clean up and start the server again:
 python start_evennia.py
 ```
 
-The script removes stale PID files, kills any orphaned twistd processes, frees
-port 4005 and finally executes `evennia start`. If Evennia is already running it
-simply prints a warning and exits.
+The script removes stale PID files, kills any orphaned twistd processes and
+frees port 4005 before calling `evennia start`. Both `start_evennia.py` and
+`reset_evennia.py` default to port `4005`. Set the `EVENNIA_PORT`
+environment variable or pass `--port <num>` to override this value. If Evennia
+is already running the script simply prints a warning and exits.
 
 Cleaning up these processes and files usually resolves the error.
