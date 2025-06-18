@@ -34,7 +34,8 @@ class CmdSpellbook(Command):
                     spell = SPELLS.get(spell_key)
                     if not spell:
                         continue
-                    prof = 0 if isinstance(entry, str) else getattr(entry, "proficiency", 0)
+                    profs = self.caller.db.proficiencies or {}
+                    prof = profs.get(spell_key, 0)
                     msg = (
                         f"|w{spell.key.capitalize()}|n\n"
                         f"  Mana Cost: |w{spell.mana_cost}|n\n"
@@ -49,17 +50,15 @@ class CmdSpellbook(Command):
 
         table = EvTable("Spell", "Mana", "Proficiency")
         for entry in known:
-            if isinstance(entry, str):
-                spell = SPELLS.get(entry)
+                if isinstance(entry, str):
+                    key = entry
+                else:
+                    key = entry.key
+                spell = SPELLS.get(key)
                 if not spell:
                     continue
-                prof = 0
-                key = entry
-            else:
-                spell = SPELLS.get(entry.key)
-                key = entry.key
-                prof = getattr(entry, "proficiency", 0)
-            if spell:
+                profs = self.caller.db.proficiencies or {}
+                prof = profs.get(key, 0)
                 table.add_row(key, spell.mana_cost, f"{prof}%")
         self.msg(str(table))
 
@@ -121,10 +120,11 @@ class CmdCast(Command):
             self.caller.location.msg_contents(
                 f"{self.caller.get_display_name(self.caller)} casts {colored}!"
             )
-        if isinstance(spell_entry, Spell):
-            if spell_entry.proficiency < 100:
-                spell_entry.proficiency = min(100, spell_entry.proficiency + 1)
-            self.caller.db.spells = known
+        profs = self.caller.db.proficiencies or {}
+        prof = profs.get(spell_key, 0)
+        if prof < 100:
+            profs[spell_key] = min(100, prof + 1)
+            self.caller.db.proficiencies = profs
 
 
 class CmdLearnSpell(Command):
@@ -150,9 +150,12 @@ class CmdLearnSpell(Command):
             self.msg("You have no practice sessions left.")
             return
         self.caller.db.practice_sessions -= 1
-        new_spell = Spell(spell.key, spell.stat, spell.mana_cost, spell.desc, 25)
+        new_spell = Spell(spell.key, spell.stat, spell.mana_cost, spell.desc, spell.cooldown)
         known.append(new_spell)
         self.caller.db.spells = known
+        profs = self.caller.db.proficiencies or {}
+        profs[spell.key] = 25
+        self.caller.db.proficiencies = profs
         self.msg(f"You learn the {spell.key} spell.")
 
 

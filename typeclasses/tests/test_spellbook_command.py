@@ -7,7 +7,7 @@ class TestSpellbook(EvenniaTest):
     def setUp(self):
         super().setUp()
         # give char1 a known spell
-        self.char1.db.spells = [Spell("fireball", "INT", 10, "A fiery blast.", 50)]
+        self.char1.db.spells = [Spell("fireball", "INT", 10, "A fiery blast.")]
         self.char1.msg = MagicMock()
 
     def test_spellbook_lists_spells(self):
