@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
-"""Reset and restart Evennia server if not already running."""
+"""Reset and restart Evennia server if not already running.
 
+The helper cleans up lingering PID files and frees the configured port
+before calling ``evennia start``. The port defaults to ``4005`` but can be
+overridden via the ``EVENNIA_PORT`` environment variable or a ``--port``
+command-line option.
+"""
+
+import argparse
 import os
 import subprocess
 import signal
@@ -11,6 +18,16 @@ import sys
 from utils.startup_utils import kill_port
 
 PORT = 4005
+
+
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Reset and restart Evennia")
+    parser.add_argument(
+        "--port",
+        type=int,
+        help="TCP port to free before starting",
+    )
+    return parser.parse_args()
 
 
 def get_twistd_processes():
@@ -69,6 +86,9 @@ def evennia_running(procs):
 
 
 def main():
+    args = _parse_args()
+    port = args.port if args.port is not None else int(os.getenv("EVENNIA_PORT", PORT))
+
     procs = get_twistd_processes()
     kill_parent_of_defunct(procs)
     if evennia_running(procs):
@@ -76,7 +96,7 @@ def main():
         return
 
     cleanup_files()
-    kill_port(PORT)
+    kill_port(port)
 
     try:
         subprocess.run(["evennia", "start"], check=True)
