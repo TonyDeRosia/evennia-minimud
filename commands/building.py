@@ -316,6 +316,47 @@ class CmdDelDir(Command):
         self.msg(f"Exit {direction} removed.")
 
 
+class CmdUnlink(Command):
+    """Remove an exit and its reverse link if present."""
+
+    key = "unlink"
+    locks = "cmd:perm(Builder) or perm(Admin) or perm(Developer)"
+    help_category = "Building"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: unlink <direction>")
+            return
+        direction = DIR_FULL.get(self.args.strip().lower())
+        if not direction:
+            self.msg("Unknown direction.")
+            return
+
+        room = self.caller.location
+        if not room:
+            self.msg("You have no location.")
+            return
+
+        exits = room.db.exits or {}
+        target = exits.get(direction)
+        if not target:
+            self.msg("No exit in that direction.")
+            return
+
+        exits.pop(direction, None)
+        room.db.exits = exits
+
+        opposite = OPPOSITE.get(direction)
+        if opposite and target.db.exits:
+            back = target.db.exits.get(opposite)
+            if back == room:
+                other_exits = target.db.exits
+                other_exits.pop(opposite, None)
+                target.db.exits = other_exits
+
+        self.msg(f"Exit {direction} removed.")
+
+
 class CmdLink(MuxCommand):
     """Link the current room to another by VNUM."""
 

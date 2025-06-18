@@ -15,6 +15,7 @@ from ..building import (
     CmdSetFlag,
     CmdRemoveFlag,
     CmdDelDir,
+    CmdUnlink,
     CmdDelRoom,
     CmdInitMidgard,
 )
@@ -1442,6 +1443,7 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdSetFlag)
         self.add(CmdRemoveFlag)
         self.add(CmdDelDir)
+        self.add(CmdUnlink)
         self.add(CmdDelRoom)
         self.add(CmdInitMidgard)
         self.add(CmdCNPC)
