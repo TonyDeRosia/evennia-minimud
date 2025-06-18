@@ -17,6 +17,7 @@ process.
 
 from twisted.internet import protocol
 from twisted.application import internet
+from django.conf import settings
 
 
 class Echo(protocol.Protocol):
@@ -35,5 +36,6 @@ def start_plugin_services(portal):
     # older installs may not define it yet, so fall back to the Portal's
     # parent service when needed.
     application = getattr(portal, "application", None) or portal.parent
-    application.addService(internet.TCPServer(9000, factory))
+    port = getattr(settings, "ECHO_SERVICE_PORT", 9000)
+    application.addService(internet.TCPServer(port, factory))
 
