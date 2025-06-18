@@ -4,11 +4,19 @@ from typeclasses.rooms import Room
 from utils.prototype_manager import load_all_prototypes
 
 
-def create():
-    """Instantiate Midgard rooms and their exits if missing."""
+def create() -> tuple[int, int]:
+    """Instantiate Midgard rooms and their exits if missing.
+
+    Returns
+    -------
+    tuple[int, int]
+        Number of rooms created and exits created.
+    """
     prototypes = load_all_prototypes("room")
     midgard = [p for p in prototypes.values() if p.get("area") == "midgard"]
+
     rooms = {}
+    rooms_created = 0
     for proto in midgard:
         vnum = int(proto.get("room_id"))
         objs = ObjectDB.objects.filter(
@@ -38,8 +46,10 @@ def create():
                 obj.tags.add(name, category=category)
             else:
                 obj.tags.add(tag)
+        rooms_created += 1
         rooms[vnum] = obj
-    # create exits
+
+    exits_created = 0
     for proto in midgard:
         vnum = int(proto.get("room_id"))
         room = rooms.get(vnum)
@@ -52,4 +62,7 @@ def create():
             room.db.exits = room.db.exits or {}
             if dir_name not in room.db.exits:
                 room.db.exits[dir_name] = dest
+                exits_created += 1
+
+    return rooms_created, exits_created
 
