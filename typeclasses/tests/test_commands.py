@@ -581,6 +581,11 @@ class TestReturnAppearance(EvenniaTest):
         self.assertIn(f"[fighting {npc.get_display_name(self.char1)}]", out)
         self.assertIn("[idle]", out)
 
+    def test_exit_display_order(self):
+        self.room1.db.exits = {"south": self.room2, "east": self.room2, "west": self.room2, "north": self.room2}
+        display = self.room1.get_display_exits(self.char1)
+        self.assertEqual(display, "|wExits:|n North, South, West, East")
+
 
 class TestRestCommands(EvenniaTest):
     def setUp(self):
