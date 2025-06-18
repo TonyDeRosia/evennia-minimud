@@ -127,9 +127,12 @@ class RoomParent(ObjectParent):
         text += f"\n{self.get_display_exits(looker)}"
 
         visible = [
-            obj for obj in self.contents
-            if obj != looker and obj.access(looker, "view")
+            obj
+            for obj in self.contents
+            if obj != looker
+            and obj.access(looker, "view")
             and (not hasattr(looker, "can_see") or looker.can_see(obj))
+            and not getattr(obj.db, "is_dead", False)
         ]
 
         characters = [
