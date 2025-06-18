@@ -1148,7 +1148,12 @@ class NPC(Character):
             if inst:
                 inst.remove_combatant(self)
 
-        corpse = self.drop_loot(attacker)
+        corpse = None
+        try:
+            corpse = self.drop_loot(attacker)
+        except Exception as err:  # pragma: no cover - log errors
+            logger.log_err(f"Loot drop error on {self}: {err}")
+
         if corpse:
             corpse.location = self.location
 
