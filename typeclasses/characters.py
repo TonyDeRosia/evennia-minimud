@@ -621,11 +621,11 @@ class Character(ObjectParent, ClothedCharacter):
         # return the list of hands that are no longer holding the weapon
         return freed
 
-    def use_skill(self, skill_name, *args, **kwargs):
+    def use_skill(self, skill_name, target=None, *args, **kwargs):
         """Attempt to use a skill."""
         from world import abilities
 
-        return abilities.use_skill(self, skill_name, *args, **kwargs)
+        return abilities.use_skill(self, target or self, skill_name, *args, **kwargs)
 
     def cast_spell(self, spell_key, target=None):
         """Cast a known spell."""

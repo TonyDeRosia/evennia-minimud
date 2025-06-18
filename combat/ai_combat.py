@@ -152,7 +152,7 @@ def _default_behaviors(npc) -> Iterable[Behavior]:
             if engine:
                 engine.queue_action(n, SkillAction(n, skill, t))
             else:
-                abilities.use_skill(n, skill.name, target=t)
+                abilities.use_skill(n, t, skill.name)
 
         return Behavior(20, check, act)
 

@@ -57,7 +57,7 @@ def use_skill(actor, target, skill_name: str) -> CombatResult:
     """
     from combat.combat_actions import CombatResult
     use_fn = getattr(actor, "use_skill", None)
-    if callable(use_fn):
+    if callable(use_fn) and getattr(use_fn, "__func__", None) is not use_skill:
         return use_fn(skill_name, target=target)
 
     skill_cls = SKILL_CLASSES.get(skill_name)
