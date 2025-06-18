@@ -57,3 +57,4 @@ nosetests.xml
 
 # Dump files
 world/project_dump.txt
+.twistd-*
