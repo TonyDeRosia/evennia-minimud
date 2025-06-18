@@ -173,8 +173,8 @@ def at_server_start():
                 script.start()
             elif getattr(script.db, "_paused_time", None):
                 script.unpause()
-        if hasattr(script, "reload_spawns"):
-            script.reload_spawns()
+        if hasattr(script, "load_spawn_data"):
+            script.load_spawn_data()
     except Exception as err:
         logger.log_err(f"Failed to initialize spawn_manager script: {err}")
 

@@ -1184,6 +1184,8 @@ Examples:
 Notes:
     - Room spawns are automatically registered when prototypes are saved. Use
       this command if spawns fail to appear or after manually editing files.
+    - NPCs are not automatically respawned on server startup; run this command
+      to load spawn data if mobs are missing.
 """,
     },
     {
