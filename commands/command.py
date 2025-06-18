@@ -29,7 +29,8 @@ class Command(BaseCommand):
     def at_pre_cmd(self):
         """Proxy commands when ghost-puppeting another character."""
         proxy = getattr(self.caller.ndb, "puppet_proxy", None)
-        if proxy and self.cmdstring != "@puppet":
+        # check both names so the admin can end ghost mode with either spelling
+        if proxy and self.cmdstring not in ("@puppet", "ghost"):
             self.caller.msg(f"[PUPPETING {proxy.key}]")
             proxy.execute_cmd(self.raw_string, session=self.session)
             self.caller.msg("[END PUPPET]")
