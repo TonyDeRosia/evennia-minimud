@@ -6,6 +6,8 @@ import logging
 from dataclasses import dataclass
 from typing import Optional, Iterable
 
+from .damage_types import DamageType
+
 from .engine.combat_math import CombatMath
 from .combat_utils import format_combat_message, highlight_keywords
 from world.system import state_manager
@@ -21,7 +23,7 @@ class CombatResult:
     target: object
     message: str
     damage: int = 0
-    damage_type: object | None = None
+    damage_type: DamageType | None = None
 
 
 class Action:
