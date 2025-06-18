@@ -174,9 +174,10 @@ class SpawnManager(Script):
             return obj
         objs = search.search_object(room)
         obj = objs[0] if objs else None
-        if obj:
+        if obj and obj.is_typeclass(Room, exact=False):
             entry["room"] = obj
-        return obj
+            return obj
+        return None
 
     def _live_count(self, proto: Any, room: Any) -> int:
         return len([
