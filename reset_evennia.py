@@ -3,71 +3,16 @@
 
 import os
 import subprocess
-import signal
-import glob
-import shutil
 import sys
 
+from utils.startup_utils import (
+    _cleanup_files,
+    _kill_defunct_parents,
+    _twistd_processes,
+    kill_port,
+)
+
 PORT = 4005
-
-
-def get_twistd_processes():
-    """Return list of twistd processes as dicts."""
-    try:
-        output = subprocess.check_output(
-            ["ps", "axo", "pid,ppid,state,command"], text=True
-        )
-    except subprocess.CalledProcessError:
-        return []
-    procs = []
-    for line in output.strip().splitlines()[1:]:
-        parts = line.strip().split(None, 3)
-        if len(parts) < 4:
-            continue
-        pid, ppid, state, cmd = parts
-        if "twistd" in cmd:
-            procs.append(
-                {
-                    "pid": int(pid),
-                    "ppid": int(ppid),
-                    "state": state,
-                    "cmd": cmd,
-                }
-            )
-    return procs
-
-
-def kill_parent_of_defunct(procs):
-    for p in procs:
-        if "<defunct>" in p["cmd"] or "Z" in p["state"]:
-            try:
-                os.kill(p["ppid"], signal.SIGKILL)
-            except ProcessLookupError:
-                pass
-
-
-def cleanup_files():
-    for pattern in ["server/*.pid", "server/*.log", ".twistd-*"]:
-        for path in glob.glob(pattern):
-            if os.path.isdir(path):
-                shutil.rmtree(path, ignore_errors=True)
-            else:
-                try:
-                    os.remove(path)
-                except FileNotFoundError:
-                    pass
-
-
-def kill_port(port):
-    try:
-        output = subprocess.check_output(["lsof", "-ti", f":{port}"], text=True)
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return
-    for pid in output.strip().splitlines():
-        try:
-            os.kill(int(pid), signal.SIGKILL)
-        except ProcessLookupError:
-            pass
 
 
 def evennia_running(procs):
@@ -79,13 +24,13 @@ def evennia_running(procs):
 
 
 def main():
-    procs = get_twistd_processes()
-    kill_parent_of_defunct(procs)
+    procs = _twistd_processes()
+    _kill_defunct_parents(procs)
     if evennia_running(procs):
         print("Evennia already running.")
         return
 
-    cleanup_files()
+    _cleanup_files()
     kill_port(PORT)
 
     try:
