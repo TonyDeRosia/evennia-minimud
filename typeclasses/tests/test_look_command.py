@@ -31,7 +31,7 @@ class TestLookCommand(EvenniaTest):
         npc = create.create_object(BaseNPC, key="orc", location=self.room1)
         corpse = create.create_object(Corpse, key="orc corpse", location=self.room1)
         corpse.db.corpse_of = npc.key
-        npc.db.is_dead = True
+        npc.db.dead = True
 
         self.char1.execute_cmd("look")
         output = " ".join(
