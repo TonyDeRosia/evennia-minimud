@@ -46,6 +46,15 @@ class Character(ObjectParent, ClothedCharacter):
     practice_sessions = AttributeProperty(0)
 
     @property
+    def proficiencies(self):
+        """Mapping of combat proficiencies."""
+        return self.db.proficiencies or {}
+
+    @proficiencies.setter
+    def proficiencies(self, value):
+        self.db.proficiencies = value
+
+    @property
     def in_combat(self):
         """Return True if in combat, otherwise False"""
         return bool(getattr(self.db, "in_combat", False))
@@ -257,14 +266,14 @@ class Character(ObjectParent, ClothedCharacter):
         from world.system.class_skills import MELEE_CLASSES
 
         state_manager.grant_ability(self, "Unarmed")
-        profs = self.db.proficiencies or {}
+        profs = self.proficiencies
         if profs.get("Unarmed", 0) < 25:
             profs["Unarmed"] = 25
         if self.db.charclass and self.db.charclass in MELEE_CLASSES:
             state_manager.grant_ability(self, "Hand-to-Hand")
             if profs.get("Hand-to-Hand", 0) < 25:
                 profs["Hand-to-Hand"] = 25
-        self.db.proficiencies = profs
+        self.proficiencies = profs
 
     def at_post_puppet(self, **kwargs):
         """Ensure stats refresh when a character is controlled."""
