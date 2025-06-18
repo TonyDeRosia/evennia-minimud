@@ -13,6 +13,8 @@ import signal
 import subprocess
 import sys
 
+from utils.startup_utils import kill_port
+
 PORT = 4005
 
 
@@ -57,18 +59,6 @@ def _cleanup_files():
                     pass
 
 
-def _kill_port(port: int):
-    try:
-        output = subprocess.check_output(["lsof", "-ti", f":{port}"], text=True)
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return
-    for pid in output.strip().splitlines():
-        try:
-            os.kill(int(pid), signal.SIGKILL)
-        except ProcessLookupError:
-            pass
-
-
 def _is_running() -> bool:
     return os.path.exists("server/server.pid") or os.path.exists("server/portal.pid")
 
@@ -82,7 +72,7 @@ def main() -> None:
         return
 
     _cleanup_files()
-    _kill_port(PORT)
+    kill_port(PORT)
 
     try:
         subprocess.run(["evennia", "start"], check=True)
