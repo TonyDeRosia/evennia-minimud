@@ -1,5 +1,4 @@
 from evennia.utils.evtable import EvTable
-import textwrap
 from evennia import CmdSet
 from evennia.objects.models import ObjectDB
 from evennia.server.models import ServerConfig
@@ -159,6 +158,9 @@ class CmdAList(Command):
             "Interval",
             border="cells",
         )
+        table.reformat_column(2, align="r")  # Rooms
+        table.reformat_column(8, align="r")  # Age
+        table.reformat_column(9, align="r")  # Interval
         for area in areas:
             if hasattr(area, "_temp_room_count"):
                 room_count = area._temp_room_count
@@ -190,9 +192,15 @@ class CmdAList(Command):
                 area._temp_room_ids = room_ids
 
             spawn_count = spawn_counts.get(area.key.lower(), 0)
-            vnum_text = ", ".join(str(r) for r in room_ids) if room_ids else "-"
-            if vnum_text != "-":
-                vnum_text = textwrap.shorten(vnum_text, width=60, placeholder="...")
+            if room_ids:
+                limit = 5
+                if len(room_ids) > limit:
+                    first = ", ".join(str(r) for r in room_ids[:limit])
+                    vnum_text = f"{first}, ... (count: {len(room_ids)})"
+                else:
+                    vnum_text = ", ".join(str(r) for r in room_ids)
+            else:
+                vnum_text = "-"
             table.add_row(
                 area.key,
                 f"{area.start}-{area.end}",

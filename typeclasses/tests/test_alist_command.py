@@ -81,8 +81,9 @@ class TestAListCommand(EvenniaTest):
         out = self.char1.msg.call_args[0][0]
         row = next(line for line in out.splitlines() if line.startswith("| zone"))
         cols = [c.strip() for c in row.split("|")[1:-1]]
-        self.assertLessEqual(len(cols[3]), 60)
-        self.assertTrue(cols[3].endswith("..."))
+        self.assertEqual(
+            cols[3], "1, 2, 3, 4, 5, ... (count: 29)"
+        )
 
     def test_current(self):
         self.char1.location = self.room1
