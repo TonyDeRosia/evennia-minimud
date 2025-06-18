@@ -1,6 +1,8 @@
 from evennia import create_object
 from evennia.objects.models import ObjectDB
 from evennia.utils import logger
+from typeclasses.rooms import Room
+from typeclasses.exits import Exit
 
 # short direction aliases used for exit objects
 DIR_SHORT = {
@@ -18,6 +20,7 @@ DIR_SHORT = {
     "out": "o",
 }
 
+# Midgard room definitions
 midgard_rooms = {
     200050: {
         "name": "|cTemple Steppes|n",
@@ -151,9 +154,6 @@ def create() -> tuple[int, int]:
     tuple[int, int]
         Number of rooms created and exits created.
     """
-    from typeclasses.rooms import Room
-    from typeclasses.exits import Exit
-
     rooms: dict[int, Room] = {}
     rooms_created = 0
 
@@ -170,47 +170,33 @@ def create() -> tuple[int, int]:
         room.db.room_id = vnum
         room.db.desc = data.get("desc", "")
         room.tags.add("midgard", category="area")
-
         rooms[vnum] = room
 
+    # Create exits
     exits_created = 0
     for vnum, data in midgard_rooms.items():
         src = rooms.get(vnum)
         if not src:
             continue
 
-        exits = src.db.exits or {}
-
         for dir_name, dest_vnum in data.get("exits", {}).items():
             dest = rooms.get(dest_vnum)
             if not dest:
                 continue
 
-            if exits.get(dir_name) != dest:
-                exits[dir_name] = dest
-
-            exit_obj = next(
-                (
-                    ex
-                    for ex in src.exits
-                    if ex.key.lower() == dir_name.lower() and ex.destination == dest
-                ),
-                None,
+            # Check if exit already exists
+            exists = any(
+                ex.key.lower() == dir_name.lower() and ex.destination == dest
+                for ex in src.exits
             )
-            if not exit_obj:
+            if not exists:
                 exit_obj = create_object(
-                    "typeclasses.exits.Exit",
-                    key=dir_name,
-                    location=src,
-                    destination=dest,
+                    Exit, key=dir_name, location=src, destination=dest
                 )
+                short = DIR_SHORT.get(dir_name)
+                if short and short not in exit_obj.aliases.all():
+                    exit_obj.aliases.add(short)
                 exits_created += 1
-
-            short = DIR_SHORT.get(dir_name)
-            if short and short not in exit_obj.aliases.all():
-                exit_obj.aliases.add(short)
-
-        src.db.exits = exits
 
     logger.log_info(
         f"✅ Midgard created: {rooms_created} rooms, {exits_created} exits."

@@ -38,10 +38,13 @@ class TestMidgardArea(EvenniaTest):
         assert target
         assert self.char1.location == target
 
+        assert target.db.area == "midgard"
+
         data = create_midgard_area.midgard_rooms[200050]
         assert target.key == data["name"]
         assert target.db.desc == data["desc"]
         assert target.db.exits.get("south")
+
         exit_objs = [ex for ex in target.exits if ex.key.lower() == "south"]
         assert exit_objs
         assert "s" in exit_objs[0].aliases.all()
