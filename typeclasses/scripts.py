@@ -92,53 +92,39 @@ class GlobalTick(Script):
                 obj.refresh_prompt()
 
 
-class AutoDecayScript(Script):
+class DecayScript(Script):
     """Delete the attached object after a delay."""
 
     def at_script_creation(self):
-        self.key = "auto_decay"
-        self.desc = "Automatically delete an object after a delay"
+        self.key = "decay"
+        self.desc = "Delete the object after a delay"
         self.persistent = True
+        # keep checking until we delete the object
+        self.repeats = -1
+        self.db.room_only = False
 
     def at_repeat(self):
         obj = self.obj
-        if obj:
-            obj.delete()
-        self.stop()
-
-
-class CorpseDecayScript(Script):
-    """Handle timed decomposition of corpse objects."""
-
-    def at_script_creation(self):
-        self.key = "corpse_decay"
-        self.desc = "Decay a corpse after a delay"
-        self.persistent = True
-        # check how often to repeat; once per interval until deleted
-        self.repeats = -1
-        self.db.allow_inventory_decay = getattr(
-            settings, "ALLOW_CORPSE_DECAY_IN_INVENTORY", False
-        )
-
-    def at_repeat(self):
-        corpse = self.obj
-        if not corpse:
+        if not obj:
             self.stop()
             return
 
-        allow_inv = self.db.allow_inventory_decay
-        location = corpse.location
-        if location and not allow_inv:
-            # only decay if lying in a room
-            from typeclasses.rooms import Room
+        if self.db.room_only:
+            location = obj.location
+            if location:
+                from typeclasses.rooms import Room
 
-            if not inherits_from(location, Room):
+                if not inherits_from(location, Room):
+                    return
+            else:
                 return
 
-        if location:
-            name = corpse.db.corpse_of or corpse.key
+        location = obj.location
+        if location and getattr(obj.db, "is_corpse", False):
+            name = obj.db.corpse_of or obj.key
             location.msg_contents(
                 f"|gThe corpse of {name} decomposes and crumbles to dust.|n"
             )
-        corpse.delete()
+
+        obj.delete()
         self.stop()

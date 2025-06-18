@@ -47,5 +47,5 @@ class TestMobUtils(EvenniaTest):
         npc.db.corpse_decay_time = 1
 
         corpse = make_corpse(npc)
-        script = corpse.scripts.get("corpse_decay")[0]
+        script = corpse.scripts.get("decay")[0]
         self.assertEqual(script.interval, 60)
