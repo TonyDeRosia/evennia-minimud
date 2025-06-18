@@ -670,7 +670,7 @@ class CmdAffects(Command):
     """
 
     key = "affects"
-    aliases = ("effects",)
+    aliases = ("effects", "aff")
     help_category = "General"
 
     def func(self):
@@ -679,6 +679,7 @@ class CmdAffects(Command):
         caller = self.caller
         rows = []
 
+        cd_lines = []
         for status, dur in (caller.db.status_effects or {}).items():
             effect = EFFECTS.get(status)
             name = effect.name if effect else status
@@ -706,7 +707,12 @@ class CmdAffects(Command):
                     desc = f"Temporary bonus to {stat}."
                 rows.append((name, entry.get("duration"), desc))
 
-        if not rows:
+        for key in caller.cooldowns.all:
+            remaining = caller.cooldowns.time_left(key, use_int=True)
+            if remaining:
+                cd_lines.append(f"|C{key.capitalize()}|n - |cCD|n {remaining} Seconds")
+
+        if not rows and not cd_lines:
             self.msg("You are not affected by any effects.")
             return
 
@@ -715,7 +721,10 @@ class CmdAffects(Command):
         )
         for name, dur, desc in rows:
             table.add_row(name, str(dur) if dur is not None else "-", desc)
-        self.msg(str(table))
+        output = str(table)
+        if cd_lines:
+            output += "\n" + "\n".join(cd_lines)
+        self.msg(output)
 
 
 class CmdTitle(Command):

@@ -1,6 +1,8 @@
 from evennia import CmdSet, search_object
 from django.conf import settings
 
+from world.system import state_manager
+
 from .command import Command
 
 
@@ -12,6 +14,9 @@ class CmdRecall(Command):
 
     def func(self):
         caller = self.caller
+        if state_manager.is_on_cooldown(caller, "recall"):
+            caller.msg("You are still recovering.")
+            return
         dest = caller.db.recall_location
         if not dest:
             default_ref = getattr(settings, "DEFAULT_RECALL_ROOM", "#2")
@@ -28,6 +33,7 @@ class CmdRecall(Command):
             return
         caller.move_to(dest, quiet=True, move_type="teleport")
         caller.msg(f"You recall to {dest.get_display_name(caller)}.")
+        state_manager.add_cooldown(caller, "recall", 15)
 
 
 class CmdSetRecall(Command):
