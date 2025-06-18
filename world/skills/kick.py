@@ -9,6 +9,8 @@ class Kick(Skill):
     """Basic unarmed kick attack."""
 
     name = "kick"
+    #: Proficiency with this skill is boosted by unarmed training
+    support_skill = "unarmed"
     cooldown = 4
     stamina_cost = 5
     base_damage = 5

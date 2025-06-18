@@ -11,7 +11,8 @@ def calculate_hit_success(chara, ability_key, support_skill=None):
     ability_key : str
         Key of the primary ability being attempted.
     support_skill : str, optional
-        Name of a supporting skill providing a small bonus.
+        Name of a secondary skill providing a proficiency bonus. Every
+        10 points in this skill adds +1% to the success chance.
     """
     profs = getattr(getattr(chara, "db", None), "proficiencies", {}) or {}
     chance = profs.get(ability_key, 0)

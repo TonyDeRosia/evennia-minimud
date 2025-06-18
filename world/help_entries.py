@@ -3823,6 +3823,8 @@ Usage:
 Learn new spells from trainers with |wlearn|n. Spells start at 25% proficiency.
 Use practice sessions with |wlearn|n to raise proficiency up to 75%. Casting
 spells will slowly increase proficiency to a maximum of 100%.
+Some spells list a supporting skill such as |wspellcasting|n. Every 10 points in
+that skill grants +1% casting success chance.
 Usage: |wcast <spell> [on <target>]|n consumes mana based on the spell.
 """,
     },
