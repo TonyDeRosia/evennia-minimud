@@ -210,3 +210,16 @@ Room VNUMs now tracked in world/prototypes/areas/*.json under a rooms list. See 
 ## Admin Tools
 Use `@whoip` to list connected sessions along with IP and protocol. Provide a search
 term to filter by account name or IP.
+
+## Troubleshooting
+
+If `evennia start` fails with "Another twistd server is running", stale processes or files may be left over.
+
+1. Kill any lingering twistd processes:
+   ```bash
+   pkill -9 twistd
+   ```
+2. Check for `server.pid` and `portal.pid` in the `server/` directory and delete them if present.
+3. Remove any `.twistd-*` directories if they exist.
+
+Cleaning up these processes and files usually resolves the error.
