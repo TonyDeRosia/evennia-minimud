@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import Optional, Iterable
 
 from .engine.combat_math import CombatMath
-from . import combat_utils
+from .combat_utils import format_combat_message, highlight_keywords
 from world.system import state_manager
 from world.abilities import colorize_name, use_skill, cast_spell
 
@@ -78,7 +78,9 @@ class AttackAction(Action):
         logger.debug("AttackAction weapon=%s", getattr(weapon, "key", weapon))
         wname = getattr(weapon, "key", None) or (weapon.get("name") if isinstance(weapon, dict) else "fists")
 
-        attempt = f"{self.actor.key} swings {wname} at {target.key}."
+        attempt = format_combat_message(
+            self.actor, target, f"swings {wname} at", attempt=True
+        )
 
         unarmed = not getattr(self.actor, "wielding", [])
         hit_bonus = 0.0
@@ -93,17 +95,14 @@ class AttackAction(Action):
 
         hit, outcome = CombatMath.check_hit(self.actor, target, bonus=hit_bonus)
         if not hit:
-            msg = f"{attempt}\n{outcome}"
-            msg = combat_utils.highlight_keywords(msg)
+            msg = highlight_keywords(f"{attempt}\n{outcome}")
             return CombatResult(self.actor, target, msg)
 
         dmg, dtype = CombatMath.calculate_damage(self.actor, weapon, target)
         dmg, crit = CombatMath.apply_critical(self.actor, target, dmg)
 
-        msg = f"{attempt}\n{self.actor.key} hits {target.key}!"
-        if crit:
-            msg += "\nCritical hit!"
-        msg = combat_utils.highlight_keywords(msg)
+        msg = format_combat_message(self.actor, target, "hits", dmg, crit=crit)
+        msg = highlight_keywords(f"{attempt}\n{msg}")
 
         return CombatResult(self.actor, target, msg, damage=dmg, damage_type=dtype)
 
@@ -134,12 +133,12 @@ class SkillAction(Action):
             return CombatResult(self.actor, self.target or self.actor, "Nothing happens.")
         if result.message:
             result.message = result.message.replace(self.skill.name, colorize_name(self.skill.name))
-            result.message = combat_utils.highlight_keywords(result.message)
+            result.message = highlight_keywords(result.message)
         if result.damage:
             result.damage, crit = CombatMath.apply_critical(self.actor, result.target, result.damage)
             if crit:
                 result.message += "\nCritical hit!"
-            result.message = combat_utils.highlight_keywords(result.message)
+            result.message = highlight_keywords(result.message)
         return result
 
 
@@ -160,11 +159,11 @@ class SpellAction(Action):
 
         result = cast_spell(self.actor, self.spell.key, target=self.target)
         if result.message:
-            result.message = f"{self.actor.key} casts {colorize_name(self.spell.key)}!\n" + result.message
-            result.message = combat_utils.highlight_keywords(result.message)
+            prefix = f"{self.actor.key} casts {colorize_name(self.spell.key)}!"
+            result.message = highlight_keywords(f"{prefix}\n{result.message}")
         if result.damage:
             result.damage, crit = CombatMath.apply_critical(self.actor, result.target, result.damage)
             if crit:
                 result.message += "\nCritical hit!"
-            result.message = combat_utils.highlight_keywords(result.message)
+            result.message = highlight_keywords(result.message)
         return result
