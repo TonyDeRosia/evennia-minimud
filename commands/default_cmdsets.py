@@ -27,7 +27,7 @@ from evennia.contrib.game_systems.crafting.crafting import CmdCraft
 
 
 from commands.combat import CombatCmdSet
-from commands.skills import SkillCmdSet
+from commands.skills import SkillCmdSet, CmdRecall
 from commands.interact import InteractCmdSet
 from commands.equipment import EquipmentCmdSet
 from commands.account import AccountOptsCmdSet
@@ -77,6 +77,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CombatCmdSet)
         self.add(AbilityCmdSet)
         self.add(SkillCmdSet)
+        self.add(CmdRecall)
         self.add(SpellCmdSet)
         self.add(InteractCmdSet)
         self.add(InfoCmdSet)

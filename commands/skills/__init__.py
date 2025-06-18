@@ -1,7 +1,8 @@
 from evennia import CmdSet
 from evennia.utils.evtable import EvTable
 from world.stats import CORE_STAT_KEYS
-from .command import Command
+from ..command import Command
+from .recall import CmdRecall
 
 # A dict of all skills, with their associated stat as the value
 SKILL_DICT = {
