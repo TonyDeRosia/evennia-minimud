@@ -3,10 +3,14 @@ from unittest.mock import MagicMock
 
 from combat.ai_combat import npc_take_turn
 from combat.combat_actions import SpellAction, SkillAction
+from combat.combat_skills import SKILL_CLASSES
+
+DEFAULT_LOCATION = MagicMock()
 
 class DummyNPC:
-    def __init__(self):
-        self.location = MagicMock()
+    def __init__(self, location=None):
+        self.location = location or DEFAULT_LOCATION
+        self.hp = 20
         self.traits = MagicMock()
         self.traits.health = MagicMock(value=20, max=20)
         self.traits.mana = MagicMock(current=20)
@@ -23,9 +27,25 @@ class DummyNPC:
 
 class TestAICombat(unittest.TestCase):
     def setUp(self):
-        self.npc = DummyNPC()
-        self.target = DummyNPC()
+        loc = MagicMock()
+        self.npc = DummyNPC(loc)
+        self.target = DummyNPC(loc)
         self.engine = MagicMock()
+        # Provide simple skill stubs that don't require init args
+        class _Cleave:
+            name = "cleave"
+            stamina_cost = 20
+            cooldown = 8
+
+            def resolve(self, user, target):
+                pass
+
+        class _ShieldBash(_Cleave):
+            name = "shield bash"
+            stamina_cost = 15
+
+        SKILL_CLASSES["cleave"] = _Cleave
+        SKILL_CLASSES["shield bash"] = _ShieldBash
 
     def test_prefers_spell_over_skill(self):
         npc_take_turn(self.engine, self.npc, self.target)
