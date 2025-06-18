@@ -49,9 +49,9 @@ XP_TO_LEVEL = lambda level: 100 + (level ** 2 * 20)
 XP_CARRY_OVER = False
 
 # Default area to assign rooms that lack one
-DEFAULT_AREA_NAME = "Starter Zone"
-DEFAULT_AREA_START = 200000
-DEFAULT_AREA_END = 200999
+DEFAULT_AREA_NAME = "midgard"
+DEFAULT_AREA_START = 200050
+DEFAULT_AREA_END = 200150
 
 # ----------------------------------------------------------------------
 # Corpse decay settings
