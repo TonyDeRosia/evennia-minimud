@@ -14,11 +14,13 @@ from combat.combat_actions import CombatResult
 from combat.combat_skills import SKILL_CLASSES, SkillCategory
 from world.spells import SPELLS, Spell
 from world.system import state_manager
+from utils.ansi_utils import format_ansi_title
 
 __all__ = ["colorize_name", "use_skill", "cast_spell"]
 
 _COLOR_PREFIX = (
-    "|r", "|R", "|g", "|G", "|b", "|B", "|y", "|Y", "|m", "|M", "|c", "|C", "|w", "|W"
+    "|r", "|R", "|g", "|G", "|b", "|B", "|y", "|Y",
+    "|m", "|M", "|c", "|C", "|w", "|W"
 )
 
 _CATEGORY_STAT = {
@@ -30,14 +32,17 @@ _CATEGORY_STAT = {
 logger = logging.getLogger(__name__)
 
 
-def colorize_name(name: str) -> str:
-    """Wrap name with Evennia color codes if not already styled."""
+def colorize_name(name: str, color: str = "c") -> str:
+    """
+    Wrap name in ANSI color codes if not already styled.
+    Uses cyan by default and capitalizes name via format_ansi_title.
+    """
     if not name:
         return ""
     for prefix in _COLOR_PREFIX:
         if name.startswith(prefix):
             return name if name.endswith("|n") else name + "|n"
-    return f"|w{name}|n"
+    return f"|{color}{format_ansi_title(name)}|n"
 
 
 def _calc_hit(prof: int, stat_val: int) -> int:
@@ -46,7 +51,10 @@ def _calc_hit(prof: int, stat_val: int) -> int:
 
 
 def use_skill(actor, target, skill_name: str) -> CombatResult:
-    """Execute a skill from actor against target. Falls back to method on actor if present."""
+    """
+    Execute a skill from actor against target.
+    Falls back to actor.use_skill if defined.
+    """
     use_fn = getattr(actor, "use_skill", None)
     if callable(use_fn):
         return use_fn(skill_name, target=target)
@@ -85,7 +93,10 @@ def use_skill(actor, target, skill_name: str) -> CombatResult:
 
 
 def cast_spell(actor, spell_key: str, target: Optional[object] = None) -> CombatResult:
-    """Cast a spell from actor at target. Falls back to method on actor if present."""
+    """
+    Cast a spell from actor at target.
+    Falls back to actor.cast_spell if defined.
+    """
     cast_fn = getattr(actor, "cast_spell", None)
     if callable(cast_fn):
         return cast_fn(spell_key, target=target)
@@ -93,7 +104,6 @@ def cast_spell(actor, spell_key: str, target: Optional[object] = None) -> Combat
     spell = SPELLS.get(spell_key)
     if not spell:
         return CombatResult(actor, target or actor, "Nothing happens.")
-
     if not actor.cooldowns.ready(spell.key):
         return CombatResult(actor, actor, "Still recovering.")
     if actor.traits.mana.current < spell.mana_cost:
@@ -105,7 +115,7 @@ def cast_spell(actor, spell_key: str, target: Optional[object] = None) -> Combat
             prof = entry.proficiency
             if prof < 100:
                 entry.proficiency = min(100, prof + 1)
-                actor.db.spells = actor.db.spells  # force save
+                actor.db.spells = actor.db.spells
             break
         if isinstance(entry, str) and entry == spell.key:
             srec = Spell(spell.key, spell.stat, spell.mana_cost, spell.desc, 0)
