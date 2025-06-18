@@ -1599,7 +1599,9 @@ Examples:
     alist current
 
 Notes:
-    - The Vnums column lists all room ids defined for the area.
+    - The Vnums column lists up to five room ids for each area.
+      Longer lists are truncated as "..., (count: N)" where N is the total
+      number of rooms.
 
 Related:
     help ansi
