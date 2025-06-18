@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
-"""Utility to cleanly start the Evennia server using `evennia start`.
+"""
+Utility to cleanly start the Evennia server using `evennia start`.
 
-This script checks for lingering processes or files that might prevent
-Evennia from launching. It removes stale PID files and temporary
-directories and frees the default port before executing ``evennia start``.
+This script:
+- Checks for lingering twistd processes
+- Kills defunct twistd parents
+- Cleans up stale PID/log files
+- Frees the default port (4005)
+- Starts Evennia cleanly
 """
 
-import glob
 import os
-import shutil
-import signal
 import subprocess
 import sys
-
-from utils.startup_utils import kill_port
+import signal
+import shutil
+import glob
 
 PORT = 4005
 
@@ -39,6 +41,7 @@ def _twistd_processes():
 
 
 def _kill_defunct_parents(procs):
+    """Kill the parent of any defunct (zombie) twistd processes."""
     for p in procs:
         if "<defunct>" in p["cmd"] or "Z" in p["state"]:
             try:
@@ -48,6 +51,7 @@ def _kill_defunct_parents(procs):
 
 
 def _cleanup_files():
+    """Remove stale .pid, .log, and twistd temp files."""
     for pattern in ["server/*.pid", "server/*.log", ".twistd-*"]:
         for path in glob.glob(pattern):
             if os.path.isdir(path):
@@ -59,7 +63,23 @@ def _cleanup_files():
                     pass
 
 
+def kill_port(port: int):
+    """Kill any process listening on the specified port."""
+    try:
+        output = subprocess.check_output(
+            ["lsof", "-i", f":{port}"], text=True
+        ).splitlines()[1:]  # skip header
+        for line in output:
+            parts = line.split()
+            if len(parts) >= 2:
+                pid = int(parts[1])
+                os.kill(pid, signal.SIGKILL)
+    except subprocess.CalledProcessError:
+        pass  # lsof returned no output
+
+
 def _is_running() -> bool:
+    """Check if Evennia appears to be already running."""
     return os.path.exists("server/server.pid") or os.path.exists("server/portal.pid")
 
 
