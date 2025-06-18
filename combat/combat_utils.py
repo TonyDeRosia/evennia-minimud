@@ -2,6 +2,7 @@
 
 import logging
 import random
+import re
 from typing import Tuple, Iterable
 
 from world.system import state_manager
@@ -228,7 +229,10 @@ def highlight_keywords(text: str) -> str:
 
     if not text:
         return text
-    text = text.replace("misses", "|Cmisses|n")
+
+    # Only colorize "misses" if it is not already color coded
+    text = re.sub(r"(?<!\|C)misses", "|Cmisses|n", text)
+
     text = text.replace("Critical hit!", "|RCritical hit!|n")
     return text
 
