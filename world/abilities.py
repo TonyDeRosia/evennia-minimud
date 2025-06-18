@@ -10,7 +10,6 @@ from typing import Optional
 from django.conf import settings
 from evennia.utils import logger
 
-from combat.combat_actions import CombatResult
 from combat.combat_skills import SKILL_CLASSES, SkillCategory
 from world.spells import SPELLS, Spell
 from world.system import state_manager
@@ -55,6 +54,7 @@ def use_skill(actor, target, skill_name: str) -> CombatResult:
     Execute a skill from actor against target.
     Falls back to actor.use_skill if defined.
     """
+    from combat.combat_actions import CombatResult
     use_fn = getattr(actor, "use_skill", None)
     if callable(use_fn):
         return use_fn(skill_name, target=target)
@@ -97,6 +97,7 @@ def cast_spell(actor, spell_key: str, target: Optional[object] = None) -> Combat
     Cast a spell from actor at target.
     Falls back to actor.cast_spell if defined.
     """
+    from combat.combat_actions import CombatResult
     cast_fn = getattr(actor, "cast_spell", None)
     if callable(cast_fn):
         return cast_fn(spell_key, target=target)

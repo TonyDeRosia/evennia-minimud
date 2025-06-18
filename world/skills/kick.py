@@ -1,4 +1,3 @@
-from combat.combat_actions import CombatResult
 from combat.combat_utils import roll_evade
 from combat.damage_types import DamageType
 from world.system import stat_manager
@@ -15,6 +14,8 @@ class Kick(Skill):
 
     def resolve(self, user, target):
         """Resolve the kick immediately, applying damage to ``target``."""
+
+        from combat.combat_actions import CombatResult
 
         self.improve(user)
 
