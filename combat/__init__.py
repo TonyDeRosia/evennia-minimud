@@ -1,5 +1,14 @@
 """Combat system package."""
 
+import os
+import django
+import evennia
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.conf.settings")
+django.setup()
+if getattr(evennia, "SESSION_HANDLER", None) is None:
+    evennia._init()
+
 from .engine import CombatEngine
 from .round_manager import CombatRoundManager, CombatInstance
 from .combat_actions import (
