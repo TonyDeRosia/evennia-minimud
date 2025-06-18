@@ -213,18 +213,16 @@ term to filter by account name or IP.
 
 ## Troubleshooting
 
-If `evennia start` fails with "Another twistd server is running", stale processes or files may be left over.
+If `evennia start` fails with "Another twistd server is running", stale
+processes or files may be left over. Launch the included helper script to
+clean up and start the server again:
 
-1. Kill any lingering twistd processes:
-   ```bash
-   pkill -9 twistd
-   ```
-2. Check for `server.pid` and `portal.pid` in the `server/` directory and delete them if present.
-3. Remove any `.twistd-*` directories if they exist.
-4. Run the helper script to reset Evennia:
-   ```bash
-   python reset_evennia.py
-   ```
-   This cleans up lingering processes, frees port 4005, and restarts the server. If Evennia is already running, the script exits with a message.
+```bash
+python start_evennia.py
+```
+
+The script removes stale PID files, kills any orphaned twistd processes, frees
+port 4005 and finally executes `evennia start`. If Evennia is already running it
+simply prints a warning and exits.
 
 Cleaning up these processes and files usually resolves the error.
