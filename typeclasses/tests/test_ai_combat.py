@@ -92,3 +92,17 @@ class TestAICombat(unittest.TestCase):
         action = self.engine.queue_action.call_args[0][1]
         self.assertIsInstance(action, SkillAction)
         self.assertEqual(action.skill.name, "shield bash")
+
+    def test_attack_action_uses_combat_math(self):
+        """Ensure NPC basic attacks rely on CombatMath helpers."""
+
+        self.npc.db.spells = []
+        self.npc.db.skills = []
+        self.engine.queue_action.reset_mock()
+        npc_take_turn(self.engine, self.npc, self.target)
+        action = self.engine.queue_action.call_args[0][1]
+        with patch("combat.combat_actions.CombatMath.check_hit", return_value=(True, "")) as mock_hit, \
+             patch("combat.combat_actions.CombatMath.calculate_damage", return_value=(5, None)), \
+             patch("combat.combat_actions.CombatMath.apply_critical", return_value=(5, False)):
+            action.resolve()
+        mock_hit.assert_called()
