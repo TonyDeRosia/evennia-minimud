@@ -103,6 +103,8 @@ Copy
 Edit
 ic
 batchcmd initial_build
+py world.scripts.create_midgard_area.create()
+This populates rooms 200050-200150 so @teleport works.
 Creating NPCs
 Use:
 
