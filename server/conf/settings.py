@@ -53,6 +53,9 @@ DEFAULT_AREA_NAME = "midgard"
 DEFAULT_AREA_START = 200050
 DEFAULT_AREA_END = 200150
 
+# Default fallback room used when a player recalls without a saved location.
+DEFAULT_RECALL_ROOM = "#2"
+
 # ----------------------------------------------------------------------
 # Corpse decay settings
 # ----------------------------------------------------------------------
