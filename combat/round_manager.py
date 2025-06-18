@@ -102,8 +102,13 @@ class CombatInstance:
             if hp <= 0:
                 continue
             # check combat status using the persistent db attribute
-            in_combat = getattr(fighter.db, "in_combat", False)
-            if in_combat:
+            try:
+                in_combat = getattr(fighter.db, "in_combat")
+            except Exception:
+                in_combat = None
+            if in_combat is None:
+                in_combat = getattr(fighter, "in_combat", False)
+            if in_combat or (fighter in self.combatants and hp > 0):
                 active_fighters.append(fighter)
 
         return len(active_fighters) >= 2
@@ -121,16 +126,22 @@ class CombatInstance:
         # Add new fighters
         for actor in fighters - current:
             self.engine.add_participant(actor)
+            if getattr(actor, "pk", None) is None:
+                setattr(actor, "in_combat", True)
 
         # Remove fighters no longer present in the combatants set
         for actor in current - fighters:
             self.engine.remove_participant(actor)
+            if getattr(actor, "pk", None) is None:
+                setattr(actor, "in_combat", False)
 
         # Remove defeated combatants
         for actor in list(fighters):
             if _current_hp(actor) <= 0:
-                if hasattr(actor, "db"):
+                if hasattr(actor, "db") and getattr(actor, "pk", None) is not None:
                     actor.db.in_combat = False
+                else:
+                    setattr(actor, "in_combat", False)
                 self.engine.remove_participant(actor)
                 self.combatants.discard(actor)
 
@@ -224,8 +235,11 @@ class CombatInstance:
             fighters = [p.actor for p in self.engine.participants]
 
             for fighter in fighters:
-                if fighter and hasattr(fighter, "db"):
-                    fighter.db.in_combat = False
+                if fighter:
+                    if hasattr(fighter, "db") and getattr(fighter, "pk", None) is not None:
+                        fighter.db.in_combat = False
+                    else:
+                        setattr(fighter, "in_combat", False)
 
         if reason:
             log_trace(f"Combat ended: {reason}")

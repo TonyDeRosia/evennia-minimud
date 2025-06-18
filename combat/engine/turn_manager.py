@@ -29,6 +29,8 @@ class TurnManager:
     def add_participant(self, actor: object) -> None:
         if hasattr(actor, "db") and getattr(actor, "pk", None) is not None:
             actor.db.in_combat = True
+        else:
+            setattr(actor, "in_combat", True)
         self.participants.append(CombatParticipant(actor=actor))
         if hasattr(actor, "ndb"):
             actor.ndb.combat_engine = self.engine
@@ -41,6 +43,8 @@ class TurnManager:
 
         if hasattr(actor, "db") and getattr(actor, "pk", None) is not None:
             actor.db.in_combat = False
+        else:
+            setattr(actor, "in_combat", False)
         if hasattr(actor, "on_exit_combat"):
             actor.on_exit_combat()
         if hasattr(actor, "ndb") and hasattr(actor.ndb, "combat_engine"):
