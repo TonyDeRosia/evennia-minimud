@@ -33,6 +33,11 @@ class CombatInstance:
         current = {p.actor for p in self.engine.participants}
         if combatant in current:
             return True
+        if getattr(combatant, "pk", None) is None:
+            try:
+                combatant.save()
+            except Exception:
+                pass
         self.combatants.add(combatant)
         self.engine.add_participant(combatant)
         return True
@@ -273,6 +278,14 @@ class CombatRoundManager:
 
         fighters = combatants or []
 
+        # ensure all fighters are saved before using them as keys
+        for fighter in fighters:
+            if getattr(fighter, "pk", None) is None:
+                try:
+                    fighter.save()
+                except Exception:
+                    pass
+
         try:
             from .engine import CombatEngine
         except ImportError as err:
@@ -288,11 +301,6 @@ class CombatRoundManager:
         inst = CombatInstance(combat_id, engine, set(fighters), round_time or 2.0)
         self.combats[combat_id] = inst
         for fighter in fighters:
-            if getattr(fighter, "pk", None) is None:
-                try:
-                    fighter.save()
-                except Exception:
-                    pass
             self.combatant_to_combat[fighter] = combat_id
 
         inst.start()
@@ -324,12 +332,12 @@ class CombatRoundManager:
             if inst:
                 for c in combatants:
                     if c not in inst.combatants:
-                        inst.add_combatant(c)
                         if getattr(c, "pk", None) is None:
                             try:
                                 c.save()
                             except Exception:
                                 pass
+                        inst.add_combatant(c)
                         self.combatant_to_combat[c] = inst.combat_id
                 inst.start()
                 return inst
