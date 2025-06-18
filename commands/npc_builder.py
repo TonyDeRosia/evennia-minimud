@@ -676,6 +676,10 @@ def finalize_mob_prototype(caller, npc):
     meta = npc.db.metadata or {}
 
     npc.tags.add("npc")
+    if isinstance(npc.db.skills, dict):
+        npc.db.skills = list(npc.db.skills.keys())
+    if isinstance(npc.db.spells, dict):
+        npc.db.spells = list(npc.db.spells.keys())
     npc_type = meta.get("type") or getattr(npc.db, "npc_type", None)
     if npc_type:
         npc.tags.add(npc_type, category="npc_type")
