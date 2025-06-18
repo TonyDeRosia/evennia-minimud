@@ -12,7 +12,7 @@ class TestSkillAndSpellUsage(EvenniaTest):
     def test_cast_spell_applies_cost_and_cooldown(self):
         mana_before = self.char1.traits.mana.current
         result = self.char1.cast_spell("fireball", target=self.char2)
-        self.assertTrue(result)
+        self.assertIn("casts fireball", result.message)
         self.assertEqual(self.char1.traits.mana.current, mana_before - SPELLS["fireball"].mana_cost)
         self.assertTrue(self.char1.cooldowns.time_left("fireball", use_int=True))
 
@@ -45,7 +45,7 @@ class TestSkillAndSpellUsage(EvenniaTest):
     def test_cast_spell_converts_dict(self):
         self.char1.db.spells = {"fireball": 100}
         result = self.char1.cast_spell("fireball", target=self.char2)
-        self.assertTrue(result)
+        self.assertIn("casts fireball", result.message)
         spells = self.char1.db.spells
         self.assertIsInstance(spells, list)
         self.assertIsInstance(spells[0], Spell)
