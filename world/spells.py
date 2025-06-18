@@ -9,6 +9,8 @@ class Spell:
     desc: str = ""
     cooldown: int = 0
     proficiency: int = 0
+    # Optional skill providing a proficiency bonus to casting success
+    support_skill: str | None = None
 
 
 SPELLS: Dict[str, Spell] = {
