@@ -31,7 +31,7 @@ class Kick(Skill):
 
         if not hit or evade:
             msg = format_combat_message(user, target, "kick", miss=True)
-            return CombatResult(actor=user, target=target, message=highlight_keywords(msg))
+            return CombatResult(actor=user, target=target, message=msg)
 
         dmg = int(self.base_damage + str_val * 0.2)
 
