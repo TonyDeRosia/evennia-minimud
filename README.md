@@ -13,7 +13,7 @@ Can I use this as a base for my own game?
 Yes! Please do. Installation instructions are below, and additional documentation can be found on the Evennia website.
 
 Getting Started
-This project uses a round-based combat system that processes queued actions each tick. Refer to docs/combat_loop_mapping.md for a full walkthrough of combat.
+This project uses a round-based combat system that processes queued actions each tick. Refer to docs/combat_loop_mapping.md for a full walkthrough of combat. A summary of default combat abilities can be found in docs/combat_skills.md.
 
 Currency
 There are four coin types:
