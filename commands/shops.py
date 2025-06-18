@@ -289,8 +289,9 @@ class CmdDonate(Command):
         for obj in objs:
             obj.delete()
 
-        from world.system import state_manager
-        state_manager.gain_xp(self.caller, total)
+        from combat.combat_utils import award_xp
+
+        award_xp(self.caller, total)
 
         self.msg(f"You exchange {obj_name} for {total} experience.")
 

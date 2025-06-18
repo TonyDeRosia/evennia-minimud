@@ -36,8 +36,9 @@ class TestDefendAction(unittest.TestCase):
         ):
             engine.start_round()
             engine.process_round()
-        messages = [call.args[0] for call in a.location.msg_contents.call_args_list]
-        self.assertIn("braces", messages[0])
+        output = a.location.msg_contents.call_args_list[0].args[0]
+        messages = output.splitlines()
+        self.assertTrue(any("braces" in m for m in messages))
         a.tags.add.assert_any_call("defending", category="status")
 
 

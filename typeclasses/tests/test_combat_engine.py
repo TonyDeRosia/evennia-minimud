@@ -215,7 +215,8 @@ class TestCombatEngine(unittest.TestCase):
                 engine.process_round()
 
             expected = get_condition_msg(b.hp, b.traits.health.max)
-            calls = [c.args[0] for c in room.msg_contents.call_args_list]
+            output = room.msg_contents.call_args_list[0].args[0]
+            calls = output.splitlines()
             self.assertFalse(any(f"The {b.key} {expected}" in msg for msg in calls))
             room.reset_mock()
 
@@ -241,7 +242,8 @@ class TestCombatEngine(unittest.TestCase):
             engine.start_round()
             engine.process_round()
 
-        calls = [c.args[0] for c in room.msg_contents.call_args_list]
+        output = room.msg_contents.call_args_list[0].args[0]
+        calls = output.splitlines()
         self.assertTrue(any("attacker dealt 3 damage" in msg for msg in calls))
 
     def test_participant_without_hp_removed(self):
@@ -475,6 +477,29 @@ class TestCombatDeath(EvenniaTest):
             if obj.is_typeclass('typeclasses.objects.Corpse', exact=False)
         )
         self.assertEqual(corpse.db.corpse_of, npc.key)
+
+    def test_award_xp_to_uses_helper(self):
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.exp_reward = 5
+
+        with patch("combat.combat_utils.award_xp") as mock_award:
+            npc.award_xp_to(self.char1)
+            mock_award.assert_called_with(self.char1, 5)
+
+    def test_on_death_uses_award_helper(self):
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+        npc.db.exp_reward = 4
+
+        with patch("combat.combat_utils.award_xp") as mock_award:
+            npc.on_death(self.char1)
+            mock_award.assert_called_with(self.char1, 4, [self.char1])
 
 
 class TestCombatNPCTurn(EvenniaTest):

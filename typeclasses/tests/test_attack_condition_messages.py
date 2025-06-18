@@ -25,7 +25,8 @@ class TestAttackConditionMessages(EvenniaTest):
         expected = get_condition_msg(
             target.traits.health.current, target.traits.health.max
         )
-        calls = [c.args[0] for c in self.room1.msg_contents.call_args_list]
+        output = self.room1.msg_contents.call_args_list[0].args[0]
+        calls = output.splitlines()
         self.assertFalse(any(f"The {target.key} {expected}" in msg for msg in calls))
 
     def test_barehand_condition(self):

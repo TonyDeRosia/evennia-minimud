@@ -26,11 +26,11 @@ class DamageProcessor:
     # -------------------------------------------------------------
     # messaging helpers
     # -------------------------------------------------------------
-    def dam_message(self, attacker, target, damage: int, *, crit: bool = False) -> None:
-        if not attacker or not target or not attacker.location:
-            return
-        msg = format_combat_message(attacker, target, "hits", damage, crit=crit)
-        attacker.location.msg_contents(msg)
+    def dam_message(self, attacker, target, damage: int, *, crit: bool = False) -> str | None:
+        """Return a formatted damage message without sending it."""
+        if not attacker or not target:
+            return None
+        return format_combat_message(attacker, target, "hits", damage, crit=crit)
 
     def skill_message(self, actor, target, skill: str, success: bool = True) -> None:
         if not actor or not actor.location:
@@ -63,19 +63,19 @@ class DamageProcessor:
     def solo_gain(self, chara, exp: int) -> None:
         if not exp or not chara:
             return
-        if hasattr(chara, "msg"):
-            chara.msg(f"You gain |Y{exp}|n experience points.")
-        state_manager.gain_xp(chara, exp)
+        from combat.combat_utils import award_xp
+
+        award_xp(chara, exp)
 
     def group_gain(self, members: List[object], exp: int) -> None:
         members = [m for m in members if m]
         if not members or not exp:
             return
+        from combat.combat_utils import award_xp
+
         share = max(int(exp / len(members)), int(exp * 0.10))
         for member in members:
-            if hasattr(member, "msg"):
-                member.msg(f"You gain |Y{share}|n experience points.")
-            state_manager.gain_xp(member, share)
+            award_xp(member, share)
 
     def apply_damage(self, attacker, target, amount: int, damage_type: DamageType | None) -> int:
         if hasattr(target, "at_damage"):
@@ -190,6 +190,7 @@ class DamageProcessor:
         if action in participant.next_action:
             participant.next_action.remove(action)
 
+        self.round_output.append("")
         damage_done = 0
         if result.damage and result.target:
             dt = result.damage_type
@@ -200,11 +201,13 @@ class DamageProcessor:
                     dt = None
             damage_done = self.apply_damage(actor, result.target, result.damage, dt)
             if not result.message:
-                self.dam_message(actor, result.target, damage_done)
+                msg = self.dam_message(actor, result.target, damage_done)
+                if msg:
+                    self.round_output.append(msg)
             damage_totals[actor] = damage_totals.get(actor, 0) + damage_done
 
-        if actor.location and result.message:
-            actor.location.msg_contents(result.message)
+        if result.message:
+            self.round_output.append(result.message)
 
         if result.target:
             self.aggro.track(result.target, actor)
