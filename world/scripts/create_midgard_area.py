@@ -2,6 +2,23 @@ from evennia import create_object
 from evennia.objects.models import ObjectDB
 from evennia.utils import logger
 from typeclasses.rooms import Room
+from typeclasses.exits import Exit
+
+# short direction aliases used for exit objects
+DIR_SHORT = {
+    "north": "n",
+    "south": "s",
+    "east": "e",
+    "west": "w",
+    "northeast": "ne",
+    "southwest": "sw",
+    "northwest": "nw",
+    "southeast": "se",
+    "up": "u",
+    "down": "d",
+    "in": "i",
+    "out": "o",
+}
 
 # Midgard room definitions
 midgard_rooms = {
@@ -140,29 +157,22 @@ def create() -> tuple[int, int]:
     rooms: dict[int, Room] = {}
     rooms_created = 0
 
-    # Create rooms if they don't exist
     for vnum, data in midgard_rooms.items():
         objs = ObjectDB.objects.filter(
             db_attributes__db_key="room_id", db_attributes__db_value=vnum
         )
-
-        room = None
-        for obj in objs:
-            if obj.is_typeclass(Room, exact=False):
-                room = obj
-            else:
-                obj.delete()
-
+        room = next((obj for obj in objs if obj.is_typeclass(Room, exact=False)), None)
         if not room:
             room = create_object(Room, key=data["name"])
-            room.db.desc = data.get("desc", "")
-            room.tags.add("midgard", category="area")
             rooms_created += 1
 
-        room.set_area("midgard", room_id=vnum)
+        room.key = data["name"]
+        room.db.room_id = vnum
+        room.db.desc = data.get("desc", "")
+        room.tags.add("midgard", category="area")
         rooms[vnum] = room
 
-    # Create exits between rooms
+    # Create exits
     exits_created = 0
     for vnum, data in midgard_rooms.items():
         src = rooms.get(vnum)
@@ -174,14 +184,18 @@ def create() -> tuple[int, int]:
             if not dest:
                 continue
 
+            # Check if exit already exists
             exists = any(
                 ex.key.lower() == dir_name.lower() and ex.destination == dest
                 for ex in src.exits
             )
             if not exists:
-                create_object(
-                    "typeclasses.exits.Exit", key=dir_name, location=src, destination=dest
+                exit_obj = create_object(
+                    Exit, key=dir_name, location=src, destination=dest
                 )
+                short = DIR_SHORT.get(dir_name)
+                if short and short not in exit_obj.aliases.all():
+                    exit_obj.aliases.add(short)
                 exits_created += 1
 
     logger.log_info(
