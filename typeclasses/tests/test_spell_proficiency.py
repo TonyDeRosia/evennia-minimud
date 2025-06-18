@@ -18,5 +18,5 @@ class TestSpellLearning(EvenniaTest):
         spells = self.char1.db.spells
         self.assertEqual(len(spells), 1)
         self.assertEqual(spells[0].key, "fireball")
-        self.assertEqual(spells[0].proficiency, 25)
+        self.assertEqual(self.char1.db.proficiencies.get("fireball"), 25)
         self.assertEqual(self.char1.db.practice_sessions, 0)

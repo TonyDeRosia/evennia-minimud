@@ -666,18 +666,14 @@ class Character(ObjectParent, ClothedCharacter):
         if not self.cooldowns.ready(spell.key):
             return False
         known = self.db.spells or []
-        srec = None
+        learned = False
         for entry in known:
-            if isinstance(entry, str) and entry == spell_key:
-                srec = Spell(spell.key, spell.stat, spell.mana_cost, spell.desc, 0)
-                idx = known.index(entry)
-                known[idx] = srec
-                self.db.spells = known
+            if (isinstance(entry, str) and entry == spell_key) or (
+                hasattr(entry, "key") and entry.key == spell_key
+            ):
+                learned = True
                 break
-            if hasattr(entry, "key") and entry.key == spell_key:
-                srec = entry
-                break
-        if not srec:
+        if not learned:
             return False
         if self.traits.mana.current < spell.mana_cost:
             return False
@@ -696,9 +692,11 @@ class Character(ObjectParent, ClothedCharacter):
             self.location.msg_contents(
                 f"{self.get_display_name(self)} casts {colored}!"
             )
-        if srec.proficiency < 100:
-            srec.proficiency = min(100, srec.proficiency + 1)
-            self.db.spells = known
+        profs = self.db.proficiencies or {}
+        prof = profs.get(spell_key, 0)
+        if prof < 100:
+            profs[spell_key] = min(100, prof + 1)
+            self.db.proficiencies = profs
         return True
 
     def get_display_status(self, looker, **kwargs):
