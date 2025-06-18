@@ -100,8 +100,7 @@ def _ensure_room_areas():
 def at_server_init():
     """Called as the service layer initializes."""
 
-    logger.log_info("at_server_init: building caches")
-    _build_caches()
+    logger.log_info("at_server_init")
 
 
 def at_server_start():
@@ -237,7 +236,6 @@ def at_server_cold_start():
     shutdown or a reset.
     """
     logger.log_info("at_server_cold_start: cold boot")
-    _build_caches()
 
 
 def at_server_cold_stop():
