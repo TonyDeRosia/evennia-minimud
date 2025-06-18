@@ -44,7 +44,8 @@ class CombatInstance:
         self.engine.remove_participant(combatant)
         self.combatants.discard(combatant)
         try:
-            CombatRoundManager.get().combatant_to_combat.pop(combatant, None)
+            if getattr(combatant, "pk", None) is not None:
+                CombatRoundManager.get().combatant_to_combat.pop(combatant, None)
         except Exception:  # pragma: no cover - safety
             pass
         return True
@@ -287,6 +288,11 @@ class CombatRoundManager:
         inst = CombatInstance(combat_id, engine, set(fighters), round_time or 2.0)
         self.combats[combat_id] = inst
         for fighter in fighters:
+            if getattr(fighter, "pk", None) is None:
+                try:
+                    fighter.save()
+                except Exception:
+                    pass
             self.combatant_to_combat[fighter] = combat_id
 
         inst.start()
@@ -299,10 +305,13 @@ class CombatRoundManager:
         if not inst:
             return
         for fighter in list(inst.combatants):
-            self.combatant_to_combat.pop(fighter, None)
+            if getattr(fighter, "pk", None) is not None:
+                self.combatant_to_combat.pop(fighter, None)
 
     def get_combatant_combat(self, combatant) -> Optional[CombatInstance]:
         """Return the combat instance ``combatant`` is part of."""
+        if getattr(combatant, "pk", None) is None:
+            return None
         cid = self.combatant_to_combat.get(combatant)
         if cid is None:
             return None
@@ -316,6 +325,11 @@ class CombatRoundManager:
                 for c in combatants:
                     if c not in inst.combatants:
                         inst.add_combatant(c)
+                        if getattr(c, "pk", None) is None:
+                            try:
+                                c.save()
+                            except Exception:
+                                pass
                         self.combatant_to_combat[c] = inst.combat_id
                 inst.start()
                 return inst
