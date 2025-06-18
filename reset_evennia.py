@@ -8,6 +8,8 @@ import glob
 import shutil
 import sys
 
+from utils.startup_utils import kill_port
+
 PORT = 4005
 
 
@@ -56,18 +58,6 @@ def cleanup_files():
                     os.remove(path)
                 except FileNotFoundError:
                     pass
-
-
-def kill_port(port):
-    try:
-        output = subprocess.check_output(["lsof", "-ti", f":{port}"], text=True)
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return
-    for pid in output.strip().splitlines():
-        try:
-            os.kill(int(pid), signal.SIGKILL)
-        except ProcessLookupError:
-            pass
 
 
 def evennia_running(procs):
