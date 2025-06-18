@@ -7,6 +7,8 @@ class Skill:
     name = "skill"
     cooldown = 0
     stamina_cost = 0
+    #: Optional skill name that can assist with hit chance
+    support_skill: str | None = None
 
     def improve(self, user) -> None:
         """Increase proficiency by 1% every 25 uses and randomly."""

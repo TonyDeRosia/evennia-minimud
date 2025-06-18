@@ -633,8 +633,11 @@ class Character(ObjectParent, ClothedCharacter):
                 return CombatResult(actor=self, target=self, message="Too exhausted.")
             self.traits.stamina.current -= skill.stamina_cost
             state_manager.add_cooldown(self, skill.name, skill.cooldown)
+            from utils.hit_chance import calculate_hit_success
+            if not calculate_hit_success(self, skill.name, getattr(skill, "support_skill", None)):
+                return CombatResult(actor=self, target=target, message="You miss your strike.")
             result = skill.resolve(self, target)
-            for eff in skill.effects:
+            for eff in getattr(skill, "effects", []):
                 state_manager.add_status_effect(target, eff.key, eff.duration)
             return result
 
@@ -680,6 +683,10 @@ class Character(ObjectParent, ClothedCharacter):
             return False
         self.traits.mana.current -= spell.mana_cost
         state_manager.add_cooldown(self, spell.key, spell.cooldown)
+        from utils.hit_chance import calculate_hit_success
+        if not calculate_hit_success(self, spell.key, getattr(spell, "support_skill", None)):
+            self.msg("You fail to cast the spell.")
+            return False
         colored = colorize_spell(spell.key)
         if target:
             self.location.msg_contents(
