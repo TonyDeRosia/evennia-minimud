@@ -1,7 +1,145 @@
 from evennia import create_object
 from evennia.objects.models import ObjectDB
 from evennia.utils import logger
-from utils.prototype_manager import load_all_prototypes
+
+# short direction aliases used for exit objects
+DIR_SHORT = {
+    "north": "n",
+    "south": "s",
+    "east": "e",
+    "west": "w",
+    "northeast": "ne",
+    "southwest": "sw",
+    "northwest": "nw",
+    "southeast": "se",
+    "up": "u",
+    "down": "d",
+    "in": "i",
+    "out": "o",
+}
+
+midgard_rooms = {
+    200050: {
+        "name": "|cTemple Steppes|n",
+        "desc": (
+            "Wide marble steps rise toward an ancient temple crowned with golden spires. "
+            "Weathered pillars etched with celestial symbols surround the area, glowing faintly with divine energy. "
+            "A soft breeze stirs the incense drifting from the temple entrance, filling the air with a sense of calm and purpose. "
+            "This sacred hub stands as the beating heart of Midgard, where adventurers come to seek clarity and divine guidance."
+        ),
+        "exits": {"south": 200051},
+    },
+    200051: {
+        "name": "|wPath to Temple|n",
+        "desc": (
+            "Stone lanterns guide your descent along a cobbled trail that winds between statues of forgotten gods. "
+            "Faint chanting echoes from above, lingering like memory in the air. "
+            "The scent of flowers and incense fades the farther you walk from the temple. "
+            "This tranquil path serves as a bridge between Midgard’s divine heights and its bustling town below."
+        ),
+        "exits": {"north": 200050, "south": 200052},
+    },
+    200052: {
+        "name": "|GMidgard Square|n",
+        "desc": (
+            "The town square bustles with merchants and lively chatter. "
+            "Colorful stalls ring a central fountain splashing gently. "
+            "The smell of fresh bread mixes with the clang of distant forges. "
+            "Travelers from all paths pause here before continuing their journeys."
+        ),
+        "exits": {"north": 200051, "east": 200053},
+    },
+    200053: {
+        "name": "|yEast Market|n",
+        "desc": (
+            "Vendors shout prices from ramshackle booths lining the street. "
+            "Bright awnings flap in the ever-present breeze. "
+            "Coins clink and children laugh as trade carries on. "
+            "The eastern road leads deeper into Midgard’s busy districts."
+        ),
+        "exits": {"west": 200052, "south": 200054},
+    },
+    200054: {
+        "name": "|mGuildhall Entrance|n",
+        "desc": (
+            "Carved stone arches mark the entrance to the grand guildhall. "
+            "Banners of various colors flutter proudly from the walls. "
+            "Footsteps echo softly beneath the high ceilings. "
+            "New members often gather here before pledging their service."
+        ),
+        "exits": {"north": 200053, "west": 200055},
+    },
+    200055: {
+        "name": "|cKnight Quarters|n",
+        "desc": (
+            "Rows of polished armor stand at attention along the corridor. "
+            "The scent of oil and metal lingers in the air. "
+            "Trophies from past campaigns adorn the walls with pride. "
+            "Off-duty knights swap stories here after their patrols."
+        ),
+        "exits": {"east": 200054},
+    },
+    200056: {
+        "name": "|wTraining Yard|n",
+        "desc": (
+            "Wooden dummies and targets crowd the open yard. "
+            "Instructors bark orders to squires going through drills. "
+            "Sweat and determination hang thick in the afternoon sun. "
+            "The clatter of weapons rings out from dawn until dusk."
+        ),
+        "exits": {},
+    },
+    200057: {
+        "name": "|rBarracks Path|n",
+        "desc": (
+            "A narrow lane runs between sturdy stone barracks. "
+            "Booted soldiers march in step to a silent cadence. "
+            "Flags bearing Midgard’s sigil snap crisply overhead. "
+            "The lane continues south toward the outer gate."
+        ),
+        "exits": {"west": 200056, "south": 200058},
+    },
+    200058: {
+        "name": "|gSouth Gate|n",
+        "desc": (
+            "Heavy iron gates guard the southern exit of the town. "
+            "Beyond lies a well-worn road fading into the countryside. "
+            "Guards nod to those leaving on errands or patrol. "
+            "This threshold marks the boundary between Midgard and the wider world."
+        ),
+        "exits": {"north": 200057},
+    },
+    200059: {
+        "name": "|GForge Square|n",
+        "desc": (
+            "The clang of hammer on anvil resonates throughout this square. "
+            "Sparks fly as smiths labor over glowing metal. "
+            "The air is thick with smoke and the smell of coal. "
+            "Apprentices hurry about carrying fresh supplies."
+        ),
+        "exits": {"east": 200060},
+    },
+    200060: {
+        "name": "|CSmithy|n",
+        "desc": (
+            "Inside the smithy, heat from the forge creates shimmering waves. "
+            "Tools hang neatly from racks awaiting the smith’s hand. "
+            "Finished blades glint faintly in the low light. "
+            "A door to the north leads up to the watchtower above."
+        ),
+        "exits": {"west": 200059},
+    },
+    200061: {
+        "name": "|YWatchtower|n",
+        "desc": (
+            "This tall tower commands a view of the surrounding lands. "
+            "Stairs spiral upward toward a lookout platform. "
+            "Torches burn steadily, warding off the creeping dark. "
+            "From here the town’s defenders keep watch through the night."
+        ),
+        "exits": {},
+    },
+}
 
 
 def create() -> tuple[int, int]:
@@ -14,58 +152,67 @@ def create() -> tuple[int, int]:
         Number of rooms created and exits created.
     """
     from typeclasses.rooms import Room
-    prototypes = load_all_prototypes("room")
-    midgard = [p for p in prototypes.values() if p.get("area") == "midgard"]
+    from typeclasses.exits import Exit
 
-    rooms = {}
+    rooms: dict[int, Room] = {}
     rooms_created = 0
 
-    for proto in midgard:
-        vnum = int(proto.get("room_id"))
+    for vnum, data in midgard_rooms.items():
         objs = ObjectDB.objects.filter(
             db_attributes__db_key="room_id", db_attributes__db_value=vnum
         )
-        room_obj = next((obj for obj in objs if obj.is_typeclass(Room, exact=False)), None)
+        room = next((obj for obj in objs if obj.is_typeclass(Room, exact=False)), None)
+        if not room:
+            room = create_object(Room, key=data["name"])
+            rooms_created += 1
 
-        if room_obj:
-            rooms[vnum] = room_obj
-            continue
+        room.key = data["name"]
+        room.db.room_id = vnum
+        room.db.desc = data.get("desc", "")
+        room.tags.add("midgard", category="area")
 
-        obj = create_object(
-            proto.get("typeclass", Room), key=proto.get("key"), nohome=True
-        )
-        obj.db.desc = proto.get("desc", "")
-        obj.db.room_id = vnum
-        obj.db.area = proto.get("area")
-
-        if proto.get("xyz"):
-            obj.db.xyz = proto["xyz"]
-
-        for tag in proto.get("tags", []):
-            if isinstance(tag, (list, tuple)) and len(tag) >= 1:
-                name = tag[0]
-                category = tag[1] if len(tag) > 1 else None
-                obj.tags.add(name, category=category)
-            else:
-                obj.tags.add(tag)
-
-        rooms[vnum] = obj
-        rooms_created += 1
+        rooms[vnum] = room
 
     exits_created = 0
-    for proto in midgard:
-        vnum = int(proto.get("room_id"))
-        room = rooms.get(vnum)
-        if not room:
+    for vnum, data in midgard_rooms.items():
+        src = rooms.get(vnum)
+        if not src:
             continue
-        for dir_name, dest_vnum in proto.get("exits", {}).items():
-            dest = rooms.get(int(dest_vnum))
+
+        exits = src.db.exits or {}
+
+        for dir_name, dest_vnum in data.get("exits", {}).items():
+            dest = rooms.get(dest_vnum)
             if not dest:
                 continue
-            room.db.exits = room.db.exits or {}
-            if dir_name not in room.db.exits:
-                room.db.exits[dir_name] = dest
+
+            if exits.get(dir_name) != dest:
+                exits[dir_name] = dest
+
+            exit_obj = next(
+                (
+                    ex
+                    for ex in src.exits
+                    if ex.key.lower() == dir_name.lower() and ex.destination == dest
+                ),
+                None,
+            )
+            if not exit_obj:
+                exit_obj = create_object(
+                    "typeclasses.exits.Exit",
+                    key=dir_name,
+                    location=src,
+                    destination=dest,
+                )
                 exits_created += 1
 
-    logger.log_info(f"✅ Midgard created: {rooms_created} rooms, {exits_created} exits.")
+            short = DIR_SHORT.get(dir_name)
+            if short and short not in exit_obj.aliases.all():
+                exit_obj.aliases.add(short)
+
+        src.db.exits = exits
+
+    logger.log_info(
+        f"✅ Midgard created: {rooms_created} rooms, {exits_created} exits."
+    )
     return rooms_created, exits_created
