@@ -1,7 +1,7 @@
 from unittest.mock import patch
 from evennia.utils.test_resources import EvenniaTest
 from combat.combat_skills import SKILL_CLASSES
-from world.spells import SPELLS
+from world.spells import SPELLS, Spell
 
 class TestSkillAndSpellUsage(EvenniaTest):
     def setUp(self):
@@ -41,4 +41,13 @@ class TestSkillAndSpellUsage(EvenniaTest):
             result = self.char1.use_skill("cleave", target=self.char2)
         self.assertEqual(self.char2.hp, 10)
         self.assertIn("misses", result.message)
+
+    def test_cast_spell_converts_dict(self):
+        self.char1.db.spells = {"fireball": 100}
+        result = self.char1.cast_spell("fireball", target=self.char2)
+        self.assertTrue(result)
+        spells = self.char1.db.spells
+        self.assertIsInstance(spells, list)
+        self.assertIsInstance(spells[0], Spell)
+        self.assertEqual(spells[0].key, "fireball")
 
