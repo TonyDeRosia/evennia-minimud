@@ -14,6 +14,8 @@ python -m pip install --upgrade pip
 pip install -r requirements-test.txt
 pip install -e .
 ```
+Running `pytest` before installing these packages will lead to test
+collection errors because Django and Evennia cannot be imported.
 
 You can run `scripts/setup_test_env.sh` to perform these commands
 automatically. Once everything is installed, run the tests with:
