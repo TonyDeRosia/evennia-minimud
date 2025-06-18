@@ -1,19 +1,25 @@
 #!/usr/bin/env python3
-"""Utility to cleanly start the Evennia server using `evennia start`.
+"""Clean startup helper for Evennia.
 
-This script checks for lingering processes or files that might prevent
-Evennia from launching. It removes stale PID files and temporary
-directories and frees the default port before executing ``evennia start``.
+The default launcher occasionally leaves behind ``twistd`` processes or
+PID files that prevent the game from booting.  This script performs a
+more thorough cleanup and then executes ``evennia start``.  It can also
+optionally run migrations and reload the server if it is already
+running.
 """
 
+import argparse
 import glob
 import os
 import shutil
 import signal
+import socket
 import subprocess
 import sys
+import time
 
 PORT = 4005
+WAIT_TIMEOUT = 15
 
 
 def _twistd_processes():
@@ -45,6 +51,24 @@ def _kill_defunct_parents(procs):
                 pass
 
 
+def _wait_for_port(port: int, timeout: int = WAIT_TIMEOUT) -> bool:
+    """Return ``True`` when the TCP ``port`` opens or ``False`` if timed out."""
+    start = time.time()
+    while time.time() - start < timeout:
+        with socket.socket() as sock:
+            sock.settimeout(1)
+            if sock.connect_ex(("localhost", port)) == 0:
+                return True
+        time.sleep(0.5)
+    return False
+
+
+def _run(cmd: list[str]) -> None:
+    """Run a subprocess, printing the command."""
+    print(" ".join(cmd))
+    subprocess.run(cmd, check=True)
+
+
 def _cleanup_files():
     for pattern in ["server/*.pid", "server/*.log", ".twistd-*"]:
         for path in glob.glob(pattern):
@@ -74,21 +98,54 @@ def _is_running() -> bool:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Clean Evennia startup helper")
+    parser.add_argument(
+        "--migrate",
+        action="store_true",
+        help="Run 'evennia migrate' before starting",
+    )
+    parser.add_argument(
+        "--reload",
+        action="store_true",
+        help="Reload if the server is already running",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Stop a running server before starting",
+    )
+    args = parser.parse_args()
+
     procs = _twistd_processes()
     _kill_defunct_parents(procs)
 
-    if _is_running():
-        print("Evennia already running.")
-        return
+    running = _is_running()
+
+    if running:
+        if args.reload:
+            _run(["evennia", "reload"])
+            return
+        if not args.force:
+            print("Evennia already running.")
+            return
+        _run(["evennia", "stop"])
+
+    if args.migrate:
+        _run(["evennia", "migrate"])
 
     _cleanup_files()
     _kill_port(PORT)
 
     try:
-        subprocess.run(["evennia", "start"], check=True)
+        _run(["evennia", "start"])
     except FileNotFoundError:
         print("evennia executable not found.", file=sys.stderr)
         sys.exit(1)
+
+    if _wait_for_port(PORT):
+        print("Evennia started successfully.")
+    else:
+        print("Server did not become ready in time.", file=sys.stderr)
 
 
 if __name__ == "__main__":
