@@ -26,6 +26,29 @@ class Command(BaseCommand):
             session = to_obj.sessions.get() if to_obj != self.caller else self.session
         to_obj.msg(text, from_obj=from_obj, session=session, **kwargs)
 
+    def at_pre_cmd(self):
+        puppet = getattr(self.caller.ndb, "puppet_proxy", None)
+        if puppet and self.cmdstring.lower() not in {"@puppet", "puppet", "ghost"}:
+            output = []
+
+            def _collect(text=None, **kwargs):
+                if text:
+                    output.append(str(text))
+
+            original = puppet.msg
+            puppet.msg = _collect
+            puppet.execute_cmd(self.raw)
+            puppet.msg = original
+
+            if output:
+                prefix = f"[PUPPETING {puppet.key}]"
+                suffix = "[END PUPPET]"
+                self.caller.msg(f"{prefix}\n" + "\n".join(output) + f"\n{suffix}")
+            else:
+                self.caller.msg(f"[PUPPETING {puppet.key}]\n[END PUPPET]")
+            return True
+        return super().at_pre_cmd()
+
     def at_post_cmd(self):
         """Hook called after command execution."""
         super().at_post_cmd()

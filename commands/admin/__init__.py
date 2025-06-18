@@ -497,6 +497,96 @@ class CmdForceMobReport(Command):
         )
 
 
+class CmdPull(Command):
+    """Pull a character into the game and puppet it."""
+
+    key = "@pull"
+    locks = "cmd:perm(Admin)"
+    help_category = "Admin"
+
+    def func(self):
+        caller = self.caller
+        if not self.args:
+            caller.msg("Usage: @pull <character>")
+            return
+
+        target = caller.search(self.args.strip(), global_search=True)
+        if not target:
+            return
+        if target.sessions.count():
+            caller.msg(f"{target.key} is already puppeted.")
+            return
+
+        session = caller.sessions.get()
+        location = caller.location
+
+        caller.account.unpuppet_object(session)
+        caller.account.puppet_object(session, target)
+        if location and target.location != location:
+            target.move_to(location, quiet=True)
+        session.msg(f"You pull {target.key} into the game.")
+        if target != caller:
+            target.msg(f"You have been pulled into play by {caller.key}.")
+
+
+class CmdPush(Command):
+    """Force a character you control to log out."""
+
+    key = "@push"
+    locks = "cmd:perm(Admin)"
+    help_category = "Admin"
+
+    def func(self):
+        caller = self.caller
+        if not self.args:
+            caller.msg("Usage: @push <character>")
+            return
+
+        target = caller.search(self.args.strip(), global_search=True)
+        if not target:
+            return
+        if target.account != caller.account or not target.sessions.count():
+            caller.msg("You are not controlling that character.")
+            return
+
+        session = target.sessions.get()
+        caller.account.unpuppet_object(session)
+        caller.msg(f"{target.key} pushed out of play.")
+        target.msg("You have been logged out by an admin.")
+
+
+class CmdPuppet(Command):
+    """Temporarily puppet a character without taking it over."""
+
+    key = "@puppet"
+    aliases = ["ghost"]
+    locks = "cmd:perm(Admin)"
+    help_category = "Admin"
+
+    def func(self):
+        caller = self.caller
+        proxy = caller.ndb.puppet_proxy
+
+        if proxy:
+            caller.ndb.puppet_proxy = None
+            caller.msg(f"Stopped puppeting {proxy.key}.")
+            return
+
+        if not self.args:
+            caller.msg("Usage: @puppet <character>")
+            return
+
+        target = caller.search(self.args.strip(), global_search=True)
+        if not target:
+            return
+        if target.sessions.count():
+            caller.msg(f"{target.key} is already puppeted.")
+            return
+
+        caller.ndb.puppet_proxy = target
+        caller.msg(f"Now puppeting {target.key}. Type @puppet again to stop.")
+
+
 def _create_gear(
     caller,
     typeclass,
@@ -1395,6 +1485,9 @@ class AdminCmdSet(CmdSet):
         self.add(CmdSetStat)
         self.add(CmdSetAttr)
         self.add(CmdSetBounty)
+        self.add(CmdPull)
+        self.add(CmdPush)
+        self.add(CmdPuppet)
         self.add(CmdSlay)
         self.add(CmdSmite)
         self.add(CmdRestoreAll)
