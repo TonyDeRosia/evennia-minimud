@@ -11,6 +11,7 @@ from django.conf import settings
 from evennia.utils import logger
 
 from combat.combat_skills import SKILL_CLASSES, SkillCategory
+from combat import combat_utils
 from world.spells import SPELLS, Spell
 from world.system import state_manager
 from utils.ansi_utils import format_ansi_title
@@ -82,6 +83,7 @@ def use_skill(actor, target, skill_name: str) -> CombatResult:
         msg = f"{colorize_name(actor.key)}'s {skill.name} misses {colorize_name(target.key)}."
         if getattr(settings, "COMBAT_SHOW_HIT", False):
             msg += f" [HIT {hit_chance}%]"
+        msg = combat_utils.highlight_keywords(msg)
         return CombatResult(actor, target, msg)
 
     result = skill.resolve(actor, target)
@@ -89,6 +91,8 @@ def use_skill(actor, target, skill_name: str) -> CombatResult:
         result.message += f" [HIT {hit_chance}%]"
     for eff in getattr(skill, "effects", []):
         state_manager.add_status_effect(target, eff.key, eff.duration)
+    if result.message:
+        result.message = combat_utils.highlight_keywords(result.message)
     return result
 
 
@@ -141,6 +145,7 @@ def cast_spell(actor, spell_key: str, target: Optional[object] = None) -> Combat
         msg = f"{aname} casts {spell.key} at {tname}!"
     else:
         msg = f"{aname} casts {spell.key} at {tname}, but it fizzles."
+    msg = combat_utils.highlight_keywords(msg)
 
     if getattr(settings, "COMBAT_SHOW_HIT", False):
         msg += f" [HIT {hit_chance}%]"

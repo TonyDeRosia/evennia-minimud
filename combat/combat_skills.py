@@ -17,6 +17,7 @@ class SkillCategory(str, Enum):
 from typing import TYPE_CHECKING
 
 from .combat_utils import roll_damage, roll_evade
+from . import combat_utils
 from .combat_states import CombatState
 from world.system import stat_manager
 from world.skills.kick import Kick
@@ -59,7 +60,9 @@ class ShieldBash(Skill):
                 return CombatResult(
                     actor=user,
                     target=target,
-                    message=f"{user.key}'s shield bash misses {target.key}.",
+                    message=combat_utils.highlight_keywords(
+                        f"{user.key}'s shield bash misses {target.key}."
+                    ),
                 )
             dmg = roll_damage(self.damage)
             target.hp = max(target.hp - dmg, 0)
@@ -72,7 +75,9 @@ class ShieldBash(Skill):
             return CombatResult(
                 actor=user,
                 target=target,
-                message=f"{user.key}'s shield bash misses {target.key}.",
+                message=combat_utils.highlight_keywords(
+                    f"{user.key}'s shield bash misses {target.key}."
+                ),
             )
 
 
@@ -91,13 +96,17 @@ class Cleave(Skill):
             return CombatResult(actor=user, target=target, message="They are already down.")
         if stat_manager.check_hit(user, target):
             if roll_evade(user, target):
-                msg = f"{user.key}'s cleave misses {target.key}."
+                msg = combat_utils.highlight_keywords(
+                    f"{user.key}'s cleave misses {target.key}."
+                )
             else:
                 dmg = roll_damage(self.damage)
                 target.hp = max(target.hp - dmg, 0)
                 msg = f"{user.key} cleaves {target.key} for {dmg} damage!"
         else:
-            msg = f"{user.key}'s cleave misses {target.key}."
+            msg = combat_utils.highlight_keywords(
+                f"{user.key}'s cleave misses {target.key}."
+            )
         return CombatResult(actor=user, target=target, message=msg)
 
 

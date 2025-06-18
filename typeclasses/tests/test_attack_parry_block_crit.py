@@ -104,6 +104,7 @@ class TestAttackReactions(unittest.TestCase):
         self.assertEqual(self.defender.hp, 0)
         calls = [c.args[0] for c in self.attacker.location.msg_contents.call_args_list]
         self.assertTrue(any("Critical" in msg for msg in calls))
+        self.assertTrue(any("|R" in msg for msg in calls))
         mp.assert_called()
         mb.assert_called()
         mcrit.assert_called()
