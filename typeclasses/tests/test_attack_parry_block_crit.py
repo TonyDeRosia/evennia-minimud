@@ -72,7 +72,8 @@ class TestAttackReactions(unittest.TestCase):
              patch("world.system.stat_manager.roll_crit", return_value=False):
             self._run_engine()
         self.assertEqual(self.defender.hp, 10)
-        calls = [c.args[0] for c in self.attacker.location.msg_contents.call_args_list]
+        output = self.attacker.location.msg_contents.call_args_list[0].args[0]
+        calls = output.splitlines()
         self.assertTrue(any("parries" in msg for msg in calls))
         mock_parry.assert_called()
 
@@ -86,7 +87,8 @@ class TestAttackReactions(unittest.TestCase):
              patch("world.system.stat_manager.roll_crit", return_value=False):
             self._run_engine()
         self.assertEqual(self.defender.hp, 10)
-        calls = [c.args[0] for c in self.attacker.location.msg_contents.call_args_list]
+        output = self.attacker.location.msg_contents.call_args_list[0].args[0]
+        calls = output.splitlines()
         self.assertTrue(any("blocks" in msg for msg in calls))
         mp.assert_called()
         mb.assert_called()
@@ -102,7 +104,8 @@ class TestAttackReactions(unittest.TestCase):
              patch("world.system.stat_manager.crit_damage", return_value=10) as mcd:
             self._run_engine()
         self.assertEqual(self.defender.hp, 0)
-        calls = [c.args[0] for c in self.attacker.location.msg_contents.call_args_list]
+        output = self.attacker.location.msg_contents.call_args_list[0].args[0]
+        calls = output.splitlines()
         self.assertTrue(any("Critical" in msg for msg in calls))
         mp.assert_called()
         mb.assert_called()
