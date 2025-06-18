@@ -46,10 +46,13 @@ class CmdPush(Command):
         if not target:
             return
         sess = target.sessions.get()
+        if isinstance(sess, list):
+            sess = sess[0] if sess else None
         if not sess:
             caller.msg(f"{target.key} is not currently puppeted.")
             return
-        if sess.account != caller.account:
+        account = sess.get_account() if hasattr(sess, "get_account") else sess.account
+        if account != caller.account:
             caller.msg(f"You are not controlling {target.key}.")
             return
         caller.account.unpuppet_object(sess)
