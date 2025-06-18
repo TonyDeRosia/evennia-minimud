@@ -859,8 +859,11 @@ class CmdScan(Command):
             if things:
                 lines.append("|wYou see:|n " + ", ".join(things))
 
-            exits = [e.key.capitalize() for e in dest.exits if is_admin or e.access(caller, "view")]
-            lines.append("|wExits:|n " + (", ".join(exits) if exits else "None"))
+            from utils.directions import sort_exit_names
+
+            exit_keys = [e.key for e in dest.exits if is_admin or e.access(caller, "view")]
+            exit_keys = sort_exit_names(exit_keys)
+            lines.append("|wExits:|n " + (", ".join(name.capitalize() for name in exit_keys) if exit_keys else "None"))
 
             out.append("\n".join(lines))
 

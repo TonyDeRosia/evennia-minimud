@@ -116,7 +116,11 @@ class RoomParent(ObjectParent):
         return f"Special commands here: {', '.join(cmd_keys)}" if cmd_keys else ""
 
     def get_display_exits(self, looker, **kwargs):
-        exit_names = [key.capitalize() for key in (self.db.exits or {})]
+        from utils.directions import sort_exit_names
+
+        exit_keys = list((self.db.exits or {}).keys())
+        ordered = sort_exit_names(exit_keys)
+        exit_names = [name.capitalize() for name in ordered]
         return "|wExits:|n " + ", ".join(exit_names) if exit_names else "|wExits:|n None"
 
     def return_appearance(self, looker):
