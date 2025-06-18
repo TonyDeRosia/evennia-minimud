@@ -89,9 +89,11 @@ def _scavenge(npc: BaseNPC) -> None:
 
 
 def _roam(npc: BaseNPC) -> None:
-    """Move randomly if not a sentinel."""
+    """Move randomly if allowed."""
     flags = set(npc.db.actflags or [])
     if "sentinel" in flags:
+        return
+    if "wander" not in flags and npc.db.ai_type != "wander":
         return
     if not npc.location:
         return

@@ -61,9 +61,9 @@ class TestRoomMinimap(EvenniaTest):
         
         appearance = room.return_appearance(self.char1)
         map_lines = room.generate_map(self.char1).splitlines()
-        
+
         # Confirm that map appears at the top of room description
-        self.assertEqual(appearance.splitlines()[:len(map_lines)], map_lines)
+        self.assertEqual(appearance.splitlines()[1 : len(map_lines) + 1], map_lines)
 
     def test_xygrid_map_and_appearance(self):
         # Center + 4 directions
@@ -98,4 +98,4 @@ class TestRoomMinimap(EvenniaTest):
         self.assertEqual(generated_map, expected_map)
         
         appearance = center.return_appearance(self.char1)
-        self.assertTrue(appearance.startswith(expected_map))
+        self.assertTrue(appearance.startswith("\n" + expected_map + "\n"))

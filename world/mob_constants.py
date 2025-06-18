@@ -69,6 +69,7 @@ class ACTFLAGS(_StrEnum):
     ASSIST = "assist"
     CALL_FOR_HELP = "call_for_help"
     NOLOOT = "noloot"
+    WANDER = "wander"
 
 
 class AFFECTED_BY(_StrEnum):

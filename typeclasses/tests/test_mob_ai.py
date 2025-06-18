@@ -87,3 +87,18 @@ class TestMobAIBehaviors(EvenniaTest):
         with patch.object(helper, "enter_combat") as mock:
             mob_ai.process_mob_ai(helper)
             mock.assert_called_with(self.char1)
+
+    def test_wander_flag_moves(self):
+        from typeclasses.npcs import BaseNPC
+        from typeclasses.exits import Exit
+
+        dest = create.create_object("typeclasses.rooms.Room", key="dest")
+        exit_obj = create.create_object(Exit, key="east", location=self.room1)
+        exit_obj.destination = dest
+
+        npc = create.create_object(BaseNPC, key="wander", location=self.room1)
+        npc.db.actflags = ["wander"]
+
+        with patch.object(exit_obj, "at_traverse") as mock:
+            mob_ai.process_mob_ai(npc)
+            mock.assert_called_with(npc, dest)
