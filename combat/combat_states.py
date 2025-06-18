@@ -34,6 +34,12 @@ class CombatStateManager:
         ``on_apply`` is only triggered the first time the state is added.
         """
 
+        if getattr(obj, "pk", None) is None:
+            try:
+                obj.save()
+            except Exception:
+                return
+
         obj_states = self.states.setdefault(obj, {})
         current = obj_states.get(state.key)
         if current:
