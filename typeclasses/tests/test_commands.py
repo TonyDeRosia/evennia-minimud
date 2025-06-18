@@ -828,6 +828,17 @@ class TestDelDirCommand(EvenniaTest):
         self.assertNotIn("south", new_room.db.exits)
 
 
+class TestUnlinkCommand(EvenniaTest):
+    def test_unlink_removes_two_way_exit(self):
+        start = self.char1.location
+        self.char1.execute_cmd("dig east")
+        new_room = start.db.exits.get("east")
+        self.assertIsNotNone(new_room)
+        self.char1.execute_cmd("unlink east")
+        self.assertNotIn("east", start.db.exits)
+        self.assertNotIn("west", new_room.db.exits)
+
+
 class TestDelRoomCommand(EvenniaTest):
     def test_delroom_by_direction(self):
         start = self.char1.location

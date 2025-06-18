@@ -1814,6 +1814,33 @@ Related:
 """,
     },
     {
+        "key": "unlink",
+        "category": "Building",
+        "text": """Help for unlink
+
+Remove an exit from the current room.
+
+Usage:
+    unlink <direction>
+
+Switches:
+    None
+
+Arguments:
+    None
+
+Examples:
+    unlink north
+
+Notes:
+    - Removes the exit in the given direction. If the adjoining room
+    - links back here, that exit is removed as well.
+
+Related:
+    help ansi
+""",
+    },
+    {
         "key": "delroom",
         "category": "Building",
         "text": """
