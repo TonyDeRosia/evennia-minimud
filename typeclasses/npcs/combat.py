@@ -17,8 +17,7 @@ class CombatNPC(BaseNPC):
         if not target:
             return
         engine = getattr(getattr(self, "ndb", None), "combat_engine", None)
-        if engine:
-            from combat.combat_actions import AttackAction
+        from combat.ai_combat import npc_take_turn
 
-            engine.queue_action(self, AttackAction(self, target))
+        npc_take_turn(engine, self, target)
 
