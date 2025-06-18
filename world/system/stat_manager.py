@@ -519,6 +519,13 @@ def get_effective_stat(obj, key: str) -> int:
     return int(base)
 
 
+def proficiency_hit(proficiency: int, stat: int) -> int:
+    """Return a hit chance based on proficiency and a stat."""
+
+    bonus = max((stat - 10) * 0.5, 0)
+    return int(min(95, proficiency + bonus))
+
+
 def compute_hit_chance(obj) -> int:
     """Return the attacker's base hit chance."""
 
