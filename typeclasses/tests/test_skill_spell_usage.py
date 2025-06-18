@@ -42,6 +42,7 @@ class TestSkillAndSpellUsage(EvenniaTest):
             result = self.char1.use_skill("cleave", target=self.char2)
         self.assertEqual(self.char2.hp, 10)
         self.assertIn("misses", result.message)
+        self.assertIn("|C", result.message)
 
     def test_cast_spell_converts_dict(self):
         self.char1.db.spells = {"fireball": 100}

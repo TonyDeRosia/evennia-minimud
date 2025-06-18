@@ -218,6 +218,16 @@ def format_combat_message(
     return f"{a_name} {action} {t_name}!"
 
 
+def highlight_keywords(text: str) -> str:
+    """Wrap common combat phrases in ANSI color codes."""
+
+    if not text:
+        return text
+    text = text.replace("misses", "|Cmisses|n")
+    text = text.replace("Critical hit!", "|RCritical hit!|n")
+    return text
+
+
 def get_condition_msg(hp: int, max_hp: int) -> str:
     """Return a short description of current health."""
 
