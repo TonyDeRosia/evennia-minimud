@@ -217,10 +217,29 @@ class CmdRList(Command):
 
         lines = []
         for num in sorted(vnums):
-            if num in rooms:
-                lines.append(f"{num}: {rooms[num].key}")
-            else:
-                lines.append(f"{num}: (unbuilt)")
+            try:
+                room = ObjectDB.objects.get(
+                    db_attributes__db_key="room_id",
+                    db_attributes__db_value=num,
+                )
+                name = room.get_display_name(self.caller)
+                lines.append(f"{num} - {name}:")
+            except ObjectDB.DoesNotExist:
+                proto = protos.get(num)
+                if not proto:
+                    for v, p in protos.items():
+                        rid = p.get("room_id", v)
+                        try:
+                            if int(rid) == num:
+                                proto = p
+                                break
+                        except (TypeError, ValueError):
+                            continue
+
+                if proto and proto.get("key"):
+                    lines.append(f"{num} - {proto.get('key')}: (unbuilt)")
+                else:
+                    lines.append(f"{num}: (unbuilt)")
 
         header = f"Rooms in {area.key} ({area.start}-{area.end})"
         self.msg("\n".join([header] + lines))
