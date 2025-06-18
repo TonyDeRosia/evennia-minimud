@@ -112,6 +112,7 @@ def at_server_start():
     from evennia.utils import create
     from evennia.scripts.models import ScriptDB
     from world.scripts.mob_db import get_mobdb
+    from typeclasses.npcs import BaseNPC
 
     script = ScriptDB.objects.filter(db_key="global_tick").first()
     if not script or script.typeclass_path != "typeclasses.scripts.GlobalTick":
