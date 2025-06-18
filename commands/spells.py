@@ -1,7 +1,7 @@
 from evennia import CmdSet
 from evennia.utils.evtable import EvTable
 from .command import Command
-from world.spells import SPELLS, Spell
+from world.spells import SPELLS, Spell, colorize_spell
 
 
 class CmdSpellbook(Command):
@@ -112,13 +112,14 @@ class CmdCast(Command):
             if not target:
                 return
         self.caller.traits.mana.current -= spell.mana_cost
+        colored = colorize_spell(spell.key)
         if target:
             self.caller.location.msg_contents(
-                f"{self.caller.get_display_name(self.caller)} casts {spell.key} at {target.get_display_name(self.caller)}!"
+                f"{self.caller.get_display_name(self.caller)} casts {colored} at {target.get_display_name(self.caller)}!"
             )
         else:
             self.caller.location.msg_contents(
-                f"{self.caller.get_display_name(self.caller)} casts {spell.key}!"
+                f"{self.caller.get_display_name(self.caller)} casts {colored}!"
             )
         if isinstance(spell_entry, Spell):
             if spell_entry.proficiency < 100:

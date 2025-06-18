@@ -214,6 +214,17 @@ def spawn_from_vnum(vnum: int, location=None):
     npc.db.vnum = vnum
     npc.tags.add(f"M{vnum}", category="vnum")
 
+    skills = proto_data.get("skills") or {}
+    if isinstance(skills, dict):
+        npc.db.skills = list(skills.keys())
+    elif isinstance(skills, list):
+        npc.db.skills = [str(s) for s in skills]
+    spells = proto_data.get("spells") or {}
+    if isinstance(spells, dict):
+        npc.db.spells = list(spells.keys())
+    elif isinstance(spells, list):
+        npc.db.spells = [str(s) for s in spells]
+
     mobprogs = proto_data.get("mobprogs") or []
     npc.db.mobprogs = mobprogs
 

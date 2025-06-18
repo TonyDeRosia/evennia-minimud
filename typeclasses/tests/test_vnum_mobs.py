@@ -308,3 +308,17 @@ class TestVnumMobs(EvenniaTest):
             npc.db.primary_stats.get("STR"),
         )
 
+    def test_spawn_converts_skill_spell_lists(self):
+        proto = {
+            "key": "mage",
+            "typeclass": "typeclasses.npcs.BaseNPC",
+            "skills": {"cleave": 100},
+            "spells": {"fireball": 100},
+        }
+        vnum = register_prototype(proto, vnum=81)
+        npc = spawn_from_vnum(vnum, location=self.char1.location)
+        self.assertIsInstance(npc.db.skills, list)
+        self.assertIsInstance(npc.db.spells, list)
+        self.assertIn("cleave", npc.db.skills)
+        self.assertIn("fireball", npc.db.spells)
+

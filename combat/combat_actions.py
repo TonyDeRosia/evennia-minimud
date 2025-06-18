@@ -254,10 +254,13 @@ class SpellAction(Action):
         success = getattr(self.actor, "cast_spell", None)
         if callable(success):
             success(self.spell.key, self.target)
+        from world.spells import colorize_spell
+
+        colored = colorize_spell(self.spell.key)
         result = CombatResult(
             actor=self.actor,
             target=self.target or self.actor,
-            message=f"{self.actor.key} casts {self.spell.key}!",
+            message=f"{self.actor.key} casts {colored}!",
         )
         if getattr(result, "damage", 0):
             result.damage, crit = CombatMath.apply_critical(self.actor, result.target, result.damage)

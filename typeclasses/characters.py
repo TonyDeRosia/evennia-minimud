@@ -654,7 +654,7 @@ class Character(ObjectParent, ClothedCharacter):
 
     def cast_spell(self, spell_key, target=None):
         """Cast a known spell, spending mana."""
-        from world.spells import SPELLS
+        from world.spells import SPELLS, colorize_spell
         from world.system import state_manager
 
         spell = SPELLS.get(spell_key)
@@ -680,13 +680,14 @@ class Character(ObjectParent, ClothedCharacter):
             return False
         self.traits.mana.current -= spell.mana_cost
         state_manager.add_cooldown(self, spell.key, spell.cooldown)
+        colored = colorize_spell(spell.key)
         if target:
             self.location.msg_contents(
-                f"{self.get_display_name(self)} casts {spell.key} at {target.get_display_name(self)}!"
+                f"{self.get_display_name(self)} casts {colored} at {target.get_display_name(self)}!"
             )
         else:
             self.location.msg_contents(
-                f"{self.get_display_name(self)} casts {spell.key}!"
+                f"{self.get_display_name(self)} casts {colored}!"
             )
         if srec.proficiency < 100:
             srec.proficiency = min(100, srec.proficiency + 1)
