@@ -70,9 +70,9 @@ def _ensure_room_areas():
     from typeclasses.rooms import Room
     from world.areas import Area, find_area, save_area
 
-    name = getattr(settings, "DEFAULT_AREA_NAME", "Starter Zone")
-    start = getattr(settings, "DEFAULT_AREA_START", 200000)
-    end = getattr(settings, "DEFAULT_AREA_END", 200999)
+    name = getattr(settings, "DEFAULT_AREA_NAME", "midgard")
+    start = getattr(settings, "DEFAULT_AREA_START", 200050)
+    end = getattr(settings, "DEFAULT_AREA_END", 200150)
 
     _, area = find_area(name)
     if area is None:

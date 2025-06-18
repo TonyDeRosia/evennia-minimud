@@ -85,14 +85,12 @@ Follow the prompt to create your superuser account.
 Setup Continued
 ```bash
 evennia xyzgrid init
-evennia xyzgrid add world.maps.starter_town
 evennia xyzgrid spawn
 evennia reload
 ```
 Then, in-game:
 ```bash
 ic
-batchcmd initial_build
 @initmidgard
 ```
 This populates rooms 200050-200150 so @teleport works.
