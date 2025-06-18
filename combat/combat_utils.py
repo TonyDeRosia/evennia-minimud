@@ -185,11 +185,15 @@ def format_combat_message(
     *,
     crit: bool = False,
     miss: bool = False,
+    attempt: bool = False,
 ) -> str:
     """Return a standardized combat log message with color coding."""
 
     a_name = getattr(actor, "key", str(actor))
     t_name = getattr(target, "key", str(target))
+
+    if attempt:
+        return f"{a_name} {action} {t_name}."
 
     if miss:
         return f"|C{a_name}'s {action} misses {t_name}!|n"

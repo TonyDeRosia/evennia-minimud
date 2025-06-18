@@ -1,4 +1,4 @@
-from combat.combat_utils import roll_evade
+from combat.combat_utils import roll_evade, format_combat_message
 from combat.damage_types import DamageType
 from world.system import stat_manager
 from .skill import Skill
@@ -28,7 +28,7 @@ class Kick(Skill):
             return CombatResult(
                 actor=user,
                 target=target,
-                message=f"{user.key}'s kick misses {target.key}.",
+                message=format_combat_message(user, target, "kick", miss=True),
             )
 
         str_val = stat_manager.get_effective_stat(user, "STR")
@@ -42,5 +42,5 @@ class Kick(Skill):
         return CombatResult(
             actor=user,
             target=target,
-            message=f"{user.key} kicks {target.key} for {dmg} damage!",
+            message=format_combat_message(user, target, "kicks", dmg),
         )

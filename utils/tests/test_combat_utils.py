@@ -118,6 +118,18 @@ class TestCombatUtils(EvenniaTest):
                 self.assertTrue(msg.startswith("Attacker"))
                 self.assertIn("damage", msg)
 
+    def test_format_combat_message_attempt(self):
+        from combat import combat_utils
+
+        msg = combat_utils.format_combat_message(
+            self.char1,
+            self.char2,
+            "swings sword at",
+            attempt=True,
+        )
+        self.assertIn("swings sword at", msg)
+        self.assertTrue(msg.endswith("."))
+
     def test_get_condition_msg(self):
         from combat.combat_utils import get_condition_msg
 

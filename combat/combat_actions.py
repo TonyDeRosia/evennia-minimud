@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from typing import Optional, Iterable
 
 from .engine.combat_math import CombatMath
+from .combat_utils import format_combat_message
 from world.system import state_manager
 from world.abilities import colorize_name, use_skill, cast_spell
 
@@ -77,7 +78,9 @@ class AttackAction(Action):
         logger.debug("AttackAction weapon=%s", getattr(weapon, "key", weapon))
         wname = getattr(weapon, "key", None) or (weapon.get("name") if isinstance(weapon, dict) else "fists")
 
-        attempt = f"{self.actor.key} swings {wname} at {target.key}."
+        attempt = format_combat_message(
+            self.actor, target, f"swings {wname} at", attempt=True
+        )
 
         unarmed = not getattr(self.actor, "wielding", [])
         hit_bonus = 0.0
@@ -97,11 +100,13 @@ class AttackAction(Action):
         dmg, dtype = CombatMath.calculate_damage(self.actor, weapon, target)
         dmg, crit = CombatMath.apply_critical(self.actor, target, dmg)
 
-        msg = f"{attempt}\n{self.actor.key} hits {target.key}!"
-        if crit:
-            msg += "\nCritical hit!"
+        msg = format_combat_message(
+            self.actor, target, "hits", dmg, crit=crit
+        )
 
-        return CombatResult(self.actor, target, msg, damage=dmg, damage_type=dtype)
+        return CombatResult(
+            self.actor, target, f"{attempt}\n{msg}", damage=dmg, damage_type=dtype
+        )
 
 
 class DefendAction(Action):
