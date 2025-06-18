@@ -663,6 +663,9 @@ class Character(ObjectParent, ClothedCharacter):
         if not self.cooldowns.ready(spell.key):
             return False
         known = self.db.spells or []
+        if isinstance(known, Mapping):
+            known = list(known.keys())
+            self.db.spells = known
         srec = None
         for entry in known:
             if isinstance(entry, str) and entry == spell_key:
