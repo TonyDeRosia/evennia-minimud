@@ -25,8 +25,9 @@ class CmdPull(Command):
             return
         if caller.location:
             target.move_to(caller.location, quiet=True)
-        caller.account.puppet_object(self.session, target)
-        caller.msg(f"You pull {target.key} to you and take control.")
+        session = self.session
+        caller.account.puppet_object(session, target)
+        session.msg(f"You pull {target.key} to you and take control.")
         target.msg(f"You are pulled into the game by {caller.key}.")
 
 
