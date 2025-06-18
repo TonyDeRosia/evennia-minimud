@@ -190,9 +190,6 @@ Supports action queues, status effects, resistances
 
 Fully pluggable and extendable
 
-Admin & Builder Commands
-Use `@accounts` to list accounts. Add `name <text>` to search by substring, `staff` for staff-only results and an optional page number.
-
 Running Tests
 Install test dependencies:
 ```bash

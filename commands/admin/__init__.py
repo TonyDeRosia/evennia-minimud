@@ -63,11 +63,7 @@ from ..opedit import CmdOPEdit
 from ..rpedit import CmdRPEdit
 from .resetworld import CmdResetWorld
 from .spawncontrol import CmdSpawnReload, CmdForceRespawn, CmdShowSpawns
-<<<<<<< codex/add-cmdaccounts-command-to-admin
-from .accounts import CmdAccounts
-=======
 from .whoip import CmdWhoIP
->>>>>>> main
 
 
 def _safe_split(text):
@@ -1410,11 +1406,7 @@ class AdminCmdSet(CmdSet):
         self.add(CmdSpawnReload)
         self.add(CmdForceRespawn)
         self.add(CmdShowSpawns)
-<<<<<<< codex/add-cmdaccounts-command-to-admin
-        self.add(CmdAccounts)
-=======
         self.add(CmdWhoIP)
->>>>>>> main
         self.add(CmdScan)
 
 
@@ -1483,4 +1475,3 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdSpawnReload)
         self.add(CmdForceRespawn)
         self.add(CmdShowSpawns)
-        self.add(CmdAccounts)
