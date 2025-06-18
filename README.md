@@ -206,3 +206,7 @@ pytest -q
 Area JSON Format
 Room VNUMs now tracked in world/prototypes/areas/*.json under a rooms list. See docs/area_json.md for format details.
 
+
+## Admin Tools
+Use `@whoip` to list connected sessions along with IP and protocol. Provide a search
+term to filter by account name or IP.

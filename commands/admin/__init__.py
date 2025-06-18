@@ -63,6 +63,7 @@ from ..opedit import CmdOPEdit
 from ..rpedit import CmdRPEdit
 from .resetworld import CmdResetWorld
 from .spawncontrol import CmdSpawnReload, CmdForceRespawn, CmdShowSpawns
+from .whoip import CmdWhoIP
 
 
 def _safe_split(text):
@@ -1405,6 +1406,7 @@ class AdminCmdSet(CmdSet):
         self.add(CmdSpawnReload)
         self.add(CmdForceRespawn)
         self.add(CmdShowSpawns)
+        self.add(CmdWhoIP)
         self.add(CmdScan)
 
 
