@@ -1,5 +1,6 @@
 from evennia import create_object
 from evennia.objects.models import ObjectDB
+from evennia.utils import logger
 from typeclasses.rooms import Room
 from utils.prototype_manager import load_all_prototypes
 
@@ -9,6 +10,7 @@ def create():
     prototypes = load_all_prototypes("room")
     midgard = [p for p in prototypes.values() if p.get("area") == "midgard"]
     rooms = {}
+    created_rooms = 0
     for proto in midgard:
         vnum = int(proto.get("room_id"))
         objs = ObjectDB.objects.filter(
@@ -39,7 +41,9 @@ def create():
             else:
                 obj.tags.add(tag)
         rooms[vnum] = obj
+        created_rooms += 1
     # create exits
+    created_exits = 0
     for proto in midgard:
         vnum = int(proto.get("room_id"))
         room = rooms.get(vnum)
@@ -52,4 +56,9 @@ def create():
             room.db.exits = room.db.exits or {}
             if dir_name not in room.db.exits:
                 room.db.exits[dir_name] = dest
+                created_exits += 1
+
+    summary = f"Created {created_rooms} rooms and {created_exits} exits."
+    logger.log_info(summary)
+    return summary
 
