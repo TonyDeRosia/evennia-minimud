@@ -38,6 +38,7 @@ from commands.guilds import GuildCmdSet
 from commands.rest import RestCmdSet
 from commands.loot import LootCmdSet
 from commands.who import CmdWho
+from commands.recall import RecallCmdSet
 from commands.building import CmdDig, CmdTeleport, CmdDelRoom, CmdRDel, CmdLink
 from commands.areas import AreaCmdSet
 from commands.room_flags import RoomFlagCmdSet
@@ -82,6 +83,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(InfoCmdSet)
         self.add(LootCmdSet)
         self.add(RestCmdSet)
+        self.add(RecallCmdSet)
         self.add(GuildCmdSet)
         self.add(EquipmentCmdSet)
         self.add(CmdDig)

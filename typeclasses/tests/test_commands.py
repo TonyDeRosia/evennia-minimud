@@ -1012,3 +1012,36 @@ class TestReportCommand(EvenniaTest):
             f"{self.char1.key} reports:\n{prompt}", exclude=self.char1
         )
         self.char1.msg.assert_any_call("|gYou report your current status.|n")
+
+class TestRecallCommands(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.msg = MagicMock()
+        self.room1.tags.add("sanctuary", category="room_flag")
+
+    def test_setrecall_requires_sanctuary(self):
+        self.room1.tags.remove("sanctuary", category="room_flag")
+        self.char1.execute_cmd("setrecall")
+        self.char1.msg.assert_any_call("You may only set recall in a sanctuary.")
+        self.assertIsNone(self.char1.db.recall_location)
+
+    def test_setrecall_saves_location(self):
+        self.char1.execute_cmd("setrecall")
+        self.assertEqual(self.char1.db.recall_location, self.char1.location)
+
+    def test_recall_uses_saved_location(self):
+        from evennia.utils import create
+        self.char1.execute_cmd("setrecall")
+        home = self.char1.location
+        other = create.create_object(Room, key="other")
+        self.char1.move_to(other, quiet=True)
+        self.char1.execute_cmd("recall")
+        self.assertEqual(self.char1.location, home)
+
+    def test_recall_without_location(self):
+        if self.room1.tags.has("sanctuary", category="room_flag"):
+            self.room1.tags.remove("sanctuary", category="room_flag")
+        self.char1.db.recall_location = None
+        self.char1.execute_cmd("recall")
+        self.char1.msg.assert_any_call("You have not set a recall location.")
+

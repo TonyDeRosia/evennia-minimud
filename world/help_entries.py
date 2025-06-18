@@ -2898,6 +2898,41 @@ Related:
 """,
     },
     {
+        "key": "recall",
+        "category": "General",
+        "text": """Help for recall
+
+Teleport to your personal recall location.
+
+Usage:
+    recall
+
+Notes:
+    - Set a location first with |wsetrecall|n.
+    - Rooms flagged with |wno_recall|n block recall.
+
+Related:
+    help ansi
+""",
+    },
+    {
+        "key": "setrecall",
+        "category": "General",
+        "text": """Help for setrecall
+
+Set your recall location to this room.
+
+Usage:
+    setrecall
+
+Notes:
+    - Only works in rooms flagged |wsanctuary|n.
+
+Related:
+    help ansi
+""",
+    },
+    {
         "key": "regeneration",
         "category": "General",
         "text": """
