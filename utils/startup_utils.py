@@ -28,7 +28,7 @@ def _twistd_processes() -> List[Dict[str, str]]:
     return procs
 
 
-def _kill_defunct_parents(procs) -> None:
+def _kill_defunct_parents(procs: List[Dict[str, str]]) -> None:
     """Kill parents of defunct twistd processes."""
     for proc in procs:
         if "<defunct>" in proc["cmd"] or "Z" in proc["state"]:
@@ -39,7 +39,7 @@ def _kill_defunct_parents(procs) -> None:
 
 
 def _cleanup_files() -> None:
-    """Remove stale pid files, logs and twistd temp directories."""
+    """Remove stale pid files, logs, and twistd temp directories."""
     for pattern in ["server/*.pid", "server/*.log", ".twistd-*"]:
         for path in glob.glob(pattern):
             if os.path.isdir(path):
@@ -52,13 +52,51 @@ def _cleanup_files() -> None:
 
 
 def kill_port(port: int) -> None:
-    """Kill any process listening on the given port."""
+    """Kill any process listening on the given port (cross-platform)."""
     try:
-        output = subprocess.check_output(["lsof", "-ti", f":{port}"], text=True)
-    except (subprocess.CalledProcessError, FileNotFoundError):
+        import psutil  # type: ignore
+    except ImportError:
+        psutil = None
+
+    if psutil:
+        for proc in psutil.process_iter(["pid", "connections"]):
+            try:
+                for conn in proc.connections(kind="inet"):
+                    if conn.laddr and conn.laddr.port == port:
+                        try:
+                            proc.kill()
+                        finally:
+                            break
+            except Exception:
+                continue
         return
-    for pid in output.strip().splitlines():
+
+    if os.name == "posix":
         try:
-            os.kill(int(pid), signal.SIGKILL)
-        except ProcessLookupError:
-            pass
+            output = subprocess.check_output(["lsof", "-ti", f":{port}"], text=True)
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            return
+        for pid in output.strip().splitlines():
+            try:
+                os.kill(int(pid), signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+        return
+
+    if os.name == "nt":
+        try:
+            output = subprocess.check_output(["netstat", "-ano"], text=True)
+        except (FileNotFoundError, subprocess.CalledProcessError):
+            return
+        for line in output.splitlines():
+            if f":{port} " in line:
+                pid = line.split()[-1]
+                try:
+                    subprocess.run(
+                        ["taskkill", "/F", "/PID", pid],
+                        check=True,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                    )
+                except subprocess.CalledProcessError:
+                    pass

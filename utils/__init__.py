@@ -23,6 +23,7 @@ except Exception:  # pragma: no cover - may fail before Django setup
 from .dice import roll_dice_string
 from .defense_scaling import DefensiveStats
 from .directions import sort_exit_names
+from .startup_utils import kill_port
 
 
 def display_auto_prompt(account, caller, msg_func, *, force=False):
