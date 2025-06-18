@@ -5,22 +5,28 @@ from typeclasses.rooms import Room
 from utils.prototype_manager import load_all_prototypes
 
 
-def create():
-    """Instantiate Midgard rooms and their exits if missing."""
+def create() -> tuple[int, int]:
+    """
+    Instantiate Midgard rooms and their exits if missing.
+
+    Returns
+    -------
+    tuple[int, int]
+        Number of rooms created and exits created.
+    """
     prototypes = load_all_prototypes("room")
     midgard = [p for p in prototypes.values() if p.get("area") == "midgard"]
+
     rooms = {}
-    created_rooms = 0
+    rooms_created = 0
+
     for proto in midgard:
         vnum = int(proto.get("room_id"))
         objs = ObjectDB.objects.filter(
             db_attributes__db_key="room_id", db_attributes__db_value=vnum
         )
-        room_obj = None
-        for obj in objs:
-            if obj.is_typeclass(Room, exact=False):
-                room_obj = obj
-                break
+        room_obj = next((obj for obj in objs if obj.is_typeclass(Room, exact=False)), None)
+
         if room_obj:
             rooms[vnum] = room_obj
             continue
@@ -31,8 +37,10 @@ def create():
         obj.db.desc = proto.get("desc", "")
         obj.db.room_id = vnum
         obj.db.area = proto.get("area")
+
         if proto.get("xyz"):
             obj.db.xyz = proto["xyz"]
+
         for tag in proto.get("tags", []):
             if isinstance(tag, (list, tuple)) and len(tag) >= 1:
                 name = tag[0]
@@ -40,10 +48,11 @@ def create():
                 obj.tags.add(name, category=category)
             else:
                 obj.tags.add(tag)
+
         rooms[vnum] = obj
-        created_rooms += 1
-    # create exits
-    created_exits = 0
+        rooms_created += 1
+
+    exits_created = 0
     for proto in midgard:
         vnum = int(proto.get("room_id"))
         room = rooms.get(vnum)
@@ -56,9 +65,7 @@ def create():
             room.db.exits = room.db.exits or {}
             if dir_name not in room.db.exits:
                 room.db.exits[dir_name] = dest
-                created_exits += 1
+                exits_created += 1
 
-    summary = f"Created {created_rooms} rooms and {created_exits} exits."
-    logger.log_info(summary)
-    return summary
-
+    logger.log_info(f"✅ Midgard created: {rooms_created} rooms, {exits_created} exits.")
+    return rooms_created, exits_created

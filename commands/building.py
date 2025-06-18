@@ -700,3 +700,19 @@ class CmdRemoveFlag(Command):
         else:
             self.msg("Flag not set.")
 
+
+class CmdInitMidgard(Command):
+    """Create rooms and exits for the Midgard area."""
+
+    key = "@initmidgard"
+    locks = "cmd:perm(Admin) or perm(Builder)"
+    help_category = "Building"
+
+    def func(self):
+        from world.scripts import create_midgard_area
+
+        rooms_created, exits_created = create_midgard_area.create()
+        self.msg(
+            f"Midgard initialized: {rooms_created} rooms and {exits_created} exits created."
+        )
+
