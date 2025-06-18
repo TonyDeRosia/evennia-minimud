@@ -17,7 +17,6 @@ at_server_cold_stop()
 
 """
 
-
 import time
 
 from evennia.utils import logger
@@ -113,57 +112,71 @@ def at_server_start():
     from world.scripts.mob_db import get_mobdb
     from typeclasses.npcs import BaseNPC
 
-    script = ScriptDB.objects.filter(db_key="global_tick").first()
-    if not script or script.typeclass_path != "typeclasses.scripts.GlobalTick":
-        if script:
-            script.delete()
-        script = create.create_script(
-            "typeclasses.scripts.GlobalTick", key="global_tick"
-        )
-    else:
-        if not script.is_active:
-            script.start()
-        elif getattr(script.db, "_paused_time", None):
-            script.unpause()
+    try:
+        script = ScriptDB.objects.filter(db_key="global_tick").first()
+        if not script or script.typeclass_path != "typeclasses.scripts.GlobalTick":
+            if script:
+                script.delete()
+            script = create.create_script(
+                "typeclasses.scripts.GlobalTick", key="global_tick"
+            )
+        else:
+            if not script.is_active:
+                script.start()
+            elif getattr(script.db, "_paused_time", None):
+                script.unpause()
+    except Exception as err:
+        logger.log_err(f"Failed to initialize global_tick script: {err}")
 
-    script = ScriptDB.objects.filter(db_key="global_npc_ai").first()
-    if not script or script.typeclass_path != "scripts.global_npc_ai.GlobalNPCAI":
-        if script:
-            script.delete()
-        script = create.create_script(
-            "scripts.global_npc_ai.GlobalNPCAI", key="global_npc_ai"
-        )
-    else:
-        if not script.is_active:
-            script.start()
-        elif getattr(script.db, "_paused_time", None):
-            script.unpause()
+    try:
+        script = ScriptDB.objects.filter(db_key="global_npc_ai").first()
+        if not script or script.typeclass_path != "scripts.global_npc_ai.GlobalNPCAI":
+            if script:
+                script.delete()
+            script = create.create_script(
+                "scripts.global_npc_ai.GlobalNPCAI", key="global_npc_ai"
+            )
+        else:
+            if not script.is_active:
+                script.start()
+            elif getattr(script.db, "_paused_time", None):
+                script.unpause()
+    except Exception as err:
+        logger.log_err(f"Failed to initialize global_npc_ai script: {err}")
 
-    script = ScriptDB.objects.filter(db_key="area_reset").first()
-    if not script or script.typeclass_path != "world.area_reset.AreaReset":
-        if script:
-            script.delete()
-        script = create.create_script("world.area_reset.AreaReset", key="area_reset")
-    else:
-        if not script.is_active:
-            script.start()
-        elif getattr(script.db, "_paused_time", None):
-            script.unpause()
+    try:
+        script = ScriptDB.objects.filter(db_key="area_reset").first()
+        if not script or script.typeclass_path != "world.area_reset.AreaReset":
+            if script:
+                script.delete()
+            script = create.create_script(
+                "world.area_reset.AreaReset", key="area_reset"
+            )
+        else:
+            if not script.is_active:
+                script.start()
+            elif getattr(script.db, "_paused_time", None):
+                script.unpause()
+    except Exception as err:
+        logger.log_err(f"Failed to initialize area_reset script: {err}")
 
-    script = ScriptDB.objects.filter(db_key="spawn_manager").first()
-    if not script or script.typeclass_path != "scripts.spawn_manager.SpawnManager":
-        if script:
-            script.delete()
-        script = create.create_script(
-            "scripts.spawn_manager.SpawnManager", key="spawn_manager"
-        )
-    else:
-        if not script.is_active:
-            script.start()
-        elif getattr(script.db, "_paused_time", None):
-            script.unpause()
-    if hasattr(script, "reload_spawns"):
-        script.reload_spawns()
+    try:
+        script = ScriptDB.objects.filter(db_key="spawn_manager").first()
+        if not script or script.typeclass_path != "scripts.spawn_manager.SpawnManager":
+            if script:
+                script.delete()
+            script = create.create_script(
+                "scripts.spawn_manager.SpawnManager", key="spawn_manager"
+            )
+        else:
+            if not script.is_active:
+                script.start()
+            elif getattr(script.db, "_paused_time", None):
+                script.unpause()
+        if hasattr(script, "reload_spawns"):
+            script.reload_spawns()
+    except Exception as err:
+        logger.log_err(f"Failed to initialize spawn_manager script: {err}")
 
     # Ensure mob database script exists
     get_mobdb()
@@ -187,6 +200,7 @@ def at_server_start():
     _ensure_room_areas()
     from typeclasses.rooms import Room
     from world.scripts import create_midgard_area
+
     if not (
         Room.objects.filter(db_tags__db_key__iexact="midgard").exists()
         or Room.objects.filter(
@@ -207,6 +221,7 @@ def at_server_stop():
     """
     logger.log_info("at_server_stop: cleaning up")
     from combat.round_manager import CombatRoundManager
+
     CombatRoundManager.get().force_end_all_combat()
     _clear_caches()
     ServerConfig.objects.conf("server_start_time", delete=True)
@@ -226,6 +241,7 @@ def at_server_reload_stop():
     """
     logger.log_info("at_server_reload_stop: reload complete")
     from combat.round_manager import CombatRoundManager
+
     CombatRoundManager.get().force_end_all_combat()
     ServerConfig.objects.conf("reload_started", delete=True)
 
@@ -245,4 +261,3 @@ def at_server_cold_stop():
     """
     logger.log_info("at_server_cold_stop: shutting down")
     _clear_caches()
-
