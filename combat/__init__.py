@@ -20,7 +20,13 @@ from .combat_actions import (
     CombatResult,
 )
 from .combat_states import CombatState, CombatStateManager
-from .combat_skills import Skill, ShieldBash, Thrust, Cleave, SKILL_CLASSES
+from .combat_skills import (
+    Skill,
+    ShieldBash,
+    Thrust,
+    Cleave,
+    SKILL_CLASSES,
+)
 from .damage_types import DamageType
 from .combat_utils import get_condition_msg, calculate_initiative
 
