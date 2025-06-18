@@ -1,7 +1,6 @@
 from evennia import create_object
 from evennia.objects.models import ObjectDB
 from evennia.utils import logger
-from typeclasses.rooms import Room
 from utils.prototype_manager import load_all_prototypes
 
 
@@ -14,6 +13,7 @@ def create() -> tuple[int, int]:
     tuple[int, int]
         Number of rooms created and exits created.
     """
+    from typeclasses.rooms import Room
     prototypes = load_all_prototypes("room")
     midgard = [p for p in prototypes.values() if p.get("area") == "midgard"]
 
