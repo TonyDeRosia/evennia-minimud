@@ -419,6 +419,17 @@ class TestInfoCommands(EvenniaTest):
         self.assertIn("Speed Boost", out)
         self.assertNotIn("Strength Bonus", out)
 
+    def test_affects_alias(self):
+        self.char1.execute_cmd("aff")
+        self.assertTrue(self.char1.msg.called)
+
+    def test_affects_displays_cooldowns(self):
+        self.char1.cooldowns.add("recall", 10)
+        self.char1.execute_cmd("affects")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Recall - CD", out)
+        self.assertIn("10", out)
+
     def test_guild(self):
         self.char1.db.guild = "Adventurers Guild"
         self.char1.execute_cmd("guild")

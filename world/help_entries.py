@@ -166,7 +166,7 @@ Related:
         "text": """
 Help for affects
 
-View your active buffs and status effects.
+View your active buffs, status effects, and ability cooldowns.
 
 Status effects include temporary conditions like |wstunned|n or
 |wdefending|n applied during combat. They modify your stats or actions
@@ -174,6 +174,7 @@ until their duration expires.
 
 Usage:
     affects
+    aff
 
 Switches:
     None
@@ -186,6 +187,7 @@ Examples:
 
 Notes:
     - Displays any active effects along with their remaining duration in ticks.
+    - Active cooldowns show as "<ability> - CD" with time left in seconds.
 
 Related:
     help ansi
