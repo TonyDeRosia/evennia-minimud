@@ -163,9 +163,9 @@ Room JSONs may include:
 "spawns": [
   {"proto": "mob_goblin", "max_spawns": 2, "spawn_interval": 300}
 ]
-SpawnManager automatically registers spawns when a room prototype is saved. If
-```
-spawns appear to be missing (for example after a server restart), use:
+SpawnManager automatically registers spawns when a room prototype is saved.
+Spawns are not automatically repopulated when the server starts. Use the
+commands below to load spawn data or force a respawn if NPCs are missing:
 
 ```bash
 @spawnreload
