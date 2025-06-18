@@ -1,6 +1,6 @@
 """Tests for custom commands."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from evennia.utils.test_resources import EvenniaTest
 from django.test import override_settings
@@ -826,6 +826,32 @@ class TestDelDirCommand(EvenniaTest):
         self.char1.execute_cmd("deldir north")
         self.assertNotIn("north", start.db.exits)
         self.assertNotIn("south", new_room.db.exits)
+
+
+class TestLinkCommand(EvenniaTest):
+    @patch("commands.building.ObjectDB.objects.filter")
+    @patch("commands.building.find_area_by_vnum")
+    def test_link_creates_two_way_exit_and_coords(self, mock_find_by_vnum, mock_filter):
+        from evennia.utils import create
+        from world.areas import Area
+
+        area = Area(key="zone", start=200000, end=200100)
+        mock_find_by_vnum.return_value = area
+
+        start = self.char1.location
+        start.db.coord = (0, 0)
+
+        target = create.create_object(Room, key="target", location=None)
+        target.set_area("zone", 200002)
+        target.db.coord = None
+
+        mock_filter.return_value = [target]
+
+        self.char1.execute_cmd("link east 200002")
+
+        self.assertEqual(start.db.exits.get("east"), target)
+        self.assertEqual(target.db.exits.get("west"), start)
+        self.assertEqual(target.db.coord, (1, 0))
 
 
 class TestUnlinkCommand(EvenniaTest):
