@@ -1,0 +1,10 @@
+{
+    "typeclass": "typeclasses.rooms.Room",
+    "key": "|GMidgard Square|n",
+    "desc": "The town square bustles with merchants and lively chatter. Colorful stalls ring a central fountain splashing gently. The smell of fresh bread mixes with the clang of distant forges. Travelers from all paths pause here before continuing their journeys.",
+    "exits": {
+        "north": 200051
+    },
+    "vnum": 200052,
+    "area": "midgard"
+}

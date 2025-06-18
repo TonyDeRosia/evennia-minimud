@@ -1,0 +1,8 @@
+{
+    "typeclass": "typeclasses.rooms.Room",
+    "key": "|wTraining Yard|n",
+    "desc": "Wooden dummies and targets crowd the open yard. Instructors bark orders to squires going through drills. Sweat and determination hang thick in the afternoon sun. The clatter of weapons rings out from dawn until dusk.",
+    "exits": {},
+    "vnum": 200056,
+    "area": "midgard"
+}

@@ -1,0 +1,8 @@
+{
+    "typeclass": "typeclasses.rooms.Room",
+    "key": "|mGuildhall Entrance|n",
+    "desc": "Carved stone arches mark the entrance to the grand guildhall. Banners of various colors flutter proudly from the walls. Footsteps echo softly beneath the high ceilings. New members often gather here before pledging their service.",
+    "exits": {},
+    "vnum": 200054,
+    "area": "midgard"
+}

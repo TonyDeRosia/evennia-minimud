@@ -1,0 +1,11 @@
+{
+    "key": "verdant_overgrowth",
+    "start": 200000,
+    "end": 200049,
+    "desc": "",
+    "builders": [],
+    "reset_interval": 0,
+    "flags": [],
+    "age": 3,
+    "rooms": []
+}

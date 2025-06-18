@@ -1,0 +1,8 @@
+{
+    "typeclass": "typeclasses.rooms.Room",
+    "key": "|cKnight Quarters|n",
+    "desc": "Rows of polished armor stand at attention along the corridor. The scent of oil and metal lingers in the air. Trophies from past campaigns adorn the walls with pride. Off-duty knights swap stories here after their patrols.",
+    "exits": {},
+    "vnum": 200055,
+    "area": "midgard"
+}

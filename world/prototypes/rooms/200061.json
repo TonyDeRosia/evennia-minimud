@@ -1,0 +1,8 @@
+{
+    "typeclass": "typeclasses.rooms.Room",
+    "key": "|YWatchtower|n",
+    "desc": "This tall tower commands a view of the surrounding lands. Stairs spiral upward toward a lookout platform. Torches burn steadily, warding off the creeping dark. From here the town\u2019s defenders keep watch through the night.",
+    "exits": {},
+    "vnum": 200061,
+    "area": "midgard"
+}

@@ -1,0 +1,8 @@
+{
+    "typeclass": "typeclasses.rooms.Room",
+    "key": "|CSmithy|n",
+    "desc": "Inside the smithy, heat from the forge creates shimmering waves. Tools hang neatly from racks awaiting the smith\u2019s hand. Finished blades glint faintly in the low light. A door to the north leads up to the watchtower above.",
+    "exits": {},
+    "vnum": 200060,
+    "area": "midgard"
+}

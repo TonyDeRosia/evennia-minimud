@@ -1,0 +1,8 @@
+{
+    "typeclass": "typeclasses.rooms.Room",
+    "key": "|gSouth Gate|n",
+    "desc": "Heavy iron gates guard the southern exit of the town. Beyond lies a well-worn road fading into the countryside. Guards nod to those leaving on errands or patrol. This threshold marks the boundary between Midgard and the wider world.",
+    "exits": {},
+    "vnum": 200058,
+    "area": "midgard"
+}

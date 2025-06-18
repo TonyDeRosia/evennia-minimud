@@ -1,0 +1,8 @@
+{
+    "typeclass": "typeclasses.rooms.Room",
+    "key": "|yEast Market|n",
+    "desc": "Vendors shout prices from ramshackle booths lining the street. Bright awnings flap in the ever-present breeze. Coins clink and children laugh as trade carries on. The eastern road leads deeper into Midgard\u2019s busy districts.",
+    "exits": {},
+    "vnum": 200053,
+    "area": "midgard"
+}

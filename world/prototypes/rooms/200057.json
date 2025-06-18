@@ -1,0 +1,8 @@
+{
+    "typeclass": "typeclasses.rooms.Room",
+    "key": "|rBarracks Path|n",
+    "desc": "A narrow lane runs between sturdy stone barracks. Booted soldiers march in step to a silent cadence. Flags bearing Midgard\u2019s sigil snap crisply overhead. The lane continues south toward the outer gate.",
+    "exits": {},
+    "vnum": 200057,
+    "area": "midgard"
+}

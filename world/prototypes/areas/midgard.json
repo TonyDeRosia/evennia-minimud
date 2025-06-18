@@ -6,6 +6,7 @@
     "builders": [],
     "reset_interval": 0,
     "flags": [],
+    "age": 16,
     "rooms": [
         200050,
         200051,

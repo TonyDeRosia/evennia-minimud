@@ -1,0 +1,8 @@
+{
+    "typeclass": "typeclasses.rooms.Room",
+    "key": "|GForge Square|n",
+    "desc": "The clang of hammer on anvil resonates throughout this square. Sparks fly as smiths labor over glowing metal. The air is thick with smoke and the smell of coal. Apprentices hurry about carrying fresh supplies.",
+    "exits": {},
+    "vnum": 200059,
+    "area": "midgard"
+}

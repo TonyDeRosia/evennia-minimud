@@ -1,0 +1,11 @@
+{
+    "typeclass": "typeclasses.rooms.Room",
+    "key": "|wPath to Temple|n",
+    "desc": "Stone lanterns guide your descent along a cobbled trail that winds between statues of forgotten gods. Faint chanting echoes from above, lingering like memory in the air. The scent of flowers and incense fades the farther you walk from the temple. This tranquil path serves as a bridge between Midgard\u2019s divine heights and its bustling town below.",
+    "exits": {
+        "north": 200050,
+        "south": 200052
+    },
+    "vnum": 200051,
+    "area": "midgard"
+}
