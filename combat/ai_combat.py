@@ -40,6 +40,9 @@ def _iter_abilities(data: Any) -> Iterator[Tuple[str, int]]:
     if not data:
         return
 
+    if isinstance(data, str):
+        data = [data]
+
     if isinstance(data, dict):
         items = data.items()
     else:
