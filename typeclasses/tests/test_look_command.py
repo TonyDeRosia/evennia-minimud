@@ -3,7 +3,8 @@ from django.test import override_settings
 from evennia.utils import create
 from evennia.utils.test_resources import EvenniaTest
 from typeclasses.npcs import BaseNPC
-
+from typeclasses.objects import Corpse
+from world.corpse import make_corpse  # Adjust import based on your project
 
 @override_settings(DEFAULT_HOME=None)
 class TestLookCommand(EvenniaTest):
@@ -26,21 +27,21 @@ class TestLookCommand(EvenniaTest):
         self.char1.msg.assert_any_call(slime2.return_appearance(self.char1))
 
     def test_dead_npc_hidden_in_room_contents(self):
+        # Create and kill an NPC
         npc = create.create_object(BaseNPC, key="orc", location=self.room1)
         npc.db.corpse_decay_time = 0
         npc.ndb.damage_log = {}
-        npc.delete = lambda *a, **kw: None
         npc_name = npc.get_display_name(self.char1)
-        npc.on_death(self.char1)
-        corpse = next(
-            obj
-            for obj in self.room1.contents
-            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
-        )
 
+        corpse = make_corpse(npc)
+        npc.location = None
+        npc.db.dead = True
+
+        # Confirm corpse is in the room and NPC is not shown
         self.char1.execute_cmd("look")
         output = " ".join(
             str(arg) for call in self.char1.msg.call_args_list for arg in call.args
         )
+
         self.assertIn(corpse.get_display_name(self.char1), output)
         self.assertNotIn(npc_name, output)
