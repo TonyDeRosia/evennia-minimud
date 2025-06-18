@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Callable, Iterable, Iterator, Tuple, Any
+from collections.abc import Iterable as AbcIterable
 from random import random
 import re
 
@@ -43,6 +44,8 @@ def _iter_abilities(data: Any) -> Iterator[Tuple[str, int]]:
     if isinstance(data, dict):
         items = data.items()
     else:
+        if isinstance(data, str) or not isinstance(data, AbcIterable):
+            data = [data]
         items = [(entry, None) for entry in data]
 
     for name, chance in items:
