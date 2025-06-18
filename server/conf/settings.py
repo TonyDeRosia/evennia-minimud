@@ -150,6 +150,9 @@ MAX_NR_CHARACTERS = 3
 CMDSET_UNLOGGEDIN = "evennia.contrib.base_systems.menu_login.UnloggedinCmdSet"
 CONNECTION_SCREEN_MODULE = "evennia.contrib.base_systems.menu_login.connection_screens"
 
+# Default port for the Echo portal plugin service
+ECHO_SERVICE_PORT = 9000
+
 ######################################################################
 # Settings given in secret_settings.py override those in this file.
 ######################################################################
