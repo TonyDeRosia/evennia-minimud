@@ -1,7 +1,10 @@
 from evennia import create_object
 from evennia.objects.models import ObjectDB
 from evennia.utils import logger
+from typeclasses.rooms import Room
+from typeclasses.exits import Exit
 
+# Midgard room definitions
 midgard_rooms = {
     200050: {
         "name": "|cTemple Steppes|n",
@@ -135,58 +138,44 @@ def create() -> tuple[int, int]:
     tuple[int, int]
         Number of rooms created and exits created.
     """
-    from typeclasses.rooms import Room
-    from typeclasses.exits import Exit
-
     rooms: dict[int, Room] = {}
     rooms_created = 0
 
+    # Create rooms if they don't exist
     for vnum, data in midgard_rooms.items():
         objs = ObjectDB.objects.filter(
             db_attributes__db_key="room_id", db_attributes__db_value=vnum
         )
         room = next((obj for obj in objs if obj.is_typeclass(Room, exact=False)), None)
+
         if not room:
             room = create_object(Room, key=data["name"])
+            room.db.room_id = vnum
+            room.db.desc = data.get("desc", "")
+            room.tags.add("midgard", category="area")
             rooms_created += 1
-
-        room.key = data["name"]
-        room.db.room_id = vnum
-        room.db.desc = data.get("desc", "")
-        room.tags.add("midgard", category="area")
 
         rooms[vnum] = room
 
+    # Create exits between rooms
     exits_created = 0
     for vnum, data in midgard_rooms.items():
         src = rooms.get(vnum)
         if not src:
             continue
 
-        exits = src.db.exits or {}
-
         for dir_name, dest_vnum in data.get("exits", {}).items():
             dest = rooms.get(dest_vnum)
             if not dest:
                 continue
-
-            if exits.get(dir_name) != dest:
-                exits[dir_name] = dest
 
             exists = any(
                 ex.key.lower() == dir_name.lower() and ex.destination == dest
                 for ex in src.exits
             )
             if not exists:
-                create_object(
-                    "typeclasses.exits.Exit",
-                    key=dir_name,
-                    location=src,
-                    destination=dest,
-                )
+                create_object(Exit, key=dir_name, location=src, destination=dest)
                 exits_created += 1
-
-        src.db.exits = exits
 
     logger.log_info(
         f"✅ Midgard created: {rooms_created} rooms, {exits_created} exits."
