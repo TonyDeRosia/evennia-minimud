@@ -67,6 +67,7 @@ class ShieldBash(Skill):
 
 
 class Thrust(Skill):
+    """Basic piercing attack with a melee weapon."""
     name = "thrust"
     category = SkillCategory.MELEE
     damage = (3, 6)
@@ -93,6 +94,7 @@ class Thrust(Skill):
 
 
 class Cleave(Skill):
+    """Wide swing hitting multiple nearby targets."""
     name = "cleave"
     category = SkillCategory.MELEE
     damage = (3, 6)
