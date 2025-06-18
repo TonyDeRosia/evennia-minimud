@@ -396,9 +396,9 @@ class CmdCompleteQuest(Command):
 
         rewards = []
         if quest.xp_reward:
-            from world.system import state_manager
+            from combat.combat_utils import award_xp
 
-            state_manager.gain_xp(caller, quest.xp_reward)
+            award_xp(caller, quest.xp_reward)
             rewards.append(f"{quest.xp_reward} XP")
 
         from utils.currency import to_copper, from_copper, format_wallet
