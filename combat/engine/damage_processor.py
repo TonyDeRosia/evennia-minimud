@@ -161,6 +161,7 @@ class DamageProcessor:
             should_remove = (
                 getattr(actor, "location", None) is None
                 or hp <= 0
+                or getattr(getattr(actor, "db", None), "is_dead", False)
                 or (target is None and not participant.next_action)
             )
             if should_remove:

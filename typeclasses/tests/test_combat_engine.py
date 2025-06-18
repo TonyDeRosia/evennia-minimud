@@ -436,6 +436,19 @@ class TestCombatDeath(EvenniaTest):
 
         self.assertEqual(player.db.experience, expected)
 
+    def test_npc_on_death_sets_flag_and_moves_out(self):
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+
+        with patch.object(npc, "delete") as mock_delete:
+            npc.on_death(self.char1)
+            self.assertTrue(npc.db.is_dead)
+            self.assertIsNone(npc.location)
+            mock_delete.assert_called_once()
+
 
 class TestCombatNPCTurn(EvenniaTest):
     def test_at_combat_turn_auto_attack(self):
@@ -566,6 +579,28 @@ class TestUnsavedPrototypeCombat(unittest.TestCase):
             engine.track_aggro(player, npc)
 
         self.assertFalse(engine.aggro)
+
+
+class TestCleanupEnvironment(EvenniaTest):
+    def test_cleanup_removes_dead_actor(self):
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+        from combat.engine import CombatEngine
+        from combat.round_manager import CombatRoundManager
+
+        npc = create.create_object(NPC, key="dead", location=self.room1)
+        player = self.char1
+
+        engine = CombatEngine([player, npc], round_time=0)
+        npc.db.is_dead = True
+
+        manager = CombatRoundManager.get()
+        manager.combats.clear()
+        manager.combatant_to_combat.clear()
+
+        engine.processor.cleanup_environment()
+
+        self.assertNotIn(npc, [p.actor for p in engine.participants])
 
 
 def test_attacker_target_cleared_on_defeat():

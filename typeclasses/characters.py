@@ -1137,6 +1137,7 @@ class NPC(Character):
             return
         self.db._dead = True
         self.db.dead = True
+        self.db.is_dead = True
 
         # remove from combat if necessary. The combat script may have been
         # cleaned up already, so verify it before using it.
@@ -1182,6 +1183,7 @@ class NPC(Character):
         if attacker and getattr(attacker.db, "combat_target", None) is self:
             attacker.db.combat_target = None
 
+        self.location = None
         self.delete()
 
     # property to mimic weapons
