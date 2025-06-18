@@ -199,17 +199,18 @@ def format_combat_message(
         return f"|C{a_name}'s {action} misses {t_name}!|n"
 
     if damage is not None:
-        max_range = state_manager.get_effective_stat(actor, "attack_power")
-        if not max_range:
+        # Estimate the maximum possible damage for color coding
+        max_damage = state_manager.get_effective_stat(actor, "attack_power")
+        if not max_damage:
             level = getattr(getattr(actor, "db", None), "level", 0) or 0
-            max_range = level * 5
-        max_range = max(max_range, 1)
+            max_damage = level * 5
+        max_damage = max(max_damage, 1)
 
-        if damage >= 0.9 * max_range:
+        if damage >= 0.9 * max_damage:
             color = "|R"
-        elif damage >= 0.6 * max_range:
+        elif damage >= 0.6 * max_damage:
             color = "|r"
-        elif damage >= 0.3 * max_range:
+        elif damage >= 0.3 * max_damage:
             color = "|y"
         elif damage > 0:
             color = "|g"

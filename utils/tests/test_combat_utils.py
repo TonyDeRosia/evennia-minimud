@@ -102,11 +102,11 @@ class TestCombatUtils(EvenniaTest):
 
         self.char1.db.level = 20
         with patch("world.system.state_manager.get_effective_stat", return_value=0):
-            max_range = self.char1.db.level * 5
+            max_damage = self.char1.db.level * 5
             levels = [
-                (int(max_range * 0.95), "|R"),
-                (int(max_range * 0.65), "|r"),
-                (int(max_range * 0.35), "|y"),
+                (int(max_damage * 0.95), "|R"),
+                (int(max_damage * 0.65), "|r"),
+                (int(max_damage * 0.35), "|y"),
                 (1, "|g"),
                 (0, "|w"),
             ]
