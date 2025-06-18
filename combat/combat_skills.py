@@ -30,6 +30,8 @@ class Skill:
     damage: tuple[int, int] | None = None
     stamina_cost: int = 0
     cooldown: int = 0
+    # Optional skill granting a proficiency bonus to success chance
+    support_skill: str | None = None
     effects: List[CombatState] = field(default_factory=list)
 
     def resolve(self, user, target) -> CombatResult:
@@ -38,6 +40,7 @@ class Skill:
 
 class ShieldBash(Skill):
     name = "shield bash"
+    support_skill = None
     category = SkillCategory.MELEE
     damage = (2, 6)
     cooldown = 6
@@ -74,6 +77,7 @@ class Cleave(Skill):
     """Powerful swing hitting a single foe."""
 
     name = "cleave"
+    support_skill = "swords"
     category = SkillCategory.MELEE
     damage = (3, 6)
     stamina_cost = 20
