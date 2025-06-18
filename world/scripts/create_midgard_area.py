@@ -2,7 +2,6 @@ from evennia import create_object
 from evennia.objects.models import ObjectDB
 from evennia.utils import logger
 from typeclasses.rooms import Room
-from typeclasses.exits import Exit
 
 # Midgard room definitions
 midgard_rooms = {
@@ -146,15 +145,21 @@ def create() -> tuple[int, int]:
         objs = ObjectDB.objects.filter(
             db_attributes__db_key="room_id", db_attributes__db_value=vnum
         )
-        room = next((obj for obj in objs if obj.is_typeclass(Room, exact=False)), None)
+
+        room = None
+        for obj in objs:
+            if obj.is_typeclass(Room, exact=False):
+                room = obj
+            else:
+                obj.delete()
 
         if not room:
             room = create_object(Room, key=data["name"])
-            room.db.room_id = vnum
             room.db.desc = data.get("desc", "")
             room.tags.add("midgard", category="area")
             rooms_created += 1
 
+        room.set_area("midgard", room_id=vnum)
         rooms[vnum] = room
 
     # Create exits between rooms
@@ -174,7 +179,9 @@ def create() -> tuple[int, int]:
                 for ex in src.exits
             )
             if not exists:
-                create_object(Exit, key=dir_name, location=src, destination=dest)
+                create_object(
+                    "typeclasses.exits.Exit", key=dir_name, location=src, destination=dest
+                )
                 exits_created += 1
 
     logger.log_info(
