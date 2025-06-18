@@ -1,41 +1,40 @@
-# Ability helper module
+# ability_helpers.py
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from random import randint
 from typing import Optional
 
-from evennia.utils import logger
 from django.conf import settings
+from evennia.utils import logger
 
-from combat.combat_skills import SKILL_CLASSES, SkillCategory
 from combat.combat_actions import CombatResult
+from combat.combat_skills import SKILL_CLASSES, SkillCategory
 from world.spells import SPELLS, Spell
 from world.system import state_manager
 
 __all__ = ["colorize_name", "use_skill", "cast_spell"]
 
-
 _COLOR_PREFIX = (
-    "|r",
-    "|R",
-    "|g",
-    "|G",
-    "|b",
-    "|B",
-    "|y",
-    "|Y",
-    "|m",
-    "|M",
-    "|c",
-    "|C",
-    "|w",
-    "|W",
+    "|r", "|R", "|g", "|G", "|b", "|B", "|y", "|Y", "|m", "|M", "|c", "|C", "|w", "|W"
 )
+
+_CATEGORY_STAT = {
+    SkillCategory.MELEE: "STR",
+    SkillCategory.RANGED: "DEX",
+    SkillCategory.MAGIC: "INT",
+}
+
+DIR_SHORT = {
+    "north": "n", "south": "s", "east": "e", "west": "w",
+    "northeast": "ne", "southwest": "sw", "northwest": "nw", "southeast": "se",
+    "up": "u", "down": "d", "in": "i", "out": "o",
+}
 
 
 def colorize_name(name: str) -> str:
-    """Return ``name`` wrapped in color codes if not already colored."""
+    """Wrap name with Evennia color codes if not already styled."""
     if not name:
         return ""
     for prefix in _COLOR_PREFIX:
@@ -44,20 +43,13 @@ def colorize_name(name: str) -> str:
     return f"|w{name}|n"
 
 
-_CATEGORY_STAT = {
-    SkillCategory.MELEE: "STR",
-    SkillCategory.RANGED: "DEX",
-    SkillCategory.MAGIC: "INT",
-}
-
-
 def _calc_hit(prof: int, stat_val: int) -> int:
     bonus = max((stat_val - 10) * 0.5, 0)
     return int(round(prof + bonus))
 
 
 def use_skill(actor, target, skill_name: str) -> CombatResult:
-    """Execute ``skill_name`` from ``actor`` against ``target``."""
+    """Execute a skill from actor against target."""
     skill_cls = SKILL_CLASSES.get(skill_name)
     if not skill_cls:
         return CombatResult(actor, target, "Nothing happens.")
@@ -91,7 +83,7 @@ def use_skill(actor, target, skill_name: str) -> CombatResult:
 
 
 def cast_spell(actor, target: Optional[object], spell_name: str) -> CombatResult:
-    """Cast ``spell_name`` from ``actor`` at ``target``."""
+    """Cast a spell from actor at target."""
     spell = SPELLS.get(spell_name)
     if not spell:
         return CombatResult(actor, target or actor, "Nothing happens.")
@@ -107,8 +99,16 @@ def cast_spell(actor, target: Optional[object], spell_name: str) -> CombatResult
             prof = entry.proficiency
             if prof < 100:
                 entry.proficiency = min(100, prof + 1)
-                actor.db.spells = actor.db.spells  # save change
+                actor.db.spells = actor.db.spells  # force save
             break
+        if isinstance(entry, str) and entry == spell.key:
+            srec = Spell(spell.key, spell.stat, spell.mana_cost, spell.desc, 0)
+            idx = actor.db.spells.index(entry)
+            actor.db.spells[idx] = srec
+            actor.db.spells = actor.db.spells
+            prof = 0
+            break
+
     stat_val = state_manager.get_effective_stat(actor, spell.stat)
     hit_chance = _calc_hit(prof, stat_val)
     hit_roll = randint(1, 100)
@@ -119,15 +119,19 @@ def cast_spell(actor, target: Optional[object], spell_name: str) -> CombatResult
     tname = colorize_name(target.key) if target else "the area"
     aname = colorize_name(actor.key)
     hit = hit_roll <= hit_chance
+
     if hit:
         msg = f"{aname} casts {spell.key} at {tname}!"
     else:
-        msg = f"{aname} casts {spell.key} at {tname}, but it fizzles.""
+        msg = f"{aname} casts {spell.key} at {tname}, but it fizzles."
+
     if getattr(settings, "COMBAT_SHOW_HIT", False):
         msg += f" [HIT {hit_chance}%]"
+
     if not actor.has_account:
         logger.log_info(f"NPC {actor.key} casts {spell.key} -> {'hit' if hit else 'miss'}")
+
     if not hit:
         return CombatResult(actor, target or actor, msg)
-    result = CombatResult(actor, target or actor, msg)
-    return result
+
+    return CombatResult(actor, target or actor, msg)
