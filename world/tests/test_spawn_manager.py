@@ -194,3 +194,15 @@ class TestSpawnManager(EvenniaTest):
             self.script.force_respawn(1)
 
         self.assertEqual(npc.location, self.room)
+
+    def test_get_room_ignores_nonroom_search_result(self):
+        entry = {"room": "fake"}
+        fake_obj = mock.Mock()
+        fake_obj.is_typeclass.return_value = False
+        with mock.patch(
+            "scripts.spawn_manager.search.search_object",
+            return_value=[fake_obj],
+        ):
+            room = self.script._get_room(entry)
+        self.assertIsNone(room)
+        self.assertEqual(entry["room"], "fake")
