@@ -212,6 +212,8 @@ Copy
 Edit
 pip install -r requirements-test.txt
 pip install -e .
+If these packages are not installed before running `pytest`, test collection
+will fail with import errors for Django/Evennia.
 Then run:
 
 bash
