@@ -14,11 +14,15 @@ class SkillCategory(str, Enum):
     RANGED = "ranged"
     MAGIC = "magic"
 
-from .combat_actions import CombatResult
+from typing import TYPE_CHECKING
+
 from .combat_utils import roll_damage, roll_evade
 from .combat_states import CombatState
 from world.system import stat_manager
 from world.skills.kick import Kick
+
+if TYPE_CHECKING:  # pragma: no cover - for type checkers only
+    from .combat_actions import CombatResult
 
 
 @dataclass
@@ -32,7 +36,8 @@ class Skill:
     cooldown: int = 0
     effects: List[CombatState] = field(default_factory=list)
 
-    def resolve(self, user, target) -> CombatResult:
+    def resolve(self, user, target) -> "CombatResult":
+        from .combat_actions import CombatResult
         return CombatResult(actor=user, target=target, message="Nothing happens.")
 
 
@@ -45,6 +50,7 @@ class ShieldBash(Skill):
     effects = [CombatState(key="stunned", duration=1, desc="Stunned")]
 
     def resolve(self, user, target):
+        from .combat_actions import CombatResult
         if not getattr(target, "is_alive", lambda: True)():
             return CombatResult(actor=user, target=target, message="They are already down.")
         hit = stat_manager.check_hit(user, target)
@@ -80,6 +86,7 @@ class Cleave(Skill):
     cooldown = 8
 
     def resolve(self, user, target):
+        from .combat_actions import CombatResult
         if not getattr(target, "is_alive", lambda: True)():
             return CombatResult(actor=user, target=target, message="They are already down.")
         if stat_manager.check_hit(user, target):
