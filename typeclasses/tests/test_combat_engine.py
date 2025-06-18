@@ -215,7 +215,8 @@ class TestCombatEngine(unittest.TestCase):
                 engine.process_round()
 
             expected = get_condition_msg(b.hp, b.traits.health.max)
-            calls = [c.args[0] for c in room.msg_contents.call_args_list]
+            output = room.msg_contents.call_args_list[0].args[0]
+            calls = output.splitlines()
             self.assertFalse(any(f"The {b.key} {expected}" in msg for msg in calls))
             room.reset_mock()
 
@@ -241,7 +242,8 @@ class TestCombatEngine(unittest.TestCase):
             engine.start_round()
             engine.process_round()
 
-        calls = [c.args[0] for c in room.msg_contents.call_args_list]
+        output = room.msg_contents.call_args_list[0].args[0]
+        calls = output.splitlines()
         self.assertTrue(any("attacker dealt 3 damage" in msg for msg in calls))
 
     def test_participant_without_hp_removed(self):

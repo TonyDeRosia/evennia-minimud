@@ -169,7 +169,8 @@ class TestAttackAction(unittest.TestCase):
             engine.start_round()
             engine.process_round()
 
-        calls = [c.args[0] for c in attacker.location.msg_contents.call_args_list]
+        output = attacker.location.msg_contents.call_args_list[0].args[0]
+        calls = output.splitlines()
         self.assertTrue(any("fists" in msg for msg in calls))
 
 def test_npc_attack_uses_natural_weapon(self):

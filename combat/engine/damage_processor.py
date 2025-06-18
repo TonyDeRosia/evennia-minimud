@@ -26,11 +26,11 @@ class DamageProcessor:
     # -------------------------------------------------------------
     # messaging helpers
     # -------------------------------------------------------------
-    def dam_message(self, attacker, target, damage: int, *, crit: bool = False) -> None:
-        if not attacker or not target or not attacker.location:
-            return
-        msg = format_combat_message(attacker, target, "hits", damage, crit=crit)
-        attacker.location.msg_contents(msg)
+    def dam_message(self, attacker, target, damage: int, *, crit: bool = False) -> str | None:
+        """Return a formatted damage message without sending it."""
+        if not attacker or not target:
+            return None
+        return format_combat_message(attacker, target, "hits", damage, crit=crit)
 
     def skill_message(self, actor, target, skill: str, success: bool = True) -> None:
         if not actor or not actor.location:
@@ -190,6 +190,7 @@ class DamageProcessor:
         if action in participant.next_action:
             participant.next_action.remove(action)
 
+        self.round_output.append("")
         damage_done = 0
         if result.damage and result.target:
             dt = result.damage_type
@@ -200,11 +201,13 @@ class DamageProcessor:
                     dt = None
             damage_done = self.apply_damage(actor, result.target, result.damage, dt)
             if not result.message:
-                self.dam_message(actor, result.target, damage_done)
+                msg = self.dam_message(actor, result.target, damage_done)
+                if msg:
+                    self.round_output.append(msg)
             damage_totals[actor] = damage_totals.get(actor, 0) + damage_done
 
-        if actor.location and result.message:
-            actor.location.msg_contents(result.message)
+        if result.message:
+            self.round_output.append(result.message)
 
         if result.target:
             self.aggro.track(result.target, actor)
