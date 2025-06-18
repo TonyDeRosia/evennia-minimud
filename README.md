@@ -55,7 +55,7 @@ Rooms can optionally store (x, y, "area") coordinates for use with xyzgrid mappi
 
 Installation
 Requirements
-Python 3.12+
+Python 3.10+
 
 Git
 
