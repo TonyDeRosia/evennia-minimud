@@ -8,6 +8,7 @@ import logging
 
 from .engine.combat_math import CombatMath
 from world.system import state_manager
+from world.abilities import colorize_name
 
 logger = logging.getLogger(__name__)
 
@@ -214,6 +215,10 @@ class SkillAction(Action):
         if self.stamina_cost and hasattr(self.actor.traits, "stamina"):
             self.actor.traits.stamina.current -= self.stamina_cost
         result = self.skill.resolve(self.actor, self.target)
+        if result.message:
+            result.message = result.message.replace(
+                self.skill.name, colorize_name(self.skill.name)
+            )
         if getattr(result, "damage", 0):
             result.damage, crit = CombatMath.apply_critical(self.actor, result.target, result.damage)
             if crit:
@@ -257,7 +262,7 @@ class SpellAction(Action):
         result = CombatResult(
             actor=self.actor,
             target=self.target or self.actor,
-            message=f"{self.actor.key} casts {self.spell.key}!",
+            message=f"{self.actor.key} casts {colorize_name(self.spell.key)}!",
         )
         if getattr(result, "damage", 0):
             result.damage, crit = CombatMath.apply_critical(self.actor, result.target, result.damage)
