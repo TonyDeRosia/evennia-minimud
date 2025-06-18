@@ -27,6 +27,7 @@ from utils.currency import COIN_VALUES
 from commands.interact import GatherCmdSet
 from world.system import stat_manager
 from utils import normalize_slot
+from django.conf import settings
 
 
 class ObjectParent:
@@ -450,10 +451,11 @@ class Corpse(Object):
         if (decay := self.db.decay_time):
             # start auto-decay timer in minutes
             self.scripts.add(
-                "typeclasses.scripts.CorpseDecayScript",
-                key="corpse_decay",
+                "typeclasses.scripts.DecayScript",
+                key="decay",
                 interval=int(decay) * 60,
                 start_delay=True,
+                room_only=not settings.ALLOW_CORPSE_DECAY_IN_INVENTORY,
             )
 
     def at_object_post_creation(self):
@@ -461,12 +463,13 @@ class Corpse(Object):
         name = self.db.corpse_of or self.key or "someone"
         self.db.desc = f"The corpse of {name} lies here."
         decay = self.db.decay_time
-        if decay and not self.scripts.get("corpse_decay"):
+        if decay and not self.scripts.get("decay"):
             self.scripts.add(
-                "typeclasses.scripts.CorpseDecayScript",
-                key="corpse_decay",
+                "typeclasses.scripts.DecayScript",
+                key="decay",
                 interval=int(decay) * 60,
                 start_delay=True,
+                room_only=not settings.ALLOW_CORPSE_DECAY_IN_INVENTORY,
             )
 
     def get_display_name(self, looker, **kwargs):
