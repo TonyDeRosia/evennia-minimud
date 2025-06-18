@@ -8,6 +8,7 @@ import logging
 
 from .engine.combat_math import CombatMath
 from world.system import state_manager
+from world import abilities
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +82,8 @@ class Action:
         if (
             self.range == 1
             and self.target
-            and getattr(actor, "location", None) is not getattr(self.target, "location", None)
+            and getattr(actor, "location", None)
+            is not getattr(self.target, "location", None)
         ):
             return False, "Target out of range."
         if self.requires_status and hasattr(actor, "tags"):
@@ -172,7 +174,6 @@ class AttackAction(Action):
         )
 
 
-
 class DefendAction(Action):
     """Assume a defensive stance to reduce incoming damage."""
 
@@ -211,11 +212,17 @@ class SkillAction(Action):
 
     def resolve(self) -> CombatResult:
         """Execute the skill and return its result."""
-        if self.stamina_cost and hasattr(self.actor.traits, "stamina"):
-            self.actor.traits.stamina.current -= self.stamina_cost
-        result = self.skill.resolve(self.actor, self.target)
+        result = abilities.use_skill(self.actor, self.skill.name, target=self.target)
+        if result is None:
+            result = CombatResult(
+                actor=self.actor,
+                target=self.target or self.actor,
+                message="Nothing happens.",
+            )
         if getattr(result, "damage", 0):
-            result.damage, crit = CombatMath.apply_critical(self.actor, result.target, result.damage)
+            result.damage, crit = CombatMath.apply_critical(
+                self.actor, result.target, result.damage
+            )
             if crit:
                 result.message += "\nCritical hit!"
         return result
@@ -248,19 +255,19 @@ class SpellAction(Action):
     def resolve(self) -> CombatResult:
         """Invoke the stored spell and return its combat result."""
         if not self.spell:
-            return CombatResult(self.actor, self.target or self.actor, "Nothing happens.")
-        if self.mana_cost and hasattr(self.actor.traits, "mana"):
-            self.actor.traits.mana.current -= self.mana_cost
-        success = getattr(self.actor, "cast_spell", None)
-        if callable(success):
-            success(self.spell.key, self.target)
+            return CombatResult(
+                self.actor, self.target or self.actor, "Nothing happens."
+            )
+        success = abilities.cast_spell(self.actor, self.spell.key, target=self.target)
         result = CombatResult(
             actor=self.actor,
             target=self.target or self.actor,
             message=f"{self.actor.key} casts {self.spell.key}!",
         )
         if getattr(result, "damage", 0):
-            result.damage, crit = CombatMath.apply_critical(self.actor, result.target, result.damage)
+            result.damage, crit = CombatMath.apply_critical(
+                self.actor, result.target, result.damage
+            )
             if crit:
                 result.message += "\nCritical hit!"
         return result

@@ -1,7 +1,8 @@
-# ability_helpers.py
+"""Combat ability helpers for casting spells and using skills."""
 
 from __future__ import annotations
 
+import logging
 from collections.abc import Mapping
 from random import randint
 from typing import Optional
@@ -26,11 +27,7 @@ _CATEGORY_STAT = {
     SkillCategory.MAGIC: "INT",
 }
 
-DIR_SHORT = {
-    "north": "n", "south": "s", "east": "e", "west": "w",
-    "northeast": "ne", "southwest": "sw", "northwest": "nw", "southeast": "se",
-    "up": "u", "down": "d", "in": "i", "out": "o",
-}
+logger = logging.getLogger(__name__)
 
 
 def colorize_name(name: str) -> str:
@@ -49,7 +46,11 @@ def _calc_hit(prof: int, stat_val: int) -> int:
 
 
 def use_skill(actor, target, skill_name: str) -> CombatResult:
-    """Execute a skill from actor against target."""
+    """Execute a skill from actor against target. Falls back to method on actor if present."""
+    use_fn = getattr(actor, "use_skill", None)
+    if callable(use_fn):
+        return use_fn(skill_name, target=target)
+
     skill_cls = SKILL_CLASSES.get(skill_name)
     if not skill_cls:
         return CombatResult(actor, target, "Nothing happens.")
@@ -65,6 +66,7 @@ def use_skill(actor, target, skill_name: str) -> CombatResult:
     stat_val = state_manager.get_effective_stat(actor, stat_key)
     hit_chance = _calc_hit(prof, stat_val)
     hit_roll = randint(1, 100)
+
     actor.traits.stamina.current -= skill.stamina_cost
     state_manager.add_cooldown(actor, skill.name, skill.cooldown)
 
@@ -82,9 +84,13 @@ def use_skill(actor, target, skill_name: str) -> CombatResult:
     return result
 
 
-def cast_spell(actor, target: Optional[object], spell_name: str) -> CombatResult:
-    """Cast a spell from actor at target."""
-    spell = SPELLS.get(spell_name)
+def cast_spell(actor, spell_key: str, target: Optional[object] = None) -> CombatResult:
+    """Cast a spell from actor at target. Falls back to method on actor if present."""
+    cast_fn = getattr(actor, "cast_spell", None)
+    if callable(cast_fn):
+        return cast_fn(spell_key, target=target)
+
+    spell = SPELLS.get(spell_key)
     if not spell:
         return CombatResult(actor, target or actor, "Nothing happens.")
 
@@ -129,7 +135,7 @@ def cast_spell(actor, target: Optional[object], spell_name: str) -> CombatResult
         msg += f" [HIT {hit_chance}%]"
 
     if not actor.has_account:
-        logger.log_info(f"NPC {actor.key} casts {spell.key} -> {'hit' if hit else 'miss'}")
+        logger.info(f"NPC {actor.key} casts {spell.key} -> {'hit' if hit else 'miss'}")
 
     if not hit:
         return CombatResult(actor, target or actor, msg)
