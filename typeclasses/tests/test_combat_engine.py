@@ -3,7 +3,7 @@ import unittest
 from evennia.utils.test_resources import EvenniaTest
 
 from combat.engine import CombatEngine
-from combat.combat_actions import Action, CombatResult
+from combat.combat_actions import Action, CombatResult, AttackAction
 from utils.currency import from_copper, to_copper
 from combat.combat_utils import get_condition_msg
 from commands import npc_builder
@@ -691,10 +691,15 @@ def test_remaining_combatants_continue_after_kill():
     player = Dummy()
     mob1 = Dummy()
     mob2 = Dummy()
+    player.key = "player"
+    mob1.key = "mob1"
+    mob2.key = "mob2"
     player.location = mob1.location = mob2.location
     player.db.combat_target = mob1
     mob1.db.combat_target = player
     mob2.db.combat_target = player
+    for obj in (player, mob1, mob2):
+        obj.db.active_effects = {}
 
     engine = CombatEngine([player, mob1, mob2], round_time=0)
     engine.queue_action(player, KillAction(player, mob1))
@@ -728,6 +733,47 @@ def test_dead_actor_action_skipped():
     ):
         engine.start_round()
         engine.process_round()
+        engine.process_round()
+
+    assert mob2 in [p.actor for p in engine.participants]
+    assert player.db.combat_target is mob2
+
+
+def test_queue_pruned_after_defeat():
+    player = Dummy()
+    mob1 = Dummy()
+    mob2 = Dummy()
+    player.key = "player"
+    mob1.key = "mob1"
+    mob2.key = "mob2"
+    player.location = mob1.location = mob2.location
+    player.db.combat_target = mob1
+    mob1.db.combat_target = player
+    mob2.db.combat_target = player
+
+    engine = CombatEngine([player, mob1, mob2], round_time=0)
+    engine.queue_action(player, KillAction(player, mob1))
+    class MarkAction(Action):
+        def resolve(self):
+            return CombatResult(self.actor, self.target, "mark")
+
+    engine.queue_action(player, MarkAction(player, mob1))
+
+    def _dummy_attack(self):
+        return CombatResult(self.actor, self.target, "atk")
+
+    with patch("world.system.state_manager.apply_regen"), patch(
+        "world.system.state_manager.get_effective_stat", return_value=0
+    ), patch(
+        "combat.combat_actions.AttackAction.resolve", _dummy_attack
+    ), patch(
+        "random.randint", return_value=0
+    ):
+        engine.start_round()
+        engine.process_round()
+        participant = next(p for p in engine.participants if p.actor is player)
+        assert not any(getattr(a, "target", None) is mob1 for a in participant.next_action)
+        engine.queue_action(player, MarkAction(player, mob2))
         engine.process_round()
 
     assert mob2 in [p.actor for p in engine.participants]
