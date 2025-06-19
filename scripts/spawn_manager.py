@@ -202,7 +202,7 @@ class SpawnManager(Script):
                 if isinstance(base_cls, str):
                     module, clsname = base_cls.rsplit(".", 1)
                     base_cls = getattr(__import__(module, fromlist=[clsname]), clsname)
-                data["typeclass"] = base_cls
+                data["typeclass"] = f"{base_cls.__module__}.{base_cls.__name__}"
                 npc = spawner.spawn(data)[0]
                 npc.location = room
                 npc.db.prototype_key = proto
