@@ -371,3 +371,24 @@ def test_round_output_blank_line():
     calls = [c.args[0] for c in attacker.location.msg_contents.call_args_list]
     assert calls[-1] == "\n"
 
+
+def test_round_output_multiple_combatants_separated():
+    a = Dummy()
+    b = Dummy()
+    c = Dummy()
+    a.location = b.location = c.location
+    a.db.combat_target = b
+    b.db.combat_target = c
+    c.db.combat_target = a
+
+    engine = CombatEngine([a, b, c], round_time=0)
+    engine.queue_action(a, AttackAction(a, b))
+
+    with patch("world.system.state_manager.apply_regen"), patch("random.randint", return_value=0):
+        engine.start_round()
+        engine.process_round()
+
+    calls = [c.args[0] for c in a.location.msg_contents.call_args_list]
+    assert calls[1] == "\n"
+    assert calls[3] == "\n"
+

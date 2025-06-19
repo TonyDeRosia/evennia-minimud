@@ -22,6 +22,16 @@ class DamageProcessor:
         self.turn_manager = turn_manager
         self.aggro = aggro
         self.round_output: List[str] = []
+        self._message_buffers: Dict[object, List[str]] = {}
+
+    def _buffer_message(self, participant: CombatParticipant, message: str) -> None:
+        self._message_buffers.setdefault(participant.actor, []).append(message)
+
+    def _flush_buffer(self, participant: CombatParticipant) -> None:
+        msgs = self._message_buffers.pop(participant.actor, [])
+        if msgs:
+            self.round_output.extend(msgs)
+            self.round_output.append("\n")
 
     # -------------------------------------------------------------
     # messaging helpers
@@ -219,6 +229,7 @@ class DamageProcessor:
             participant.next_action.remove(action)
 
         damage_done = 0
+        msg = result.message
         if result.damage and result.target:
             dt = result.damage_type
             if isinstance(dt, str):
@@ -227,12 +238,12 @@ class DamageProcessor:
                 except ValueError:
                     dt = None
             damage_done = self.apply_damage(actor, result.target, result.damage, dt)
-            if not result.message:
-                self.dam_message(actor, result.target, damage_done)
+            if not msg:
+                msg = format_combat_message(actor, result.target, "hits", damage_done)
             damage_totals[actor] = damage_totals.get(actor, 0) + damage_done
 
-        if actor.location and result.message:
-            actor.location.msg_contents(result.message)
+        if msg:
+            self._buffer_message(participant, msg)
 
         if result.target:
             self.aggro.track(result.target, actor)
@@ -252,24 +263,19 @@ class DamageProcessor:
             self.round_output.extend(summary_lines)
 
     def _broadcast_round_output(self) -> None:
-        msg = "\n".join(self.round_output)
         room = None
         if self.turn_manager.participants:
             room = getattr(self.turn_manager.participants[0].actor, "location", None)
+
         if room:
-            if msg:
-                room.msg_contents(msg)
-            room.msg_contents("\n")
+            for line in self.round_output:
+                room.msg_contents(line)
         else:
-            for participant in self.turn_manager.participants:
-                actor = participant.actor
-                if hasattr(actor, "msg"):
-                    if msg:
-                        actor.msg(msg)
-            for participant in self.turn_manager.participants:
-                actor = participant.actor
-                if hasattr(actor, "msg"):
-                    actor.msg("\n")
+            for line in self.round_output:
+                for participant in self.turn_manager.participants:
+                    actor = participant.actor
+                    if hasattr(actor, "msg"):
+                        actor.msg(line)
 
     def process_round(self) -> None:
         self.turn_manager.start_round()
@@ -277,11 +283,18 @@ class DamageProcessor:
         damage_totals: Dict[object, int] = {}
 
         actions = self.turn_manager.gather_actions()
+        prev = None
         for _, _, _, participant, action in actions:
+            if prev is not participant and prev is not None:
+                self._flush_buffer(prev)
+            prev = participant
             self._execute_action(participant, action, damage_totals)
+        if prev is not None:
+            self._flush_buffer(prev)
 
         self.cleanup_environment()
         self._summarize_damage(damage_totals)
+        self.round_output.append("\n")
         self._broadcast_round_output()
 
         self.engine.round += 1
