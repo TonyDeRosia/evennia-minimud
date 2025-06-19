@@ -164,6 +164,17 @@ class DamageProcessor:
                     combatant.db.combat_target = remaining[0] if remaining else None
                 if combatant not in [p.actor for p in self.turn_manager.participants]:
                     self.turn_manager.add_participant(combatant)
+            # pull in any other hostile NPCs that were not yet participants
+            room = getattr(target, "location", None)
+            if room:
+                for obj in room.contents:
+                    if obj in inst.combatants:
+                        continue
+                    if _current_hp(obj) <= 0:
+                        continue
+                    t = getattr(getattr(obj, "db", None), "combat_target", None)
+                    if t in inst.combatants:
+                        inst.add_combatant(obj)
             inst.sync_participants()
 
         if attacker and attacker.location:

@@ -778,3 +778,34 @@ def test_queue_pruned_after_defeat():
 
     assert mob2 in [p.actor for p in engine.participants]
     assert player.db.combat_target is mob2
+
+
+def test_hostile_joins_after_midround_kill():
+    player = Dummy()
+    mob1 = Dummy()
+    mob2 = Dummy()
+    room = MagicMock()
+    player.location = mob1.location = mob2.location = room
+
+    player.db.combat_target = mob1
+    mob1.db.combat_target = player
+    mob2.db.combat_target = player
+
+    from combat.round_manager import CombatRoundManager
+
+    manager = CombatRoundManager.get()
+    manager.combats.clear()
+    manager.combatant_to_combat.clear()
+    inst = manager.start_combat([player, mob1])
+
+    engine = inst.engine
+    engine.queue_action(player, KillAction(player, mob1))
+
+    with patch("world.system.state_manager.apply_regen"), patch(
+        "random.randint", return_value=0
+    ):
+        inst.process_round()
+        inst.process_round()
+
+    assert mob2 in [p.actor for p in engine.participants]
+    assert player.db.combat_target is mob2
