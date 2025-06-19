@@ -87,3 +87,48 @@ class TestMobAIBehaviors(EvenniaTest):
         with patch.object(helper, "enter_combat") as mock:
             mob_ai.process_mob_ai(helper)
             mock.assert_called_with(self.char1)
+
+    def test_wander_moves(self):
+        from typeclasses.npcs import BaseNPC
+        from typeclasses.exits import Exit
+
+        dest = create.create_object("typeclasses.rooms.Room", key="dest")
+        exit_obj = create.create_object(Exit, key="east", location=self.room1)
+        exit_obj.destination = dest
+        npc = create.create_object(BaseNPC, key="walker", location=self.room1)
+        npc.db.actflags = ["wander"]
+
+        with patch.object(exit_obj, "at_traverse") as mock:
+            mob_ai.process_mob_ai(npc)
+            mock.assert_called_with(npc, dest)
+
+    def test_no_wander_no_move(self):
+        from typeclasses.npcs import BaseNPC
+        from typeclasses.exits import Exit
+
+        dest = create.create_object("typeclasses.rooms.Room", key="dest")
+        exit_obj = create.create_object(Exit, key="east", location=self.room1)
+        exit_obj.destination = dest
+        npc = create.create_object(BaseNPC, key="idler", location=self.room1)
+
+        with patch.object(exit_obj, "at_traverse") as mock:
+            mob_ai.process_mob_ai(npc)
+            mock.assert_not_called()
+
+    def test_stay_area_blocks_travel(self):
+        from typeclasses.npcs import BaseNPC
+        from typeclasses.exits import Exit
+
+        dest = create.create_object("typeclasses.rooms.Room", key="far")
+        dest.db.area = "elsewhere"
+        exit_obj = create.create_object(Exit, key="east", location=self.room1)
+        exit_obj.destination = dest
+        self.room1.db.area = "home"
+
+        npc = create.create_object(BaseNPC, key="homebody", location=self.room1)
+        npc.db.actflags = ["wander", "stay_area"]
+        npc.db.area_tag = "home"
+
+        with patch.object(exit_obj, "at_traverse") as mock:
+            mob_ai.process_mob_ai(npc)
+            mock.assert_not_called()
