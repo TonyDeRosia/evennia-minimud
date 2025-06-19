@@ -348,7 +348,7 @@ def check_level_up(chara) -> bool:
 
     if leveled:
         chara.db.level = level
-        chara.msg(f"You have reached |Glevel {level}|n!")
+        chara.msg(f"You have reached |ylevel {level}|n!")
         chara.msg("You gain |C3 practice sessions|n and |C1 training point|n.")
         stat_manager.refresh_stats(chara)
 
@@ -368,7 +368,7 @@ def level_up(chara, excess: int = 0) -> None:
     chara.db.tnl = settings.XP_TO_LEVEL(level)
     if not settings.XP_CARRY_OVER:
         chara.db.experience = (chara.db.experience or 0) - excess
-    chara.msg(f"You have reached |Glevel {level}|n!")
+    chara.msg(f"You have reached |ylevel {level}|n!")
     chara.msg("You gain |C3 practice sessions|n and |C1 training point|n.")
     stat_manager.refresh_stats(chara)
 
