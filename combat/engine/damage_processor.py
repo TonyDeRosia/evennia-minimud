@@ -141,11 +141,16 @@ class DamageProcessor:
             if combatant is target:
                 continue
             current = getattr(getattr(combatant, "db", None), "combat_target", None)
-            if current is target:
+            needs_new = current is target or _current_hp(current) <= 0
+            if needs_new:
+                remaining = [c for c in survivors if c is not combatant]
+                new_target = remaining[0] if remaining else None
                 try:
-                    combatant.db.combat_target = None
+                    combatant.db.combat_target = new_target
                 except Exception:
                     pass
+            if inst and combatant not in [p.actor for p in self.turn_manager.participants]:
+                self.turn_manager.add_participant(combatant)
 
         if attacker and getattr(attacker, "db", None) is not None:
             try:
@@ -155,15 +160,6 @@ class DamageProcessor:
                 pass
 
         if inst:
-            for combatant in list(survivors):
-                if combatant is target:
-                    continue
-                current = getattr(getattr(combatant, "db", None), "combat_target", None)
-                if current is target or _current_hp(current) <= 0:
-                    remaining = [c for c in survivors if c is not combatant]
-                    combatant.db.combat_target = remaining[0] if remaining else None
-                if combatant not in [p.actor for p in self.turn_manager.participants]:
-                    self.turn_manager.add_participant(combatant)
             # pull in any other hostile NPCs that were not yet participants
             room = getattr(target, "location", None)
             if room:

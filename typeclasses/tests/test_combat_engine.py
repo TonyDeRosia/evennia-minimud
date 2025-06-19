@@ -810,3 +810,55 @@ def test_hostile_joins_after_midround_kill():
 
     assert mob2 in [p.actor for p in engine.participants]
     assert player.db.combat_target is mob2
+
+
+def test_multi_combat_until_one_remains():
+    player = Dummy()
+    mobs = [Dummy() for _ in range(4)]
+    player.key = "player"
+    for i, mob in enumerate(mobs, start=1):
+        mob.key = f"mob{i}"
+    room = MagicMock()
+    for obj in [player] + mobs:
+        obj.location = room
+        obj.db.active_effects = {}
+
+    player.db.combat_target = mobs[0]
+    mobs[0].db.combat_target = player
+    mobs[1].db.combat_target = mobs[0]
+    mobs[2].db.combat_target = mobs[1]
+    mobs[3].db.combat_target = mobs[2]
+
+    engine = CombatEngine([player] + mobs, round_time=0)
+
+    with patch("world.system.state_manager.apply_regen"), patch(
+        "random.randint", return_value=0
+    ):
+        engine.start_round()
+
+        # kill mobs one at a time
+        engine.queue_action(player, KillAction(player, mobs[0]))
+        engine.process_round()
+        assert mobs[0] not in [p.actor for p in engine.participants]
+        assert player.db.combat_target is mobs[1]
+        assert mobs[1].db.combat_target is player
+        assert mobs[2].db.combat_target is mobs[1]
+        assert mobs[3].db.combat_target is mobs[2]
+
+        engine.queue_action(player, KillAction(player, mobs[1]))
+        engine.process_round()
+        assert mobs[1] not in [p.actor for p in engine.participants]
+        assert player.db.combat_target is mobs[2]
+        assert mobs[2].db.combat_target is player
+        assert mobs[3].db.combat_target is mobs[2]
+
+        engine.queue_action(player, KillAction(player, mobs[2]))
+        engine.process_round()
+        assert player.db.combat_target is mobs[3]
+        assert mobs[3].db.combat_target is player
+
+        engine.queue_action(player, KillAction(player, mobs[3]))
+        engine.process_round()
+
+    assert not engine.participants
+    assert player.db.combat_target is None
