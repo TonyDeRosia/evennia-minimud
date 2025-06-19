@@ -44,7 +44,10 @@ class CombatEngine:
         self.turn_manager.start_round()
 
     def process_round(self) -> None:
-        log_trace(f"Processing combat round {self.round}")
+        combatant_keys = ", ".join(
+            getattr(p.actor, "key", str(p.actor)) for p in self.turn_manager.participants
+        )
+        log_trace(f"Processing combat round {self.round} | Combatants: {combatant_keys}")
         self.processor.process_round()
 
     # Convenience wrappers for processor functionality

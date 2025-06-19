@@ -665,4 +665,23 @@ def test_clearing_target_leaves_combat():
         player.db.combat_target = None
         engine.process_round()
 
-    assert player not in [p.actor for p in engine.participants]
+    assert player in [p.actor for p in engine.participants]
+
+
+def test_retarget_after_defeat():
+    a = Dummy()
+    b1 = Dummy()
+    b2 = Dummy()
+    a.location = b1.location = b2.location
+    a.db.combat_target = b1
+    b1.db.combat_target = a
+    b2.db.combat_target = a
+
+    engine = CombatEngine([a, b1, b2], round_time=0)
+    engine.queue_action(a, KillAction(a, b1))
+
+    with patch("world.system.state_manager.apply_regen"), patch("random.randint", return_value=0):
+        engine.start_round()
+        engine.process_round()
+
+    assert a.db.combat_target is b2
