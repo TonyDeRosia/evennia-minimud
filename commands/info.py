@@ -216,12 +216,13 @@ class CmdBounty(Command):
 
         wallet = self.caller.db.coins or {}
         if to_copper(wallet) < amount:
-            self.msg("You don't have that many coins.")
+            self.msg("You do not have enough coins to place this bounty.")
             return
+
         self.caller.db.coins = from_copper(to_copper(wallet) - amount)
         target.db.bounty = (target.db.bounty or 0) + amount
         self.msg(
-            f"You place a bounty of {amount} coins on {target.get_display_name(self.caller)}."
+            f"You place a bounty of {amount} gold on {target.get_display_name(self.caller)}."
         )
 
 

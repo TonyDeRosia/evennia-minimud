@@ -477,11 +477,23 @@ class TestBountyLarge(EvenniaTest):
         self.char1.db.coins = from_copper(100)
         self.char2.db.coins = from_copper(0)
         self.char2.db.bounty = 0
+        self.char1.msg = MagicMock()
+        self.char2.msg = MagicMock()
 
     def test_bounty_place(self):
         self.char1.execute_cmd(f"bounty {self.char2.key} 30")
         self.assertEqual(to_copper(self.char1.db.coins), 70)
         self.assertEqual(self.char2.db.bounty, 30)
+        self.char1.msg.assert_any_call(
+            f"You place a bounty of 30 gold on {self.char2.get_display_name(self.char1)}."
+        )
+
+    def test_bounty_insufficient_funds(self):
+        self.char1.db.coins = from_copper(5)
+        self.char1.execute_cmd(f"bounty {self.char2.key} 10")
+        self.char1.msg.assert_any_call("You do not have enough coins to place this bounty.")
+        self.assertEqual(to_copper(self.char1.db.coins), 5)
+        self.assertEqual(self.char2.db.bounty, 0)
 
     def test_bounty_reward_on_defeat(self):
         self.char1.execute_cmd(f"bounty {self.char2.key} 10")
