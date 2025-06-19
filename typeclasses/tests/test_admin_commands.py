@@ -539,6 +539,31 @@ class TestAdminCommands(EvenniaTest):
         from combat.round_manager import CombatRoundManager
         self.assertFalse(CombatRoundManager.get().combats)
 
+    def test_peace_clears_room_combat_tags(self):
+        """After using peace, room occupants should no longer show fighting tags."""
+
+        from commands.combat import CombatCmdSet
+        from commands.admin import CmdPeace
+
+        self.char1.cmdset.add_default(CombatCmdSet)
+        self.char2.cmdset.add_default(CombatCmdSet)
+
+        # mock attack to avoid full combat loop
+        self.char1.attack = MagicMock()
+
+        # start combat and verify tag appears
+        self.char1.execute_cmd(f"attack {self.char2.key}")
+        out = self.room1.return_appearance(self.char1)
+        self.assertIn(f"[fighting {self.char2.get_display_name(self.char1)}]", out)
+
+        cmd = CmdPeace()
+        cmd.caller = self.char1
+        cmd.func()
+
+        # combat ended - tags should be gone
+        out = self.room1.return_appearance(self.char1)
+        self.assertNotIn("[fighting", out)
+
     def test_force_mob_report(self):
         from commands.admin import CmdForceMobReport
 
