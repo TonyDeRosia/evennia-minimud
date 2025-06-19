@@ -1,7 +1,7 @@
 from evennia import CmdSet, create_object
 from evennia.utils.evtable import EvTable
 from evennia.utils import iter_to_str
-from utils.currency import to_copper, from_copper, COIN_VALUES
+from utils.currency import to_copper, from_copper, COIN_VALUES, format_wallet
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 from world.stats import CORE_STAT_KEYS
 from utils.stats_utils import get_display_scroll, _strip_colors, _pad
@@ -167,7 +167,7 @@ class CmdFinger(Command):
 
         bounty = target.attributes.get("bounty", 0)
         if bounty:
-            lines.append(f"Bounty: {bounty}")
+            lines.append(f"Bounty: {format_wallet(bounty)}")
         else:
             lines.append("No bounty.")
 
