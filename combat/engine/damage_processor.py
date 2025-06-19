@@ -173,10 +173,12 @@ class DamageProcessor:
                         inst.add_combatant(obj)
             inst.sync_participants()
 
-        if attacker and attacker.location:
-            attacker.location.msg_contents(
-                f"{target.key} is defeated by {attacker.key}!"
-            )
+        # Death notifications are handled by ``on_death`` on the defeated
+        # character, so we avoid broadcasting here to prevent duplicates.
+        # if attacker and attacker.location:
+        #     attacker.location.msg_contents(
+        #         f"{target.key} is defeated by {attacker.key}!"
+        #     )
 
         self.turn_manager.remove_participant(target)
 
