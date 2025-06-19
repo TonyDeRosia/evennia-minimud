@@ -172,6 +172,13 @@ spawns appear to be missing (for example after a server restart), use:
 @forcerespawn <vnum>
 @showspawns [vnum]
 ```
+Troubleshooting Mob Spawns
+If NPCs do not appear as expected, inspect `scripts/spawn_manager.py` to ensure
+the global spawn manager is running. Use `@spawnreload` to reload spawn entries
+from room prototypes and `@showspawns <room_vnum>` to list registered spawns.
+Check server logs for messages from `SpawnManager` about errors or skipped
+rooms. Also confirm each room prototype includes a valid `spawns` field with the
+correct NPC identifiers.
 Weapon Creation
 ```bash
 cweapon "longsword" mainhand 1d8 4 STR+2 A reliable longsword.
