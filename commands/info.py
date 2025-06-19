@@ -222,7 +222,7 @@ class CmdBounty(Command):
         self.caller.db.coins = from_copper(to_copper(wallet) - amount)
         target.db.bounty = (target.db.bounty or 0) + amount
         self.msg(
-            f"You place a bounty of {amount} gold on {target.get_display_name(self.caller)}."
+            f"You place a bounty of {amount} coins on {target.get_display_name(self.caller)}."
         )
 
 
