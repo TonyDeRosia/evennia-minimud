@@ -247,11 +247,10 @@ class CmdFlee(Command):
             self.msg("There is nowhere to flee to!")
             return
 
-        from combat.round_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager, leave_combat
         manager = CombatRoundManager.get()
-        if instance := manager.get_combatant_combat(caller):
-            if not instance.remove_combatant(self.caller):
-                self.msg("You cannot leave combat.")
+        if manager.get_combatant_combat(caller):
+            leave_combat(caller)
 
         self.caller.db.fleeing = True
         self.msg("You flee!")

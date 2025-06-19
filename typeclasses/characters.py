@@ -432,15 +432,8 @@ class Character(ObjectParent, ClothedCharacter):
                     )
                     self.db.bounty = 0
             self.traits.health.rate = 0
-            if self.in_combat:
-                from combat.round_manager import CombatRoundManager
-                manager = CombatRoundManager.get()
-                inst = manager.get_combatant_combat(self)
-                if inst and not inst.remove_combatant(self):
-                    logger.log_err(
-                        f"Could not remove defeated character from combat! Character: {self.name} (#{self.id}) Location: {self.location.name} (#{self.location.id})"
-                    )
-                    return
+            from combat.round_manager import leave_combat
+            leave_combat(self)
             if bounty := self.db.bounty:
                 wallet = attacker.db.coins or {}
                 total = to_copper(wallet) + bounty
@@ -925,14 +918,9 @@ class PlayerCharacter(Character):
         if not self.location:
             return
 
-        # remove from combat if necessary. Victory cleanup may have already
-        # deleted the combat script, so ensure it is valid before using it.
-        if self.in_combat:
-            from combat.round_manager import CombatRoundManager
-            manager = CombatRoundManager.get()
-            inst = manager.get_combatant_combat(self)
-            if inst:
-                inst.remove_combatant(self)
+        # remove from combat if engaged
+        from combat.round_manager import leave_combat
+        leave_combat(self)
         # avoid spawning multiple corpses for repeated calls
         existing = [
             obj
@@ -1144,14 +1132,9 @@ class NPC(Character):
         self.db.dead = True
         self.db.is_dead = True
 
-        # remove from combat if necessary. The combat script may have been
-        # cleaned up already, so verify it before using it.
-        if self.in_combat:
-            from combat.round_manager import CombatRoundManager
-            manager = CombatRoundManager.get()
-            inst = manager.get_combatant_combat(self)
-            if inst:
-                inst.remove_combatant(self)
+        # remove from combat if engaged
+        from combat.round_manager import leave_combat
+        leave_combat(self)
 
         corpse = None
         try:
@@ -1283,11 +1266,8 @@ class NPC(Character):
         if "timid" in self.attributes.get("react_as", ""):
             self.at_emote("flees!")
             self.db.fleeing = True
-            from combat.round_manager import CombatRoundManager
-            manager = CombatRoundManager.get()
-            inst = manager.get_combatant_combat(self)
-            if inst and not inst.remove_combatant(self):
-                return dmg
+            from combat.round_manager import leave_combat
+            leave_combat(self)
             # there's a 50/50 chance the object will escape forever
             if randint(0, 1):
                 self.move_to(None)
