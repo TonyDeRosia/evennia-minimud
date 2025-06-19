@@ -237,19 +237,24 @@ class DamageProcessor:
             self.round_output.extend(summary_lines)
 
     def _broadcast_round_output(self) -> None:
-        if not self.round_output:
-            return
         msg = "\n".join(self.round_output)
         room = None
         if self.turn_manager.participants:
             room = getattr(self.turn_manager.participants[0].actor, "location", None)
         if room:
-            room.msg_contents(msg)
+            if msg:
+                room.msg_contents(msg)
+            room.msg_contents("\n")
         else:
             for participant in self.turn_manager.participants:
                 actor = participant.actor
                 if hasattr(actor, "msg"):
-                    actor.msg(msg)
+                    if msg:
+                        actor.msg(msg)
+            for participant in self.turn_manager.participants:
+                actor = participant.actor
+                if hasattr(actor, "msg"):
+                    actor.msg("\n")
 
     def process_round(self) -> None:
         self.turn_manager.start_round()

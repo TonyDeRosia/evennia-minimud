@@ -352,3 +352,22 @@ def test_npc_damage_dice_fallback_to_2d6():
     assert defender.hp == 8
     mock_roll.assert_called_with("2d6")
 
+
+def test_round_output_blank_line():
+    attacker = Dummy()
+    defender = Dummy()
+    attacker.location = defender.location
+    attacker.db.combat_target = defender
+    defender.db.combat_target = attacker
+
+    engine = CombatEngine([attacker, defender], round_time=0)
+    engine.queue_action(attacker, AttackAction(attacker, defender))
+
+    with patch("world.system.state_manager.apply_regen"), \
+         patch("random.randint", return_value=0):
+        engine.start_round()
+        engine.process_round()
+
+    calls = [c.args[0] for c in attacker.location.msg_contents.call_args_list]
+    assert calls[-1] == "\n"
+
