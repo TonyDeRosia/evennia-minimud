@@ -432,14 +432,15 @@ class Character(ObjectParent, ClothedCharacter):
                     )
                     self.db.bounty = 0
             self.traits.health.rate = 0
-            from combat.round_manager import leave_combat
-            leave_combat(self)
-            if bounty := self.db.bounty:
-                wallet = attacker.db.coins or {}
-                total = to_copper(wallet) + bounty
-                attacker.db.coins = from_copper(total)
-            if utils.inherits_from(self, PlayerCharacter):
-                self.on_death(attacker)
+            if not self.in_combat and not self.attributes.get("_dead"):
+                from combat.round_manager import leave_combat
+                leave_combat(self)
+                if bounty := self.db.bounty:
+                    wallet = attacker.db.coins or {}
+                    total = to_copper(wallet) + bounty
+                    attacker.db.coins = from_copper(total)
+                if utils.inherits_from(self, PlayerCharacter):
+                    self.on_death(attacker)
         return damage
     def at_emote(self, message, **kwargs):
         """
@@ -1260,7 +1261,8 @@ class NPC(Character):
 
         if self.traits.health.value <= 0:
             # we've been defeated!
-            self.on_death(attacker)
+            if not self.attributes.get("_dead") and not self.in_combat:
+                self.on_death(attacker)
             return dmg
 
         if "timid" in self.attributes.get("react_as", ""):
