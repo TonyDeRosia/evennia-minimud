@@ -202,12 +202,16 @@ class CmdBounty(Command):
             return
 
         parts = self.args.split(None, 2)
-        if len(parts) < 2 or not parts[1].isdigit():
+        if len(parts) < 2:
+            self.msg("Usage: bounty <target> <amount> [coin]")
+            return
+
+        amount_str = parts[1]
+        if not amount_str.lstrip("-").isdigit():
             self.msg("Usage: bounty <target> <amount> [coin]")
             return
 
         target_name = parts[0]
-        amount_str = parts[1]
         coin = parts[2].lower() if len(parts) > 2 else "copper"
 
         if coin not in COIN_VALUES:

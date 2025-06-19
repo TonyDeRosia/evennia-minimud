@@ -56,10 +56,14 @@ class CmdBank(Command):
                 caller.msg(f"Usage: bank {sub} <amount [coin]>")
                 return
             amount_parts = rest.split()
-            if not amount_parts[0].isdigit():
+            amount_str = amount_parts[0]
+            if not amount_str.lstrip('-').isdigit():
                 caller.msg(f"Usage: bank {sub} <amount [coin]>")
                 return
-            amt = int(amount_parts[0])
+            amt = int(amount_str)
+            if amt <= 0:
+                caller.msg("Amount must be positive.")
+                return
             coin = amount_parts[1].lower() if len(amount_parts) > 1 else "copper"
             if coin not in COIN_VALUES:
                 caller.msg(f"Unknown coin type: {coin}.")
@@ -86,10 +90,14 @@ class CmdBank(Command):
             if len(parts) < 2:
                 caller.msg("Usage: bank transfer <amount [coin]> <target>")
                 return
-            if not parts[0].isdigit():
+            amount_str = parts[0]
+            if not amount_str.lstrip('-').isdigit():
                 caller.msg("Usage: bank transfer <amount [coin]> <target>")
                 return
-            amt = int(parts[0])
+            amt = int(amount_str)
+            if amt <= 0:
+                caller.msg("Amount must be positive.")
+                return
             if len(parts) == 2:
                 coin = "copper"
                 target_name = parts[1]

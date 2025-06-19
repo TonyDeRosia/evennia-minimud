@@ -550,6 +550,12 @@ class TestBountyLarge(EvenniaTest):
         self.assertEqual(to_copper(self.char1.db.coins), COIN_VALUES["gold"] + 200)
         self.assertEqual(self.char2.db.bounty, 0)
 
+    def test_bounty_negative_amount(self):
+        self.char1.execute_cmd(f"bounty {self.char2.key} -10 gold")
+        self.char1.msg.assert_any_call("Amount must be positive.")
+        self.assertEqual(to_copper(self.char1.db.coins), 100)
+        self.assertEqual(self.char2.db.bounty, 0)
+
 
 class TestCommandPrompt(EvenniaTest):
     def setUp(self):
