@@ -232,7 +232,8 @@ class CombatInstance:
 
         # Clean up fighter states
         if self.engine:
-            fighters = [p.actor for p in self.engine.participants]
+            fighters = set(self.combatants)
+            fighters.update(p.actor for p in self.engine.participants)
 
             for fighter in fighters:
                 if not fighter:
