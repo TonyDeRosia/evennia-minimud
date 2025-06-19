@@ -1157,6 +1157,33 @@ Notes:
     - Ends combat for everyone present.
 
 Related:
+        help ansi
+""",
+    },
+    {
+        "key": "@debug_combat",
+        "category": "Admin",
+        "text": """
+Help for @debug_combat
+
+Display combat debug information for a target.
+
+Usage:
+    @debug_combat <target>
+
+Switches:
+    None
+
+Arguments:
+    target - character or object to inspect
+
+Examples:
+    @debug_combat Bob
+
+Notes:
+    - Shows persistent and non-persistent combat flags for the target.
+
+Related:
     help ansi
 """,
     },

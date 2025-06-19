@@ -500,6 +500,41 @@ class CmdForceMobReport(Command):
         )
 
 
+class CmdDebugCombat(Command):
+    """Display combat debug info for a target."""
+
+    key = "@debug_combat"
+    locks = "cmd:perm(Developer)"
+    help_category = "Admin"
+
+    def func(self):
+        caller = self.caller
+        if not self.args:
+            caller.msg("Usage: @debug_combat <target>")
+            return
+        target = caller.search(self.args.strip(), global_search=True)
+        if not target:
+            return
+        db_in_combat = getattr(target.db, "in_combat", None)
+        combat_target = getattr(target.db, "combat_target", None)
+        if hasattr(combat_target, "get_display_name"):
+            combat_target = combat_target.get_display_name(caller)
+        ndb = getattr(target, "ndb", None)
+        engine = getattr(ndb, "combat_engine", None) if ndb else None
+        log = getattr(ndb, "damage_log", None) if ndb else None
+        from combat.round_manager import CombatRoundManager
+        inst = CombatRoundManager.get().get_combatant_combat(target)
+        lines = [
+            f"Debug combat info for {target.get_display_name(caller)}:",
+            f"  db.in_combat: {db_in_combat}",
+            f"  db.combat_target: {combat_target}",
+            f"  ndb.combat_engine: {engine}",
+            f"  ndb.damage_log: {log}",
+            f"  combat instance: {inst}",
+        ]
+        caller.msg("\n".join(lines))
+
+
 def _create_gear(
     caller,
     typeclass,
@@ -1404,6 +1439,7 @@ class AdminCmdSet(CmdSet):
         self.add(CmdPurge)
         self.add(CmdPeace)
         self.add(CmdForceMobReport)
+        self.add(CmdDebugCombat)
         self.add(CmdUpdate)
         self.add(CmdResetWorld)
         self.add(CmdSpawnReload)
