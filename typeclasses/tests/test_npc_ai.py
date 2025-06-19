@@ -108,6 +108,22 @@ class TestAIBehaviors(EvenniaTest):
             ai.process_ai(npc)
             mock.assert_called_with(npc, dest)
 
+    def test_wander_ai_sentinel_does_not_move(self):
+        from world.npc_handlers import ai
+        from typeclasses.npcs import BaseNPC
+        from typeclasses.exits import Exit
+
+        dest = create.create_object("typeclasses.rooms.Room", key="dest")
+        exit_obj = create.create_object(Exit, key="east", location=self.room1)
+        exit_obj.destination = dest
+        npc = create.create_object(BaseNPC, key="sentinel", location=self.room1)
+        npc.db.ai_type = "wander"
+        npc.db.actflags = ["sentinel"]
+
+        with patch.object(exit_obj, "at_traverse") as mock:
+            ai.process_ai(npc)
+            mock.assert_not_called()
+
     def test_invalid_ai_type_no_action(self):
         from world.npc_handlers import ai
         from typeclasses.npcs import BaseNPC

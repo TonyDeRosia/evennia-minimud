@@ -10,6 +10,9 @@ class WanderAI(BaseAI):
     """Move randomly through available exits."""
 
     def execute(self, npc):
+        flags = set(npc.db.actflags or [])
+        if "sentinel" in flags:
+            return
         if not npc.location:
             return
         exits = npc.location.contents_get(content_type="exit")
