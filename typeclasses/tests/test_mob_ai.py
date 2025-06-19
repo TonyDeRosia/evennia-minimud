@@ -157,3 +157,20 @@ class TestMobAIBehaviors(EvenniaTest):
             mob_ai.process_mob_ai(caller)
             mock.assert_not_called()
         self.assertFalse(self.room1.msg_contents.called)
+
+    def test_wimpy_flees_when_low_hp(self):
+        from typeclasses.npcs import BaseNPC
+        from combat.round_manager import CombatRoundManager
+
+        npc = create.create_object(BaseNPC, key="coward", location=self.room1)
+        npc.db.actflags = ["wimpy"]
+        npc.hp = 20
+        npc.max_hp = 100
+        manager = CombatRoundManager.get()
+        manager.start_combat([npc, self.char1])
+
+        npc.execute_cmd = MagicMock()
+
+        mob_ai.process_mob_ai(npc)
+
+        npc.execute_cmd.assert_called_with("flee")

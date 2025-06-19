@@ -215,6 +215,26 @@ def _call_for_help(npc: BaseNPC) -> None:
 
 
 
+def _check_wimpy(npc: BaseNPC) -> bool:
+    """Flee combat if health is low and the mob is wimpy."""
+
+    flags = set(npc.db.actflags or [])
+    if "wimpy" not in flags:
+        return False
+    if not npc.in_combat:
+        return False
+
+    threshold = npc.db.get("flee_at")
+    if threshold is None:
+        maxhp = npc.max_hp or 0
+        threshold = int(maxhp * 0.25)
+
+    if npc.hp <= threshold:
+        npc.execute_cmd("flee")
+        return True
+    return False
+
+
 # ------------------------------------------------------------
 # Main AI entry
 # ------------------------------------------------------------
@@ -226,6 +246,8 @@ def process_mob_ai(npc: BaseNPC) -> None:
 
     _assist_allies(npc)
     _call_for_help(npc)
+    if _check_wimpy(npc):
+        return
 
     if npc.in_combat and npc.db.combat_target:
         npc_take_turn(None, npc, npc.db.combat_target)
