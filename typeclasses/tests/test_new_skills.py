@@ -90,8 +90,8 @@ class TestKickSkill(EvenniaTest):
 
         expected = int(5 + 20 * 0.2)
         self.char2.at_damage.assert_called_with(self.char1, expected, DamageType.BLUDGEONING)
-        msg = f"{self.char1.key} kicks {self.char2.key} for {expected} damage!"
-        self.room1.msg_contents.assert_called_with(msg)
+        msg = f"$You() kick(s) {self.char2.key} for {expected} damage!"
+        self.room1.msg_contents.assert_called_with(msg, from_obj=self.char1)
 
     def test_kick_numbered_target(self):
         """Ensure numbered aliases target the correct enemy."""
@@ -117,4 +117,49 @@ class TestKickSkill(EvenniaTest):
             self.char1.execute_cmd("kick slime-2")
 
         self.assertEqual(self.char1.db.combat_target, slime2)
+
+    def test_kick_command_single_message(self):
+        self.room1.msg_contents = MagicMock()
+        self.char2.at_damage = MagicMock()
+
+        class DummyEngine:
+            def queue_action(self, actor, action):
+                action.resolve()
+
+        class DummyCombat:
+            def __init__(self):
+                self.engine = DummyEngine()
+
+        with patch("commands.abilities.maybe_start_combat", return_value=DummyCombat()), \
+             patch.object(stat_manager, "check_hit", return_value=True), \
+             patch("combat.combat_utils.roll_evade", return_value=False), \
+             patch.object(stat_manager, "get_effective_stat", return_value=10), \
+             patch("world.skills.skill.random", return_value=0):
+            self.char1.execute_cmd(f"kick {self.char2.key}")
+
+        self.assertFalse(self.char1.msg.called)
+        self.assertEqual(len(self.room1.msg_contents.call_args_list), 1)
+
+    def test_kick_engine_single_message(self):
+        self.room1.msg_contents = MagicMock()
+        self.char1.location = self.room1
+        self.char2.location = self.room1
+        self.char2.at_damage = MagicMock()
+
+        from combat.engine import CombatEngine
+        from combat.combat_actions import SkillAction
+
+        engine = CombatEngine([self.char1, self.char2], round_time=0)
+        engine.queue_action(self.char1, SkillAction(self.char1, Kick(), self.char2))
+
+        with patch("world.system.state_manager.apply_regen"), \
+             patch.object(stat_manager, "check_hit", return_value=True), \
+             patch("combat.combat_utils.roll_evade", return_value=False), \
+             patch.object(stat_manager, "get_effective_stat", return_value=10), \
+             patch("random.randint", return_value=0):
+            engine.start_round()
+            engine.process_round()
+
+        self.assertFalse(self.char1.msg.called)
+        self.assertEqual(len(self.room1.msg_contents.call_args_list), 1)
 

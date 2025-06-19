@@ -61,7 +61,12 @@ class CmdKick(Command):
         # Resolve the skill immediately instead of queuing an action
         result = skill.resolve(self.caller, target)
         if result.message and self.caller.location:
-            self.caller.location.msg_contents(result.message)
+            self.caller.location.msg_contents(result.message, from_obj=self.caller)
+        if result.damage:
+            if hasattr(target, "at_damage"):
+                target.at_damage(self.caller, result.damage, result.damage_type)
+            elif hasattr(target, "hp"):
+                target.hp = max(target.hp - result.damage, 0)
 
 
 class AbilityCmdSet(CmdSet):

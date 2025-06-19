@@ -410,10 +410,6 @@ class Character(ObjectParent, ClothedCharacter):
             self.msg(
                 f"{crit_prefix}You take {damage} damage from {attacker.get_display_name(self)}."
             )
-            attacker.msg(
-                f"You deal {damage} damage to {self.get_display_name(attacker)}"
-                + ("!" if critical else ".")
-            )
         else:
             self.msg(f"{crit_prefix}You take {damage} damage.")
         if self.traits.health.value <= 0:
@@ -449,8 +445,6 @@ class Character(ObjectParent, ClothedCharacter):
                 wallet = attacker.db.coins or {}
                 total = to_copper(wallet) + bounty
                 attacker.db.coins = from_copper(total)
-                attacker.msg(f"You claim {bounty} coins for defeating {self.key}.")
-                self.db.bounty = 0
             if utils.inherits_from(self, PlayerCharacter):
                 self.on_death(attacker)
         return damage
@@ -1134,8 +1128,6 @@ class NPC(Character):
         if not attacker or not exp:
             return
         if hasattr(attacker, "msg"):
-            attacker.msg(f"You gain |Y{exp}|n experience points.")
-        state_manager.gain_xp(attacker, exp)
 
     def on_death(self, attacker):
         """Handle character death cleanup."""
