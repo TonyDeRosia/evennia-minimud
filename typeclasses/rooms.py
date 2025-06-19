@@ -227,7 +227,10 @@ class Room(RoomParent, DefaultRoom):
     def return_appearance(self, looker):
         appearance = super().return_appearance(looker)
         minimap = self.generate_map(looker)
-        return f"{minimap}\n{appearance}" if minimap else appearance
+        if minimap:
+            # Surround the visual map with blank lines for readability
+            return f"\n{minimap}\n\n{appearance}"
+        return appearance
 
     def get_display_header(self, looker, **kwargs):
         area = self.get_area()
