@@ -178,6 +178,43 @@ def _assist_allies(npc: BaseNPC) -> None:
             break
 
 
+def _call_for_help(npc: BaseNPC) -> None:
+    """Request aid from allies when in combat."""
+
+    flags = set(npc.db.actflags or [])
+    called = npc.ndb.get("called_for_help")
+
+    if "call_for_help" not in flags:
+        if called:
+            del npc.ndb.called_for_help
+        return
+
+    if not npc.in_combat:
+        if called:
+            del npc.ndb.called_for_help
+        return
+
+    if called:
+        return
+
+    npc.ndb.called_for_help = True
+    if not npc.location:
+        return
+
+    npc.location.msg_contents(f"{npc.key} calls for help!")
+    target = npc.db.combat_target
+    if not target:
+        return
+    for obj in npc.location.contents:
+        if obj is npc or not isinstance(obj, BaseNPC):
+            continue
+        if obj.in_combat:
+            continue
+        if "assist" in set(obj.db.actflags or []):
+            obj.enter_combat(target)
+
+
+
 # ------------------------------------------------------------
 # Main AI entry
 # ------------------------------------------------------------
@@ -188,6 +225,7 @@ def process_mob_ai(npc: BaseNPC) -> None:
         return
 
     _assist_allies(npc)
+    _call_for_help(npc)
 
     if npc.in_combat and npc.db.combat_target:
         npc_take_turn(None, npc, npc.db.combat_target)
