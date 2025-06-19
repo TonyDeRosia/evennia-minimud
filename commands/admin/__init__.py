@@ -443,7 +443,7 @@ class CmdPeace(Command):
             caller.msg("You have no location.")
             return
 
-        from combat.round_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager, leave_combat
         manager = CombatRoundManager.get()
         instance = manager.get_combatant_combat(caller)
         if not instance:
@@ -456,7 +456,7 @@ class CmdPeace(Command):
             return
 
         for p in list(instance.engine.participants):
-            instance.remove_combatant(p.actor)
+            leave_combat(p.actor)
         manager.remove_combat(instance.combat_id)
         location.msg_contents("Peace falls over the area.")
 

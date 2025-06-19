@@ -380,3 +380,28 @@ class CombatRoundManager:
             )
 
         return "\n".join(lines)
+
+
+def leave_combat(chara) -> None:
+    """Remove ``chara`` from combat and clear combat state."""
+
+    if not chara:
+        return
+
+    manager = CombatRoundManager.get()
+    instance = manager.get_combatant_combat(chara)
+    if instance:
+        instance.remove_combatant(chara)
+
+    if hasattr(chara, "db") and getattr(chara, "pk", None) is not None:
+        chara.db.in_combat = False
+        chara.db.combat_target = None
+    else:
+        setattr(chara, "in_combat", False)
+        setattr(chara, "combat_target", None)
+
+    if hasattr(chara, "ndb") and hasattr(chara.ndb, "combat_engine"):
+        del chara.ndb.combat_engine
+    if hasattr(chara, "ndb") and hasattr(chara.ndb, "damage_log"):
+        del chara.ndb.damage_log
+

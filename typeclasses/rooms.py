@@ -54,10 +54,8 @@ class RoomParent(ObjectParent):
 
     def at_object_leave(self, mover, destination, **kwargs):
         super().at_object_leave(mover, destination, **kwargs)
-        from combat.round_manager import CombatRoundManager
-        manager = CombatRoundManager.get()
-        if instance := manager.get_combatant_combat(mover):
-            instance.remove_combatant(mover)
+        from combat.round_manager import leave_combat
+        leave_combat(mover)
         if "character" in mover._content_types:
             for obj in self.contents_get(content_type="character"):
                 if obj != mover:
