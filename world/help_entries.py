@@ -2229,22 +2229,25 @@ Related:
         "text": """
 Help for bounty
 
-Place a bounty on another character. ``<amount>`` is in copper coins.
+Place a bounty on another character.
 
 Usage:
-    bounty
+    bounty <target> <amount> <currency>
 
 Switches:
     None
 
 Arguments:
-    None
+    <target> - character to put a bounty on
+    <amount> - how many coins to spend
+    <currency> - coin type (copper, silver, gold or platinum)
 
 Examples:
     None
 
 Notes:
-    - None
+    - If ``<currency>`` is omitted it defaults to copper.
+    - Accepted currencies: copper, silver, gold and platinum.
 
 Related:
     help ansi
