@@ -221,6 +221,27 @@ class TestRoomDisplayName(EvenniaTest):
         self.assertEqual(name, "field")
 
 
+class TestRoomAppearanceMetadata(EvenniaTest):
+    def test_builder_sees_area_and_vnum(self):
+        from typeclasses.rooms import Room
+
+        room = create_object(Room, key="square")
+        room.set_area("Midgard", 200054)
+        self.char1.permissions.add("Builder")
+
+        out = room.return_appearance(self.char1)
+        self.assertIn("Midgard [vnum: 200054]", out)
+
+    def test_player_hides_area_and_vnum(self):
+        from typeclasses.rooms import Room
+
+        room = create_object(Room, key="square")
+        room.set_area("Midgard", 200054)
+
+        out = room.return_appearance(self.char1)
+        self.assertNotIn("vnum: 200054", out)
+
+
 class TestMeleeWeaponAtAttack(EvenniaTest):
     def test_damage_dice_only(self):
         weapon = create_object(
