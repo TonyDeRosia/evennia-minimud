@@ -65,6 +65,7 @@ class ACTFLAGS(_StrEnum):
     SCAVENGER = "scavenger"
     AGGRESSIVE = "aggressive"
     STAY_AREA = "stay_area"
+    WANDER = "wander"
     WIMPY = "wimpy"
     ASSIST = "assist"
     CALL_FOR_HELP = "call_for_help"

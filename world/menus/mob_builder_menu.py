@@ -1148,7 +1148,7 @@ def menunode_actflags(caller, raw_string="", **kwargs):
     if default:
         text += f" [default: {' '.join(default)}]"
     text += f"\nAvailable: {flags}"
-    text += "\nExample: |wsentinel aggressive assist call_for_help|n"
+    text += "\nExample: |wsentinel wander aggressive assist call_for_help|n"
     text += "\n(back to go back, skip for default)"
     options = add_back_skip({"key": "_default", "goto": _set_actflags}, _set_actflags)
     return with_summary(caller, text), options
