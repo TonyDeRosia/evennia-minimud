@@ -966,7 +966,7 @@ Related:
         "text": """
 Help for setbounty
 
-Assign a bounty to a character.
+Assign a bounty to a character. Amounts are in copper coins.
 
 Usage:
     setbounty <target> <amount>
@@ -2229,7 +2229,7 @@ Related:
         "text": """
 Help for bounty
 
-Place a bounty on another character. Usage: bounty <target> <amount>
+Place a bounty on another character. ``<amount>`` is in copper coins.
 
 Usage:
     bounty

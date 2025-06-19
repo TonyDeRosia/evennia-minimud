@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 from evennia.utils.test_resources import EvenniaTest
 from django.test import override_settings
-from utils.currency import from_copper, to_copper
+from utils.currency import from_copper, to_copper, COIN_VALUES
 from evennia.objects.models import ObjectDB
 from typeclasses.rooms import Room
 
@@ -485,7 +485,7 @@ class TestBountyLarge(EvenniaTest):
         self.assertEqual(to_copper(self.char1.db.coins), 70)
         self.assertEqual(self.char2.db.bounty, 30)
         self.char1.msg.assert_any_call(
-            f"You place a bounty of 30 gold on {self.char2.get_display_name(self.char1)}."
+            f"You place a bounty of 30 coins on {self.char2.get_display_name(self.char1)}."
         )
 
     def test_bounty_insufficient_funds(self):
@@ -510,6 +510,14 @@ class TestBountyLarge(EvenniaTest):
         self.char2.at_damage(self.char1, 200)
         self.assertEqual(to_copper(self.char1.db.coins), 40)
         self.assertEqual(self.char2.db.bounty, 0)
+
+    def test_bounty_very_large_amount(self):
+        big_wallet = from_copper(COIN_VALUES["gold"] * 600)
+        self.char1.db.coins = big_wallet
+        amount = COIN_VALUES["gold"] * 500
+        self.char1.execute_cmd(f"bounty {self.char2.key} {amount}")
+        self.assertEqual(to_copper(self.char1.db.coins), COIN_VALUES["gold"] * 100)
+        self.assertEqual(self.char2.db.bounty, amount)
 
 
 class TestCommandPrompt(EvenniaTest):
