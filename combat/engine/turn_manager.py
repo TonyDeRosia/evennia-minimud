@@ -43,8 +43,10 @@ class TurnManager:
 
         if hasattr(actor, "db") and getattr(actor, "pk", None) is not None:
             actor.db.in_combat = False
+            actor.db.combat_target = None
         else:
             setattr(actor, "in_combat", False)
+            setattr(actor, "combat_target", None)
         if hasattr(actor, "on_exit_combat"):
             actor.on_exit_combat()
         if hasattr(actor, "ndb") and hasattr(actor.ndb, "combat_engine"):
