@@ -27,13 +27,15 @@ def _current_hp(obj):
     if hasattr(obj, "hp"):
         try:
             return int(obj.hp)
-        except Exception:
-            pass
+        except Exception as err:
+            raise ValueError(f"invalid hp value on {obj!r}") from err
+
     hp_trait = getattr(getattr(obj, "traits", None), "health", None)
     if hp_trait is not None:
         try:
             return int(hp_trait.value)
-        except Exception:
-            return 0
-    return 0
+        except Exception as err:
+            raise ValueError(f"invalid health trait on {obj!r}") from err
+
+    raise AttributeError(f"{obj!r} lacks a health trait or hp attribute")
 
