@@ -183,10 +183,12 @@ class CmdFinger(Command):
 
 class CmdBounty(Command):
     """
-    Place a bounty on another character. Usage: bounty <target> <amount>
+    Place a bounty on another character.
 
     Usage:
-        bounty
+        bounty <target> <amount> [coin]
+
+    ``coin`` defaults to copper if omitted.
 
     See |whelp bounty|n for details.
     """
@@ -196,16 +198,24 @@ class CmdBounty(Command):
 
     def func(self):
         if not self.args:
-            self.msg("Usage: bounty <target> <amount>")
+            self.msg("Usage: bounty <target> <amount> [coin]")
             return
 
-        parts = self.args.split(None, 1)
-        if len(parts) != 2 or not parts[1].isdigit():
-            self.msg("Usage: bounty <target> <amount>")
+        parts = self.args.split(None, 2)
+        if len(parts) < 2 or not parts[1].isdigit():
+            self.msg("Usage: bounty <target> <amount> [coin]")
             return
 
-        target_name, amount_str = parts
+        target_name = parts[0]
+        amount_str = parts[1]
+        coin = parts[2].lower() if len(parts) > 2 else "copper"
+
+        if coin not in COIN_VALUES:
+            self.msg(f"Unknown coin type: {coin}.")
+            return
+
         amount = int(amount_str)
+        amount_copper = amount * COIN_VALUES[coin]
         target = self.caller.search(target_name, global_search=True)
         if not target:
             return
@@ -215,14 +225,14 @@ class CmdBounty(Command):
             return
 
         wallet = self.caller.db.coins or {}
-        if to_copper(wallet) < amount:
+        if to_copper(wallet) < amount_copper:
             self.msg("You do not have enough coins to place this bounty.")
             return
 
-        self.caller.db.coins = from_copper(to_copper(wallet) - amount)
-        target.db.bounty = (target.db.bounty or 0) + amount
+        self.caller.db.coins = from_copper(to_copper(wallet) - amount_copper)
+        target.db.bounty = (target.db.bounty or 0) + amount_copper
         self.msg(
-            f"You place a bounty of {amount} coins on {target.get_display_name(self.caller)}."
+            f"You place a bounty of {amount} {coin} on {target.get_display_name(self.caller)}."
         )
 
 
