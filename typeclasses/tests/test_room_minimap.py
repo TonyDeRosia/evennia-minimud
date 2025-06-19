@@ -33,9 +33,9 @@ class TestRoomMinimap(EvenniaTest):
         
         map_output = room.generate_map(self.char1)
         expected = [
-            "    |g#|n    ",
-            " |g#|n  |g@|n  |g#|n ",
-            "    |g#|n    ",
+            "   [ ]   ",
+            "[ ][X][ ]",
+            "   [ ]   ",
         ]
         self.assertEqual(map_output.splitlines(), expected)
 
@@ -46,7 +46,7 @@ class TestRoomMinimap(EvenniaTest):
         map_output = room.generate_map(self.char1)
         expected = [
             "         ",
-            "    |g@|n    ",
+            "   [X]   ",
             "         ",
         ]
         self.assertEqual(map_output.splitlines(), expected)
@@ -89,9 +89,9 @@ class TestRoomMinimap(EvenniaTest):
         
         # Expected 3x3 map with surrounding rooms
         expected_map = "\n".join([
-            "    |g#|n    ",
-            " |g#|n  |g@|n  |g#|n ",
-            "    |g#|n    ",
+            "   [ ]   ",
+            "[ ][X][ ]",
+            "   [ ]   ",
         ])
         
         generated_map = center.generate_map(self.char1)
