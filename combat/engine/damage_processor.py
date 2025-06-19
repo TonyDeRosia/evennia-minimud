@@ -130,6 +130,22 @@ class DamageProcessor:
         survivors = []
         if inst:
             survivors = [c for c in inst.combatants if _current_hp(c) > 0]
+        else:
+            survivors = [
+                p.actor
+                for p in self.turn_manager.participants
+                if p.actor is not target and _current_hp(p.actor) > 0
+            ]
+
+        for combatant in survivors:
+            if combatant is target:
+                continue
+            current = getattr(getattr(combatant, "db", None), "combat_target", None)
+            if current is target:
+                try:
+                    combatant.db.combat_target = None
+                except Exception:
+                    pass
 
         if attacker and getattr(attacker, "db", None) is not None:
             try:
@@ -248,7 +264,15 @@ class DamageProcessor:
         if result.target:
             self.aggro.track(result.target, actor)
             if _current_hp(result.target) <= 0:
-                self.handle_defeat(result.target, actor)
+                defeated = result.target
+                self.handle_defeat(defeated, actor)
+                for p in self.turn_manager.participants:
+                    p.next_action = [
+                        a
+                        for a in p.next_action
+                        if getattr(a, "target", None) is not defeated
+                        and getattr(a, "actor", None) is not defeated
+                    ]
 
     def _summarize_damage(self, damage_totals: Dict[object, int]) -> None:
         if not getattr(settings, "COMBAT_DEBUG_SUMMARY", False):
