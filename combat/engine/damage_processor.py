@@ -111,17 +111,23 @@ class DamageProcessor:
             except Exception:
                 pass
 
-        if attacker and getattr(attacker, "db", None) is not None:
-            try:
-                attacker.db.combat_target = None
-            except Exception:
-                pass
-
         from combat.round_manager import CombatRoundManager
 
         inst = CombatRoundManager.get().get_combatant_combat(target)
         if inst:
             inst.remove_combatant(target)
+
+        survivors = []
+        if attacker and inst:
+            survivors = [
+                c for c in inst.combatants if c is not attacker and _current_hp(c) > 0
+            ]
+
+        if attacker and getattr(attacker, "db", None) is not None:
+            try:
+                attacker.db.combat_target = survivors[0] if survivors else None
+            except Exception:
+                pass
 
         if attacker and attacker.location:
             attacker.location.msg_contents(
@@ -154,11 +160,18 @@ class DamageProcessor:
             actor = participant.actor
             hp = _current_hp(actor)
             target = getattr(getattr(actor, "db", None), "combat_target", None)
+            hostiles = [
+                p.actor
+                for p in self.turn_manager.participants
+                if p.actor is not actor
+                and getattr(getattr(p.actor, "db", None), "combat_target", None) is actor
+                and _current_hp(p.actor) > 0
+            ]
             should_remove = (
                 getattr(actor, "location", None) is None
                 or hp <= 0
                 or getattr(getattr(actor, "db", None), "is_dead", False)
-                or (target is None and not participant.next_action)
+                or (target is None and not participant.next_action and not hostiles)
             )
             if should_remove:
                 self.turn_manager.remove_participant(actor)
