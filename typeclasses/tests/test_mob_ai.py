@@ -132,3 +132,28 @@ class TestMobAIBehaviors(EvenniaTest):
         with patch.object(exit_obj, "at_traverse") as mock:
             mob_ai.process_mob_ai(npc)
             mock.assert_not_called()
+
+    def test_call_for_help_summons_allies(self):
+        from typeclasses.npcs import BaseNPC
+        from combat.round_manager import CombatRoundManager
+
+        caller = create.create_object(BaseNPC, key="caller", location=self.room1)
+        caller.db.actflags = ["call_for_help"]
+        manager = CombatRoundManager.get()
+        manager.start_combat([caller, self.char1])
+
+        ally = create.create_object(BaseNPC, key="ally", location=self.room1)
+        ally.db.actflags = ["assist"]
+
+        self.room1.msg_contents = MagicMock()
+
+        with patch.object(ally, "enter_combat") as mock:
+            mob_ai.process_mob_ai(caller)
+            mock.assert_called_with(self.char1)
+            self.assertTrue(caller.ndb.called_for_help)
+
+        self.room1.msg_contents.reset_mock()
+        with patch.object(ally, "enter_combat") as mock:
+            mob_ai.process_mob_ai(caller)
+            mock.assert_not_called()
+        self.assertFalse(self.room1.msg_contents.called)
