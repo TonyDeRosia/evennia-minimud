@@ -188,14 +188,19 @@ class TestSpawnManager(EvenniaTest):
             },
         ]
         with mock.patch.object(self.script, "_spawn") as m_spawn, \
-             mock.patch("scripts.spawn_manager.time.time", return_value=10):
+             mock.patch("scripts.spawn_manager.time.time", return_value=10), \
+             mock.patch("evennia.utils.logger.log_debug") as m_debug:
             self.script.at_repeat()
             m_spawn.assert_called_once()
+            m_debug.assert_called_once()
 
         m_spawn.reset_mock()
-        with mock.patch("scripts.spawn_manager.time.time", return_value=10):
+        with mock.patch.object(self.script, "_spawn", m_spawn), \
+             mock.patch("scripts.spawn_manager.time.time", return_value=10), \
+             mock.patch("evennia.utils.logger.log_debug") as m_debug:
             self.script.at_repeat()
             m_spawn.assert_called_once()
+            m_debug.assert_called_once()
 
     def test_get_room_falls_back_to_room_id_when_dbref_not_room(self):
         dummy = create_object("typeclasses.objects.Object", key="dummy")

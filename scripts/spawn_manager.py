@@ -6,6 +6,9 @@ from typing import Any, Dict, List
 from evennia.prototypes import spawner
 from evennia.objects.models import ObjectDB
 from evennia.utils import logger, search
+
+if not hasattr(logger, "log_debug"):
+    logger.log_debug = logger.log_info
 from typeclasses.rooms import Room
 
 from typeclasses.scripts import Script
@@ -132,6 +135,9 @@ class SpawnManager(Script):
 
     def reload_spawns(self) -> None:
         self.load_spawn_data()
+        logger.log_info(
+            f"SpawnManager: loaded {len(self.db.entries)} spawn entries"
+        )
         self.at_start()
         for entry in self.db.entries:
             room_vnum = self._normalize_room_id(entry)
@@ -286,7 +292,9 @@ class SpawnManager(Script):
         tick_mod = self.db.tick_count % batch_size
 
         for entry in self.db.entries:
-            rid = self._normalize_room_id(entry.get("room"))
+            rid = entry.get("room_id")
+            if rid is None:
+                rid = self._normalize_room_id(entry.get("room"))
             hash_value = rid if rid is not None else hash(str(entry.get("room")))
             if batch_size > 1 and hash_value % batch_size != tick_mod:
                 continue
@@ -297,6 +305,9 @@ class SpawnManager(Script):
                 continue
             live = self._live_count(proto, room)
             max_count = entry.get("max_count", 0)
+            logger.log_debug(
+                f"SpawnManager: processing room {self._normalize_room_id(entry)} for {proto} - {live}/{max_count}"
+            )
             if live >= max_count:
                 continue
             last = entry.get("last_spawn", 0)
