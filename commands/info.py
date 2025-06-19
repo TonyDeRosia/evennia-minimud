@@ -167,7 +167,7 @@ class CmdFinger(Command):
 
         bounty = target.attributes.get("bounty", 0)
         if bounty:
-            lines.append(f"Bounty: {format_wallet(bounty)}")
+            lines.append(f"Bounty: {format_wallet(bounty, show_zero=True)}")
         else:
             lines.append("No bounty.")
 
@@ -232,7 +232,7 @@ class CmdBounty(Command):
         self.caller.db.coins = from_copper(to_copper(wallet) - amount_copper)
         target.db.bounty = (target.db.bounty or 0) + amount_copper
         self.msg(
-            f"You place a bounty of {amount} {coin} on {target.get_display_name(self.caller)}."
+            f"You place a bounty of {format_wallet(amount_copper, show_zero=True)} on {target.get_display_name(self.caller)}."
         )
 
 

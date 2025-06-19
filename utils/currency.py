@@ -41,19 +41,41 @@ def from_copper(amount: int) -> dict:
     return wallet
 
 
-def format_wallet(wallet) -> str:
-    """Return a human-readable currency string."""
+def format_wallet(wallet, *, show_zero: bool = False) -> str:
+    """Return a human-readable currency string.
+
+    Args:
+        wallet: Mapping of coin names to amounts or an integer copper value.
+        show_zero: When ``True``, include zero-valued denominations between the
+            highest and lowest non-zero coins.
+    """
     if wallet is None:
         wallet = {}
     if isinstance(wallet, int):
         wallet = from_copper(wallet)
-    parts = []
-    for coin in ["platinum", "gold", "silver", "copper"]:
-        count = int(wallet.get(coin, 0))
-        if count:
-            parts.append(f"{count} {coin.capitalize()}")
-    if not parts:
+
+    coins = ["platinum", "gold", "silver", "copper"]
+    counts = [int(wallet.get(c, 0)) for c in coins]
+
+    if not any(counts):
         return "0 Copper"
+
+    if not show_zero:
+        parts = [
+            f"{count} {coin.capitalize()}"
+            for coin, count in zip(coins, counts)
+            if count
+        ]
+        return ", ".join(parts)
+
+    # determine range from highest to lowest non-zero denomination
+    first = next(i for i, c in enumerate(counts) if c)
+    last = len(coins) - 1 - next(i for i, c in enumerate(reversed(counts)) if c)
+
+    parts = [
+        f"{counts[i]} {coins[i].capitalize()}"
+        for i in range(first, last + 1)
+    ]
     return ", ".join(parts)
 
 

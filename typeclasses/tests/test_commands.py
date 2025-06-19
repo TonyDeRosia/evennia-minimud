@@ -71,6 +71,12 @@ class TestInfoCommands(EvenniaTest):
         self.assertIn("Guild Points: 20", output)
         self.assertIn("Bounty: 10 Copper", output)
 
+    def test_finger_bounty_with_intermediate_zero(self):
+        self.char2.attributes.add("bounty", 3050)
+        self.char1.execute_cmd(f"finger {self.char2.key}")
+        output = self.char1.msg.call_args[0][0]
+        self.assertIn("Bounty: 3 Platinum, 0 Gold, 5 Silver", output)
+
     def test_score(self):
         self.char1.db.title = "Tester"
         self.char1.db.copper = 10
