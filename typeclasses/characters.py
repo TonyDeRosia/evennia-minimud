@@ -1127,7 +1127,14 @@ class NPC(Character):
         exp = int(exp_reward)
         if not attacker or not exp:
             return
+
+        exp = state_manager.calculate_xp_reward(attacker, self, exp)
+        if not exp:
+            return
+
         if hasattr(attacker, "msg"):
+            attacker.msg(f"You gain |Y{exp}|n experience points!")
+        state_manager.gain_xp(attacker, exp)
 
     def on_death(self, attacker):
         """Handle character death cleanup."""

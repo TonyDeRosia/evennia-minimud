@@ -39,6 +39,8 @@ class AggroTracker:
             level = getattr(getattr(victim, "db", None), "level", 1) or 1
             exp = level * 5
 
+        exp = state_manager.calculate_xp_reward(attacker, victim, exp)
+
         contributors = self.contributors(victim, active) or [attacker]
         award_xp(attacker, exp, contributors)
 
