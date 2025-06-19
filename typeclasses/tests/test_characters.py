@@ -447,3 +447,16 @@ class TestPlayerDeath(EvenniaTest):
         self.assertEqual(part_names, expected)
         self.assertIn(item, player.contents)
         self.assertEqual(player.db.coins.get("gold"), 2)
+
+    def test_player_death_broadcasts_room_message(self):
+        player = self.char1
+        attacker = self.char2
+        self.room1.msg_contents = MagicMock()
+
+        player.traits.health.current = 1
+        player.at_damage(attacker, 2)
+
+        calls = [c.args[0] for c in self.room1.msg_contents.call_args_list]
+        self.assertTrue(
+            any("is slain" in msg or "dies." in msg for msg in calls)
+        )
