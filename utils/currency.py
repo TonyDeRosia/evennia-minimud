@@ -2,12 +2,12 @@
 
 # Value of each coin type in copper pieces. One silver is worth 100 copper,
 # one gold is worth 10 silver (1000 copper) and one platinum is worth
-# 100 gold (100000 copper).
+# 10 gold (10000 copper).
 COIN_VALUES = {
     "copper": 1,
     "silver": 100,
     "gold": 1000,
-    "platinum": 100000,
+    "platinum": 10000,
 }
 
 
@@ -16,7 +16,7 @@ def to_copper(wallet) -> int:
 
     The wallet is a mapping of coin names to amounts using the ratios in
     :data:`COIN_VALUES` (1 silver = 100 copper, 1 gold = 1000 copper,
-    1 platinum = 100000 copper).
+    1 platinum = 10000 copper).
     """
     if wallet is None:
         return 0
