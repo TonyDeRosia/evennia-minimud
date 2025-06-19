@@ -391,3 +391,28 @@ def gain_xp(chara, amount: int) -> None:
             chara.db.tnl -= excess
         else:
             chara.db.tnl = settings.XP_TO_LEVEL(int(chara.db.level or 1))
+
+
+def calculate_xp_reward(attacker, npc, base_xp: int) -> int:
+    """Return ``base_xp`` scaled by level difference between ``attacker`` and ``npc``."""
+
+    atk_lvl = getattr(getattr(attacker, "db", None), "level", 1) or 1
+    npc_lvl = getattr(getattr(npc, "db", None), "level", 1) or 1
+    diff = npc_lvl - atk_lvl
+
+    if diff >= 3:
+        scale = 1.5
+    elif diff == 2:
+        scale = 1.25
+    elif diff == 1:
+        scale = 1.1
+    elif diff == 0:
+        scale = 1.0
+    elif diff == -1:
+        scale = 0.8
+    elif diff == -2:
+        scale = 0.5
+    else:
+        scale = 0.0
+
+    return max(0, int(round(base_xp * scale)))
