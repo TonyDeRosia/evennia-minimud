@@ -118,16 +118,27 @@ class DamageProcessor:
             inst.remove_combatant(target)
 
         survivors = []
-        if attacker and inst:
-            survivors = [
-                c for c in inst.combatants if c is not attacker and _current_hp(c) > 0
-            ]
+        if inst:
+            survivors = [c for c in inst.combatants if _current_hp(c) > 0]
 
         if attacker and getattr(attacker, "db", None) is not None:
             try:
-                attacker.db.combat_target = survivors[0] if survivors else None
+                others = [c for c in survivors if c is not attacker]
+                attacker.db.combat_target = others[0] if others else None
             except Exception:
                 pass
+
+        if inst:
+            for combatant in list(survivors):
+                if combatant is target:
+                    continue
+                current = getattr(getattr(combatant, "db", None), "combat_target", None)
+                if current is target or _current_hp(current) <= 0:
+                    remaining = [c for c in survivors if c is not combatant]
+                    combatant.db.combat_target = remaining[0] if remaining else None
+                if combatant not in [p.actor for p in self.turn_manager.participants]:
+                    self.turn_manager.add_participant(combatant)
+            inst.sync_participants()
 
         if attacker and attacker.location:
             attacker.location.msg_contents(
