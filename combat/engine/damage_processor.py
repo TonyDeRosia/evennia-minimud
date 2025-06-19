@@ -196,6 +196,10 @@ class DamageProcessor:
     # -------------------------------------------------------------
     def _execute_action(self, participant: CombatParticipant, action, damage_totals: Dict[object, int]) -> None:
         actor = participant.actor
+        if _current_hp(actor) <= 0:
+            if action in participant.next_action:
+                participant.next_action.remove(action)
+            return
         target = getattr(action, "target", None)
         if target and _current_hp(target) <= 0:
             if action in participant.next_action:
