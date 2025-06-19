@@ -69,7 +69,7 @@ class TestInfoCommands(EvenniaTest):
         self.assertIn("The Warrior", output)
         self.assertIn("Guild: Adventurers Guild", output)
         self.assertIn("Guild Points: 20", output)
-        self.assertIn("Bounty: 10", output)
+        self.assertIn("Bounty: 10 Copper", output)
 
     def test_score(self):
         self.char1.db.title = "Tester"
@@ -462,7 +462,7 @@ class TestBountySmall(EvenniaTest):
         self.char2.db.bounty = 0
 
     def test_bounty_reward_on_defeat(self):
-        self.char1.execute_cmd(f"bounty {self.char2.key} 10")
+        self.char1.execute_cmd(f"bounty {self.char2.key} 10 copper")
         self.assertEqual(self.char2.db.bounty, 10)
         self.assertEqual(to_copper(self.char1.db.coins), 10)
         self.char2.traits.health.current = 5
@@ -481,22 +481,22 @@ class TestBountyLarge(EvenniaTest):
         self.char2.msg = MagicMock()
 
     def test_bounty_place(self):
-        self.char1.execute_cmd(f"bounty {self.char2.key} 30")
+        self.char1.execute_cmd(f"bounty {self.char2.key} 30 copper")
         self.assertEqual(to_copper(self.char1.db.coins), 70)
         self.assertEqual(self.char2.db.bounty, 30)
         self.char1.msg.assert_any_call(
-            f"You place a bounty of 30 coins on {self.char2.get_display_name(self.char1)}."
+            f"You place a bounty of 30 copper on {self.char2.get_display_name(self.char1)}."
         )
 
     def test_bounty_insufficient_funds(self):
         self.char1.db.coins = from_copper(5)
-        self.char1.execute_cmd(f"bounty {self.char2.key} 10")
+        self.char1.execute_cmd(f"bounty {self.char2.key} 10 copper")
         self.char1.msg.assert_any_call("You do not have enough coins to place this bounty.")
         self.assertEqual(to_copper(self.char1.db.coins), 5)
         self.assertEqual(self.char2.db.bounty, 0)
 
     def test_bounty_reward_on_defeat(self):
-        self.char1.execute_cmd(f"bounty {self.char2.key} 10")
+        self.char1.execute_cmd(f"bounty {self.char2.key} 10 copper")
         self.assertEqual(self.char2.db.bounty, 10)
         self.assertEqual(to_copper(self.char1.db.coins), 90)  # 100 - 10 bounty
         self.char2.traits.health.current = 5
@@ -515,9 +515,34 @@ class TestBountyLarge(EvenniaTest):
         big_wallet = from_copper(COIN_VALUES["gold"] * 600)
         self.char1.db.coins = big_wallet
         amount = COIN_VALUES["gold"] * 500
-        self.char1.execute_cmd(f"bounty {self.char2.key} {amount}")
+        self.char1.execute_cmd(f"bounty {self.char2.key} {amount} copper")
         self.assertEqual(to_copper(self.char1.db.coins), COIN_VALUES["gold"] * 100)
         self.assertEqual(self.char2.db.bounty, amount)
+
+    def test_bounty_place_gold(self):
+        self.char1.db.coins = from_copper(COIN_VALUES["gold"] * 2)
+        self.char1.execute_cmd(f"bounty {self.char2.key} 1 gold")
+        self.assertEqual(to_copper(self.char1.db.coins), COIN_VALUES["gold"])
+        self.assertEqual(self.char2.db.bounty, COIN_VALUES["gold"])
+        self.char1.msg.assert_any_call(
+            f"You place a bounty of 1 gold on {self.char2.get_display_name(self.char1)}."
+        )
+
+    def test_bounty_place_platinum(self):
+        self.char1.db.coins = from_copper(COIN_VALUES["platinum"] * 2)
+        self.char1.execute_cmd(f"bounty {self.char2.key} 1 platinum")
+        self.assertEqual(to_copper(self.char1.db.coins), COIN_VALUES["platinum"])
+        self.assertEqual(self.char2.db.bounty, COIN_VALUES["platinum"])
+        self.char1.msg.assert_any_call(
+            f"You place a bounty of 1 platinum on {self.char2.get_display_name(self.char1)}."
+        )
+
+    def test_bounty_insufficient_combined_funds(self):
+        self.char1.db.coins = from_copper(COIN_VALUES["gold"] + 200)
+        self.char1.execute_cmd(f"bounty {self.char2.key} 2 gold")
+        self.char1.msg.assert_any_call("You do not have enough coins to place this bounty.")
+        self.assertEqual(to_copper(self.char1.db.coins), COIN_VALUES["gold"] + 200)
+        self.assertEqual(self.char2.db.bounty, 0)
 
 
 class TestCommandPrompt(EvenniaTest):
