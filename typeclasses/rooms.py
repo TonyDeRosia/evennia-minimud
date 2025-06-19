@@ -106,6 +106,24 @@ class RoomParent(ObjectParent):
                 name = f"{name} - {room_id}"
         return name
 
+    def get_display_title(self, looker):
+        """Return the formatted room title used when displaying the room."""
+
+        title = self.key
+        if looker and (
+            looker.check_permstring("Builder") or looker.check_permstring("Admin")
+        ):
+            area = self.get_area()
+            room_id = self.get_room_id()
+            bits = []
+            if area:
+                bits.append(str(area))
+            if room_id is not None:
+                bits.append(f"[vnum: {room_id}]")
+            if bits:
+                title = f"{title} |w({' '.join(bits)})|n"
+        return title
+
     def get_display_footer(self, looker, **kwargs):
         cmd_keys = [
             f"|w{cmd.key}|n"
@@ -123,7 +141,8 @@ class RoomParent(ObjectParent):
         if not looker:
             return ""
 
-        text = f"|c{self.get_display_name(looker)}|n\n{self.db.desc}\n"
+        title = self.get_display_title(looker)
+        text = f"|c{title}|n\n{self.db.desc}\n"
         text += f"\n{self.get_display_exits(looker)}"
 
         visible = [
