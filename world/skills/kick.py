@@ -16,7 +16,7 @@ class Kick(Skill):
     base_damage = 5
 
     def resolve(self, user, target):
-        """Resolve the kick immediately, applying damage to ``target``."""
+        """Resolve the kick immediately, returning the damage dealt."""
 
         self.improve(user)
 
@@ -30,13 +30,10 @@ class Kick(Skill):
         str_val = stat_manager.get_effective_stat(user, "STR")
         dmg = int(self.base_damage + str_val * 0.2)
 
-        if hasattr(target, "at_damage"):
-            target.at_damage(user, dmg, DamageType.BLUDGEONING)
-        elif hasattr(target, "hp"):
-            target.hp = max(target.hp - dmg, 0)
-
         return CombatResult(
             actor=user,
             target=target,
-            message=f"{user.key} kicks {target.key} for {dmg} damage!",
+            message=f"$You() kick(s) {target.key} for {dmg} damage!",
+            damage=dmg,
+            damage_type=DamageType.BLUDGEONING,
         )
