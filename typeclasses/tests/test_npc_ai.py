@@ -19,6 +19,19 @@ class TestGlobalNPCAI(EvenniaTest):
             script.at_repeat()
             mock_proc.assert_called_with(npc)
 
+    def test_script_ignores_untagged_npc(self):
+        """NPCs without the npc_ai tag should not have their AI processed."""
+        from scripts.global_npc_ai import GlobalNPCAI
+        from typeclasses.npcs import BaseNPC
+
+        npc = create.create_object(BaseNPC, key="mob_no_tag", location=self.room1)
+        npc.db.ai_type = "aggressive"
+        script = GlobalNPCAI()
+
+        with patch("scripts.global_npc_ai.process_mob_ai") as mock_proc:
+            script.at_repeat()
+            mock_proc.assert_not_called()
+
     def test_base_npc_tagged_for_ai(self):
         from typeclasses.npcs import BaseNPC
 
