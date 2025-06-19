@@ -91,6 +91,7 @@ from evennia.contrib.grid.wilderness import wilderness
 from evennia.prototypes import spawner
 from evennia.utils.search import search_tag
 from evennia.utils import logger, pad
+from utils import ansi_pad
 
 
 class OverworldMapProvider(wilderness.WildernessMapProvider):
@@ -146,6 +147,7 @@ class OverworldMapProvider(wilderness.WildernessMapProvider):
             if i == y:
                 # mark our location
                 row = row[:2] + "|g@|n" + row[3:]
+            row = ansi_pad(row, 5)
             minimap.append(" " * 12 + row + " " * 12)
         minimap.append(border)
         room.ndb.minimap = "\n".join(minimap)
