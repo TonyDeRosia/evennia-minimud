@@ -89,16 +89,40 @@ def _scavenge(npc: BaseNPC) -> None:
 
 
 def _roam(npc: BaseNPC) -> None:
-    """Move randomly if not a sentinel."""
+    """Move randomly if allowed."""
+
     flags = set(npc.db.actflags or [])
+
+    if "wander" not in flags:
+        return
     if "sentinel" in flags:
         return
+
     if not npc.location:
         return
+
     exits = npc.location.contents_get(content_type="exit")
     if not exits:
         return
-    exit_obj = choice(exits)
+
+    valid_exits = list(exits)
+
+    if "stay_area" in flags and npc.db.area_tag:
+        valid_exits = []
+        for ex in exits:
+            dest = ex.destination
+            if not dest:
+                continue
+            dest_area = getattr(dest.db, "area", None)
+            if not dest_area:
+                dest_area = dest.tags.get(category="area")
+            if dest_area == npc.db.area_tag:
+                valid_exits.append(ex)
+
+    if not valid_exits:
+        return
+
+    exit_obj = choice(valid_exits)
     exit_obj.at_traverse(npc, exit_obj.destination)
 
 
