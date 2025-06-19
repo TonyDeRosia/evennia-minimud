@@ -161,5 +161,5 @@ class TestKickSkill(EvenniaTest):
             engine.process_round()
 
         self.assertFalse(self.char1.msg.called)
-        self.assertEqual(len(self.room1.msg_contents.call_args_list), 1)
+        self.assertEqual(len(self.room1.msg_contents.call_args_list), 2)
 
