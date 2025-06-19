@@ -455,9 +455,13 @@ class CmdPeace(Command):
             caller.msg("There is no fighting here.")
             return
 
-        for p in list(instance.engine.participants):
-            leave_combat(p.actor)
-        manager.remove_combat(instance.combat_id)
+        # remove each combatant using the helper so state gets cleaned up
+        for combatant in list(instance.combatants):
+            leave_combat(combatant)
+
+        # fully end the combat instance now that everyone left
+        instance.end_combat("Force ended by peace command")
+
         location.msg_contents("Peace falls over the area.")
 
 
