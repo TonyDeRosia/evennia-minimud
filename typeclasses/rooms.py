@@ -6,7 +6,6 @@ Rooms are simple containers that have no location of their own.
 
 from evennia import create_object
 from evennia.utils import iter_to_str, logger, lazy_property
-from utils import ansi_pad
 from evennia.objects.objects import DefaultRoom
 from evennia.contrib.grid.xyzgrid.xyzroom import XYZRoom
 from evennia.contrib.grid.wilderness.wilderness import WildernessRoom
@@ -215,13 +214,12 @@ class Room(RoomParent, DefaultRoom):
             row = []
             for col_x in range(x - 1, x + 2):
                 if (col_x, row_y) == (x, y):
-                    symbol = "|g@|n"
+                    row.append("[X]")
                 elif (row_y == y and abs(col_x - x) == 1) or (col_x == x and abs(row_y - y) == 1):
                     room_exists = bool(ObjectDB.objects.get_by_attribute(key="coord", value=(col_x, row_y)))
-                    symbol = "|g#|n" if room_exists else ""
+                    row.append("[ ]" if room_exists else "   ")
                 else:
-                    symbol = ""
-                row.append(ansi_pad(symbol, 3))
+                    row.append("   ")
             map_lines.append("".join(row))
 
         return "\n".join(map_lines)
