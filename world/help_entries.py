@@ -3136,6 +3136,29 @@ Related:
 """,
     },
     {
+        "key": "npc act flags",
+        "aliases": ["actflags", "actflag"],
+        "category": "Building",
+        "text": """Help for npc act flags
+
+NPC act flags enable automatic behavior:
+    sentinel - never moves on its own
+    wander - randomly move through exits
+    stay_area - do not wander outside the current area
+    scavenger - pick up items in the room
+    aggressive - attack the first player seen
+    wimpy - flee when health is low
+    assist - join allies already fighting
+    call_for_help - ask allies with assist to join
+    noloot - drop no loot when killed
+
+Set flags in the mob builder or with |w@mset <proto> actflags|n.
+
+Related:
+    help cnpc
+""",
+    },
+    {
         "key": "@deletenpc",
         "category": "Building",
         "text": """Help for @deletenpc
