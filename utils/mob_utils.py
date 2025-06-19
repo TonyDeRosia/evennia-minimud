@@ -121,18 +121,21 @@ def make_corpse(npc):
         attributes=attrs,
     )
 
-    # move carried items
-    for obj in list(npc.contents):
-        obj.location = corpse
+    no_loot = ACTFLAGS.NOLOOT.value in (npc.db.actflags or [])
 
-    moved = set()
-    for item in npc.equipment.values():
-        if item and item not in moved:
-            item.location = corpse
-            moved.add(item)
+    if not no_loot:
+        # move carried items
+        for obj in list(npc.contents):
+            obj.location = corpse
+
+        moved = set()
+        for item in npc.equipment.values():
+            if item and item not in moved:
+                item.location = corpse
+                moved.add(item)
 
     # drop carried coins unless flagged NOLOOT
-    if ACTFLAGS.NOLOOT.value not in (npc.db.actflags or []):
+    if not no_loot:
         for coin, amt in (npc.db.coins or {}).items():
             if int(amt):
                 pile = create_object(

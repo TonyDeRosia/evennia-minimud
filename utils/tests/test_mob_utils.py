@@ -49,3 +49,20 @@ class TestMobUtils(EvenniaTest):
         corpse = make_corpse(npc)
         script = corpse.scripts.get("decay")[0]
         self.assertEqual(script.interval, 60)
+
+    def test_make_corpse_no_loot_empty(self):
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+        from typeclasses.objects import Object
+
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.actflags = ["noloot"]
+
+        inv_item = create.create_object(Object, key="inv", location=npc)
+        eq_item = create.create_object(Object, key="sword", location=npc)
+        npc.db.equipment = {"mainhand": eq_item}
+
+        corpse = make_corpse(npc)
+        self.assertFalse(corpse.contents)
+        self.assertEqual(inv_item.location, npc)
+        self.assertEqual(eq_item.location, npc)
