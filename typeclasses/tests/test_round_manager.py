@@ -55,3 +55,14 @@ class TestCombatRoundManager(EvenniaTest):
         self.assertIn("Combat Manager Status:", info)
         self.assertIn("Active Instances:", info)
 
+    def test_end_combat_clears_flags(self):
+        self.char1.db.combat_target = self.char2
+        self.char2.db.combat_target = self.char1
+
+        self.instance.end_combat("done")
+
+        self.assertFalse(self.char1.db.in_combat)
+        self.assertIsNone(getattr(self.char1.db, "combat_target", None))
+        self.assertFalse(self.char2.db.in_combat)
+        self.assertIsNone(getattr(self.char2.db, "combat_target", None))
+

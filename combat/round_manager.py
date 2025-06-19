@@ -235,11 +235,14 @@ class CombatInstance:
             fighters = [p.actor for p in self.engine.participants]
 
             for fighter in fighters:
-                if fighter:
-                    if hasattr(fighter, "db") and getattr(fighter, "pk", None) is not None:
-                        fighter.db.in_combat = False
-                    else:
-                        setattr(fighter, "in_combat", False)
+                if not fighter:
+                    continue
+                if hasattr(fighter, "db") and getattr(fighter, "pk", None) is not None:
+                    fighter.db.in_combat = False
+                    fighter.db.combat_target = None
+                else:
+                    setattr(fighter, "in_combat", False)
+                    setattr(fighter, "combat_target", None)
 
         if reason:
             log_trace(f"Combat ended: {reason}")

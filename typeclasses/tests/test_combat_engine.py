@@ -269,6 +269,7 @@ class TestCombatEngine(unittest.TestCase):
         engine.remove_participant(a)
 
         self.assertFalse(a.db.in_combat)
+        self.assertIsNone(getattr(a.db, "combat_target", None))
         a.on_exit_combat.assert_called()
         self.assertNotIn(a, [p.actor for p in engine.participants])
 
