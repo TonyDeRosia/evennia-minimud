@@ -20,7 +20,7 @@ There are four coin types:
 
 1 Silver   = 100 Copper
 1 Gold     = 10 Silver   = 1,000 Copper
-1 Platinum = 100 Gold    = 100,000 Copper
+1 Platinum = 10 Gold    = 10,000 Copper
 Typical usage:
 
 Copper – meals, basic supplies.
