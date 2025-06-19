@@ -8,7 +8,7 @@ class BaseNPC(NPC):
 
     def at_object_creation(self):
         super().at_object_creation()
-        ai_flags = {"aggressive", "scavenger", "assist", "call_for_help"}
+        ai_flags = {"aggressive", "scavenger", "assist", "call_for_help", "wander"}
         flags = set(self.db.actflags or [])
         if self.db.ai_type or ai_flags.intersection(flags):
             self.tags.add("npc_ai")
