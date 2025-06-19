@@ -67,7 +67,7 @@ class TestSpawnManager(EvenniaTest):
                 1: {
                     "vnum": 1,
                     "area": "testarea",
-                    "spawns": [{"prototype": 5}],
+                    "spawns": [{"prototype": "5"}],
                 }
             }
             fake = mock.Mock()
@@ -118,6 +118,30 @@ class TestSpawnManager(EvenniaTest):
             self.script._spawn(5, self.room)
 
         self.assertEqual(m_fin.call_count, 1)
+
+    def test_force_respawn_numeric_string_limits_count(self):
+        npc = create_object(BaseNPC, key="num")
+        npc.db.prototype_key = 5
+        npc.db.spawn_room = self.room
+        npc.location = self.room
+
+        self.script.db.entries = [
+            {
+                "area": "testarea",
+                "prototype": "5",
+                "room": 1,
+                "room_id": 1,
+                "max_count": 1,
+                "respawn_rate": 5,
+                "last_spawn": 0,
+            }
+        ]
+        with mock.patch("scripts.spawn_manager.spawn_from_vnum") as m_spawn:
+            self.script.force_respawn(1)
+
+        self.assertEqual(m_spawn.call_count, 0)
+        npcs = [obj for obj in self.room.contents if obj.is_typeclass(BaseNPC, exact=False)]
+        self.assertEqual(len(npcs), 1)
 
     def test_spawn_key_finalized_once(self):
         npc = create_object(BaseNPC, key="orc")

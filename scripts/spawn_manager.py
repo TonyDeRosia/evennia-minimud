@@ -14,7 +14,13 @@ from world import prototypes
 
 
 class SpawnManager(Script):
-    """Global manager for spawning NPCs from prototypes."""
+    """Global manager for spawning NPCs from prototypes.
+
+    Prototype identifiers may be provided as integers or numeric strings. The
+    manager normalizes these using :meth:`_normalize_proto` so values like ``5``
+    and ``"5"`` are treated the same when counting existing spawns or looking up
+    prototypes.
+    """
 
     def at_script_creation(self):
         self.key = "spawn_manager"
@@ -45,29 +51,41 @@ class SpawnManager(Script):
                 proto_key = entry.get("prototype") or entry.get("proto")
                 if not proto_key:
                     continue
-                if isinstance(proto_key, int) or (isinstance(proto_key, str) and proto_key.isdigit()):
-                    if not mob_db.get_proto(int(proto_key)):
-                        logger.log_err(f"SpawnManager: missing NPC prototype '{proto_key}' for room spawn")
+                proto_key = self._normalize_proto(proto_key)
+                if isinstance(proto_key, int):
+                    if not mob_db.get_proto(proto_key):
+                        logger.log_err(
+                            f"SpawnManager: missing NPC prototype '{proto_key}' for room spawn"
+                        )
                         continue
                 elif str(proto_key) not in npc_registry:
-                    logger.log_err(f"SpawnManager: missing NPC prototype '{proto_key}' for room spawn")
+                    logger.log_err(
+                        f"SpawnManager: missing NPC prototype '{proto_key}' for room spawn"
+                    )
                     continue
 
                 room_loc = entry.get("location") or proto.get("vnum") or proto.get("room_id")
                 rid = self._normalize_room_id(room_loc)
-                self.db.entries.append({
-                    "area": (proto.get("area") or "").lower(),
-                    "prototype": proto_key,
-                    "room": room_loc,
-                    "room_id": rid,
-                    "max_count": int(entry.get("max_spawns", entry.get("max_count", 1))),
-                    "respawn_rate": int(entry.get("spawn_interval", entry.get("respawn_rate", 60))),
-                    "last_spawn": 0.0,
-                })
+                self.db.entries.append(
+                    {
+                        "area": (proto.get("area") or "").lower(),
+                        "prototype": proto_key,
+                        "room": room_loc,
+                        "room_id": rid,
+                        "max_count": int(
+                            entry.get("max_spawns", entry.get("max_count", 1))
+                        ),
+                        "respawn_rate": int(
+                            entry.get("spawn_interval", entry.get("respawn_rate", 60))
+                        ),
+                        "last_spawn": 0.0,
+                    }
+                )
 
     def record_spawn(self, prototype: Any, room: Any) -> None:
+        norm = self._normalize_proto(prototype)
         for entry in self.db.entries:
-            if entry.get("prototype") == prototype and self._room_match(entry, room):
+            if self._normalize_proto(entry.get("prototype")) == norm and self._room_match(entry, room):
                 entry["last_spawn"] = time.time()
                 break
 
@@ -82,6 +100,7 @@ class SpawnManager(Script):
             proto_key = entry.get("prototype") or entry.get("proto")
             if not proto_key:
                 continue
+            proto_key = self._normalize_proto(proto_key)
             room_val = entry.get("location") or room_id
             self.db.entries.append({
                 "area": (proto.get("area") or "").lower(),
@@ -138,6 +157,17 @@ class SpawnManager(Script):
                 return int(room)
         return None
 
+    def _normalize_proto(self, proto: Any) -> Any:
+        """Return int(proto) if the prototype is numeric."""
+        if isinstance(proto, int):
+            return proto
+        try:
+            if str(proto).isdigit():
+                return int(proto)
+        except Exception:
+            pass
+        return proto
+
     def _room_match(self, stored: Any, room: Any) -> bool:
         if isinstance(stored, dict):
             rid = stored.get("room_id")
@@ -180,14 +210,20 @@ class SpawnManager(Script):
         return None
 
     def _live_count(self, proto: Any, room: Any) -> int:
-        return len([
-            obj for obj in room.contents
-            if obj.db.prototype_key == proto and obj.db.spawn_room == room
-        ])
+        target = self._normalize_proto(proto)
+        return len(
+            [
+                obj
+                for obj in room.contents
+                if self._normalize_proto(getattr(obj.db, "prototype_key", None)) == target
+                and obj.db.spawn_room == room
+            ]
+        )
 
     def _spawn(self, proto: Any, room: Any) -> None:
         npc = None
-        proto_is_digit = isinstance(proto, int) or (isinstance(proto, str) and str(proto).isdigit())
+        proto = self._normalize_proto(proto)
+        proto_is_digit = isinstance(proto, int)
         try:
             if proto_is_digit:
                 npc = spawn_from_vnum(int(proto), location=room)
