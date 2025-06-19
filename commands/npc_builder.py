@@ -86,6 +86,9 @@ def validate_prototype(data: dict) -> list[str]:
     if "sentinel" in actflags and ai_type == "wander":
         warnings.append("Sentinel flag conflicts with wander AI type.")
 
+    if "sentinel" in actflags and "wander" in actflags:
+        warnings.append("Sentinel flag conflicts with wander flag.")
+
     combat_class = data.get("combat_class")
     npc_type = data.get("npc_type")
     try:
