@@ -32,6 +32,8 @@ _cancel = npc_builder._cancel
 _create_npc = npc_builder._create_npc
 validate_prototype = npc_builder.validate_prototype
 format_mob_summary = npc_builder.format_mob_summary
+
+
 def with_summary(caller, text: str) -> str:
     """Prepend the current build summary to ``text``."""
     data = getattr(caller.ndb, "buildnpc", None)
@@ -180,7 +182,11 @@ def _set_weight(caller, raw_string, **kwargs):
             )
             return "menunode_weight"
     caller.ndb.buildnpc["weight"] = string
-    next_step = "menunode_creature_type" if caller.ndb.buildnpc.get("vnum") is not None else "menunode_vnum"
+    next_step = (
+        "menunode_creature_type"
+        if caller.ndb.buildnpc.get("vnum") is not None
+        else "menunode_vnum"
+    )
     return _next_node(caller, next_step)
 
 
@@ -713,7 +719,11 @@ def _edit_loot_table(caller, raw_string, **kwargs):
         proto = parts[0]
         if proto.isdigit():
             vnum = int(proto)
-            if not vnum_registry.VNUM_RANGES["object"][0] <= vnum <= vnum_registry.VNUM_RANGES["object"][1]:
+            if (
+                not vnum_registry.VNUM_RANGES["object"][0]
+                <= vnum
+                <= vnum_registry.VNUM_RANGES["object"][1]
+            ):
                 caller.msg("Invalid object VNUM.")
                 return "menunode_loot_table"
             if not load_prototype("object", vnum):
@@ -1148,7 +1158,7 @@ def menunode_actflags(caller, raw_string="", **kwargs):
     if default:
         text += f" [default: {' '.join(default)}]"
     text += f"\nAvailable: {flags}"
-    text += "\nExample: |wsentinel wander aggressive assist call_for_help|n"
+    text += "\nExample: |wsentinel scavenger aggressive stay_area wander wimpy assist call_for_help noloot|n"
     text += "\n(back to go back, skip for default)"
     options = add_back_skip({"key": "_default", "goto": _set_actflags}, _set_actflags)
     return with_summary(caller, text), options
