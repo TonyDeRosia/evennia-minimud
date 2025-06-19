@@ -16,7 +16,7 @@ class GlobalNPCAI(Script):
         self.persistent = True
 
     def at_repeat(self):
-        for npc in BaseNPC.objects.all():
+        for npc in BaseNPC.objects.filter(db_tags__db_key="npc_ai"):
             if not (npc.db.ai_type or npc.db.actflags):
                 continue
             try:
