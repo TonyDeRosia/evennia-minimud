@@ -685,3 +685,26 @@ def test_retarget_after_defeat():
         engine.process_round()
 
     assert a.db.combat_target is b2
+
+
+def test_remaining_combatants_continue_after_kill():
+    player = Dummy()
+    mob1 = Dummy()
+    mob2 = Dummy()
+    player.location = mob1.location = mob2.location
+    player.db.combat_target = mob1
+    mob1.db.combat_target = player
+    mob2.db.combat_target = player
+
+    engine = CombatEngine([player, mob1, mob2], round_time=0)
+    engine.queue_action(player, KillAction(player, mob1))
+
+    with patch("world.system.state_manager.apply_regen"), patch(
+        "random.randint", return_value=0
+    ):
+        engine.start_round()
+        engine.process_round()
+        engine.process_round()
+
+    assert mob2 in [p.actor for p in engine.participants]
+    assert player.db.combat_target is mob2
