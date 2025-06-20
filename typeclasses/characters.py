@@ -1297,10 +1297,9 @@ class NPC(Character):
         dmg = super().at_damage(attacker, damage, damage_type=damage_type, critical=critical)
         self.check_triggers("on_attack", attacker=attacker, damage=dmg)
 
-        if self.traits.health.value <= 0:
+        if self.traits.health.value <= 0 and not self.attributes.get("_dead"):
             # we've been defeated!
-            if not self.attributes.get("_dead") and not self.in_combat:
-                self.on_death(attacker)
+            self.on_death(attacker)
             return dmg
 
         if "timid" in self.attributes.get("react_as", ""):
