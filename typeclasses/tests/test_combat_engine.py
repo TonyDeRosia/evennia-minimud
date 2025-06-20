@@ -926,3 +926,37 @@ def test_multi_combat_until_one_remains():
 
     assert not engine.participants
     assert player.db.combat_target is None
+
+
+def test_health_current_defeat_removes_participant():
+    class Trait:
+        def __init__(self, val):
+            self.value = val
+            self.current = val
+            self.max = val
+
+    class CurrentDummy(Dummy):
+        def __init__(self, hp=10, init=0):
+            super().__init__(hp, init)
+            self.traits.health = Trait(hp)
+
+    class KillCurrent(Action):
+        def resolve(self):
+            self.target.traits.health.current = 0
+            return CombatResult(self.actor, self.target, "boom")
+
+    attacker = Dummy()
+    defender = CurrentDummy()
+    attacker.db.combat_target = defender
+    defender.db.combat_target = attacker
+
+    engine = CombatEngine([attacker, defender], round_time=0)
+    engine.queue_action(attacker, KillCurrent(attacker, defender))
+
+    with patch("world.system.state_manager.apply_regen"), patch("random.randint", return_value=0):
+        engine.start_round()
+        engine.process_round()
+
+    assert defender.traits.health.value > 0
+    assert defender not in [p.actor for p in engine.participants]
+
