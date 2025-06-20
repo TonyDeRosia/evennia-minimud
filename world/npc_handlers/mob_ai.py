@@ -9,7 +9,7 @@ from random import choice, randint
 from evennia import DefaultObject
 from evennia.utils import logger
 from typeclasses.npcs import BaseNPC
-from combat.ai_combat import npc_take_turn
+from combat.combat_ai.npc_logic import npc_take_turn
 
 
 @dataclass
