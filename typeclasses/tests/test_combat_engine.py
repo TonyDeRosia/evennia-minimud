@@ -297,9 +297,12 @@ class TestCombatDeath(EvenniaTest):
         engine.queue_action(player, KillAction(player, npc))
 
         with patch('world.system.state_manager.apply_regen'), \
-             patch('world.system.state_manager.check_level_up'):
+             patch('world.system.state_manager.check_level_up'), \
+             patch.object(npc, 'award_xp_to', wraps=npc.award_xp_to) as mock_xp:
             engine.start_round()
             engine.process_round()
+
+        mock_xp.assert_not_called()
 
         self.assertEqual(player.db.experience, 5)
         self.assertEqual(to_copper(player.db.coins), to_copper({"silver": 3}))

@@ -110,6 +110,7 @@ class DamageProcessor:
 
         if hasattr(target, "on_death"):
             target.on_death(attacker)
+        self.engine.award_experience(attacker, target)
 
         if getattr(target, "pk", None) is not None:
             self.update_pos(target)

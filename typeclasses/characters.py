@@ -1167,7 +1167,8 @@ class NPC(Character):
                 self.location.msg_contents(f"{self.key} dies.")
 
         # award experience to the attacker before removing the NPC
-        self.award_xp_to(attacker)
+        if not (attacker and getattr(getattr(attacker, "db", None), "in_combat", False)):
+            self.award_xp_to(attacker)
 
         if attacker and getattr(attacker.db, "combat_target", None) is self:
             attacker.db.combat_target = None
