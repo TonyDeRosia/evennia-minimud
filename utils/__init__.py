@@ -11,6 +11,7 @@ try:  # optional during early initialization
         auto_calc,
         auto_calc_secondary,
         make_corpse,
+        spawn_corpse,
     )
 except Exception:  # pragma: no cover - may fail before Django setup
     pass
