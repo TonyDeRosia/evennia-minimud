@@ -190,6 +190,7 @@ Combat System
 Modular combat using a 2-second tick:
 
 ```python
+from combat.combat_manager import CombatRoundManager
 CombatRoundManager.get().start_combat([fighter1, fighter2])
 ```
 

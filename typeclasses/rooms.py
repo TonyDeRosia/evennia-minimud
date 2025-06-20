@@ -54,7 +54,7 @@ class RoomParent(ObjectParent):
 
     def at_object_leave(self, mover, destination, **kwargs):
         super().at_object_leave(mover, destination, **kwargs)
-        from combat.round_manager import leave_combat
+        from combat.combat_manager import leave_combat
         leave_combat(mover)
         if "character" in mover._content_types:
             for obj in self.contents_get(content_type="character"):
