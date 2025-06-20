@@ -940,17 +940,19 @@ class PlayerCharacter(Character):
         from world import prototypes
 
         for part in BODYPARTS:
-            proto_name = f"{part.name}_PART"
-            proto = getattr(prototypes, proto_name, None)
-            if proto:
-                obj = spawn(proto)[0]
-                obj.location = corpse
-            else:
-                create_object(
-                    "typeclasses.objects.Object",
-                    key=part.value,
-                    location=corpse,
-                )
+            # randomly decide if this body part should spawn for the player
+            if randint(1, 100) <= 50:
+                proto_name = f"{part.name}_PART"
+                proto = getattr(prototypes, proto_name, None)
+                if proto:
+                    obj = spawn(proto)[0]
+                    obj.location = corpse
+                else:
+                    create_object(
+                        "typeclasses.objects.Object",
+                        key=part.value,
+                        location=corpse,
+                    )
         self.at_death(attacker)
         if attacker:
             self.msg(f"You are slain by {attacker.get_display_name(self)}!")
