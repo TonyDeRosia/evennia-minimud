@@ -541,6 +541,35 @@ class TestCombatDeath(EvenniaTest):
         self.assertEqual(corpse.db.npc_vnum, npc.db.vnum)
         self.assertNotIn(npc, self.room1.contents)
 
+    def test_health_current_defeat_creates_corpse(self):
+        """NPCs with zero current health should die and leave a corpse."""
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        player = self.char1
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+
+        class KillCurrent(Action):
+            def resolve(self):
+                npc.traits.health.current = 0
+                return CombatResult(self.actor, npc, "boom")
+
+        engine = CombatEngine([player, npc], round_time=0)
+        engine.queue_action(player, KillCurrent(player, npc))
+
+        with patch("world.system.state_manager.apply_regen"), patch("random.randint", return_value=0):
+            engine.start_round()
+            engine.process_round()
+
+        corpse = next(
+            obj
+            for obj in self.room1.contents
+            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+        )
+        self.assertNotIn(npc, [p.actor for p in engine.participants])
+        self.assertEqual(corpse.db.corpse_of, npc.key)
+
 
 class TestCombatNPCTurn(EvenniaTest):
     def test_at_combat_turn_auto_attack(self):
