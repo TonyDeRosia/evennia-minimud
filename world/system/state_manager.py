@@ -373,8 +373,12 @@ def level_up(chara, excess: int = 0) -> None:
     stat_manager.refresh_stats(chara)
 
 
-def gain_xp(chara, amount: int) -> None:
-    """Increase ``chara.db.experience`` and check for leveling."""
+def gain_xp(chara, amount: int, announce: bool = False) -> None:
+    """Increase ``chara.db.experience`` and check for leveling.
+
+    If ``announce`` is ``True`` and ``chara`` has a ``msg`` method, the
+    character will be notified of the experience gained.
+    """
 
     if not chara or not amount:
         return
@@ -383,6 +387,9 @@ def gain_xp(chara, amount: int) -> None:
     current_level = int(chara.db.level or 1)
     chara.db.experience = (chara.db.experience or 0) + amt
     chara.db.tnl = (chara.db.tnl or settings.XP_TO_LEVEL(current_level)) - amt
+
+    if announce and hasattr(chara, "msg"):
+        chara.msg(f"You gain |Y{amt}|n experience points!")
 
     while chara.db.tnl <= 0 and (chara.db.level or 1) < MAX_LEVEL:
         excess = -chara.db.tnl

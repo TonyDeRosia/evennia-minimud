@@ -290,7 +290,7 @@ class CmdDonate(Command):
             obj.delete()
 
         from world.system import state_manager
-        state_manager.gain_xp(self.caller, total)
+        state_manager.gain_xp(self.caller, total, announce=True)
 
         self.msg(f"You exchange {obj_name} for {total} experience.")
 
