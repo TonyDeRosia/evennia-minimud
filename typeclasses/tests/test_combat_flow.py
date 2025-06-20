@@ -249,6 +249,49 @@ class TestCombatVictory(unittest.TestCase):
         self.assertIn(a, [p.actor for p in engine.participants])
         self.assertIn(c, [p.actor for p in engine.participants])
 
+    def test_handle_defeat_with_missing_targets(self):
+        a = Dummy()
+        b = Dummy()
+        c = Dummy()
+        room = MagicMock()
+        room.contents = [a, b, c]
+        a.location = b.location = c.location = room
+
+        a.db.combat_target = b
+        b.db.combat_target = None
+        c.db.combat_target = None
+
+        engine = CombatEngine([a, b, c], round_time=0)
+        engine.queue_action(a, KillAction(a, b))
+
+        with patch("world.system.state_manager.apply_regen"):
+            engine.start_round()
+            engine.process_round()
+
+        self.assertIn(a, [p.actor for p in engine.participants])
+        self.assertIn(c, [p.actor for p in engine.participants])
+        self.assertNotIn(b, [p.actor for p in engine.participants])
+
+    def test_handle_defeat_ignores_items_in_room(self):
+        a = Dummy()
+        b = Dummy()
+        item = object()
+        room = MagicMock()
+        room.contents = [a, b, item]
+        a.location = b.location = room
+
+        a.db.combat_target = b
+
+        engine = CombatEngine([a, b], round_time=0)
+        engine.queue_action(a, KillAction(a, b))
+
+        with patch("world.system.state_manager.apply_regen"):
+            engine.start_round()
+            engine.process_round()
+
+        self.assertNotIn(b, [p.actor for p in engine.participants])
+        self.assertNotIn(item, [p.actor for p in engine.participants])
+
 
 class TestNPCBehaviors(unittest.TestCase):
     def test_low_hp_triggers_callback(self):

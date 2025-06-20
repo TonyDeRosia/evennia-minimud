@@ -141,7 +141,11 @@ class DamageProcessor:
             if combatant is target:
                 continue
             current = getattr(getattr(combatant, "db", None), "combat_target", None)
-            needs_new = current is target or _current_hp(current) <= 0
+            has_hp = current and (
+                hasattr(current, "hp")
+                or getattr(getattr(current, "traits", None), "health", None) is not None
+            )
+            needs_new = current is target or not has_hp or (has_hp and _current_hp(current) <= 0)
             if needs_new:
                 remaining = [c for c in survivors if c is not combatant]
                 new_target = remaining[0] if remaining else None
@@ -164,6 +168,11 @@ class DamageProcessor:
             room = getattr(target, "location", None)
             if room:
                 for obj in room.contents:
+                    has_hp = hasattr(obj, "hp") or getattr(
+                        getattr(obj, "traits", None), "health", None
+                    ) is not None
+                    if not has_hp:
+                        continue
                     if obj in inst.combatants:
                         continue
                     if _current_hp(obj) <= 0:
