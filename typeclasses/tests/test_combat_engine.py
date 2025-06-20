@@ -570,123 +570,123 @@ class TestCombatDeath(EvenniaTest):
         self.assertNotIn(npc, [p.actor for p in engine.participants])
         self.assertEqual(corpse.db.corpse_of, npc.key)
 
-  def test_player_kills_multiple_npcs_creates_multiple_corpses_and_awards_xp(self):
-      """Killing two NPCs should produce two corpses, loot, and combined XP."""
-      from evennia.utils import create
-      from typeclasses.characters import NPC
+    def test_player_kills_multiple_npcs_creates_multiple_corpses_and_awards_xp(self):
+        """Killing two NPCs should produce two corpses, loot, and combined XP."""
+        from evennia.utils import create
+        from typeclasses.characters import NPC
 
-      player = self.char1
-      player.db.experience = 0
-      npc1 = create.create_object(NPC, key="mob1", location=self.room1)
-      npc2 = create.create_object(NPC, key="mob2", location=self.room1)
+        player = self.char1
+        player.db.experience = 0
+        npc1 = create.create_object(NPC, key="mob1", location=self.room1)
+        npc2 = create.create_object(NPC, key="mob2", location=self.room1)
 
-      for npc in (npc1, npc2):
-          npc.db.drops = []
-      npc1.db.exp_reward = 5
-      npc2.db.exp_reward = 7
+        for npc in (npc1, npc2):
+            npc.db.drops = []
+        npc1.db.exp_reward = 5
+        npc2.db.exp_reward = 7
 
-      loot1 = create.create_object("typeclasses.objects.Object", key="loot1", location=npc1)
-      loot2 = create.create_object("typeclasses.objects.Object", key="loot2", location=npc2)
+        loot1 = create.create_object("typeclasses.objects.Object", key="loot1", location=npc1)
+        loot2 = create.create_object("typeclasses.objects.Object", key="loot2", location=npc2)
 
-      engine = CombatEngine([player, npc1, npc2], round_time=0)
+        engine = CombatEngine([player, npc1, npc2], round_time=0)
 
-      # Kill first NPC
-      engine.queue_action(player, KillAction(player, npc1))
-      with patch("world.system.state_manager.apply_regen"), patch(
-          "world.system.state_manager.check_level_up"
-      ), patch("random.randint", return_value=0):
-          engine.start_round()
-          engine.process_round()
+        # Kill first NPC
+        engine.queue_action(player, KillAction(player, npc1))
+        with patch("world.system.state_manager.apply_regen"), patch(
+            "world.system.state_manager.check_level_up"
+        ), patch("random.randint", return_value=0):
+            engine.start_round()
+            engine.process_round()
 
-      # Kill second NPC
-      engine.queue_action(player, KillAction(player, npc2))
-      with patch("world.system.state_manager.apply_regen"), patch(
-          "world.system.state_manager.check_level_up"
-      ), patch("random.randint", return_value=0):
-          engine.process_round()
+        # Kill second NPC
+        engine.queue_action(player, KillAction(player, npc2))
+        with patch("world.system.state_manager.apply_regen"), patch(
+            "world.system.state_manager.check_level_up"
+        ), patch("random.randint", return_value=0):
+            engine.process_round()
 
-      # Verify two corpses were created
-      corpses = [
-          obj
-          for obj in self.room1.contents
-          if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
-      ]
-      self.assertEqual(len(corpses), 2)
+        # Verify two corpses were created
+        corpses = [
+            obj
+            for obj in self.room1.contents
+            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+        ]
+        self.assertEqual(len(corpses), 2)
 
-      # Verify correct corpse mapping
-      corpse1 = next(c for c in corpses if c.db.corpse_of == npc1.key)
-      corpse2 = next(c for c in corpses if c.db.corpse_of == npc2.key)
+        # Verify correct corpse mapping
+        corpse1 = next(c for c in corpses if c.db.corpse_of == npc1.key)
+        corpse2 = next(c for c in corpses if c.db.corpse_of == npc2.key)
 
-      # Verify loot transfer
-      self.assertIn(loot1, corpse1.contents)
-      self.assertIn(loot2, corpse2.contents)
+        # Verify loot transfer
+        self.assertIn(loot1, corpse1.contents)
+        self.assertIn(loot2, corpse2.contents)
 
-      # Verify combined XP award
-      total_xp = npc1.db.exp_reward + npc2.db.exp_reward
-      self.assertEqual(player.db.experience, total_xp)
+        # Verify combined XP award
+        total_xp = npc1.db.exp_reward + npc2.db.exp_reward
+        self.assertEqual(player.db.experience, total_xp)
 
-  def test_manual_death_when_flagged_in_combat_creates_corpse(self):
-      """Setting hp to 0 outside the engine should still create a corpse."""
-      from evennia.utils import create
-      from typeclasses.characters import NPC
+    def test_manual_death_when_flagged_in_combat_creates_corpse(self):
+        """Setting hp to 0 outside the engine should still create a corpse."""
+        from evennia.utils import create
+        from typeclasses.characters import NPC
 
-      npc = create.create_object(NPC, key="mob", location=self.room1)
-      npc.db.drops = []
-      npc.db.in_combat = True
-      npc.traits.health.current = 0
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+        npc.db.in_combat = True
+        npc.traits.health.current = 0
 
-      corpse = create.create_object('typeclasses.objects.Object', key='corpse', location=None)
+        corpse = create.create_object('typeclasses.objects.Object', key='corpse', location=None)
 
-      with patch('world.system.state_manager.check_level_up'), \
-           patch('typeclasses.characters.make_corpse', return_value=corpse) as mock_make:
-          npc.at_damage(self.char1, 0)
+        with patch('world.system.state_manager.check_level_up'), \
+             patch('typeclasses.scripts.CorpseSpawner.spawn_for', return_value=corpse) as mock_spawn:
+            npc.at_damage(self.char1, 0)
 
-      mock_make.assert_called_once_with(npc)
-      self.assertIs(corpse.location, self.room1)
+        mock_spawn.assert_called_once_with(npc, self.char1)
+        self.assertIs(corpse.location, self.room1)
 
-  def test_multi_target_kill_spawns_corpses_and_awards_xp(self):
-      """Killing two NPCs at once should create two corpses and grant XP."""
-      from evennia.utils import create
-      from typeclasses.characters import NPC
+    def test_multi_target_kill_spawns_corpses_and_awards_xp(self):
+        """Killing two NPCs at once should create two corpses and grant XP."""
+        from evennia.utils import create
+        from typeclasses.characters import NPC
 
-      player = self.char1
-      player.db.experience = 0
-      npc1 = create.create_object(NPC, key="mob1", location=self.room1)
-      npc2 = create.create_object(NPC, key="mob2", location=self.room1)
+        player = self.char1
+        player.db.experience = 0
+        npc1 = create.create_object(NPC, key="mob1", location=self.room1)
+        npc2 = create.create_object(NPC, key="mob2", location=self.room1)
 
-      for npc in (npc1, npc2):
-          npc.db.drops = []
-          npc.db.exp_reward = 3
-          npc.ndb.damage_log = {player: 5}
+        for npc in (npc1, npc2):
+            npc.db.drops = []
+            npc.db.exp_reward = 3
+            npc.ndb.damage_log = {player: 5}
 
-      class KillBoth(Action):
-          def __init__(self, actor, target, other):
-              super().__init__(actor, target)
-              self.other = other
+        class KillBoth(Action):
+            def __init__(self, actor, target, other):
+                super().__init__(actor, target)
+                self.other = other
 
-          def resolve(self):
-              npc1.traits.health.current = 0
-              npc2.traits.health.current = 0
-              return CombatResult(self.actor, npc1, "boom")
+            def resolve(self):
+                npc1.traits.health.current = 0
+                npc2.traits.health.current = 0
+                return CombatResult(self.actor, npc1, "boom")
 
-      engine = CombatEngine([player, npc1, npc2], round_time=0)
-      engine.queue_action(player, KillBoth(player, npc1, npc2))
+        engine = CombatEngine([player, npc1, npc2], round_time=0)
+        engine.queue_action(player, KillBoth(player, npc1, npc2))
 
-      with patch("world.system.state_manager.apply_regen"), patch(
-          "world.system.state_manager.check_level_up"
-      ), patch("random.randint", return_value=0):
-          engine.start_round()
-          engine.process_round()
+        with patch("world.system.state_manager.apply_regen"), patch(
+            "world.system.state_manager.check_level_up"
+        ), patch("random.randint", return_value=0):
+            engine.start_round()
+            engine.process_round()
 
-      corpses = [
-          obj
-          for obj in self.room1.contents
-          if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
-      ]
-      self.assertEqual(len(corpses), 2)
-      self.assertIn(npc1.key, [c.db.corpse_of for c in corpses])
-      self.assertIn(npc2.key, [c.db.corpse_of for c in corpses])
-      self.assertEqual(player.db.experience, npc1.db.exp_reward + npc2.db.exp_reward)
+        corpses = [
+            obj
+            for obj in self.room1.contents
+            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+        ]
+        self.assertEqual(len(corpses), 2)
+        self.assertIn(npc1.key, [c.db.corpse_of for c in corpses])
+        self.assertIn(npc2.key, [c.db.corpse_of for c in corpses])
+        self.assertEqual(player.db.experience, npc1.db.exp_reward + npc2.db.exp_reward)
 
 
 class TestCombatNPCTurn(EvenniaTest):
