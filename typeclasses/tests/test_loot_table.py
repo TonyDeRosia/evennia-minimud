@@ -1,4 +1,16 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
+
+
+class DummyObj:
+    """Simple stand-in object for spawn results in tests."""
+
+    def __init__(self):
+        self.location = None
+
+    def move_to(self, dest, quiet=False):
+        self.location = dest
+
+
 from evennia.utils import create
 from evennia.utils.test_resources import EvenniaTest
 from utils.currency import from_copper, to_copper
@@ -15,7 +27,7 @@ class TestNPCLootTable(EvenniaTest):
         npc.traits.health.current = 1
         proto_data = {"key": "ruby dagger"}
         with patch("utils.prototype_manager.load_prototype", return_value=proto_data) as load_mock, \
-             patch("evennia.prototypes.spawner.spawn", return_value=[MagicMock()]) as mock_spawn:
+             patch("evennia.prototypes.spawner.spawn", return_value=[DummyObj()]) as mock_spawn:
             room = npc.location
             npc.at_damage(self.char1, 2)
             load_mock.assert_called_with("object", 100001)
@@ -37,7 +49,7 @@ class TestNPCLootTable(EvenniaTest):
         npc.db.drops = []
         npc.db.loot_table = [{"proto": "RAW_MEAT", "chance": 0, "guaranteed_after": 2}]
         npc.traits.health.current = 1
-        with patch("evennia.prototypes.spawner.spawn", return_value=[MagicMock()]) as mock_spawn, \
+        with patch("evennia.prototypes.spawner.spawn", return_value=[DummyObj()]) as mock_spawn, \
              patch("typeclasses.characters.randint", return_value=100), \
              patch.object(npc, "delete"):
             npc.at_damage(self.char1, 2)  # first kill, no drop
