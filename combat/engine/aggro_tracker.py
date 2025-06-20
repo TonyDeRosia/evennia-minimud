@@ -43,4 +43,5 @@ class AggroTracker:
 
         contributors = self.contributors(victim, active) or [attacker]
         award_xp(attacker, exp, contributors)
+        self.table.pop(victim, None)
 
