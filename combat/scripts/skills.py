@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import Optional, Union
 
-from ..combat_actions import SkillAction
-from ..combat_skills import SKILL_CLASSES, Skill
+from combat.combat_actions import SkillAction
+from combat.combat_skills import SKILL_CLASSES, Skill
 from world.skills.utils import maybe_start_combat
 
 
