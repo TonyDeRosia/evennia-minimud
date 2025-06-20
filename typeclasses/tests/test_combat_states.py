@@ -1,5 +1,5 @@
 import unittest
-from combat.combat_states import CombatState, CombatStateManager
+from combat.effects import StatusEffect, EffectManager
 
 
 class Dummy:
@@ -8,24 +8,24 @@ class Dummy:
 
 class TestCombatStates(unittest.TestCase):
     def test_stacking_and_diminish(self):
-        mgr = CombatStateManager()
+        mgr = EffectManager()
         obj = Dummy()
-        base = CombatState(key="bleeding", duration=4, max_stacks=3, diminish=0.5)
-        mgr.add_state(obj, base)
-        self.assertEqual(mgr.states[obj]["bleeding"].duration, 4)
-        self.assertEqual(mgr.states[obj]["bleeding"].stacks, 1)
+        base = StatusEffect(key="bleeding", duration=4, max_stacks=3, diminish=0.5)
+        mgr.add_effect(obj, base)
+        self.assertEqual(mgr.effects[obj]["bleeding"].duration, 4)
+        self.assertEqual(mgr.effects[obj]["bleeding"].stacks, 1)
 
-        mgr.add_state(obj, CombatState(key="bleeding", duration=4, max_stacks=3, diminish=0.5))
-        self.assertEqual(mgr.states[obj]["bleeding"].stacks, 2)
-        self.assertEqual(mgr.states[obj]["bleeding"].duration, 6)
+        mgr.add_effect(obj, StatusEffect(key="bleeding", duration=4, max_stacks=3, diminish=0.5))
+        self.assertEqual(mgr.effects[obj]["bleeding"].stacks, 2)
+        self.assertEqual(mgr.effects[obj]["bleeding"].duration, 6)
 
-        mgr.add_state(obj, CombatState(key="bleeding", duration=4, max_stacks=3, diminish=0.5))
-        self.assertEqual(mgr.states[obj]["bleeding"].stacks, 3)
-        self.assertEqual(mgr.states[obj]["bleeding"].duration, 7)
+        mgr.add_effect(obj, StatusEffect(key="bleeding", duration=4, max_stacks=3, diminish=0.5))
+        self.assertEqual(mgr.effects[obj]["bleeding"].stacks, 3)
+        self.assertEqual(mgr.effects[obj]["bleeding"].duration, 7)
 
-        mgr.add_state(obj, CombatState(key="bleeding", duration=4, max_stacks=3, diminish=0.5))
-        self.assertEqual(mgr.states[obj]["bleeding"].stacks, 3)
-        self.assertEqual(mgr.states[obj]["bleeding"].duration, 8)
+        mgr.add_effect(obj, StatusEffect(key="bleeding", duration=4, max_stacks=3, diminish=0.5))
+        self.assertEqual(mgr.effects[obj]["bleeding"].stacks, 3)
+        self.assertEqual(mgr.effects[obj]["bleeding"].duration, 8)
 
     def test_callbacks(self):
         events = []
@@ -39,28 +39,28 @@ class TestCombatStates(unittest.TestCase):
         def on_expire(o, s):
             events.append("expire")
 
-        mgr = CombatStateManager()
+        mgr = EffectManager()
         obj = Dummy()
-        state = CombatState(
+        state = StatusEffect(
             key="bleeding",
             duration=1,
             on_apply=on_apply,
             on_tick=on_tick,
             on_expire=on_expire,
         )
-        mgr.add_state(obj, state)
+        mgr.add_effect(obj, state)
         mgr.tick()
 
         self.assertEqual(events, ["apply", "tick", "expire"])
 
     def test_states_removed_when_object_deleted(self):
-        mgr = CombatStateManager()
+        mgr = EffectManager()
         obj = Dummy()
-        mgr.add_state(obj, CombatState(key="bleeding", duration=1))
-        self.assertIn(obj, mgr.states)
+        mgr.add_effect(obj, StatusEffect(key="bleeding", duration=1))
+        self.assertIn(obj, mgr.effects)
         del obj
         import gc
 
         gc.collect()
-        self.assertEqual(len(mgr.states), 0)
+        self.assertEqual(len(mgr.effects), 0)
 
