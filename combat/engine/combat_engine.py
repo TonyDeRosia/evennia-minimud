@@ -5,8 +5,8 @@ from __future__ import annotations
 from typing import Iterable
 
 from .turn_manager import TurnManager
-from .aggro_tracker import AggroTracker
-from .damage_processor import DamageProcessor
+from ..aggro_tracker import AggroTracker
+from ..damage_processor import DamageProcessor
 from evennia.utils.logger import log_trace
 
 

@@ -6,12 +6,12 @@ from typing import Dict, List
 from evennia.utils import delay
 from django.conf import settings
 
-from ..combatants import CombatParticipant, _current_hp
-from ..combat_utils import format_combat_message
-from combat.corpse_creation import spawn_corpse
-from .turn_manager import TurnManager
+from .combatants import CombatParticipant, _current_hp
+from .combat_utils import format_combat_message
+from .corpse_creation import spawn_corpse
+from .engine.turn_manager import TurnManager
 from .aggro_tracker import AggroTracker
-from ..damage_types import DamageType
+from .damage_types import DamageType
 from world.system import state_manager
 
 
