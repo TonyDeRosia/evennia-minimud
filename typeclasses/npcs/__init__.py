@@ -12,6 +12,8 @@ class BaseNPC(NPC):
         flags = set(self.db.actflags or [])
         if self.db.ai_type or ai_flags.intersection(flags):
             self.tags.add("npc_ai")
+        if "assist" in flags:
+            self.db.auto_assist = True
 
 from .merchant import MerchantNPC  # noqa: E402
 from .banker import BankerNPC  # noqa: E402

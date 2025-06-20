@@ -45,6 +45,7 @@ class Character(ObjectParent, ClothedCharacter):
     spells = AttributeProperty([])
     training_points = AttributeProperty(0)
     practice_sessions = AttributeProperty(0)
+    auto_assist = AttributeProperty(False)
 
     @property
     def in_combat(self):

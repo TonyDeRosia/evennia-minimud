@@ -378,6 +378,27 @@ class CmdRevive(Command):
             self.msg(f"You revive {target.get_display_name(caller)}.")
 
 
+class CmdAutoAssist(Command):
+    """Toggle automatically assisting allies."""
+
+    key = "autoassist"
+    help_category = "Combat"
+
+    def func(self):
+        caller = self.caller
+        arg = self.args.strip().lower()
+        if not arg:
+            state = "|GON|n" if caller.db.auto_assist else "|ROFF|n"
+            self.msg(f"Auto-assist is {state}.")
+            return
+        if arg in ("on", "off"):
+            caller.db.auto_assist = arg == "on"
+            state = "|GON|n" if caller.db.auto_assist else "|ROFF|n"
+            self.msg(f"Auto-assist has been set {state}.")
+        else:
+            self.msg("Usage: autoassist [on/off]")
+
+
 class CmdStatus(Command):
     key = "status"
     aliases = ("hp", "stat")
@@ -411,4 +432,5 @@ class CombatCmdSet(CmdSet):
         self.add(CmdUnwield)
         self.add(CmdRevive)
         self.add(CmdRespawn)
+        self.add(CmdAutoAssist)
         self.add(CmdStatus)
