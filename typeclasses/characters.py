@@ -248,7 +248,6 @@ class Character(ObjectParent, ClothedCharacter):
         self.db.training_points = 0
         self.db.practice_sessions = 0
         from django.conf import settings
-
         self.db.level = 1
         self.db.experience = 0
         self.db.tnl = settings.XP_TO_LEVEL(1)
@@ -373,17 +372,12 @@ class Character(ObjectParent, ClothedCharacter):
         reduction = self.defense(damage_type)
         armor = max(0, reduction)
         if attacker:
-            armor = max(
-                0, armor - state_manager.get_effective_stat(attacker, "piercing")
-            )
+            armor = max(0, armor - state_manager.get_effective_stat(attacker, "piercing"))
         damage = int(max(0, round(damage * (1 - armor / 100))))
         if attacker:
             log = getattr(self.ndb, "damage_log", None) or {}
             log[attacker] = log.get(attacker, 0) + int(damage)
             self.ndb.damage_log = log
-            # track the most recent attacker so on_exit_combat can
-            # attribute loot drops correctly
-            self.ndb.last_attacker = attacker
 
         dt = None
         if damage_type:
@@ -402,16 +396,13 @@ class Character(ObjectParent, ClothedCharacter):
             damage = int(damage * get_damage_multiplier(resistances, dt))
 
         # magic resist mitigation
-        if dt and dt not in (
-            DamageType.SLASHING,
-            DamageType.PIERCING,
-            DamageType.BLUDGEONING,
-        ):
+        if dt and dt not in (DamageType.SLASHING, DamageType.PIERCING, DamageType.BLUDGEONING):
             mres = state_manager.get_effective_stat(self, "magic_resist")
             if attacker:
                 mres -= state_manager.get_effective_stat(attacker, "spell_penetration")
             if mres > 0:
                 damage = max(0, damage - mres)
+
 
         self.traits.health.current -= damage
         crit_prefix = "|rCritical!|n " if critical else ""
@@ -443,7 +434,6 @@ class Character(ObjectParent, ClothedCharacter):
             self.traits.health.rate = 0
             if not self.in_combat and not self.attributes.get("_dead"):
                 from combat.round_manager import leave_combat
-
                 leave_combat(self)
                 if bounty := self.db.bounty:
                     wallet = attacker.db.coins or {}
@@ -452,7 +442,6 @@ class Character(ObjectParent, ClothedCharacter):
                 if utils.inherits_from(self, PlayerCharacter):
                     self.on_death(attacker)
         return damage
-
     def at_emote(self, message, **kwargs):
         """
         Execute a room emote as ourself.
@@ -616,7 +605,6 @@ class Character(ObjectParent, ClothedCharacter):
         Attempt to use a skill, applying any stat bonus as necessary.
         """
         from world.system import state_manager
-
         target = kwargs.get("target")
 
         # using an active combat skill if a target is provided
@@ -625,26 +613,17 @@ class Character(ObjectParent, ClothedCharacter):
 
             skill_cls = SKILL_CLASSES.get(skill_name)
             if not skill_cls:
-                return CombatResult(
-                    actor=self, target=target, message="Nothing happens."
-                )
+                return CombatResult(actor=self, target=target, message="Nothing happens.")
             skill = skill_cls()
             if not self.cooldowns.ready(skill.name):
-                return CombatResult(
-                    actor=self, target=self, message="Still recovering."
-                )
+                return CombatResult(actor=self, target=self, message="Still recovering.")
             if self.traits.stamina.current < skill.stamina_cost:
                 return CombatResult(actor=self, target=self, message="Too exhausted.")
             self.traits.stamina.current -= skill.stamina_cost
             state_manager.add_cooldown(self, skill.name, skill.cooldown)
             from utils.hit_chance import calculate_hit_success
-
-            if not calculate_hit_success(
-                self, skill.name, getattr(skill, "support_skill", None)
-            ):
-                return CombatResult(
-                    actor=self, target=target, message="You miss your strike."
-                )
+            if not calculate_hit_success(self, skill.name, getattr(skill, "support_skill", None)):
+                return CombatResult(actor=self, target=target, message="You miss your strike.")
             result = skill.resolve(self, target)
             for eff in getattr(skill, "effects", []):
                 state_manager.add_status_effect(target, eff.key, eff.duration)
@@ -689,10 +668,7 @@ class Character(ObjectParent, ClothedCharacter):
         self.traits.mana.current -= spell.mana_cost
         state_manager.add_cooldown(self, spell.key, spell.cooldown)
         from utils.hit_chance import calculate_hit_success
-
-        if not calculate_hit_success(
-            self, spell.key, getattr(spell, "support_skill", None)
-        ):
+        if not calculate_hit_success(self, spell.key, getattr(spell, "support_skill", None)):
             self.msg("You fail to cast the spell.")
             return False
         colored = colorize_spell(spell.key)
@@ -852,7 +828,6 @@ class Character(ObjectParent, ClothedCharacter):
         if getattr(self.db, "natural_weapon", None):
             return self.db.natural_weapon
         from typeclasses.gear import BareHand
-
         return BareHand()
 
     def attack(self, target, weapon, **kwargs):
@@ -870,9 +845,7 @@ class Character(ObjectParent, ClothedCharacter):
                 self.msg("You don't see your target.")
             return
 
-        if not getattr(target, "traits", None) or not callable(
-            getattr(target, "at_damage", None)
-        ):
+        if not getattr(target, "traits", None) or not callable(getattr(target, "at_damage", None)):
             if self.sessions.count():
                 self.msg("You can't attack that.")
             return
@@ -894,6 +867,7 @@ class Character(ObjectParent, ClothedCharacter):
 
         if hasattr(self, "check_triggers"):
             self.check_triggers("on_attack", target=target, weapon=weapon)
+
 
     def revive(self, reviver, **kwargs):
         """
@@ -935,9 +909,7 @@ class PlayerCharacter(Character):
         return f"|g{name}|n"
 
     def at_damage(self, attacker, damage, damage_type=None, critical=False):
-        dmg = super().at_damage(
-            attacker, damage, damage_type=damage_type, critical=critical
-        )
+        dmg = super().at_damage(attacker, damage, damage_type=damage_type, critical=critical)
         if self.traits.health.value < 50 and self.sessions.count():
             self.refresh_prompt()
         return dmg
@@ -949,7 +921,6 @@ class PlayerCharacter(Character):
 
         # remove from combat if engaged
         from combat.round_manager import leave_combat
-
         leave_combat(self)
         # create a corpse object and reuse shared logic
         corpse = make_corpse(self)
@@ -1012,6 +983,7 @@ class PlayerCharacter(Character):
             self.traits.stamina.rate = 0.0
         self.msg(prompt=self.get_display_status(self))
 
+
     def respawn(self):
         """
         Resets the character back to the spawn point with full health.
@@ -1037,9 +1009,7 @@ class PlayerCharacter(Character):
         for slot, item in self.equipment.items():
             if not item:
                 continue
-            if not item.access(looker, "view") or not item.access(
-                looker, "search", default=True
-            ):
+            if not item.access(looker, "view") or not item.access(looker, "search", default=True):
                 continue
             if hasattr(looker, "can_see") and not looker.can_see(item):
                 continue
@@ -1079,17 +1049,6 @@ class NPC(Character):
             self.db.triggers = {}
         self.trigger_manager.start_random_triggers()
 
-    def on_exit_combat(self):
-        """Handle cleanup when this NPC leaves combat."""
-        if self.traits.health.current <= 0 and not getattr(
-            self.ndb, "_corpse_spawned", False
-        ):
-            attacker = getattr(self.ndb, "last_attacker", None)
-            try:
-                self.drop_loot(attacker)
-            finally:
-                self.ndb._corpse_spawned = True
-
     def check_triggers(self, event, **kwargs):
         """Evaluate stored triggers for a given event."""
         self.trigger_manager.check(event, **kwargs)
@@ -1120,7 +1079,7 @@ class NPC(Character):
                 chance = int(entry.get("chance", 100))
                 guaranteed = entry.get("guaranteed_after")
                 count = entry.get("_count", 0)
-
+                
                 roll = randint(1, 100)
                 if roll <= chance or (
                     guaranteed is not None and count >= int(guaranteed)
@@ -1136,9 +1095,7 @@ class NPC(Character):
                             amt = int(amount)
                         coin_loot[proto.lower()] = coin_loot.get(proto.lower(), 0) + amt
                     else:
-                        if isinstance(proto, int) or (
-                            isinstance(proto, str) and proto.isdigit()
-                        ):
+                        if isinstance(proto, int) or (isinstance(proto, str) and proto.isdigit()):
                             proto_data = load_prototype("object", int(proto))
                             if proto_data:
                                 drops.append(proto_data)
@@ -1189,7 +1146,6 @@ class NPC(Character):
     def award_xp_to(self, attacker):
         """Grant experience reward to ``attacker``."""
         from world.system import state_manager
-
         exp_reward = getattr(self.db, "exp_reward", 0)
         if exp_reward is None:
             exp_reward = 0
@@ -1227,12 +1183,10 @@ class NPC(Character):
         leave_combat(self)
 
         corpse = None
-        if not getattr(self.ndb, "_corpse_spawned", False):
-            try:
-                corpse = self.drop_loot(attacker)
-                self.ndb._corpse_spawned = True
-            except Exception as err:  # pragma: no cover - log errors
-                logger.log_err(f"Loot drop error on {self}: {err}")
+        try:
+            corpse = self.drop_loot(attacker)
+        except Exception as err:  # pragma: no cover - log errors
+            logger.log_err(f"Loot drop error on {self}: {err}")
 
         if corpse:
             if getattr(self.db, "vnum", None) is not None:
@@ -1340,9 +1294,7 @@ class NPC(Character):
         """
         Apply damage, after taking into account damage resistances.
         """
-        dmg = super().at_damage(
-            attacker, damage, damage_type=damage_type, critical=critical
-        )
+        dmg = super().at_damage(attacker, damage, damage_type=damage_type, critical=critical)
         self.check_triggers("on_attack", attacker=attacker, damage=dmg)
 
         if self.traits.health.value <= 0:
@@ -1355,7 +1307,6 @@ class NPC(Character):
             self.at_emote("flees!")
             self.db.fleeing = True
             from combat.round_manager import leave_combat
-
             leave_combat(self)
             # there's a 50/50 chance the object will escape forever
             if randint(0, 1):
@@ -1376,7 +1327,6 @@ class NPC(Character):
         else:
             self.db.combat_target = attacker
         return dmg
-
     def enter_combat(self, target, **kwargs):
         """
         initiate combat against another character
@@ -1405,7 +1355,6 @@ class NPC(Character):
 
         if engine:
             from combat.combat_actions import AttackAction
-
             engine.queue_action(self, AttackAction(self, target))
         else:
             self.attack(target, weapon)
@@ -1427,9 +1376,7 @@ class NPC(Character):
         """
         attack with your natural weapon
         """
-        if not getattr(target, "traits", None) or not callable(
-            getattr(target, "at_damage", None)
-        ):
+        if not getattr(target, "traits", None) or not callable(getattr(target, "at_damage", None)):
             if hasattr(wielder, "msg"):
                 wielder.msg("You can't attack that.")
             return
