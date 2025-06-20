@@ -177,6 +177,26 @@ def check_distance(a, b, max_range: int) -> bool:
     return result
 
 
+def damage_adjective(actor, damage: int) -> str:
+    """Return a descriptive adjective for ``damage`` dealt by ``actor``."""
+
+    max_range = state_manager.get_effective_stat(actor, "attack_power")
+    if not max_range:
+        level = getattr(getattr(actor, "db", None), "level", 0) or 0
+        max_range = level * 5
+    max_range = max(max_range, 1)
+
+    if damage >= 0.9 * max_range:
+        return "legendary"
+    if damage >= 0.6 * max_range:
+        return "heavy"
+    if damage >= 0.3 * max_range:
+        return "solid"
+    if damage > 0:
+        return "light"
+    return ""
+
+
 def format_combat_message(
     actor,
     target,
@@ -185,6 +205,7 @@ def format_combat_message(
     *,
     crit: bool = False,
     miss: bool = False,
+    adjective: bool = False,
 ) -> str:
     """Return a standardized combat log message with color coding."""
 
@@ -195,6 +216,9 @@ def format_combat_message(
         return f"|C{a_name}'s {action} misses {t_name}!|n"
 
     if damage is not None:
+        if adjective:
+            adj = damage_adjective(actor, damage)
+            adj = f"{adj} " if adj else ""
         max_range = state_manager.get_effective_stat(actor, "attack_power")
         if not max_range:
             level = getattr(getattr(actor, "db", None), "level", 0) or 0
@@ -213,7 +237,7 @@ def format_combat_message(
             color = "|w"
 
         crit_text = " |y(critical)|n" if crit else ""
-        return f"{a_name} {action} {t_name} for {color}{damage}|n damage{crit_text}"
+        return f"{a_name} {action} {t_name} for {adj}{color}{damage}|n damage{crit_text}"
 
     return f"{a_name} {action} {t_name}!"
 

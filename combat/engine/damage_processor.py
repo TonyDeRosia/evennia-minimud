@@ -40,7 +40,9 @@ class DamageProcessor:
     def dam_message(self, attacker, target, damage: int, *, crit: bool = False) -> None:
         if not attacker or not target or not attacker.location:
             return
-        msg = format_combat_message(attacker, target, "hits", damage, crit=crit)
+        msg = format_combat_message(
+            attacker, target, "hits", damage, crit=crit, adjective=True
+        )
         attacker.location.msg_contents(msg)
 
     def skill_message(self, actor, target, skill: str, success: bool = True) -> None:
