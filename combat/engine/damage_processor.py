@@ -6,7 +6,7 @@ from typing import Dict, List
 from evennia.utils import delay
 from django.conf import settings
 
-from .common import CombatParticipant, _current_hp
+from ..combatants import CombatParticipant, _current_hp
 from ..combat_utils import format_combat_message
 from .turn_manager import TurnManager
 from .aggro_tracker import AggroTracker

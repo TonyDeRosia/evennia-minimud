@@ -6,7 +6,8 @@ from typing import Iterable, List
 
 from world.system import state_manager
 
-from .common import CombatParticipant, _current_hp, HASTE_PER_EXTRA_ATTACK, MAX_ATTACKS_PER_ROUND
+from .common import HASTE_PER_EXTRA_ATTACK, MAX_ATTACKS_PER_ROUND
+from ..combatants import CombatParticipant, _current_hp
 from ..combat_actions import AttackAction, Action
 from ..combat_utils import calculate_initiative
 
