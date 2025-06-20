@@ -12,7 +12,7 @@ from evennia.contrib.game_systems.cooldowns import CooldownHandler
 from evennia.prototypes.spawner import spawn
 from utils.currency import to_copper, from_copper, format_wallet
 from utils import normalize_slot
-from corpse_creation import spawn_corpse
+from combat.corpse_creation import spawn_corpse
 from utils.mob_utils import make_corpse
 from utils.slots import SLOT_ORDER
 from collections.abc import Mapping
