@@ -2,7 +2,7 @@ from evennia import CmdSet
 from evennia.utils.evtable import EvTable
 from .command import Command
 from combat.scripts import get_spell, queue_spell
-from world.spells import Spell, colorize_spell
+from combat.spells import Spell, colorize_spell
 
 
 class CmdSpellbook(Command):

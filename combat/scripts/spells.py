@@ -7,7 +7,7 @@ from typing import Optional
 from world.skills.utils import maybe_start_combat
 
 from ..combat_actions import SpellAction
-from world.spells import SPELLS, Spell
+from combat.spells import SPELLS, Spell
 
 
 def get_spell(key: str) -> Optional[Spell]:

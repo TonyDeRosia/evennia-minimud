@@ -239,7 +239,7 @@ class SpellAction(Action):
             Optional spell target.
         """
         super().__init__(actor, target)
-        from world.spells import SPELLS
+        from combat.spells import SPELLS
 
         self.spell = SPELLS.get(spell_key)
         if self.spell:
@@ -254,7 +254,7 @@ class SpellAction(Action):
         success = getattr(self.actor, "cast_spell", None)
         if callable(success):
             success(self.spell.key, self.target)
-        from world.spells import colorize_spell
+        from combat.spells import colorize_spell
 
         colored = colorize_spell(self.spell.key)
         result = CombatResult(

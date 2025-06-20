@@ -1,5 +1,5 @@
 from evennia.utils.test_resources import EvenniaTest
-from world.spells import colorize_spell
+from combat.spells import colorize_spell
 
 class TestSpellColor(EvenniaTest):
     def test_fire_spell_color(self):
