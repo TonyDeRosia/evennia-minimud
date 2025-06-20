@@ -305,10 +305,10 @@ class DamageProcessor:
         if summary_lines:
             self.round_output.extend(summary_lines)
 
-    def _broadcast_round_output(self) -> None:
-        room = None
-        if self.turn_manager.participants:
-            room = getattr(self.turn_manager.participants[0].actor, "location", None)
+    def _broadcast_round_output(self, room=None) -> None:
+        if room is None:
+            if self.turn_manager.participants:
+                room = getattr(self.turn_manager.participants[0].actor, "location", None)
 
         if room:
             for line in self.round_output:
@@ -335,10 +335,14 @@ class DamageProcessor:
         if prev is not None:
             self._flush_buffer(prev)
 
+        room = None
+        if self.turn_manager.participants:
+            room = getattr(self.turn_manager.participants[0].actor, "location", None)
+
         self.cleanup_environment()
         self._summarize_damage(damage_totals)
         self.round_output.append("\n")
-        self._broadcast_round_output()
+        self._broadcast_round_output(room)
 
         self.engine.round += 1
         if self.engine.round_time is not None and any(_current_hp(p.actor) > 0 for p in self.turn_manager.participants):
