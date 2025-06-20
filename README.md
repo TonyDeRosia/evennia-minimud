@@ -200,6 +200,8 @@ Supports action queues, status effects, resistances
 
 Fully pluggable and extendable
 
+The available spells and the ``Spell`` dataclass now live in ``combat.spells``.
+
 `combat.scripts` exposes helper functions like `queue_spell` and
 `queue_skill` for casting and using abilities. They automatically
 queue a `SpellAction` or `SkillAction` on the active combat engine or

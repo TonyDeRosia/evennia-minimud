@@ -18,7 +18,7 @@ from utils.slots import SLOT_ORDER
 from collections.abc import Mapping
 import math
 from world.triggers import TriggerManager
-from world.spells import Spell
+from combat.spells import Spell
 from combat.combat_actions import CombatResult
 from world.combat import get_health_description
 from combat import combat_utils
@@ -647,7 +647,7 @@ class Character(ObjectParent, ClothedCharacter):
 
     def cast_spell(self, spell_key, target=None):
         """Cast a known spell, spending mana."""
-        from world.spells import SPELLS, colorize_spell
+        from combat.spells import SPELLS, colorize_spell
         from world.system import state_manager
 
         spell = SPELLS.get(spell_key)

@@ -1,7 +1,7 @@
 from unittest.mock import patch, MagicMock
 from evennia.utils.test_resources import EvenniaTest
 from combat.combat_skills import SKILL_CLASSES
-from world.spells import SPELLS
+from combat.spells import SPELLS
 
 class TestSkillAndSpellUsage(EvenniaTest):
     def setUp(self):

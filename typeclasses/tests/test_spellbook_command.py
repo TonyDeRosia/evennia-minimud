@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 from evennia.utils.test_resources import EvenniaTest
 from commands.spells import CmdSpellbook
-from world.spells import Spell
+from combat.spells import Spell
 
 class TestSpellbook(EvenniaTest):
     def setUp(self):
