@@ -66,3 +66,13 @@ class TestMobUtils(EvenniaTest):
         self.assertFalse(corpse.contents)
         self.assertEqual(inv_item.location, npc)
         self.assertEqual(eq_item.location, npc)
+
+    def test_make_corpse_includes_vnum(self):
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.vnum = 123
+
+        corpse = make_corpse(npc)
+        self.assertEqual(corpse.db.npc_vnum, 123)
