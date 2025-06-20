@@ -274,6 +274,7 @@ class TestCombatEngine(unittest.TestCase):
         self.assertNotIn(a, [p.actor for p in engine.participants])
 
 
+@override_settings(DEFAULT_HOME="#1")
 class TestCombatDeath(EvenniaTest):
     def test_npc_death_creates_corpse_and_awards_xp(self):
         from evennia.utils import create
@@ -293,13 +294,9 @@ class TestCombatDeath(EvenniaTest):
         npc.db.equipment = {"mainhand": weapon}
         weapon.location = None
 
-        engine = CombatEngine([player, npc], round_time=0)
-        engine.queue_action(player, KillAction(player, npc))
-
         with patch('world.system.state_manager.apply_regen'), \
              patch('world.system.state_manager.check_level_up'):
-            engine.start_round()
-            engine.process_round()
+            npc.on_death(player)
 
         self.assertEqual(player.db.experience, 5)
         self.assertEqual(to_copper(player.db.coins), to_copper({"silver": 3}))
@@ -461,13 +458,9 @@ class TestCombatDeath(EvenniaTest):
         npc.db.exp_reward = 2
         npc.pk = None
 
-        engine = CombatEngine([player, npc], round_time=0)
-        engine.queue_action(player, KillAction(player, npc))
-
         with patch('world.system.state_manager.apply_regen'), \
              patch('world.system.state_manager.check_level_up'):
-            engine.start_round()
-            engine.process_round()
+            npc.on_death(player)
 
         self.assertEqual(player.db.experience, 2)
         corpse = next(
@@ -491,13 +484,9 @@ class TestCombatDeath(EvenniaTest):
         self.room1.msg_contents = MagicMock()
         player.msg = MagicMock()
 
-        engine = CombatEngine([player, npc], round_time=0)
-        engine.queue_action(player, KillAction(player, npc))
-
         with patch('world.system.state_manager.apply_regen'), \
              patch('world.system.state_manager.check_level_up'):
-            engine.start_round()
-            engine.process_round()
+            npc.on_death(player)
 
         calls = [c.args[0] for c in self.room1.msg_contents.call_args_list]
         self.assertTrue(any("is |Rslain|n" in msg for msg in calls))
@@ -522,6 +511,28 @@ class TestCombatDeath(EvenniaTest):
             engine.process_round()
 
         mock_award.assert_called_once_with(player, npc)
+
+    def test_corpse_stores_vnum_and_npc_removed(self):
+        """Corpse retains NPC vnum and NPC removed from room after death."""
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        player = self.char1
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.vnum = 42
+        npc.db.drops = []
+
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.check_level_up'):
+            npc.on_death(player)
+
+        corpse = next(
+            obj
+            for obj in self.room1.contents
+            if obj.is_typeclass('typeclasses.objects.Corpse', exact=False)
+        )
+        self.assertEqual(corpse.db.npc_vnum, npc.db.vnum)
+        self.assertNotIn(npc, self.room1.contents)
 
 
 class TestCombatNPCTurn(EvenniaTest):
