@@ -17,6 +17,20 @@ class KillAction(Action):
         return CombatResult(self.actor, self.target, "boom")
 
 
+class MultiKillAction(Action):
+    """Kill primary target and an additional enemy."""
+
+    def __init__(self, actor, target, other):
+        super().__init__(actor, target)
+        self.other = other
+
+    def resolve(self):
+        # damage both targets lethally
+        self.target.at_damage(self.actor, self.target.traits.health.current + 1)
+        self.other.at_damage(self.actor, self.other.traits.health.current + 1)
+        return CombatResult(self.actor, self.target, "boom")
+
+
 class Dummy:
     def __init__(self, hp=10, init=0):
         self.hp = hp
@@ -569,6 +583,40 @@ class TestCombatDeath(EvenniaTest):
         )
         self.assertNotIn(npc, [p.actor for p in engine.participants])
         self.assertEqual(corpse.db.corpse_of, npc.key)
+
+    def test_cleanup_defeat_handles_additional_dead(self):
+        """Cleanup should process off-target deaths."""
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        player = self.char1
+        player.db.experience = 0
+        npc1 = create.create_object(NPC, key="mob1", location=self.room1)
+        npc2 = create.create_object(NPC, key="mob2", location=self.room1)
+        for npc in (npc1, npc2):
+            npc.db.drops = []
+            npc.db.exp_reward = 2
+
+        engine = CombatEngine([player, npc1, npc2], round_time=0)
+        engine.queue_action(player, MultiKillAction(player, npc1, npc2))
+
+        with patch("world.system.state_manager.apply_regen"), patch(
+            "world.system.state_manager.check_level_up"), patch(
+            "random.randint",
+            return_value=0,
+        ):
+            engine.start_round()
+            engine.process_round()
+
+        corpses = [
+            obj
+            for obj in self.room1.contents
+            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+        ]
+        self.assertEqual(len(corpses), 2)
+        self.assertEqual(player.db.experience, 4)
+        self.assertNotIn(npc1, [p.actor for p in engine.participants])
+        self.assertNotIn(npc2, [p.actor for p in engine.participants])
 
 
 class TestCombatNPCTurn(EvenniaTest):
