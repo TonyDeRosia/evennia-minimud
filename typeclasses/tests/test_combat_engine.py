@@ -89,6 +89,18 @@ class TestCombatEngine(unittest.TestCase):
             engine.process_round()
             b.on_exit_combat.assert_called()
 
+    def test_exit_hook_called_once_on_defeat(self):
+        a = Dummy()
+        b = Dummy()
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.get_effective_stat', return_value=0):
+            engine = CombatEngine([a, b], round_time=0)
+            b.on_exit_combat.reset_mock()
+            engine.queue_action(a, KillAction(a, b))
+            engine.start_round()
+            engine.process_round()
+            assert b.on_exit_combat.call_count == 1
+
     def test_initiative_and_regen(self):
         a = Dummy(init=10)
         b = Dummy(init=1)
