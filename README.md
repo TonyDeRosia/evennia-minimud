@@ -193,6 +193,8 @@ Modular combat using a 2-second tick:
 from combat.combat_manager import CombatRoundManager
 CombatRoundManager.get().start_combat([fighter1, fighter2])
 ```
+The previous `combat.round_manager` module now simply re-exports these
+classes and is considered deprecated.
 
 Supports action queues, status effects, resistances
 
