@@ -301,7 +301,7 @@ class CombatRoundManager:
         except ImportError as err:
             raise ImportError("Combat engine could not be imported") from err
 
-        engine = CombatEngine(fighters, round_time=None)
+        engine = CombatEngine(fighters, round_time=round_time or 2.0)
         if not engine:
             raise RuntimeError("CombatEngine failed to initialize")
 
