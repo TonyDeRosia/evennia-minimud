@@ -97,6 +97,8 @@ VNUM_REGISTRY_FILE = Path(GAME_DIR) / "world" / "vnum_registry.json"
 COMBAT_DEBUG_TICKS = False
 # When True, include a damage summary at the end of each combat round
 COMBAT_DEBUG_SUMMARY = False
+# Send combat debug messages to connected admins when True
+COMBAT_ADMIN_DEBUG = False
 
 # Clothing - https://www.evennia.com/docs/latest/Contribs/Contrib-Clothing.html#configuration
 CLOTHING_WEARSTYLE_MAXLENGTH = 40
