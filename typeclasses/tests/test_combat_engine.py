@@ -477,6 +477,32 @@ class TestCombatDeath(EvenniaTest):
         )
         self.assertEqual(corpse.db.corpse_of, npc.key)
 
+    def test_kill_broadcasts_and_awards_message(self):
+        """Killing an NPC should broadcast and award experience."""
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        player = self.char1
+        player.db.experience = 0
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+        npc.db.exp_reward = 5
+
+        self.room1.msg_contents = MagicMock()
+        player.msg = MagicMock()
+
+        engine = CombatEngine([player, npc], round_time=0)
+        engine.queue_action(player, KillAction(player, npc))
+
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.check_level_up'):
+            engine.start_round()
+            engine.process_round()
+
+        calls = [c.args[0] for c in self.room1.msg_contents.call_args_list]
+        self.assertTrue(any("is |Rslain|n" in msg for msg in calls))
+        self.assertTrue(any("You gain" in c.args[0] for c in player.msg.call_args_list))
+
 
 class TestCombatNPCTurn(EvenniaTest):
     def test_at_combat_turn_auto_attack(self):
