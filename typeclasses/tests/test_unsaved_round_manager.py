@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 
-from combat.combat_manager import CombatRoundManager, CombatInstance
+from combat.round_manager import CombatRoundManager, CombatInstance
 from combat.engine import CombatEngine
 
 class Dummy:

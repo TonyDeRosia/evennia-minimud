@@ -145,7 +145,7 @@ class DamageProcessor:
             except Exception:
                 pass
 
-        from combat.combat_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager
 
         inst = CombatRoundManager.get().get_combatant_combat(target)
         if inst:
@@ -259,7 +259,7 @@ class DamageProcessor:
                     self.handle_defeat(actor, killer)
 
                 self.turn_manager.remove_participant(actor)
-                from combat.combat_manager import CombatRoundManager
+                from combat.round_manager import CombatRoundManager
                 inst = CombatRoundManager.get().get_combatant_combat(actor)
                 if inst:
                     inst.remove_combatant(actor)

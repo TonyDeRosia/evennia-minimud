@@ -1,7 +1,7 @@
 """Combat system package."""
 
 from .engine import CombatEngine
-from .combat_manager import CombatRoundManager, CombatInstance
+from .round_manager import CombatRoundManager, CombatInstance
 from .combat_actions import (
     Action,
     AttackAction,

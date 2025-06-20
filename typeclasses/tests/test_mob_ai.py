@@ -76,7 +76,7 @@ class TestMobAIBehaviors(EvenniaTest):
 
     def test_assist_allies(self):
         from typeclasses.npcs import BaseNPC
-        from combat.combat_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager
 
         ally = create.create_object(BaseNPC, key="ally", location=self.room1, home=self.room1)
         ally.db.ai_type = "defensive"
@@ -95,7 +95,7 @@ class TestMobAIBehaviors(EvenniaTest):
 
     def test_no_auto_assist_no_join(self):
         from typeclasses.npcs import BaseNPC
-        from combat.combat_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager
 
         ally = create.create_object(BaseNPC, key="ally2", location=self.room1, home=self.room1)
         manager = CombatRoundManager.get()
@@ -111,7 +111,7 @@ class TestMobAIBehaviors(EvenniaTest):
 
     def test_player_auto_assist(self):
         from typeclasses.npcs import BaseNPC
-        from combat.combat_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager
 
         ally = create.create_object(BaseNPC, key="pally", location=self.room1, home=self.room1)
         manager = CombatRoundManager.get()
@@ -175,7 +175,7 @@ class TestMobAIBehaviors(EvenniaTest):
 
     def test_call_for_help_summons_allies(self):
         from typeclasses.npcs import BaseNPC
-        from combat.combat_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager
 
         caller = create.create_object(BaseNPC, key="caller", location=self.room1)
         caller.db.actflags = ["call_for_help"]
@@ -200,7 +200,7 @@ class TestMobAIBehaviors(EvenniaTest):
 
     def test_wimpy_flees_when_low_hp(self):
         from typeclasses.npcs import BaseNPC
-        from combat.combat_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager
 
         npc = create.create_object(BaseNPC, key="coward", location=self.room1)
         npc.db.actflags = ["wimpy"]
@@ -218,7 +218,7 @@ class TestMobAIBehaviors(EvenniaTest):
     def test_wimpy_uses_custom_threshold(self):
         """NPC flees when HP is below its custom ``flee_at`` value."""
         from typeclasses.npcs import BaseNPC
-        from combat.combat_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager
 
         npc = create.create_object(BaseNPC, key="scared", location=self.room1)
         npc.db.actflags = ["wimpy"]
@@ -237,7 +237,7 @@ class TestMobAIBehaviors(EvenniaTest):
     def test_wimpy_stays_above_custom_threshold(self):
         """NPC does not flee if current HP is above ``flee_at``."""
         from typeclasses.npcs import BaseNPC
-        from combat.combat_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager
 
         npc = create.create_object(BaseNPC, key="brave", location=self.room1)
         npc.db.actflags = ["wimpy"]

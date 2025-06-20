@@ -207,7 +207,7 @@ def at_server_stop():
     of it is for a reload, reset or shutdown.
     """
     logger.log_info("at_server_stop: cleaning up")
-    from combat.combat_manager import CombatRoundManager
+    from combat.round_manager import CombatRoundManager
     CombatRoundManager.get().force_end_all_combat()
     _clear_caches()
     ServerConfig.objects.conf("server_start_time", delete=True)
@@ -226,7 +226,7 @@ def at_server_reload_stop():
     This is called only time the server stops before a reload.
     """
     logger.log_info("at_server_reload_stop: reload complete")
-    from combat.combat_manager import CombatRoundManager
+    from combat.round_manager import CombatRoundManager
     CombatRoundManager.get().force_end_all_combat()
     ServerConfig.objects.conf("reload_started", delete=True)
 

@@ -384,7 +384,7 @@ class TestCombatDeath(EvenniaTest):
         npc = create.create_object(NPC, key="mob", location=self.room1)
         npc.db.drops = []
 
-        from combat.combat_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager
         manager = CombatRoundManager.get()
         instance = manager.start_combat([player, npc])
         manager.remove_combat(instance.combat_id)
@@ -825,7 +825,7 @@ class TestCleanupEnvironment(EvenniaTest):
         from evennia.utils import create
         from typeclasses.characters import NPC
         from combat.engine import CombatEngine
-        from combat.combat_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager
 
         npc = create.create_object(NPC, key="dead", location=self.room1)
         player = self.char1
@@ -1003,7 +1003,7 @@ def test_hostile_joins_after_midround_kill():
     mob1.db.combat_target = player
     mob2.db.combat_target = player
 
-    from combat.combat_manager import CombatRoundManager
+    from combat.round_manager import CombatRoundManager
 
     manager = CombatRoundManager.get()
     manager.combats.clear()

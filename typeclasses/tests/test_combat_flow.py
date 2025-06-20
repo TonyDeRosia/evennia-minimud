@@ -12,7 +12,7 @@ from combat.combat_actions import (
 from combat.combat_skills import ShieldBash
 from combat.damage_types import DamageType
 from combat.ai_combat import queue_npc_action
-from combat.combat_manager import CombatInstance, CombatRoundManager
+from combat.round_manager import CombatInstance, CombatRoundManager
 from typeclasses.gear import BareHand
 
 
