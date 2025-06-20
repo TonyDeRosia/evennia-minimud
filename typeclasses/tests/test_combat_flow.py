@@ -218,6 +218,37 @@ class TestCombatVictory(unittest.TestCase):
             engine.process_round()
         self.assertNotIn(b, [p.actor for p in engine.participants])
 
+    def test_room_keeps_fighting_after_one_dies(self):
+        a = Dummy()
+        b = Dummy()
+        c = Dummy()
+        a.location = b.location = c.location
+        a.db.combat_target = b
+        b.db.combat_target = a
+        c.db.combat_target = a
+
+        engine = CombatEngine([a, b, c], round_time=0)
+        engine.queue_action(a, KillAction(a, b))
+
+        with patch("world.system.state_manager.apply_regen"), \
+             patch("random.randint", return_value=0), \
+             patch("evennia.utils.delay"):
+            engine.start_round()
+            engine.process_round()
+
+            self.assertNotIn(b, [p.actor for p in engine.participants])
+            self.assertEqual(engine.round, 1)
+            self.assertTrue(getattr(a, "in_combat", False))
+            self.assertTrue(getattr(c, "in_combat", False))
+
+            engine.queue_action(a, AttackAction(a, c))
+            engine.queue_action(c, AttackAction(c, a))
+            engine.process_round()
+
+        self.assertEqual(engine.round, 2)
+        self.assertIn(a, [p.actor for p in engine.participants])
+        self.assertIn(c, [p.actor for p in engine.participants])
+
 
 class TestNPCBehaviors(unittest.TestCase):
     def test_low_hp_triggers_callback(self):
