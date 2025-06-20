@@ -1,4 +1,18 @@
-"""Utilities for applying :class:`combat.combat_actions.CombatResult` objects."""
+"""Resolve combat action results and update participant state.
+
+The :class:`~combat.damage_processor.DamageProcessor` executes actions
+for each :class:`~combat.combatants.CombatParticipant` in turn. Those
+actions return :class:`~combat.combat_actions.CombatResult` objects that
+describe the outcome – damage dealt, messages to display and the target
+affected. This module contains helpers that take those results and apply
+them to the game world.
+
+``resolve_combat_result`` is called by ``DamageProcessor`` after each
+action. It applies damage, buffers combat messages and records aggro for
+the attacker. When a target's health drops to zero it delegates defeat
+handling to ``DamageProcessor.handle_defeat`` and cleans up any pending
+actions that reference the defeated participant.
+"""
 
 from __future__ import annotations
 
