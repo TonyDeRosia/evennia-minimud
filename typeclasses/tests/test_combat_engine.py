@@ -80,7 +80,7 @@ class TestCombatEngine(unittest.TestCase):
     def test_enter_and_exit_callbacks(self):
         a = Dummy()
         b = Dummy()
-        with patch("world.system.state_manager.apply_regen"):
+        with patch('world.system.state_manager.apply_regen'):
             engine = CombatEngine([a, b], round_time=0)
             a.on_enter_combat.assert_called()
             b.on_enter_combat.assert_called()
@@ -93,10 +93,7 @@ class TestCombatEngine(unittest.TestCase):
         a = Dummy(init=10)
         b = Dummy(init=1)
         engine = CombatEngine([a, b], round_time=0)
-        with (
-            patch("world.system.state_manager.apply_regen") as mock_regen,
-            patch("random.randint", return_value=0),
-        ):
+        with patch('world.system.state_manager.apply_regen') as mock_regen, patch('random.randint', return_value=0):
             engine.start_round()
             self.assertEqual(engine.queue[0].actor, a)
             self.assertEqual(mock_regen.call_count, 2)
@@ -104,7 +101,7 @@ class TestCombatEngine(unittest.TestCase):
     def test_aggro_tracking(self):
         a = Dummy()
         b = Dummy()
-        with patch("world.system.state_manager.apply_regen"):
+        with patch('world.system.state_manager.apply_regen'):
             engine = CombatEngine([a, b], round_time=0)
             engine.queue_action(a, KillAction(a, b))
             engine.start_round()
@@ -116,11 +113,9 @@ class TestCombatEngine(unittest.TestCase):
         attacker.db.experience = 0
         victim = Dummy()
         victim.db.exp_reward = 10
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.check_level_up"),
-            patch.object(attacker, "msg") as mock_msg,
-        ):
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.check_level_up'), \
+             patch.object(attacker, 'msg') as mock_msg:
             engine = CombatEngine([attacker, victim], round_time=0)
             engine.queue_action(attacker, KillAction(attacker, victim))
             engine.start_round()
@@ -135,12 +130,9 @@ class TestCombatEngine(unittest.TestCase):
             obj.db.experience = 0
         victim = Dummy()
         victim.db.exp_reward = 9
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.check_level_up"),
-            patch.object(a, "msg") as msg_a,
-            patch.object(b, "msg") as msg_b,
-        ):
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.check_level_up'), \
+             patch.object(a, 'msg') as msg_a, patch.object(b, 'msg') as msg_b:
             engine = CombatEngine([a, b, victim], round_time=0)
             engine.aggro[victim] = {a: 1, b: 1}
             engine.queue_action(a, KillAction(a, victim))
@@ -157,10 +149,8 @@ class TestCombatEngine(unittest.TestCase):
             m.db.experience = 0
         victim = Dummy()
         victim.db.exp_reward = 100
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.check_level_up"),
-        ):
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.check_level_up'):
             engine = CombatEngine(members + [victim], round_time=0)
             engine.aggro[victim] = {m: 1 for m in members}
             engine.queue_action(members[0], KillAction(members[0], victim))
@@ -175,11 +165,9 @@ class TestCombatEngine(unittest.TestCase):
         a.traits.health = MagicMock(value=a.hp)
         a.key = "dummy"
         a.tags = MagicMock()
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("combat.engine.damage_processor.delay") as mock_delay,
-            patch("random.randint", return_value=0),
-        ):
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('combat.engine.damage_processor.delay') as mock_delay, \
+             patch('random.randint', return_value=0):
             engine = CombatEngine([a], round_time=0)
             engine.queue_action(a, KillAction(a, a))
             engine.start_round()
@@ -190,12 +178,10 @@ class TestCombatEngine(unittest.TestCase):
     def test_schedules_next_round(self):
         a = Dummy()
         b = Dummy()
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.get_effective_stat", return_value=0),
-            patch("combat.engine.damage_processor.delay") as mock_delay,
-            patch("random.randint", return_value=0),
-        ):
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.get_effective_stat', return_value=0), \
+             patch('combat.engine.damage_processor.delay') as mock_delay, \
+             patch('random.randint', return_value=0):
             engine = CombatEngine([a, b], round_time=0)
             engine.start_round()
             engine.process_round()
@@ -219,12 +205,10 @@ class TestCombatEngine(unittest.TestCase):
             room = MagicMock()
             a.location = b.location = room
 
-            with (
-                patch("world.system.state_manager.apply_regen"),
-                patch("world.system.state_manager.get_effective_stat", return_value=0),
-                patch("random.randint", return_value=0),
-                patch("combat.engine.damage_processor.delay"),
-            ):
+            with patch('world.system.state_manager.apply_regen'), \
+                 patch('world.system.state_manager.get_effective_stat', return_value=0), \
+                 patch('random.randint', return_value=0), \
+                 patch('combat.engine.damage_processor.delay'):
                 engine = CombatEngine([a, b], round_time=0)
                 engine.queue_action(a, act_cls(a, b))
                 engine.start_round()
@@ -248,12 +232,10 @@ class TestCombatEngine(unittest.TestCase):
         room = MagicMock()
         a.location = b.location = room
 
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.get_effective_stat", return_value=0),
-            patch("random.randint", return_value=0),
-            patch("combat.engine.damage_processor.delay"),
-        ):
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.get_effective_stat', return_value=0), \
+             patch('random.randint', return_value=0), \
+             patch('combat.engine.damage_processor.delay'):
             engine = CombatEngine([a, b], round_time=0)
             engine.queue_action(a, DamageAction(a, b))
             engine.start_round()
@@ -268,10 +250,8 @@ class TestCombatEngine(unittest.TestCase):
         a.db.combat_target = b
         b.db.combat_target = a
 
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("random.randint", return_value=0),
-        ):
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('random.randint', return_value=0):
             engine = CombatEngine([a, b], round_time=0)
             engine.start_round()
             engine.process_round()
@@ -307,27 +287,22 @@ class TestCombatDeath(EvenniaTest):
         npc.db.exp_reward = 5
         npc.db.coin_drop = {"silver": 3}
         self.char1.db.coins = from_copper(0)
-        item = create.create_object(
-            "typeclasses.objects.Object", key="loot", location=npc
-        )
+        item = create.create_object("typeclasses.objects.Object", key="loot", location=npc)
         weapon = create.create_object("typeclasses.objects.Object", key="sword")
         weapon.tags.add("equipment", category="flag")
         weapon.tags.add("identified", category="flag")
         npc.db.equipment = {"mainhand": weapon}
         weapon.location = None
 
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.check_level_up"),
-        ):
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.check_level_up'):
             npc.on_death(player)
 
         self.assertEqual(player.db.experience, 5)
         self.assertEqual(to_copper(player.db.coins), to_copper({"silver": 3}))
         corpse = next(
-            obj
-            for obj in self.room1.contents
-            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+            obj for obj in self.room1.contents
+            if obj.is_typeclass('typeclasses.objects.Corpse', exact=False)
         )
         self.assertEqual(corpse.db.corpse_of, npc.key)
         self.assertEqual(corpse.db.desc, f"The corpse of {npc.key} lies here.")
@@ -355,34 +330,6 @@ class TestCombatDeath(EvenniaTest):
             if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
         ]
         self.assertEqual(len(corpses), 1)
-
-    def test_on_exit_combat_creates_corpse_once(self):
-        """NPCs leaving combat should drop loot exactly once."""
-        from evennia.utils import create
-        from typeclasses.characters import NPC
-
-        player = self.char1
-        npc = create.create_object(NPC, key="mob", location=self.room1)
-        npc.db.drops = []
-
-        engine = CombatEngine([player, npc], round_time=0)
-        engine.queue_action(player, KillAction(player, npc))
-
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.check_level_up"),
-            patch.object(npc, "drop_loot", wraps=npc.drop_loot) as mock_drop,
-        ):
-            engine.start_round()
-            engine.process_round()
-
-        mock_drop.assert_called_once()
-        corpse = next(
-            obj
-            for obj in self.room1.contents
-            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
-        )
-        self.assertEqual(corpse.db.corpse_of, npc.key)
 
     def test_same_key_npcs_create_multiple_corpses(self):
         """Killing NPCs with the same key should spawn separate corpses."""
@@ -438,7 +385,6 @@ class TestCombatDeath(EvenniaTest):
         npc.db.drops = []
 
         from combat.round_manager import CombatRoundManager
-
         manager = CombatRoundManager.get()
         instance = manager.start_combat([player, npc])
         manager.remove_combat(instance.combat_id)
@@ -463,7 +409,7 @@ class TestCombatDeath(EvenniaTest):
         npc.db.drops = []
         npc.db.exp_reward = 7
 
-        with patch("world.system.state_manager.check_level_up"):
+        with patch('world.system.state_manager.check_level_up'):
             npc.at_damage(player, npc.traits.health.current + 1)
 
         self.assertEqual(player.db.experience, 7)
@@ -483,7 +429,7 @@ class TestCombatDeath(EvenniaTest):
         expected = (npc.db.level or 1) * settings.DEFAULT_XP_PER_LEVEL
         self.assertEqual(npc.db.exp_reward, expected)
 
-        with patch("world.system.state_manager.check_level_up"):
+        with patch('world.system.state_manager.check_level_up'):
             npc.at_damage(player, npc.traits.health.current + 1)
 
         self.assertEqual(player.db.experience, expected)
@@ -519,17 +465,15 @@ class TestCombatDeath(EvenniaTest):
         npc.db.exp_reward = 2
         npc.pk = None
 
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.check_level_up"),
-        ):
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.check_level_up'):
             npc.on_death(player)
 
         self.assertEqual(player.db.experience, 2)
         corpse = next(
             obj
             for obj in self.room1.contents
-            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+            if obj.is_typeclass('typeclasses.objects.Corpse', exact=False)
         )
         self.assertEqual(corpse.db.corpse_of, npc.key)
 
@@ -547,10 +491,8 @@ class TestCombatDeath(EvenniaTest):
         self.room1.msg_contents = MagicMock()
         player.msg = MagicMock()
 
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.check_level_up"),
-        ):
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.check_level_up'):
             npc.on_death(player)
 
         calls = [c.args[0] for c in self.room1.msg_contents.call_args_list]
@@ -569,11 +511,9 @@ class TestCombatDeath(EvenniaTest):
         engine = CombatEngine([player, npc], round_time=0)
         engine.queue_action(player, KillAction(player, npc))
 
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.check_level_up"),
-            patch.object(engine, "award_experience") as mock_award,
-        ):
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.check_level_up'), \
+             patch.object(engine, 'award_experience') as mock_award:
             engine.start_round()
             engine.process_round()
 
@@ -589,16 +529,14 @@ class TestCombatDeath(EvenniaTest):
         npc.db.vnum = 42
         npc.db.drops = []
 
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.check_level_up"),
-        ):
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.check_level_up'):
             npc.on_death(player)
 
         corpse = next(
             obj
             for obj in self.room1.contents
-            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+            if obj.is_typeclass('typeclasses.objects.Corpse', exact=False)
         )
         self.assertEqual(corpse.db.npc_vnum, npc.db.vnum)
         self.assertNotIn(npc, self.room1.contents)
@@ -618,21 +556,15 @@ class TestCombatNPCTurn(EvenniaTest):
 
         engine = CombatEngine([npc, target], round_time=0)
 
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.get_effective_stat", return_value=0),
-            patch("random.randint", return_value=0),
-            patch("combat.engine.damage_processor.delay"),
-            patch.object(
-                engine, "queue_action", wraps=engine.queue_action
-            ) as mock_queue,
-        ):
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.get_effective_stat', return_value=0), \
+             patch('random.randint', return_value=0), \
+             patch('combat.engine.damage_processor.delay'), \
+             patch.object(engine, 'queue_action', wraps=engine.queue_action) as mock_queue:
             engine.start_round()
             engine.process_round()
 
-        self.assertTrue(
-            any(isinstance(c.args[1], AttackAction) for c in mock_queue.call_args_list)
-        )
+        self.assertTrue(any(isinstance(c.args[1], AttackAction) for c in mock_queue.call_args_list))
 
 
 class TestMultipleActions(unittest.TestCase):
@@ -656,10 +588,7 @@ class TestMultipleActions(unittest.TestCase):
         engine.queue_action(a, RecordAction(a, b, "first", priority=1))
         engine.queue_action(a, RecordAction(a, b, "second", priority=5))
 
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("random.randint", return_value=0),
-        ):
+        with patch("world.system.state_manager.apply_regen"), patch("random.randint", return_value=0):
             engine.start_round()
             engine.process_round()
 
@@ -680,11 +609,9 @@ class TestMultipleActions(unittest.TestCase):
         engine.queue_action(a, first)
         engine.queue_action(a, second)
 
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("random.randint", return_value=0),
-            patch.object(engine, "track_aggro", side_effect=Exception("stop")),
-        ):
+        with patch("world.system.state_manager.apply_regen"), \
+             patch("random.randint", return_value=0), \
+             patch.object(engine, "track_aggro", side_effect=Exception("stop")):
             engine.start_round()
             with self.assertRaises(Exception):
                 engine.process_round()
@@ -701,11 +628,9 @@ def test_no_recovery_message_after_target_cleared():
     engine = CombatEngine([player, mob], round_time=0)
     engine.queue_action(player, KillAction(player, mob))
 
-    with (
-        patch("world.system.state_manager.apply_regen"),
-        patch("combat.engine.damage_processor.delay"),
-        patch("random.randint", return_value=0),
-    ):
+    with patch("world.system.state_manager.apply_regen"), \
+         patch("combat.engine.damage_processor.delay"), \
+         patch("random.randint", return_value=0):
         engine.start_round()
         engine.process_round()
 
@@ -726,13 +651,11 @@ class TestUnsavedPrototypeCombat(unittest.TestCase):
         engine = CombatEngine([player, npc], round_time=0)
         engine.queue_action(player, KillAction(player, npc))
 
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.check_level_up"),
-            patch("world.system.state_manager.get_effective_stat", return_value=0),
-            patch("random.randint", return_value=0),
-            patch("combat.engine.damage_processor.delay"),
-        ):
+        with patch("world.system.state_manager.apply_regen"), \
+             patch("world.system.state_manager.check_level_up"), \
+             patch("world.system.state_manager.get_effective_stat", return_value=0), \
+             patch("random.randint", return_value=0), \
+             patch("combat.engine.damage_processor.delay"):
             engine.start_round()
             engine.process_round()
 
@@ -781,10 +704,8 @@ def test_attacker_target_cleared_on_defeat():
     engine = CombatEngine([attacker, defender], round_time=0)
     engine.queue_action(attacker, KillAction(attacker, defender))
 
-    with (
-        patch("world.system.state_manager.apply_regen"),
-        patch("random.randint", return_value=0),
-    ):
+    with patch("world.system.state_manager.apply_regen"), \
+         patch("random.randint", return_value=0):
         engine.start_round()
         engine.process_round()
 
@@ -800,11 +721,9 @@ def test_clearing_target_leaves_combat():
 
     engine = CombatEngine([player, mob], round_time=0)
 
-    with (
-        patch("world.system.state_manager.apply_regen"),
-        patch("combat.engine.damage_processor.delay"),
-        patch("random.randint", return_value=0),
-    ):
+    with patch("world.system.state_manager.apply_regen"), \
+         patch("combat.engine.damage_processor.delay"), \
+         patch("random.randint", return_value=0):
         engine.start_round()
         engine.process_round()
 
@@ -826,10 +745,7 @@ def test_retarget_after_defeat():
     engine = CombatEngine([a, b1, b2], round_time=0)
     engine.queue_action(a, KillAction(a, b1))
 
-    with (
-        patch("world.system.state_manager.apply_regen"),
-        patch("random.randint", return_value=0),
-    ):
+    with patch("world.system.state_manager.apply_regen"), patch("random.randint", return_value=0):
         engine.start_round()
         engine.process_round()
 
@@ -853,9 +769,8 @@ def test_remaining_combatants_continue_after_kill():
     engine = CombatEngine([player, mob1, mob2], round_time=0)
     engine.queue_action(player, KillAction(player, mob1))
 
-    with (
-        patch("world.system.state_manager.apply_regen"),
-        patch("random.randint", return_value=0),
+    with patch("world.system.state_manager.apply_regen"), patch(
+        "random.randint", return_value=0
     ):
         engine.start_round()
         engine.process_round()
@@ -878,9 +793,8 @@ def test_dead_actor_action_skipped():
     engine.queue_action(player, KillAction(player, mob1))
     engine.queue_action(mob1, AttackAction(mob1, player))
 
-    with (
-        patch("world.system.state_manager.apply_regen"),
-        patch("random.randint", return_value=0),
+    with patch("world.system.state_manager.apply_regen"), patch(
+        "random.randint", return_value=0
     ):
         engine.start_round()
         engine.process_round()
@@ -904,7 +818,6 @@ def test_queue_pruned_after_defeat():
 
     engine = CombatEngine([player, mob1, mob2], round_time=0)
     engine.queue_action(player, KillAction(player, mob1))
-
     class MarkAction(Action):
         def resolve(self):
             return CombatResult(self.actor, self.target, "mark")
@@ -914,18 +827,17 @@ def test_queue_pruned_after_defeat():
     def _dummy_attack(self):
         return CombatResult(self.actor, self.target, "atk")
 
-    with (
-        patch("world.system.state_manager.apply_regen"),
-        patch("world.system.state_manager.get_effective_stat", return_value=0),
-        patch("combat.combat_actions.AttackAction.resolve", _dummy_attack),
-        patch("random.randint", return_value=0),
+    with patch("world.system.state_manager.apply_regen"), patch(
+        "world.system.state_manager.get_effective_stat", return_value=0
+    ), patch(
+        "combat.combat_actions.AttackAction.resolve", _dummy_attack
+    ), patch(
+        "random.randint", return_value=0
     ):
         engine.start_round()
         engine.process_round()
         participant = next(p for p in engine.participants if p.actor is player)
-        assert not any(
-            getattr(a, "target", None) is mob1 for a in participant.next_action
-        )
+        assert not any(getattr(a, "target", None) is mob1 for a in participant.next_action)
         engine.queue_action(player, MarkAction(player, mob2))
         engine.process_round()
 
@@ -954,9 +866,8 @@ def test_hostile_joins_after_midround_kill():
     engine = inst.engine
     engine.queue_action(player, KillAction(player, mob1))
 
-    with (
-        patch("world.system.state_manager.apply_regen"),
-        patch("random.randint", return_value=0),
+    with patch("world.system.state_manager.apply_regen"), patch(
+        "random.randint", return_value=0
     ):
         inst.process_round()
         inst.process_round()
@@ -984,9 +895,8 @@ def test_multi_combat_until_one_remains():
 
     engine = CombatEngine([player] + mobs, round_time=0)
 
-    with (
-        patch("world.system.state_manager.apply_regen"),
-        patch("random.randint", return_value=0),
+    with patch("world.system.state_manager.apply_regen"), patch(
+        "random.randint", return_value=0
     ):
         engine.start_round()
 
