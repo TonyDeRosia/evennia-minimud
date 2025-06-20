@@ -23,6 +23,7 @@ class CombatInstance:
     last_round_time: float = field(default_factory=time.time)
     combat_ended: bool = False
     tick_handle: Optional[object] = field(default=None, init=False, repr=False)
+    room: Optional[object] = field(default=None, init=False, repr=False)
 
     def add_combatant(self, combatant, **kwargs) -> bool:
         """Add ``combatant`` to this combat instance."""
@@ -33,6 +34,8 @@ class CombatInstance:
         current = {p.actor for p in self.engine.participants}
         if combatant in current:
             return True
+        if self.room is None:
+            self.room = getattr(combatant, "location", None)
         self.combatants.add(combatant)
         self.engine.add_participant(combatant)
         return True
@@ -226,9 +229,26 @@ class CombatInstance:
         if self.combat_ended:
             return
 
+        room = getattr(self, "room", None)
+        try:
+            if self.engine and self.engine.participants:
+                room = getattr(self.engine.participants[0].actor, "location", None)
+            if not room and self.combatants:
+                fighter = next(iter(self.combatants))
+                room = getattr(fighter, "location", None)
+        except Exception:  # pragma: no cover - safety
+            room = None
+
         self.combat_ended = True
         self.cancel_tick()
         CombatRoundManager.get().remove_combat(self.combat_id)
+
+        message = f"Combat ends: {reason}" if reason else "Combat ends:"
+        if room and hasattr(room, "msg_contents"):
+            try:
+                room.msg_contents(message)
+            except Exception:  # pragma: no cover - safety
+                pass
 
         # Clean up fighter states
         if self.engine:
@@ -289,6 +309,8 @@ class CombatRoundManager:
         self._next_id += 1
 
         inst = CombatInstance(combat_id, engine, set(fighters), round_time or 2.0)
+        if fighters:
+            inst.room = getattr(fighters[0], "location", None)
         self.combats[combat_id] = inst
         for fighter in fighters:
             self.combatant_to_combat[fighter] = combat_id

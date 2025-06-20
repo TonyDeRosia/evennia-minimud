@@ -12,6 +12,7 @@ from combat.combat_actions import (
 from combat.combat_skills import ShieldBash
 from combat.damage_types import DamageType
 from combat.ai_combat import queue_npc_action
+from combat.combat_manager import CombatInstance, CombatRoundManager
 from typeclasses.gear import BareHand
 
 
@@ -465,4 +466,27 @@ def test_round_output_multiple_combatants_separated():
     calls = [c.args[0] for c in a.location.msg_contents.call_args_list]
     assert calls[1] == "\n"
     assert calls[3] == "\n"
+
+
+def test_end_combat_broadcasts_room_message():
+    room = MagicMock()
+    room.msg_contents = MagicMock()
+
+    a = Dummy()
+    b = Dummy()
+    a.location = b.location = room
+
+    engine = CombatEngine([a, b], round_time=0)
+    instance = CombatInstance(1, engine, {a, b}, round_time=0)
+    instance.room = room
+
+    manager = MagicMock()
+    manager.combatant_to_combat = {}
+
+    with patch.object(CombatRoundManager, "get", return_value=manager):
+        instance.remove_combatant(a)
+        instance.remove_combatant(b)
+        instance.end_combat("done")
+
+    room.msg_contents.assert_any_call("Combat ends: done")
 
