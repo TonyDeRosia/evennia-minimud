@@ -1,7 +1,8 @@
 from evennia import CmdSet
 from evennia.utils.evtable import EvTable
 from .command import Command
-from world.spells import SPELLS, Spell, colorize_spell
+from combat.scripts import get_spell, queue_spell
+from world.spells import Spell, colorize_spell
 
 
 class CmdSpellbook(Command):
@@ -31,7 +32,7 @@ class CmdSpellbook(Command):
                 if (isinstance(entry, str) and entry == spell_key) or (
                     not isinstance(entry, str) and entry.key == spell_key
                 ):
-                    spell = SPELLS.get(spell_key)
+                    spell = get_spell(spell_key)
                     if not spell:
                         continue
                     profs = self.caller.db.proficiencies or {}
@@ -54,7 +55,7 @@ class CmdSpellbook(Command):
                     key = entry
                 else:
                     key = entry.key
-                spell = SPELLS.get(key)
+                spell = get_spell(key)
                 if not spell:
                     continue
                 profs = self.caller.db.proficiencies or {}
@@ -87,7 +88,7 @@ class CmdCast(Command):
             self.msg("Cast what?")
             return
         spell_key = self.spellname.lower()
-        spell = SPELLS.get(spell_key)
+        spell = get_spell(spell_key)
         if not spell:
             self.msg("No such spell.")
             return
@@ -110,21 +111,9 @@ class CmdCast(Command):
             target = self.caller.search(self.target)
             if not target:
                 return
-        self.caller.traits.mana.current -= spell.mana_cost
-        colored = colorize_spell(spell.key)
-        if target:
-            self.caller.location.msg_contents(
-                f"{self.caller.get_display_name(self.caller)} casts {colored} at {target.get_display_name(self.caller)}!"
-            )
-        else:
-            self.caller.location.msg_contents(
-                f"{self.caller.get_display_name(self.caller)} casts {colored}!"
-            )
-        profs = self.caller.db.proficiencies or {}
-        prof = profs.get(spell_key, 0)
-        if prof < 100:
-            profs[spell_key] = min(100, prof + 1)
-            self.caller.db.proficiencies = profs
+        result = queue_spell(self.caller, spell, target)
+        if result and result.message and self.caller.location:
+            self.caller.location.msg_contents(result.message)
 
 
 class CmdLearnSpell(Command):
@@ -135,7 +124,7 @@ class CmdLearnSpell(Command):
         if not self.obj or not (spell_key := self.obj.db.spell_training):
             self.msg("You cannot learn spells here.")
             return
-        spell = SPELLS.get(spell_key)
+        spell = get_spell(spell_key)
         if not spell:
             self.msg("You cannot learn spells here.")
             return
