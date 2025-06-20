@@ -33,7 +33,7 @@ def _current_hp(obj):
     hp_trait = getattr(getattr(obj, "traits", None), "health", None)
     if hp_trait is not None:
         try:
-            return int(hp_trait.value)
+            return int(hp_trait.current)
         except Exception as err:
             raise ValueError(f"invalid health trait on {obj!r}") from err
 
