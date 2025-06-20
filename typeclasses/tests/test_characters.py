@@ -422,7 +422,7 @@ class TestCombatResists(EvenniaTest):
 
 
 class TestPlayerDeath(EvenniaTest):
-    def test_player_death_spawns_corpse_with_bodyparts_and_keeps_inventory(self):
+    def test_player_death_spawns_corpse_with_bodyparts_and_drops_inventory(self):
         from evennia.utils import create
         from typeclasses.objects import Object
         from world.mob_constants import BODYPARTS
@@ -442,10 +442,14 @@ class TestPlayerDeath(EvenniaTest):
         ]
         self.assertEqual(len(corpses), 1)
         corpse = corpses[0]
-        part_names = sorted(obj.key for obj in corpse.contents)
+        self.assertEqual(corpse.db.corpse_of, player.key)
+        self.assertEqual(corpse.db.corpse_of_id, player.dbref)
+        part_names = sorted(
+            obj.key for obj in corpse.contents if obj.key in [p.value for p in BODYPARTS]
+        )
         expected = sorted(part.value for part in BODYPARTS)
         self.assertEqual(part_names, expected)
-        self.assertIn(item, player.contents)
+        self.assertEqual(item.location, corpse)
         self.assertEqual(player.db.coins.get("gold"), 2)
 
     def test_player_death_broadcasts_room_message(self):

@@ -922,21 +922,13 @@ class PlayerCharacter(Character):
         # remove from combat if engaged
         from combat.round_manager import leave_combat
         leave_combat(self)
-        # avoid spawning multiple corpses for repeated calls
-        existing = [
-            obj
-            for obj in self.location.contents
-            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
-            and obj.db.corpse_of == self.key
-        ]
-        if existing:
+        # create a corpse object and reuse shared logic
+        corpse = make_corpse(self)
+        if not corpse:
             return
-        corpse = create_object(
-            "typeclasses.objects.Corpse",
-            key=f"{self.key} corpse",
-            location=self.location,
-            attributes=[("corpse_of", self.key), ("is_corpse", True)],
-        )
+        # ensure expected attributes exist
+        corpse.db.corpse_of = self.key
+        corpse.db.corpse_of_id = self.dbref
         from world import prototypes
 
         for part in BODYPARTS:
