@@ -16,7 +16,7 @@ class SkillCategory(str, Enum):
 
 from .combat_actions import CombatResult
 from .combat_utils import roll_damage, roll_evade
-from .combat_states import CombatState
+from .effects import StatusEffect
 from world.system import stat_manager
 from world.skills.kick import Kick
 from world.skills.disarm import Disarm
@@ -33,7 +33,7 @@ class Skill:
     cooldown: int = 0
     # Optional skill granting a proficiency bonus to success chance
     support_skill: str | None = None
-    effects: List[CombatState] = field(default_factory=list)
+    effects: List[StatusEffect] = field(default_factory=list)
 
     def resolve(self, user, target) -> CombatResult:
         return CombatResult(actor=user, target=target, message="Nothing happens.")
@@ -46,7 +46,7 @@ class ShieldBash(Skill):
     damage = (2, 6)
     cooldown = 6
     stamina_cost = 15
-    effects = [CombatState(key="stunned", duration=1, desc="Stunned")]
+    effects = [StatusEffect(key="stunned", duration=1, desc="Stunned")]
 
     def resolve(self, user, target):
         if not getattr(target, "is_alive", lambda: True)():

@@ -10,7 +10,7 @@ from .combat_actions import (
     SpellAction,
     CombatResult,
 )
-from .combat_states import CombatState, CombatStateManager
+from .effects import StatusEffect, EffectManager
 from .combat_skills import Skill, ShieldBash, Cleave, SKILL_CLASSES
 from .damage_types import DamageType
 from .combat_utils import get_condition_msg, calculate_initiative
@@ -24,8 +24,8 @@ __all__ = [
     "SkillAction",
     "SpellAction",
     "CombatResult",
-    "CombatState",
-    "CombatStateManager",
+    "StatusEffect",
+    "EffectManager",
     "Skill",
     "ShieldBash",
     "Cleave",
