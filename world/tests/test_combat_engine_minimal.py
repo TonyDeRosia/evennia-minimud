@@ -99,6 +99,97 @@ class TestCombatEngineMinimal(unittest.TestCase):
 
         room.msg_contents.assert_not_called()
 
+    def test_xp_awarded_on_defeat(self):
+        attacker = Dummy(key="attacker")
+        defender = Dummy(key="defender")
+
+        class XPNPC(Dummy):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.db = type("db", (), {"exp_reward": 5})()
+                self.engine = None
+                self.drop_loot = MagicMock(return_value=MagicMock(contents=[]))
+
+            def on_death(self, killer):
+                self.drop_loot(killer)
+                if self.engine:
+                    self.engine.award_experience(killer, self)
+
+        defender = XPNPC(key="defender")
+        room = MagicMock()
+        room.contents = [attacker, defender]
+        attacker.location = defender.location = room
+        engine = CombatEngine([attacker, defender], round_time=0)
+        attacker.engine = engine
+        defender.engine = engine
+        engine.queue_action(defender, NoOpAction(defender))
+        engine.queue_action(attacker, KillAction(attacker, defender))
+        with patch("world.system.state_manager.apply_regen"), patch(
+            "combat.engine.damage_processor.delay"
+        ), patch("random.randint", return_value=0), patch.object(
+            engine, "award_experience"
+        ) as mock_xp:
+            engine.start_round()
+            engine.process_round()
+
+        mock_xp.assert_called_once_with(attacker, defender)
+
+    def test_corpse_spawn_and_loot_drop(self):
+        attacker = Dummy(key="attacker")
+
+        loot = object()
+
+        class LootNPC(Dummy):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.loot = [loot]
+                self.drop_loot = MagicMock(side_effect=self._drop)
+
+            def _drop(self, killer=None):
+                corpse = MagicMock()
+                corpse.contents = list(self.loot)
+                if self.location:
+                    self.location.contents.append(corpse)
+                return corpse
+
+            def on_death(self, killer):
+                return self.drop_loot(killer)
+
+        defender = LootNPC(key="defender")
+        room = MagicMock()
+        room.contents = [attacker, defender]
+        attacker.location = defender.location = room
+        engine = CombatEngine([attacker, defender], round_time=0)
+        engine.queue_action(defender, NoOpAction(defender))
+        engine.queue_action(attacker, KillAction(attacker, defender))
+        with patch("world.system.state_manager.apply_regen"), patch(
+            "combat.engine.damage_processor.delay"
+        ), patch("random.randint", return_value=0):
+            engine.start_round()
+            engine.process_round()
+
+        corpse = next(obj for obj in room.contents if obj not in (attacker, defender))
+        self.assertIn(loot, corpse.contents)
+        defender.drop_loot.assert_called_once_with(attacker)
+
+    def test_combatant_removed_after_defeat(self):
+        attacker = Dummy(key="attacker")
+        defender = Dummy(key="defender")
+        room = MagicMock()
+        room.contents = [attacker, defender]
+        attacker.location = defender.location = room
+        engine = CombatEngine([attacker, defender], round_time=0)
+        engine.queue_action(defender, NoOpAction(defender))
+        engine.queue_action(attacker, KillAction(attacker, defender))
+        with patch("world.system.state_manager.apply_regen"), patch(
+            "combat.engine.damage_processor.delay"
+        ), patch("random.randint", return_value=0):
+            engine.start_round()
+            engine.process_round()
+
+        participants = [p.actor for p in engine.participants]
+        self.assertNotIn(defender, participants)
+
 
 if __name__ == "__main__":
     unittest.main()
