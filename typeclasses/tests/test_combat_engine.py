@@ -503,6 +503,26 @@ class TestCombatDeath(EvenniaTest):
         self.assertTrue(any("is |Rslain|n" in msg for msg in calls))
         self.assertTrue(any("You gain" in c.args[0] for c in player.msg.call_args_list))
 
+    def test_npc_death_uses_engine_xp_award(self):
+        """NPC.on_death should delegate XP distribution to the combat engine."""
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        player = self.char1
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+
+        engine = CombatEngine([player, npc], round_time=0)
+        engine.queue_action(player, KillAction(player, npc))
+
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.check_level_up'), \
+             patch.object(engine, 'award_experience') as mock_award:
+            engine.start_round()
+            engine.process_round()
+
+        mock_award.assert_called_once_with(player, npc)
+
 
 class TestCombatNPCTurn(EvenniaTest):
     def test_at_combat_turn_auto_attack(self):
