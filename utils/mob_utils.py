@@ -85,7 +85,11 @@ def mobprogs_to_triggers(mobprogs: list[dict]) -> Dict[str, list[dict]]:
 
 
 def make_corpse(npc):
-    """Create a corpse object for ``npc`` and transfer belongings."""
+    """Create a corpse object for ``npc`` and transfer belongings.
+
+    If ``npc.db.vnum`` is defined, it will be copied to the corpse as the
+    ``npc_vnum`` Attribute.
+    """
 
     from evennia import create_object
     from world.mob_constants import ACTFLAGS
@@ -104,6 +108,8 @@ def make_corpse(npc):
         return existing[0]
 
     attrs = [("corpse_of", npc.key), ("corpse_of_id", npc.dbref), ("is_corpse", True)]
+    if getattr(npc.db, "vnum", None) is not None:
+        attrs.append(("npc_vnum", npc.db.vnum))
     decay = getattr(npc.db, "corpse_decay_time", None)
     if decay is None:
         from django.conf import settings

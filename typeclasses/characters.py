@@ -1060,7 +1060,11 @@ class NPC(Character):
     # death handling -----------------------------------------------------
 
     def drop_loot(self, killer=None):
-        """Create a corpse and deposit any drops and coins."""
+        """Create a corpse and deposit any drops and coins.
+
+        The returned corpse will include ``npc_vnum`` if this NPC has a
+        ``vnum`` Attribute.
+        """
         from utils.currency import COIN_VALUES
         from utils.prototype_manager import load_prototype
         from utils.dice import roll_dice_string
@@ -1158,7 +1162,11 @@ class NPC(Character):
         state_manager.gain_xp(attacker, exp)
 
     def on_death(self, attacker):
-        """Handle character death cleanup."""
+        """Handle character death cleanup.
+
+        The corpse created during this process stores this NPC's ``vnum``
+        as ``npc_vnum`` when available.
+        """
         if not self.location or self.attributes.get("_dead"):
             return
         self.db._dead = True
@@ -1181,6 +1189,8 @@ class NPC(Character):
             logger.log_err(f"Loot drop error on {self}: {err}")
 
         if corpse:
+            if getattr(self.db, "vnum", None) is not None:
+                corpse.db.npc_vnum = self.db.vnum
             corpse.location = self.location
 
         self.at_death(attacker)

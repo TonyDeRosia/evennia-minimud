@@ -443,9 +443,16 @@ class TestCombatDeath(EvenniaTest):
 
         npc = create.create_object(NPC, key="mob", location=self.room1)
         npc.db.drops = []
+        npc.db.vnum = 77
 
         with patch.object(npc, "delete") as mock_delete:
             npc.on_death(self.char1)
+            corpse = next(
+                obj
+                for obj in self.room1.contents
+                if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+            )
+            self.assertEqual(corpse.db.npc_vnum, 77)
             self.assertTrue(npc.db.is_dead)
             self.assertIsNone(npc.location)
             mock_delete.assert_called_once()
