@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Set
 
 from evennia.utils import delay
 from evennia.utils.logger import log_trace
-from .engine import _current_hp
+from .combatants import _current_hp
 
 
 @dataclass
