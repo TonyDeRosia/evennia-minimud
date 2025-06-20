@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from combat.ai_combat import npc_take_turn
+from combat.combat_ai.npc_logic import npc_take_turn
 from combat.combat_actions import SpellAction, SkillAction
 
 class DummyNPC:

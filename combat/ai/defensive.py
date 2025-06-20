@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from combat.ai import BaseAI, register_ai
-from combat.ai_combat import npc_take_turn
+from combat.combat_ai.npc_logic import npc_take_turn
 
 
 @register_ai("defensive")

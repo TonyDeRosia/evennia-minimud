@@ -11,7 +11,7 @@ from combat.combat_actions import (
 )
 from combat.combat_skills import ShieldBash
 from combat.damage_types import DamageType
-from combat.ai_combat import npc_take_turn
+from combat.combat_ai.npc_logic import npc_take_turn
 from typeclasses.gear import BareHand
 
 
