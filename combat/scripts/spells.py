@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Optional
 
+from world.skills.utils import maybe_start_combat
+
 from ..combat_actions import SpellAction
 from world.spells import SPELLS, Spell
 
@@ -19,6 +21,7 @@ def queue_spell(
     target: Optional[object] = None,
     *,
     engine: Optional[object] = None,
+    start_combat: bool = False,
 ):
     """Queue ``spell`` on ``engine`` or resolve immediately."""
     if isinstance(spell, Spell):
@@ -28,6 +31,8 @@ def queue_spell(
         spell = get_spell(key)
     if not spell:
         return None
+    if start_combat and target:
+        maybe_start_combat(caster, target)
     if engine is None and hasattr(caster, "ndb"):
         engine = getattr(caster.ndb, "combat_engine", None)
     if engine:

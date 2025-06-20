@@ -111,7 +111,10 @@ class CmdCast(Command):
             target = self.caller.search(self.target)
             if not target:
                 return
-        result = queue_spell(self.caller, spell, target)
+        if target:
+            result = queue_spell(self.caller, spell, target, start_combat=True)
+        else:
+            result = queue_spell(self.caller, spell, target)
         if result and result.message and self.caller.location:
             self.caller.location.msg_contents(result.message)
 
