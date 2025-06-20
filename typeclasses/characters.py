@@ -13,7 +13,6 @@ from evennia.prototypes.spawner import spawn
 from utils.currency import to_copper, from_copper, format_wallet
 from utils import normalize_slot
 from utils.mob_utils import make_corpse
-from typeclasses.scripts import CorpseSpawner
 from utils.slots import SLOT_ORDER
 from collections.abc import Mapping
 import math
@@ -24,6 +23,7 @@ from world.combat import get_health_description
 from combat import combat_utils
 
 from .objects import ObjectParent
+from world.mob_constants import BODYPARTS
 
 _IMMOBILE = ("sitting", "lying down", "unconscious", "sleeping")
 
@@ -922,11 +922,29 @@ class PlayerCharacter(Character):
         # remove from combat if engaged
         from combat.round_manager import leave_combat
         leave_combat(self)
-        corpse = CorpseSpawner.spawn_for(self)
+        # create a corpse object and reuse shared logic
+        corpse = make_corpse(self)
         if not corpse:
             return
+        # ensure expected attributes exist
         corpse.db.corpse_of = self.key
         corpse.db.corpse_of_id = self.dbref
+        from world import prototypes
+
+        for part in BODYPARTS:
+            # randomly decide if this body part should spawn for the player
+            if randint(1, 100) <= 50:
+                proto_name = f"{part.name}_PART"
+                proto = getattr(prototypes, proto_name, None)
+                if proto:
+                    obj = spawn(proto)[0]
+                    obj.location = corpse
+                else:
+                    create_object(
+                        "typeclasses.objects.Object",
+                        key=part.value,
+                        location=corpse,
+                    )
         self.at_death(attacker)
         if attacker:
             self.msg(f"You are slain by {attacker.get_display_name(self)}!")
@@ -1164,7 +1182,12 @@ class NPC(Character):
         # remove from combat if engaged
         leave_combat(self)
 
-        corpse = CorpseSpawner.spawn_for(self, attacker)
+        corpse = None
+        try:
+            corpse = self.drop_loot(attacker)
+        except Exception as err:  # pragma: no cover - log errors
+            logger.log_err(f"Loot drop error on {self}: {err}")
+
         if corpse:
             if getattr(self.db, "vnum", None) is not None:
                 corpse.db.npc_vnum = self.db.vnum
