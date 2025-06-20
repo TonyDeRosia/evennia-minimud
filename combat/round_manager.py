@@ -314,16 +314,35 @@ class CombatRoundManager:
 
     def start_combat(self, combatants: List[object]) -> CombatInstance:
         """Start combat for the given ``combatants``."""
+        # gather any existing combat instances these combatants are part of
+        instances = []
         for combatant in combatants:
             inst = self.get_combatant_combat(combatant)
-            if inst:
-                for c in combatants:
-                    if c not in inst.combatants:
-                        inst.add_combatant(c)
-                        self.combatant_to_combat[c] = inst.combat_id
-                inst.start()
-                return inst
-        return self.create_combat(combatants)
+            if inst and inst not in instances:
+                instances.append(inst)
+
+        if not instances:
+            # none of the combatants were already fighting
+            return self.create_combat(combatants)
+
+        primary = instances[0]
+
+        # merge any additional instances into the primary
+        for other in instances[1:]:
+            for fighter in list(other.combatants):
+                other.remove_combatant(fighter)
+                primary.add_combatant(fighter)
+                self.combatant_to_combat[fighter] = primary.combat_id
+            other.end_combat("Merged into another instance")
+
+        # ensure all provided combatants are in the primary instance
+        for combatant in combatants:
+            if combatant not in primary.combatants:
+                primary.add_combatant(combatant)
+                self.combatant_to_combat[combatant] = primary.combat_id
+
+        primary.start()
+        return primary
 
 
     # ------------------------------------------------------------------
