@@ -6,6 +6,9 @@ This project models its turn-based fighting system after the traditional combat 
 
 File: `combat/combat_manager.py`
 
+- The old `combat.round_manager` module has been deprecated and now
+  simply re-exports these classes for compatibility.
+
 - Maintains a registry of all active combat instances keyed by a unique combat id.
 - Tracks which combat each combatant belongs to for quick lookup.
 - Each `CombatInstance` schedules a tick every few seconds, much like ROM's
