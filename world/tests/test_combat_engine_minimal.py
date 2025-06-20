@@ -61,7 +61,7 @@ class TestCombatEngineMinimal(unittest.TestCase):
         engine.queue_action(defender, NoOpAction(defender))
         engine.queue_action(attacker, DamageAction(attacker, defender))
         with patch("world.system.state_manager.apply_regen"), patch(
-            "combat.engine.damage_processor.delay"
+            "combat.damage_processor.delay"
         ), patch("random.randint", return_value=0):
             engine.start_round()
             engine.process_round()
@@ -76,7 +76,7 @@ class TestCombatEngineMinimal(unittest.TestCase):
         engine.queue_action(defender, NoOpAction(defender))
         engine.queue_action(attacker, KillAction(attacker, defender))
         with patch("world.system.state_manager.apply_regen"), patch(
-            "combat.engine.damage_processor.delay"
+            "combat.damage_processor.delay"
         ), patch("random.randint", return_value=0):
             engine.start_round()
             engine.process_round()
@@ -92,7 +92,7 @@ class TestCombatEngineMinimal(unittest.TestCase):
         engine = CombatEngine([attacker, defender], round_time=0)
         engine.queue_action(attacker, DamageAction(attacker, defender))
         with patch("world.system.state_manager.apply_regen"), patch(
-            "combat.engine.damage_processor.delay"
+            "combat.damage_processor.delay"
         ), patch("random.randint", return_value=0):
             engine.start_round()
             engine.process_round()
@@ -125,7 +125,7 @@ class TestCombatEngineMinimal(unittest.TestCase):
         engine.queue_action(defender, NoOpAction(defender))
         engine.queue_action(attacker, KillAction(attacker, defender))
         with patch("world.system.state_manager.apply_regen"), patch(
-            "combat.engine.damage_processor.delay"
+            "combat.damage_processor.delay"
         ), patch("random.randint", return_value=0), patch.object(
             engine, "award_experience"
         ) as mock_xp:
@@ -163,7 +163,7 @@ class TestCombatEngineMinimal(unittest.TestCase):
         engine.queue_action(defender, NoOpAction(defender))
         engine.queue_action(attacker, KillAction(attacker, defender))
         with patch("world.system.state_manager.apply_regen"), patch(
-            "combat.engine.damage_processor.delay"
+            "combat.damage_processor.delay"
         ), patch("random.randint", return_value=0):
             engine.start_round()
             engine.process_round()
@@ -182,7 +182,7 @@ class TestCombatEngineMinimal(unittest.TestCase):
         engine.queue_action(defender, NoOpAction(defender))
         engine.queue_action(attacker, KillAction(attacker, defender))
         with patch("world.system.state_manager.apply_regen"), patch(
-            "combat.engine.damage_processor.delay"
+            "combat.damage_processor.delay"
         ), patch("random.randint", return_value=0):
             engine.start_round()
             engine.process_round()
