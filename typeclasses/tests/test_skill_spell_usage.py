@@ -1,6 +1,6 @@
 from unittest.mock import patch, MagicMock
 from evennia.utils.test_resources import EvenniaTest
-from combat.combat_skills import SKILL_CLASSES
+from combat.skills import SKILL_CLASSES
 from world.spells import SPELLS
 
 class TestSkillAndSpellUsage(EvenniaTest):
@@ -30,7 +30,7 @@ class TestSkillAndSpellUsage(EvenniaTest):
     def test_shield_bash_adds_status_effect(self):
         self.char2.hp = 10
         with patch("world.system.stat_manager.check_hit", return_value=True), \
-             patch("combat.combat_skills.roll_damage", return_value=4), \
+             patch("combat.skills.roll_damage", return_value=4), \
              patch("world.system.state_manager.add_status_effect") as mock_add, \
              patch("utils.hit_chance.calculate_hit_success", return_value=True):
             self.char1.use_skill("shield bash", target=self.char2)
@@ -40,8 +40,8 @@ class TestSkillAndSpellUsage(EvenniaTest):
     def test_skill_evade_prevents_damage(self):
         self.char2.hp = 10
         with patch("world.system.stat_manager.check_hit", return_value=True), \
-             patch("combat.combat_skills.roll_evade", return_value=True), \
-             patch("combat.combat_skills.roll_damage", return_value=4), \
+             patch("combat.skills.roll_evade", return_value=True), \
+             patch("combat.skills.roll_damage", return_value=4), \
              patch("utils.hit_chance.calculate_hit_success", return_value=True):
             result = self.char1.use_skill("cleave", target=self.char2)
         self.assertEqual(self.char2.hp, 10)

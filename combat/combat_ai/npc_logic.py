@@ -5,7 +5,7 @@ from typing import Iterable
 from .ai_controller import Behavior, run_behaviors
 from ..combat_actions import AttackAction
 from ..engine import CombatEngine
-from ..combat_skills import SKILL_CLASSES
+from ..skills import SKILL_CLASSES
 from ..scripts import queue_skill, queue_spell, get_spell
 
 

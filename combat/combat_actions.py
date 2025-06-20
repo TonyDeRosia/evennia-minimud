@@ -189,7 +189,7 @@ class DefendAction(Action):
 
 
 class SkillAction(Action):
-    """Use a :class:`~combat.combat_skills.Skill` against a target."""
+    """Use a :class:`~combat.skills.Skill` against a target."""
 
     priority = 3
 

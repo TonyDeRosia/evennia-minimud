@@ -9,7 +9,7 @@ from combat.combat_actions import (
     CombatResult,
     Action,
 )
-from combat.combat_skills import ShieldBash
+from combat.skills import ShieldBash
 from combat.damage_types import DamageType
 from combat.ai_combat import queue_npc_action
 from combat.round_manager import CombatInstance, CombatRoundManager

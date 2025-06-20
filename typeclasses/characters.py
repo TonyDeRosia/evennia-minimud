@@ -611,7 +611,7 @@ class Character(ObjectParent, ClothedCharacter):
 
         # using an active combat skill if a target is provided
         if target is not None:
-            from combat.combat_skills import SKILL_CLASSES
+            from combat.skills import SKILL_CLASSES
 
             skill_cls = SKILL_CLASSES.get(skill_name)
             if not skill_cls:

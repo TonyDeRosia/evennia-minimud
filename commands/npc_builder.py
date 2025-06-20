@@ -60,7 +60,7 @@ from world.mob_constants import (
     NPCType,
     parse_flag_list,
 )
-from combat.combat_skills import SKILL_CLASSES
+from combat.skills import SKILL_CLASSES
 
 
 def validate_prototype(data: dict) -> list[str]:

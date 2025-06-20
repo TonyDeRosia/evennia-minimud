@@ -11,7 +11,7 @@ from .combat_actions import (
     CombatResult,
 )
 from .effects import StatusEffect, EffectManager
-from .combat_skills import Skill, ShieldBash, Cleave, SKILL_CLASSES
+from .skills import Skill, ShieldBash, Cleave, SKILL_CLASSES
 from .damage_types import DamageType
 from .combat_utils import get_condition_msg, calculate_initiative
 from .action_resolvers import resolve_combat_result
