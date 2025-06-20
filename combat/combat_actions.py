@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Optional, Iterable
 import logging
 
-from .engine.combat_math import CombatMath
+from combat.engine.combat_math import CombatMath
 from world.system import state_manager
 
 logger = logging.getLogger(__name__)

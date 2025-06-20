@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from combat.engine import CombatEngine
 from combat.combat_ai.npc_logic import npc_take_turn as _npc_take_turn
 
 

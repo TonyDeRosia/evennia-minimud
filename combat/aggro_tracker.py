@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Dict, Iterable, List
 
 from world.system import state_manager
-from .combat_utils import award_xp
+from combat.combat_utils import award_xp
 
 
 class AggroTracker:

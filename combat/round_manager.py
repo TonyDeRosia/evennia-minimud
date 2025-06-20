@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Set
 
 from evennia.utils import delay
 from evennia.utils.logger import log_trace
-from .combatants import _current_hp
+from combat.combatants import _current_hp
 
 
 @dataclass
@@ -300,7 +300,7 @@ class CombatRoundManager:
         fighters = combatants or []
 
         try:
-            from .engine import CombatEngine
+            from combat.engine import CombatEngine
         except ImportError as err:
             raise ImportError("Combat engine could not be imported") from err
 

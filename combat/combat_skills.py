@@ -14,9 +14,9 @@ class SkillCategory(str, Enum):
     RANGED = "ranged"
     MAGIC = "magic"
 
-from .combat_actions import CombatResult
-from .combat_utils import roll_damage, roll_evade
-from .effects import StatusEffect
+from combat.combat_actions import CombatResult
+from combat.combat_utils import roll_damage, roll_evade
+from combat.effects import StatusEffect
 from world.system import stat_manager
 from world.skills.kick import Kick
 from world.skills.disarm import Disarm
