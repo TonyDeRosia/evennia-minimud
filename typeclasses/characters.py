@@ -952,6 +952,10 @@ class PlayerCharacter(Character):
                     location=corpse,
                 )
         self.at_death(attacker)
+        if attacker:
+            self.msg(f"You are slain by {attacker.get_display_name(self)}!")
+        else:
+            self.msg("You have died.")
         if self.location:
             if attacker:
                 self.location.msg_contents(
