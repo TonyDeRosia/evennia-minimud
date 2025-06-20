@@ -2,8 +2,7 @@ from evennia import CmdSet
 from evennia.utils.evtable import EvTable
 
 from .command import Command
-from world.skills.kick import Kick
-from world.skills.utils import maybe_start_combat
+from combat.scripts import queue_skill, get_skill
 from world.system import state_manager
 
 
@@ -46,23 +45,24 @@ class CmdKick(Command):
             target = auto_search(self.caller, self.args.strip())
             if not target:
                 return
-        skill = Kick()
+        skill = get_skill("kick")
+        if not skill:
+            self.msg("Kick skill is unavailable.")
+            return
         if state_manager.is_on_cooldown(self.caller, skill.name):
             self.msg("You are still recovering.")
             return
         if self.caller.traits.stamina.current < skill.stamina_cost:
             self.msg("You are too exhausted.")
             return
-        # Apply costs and start combat if necessary
+        # Apply costs and resolve via the combat script helper
         state_manager.add_cooldown(self.caller, skill.name, skill.cooldown)
         self.caller.traits.stamina.current -= skill.stamina_cost
-        maybe_start_combat(self.caller, target)
 
-        # Resolve the skill immediately instead of queuing an action
-        result = skill.resolve(self.caller, target)
-        if result.message and self.caller.location:
+        result = queue_skill(self.caller, skill, target, start_combat=True)
+        if result and result.message and self.caller.location:
             self.caller.location.msg_contents(result.message, from_obj=self.caller)
-        if result.damage:
+        if result and result.damage:
             if hasattr(target, "at_damage"):
                 target.at_damage(self.caller, result.damage, result.damage_type)
             elif hasattr(target, "hp"):

@@ -5,10 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Callable, Iterable
 
-from .combat_actions import AttackAction, SkillAction, SpellAction
+from .combat_actions import AttackAction
 from .engine import CombatEngine
 from .combat_skills import SKILL_CLASSES
-from world.spells import SPELLS
+from .scripts import queue_skill, queue_spell, get_spell
 
 
 @dataclass(order=True)
@@ -30,16 +30,13 @@ def _default_behaviors(npc) -> Iterable[Behavior]:
             return mana and mana.current >= spell.mana_cost and n.cooldowns.ready(spell.key)
 
         def act(engine, n, t):
-            if engine:
-                engine.queue_action(n, SpellAction(n, spell_key, t))
-            else:
-                n.cast_spell(spell_key, target=t)
+            queue_spell(n, spell_key, t, engine=engine)
 
         return Behavior(30, check, act)
 
     for sp in getattr(npc.db, "spells", []):
         spell_key = sp.key if hasattr(sp, "key") else sp
-        spell = SPELLS.get(spell_key)
+        spell = get_spell(spell_key)
         if not spell:
             continue
         yield make_spell_behavior(spell_key, spell)
@@ -51,10 +48,7 @@ def _default_behaviors(npc) -> Iterable[Behavior]:
             return stam and stam.current >= skill.stamina_cost and n.cooldowns.ready(skill.name)
 
         def act(engine, n, t):
-            if engine:
-                engine.queue_action(n, SkillAction(n, skill, t))
-            else:
-                n.use_skill(skill.name, target=t)
+            queue_skill(n, skill, t, engine=engine)
 
         return Behavior(20, check, act)
 

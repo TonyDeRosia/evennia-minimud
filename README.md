@@ -198,6 +198,11 @@ Supports action queues, status effects, resistances
 
 Fully pluggable and extendable
 
+`combat.scripts` exposes helper functions like `queue_spell` and
+`queue_skill` for casting and using abilities. They automatically
+queue a `SpellAction` or `SkillAction` on the active combat engine or
+resolve the effect immediately when outside of combat.
+
 Running Tests
 Install test dependencies:
 ```bash
