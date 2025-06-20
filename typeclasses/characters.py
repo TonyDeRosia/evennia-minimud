@@ -1162,24 +1162,8 @@ class NPC(Character):
             else:
                 self.location.msg_contents(f"{self.key} dies.")
 
-        engine = getattr(getattr(self, "ndb", None), "combat_engine", None)
-        if engine:
-            engine.award_experience(attacker, self)
-        else:
-            from combat.combat_utils import award_xp
-
-            xp = getattr(self.db, "xp_reward", None)
-            if xp is None:
-                xp = getattr(self.db, "exp_reward", 0)
-            xp = int(xp or 0)
-            if not xp:
-                level = getattr(self.db, "level", 1) or 1
-                xp = level * 5
-
-            log = getattr(getattr(self, "ndb", None), "damage_log", {})
-            contributors = list(log.keys()) or ([attacker] if attacker else [])
-            contributors = [c for c in contributors if c]
-            award_xp(attacker, xp, contributors)
+        # award experience to the attacker before removing the NPC
+        self.award_xp_to(attacker)
 
         if attacker and getattr(attacker.db, "combat_target", None) is self:
             attacker.db.combat_target = None
