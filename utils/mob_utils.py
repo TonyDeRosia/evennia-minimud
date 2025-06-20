@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import Dict
 
 from utils import vnum_registry
-from utils.debug import admin_debug
 from utils.stats_utils import normalize_stat_key
 from world.scripts.mob_db import get_mobdb
 from world.system import stat_manager
@@ -98,8 +97,6 @@ def make_corpse(npc):
     if not npc or not npc.location:
         return None
 
-    admin_debug(f"Creating corpse for {getattr(npc, 'key', npc)}")
-
     # avoid multiple corpses if on_death is called repeatedly for the same npc
     existing = [
         obj
@@ -129,7 +126,6 @@ def make_corpse(npc):
         location=npc.location,
         attributes=attrs,
     )
-    admin_debug(f"Corpse object {corpse.key} created at {getattr(npc.location, 'key', npc.location)}")
     # store the vnum of the NPC on the corpse for bookkeeping
     if hasattr(npc.db, "vnum"):
         corpse.db.npc_vnum = npc.db.vnum

@@ -8,7 +8,6 @@ from typing import Dict, List, Optional, Set
 
 from evennia.utils import delay
 from evennia.utils.logger import log_trace
-from utils.debug import admin_debug
 from .combatants import _current_hp
 
 
@@ -59,8 +58,6 @@ class CombatInstance:
 
     def start(self) -> None:
         """Begin automatic round processing."""
-        names = ", ".join(getattr(c, "key", str(c)) for c in self.combatants)
-        admin_debug(f"Combat {self.combat_id} starting with: {names}")
         self._schedule_tick()
 
     def _schedule_tick(self) -> None:
@@ -81,7 +78,6 @@ class CombatInstance:
     def _tick(self) -> None:
         """Process a round and schedule the next one."""
         self.tick_handle = None
-        admin_debug(f"Combat {self.combat_id} tick at round {self.round_number}")
         if not self.is_valid():
             self.end_combat("Invalid combat instance")
             return
@@ -232,8 +228,6 @@ class CombatInstance:
         """Mark this instance as ended and clean up fighter states."""
         if self.combat_ended:
             return
-
-        admin_debug(f"Combat {self.combat_id} ending: {reason}")
 
         room = getattr(self, "room", None)
         try:
