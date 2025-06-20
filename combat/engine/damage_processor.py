@@ -229,6 +229,11 @@ class DamageProcessor:
                 or (target is None and not participant.next_action and not hostiles)
             )
             if should_remove:
+                if hp <= 0 and not getattr(getattr(actor, "db", None), "is_dead", False):
+                    log = getattr(getattr(actor, "ndb", None), "damage_log", None) or {}
+                    killer = max(log, key=log.get) if log else None
+                    self.handle_defeat(actor, killer)
+
                 self.turn_manager.remove_participant(actor)
                 from combat.round_manager import CombatRoundManager
                 inst = CombatRoundManager.get().get_combatant_combat(actor)

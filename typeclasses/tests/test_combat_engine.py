@@ -644,6 +644,50 @@ class TestCombatDeath(EvenniaTest):
       mock_make.assert_called_once_with(npc)
       self.assertIs(corpse.location, self.room1)
 
+  def test_multi_target_kill_spawns_corpses_and_awards_xp(self):
+      """Killing two NPCs at once should create two corpses and grant XP."""
+      from evennia.utils import create
+      from typeclasses.characters import NPC
+
+      player = self.char1
+      player.db.experience = 0
+      npc1 = create.create_object(NPC, key="mob1", location=self.room1)
+      npc2 = create.create_object(NPC, key="mob2", location=self.room1)
+
+      for npc in (npc1, npc2):
+          npc.db.drops = []
+          npc.db.exp_reward = 3
+          npc.ndb.damage_log = {player: 5}
+
+      class KillBoth(Action):
+          def __init__(self, actor, target, other):
+              super().__init__(actor, target)
+              self.other = other
+
+          def resolve(self):
+              npc1.traits.health.current = 0
+              npc2.traits.health.current = 0
+              return CombatResult(self.actor, npc1, "boom")
+
+      engine = CombatEngine([player, npc1, npc2], round_time=0)
+      engine.queue_action(player, KillBoth(player, npc1, npc2))
+
+      with patch("world.system.state_manager.apply_regen"), patch(
+          "world.system.state_manager.check_level_up"
+      ), patch("random.randint", return_value=0):
+          engine.start_round()
+          engine.process_round()
+
+      corpses = [
+          obj
+          for obj in self.room1.contents
+          if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+      ]
+      self.assertEqual(len(corpses), 2)
+      self.assertIn(npc1.key, [c.db.corpse_of for c in corpses])
+      self.assertIn(npc2.key, [c.db.corpse_of for c in corpses])
+      self.assertEqual(player.db.experience, npc1.db.exp_reward + npc2.db.exp_reward)
+
 
 class TestCombatNPCTurn(EvenniaTest):
     def test_at_combat_turn_auto_attack(self):
