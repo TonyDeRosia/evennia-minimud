@@ -129,3 +129,28 @@ class TestCombatUtils(EvenniaTest):
         self.assertEqual(get_condition_msg(1, 10), "is in awful condition.")
         self.assertEqual(get_condition_msg(0, 10), "is dead.")
 
+    def test_damage_adjectives(self):
+        from combat import combat_utils
+
+        self.char1.db.level = 20
+        with patch("world.system.state_manager.get_effective_stat", return_value=0):
+            max_range = self.char1.db.level * 5
+            cases = [
+                (int(max_range * 0.95), "legendary"),
+                (int(max_range * 0.65), "heavy"),
+                (int(max_range * 0.35), "solid"),
+                (1, "light"),
+                (0, ""),
+            ]
+            for dmg, word in cases:
+                self.assertEqual(combat_utils.damage_adjective(self.char1, dmg), word)
+
+            msg = combat_utils.format_combat_message(
+                self.char1,
+                self.char2,
+                "hits",
+                damage=int(max_range * 0.95),
+                adjective=True,
+            )
+            self.assertIn("legendary", msg)
+
