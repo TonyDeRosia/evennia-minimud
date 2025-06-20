@@ -570,6 +570,25 @@ class TestCombatDeath(EvenniaTest):
         self.assertNotIn(npc, [p.actor for p in engine.participants])
         self.assertEqual(corpse.db.corpse_of, npc.key)
 
+    def test_manual_death_when_flagged_in_combat_creates_corpse(self):
+        """Setting hp to 0 outside the engine should still create a corpse."""
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+        npc.db.in_combat = True
+        npc.traits.health.current = 0
+
+        corpse = create.create_object('typeclasses.objects.Object', key='corpse', location=None)
+
+        with patch('world.system.state_manager.check_level_up'), \
+             patch('typeclasses.characters.make_corpse', return_value=corpse) as mock_make:
+            npc.at_damage(self.char1, 0)
+
+        mock_make.assert_called_once_with(npc)
+        self.assertIs(corpse.location, self.room1)
+
 
 class TestCombatNPCTurn(EvenniaTest):
     def test_at_combat_turn_auto_attack(self):
