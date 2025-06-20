@@ -4,10 +4,11 @@ Thank you for your interest in contributing!
 
 ## Running the Test Suite
 
-Tests are executed with [`pytest`](https://docs.pytest.org/). They depend on
+Tests are executed with [`pytest`](https://docs.pytest.org/). They rely on
 [Django](https://www.djangoproject.com/) and the [Evennia](https://www.evennia.com/) framework.
-A helper requirements file is provided to install compatible versions of these
-packages.
+If these packages are missing, `pytest` may report "found no collectors" or
+similar import errors. Install the required dependencies using the helper
+requirements file:
 
 ```bash
 python -m pip install --upgrade pip
