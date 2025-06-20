@@ -1144,8 +1144,13 @@ class NPC(Character):
         self.db.dead = True
         self.db.is_dead = True
 
+        from combat.round_manager import CombatRoundManager, leave_combat
+
+        # store active combat engine before removing the NPC from combat
+        inst = CombatRoundManager.get().get_combatant_combat(self)
+        engine = inst.engine if inst else None
+
         # remove from combat if engaged
-        from combat.round_manager import leave_combat
         leave_combat(self)
 
         corpse = None
@@ -1166,8 +1171,15 @@ class NPC(Character):
             else:
                 self.location.msg_contents(f"{self.key} dies.")
 
-        # award experience to the attacker before removing the NPC
-        self.award_xp_to(attacker)
+        # award experience using the combat engine if available
+        if engine:
+            try:
+                engine.award_experience(attacker, self)
+            except Exception:  # pragma: no cover - safety
+                logger.log_err("XP award failed via engine", exc_info=True)
+        else:
+            # fallback if no active engine
+            self.award_xp_to(attacker)
 
         if attacker and getattr(attacker.db, "combat_target", None) is self:
             attacker.db.combat_target = None
