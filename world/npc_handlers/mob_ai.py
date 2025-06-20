@@ -9,7 +9,7 @@ from random import choice, randint
 from evennia import DefaultObject
 from evennia.utils import logger
 from typeclasses.npcs import BaseNPC
-from combat.combat_ai.npc_logic import npc_take_turn
+from combat.ai_combat import queue_npc_action
 
 
 @dataclass
@@ -250,7 +250,7 @@ def process_mob_ai(npc: BaseNPC) -> None:
         return
 
     if npc.in_combat and npc.db.combat_target:
-        npc_take_turn(None, npc, npc.db.combat_target)
+        queue_npc_action(None, npc, npc.db.combat_target)
         return
 
     _scavenge(npc)

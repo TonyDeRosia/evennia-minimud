@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from combat.ai import BaseAI, register_ai
-from combat.combat_ai.npc_logic import npc_take_turn
+from combat.ai_combat import queue_npc_action
 
 
 @register_ai("aggressive")
@@ -10,7 +10,7 @@ class AggressiveAI(BaseAI):
 
     def execute(self, npc):
         if npc.in_combat and npc.db.combat_target:
-            npc_take_turn(None, npc, npc.db.combat_target)
+            queue_npc_action(None, npc, npc.db.combat_target)
             return
         if not npc.location:
             return

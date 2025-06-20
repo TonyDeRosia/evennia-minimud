@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from combat.combat_ai.npc_logic import npc_take_turn
+from combat.ai_combat import queue_npc_action
 from combat.combat_actions import SpellAction, SkillAction
 
 class DummyNPC:
@@ -28,20 +28,20 @@ class TestAICombat(unittest.TestCase):
         self.engine = MagicMock()
 
     def test_prefers_spell_over_skill(self):
-        npc_take_turn(self.engine, self.npc, self.target)
+        queue_npc_action(self.engine, self.npc, self.target)
         action = self.engine.queue_action.call_args[0][1]
         self.assertIsInstance(action, SpellAction)
 
     def test_uses_skill_when_no_mana(self):
         self.npc.traits.mana.current = 0
         self.engine.queue_action.reset_mock()
-        npc_take_turn(self.engine, self.npc, self.target)
+        queue_npc_action(self.engine, self.npc, self.target)
         action = self.engine.queue_action.call_args[0][1]
         self.assertIsInstance(action, SkillAction)
 
     def test_spell_order(self):
         self.npc.db.spells = ["fireball", "heal"]
-        npc_take_turn(self.engine, self.npc, self.target)
+        queue_npc_action(self.engine, self.npc, self.target)
         action = self.engine.queue_action.call_args[0][1]
         self.assertIsInstance(action, SpellAction)
         self.assertEqual(action.spell.key, "fireball")
@@ -50,7 +50,7 @@ class TestAICombat(unittest.TestCase):
         self.npc.db.spells = ["fireball", "heal"]
         self.npc.traits.mana.current = 8
         self.engine.queue_action.reset_mock()
-        npc_take_turn(self.engine, self.npc, self.target)
+        queue_npc_action(self.engine, self.npc, self.target)
         action = self.engine.queue_action.call_args[0][1]
         self.assertIsInstance(action, SpellAction)
         self.assertEqual(action.spell.key, "heal")
@@ -58,7 +58,7 @@ class TestAICombat(unittest.TestCase):
     def test_skill_order(self):
         self.npc.db.spells = []
         self.npc.db.skills = ["cleave", "shield bash"]
-        npc_take_turn(self.engine, self.npc, self.target)
+        queue_npc_action(self.engine, self.npc, self.target)
         action = self.engine.queue_action.call_args[0][1]
         self.assertIsInstance(action, SkillAction)
         self.assertEqual(action.skill.name, "cleave")
@@ -68,7 +68,7 @@ class TestAICombat(unittest.TestCase):
         self.npc.db.skills = ["cleave", "shield bash"]
         self.npc.traits.stamina.current = 15
         self.engine.queue_action.reset_mock()
-        npc_take_turn(self.engine, self.npc, self.target)
+        queue_npc_action(self.engine, self.npc, self.target)
         action = self.engine.queue_action.call_args[0][1]
         self.assertIsInstance(action, SkillAction)
         self.assertEqual(action.skill.name, "shield bash")
