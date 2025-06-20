@@ -66,3 +66,18 @@ class TestCombatRoundManager(EvenniaTest):
         self.assertFalse(self.char2.db.in_combat)
         self.assertIsNone(getattr(self.char2.db, "combat_target", None))
 
+    def test_start_combat_merges_instances(self):
+        with patch.object(CombatInstance, "start"):
+            extra = self.manager.create_combat(combatants=[self.char3])
+
+        with patch.object(CombatInstance, "start"):
+            merged = self.manager.start_combat([self.char1, self.char3])
+
+        self.assertIs(merged, self.instance)
+        self.assertEqual(len(self.manager.combats), 1)
+        self.assertIn(self.char1, merged.combatants)
+        self.assertIn(self.char2, merged.combatants)
+        self.assertIn(self.char3, merged.combatants)
+        self.assertIs(self.manager.get_combatant_combat(self.char3), merged)
+        self.assertTrue(extra.combat_ended)
+
