@@ -3,11 +3,13 @@ from unittest.mock import patch, MagicMock
 
 from evennia.utils import create
 from evennia.utils.test_resources import EvenniaTest
+from django.test import override_settings
 
 from world.npc_handlers import mob_ai
 from scripts.global_npc_ai import GlobalNPCAI
 
 
+@override_settings(DEFAULT_HOME=None)
 class TestMobAIScript(EvenniaTest):
     def test_script_calls_mob_ai(self):
         from scripts.global_npc_ai import GlobalNPCAI
@@ -23,6 +25,7 @@ class TestMobAIScript(EvenniaTest):
             mock_proc.assert_called_with(npc)
 
 
+@override_settings(DEFAULT_HOME=None)
 class TestMobAIBehaviors(EvenniaTest):
     def test_scavenger_picks_up_valuable_item(self):
         from typeclasses.npcs import BaseNPC
@@ -75,18 +78,55 @@ class TestMobAIBehaviors(EvenniaTest):
         from typeclasses.npcs import BaseNPC
         from combat.combat_manager import CombatRoundManager
 
-        ally = create.create_object(BaseNPC, key="ally", location=self.room1)
+        ally = create.create_object(BaseNPC, key="ally", location=self.room1, home=self.room1)
         ally.db.ai_type = "defensive"
         ally.db.actflags = []
         manager = CombatRoundManager.get()
         instance = manager.start_combat([ally, self.char1])
+        ally.db.combat_target = self.char1
+        self.char1.db.combat_target = ally
 
-        helper = create.create_object(BaseNPC, key="helper", location=self.room1)
-        helper.db.actflags = ["assist"]
+        helper = create.create_object(BaseNPC, key="helper", location=self.room1, home=self.room1)
+        helper.db.auto_assist = True
 
-        with patch.object(helper, "enter_combat") as mock:
+        with patch.object(helper, "enter_combat") as mock, patch("world.npc_handlers.mob_ai._call_for_help"):
             mob_ai.process_mob_ai(helper)
             mock.assert_called_with(self.char1)
+
+    def test_no_auto_assist_no_join(self):
+        from typeclasses.npcs import BaseNPC
+        from combat.combat_manager import CombatRoundManager
+
+        ally = create.create_object(BaseNPC, key="ally2", location=self.room1, home=self.room1)
+        manager = CombatRoundManager.get()
+        manager.start_combat([ally, self.char1])
+        ally.db.combat_target = self.char1
+        self.char1.db.combat_target = ally
+
+        helper = create.create_object(BaseNPC, key="helper2", location=self.room1, home=self.room1)
+
+        with patch.object(helper, "enter_combat") as mock, patch("world.npc_handlers.mob_ai._call_for_help"):
+            mob_ai.process_mob_ai(helper)
+            mock.assert_not_called()
+
+    def test_player_auto_assist(self):
+        from typeclasses.npcs import BaseNPC
+        from combat.combat_manager import CombatRoundManager
+
+        ally = create.create_object(BaseNPC, key="pally", location=self.room1, home=self.room1)
+        manager = CombatRoundManager.get()
+        manager.start_combat([ally, self.char2])
+        ally.db.combat_target = self.char2
+        self.char2.db.combat_target = ally
+
+        from typeclasses.characters import PlayerCharacter
+
+        player = create.create_object(PlayerCharacter, key="assist", location=self.room1, home=self.room1)
+        player.db.auto_assist = True
+        player.enter_combat = MagicMock()
+
+        mob_ai._assist_allies(player)
+        player.enter_combat.assert_called_with(self.char2)
 
     def test_wander_moves(self):
         from typeclasses.npcs import BaseNPC

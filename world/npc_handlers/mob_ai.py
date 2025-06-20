@@ -9,6 +9,7 @@ from random import choice, randint
 from evennia import DefaultObject
 from evennia.utils import logger
 from typeclasses.npcs import BaseNPC
+from typeclasses.characters import Character
 from combat.ai_combat import queue_npc_action
 
 
@@ -164,17 +165,16 @@ def _charm_rebellion(npc: BaseNPC) -> None:
         npc.db.charmed_by = None
 
 
-def _assist_allies(npc: BaseNPC) -> None:
-    """Join combat to assist allies."""
-    flags = set(npc.db.actflags or [])
-    if "assist" not in flags or not npc.location:
+def _assist_allies(character: Character) -> None:
+    """Join combat to assist allies if auto-assist is enabled."""
+    if not character.db.auto_assist or not character.location:
         return
-    for obj in npc.location.contents:
-        if obj is npc or not isinstance(obj, BaseNPC):
+    for obj in character.location.contents:
+        if obj is character or not isinstance(obj, BaseNPC):
             continue
         target = getattr(obj.db, "combat_target", None)
-        if obj.in_combat and target and not npc.in_combat:
-            npc.enter_combat(target)
+        if obj.in_combat and target and not character.in_combat:
+            character.enter_combat(target)
             break
 
 
@@ -182,7 +182,7 @@ def _call_for_help(npc: BaseNPC) -> None:
     """Request aid from allies when in combat."""
 
     flags = set(npc.db.actflags or [])
-    called = npc.ndb.get("called_for_help")
+    called = getattr(npc.ndb, "called_for_help", None)
 
     if "call_for_help" not in flags:
         if called:
