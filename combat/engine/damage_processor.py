@@ -8,6 +8,7 @@ from django.conf import settings
 
 from ..combatants import CombatParticipant, _current_hp
 from ..combat_utils import format_combat_message
+from combat.corpse_creation import spawn_corpse
 from .turn_manager import TurnManager
 from .aggro_tracker import AggroTracker
 from ..damage_types import DamageType
@@ -108,8 +109,29 @@ class DamageProcessor:
         if hasattr(target, "at_defeat"):
             target.at_defeat(attacker)
 
+        prev_loc = getattr(target, "location", None)
+
         if hasattr(target, "on_death"):
             target.on_death(attacker)
+
+        # award experience for the kill using the combat engine
+        try:
+            self.engine.award_experience(attacker, target)
+        except Exception:
+            pass
+
+        # ensure a corpse exists if ``on_death`` didn't create one
+        if prev_loc:
+            corpse_exists = any(
+                obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+                and obj.db.corpse_of_id == getattr(target, "dbref", None)
+                for obj in prev_loc.contents
+            )
+            if not corpse_exists:
+                original_loc = getattr(target, "location", None)
+                target.location = prev_loc
+                spawn_corpse(target, attacker)
+                target.location = original_loc
 
         if getattr(target, "pk", None) is not None:
             self.update_pos(target)

@@ -940,7 +940,6 @@ class PlayerCharacter(Character):
                 )
             else:
                 self.location.msg_contents(f"{self.key} dies.")
-        self.award_xp_to(attacker)
 
         # determine recall destination just like the recall command
         dest = self.db.recall_location
@@ -1181,14 +1180,8 @@ class NPC(Character):
             else:
                 self.location.msg_contents(f"{self.key} dies.")
 
-        # award experience using the combat engine if available
-        if engine:
-            try:
-                engine.award_experience(attacker, self)
-            except Exception:  # pragma: no cover - safety
-                logger.log_err("XP award failed via engine", exc_info=True)
-        else:
-            # fallback if no active engine
+        # award experience if no engine is managing combat
+        if not engine:
             self.award_xp_to(attacker)
 
         if attacker and getattr(attacker.db, "combat_target", None) is self:
