@@ -435,7 +435,7 @@ class Character(ObjectParent, ClothedCharacter):
                     self.db.bounty = 0
             self.traits.health.rate = 0
             if not self.in_combat and not self.attributes.get("_dead"):
-                from combat.combat_manager import leave_combat
+                from combat.round_manager import leave_combat
                 leave_combat(self)
                 if bounty := self.db.bounty:
                     wallet = attacker.db.coins or {}
@@ -922,7 +922,7 @@ class PlayerCharacter(Character):
             return
 
         # remove from combat if engaged
-        from combat.combat_manager import leave_combat
+        from combat.round_manager import leave_combat
         leave_combat(self)
         corpse = spawn_corpse(self)
         if not corpse:
@@ -1156,7 +1156,7 @@ class NPC(Character):
         self.db.dead = True
         self.db.is_dead = True
 
-        from combat.combat_manager import CombatRoundManager, leave_combat
+        from combat.round_manager import CombatRoundManager, leave_combat
 
         # store active combat engine before removing the NPC from combat
         inst = CombatRoundManager.get().get_combatant_combat(self)
@@ -1278,7 +1278,7 @@ class NPC(Character):
         if "timid" in self.attributes.get("react_as", ""):
             self.at_emote("flees!")
             self.db.fleeing = True
-            from combat.combat_manager import leave_combat
+            from combat.round_manager import leave_combat
             leave_combat(self)
             # there's a 50/50 chance the object will escape forever
             if randint(0, 1):
@@ -1313,7 +1313,7 @@ class NPC(Character):
         self.at_emote("$conj(charges) at {target}!", mapping={"target": target})
         location = self.location
 
-        from combat.combat_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager
 
         manager = CombatRoundManager.get()
         instance = manager.start_combat([self, target])

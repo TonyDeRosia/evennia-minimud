@@ -4,7 +4,7 @@ from evennia.utils import create
 from evennia.utils.test_resources import EvenniaTest
 from typeclasses.npcs import BaseNPC
 from commands.combat import CombatCmdSet
-from combat.combat_manager import CombatInstance
+from combat.round_manager import CombatInstance
 
 
 @override_settings(DEFAULT_HOME=None)
@@ -20,7 +20,7 @@ class TestAttackCommand(EvenniaTest):
         self.assertEqual(self.char1.db.combat_target, mob)
         self.assertEqual(mob.db.combat_target, self.char1)
 
-        from combat.combat_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager
         from combat.combat_actions import AttackAction
 
         manager = CombatRoundManager.get()
@@ -68,7 +68,7 @@ class TestAttackCommand(EvenniaTest):
     def test_joining_combat_queues_immediately(self):
         """Joining an ongoing fight should allow immediate actions."""
         from typeclasses.characters import PlayerCharacter
-        from combat.combat_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager
         from combat.combat_actions import AttackAction
 
         with patch.object(CombatInstance, "start"):

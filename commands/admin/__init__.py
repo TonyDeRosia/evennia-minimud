@@ -443,7 +443,7 @@ class CmdPeace(Command):
             caller.msg("You have no location.")
             return
 
-        from combat.combat_manager import CombatRoundManager, leave_combat
+        from combat.round_manager import CombatRoundManager, leave_combat
         manager = CombatRoundManager.get()
         instance = manager.get_combatant_combat(caller)
         if not instance:
@@ -522,7 +522,7 @@ class CmdDebugCombat(Command):
         ndb = getattr(target, "ndb", None)
         engine = getattr(ndb, "combat_engine", None) if ndb else None
         log = getattr(ndb, "damage_log", None) if ndb else None
-        from combat.combat_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager
         inst = CombatRoundManager.get().get_combatant_combat(target)
         lines = [
             f"Debug combat info for {target.get_display_name(caller)}:",

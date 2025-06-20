@@ -157,7 +157,7 @@ class TestAIBehaviors(EvenniaTest):
         npc.db.following = self.char1
 
         self.char1.location = self.room1
-        from combat.combat_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager
         manager = CombatRoundManager.get()
         manager.start_combat([self.char1, self.char2])
 
@@ -172,7 +172,7 @@ class TestAIBehaviors(EvenniaTest):
         caller = create.create_object(BaseNPC, key="caller", location=self.room1)
         caller.db.ai_type = "defensive"
         caller.db.actflags = ["call_for_help"]
-        from combat.combat_manager import CombatRoundManager
+        from combat.round_manager import CombatRoundManager
         manager = CombatRoundManager.get()
         manager.start_combat([caller, self.char1])
 
