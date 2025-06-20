@@ -126,6 +126,9 @@ def make_corpse(npc):
         location=npc.location,
         attributes=attrs,
     )
+    # store the vnum of the NPC on the corpse for bookkeeping
+    if hasattr(npc.db, "vnum"):
+        corpse.db.npc_vnum = npc.db.vnum
 
     no_loot = ACTFLAGS.NOLOOT.value in (npc.db.actflags or [])
 
