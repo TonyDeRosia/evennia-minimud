@@ -102,6 +102,9 @@ class DamageProcessor:
         return 0
 
     def handle_defeat(self, target, attacker) -> None:
+        if hasattr(target, "on_exit_combat"):
+            target.on_exit_combat()
+
         if hasattr(target, "at_defeat"):
             target.at_defeat(attacker)
 
