@@ -8,6 +8,7 @@ from .turn_manager import TurnManager
 from .aggro_tracker import AggroTracker
 from .damage_processor import DamageProcessor
 from evennia.utils.logger import log_trace
+from utils.debug import admin_debug
 
 
 class CombatEngine:
@@ -47,7 +48,7 @@ class CombatEngine:
         combatant_keys = ", ".join(
             getattr(p.actor, "key", str(p.actor)) for p in self.turn_manager.participants
         )
-        log_trace(f"Processing combat round {self.round} | Combatants: {combatant_keys}")
+        admin_debug(f"Processing combat round {self.round} | Combatants: {combatant_keys}")
         self.processor.process_round()
 
     # Convenience wrappers for processor functionality

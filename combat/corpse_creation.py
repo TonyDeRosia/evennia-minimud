@@ -1,6 +1,7 @@
 from random import randint
 from evennia.utils import logger, inherits_from
 from utils.mob_utils import make_corpse
+from utils.debug import admin_debug
 
 from evennia.prototypes.spawner import spawn
 from evennia import create_object
@@ -12,6 +13,7 @@ def spawn_corpse(char, killer=None):
     Player characters receive random body part objects while NPCs
     trigger their loot handling via ``drop_loot``.
     """
+    admin_debug(f"Spawning corpse for {getattr(char, 'key', char)}")
     corpse = make_corpse(char)
     if not corpse:
         return None
@@ -37,6 +39,7 @@ def spawn_corpse(char, killer=None):
 
     if inherits_from(char, NPC):
         try:
+            admin_debug(f"{getattr(char, 'key', char)} dropping loot")
             corpse = char.drop_loot(killer)
         except Exception as err:  # pragma: no cover - log errors
             logger.log_err(f"Loot drop error on {char}: {err}")

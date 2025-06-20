@@ -14,6 +14,7 @@ from utils.currency import to_copper, from_copper, format_wallet
 from utils import normalize_slot
 from combat.corpse_creation import spawn_corpse
 from utils.mob_utils import make_corpse
+from utils.debug import admin_debug
 from utils.slots import SLOT_ORDER
 from collections.abc import Mapping
 import math
@@ -1051,6 +1052,7 @@ class NPC(Character):
         from utils.prototype_manager import load_prototype
         from utils.dice import roll_dice_string
 
+        admin_debug(f"{self.key} drop_loot invoked")
         drops = list(self.db.drops or [])
         coin_loot: dict[str, int] = {}
         if loot_table := self.db.loot_table:
@@ -1061,11 +1063,18 @@ class NPC(Character):
                 chance = int(entry.get("chance", 100))
                 guaranteed = entry.get("guaranteed_after")
                 count = entry.get("_count", 0)
-                
+
                 roll = randint(1, 100)
-                if roll <= chance or (
+                admin_debug(
+                    f"Loot roll {proto}: roll={roll} chance={chance} count={count}"
+                )
+                success = roll <= chance or (
                     guaranteed is not None and count >= int(guaranteed)
-                ):
+                )
+                admin_debug(
+                    f"  -> {'success' if success else 'fail'}"
+                )
+                if success:
                     if isinstance(proto, str) and proto.lower() in COIN_VALUES:
                         amount = entry.get("amount", 1)
                         if isinstance(amount, str) and not amount.isdigit():
@@ -1112,6 +1121,9 @@ class NPC(Character):
                 if hasattr(killer, "msg"):
                     coins = format_wallet(from_copper(total_copper))
                     killer.msg(f"You receive |Y{coins}|n.")
+                admin_debug(
+                    f"Coins {from_copper(total_copper)} given to {killer.key}"
+                )
             else:
                 for coin, amt in from_copper(total_copper).items():
                     if amt:
@@ -1122,6 +1134,9 @@ class NPC(Character):
                         )
                         pile.db.coin_type = coin
                         pile.db.amount = amt
+                admin_debug(
+                    f"Coins {from_copper(total_copper)} dropped at corpse"
+                )
 
         return corpse
 

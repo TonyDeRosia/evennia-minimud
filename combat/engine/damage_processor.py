@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Dict, List
 from evennia.utils import delay
 from django.conf import settings
+from utils.debug import admin_debug
 
 from ..combatants import CombatParticipant, _current_hp
 from ..combat_utils import format_combat_message
@@ -326,6 +327,13 @@ class DamageProcessor:
         damage_totals: Dict[object, int] = {}
 
         actions = self.turn_manager.gather_actions()
+        action_summary = [
+            f"{getattr(p.actor, 'key', p.actor)}->{getattr(a, '__class__').__name__}"
+            for _, _, _, p, a in actions
+        ]
+        admin_debug(
+            f"Round {self.engine.round}: queued actions: {', '.join(action_summary)}"
+        )
         prev = None
         for _, _, _, participant, action in actions:
             if prev is not participant and prev is not None:
