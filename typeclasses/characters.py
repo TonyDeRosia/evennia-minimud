@@ -1113,7 +1113,10 @@ class NPC(Character):
 
         objs = spawn(*drops)
         for obj in objs:
-            obj.location = corpse
+            if not obj:
+                logger.log_warn(f"Loot drop for {self} returned no object.")
+                continue
+            obj.move_to(corpse, quiet=True)
 
         # handle coin rewards
         coin_map = {}
