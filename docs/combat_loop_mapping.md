@@ -107,3 +107,15 @@ from combat.engine import CombatEngine, TurnManager, AggroTracker, DamageProcess
   participant = CombatParticipant(actor)
   ```
 
+## Additional Mechanics
+
+- **Parry and Dodge** – `CombatMath.check_hit` mirrors ROM's `check_dodge` and
+  `check_parry` functions. After verifying a hit, it rolls
+  `roll_evade`, `roll_parry` and `roll_block` to allow the defender a chance to
+  avoid damage based on their `evasion`, `parry_rate` and `block_rate` stats.
+
+- **Wimpy Fleeing** – NPCs with the `wimpy` flag run away when their HP drops
+  below a threshold. The `_check_wimpy` helper in `world/npc_handlers/mob_ai.py`
+  compares the mob's current HP against `flee_at` (defaulting to 25% of maximum)
+  and issues the `flee` command when triggered.
+

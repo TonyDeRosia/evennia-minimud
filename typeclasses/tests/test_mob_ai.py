@@ -214,3 +214,41 @@ class TestMobAIBehaviors(EvenniaTest):
         mob_ai.process_mob_ai(npc)
 
         npc.execute_cmd.assert_called_with("flee")
+
+    def test_wimpy_uses_custom_threshold(self):
+        """NPC flees when HP is below its custom ``flee_at`` value."""
+        from typeclasses.npcs import BaseNPC
+        from combat.combat_manager import CombatRoundManager
+
+        npc = create.create_object(BaseNPC, key="scared", location=self.room1)
+        npc.db.actflags = ["wimpy"]
+        npc.db.flee_at = 50
+        npc.hp = 40
+        npc.max_hp = 100
+        manager = CombatRoundManager.get()
+        manager.start_combat([npc, self.char1])
+
+        npc.execute_cmd = MagicMock()
+
+        mob_ai.process_mob_ai(npc)
+
+        npc.execute_cmd.assert_called_with("flee")
+
+    def test_wimpy_stays_above_custom_threshold(self):
+        """NPC does not flee if current HP is above ``flee_at``."""
+        from typeclasses.npcs import BaseNPC
+        from combat.combat_manager import CombatRoundManager
+
+        npc = create.create_object(BaseNPC, key="brave", location=self.room1)
+        npc.db.actflags = ["wimpy"]
+        npc.db.flee_at = 50
+        npc.hp = 80
+        npc.max_hp = 100
+        manager = CombatRoundManager.get()
+        manager.start_combat([npc, self.char1])
+
+        npc.execute_cmd = MagicMock()
+
+        mob_ai.process_mob_ai(npc)
+
+        npc.execute_cmd.assert_not_called()
