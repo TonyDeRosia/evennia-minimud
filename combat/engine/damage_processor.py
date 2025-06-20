@@ -267,35 +267,9 @@ class DamageProcessor:
         if action in participant.next_action:
             participant.next_action.remove(action)
 
-        damage_done = 0
-        msg = result.message
-        if result.damage and result.target:
-            dt = result.damage_type
-            if isinstance(dt, str):
-                try:
-                    dt = DamageType(dt)
-                except ValueError:
-                    dt = None
-            damage_done = self.apply_damage(actor, result.target, result.damage, dt)
-            if not msg:
-                msg = format_combat_message(actor, result.target, "hits", damage_done)
-            damage_totals[actor] = damage_totals.get(actor, 0) + damage_done
+        from combat.action_resolvers import resolve_combat_result
 
-        if msg:
-            self._buffer_message(participant, msg)
-
-        if result.target:
-            self.aggro.track(result.target, actor)
-            if _current_hp(result.target) <= 0:
-                defeated = result.target
-                self.handle_defeat(defeated, actor)
-                for p in self.turn_manager.participants:
-                    p.next_action = [
-                        a
-                        for a in p.next_action
-                        if getattr(a, "target", None) is not defeated
-                        and getattr(a, "actor", None) is not defeated
-                    ]
+        resolve_combat_result(self, participant, result, damage_totals)
 
     def _summarize_damage(self, damage_totals: Dict[object, int]) -> None:
         if not getattr(settings, "COMBAT_DEBUG_SUMMARY", False):
