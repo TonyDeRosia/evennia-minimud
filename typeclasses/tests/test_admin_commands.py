@@ -465,13 +465,13 @@ class TestAdminCommands(EvenniaTest):
         cmd.caller = self.char1
         cmd.func()
 
-        from combat.round_manager import CombatRoundManager
+        from combat.combat_manager import CombatRoundManager
         self.assertFalse(CombatRoundManager.get().combats)
 
     def test_peace_after_victory(self):
         """Peace should handle the combat script being deleted already."""
 
-        from combat.round_manager import CombatRoundManager
+        from combat.combat_manager import CombatRoundManager
 
         manager = CombatRoundManager.get()
         instance = manager.start_combat([self.char1, self.char2])
@@ -501,7 +501,7 @@ class TestAdminCommands(EvenniaTest):
 
         # start combat
         self.char1.execute_cmd(f"attack {self.char2.key}")
-        from combat.round_manager import CombatRoundManager
+        from combat.combat_manager import CombatRoundManager
         manager = CombatRoundManager.get()
         instance = manager.get_combatant_combat(self.char1)
 
@@ -536,7 +536,7 @@ class TestAdminCommands(EvenniaTest):
         cmd.caller = self.char1
         cmd.func()
 
-        from combat.round_manager import CombatRoundManager
+        from combat.combat_manager import CombatRoundManager
         self.assertFalse(CombatRoundManager.get().combats)
 
     def test_peace_clears_room_combat_tags(self):

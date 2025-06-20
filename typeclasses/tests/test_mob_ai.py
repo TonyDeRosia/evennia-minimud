@@ -73,7 +73,7 @@ class TestMobAIBehaviors(EvenniaTest):
 
     def test_assist_allies(self):
         from typeclasses.npcs import BaseNPC
-        from combat.round_manager import CombatRoundManager
+        from combat.combat_manager import CombatRoundManager
 
         ally = create.create_object(BaseNPC, key="ally", location=self.room1)
         ally.db.ai_type = "defensive"
@@ -135,7 +135,7 @@ class TestMobAIBehaviors(EvenniaTest):
 
     def test_call_for_help_summons_allies(self):
         from typeclasses.npcs import BaseNPC
-        from combat.round_manager import CombatRoundManager
+        from combat.combat_manager import CombatRoundManager
 
         caller = create.create_object(BaseNPC, key="caller", location=self.room1)
         caller.db.actflags = ["call_for_help"]
@@ -160,7 +160,7 @@ class TestMobAIBehaviors(EvenniaTest):
 
     def test_wimpy_flees_when_low_hp(self):
         from typeclasses.npcs import BaseNPC
-        from combat.round_manager import CombatRoundManager
+        from combat.combat_manager import CombatRoundManager
 
         npc = create.create_object(BaseNPC, key="coward", location=self.room1)
         npc.db.actflags = ["wimpy"]

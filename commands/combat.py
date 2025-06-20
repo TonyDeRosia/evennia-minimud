@@ -86,7 +86,7 @@ class CmdAttack(Command):
             del self.caller.db.fleeing
 
         # it's all good! let's get started!
-        from combat.round_manager import CombatRoundManager
+        from combat.combat_manager import CombatRoundManager
 
         manager = CombatRoundManager.get()
         instance = manager.start_combat([self.caller, target])
@@ -247,7 +247,7 @@ class CmdFlee(Command):
             self.msg("There is nowhere to flee to!")
             return
 
-        from combat.round_manager import CombatRoundManager, leave_combat
+        from combat.combat_manager import CombatRoundManager, leave_combat
         manager = CombatRoundManager.get()
         if manager.get_combatant_combat(caller):
             leave_combat(caller)

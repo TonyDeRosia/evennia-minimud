@@ -1,4 +1,4 @@
-from combat.round_manager import CombatRoundManager
+from combat.combat_manager import CombatRoundManager
 
 
 def maybe_start_combat(attacker, target):

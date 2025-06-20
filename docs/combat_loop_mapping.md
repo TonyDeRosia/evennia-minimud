@@ -4,7 +4,7 @@ This project models its turn-based fighting system after the traditional combat 
 
 ## CombatRoundManager
 
-File: `combat/round_manager.py`
+File: `combat/combat_manager.py`
 
 - Maintains a registry of all active combat instances keyed by a unique combat id.
 - Tracks which combat each combatant belongs to for quick lookup.
@@ -53,7 +53,7 @@ The following outlines how a single combat round flows through the system:
 The following snippet demonstrates a minimal fight between two characters. First create a combat and then queue actions for the round:
 
 ```python
-from combat.round_manager import CombatRoundManager
+from combat.combat_manager import CombatRoundManager
 from combat.combat_actions import AttackAction
 
 # attacker and target are Character objects already in the same room
