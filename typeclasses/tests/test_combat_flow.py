@@ -11,7 +11,7 @@ from combat.combat_actions import (
 )
 from combat.combat_skills import ShieldBash
 from combat.damage_types import DamageType
-from combat.combat_ai.npc_logic import npc_take_turn
+from combat.ai_combat import queue_npc_action
 from typeclasses.gear import BareHand
 
 
@@ -300,7 +300,7 @@ class TestNPCBehaviors(unittest.TestCase):
         npc.traits.health.max = 10
         npc.on_low_hp = MagicMock()
         target = Dummy()
-        npc_take_turn(None, npc, target)
+        queue_npc_action(None, npc, target)
         npc.on_low_hp.assert_called()
 
 
