@@ -81,3 +81,11 @@ class TestCombatRoundManager(EvenniaTest):
         self.assertIs(self.manager.get_combatant_combat(self.char3), merged)
         self.assertTrue(extra.combat_ended)
 
+    def test_round_time_passed_to_engine(self):
+        with patch.object(CombatInstance, "start"):
+            inst = self.manager.create_combat(
+                combatants=[self.char1, self.char2], round_time=3.5
+            )
+        self.assertEqual(inst.round_time, 3.5)
+        self.assertEqual(inst.engine.round_time, 3.5)
+

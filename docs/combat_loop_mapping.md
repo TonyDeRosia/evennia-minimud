@@ -14,6 +14,8 @@ File: `combat/combat_manager.py`
 - Each `CombatInstance` schedules a tick every few seconds, much like ROM's
   `violence_update` that iterates over every character currently fighting.
 - Each tick triggers the associated `CombatEngine` to process a new round.
+- The `round_time` argument used when creating a combat sets this tick interval
+  and is forwarded to `CombatEngine` so its automatic round timer matches.
 - When `COMBAT_DEBUG_TICKS` is `True` in `server/conf/settings.py`, a debug log is emitted each tick.
 
 ## CombatInstance
