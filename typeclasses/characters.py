@@ -965,6 +965,30 @@ class PlayerCharacter(Character):
                 self.location.msg_contents(f"{self.key} dies.")
         self.award_xp_to(attacker)
 
+        # determine recall destination just like the recall command
+        dest = self.db.recall_location
+        if not dest:
+            from django.conf import settings
+            from evennia import search_object
+
+            default_ref = getattr(settings, "DEFAULT_RECALL_ROOM", "#2")
+            dest_list = search_object(default_ref)
+            dest = dest_list[0] if dest_list else None
+
+        if dest and dest.is_typeclass("typeclasses.rooms.Room", exact=False):
+            self.move_to(dest, quiet=True, move_type="teleport")
+
+        # clear knockout status and restore health
+        self.tags.remove("unconscious", category="status")
+        self.tags.remove("lying down", category="status")
+        self.traits.health.reset()
+        self.traits.health.rate = 0.0
+        if self.traits.mana:
+            self.traits.mana.rate = 0.0
+        if self.traits.stamina:
+            self.traits.stamina.rate = 0.0
+        self.msg(prompt=self.get_display_status(self))
+
 
     def respawn(self):
         """
