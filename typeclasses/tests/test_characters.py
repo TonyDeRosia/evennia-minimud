@@ -460,3 +460,15 @@ class TestPlayerDeath(EvenniaTest):
         self.assertTrue(
             any("is slain" in msg or "dies." in msg for msg in calls)
         )
+
+    def test_player_receives_death_message(self):
+        player = self.char1
+        attacker = self.char2
+        player.msg = MagicMock()
+
+        player.traits.health.current = 1
+        player.at_damage(attacker, 2)
+
+        player.msg.assert_any_call(
+            f"You are slain by {attacker.get_display_name(player)}!"
+        )
