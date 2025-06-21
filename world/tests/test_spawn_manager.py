@@ -235,3 +235,27 @@ class TestSpawnManager(EvenniaTest):
             room = self.script._get_room(entry)
         self.assertIsNone(room)
         self.assertEqual(entry["room"], "fake")
+
+    def test_force_respawn_handles_string_room_and_proto(self):
+        self.script.db.entries = [
+            {
+                "area": "testarea",
+                "prototype": "5",
+                "room": "1",
+                "room_id": 1,
+                "max_count": 1,
+                "respawn_rate": 5,
+                "last_spawn": 0,
+            }
+        ]
+        npc = create_object(BaseNPC, key="num")
+        with mock.patch("scripts.spawn_manager.spawn_from_vnum") as m_spawn:
+            def side(vnum, location=None):
+                npc.location = location
+                return npc
+
+            m_spawn.side_effect = side
+            self.script.force_respawn(1)
+
+        self.assertEqual(npc.location, self.room)
+        m_spawn.assert_called_once_with(5, location=self.room)
