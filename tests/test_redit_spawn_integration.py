@@ -1,0 +1,68 @@
+from unittest.mock import MagicMock, patch
+from django.test import override_settings
+from evennia.utils.test_resources import EvenniaTest
+from evennia.utils import create
+from typeclasses.rooms import Room
+from typeclasses.npcs import BaseNPC
+from world.areas import Area
+from scripts.spawn_manager import SpawnManager
+from commands import redit
+from commands.admin import BuilderCmdSet
+
+
+@override_settings(DEFAULT_HOME=None)
+class TestReditSpawnIntegration(EvenniaTest):
+    def setUp(self):
+        super().setUp()
+        self.char1.msg = MagicMock()
+        self.char1.cmdset.add_default(BuilderCmdSet)
+        self.room = create.create_object(
+            Room, key="R1", location=self.char1.location, home=self.char1.location
+        )
+        self.room.db.room_id = 5
+        self.room.db.area = "zone"
+        self.char1.location = self.room
+        self.script = SpawnManager()
+        self.script.at_script_creation()
+
+    def test_spawn_manager_integration(self):
+        area = Area(key="zone", start=1, end=10)
+        with (
+            patch("commands.redit.validate_vnum", return_value=True),
+            patch("commands.redit.register_vnum"),
+            patch("commands.redit.load_prototype", return_value=None),
+            patch("commands.redit.spawner.spawn", return_value=[self.room]),
+            patch("commands.redit.find_area_by_vnum", return_value=area),
+            patch("commands.redit.find_area", return_value=(0, area)),
+            patch("commands.redit.save_prototype"),
+            patch("commands.redit.OLCEditor"),
+        ):
+            self.char1.execute_cmd("redit create 5")
+
+        redit._handle_spawn_cmd(self.char1, "add slime 1 5")
+        proto = self.char1.ndb.room_protos[5]
+        self.char1.ndb.room_protos[5] = proto
+
+        self.script.register_room_spawn = MagicMock(
+            wraps=self.script.register_room_spawn
+        )
+        self.script.force_respawn = MagicMock(wraps=self.script.force_respawn)
+
+        with (
+            patch("commands.redit.save_prototype"),
+            patch("commands.redit.ObjectDB.objects.filter", return_value=[self.room]),
+            patch("commands.redit.ScriptDB.objects.filter") as mock_filter,
+            patch.object(self.script, "_spawn") as mock_spawn,
+        ):
+            mock_filter.return_value.first.return_value = self.script
+            mock_spawn.side_effect = lambda proto, room: create.create_object(
+                BaseNPC, key=str(proto), location=room
+            )
+            redit.menunode_done(self.char1)
+
+        self.script.register_room_spawn.assert_called_with(proto)
+        self.script.force_respawn.assert_called_with(5)
+        npcs = [obj for obj in self.room.contents if obj.is_typeclass(BaseNPC, exact=False)]
+        assert len(npcs) == 1
+        assert npcs[0].key == "slime"
+        assert proto["vnum"] == 5
