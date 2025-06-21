@@ -121,10 +121,12 @@ class DamageProcessor:
         else:
             handle_death(target, attacker)
 
-        if getattr(target, "pk", None) is not None:
+        deleted = getattr(target, "pk", None) is None
+
+        if not deleted:
             self.update_pos(target)
 
-        if inst:
+        if inst and not deleted:
             inst.remove_combatant(target)
 
         survivors = []
