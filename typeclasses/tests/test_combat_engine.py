@@ -451,7 +451,6 @@ class TestCombatDeath(EvenniaTest):
             )
             self.assertEqual(corpse.db.npc_vnum, 77)
             self.assertTrue(npc.db.is_dead)
-            self.assertIsNone(npc.location)
             mock_delete.assert_called_once()
 
     def test_unsaved_npc_death_creates_corpse_and_awards_xp(self):

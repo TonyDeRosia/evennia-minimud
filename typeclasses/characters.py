@@ -1135,7 +1135,6 @@ class NPC(Character):
         if attacker and getattr(attacker.db, "combat_target", None) is self:
             attacker.db.combat_target = None
 
-        self.location = None
         self.delete()
 
     # property to mimic weapons
