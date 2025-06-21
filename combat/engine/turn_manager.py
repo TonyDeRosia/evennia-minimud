@@ -28,10 +28,14 @@ class TurnManager:
     # participant management
     # -------------------------------------------------------------
     def add_participant(self, actor: object) -> None:
+        # Always mark the actor as being in combat **before** it is queued. This
+        # ensures that any hooks triggered during `on_enter_combat` or later
+        # phases can rely on this flag being set.
         if hasattr(actor, "db") and getattr(actor, "pk", None) is not None:
             actor.db.in_combat = True
         else:
             setattr(actor, "in_combat", True)
+
         self.participants.append(CombatParticipant(actor=actor))
         if hasattr(actor, "ndb"):
             actor.ndb.combat_engine = self.engine
