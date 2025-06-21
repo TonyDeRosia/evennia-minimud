@@ -12,8 +12,9 @@ class BanditAI(BaseCombatAI):
         npc = self.obj
         if not npc or not npc.location:
             return None
-        for obj in npc.location.contents:
-            if obj.has_account and obj.db.level and npc.db.level:
-                if obj.db.level < npc.db.level:
-                    return obj
-        return None
+        return self.find_target(
+            lambda obj: obj.has_account
+            and obj.db.level
+            and npc.db.level
+            and obj.db.level < npc.db.level
+        )
