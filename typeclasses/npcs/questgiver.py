@@ -11,9 +11,5 @@ class QuestGiverNPC(QuestGiverRole, BaseNPC):
     and customized in the future.
     """
 
-    def at_character_arrive(self, chara, **kwargs):
-        """Remind players they can ask for quests."""
-        super().at_character_arrive(chara, **kwargs)
-        if chara.has_account:
-            chara.msg(f"{self.key} says, 'Ask me for a quest if you're looking for work.'")
+    arrival_message = "Ask me for a quest if you're looking for work."
 

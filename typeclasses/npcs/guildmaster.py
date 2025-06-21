@@ -11,9 +11,5 @@ class GuildmasterNPC(GuildmasterRole, BaseNPC):
     guildmaster behaviors without modifying the base NPC class.
     """
 
-    def at_character_arrive(self, chara, **kwargs):
-        """Offer assistance with guild matters."""
-        super().at_character_arrive(chara, **kwargs)
-        if chara.has_account:
-            chara.msg(f"{self.key} says, 'Step forward if you seek guild business.'")
+    arrival_message = "Step forward if you seek guild business."
 

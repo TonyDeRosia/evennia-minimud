@@ -11,9 +11,5 @@ class CombatTrainerNPC(CombatTrainerRole, BaseNPC):
     added when needed.
     """
 
-    def at_character_arrive(self, chara, **kwargs):
-        """Encourage the player to spar."""
-        super().at_character_arrive(chara, **kwargs)
-        if chara.has_account:
-            chara.msg(f"{self.key} says, 'Ready to test your mettle?'")
+    arrival_message = "Ready to test your mettle?"
 
