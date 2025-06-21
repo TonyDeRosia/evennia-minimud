@@ -221,8 +221,8 @@ class TestVnumMobs(EvenniaTest):
             self.char1.execute_cmd("@mspawn 42")
             mock_spawn.assert_not_called()
         out = self.char1.msg.call_args[0][0]
-        self.assertIn("not finalized", out)
-        self.assertIn("editnpc 42", out)
+        self.assertIn("medit create 42", out)
+        self.assertIn("No prototype", out)
 
     def test_spawn_from_vnum_missing_key_error(self):
         proto = {"desc": "bad"}
