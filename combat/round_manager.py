@@ -113,6 +113,7 @@ class CombatInstance:
         fighters.update(self.combatants)
 
         active_fighters = []
+        fighter_info = []
         for fighter in fighters:
             if not fighter:
                 continue
@@ -121,14 +122,17 @@ class CombatInstance:
             in_combat = getattr(getattr(fighter, "db", None), "in_combat", None)
             if in_combat is None:
                 in_combat = getattr(fighter, "in_combat", False)
+            fighter_info.append((fighter, hp, in_combat))
+            if hp > 0 and (in_combat is True or fighter in self.combatants):
+                active_fighters.append(fighter)
+
+        for fighter, hp, in_combat in fighter_info:
             logger.debug(
-                "Checking combatants: %s - HP: %s, in_combat: %s",
+                "Fighter status: %s - HP: %s, in_combat: %s",
                 getattr(fighter, "key", fighter),
                 hp,
                 in_combat,
             )
-            if hp > 0 and (in_combat is True or fighter in self.combatants):
-                active_fighters.append(fighter)
 
         return len(active_fighters) >= 2
 
