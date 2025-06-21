@@ -33,6 +33,17 @@ def handle_death(victim, killer=None):
 
     location = victim.location
     corpse = None
+
+    # broadcast messages before converting to a corpse
+    if killer:
+        victim.msg(f"You are slain by {killer.get_display_name(victim)}!")
+        if location:
+            location.msg_contents(f"{victim.key} is |Rslain|n by |C{killer.key}|n!")
+    else:
+        victim.msg("You have died.")
+        if location:
+            location.msg_contents(f"{victim.key} dies.")
+
     if location:
         corpse = next(
             (
@@ -53,16 +64,6 @@ def handle_death(victim, killer=None):
                     corpse.db.corpse_of_id = victim.dbref
                 if getattr(getattr(victim, "db", None), "vnum", None) is not None:
                     corpse.db.npc_vnum = victim.db.vnum
-
-    # broadcast messages
-    if killer:
-        victim.msg(f"You are slain by {killer.get_display_name(victim)}!")
-        if location:
-            location.msg_contents(f"{victim.key} is |Rslain|n by |C{killer.key}|n!")
-    else:
-        victim.msg("You have died.")
-        if location:
-            location.msg_contents(f"{victim.key} dies.")
 
     # experience award
     if killer:

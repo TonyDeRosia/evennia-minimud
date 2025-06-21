@@ -47,6 +47,30 @@ class TestOnDeathManager(EvenniaTest):
         corpse = next(obj for obj in self.room.contents if obj.db.corpse_of == self.char1.key)
         self.assertIsNotNone(corpse)
 
+    def test_death_message_then_corpse_loot(self):
+        npc = create.create_object(NPC, key="mob", location=self.room)
+        npc.db.drops = []
+        order = []
+
+        def record_msg(*args, **kwargs):
+            order.append("msg")
+
+        def drop_loot_side(killer=None):
+            order.append("corpse")
+            corpse = create.create_object("typeclasses.objects.Corpse", key="corpse", location=None)
+            loot = create.create_object("typeclasses.objects.Object", key="loot", location=corpse)
+            return corpse
+
+        npc.msg = MagicMock(side_effect=record_msg)
+        self.room.msg_contents = MagicMock(side_effect=record_msg)
+        npc.drop_loot = MagicMock(side_effect=drop_loot_side)
+
+        on_death_manager.handle_death(npc, self.char1)
+
+        self.assertEqual(order[0], "msg")
+        self.assertEqual(order[1], "msg")
+        self.assertEqual(order[2], "corpse")
+
 
 if __name__ == "__main__":
     unittest.main()
