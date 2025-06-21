@@ -109,3 +109,17 @@ class TestCombatRoundManager(EvenniaTest):
         self.assertIsNot(new_inst, self.instance)
         self.assertIs(self.manager.get_combatant_combat(self.char1), new_inst)
 
+    def test_restart_after_combat_end_creates_new_instance(self):
+        """Calling start_combat after an instance ends should start fresh combat."""
+        self.instance.end_combat("done")
+        self.assertFalse(self.char1.db.in_combat)
+        self.assertFalse(self.char2.db.in_combat)
+
+        with patch.object(CombatInstance, "start"):
+            new_inst = self.manager.start_combat([self.char1, self.char2])
+
+        self.assertIsNot(new_inst, self.instance)
+        self.assertIs(self.manager.get_combatant_combat(self.char1), new_inst)
+        self.assertTrue(self.char1.db.in_combat)
+        self.assertTrue(self.char2.db.in_combat)
+
