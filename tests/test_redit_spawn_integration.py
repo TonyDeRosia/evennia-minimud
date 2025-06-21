@@ -66,3 +66,30 @@ class TestReditSpawnIntegration(EvenniaTest):
         assert len(npcs) == 1
         assert npcs[0].key == "slime"
         assert proto["vnum"] == 5
+
+    def test_invalid_proto_not_added(self):
+        area = Area(key="zone", start=1, end=10)
+        with (
+            patch("commands.redit.validate_vnum", return_value=True),
+            patch("commands.redit.register_vnum"),
+            patch("commands.redit.load_prototype", return_value=None),
+            patch("commands.redit.spawner.spawn", return_value=[self.room]),
+            patch("commands.redit.find_area_by_vnum", return_value=area),
+            patch("commands.redit.find_area", return_value=(0, area)),
+            patch("commands.redit.save_prototype"),
+            patch("commands.redit.OLCEditor"),
+        ):
+            self.char1.execute_cmd("redit create 5")
+
+        self.char1.msg.reset_mock()
+
+        with (
+            patch("commands.redit.get_mobdb") as mock_db,
+            patch("commands.redit.prototypes.get_npc_prototypes", return_value={}),
+        ):
+            mock_db.return_value.get_proto.return_value = None
+            result = redit._handle_spawn_cmd(self.char1, "add unknown 1 5")
+
+        assert result == "menunode_spawns"
+        assert not self.char1.ndb.room_protos[5]["spawns"]
+        self.char1.msg.assert_any_call("Prototype not found.")
