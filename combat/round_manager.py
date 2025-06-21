@@ -11,7 +11,10 @@ from typing import Dict, List, Optional, Set
 
 from evennia.utils import delay
 from evennia.utils.logger import log_trace
+import logging
 from combat.combatants import _current_hp
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -84,9 +87,17 @@ class CombatInstance:
         if not self.is_valid():
             self.end_combat("Invalid combat instance")
             return
+
+        # Sync and process any defeated combatants before checking active fighters
+        try:
+            self.sync_participants()
+        except Exception as err:  # pragma: no cover - safety
+            log_trace(f"Error syncing participants: {err}")
+
         if not self.has_active_fighters():
             self.end_combat("No active fighters remaining")
             return
+
         self.process_round()
 
     def is_valid(self) -> bool:
@@ -106,8 +117,6 @@ class CombatInstance:
             if not fighter:
                 continue
             hp = _current_hp(fighter)
-            if hp <= 0:
-                continue
             # check combat status using the persistent db attribute
             try:
                 in_combat = getattr(fighter.db, "in_combat")
@@ -115,6 +124,12 @@ class CombatInstance:
                 in_combat = None
             if in_combat is None:
                 in_combat = getattr(fighter, "in_combat", False)
+            logger.debug(
+                "Checking combatants: %s - HP: %s, in_combat: %s",
+                getattr(fighter, "key", fighter),
+                hp,
+                in_combat,
+            )
             if in_combat or (fighter in self.combatants and hp > 0):
                 active_fighters.append(fighter)
 
@@ -142,15 +157,15 @@ class CombatInstance:
             if getattr(actor, "pk", None) is None:
                 setattr(actor, "in_combat", False)
 
-        # Remove defeated combatants
+        # Remove defeated combatants after processing their death logic
         for actor in list(fighters):
-            if _current_hp(actor) <= 0:
-                if hasattr(actor, "db") and getattr(actor, "pk", None) is not None:
-                    actor.db.in_combat = False
-                else:
-                    setattr(actor, "in_combat", False)
-                self.engine.remove_participant(actor)
-                self.combatants.discard(actor)
+            if _current_hp(actor) <= 0 and not getattr(getattr(actor, "db", None), "is_dead", False):
+                log = getattr(getattr(actor, "ndb", None), "damage_log", None) or {}
+                killer = max(log, key=log.get) if log else None
+                try:
+                    self.engine.handle_defeat(actor, killer)
+                except Exception as err:  # pragma: no cover - safety
+                    log_trace(f"Error handling defeat of {getattr(actor, 'key', actor)}: {err}")
 
     def process_round(self) -> None:
         """Process a single combat round for this instance."""
