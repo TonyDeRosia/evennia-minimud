@@ -26,20 +26,7 @@ from world import prototypes
 from world.scripts.mob_db import get_mobdb
 from .building import DIR_FULL, OPPOSITE
 from .command import Command
-
-
-VALID_ROOM_FLAGS = (
-    "dark",
-    "nopvp",
-    "sanctuary",
-    "indoors",
-    "safe",
-    "no_recall",
-    "no_mount",
-    "no_flee",
-    "rest_area",
-)
-
+from .room_flags import VALID_ROOM_FLAGS
 
 def proto_from_room(room) -> dict:
     """Return a prototype dict generated from ``room``."""
