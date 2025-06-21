@@ -485,7 +485,7 @@ Examples:
     None
 
 Notes:
-    - Valid VNUM range is 200000-299999.
+    - Invalid numbers list the allowed range and next free slot.
     - Use @nextvnum R to obtain a free number.
     - redit create immediately spawns a usable room and registers it to the area.
     - redit here <vnum> assigns the current room to that VNUM and opens the editor.
@@ -3504,7 +3504,7 @@ Example:
     medit create 10
 
 Notes:
-    - VNUMs are validated against the registry.
+    - Invalid numbers list the allowed range and next free slot.
     - The mob is spawned when you finish the menu.
 """,
     },
@@ -4001,6 +4001,7 @@ Use |w@nextvnum <I|M|R|O|Q|S>|n to fetch the next free number. Prefix the
 value with its letter, like |wM5|n, when spawning or referencing by VNUM.
 NPCs spawned from a VNUM automatically gain a |wM<number>|n tag so you can
 find them later with |wsearch_tag(key="M<number>", category="vnum")|n.
+Invalid VNUMs will include the allowed range and next free slot in the error message.
 """,
     },
     {

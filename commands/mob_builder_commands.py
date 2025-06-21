@@ -13,8 +13,7 @@ from utils.prototype_manager import load_all_prototypes
 from .command import Command
 from . import npc_builder
 from world import prototypes, area_npcs
-from world.areas import get_areas
-from world.areas import find_area_by_vnum
+from world.areas import get_areas, find_area_by_vnum, get_area_vnum_range
 from world.mob_constants import (
     NPC_RACES,
     NPC_CLASSES,
@@ -252,7 +251,10 @@ class CmdMCreate(Command):
                     builder=self.caller.key,
                 )
             except Exception:
-                pass
+                rng = get_area_vnum_range(area)
+                if rng:
+                    self.msg(f"Using global range. {area} uses {rng[0]}-{rng[1]}.")
+                proto["vnum"] = vnum_registry.get_next_vnum("npc")
         prototypes.register_npc_prototype(self.new_key, proto)
         self.msg(f"Prototype {self.new_key} created.")
 

@@ -15,6 +15,7 @@ from utils.vnum_registry import (
     register_vnum,
     unregister_vnum,
     VNUM_RANGES,
+    peek_next_vnum,
 )
 from world.areas import find_area_by_vnum, get_areas, update_area
 from evennia.prototypes import spawner
@@ -348,7 +349,11 @@ def _handle_exit_cmd(caller, raw_string, **kwargs):
             return "menunode_exits"
         vnum = int(args[2])
         if not validate_vnum(vnum, "room"):
-            caller.msg("Invalid or used vnum.")
+            start, end = VNUM_RANGES["room"]
+            next_vnum = peek_next_vnum("room")
+            caller.msg(
+                f"Invalid or used VNUM. Rooms use {start}-{end}. Next free: {next_vnum}."
+            )
             return "menunode_exits"
         register_vnum(vnum)
         current_vnum = caller.ndb.current_vnum
@@ -685,7 +690,11 @@ class CmdREdit(Command):
                 _clear_state()
                 return
             if not validate_vnum(new_vnum, "room"):
-                self.msg("Invalid or already used VNUM.")
+                start, end = VNUM_RANGES["room"]
+                next_vnum = peek_next_vnum("room")
+                self.msg(
+                    f"Invalid or already used VNUM. Rooms use {start}-{end}. Next free: {next_vnum}."
+                )
                 _clear_state()
                 return
             save_prototype("room", proto, vnum=new_vnum)
@@ -726,9 +735,9 @@ class CmdREdit(Command):
                 return
             if not validate_vnum(vnum, "room"):
                 start, end = VNUM_RANGES["room"]
+                next_vnum = peek_next_vnum("room")
                 self.msg(
-                    f"Invalid or already used VNUM. Rooms use {start}-{end}. "
-                    "Try @nextvnum R."
+                    f"Invalid or already used VNUM. Rooms use {start}-{end}. Next free: {next_vnum}."
                 )
                 _clear_state()
                 return
@@ -738,7 +747,9 @@ class CmdREdit(Command):
             if area_name:
                 idx, area = find_area(area_name)
                 if area and not (area.start <= vnum <= area.end):
-                    self.msg("Number outside area range.")
+                    self.msg(
+                        f"Number outside area range {area.start}-{area.end}."
+                    )
                     _clear_state()
                     return
                 objs = ObjectDB.objects.filter(
@@ -836,9 +847,9 @@ class CmdREdit(Command):
         vnum = int(parts[1])
         if not validate_vnum(vnum, "room"):
             start, end = VNUM_RANGES["room"]
+            next_vnum = peek_next_vnum("room")
             self.msg(
-                f"Invalid or already used VNUM. Rooms use {start}-{end}. "
-                "Try @nextvnum R."
+                f"Invalid or already used VNUM. Rooms use {start}-{end}. Next free: {next_vnum}."
             )
             _clear_state()
             return

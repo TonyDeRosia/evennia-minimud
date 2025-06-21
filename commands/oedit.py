@@ -6,7 +6,7 @@ from utils.prototype_manager import (
     save_prototype,
     load_all_prototypes,
 )
-from utils.vnum_registry import validate_vnum, register_vnum
+from utils.vnum_registry import validate_vnum, register_vnum, VNUM_RANGES, peek_next_vnum
 from .command import Command
 from commands.admin import parse_stat_mods
 from utils import VALID_SLOTS, normalize_slot
@@ -191,7 +191,11 @@ class CmdOEdit(Command):
         proto = load_prototype("object", vnum)
         if proto is None:
             if not validate_vnum(vnum, "object"):
-                self.msg("Invalid or already used VNUM.")
+                start, end = VNUM_RANGES["object"]
+                next_vnum = peek_next_vnum("object")
+                self.msg(
+                    f"Invalid or already used VNUM. Objects use {start}-{end}. Next free: {next_vnum}."
+                )
                 return
             register_vnum(vnum)
             proto = {"key": f"object_{vnum}", "typeclass": "typeclasses.objects.Object"}
