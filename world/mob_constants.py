@@ -2,27 +2,17 @@
 
 from __future__ import annotations
 
-from enum import Enum
 from typing import Iterable, Set
 
-from world.constants import NPC_CLASSES, NPC_RACES
+from world.constants import NPC_CLASSES, NPC_RACES, StrEnum
 
 
-class _StrEnum(str, Enum):
-    """Enum with string values supporting case-insensitive comparison."""
-
-    @classmethod
-    def from_str(cls, value: str) -> "_StrEnum":
-        for member in cls:
-            if member.value.lower() == value.lower() or member.name.lower() == value.lower():
-                return member
-        raise ValueError(value)
 
 
 # NPC_RACES and NPC_CLASSES are defined in ``world.constants``.
 
 
-class NPC_GENDERS(_StrEnum):
+class NPC_GENDERS(StrEnum):
     """Gender options for NPCs."""
 
     MALE = "male"
@@ -33,7 +23,7 @@ class NPC_GENDERS(_StrEnum):
 NPC_SEXES = NPC_GENDERS
 
 
-class NPC_SIZES(_StrEnum):
+class NPC_SIZES(StrEnum):
     """Size categories for NPCs."""
 
     SMALL = "small"
@@ -41,7 +31,7 @@ class NPC_SIZES(_StrEnum):
     LARGE = "large"
 
 
-class NPCType(_StrEnum):
+class NPCType(StrEnum):
     """Archetype identifiers for NPCs."""
 
     BASE = "base"
@@ -60,7 +50,7 @@ class NPCType(_StrEnum):
 
 
 
-class ACTFLAGS(_StrEnum):
+class ACTFLAGS(StrEnum):
     SENTINEL = "sentinel"
     SCAVENGER = "scavenger"
     AGGRESSIVE = "aggressive"
@@ -72,7 +62,7 @@ class ACTFLAGS(_StrEnum):
     NOLOOT = "noloot"
 
 
-class AFFECTED_BY(_StrEnum):
+class AFFECTED_BY(StrEnum):
     BLIND = "blind"
     INVISIBLE = "invisible"
     DETECT_EVIL = "detect_evil"
@@ -88,14 +78,14 @@ class AFFECTED_BY(_StrEnum):
     FLYING = "fly"
 
 
-class LANGUAGES(_StrEnum):
+class LANGUAGES(StrEnum):
     COMMON = "common"
     ELVISH = "elvish"
     DWARVISH = "dwarvish"
     ORCISH = "orcish"
 
 
-class BODYPARTS(_StrEnum):
+class BODYPARTS(StrEnum):
     HEAD = "head"
     ARMS = "arms"
     LEGS = "legs"
@@ -112,7 +102,7 @@ class BODYPARTS(_StrEnum):
     TENTACLES = "tentacles"
 
 
-class SAVING_THROWS(_StrEnum):
+class SAVING_THROWS(StrEnum):
     POISON = "poison"
     MAGIC = "magic"
     PARA = "para"
@@ -120,7 +110,7 @@ class SAVING_THROWS(_StrEnum):
     SPELL = "spell"
 
 
-class RIS_TYPES(_StrEnum):
+class RIS_TYPES(StrEnum):
     FIRE = "fire"
     COLD = "cold"
     ELECTRIC = "electric"
@@ -138,7 +128,7 @@ class RIS_TYPES(_StrEnum):
     PLUS1 = "plus1"
 
 
-class ATTACK_TYPES(_StrEnum):
+class ATTACK_TYPES(StrEnum):
     BITE = "bite"
     CLAW = "claw"
     STING = "sting"
@@ -149,14 +139,14 @@ class ATTACK_TYPES(_StrEnum):
     KICK = "kick"
 
 
-class DEFENSE_TYPES(_StrEnum):
+class DEFENSE_TYPES(StrEnum):
     PARRY = "parry"
     DODGE = "dodge"
     BLOCK = "block"
     ABSORB = "absorb"
 
 
-class SPECIAL_FUNCS(_StrEnum):
+class SPECIAL_FUNCS(StrEnum):
     BREATH_FIRE = "spec_breath_fire"
     CAST_MAGE = "spec_cast_mage"
     CAST_CLERIC = "spec_cast_cleric"
@@ -167,16 +157,16 @@ class SPECIAL_FUNCS(_StrEnum):
 # Helper functions
 # ------------------------------------------------------------
 
-def parse_flag_list(text: str, enum_cls: type[_StrEnum]) -> Set[_StrEnum]:
+def parse_flag_list(text: str, enum_cls: type[StrEnum]) -> Set[StrEnum]:
     """Return a set of enum members from ``text``."""
-    flags: Set[_StrEnum] = set()
+    flags: Set[StrEnum] = set()
     for part in text.split():
         member = enum_cls.from_str(part)
         flags.add(member)
     return flags
 
 
-def flags_to_string(flags: Iterable[_StrEnum]) -> str:
+def flags_to_string(flags: Iterable[StrEnum]) -> str:
     """Return a space-separated string from ``flags``."""
     return " ".join(flag.value for flag in flags)
 
