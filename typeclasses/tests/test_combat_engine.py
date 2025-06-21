@@ -951,6 +951,27 @@ def test_dead_actor_action_skipped():
     assert player.db.combat_target is mob2
 
 
+def test_dead_flagged_actor_action_skipped():
+    player = Dummy()
+    npc = Dummy()
+    player.location = npc.location
+    player.db.combat_target = npc
+    npc.db.combat_target = player
+    npc.db.is_dead = True
+
+    engine = CombatEngine([player, npc], round_time=0)
+    engine.queue_action(npc, AttackAction(npc, player))
+
+    with patch("world.system.state_manager.apply_regen"), patch(
+        "random.randint", return_value=0
+    ), patch("combat.combat_actions.AttackAction.resolve") as mock_resolve:
+        engine.start_round()
+        engine.process_round()
+
+    mock_resolve.assert_not_called()
+    assert npc not in [p.actor for p in engine.participants]
+
+
 def test_queue_pruned_after_defeat():
     player = Dummy()
     mob1 = Dummy()

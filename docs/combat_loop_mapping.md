@@ -117,4 +117,6 @@ from combat.engine import CombatEngine, TurnManager, AggroTracker, DamageProcess
   below a threshold. The `_check_wimpy` helper in `world/npc_handlers/mob_ai.py`
   compares the mob's current HP against `flee_at` (defaulting to 25% of maximum)
   and issues the `flee` command when triggered.
+- **Dead NPC Cleanup** – combatants flagged with `db.is_dead` skip any queued
+  actions and are removed from combat at the end of the round.
 
