@@ -450,13 +450,17 @@ class Corpse(Object):
             self.db.weight = weight
         if (decay := self.db.decay_time):
             # start auto-decay timer in minutes
-            self.scripts.add(
+            script = self.scripts.add(
                 "typeclasses.scripts.DecayScript",
                 key="decay",
-                interval=int(decay) * 60,
                 start_delay=True,
                 room_only=not settings.ALLOW_CORPSE_DECAY_IN_INVENTORY,
+                autostart=False,
             )
+            if isinstance(script, list):
+                script = script[0]
+            script.interval = int(decay) * 60
+            script.start()
 
     def at_object_post_creation(self):
         super().at_object_post_creation()
@@ -464,13 +468,17 @@ class Corpse(Object):
         self.db.desc = f"The corpse of {name} lies here."
         decay = self.db.decay_time
         if decay and not self.scripts.get("decay"):
-            self.scripts.add(
+            script = self.scripts.add(
                 "typeclasses.scripts.DecayScript",
                 key="decay",
-                interval=int(decay) * 60,
                 start_delay=True,
                 room_only=not settings.ALLOW_CORPSE_DECAY_IN_INVENTORY,
+                autostart=False,
             )
+            if isinstance(script, list):
+                script = script[0]
+            script.interval = int(decay) * 60
+            script.start()
 
     def get_display_name(self, looker, **kwargs):
         name = self.db.corpse_of or self.key or "corpse"
