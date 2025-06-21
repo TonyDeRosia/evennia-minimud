@@ -240,8 +240,8 @@ class CmdASave(Command):
             for room in rooms:
                 proto = proto_from_room(room)
                 save_prototype("room", proto, vnum=room.db.room_id)
-                from evennia.scripts.models import ScriptDB
-                script = ScriptDB.objects.filter(db_key="spawn_manager").first()
+                from utils.script_utils import get_spawn_manager
+                script = get_spawn_manager()
                 if script and hasattr(script, "register_room_spawn"):
                     script.register_room_spawn(proto)
                     if hasattr(script, "force_respawn"):

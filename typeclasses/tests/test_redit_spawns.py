@@ -61,8 +61,7 @@ class TestReditSpawns(EvenniaTest):
         mock_script = MagicMock()
         with patch("commands.redit.save_prototype"), patch(
             "commands.redit.ObjectDB.objects.filter", return_value=[room]
-        ), patch("commands.redit.ScriptDB.objects.filter") as mock_filter:
-            mock_filter.return_value.first.return_value = mock_script
+        ), patch("commands.redit.get_spawn_manager", return_value=mock_script):
             redit.menunode_done(self.char1)
             mock_script.register_room_spawn.assert_called_with(proto)
             assert proto["vnum"] == 5

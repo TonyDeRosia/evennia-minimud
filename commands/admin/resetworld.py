@@ -1,6 +1,6 @@
 from evennia import CmdSet
 from ..command import Command
-from evennia.scripts.models import ScriptDB
+from utils.script_utils import get_spawn_manager, respawn_area
 
 class CmdResetWorld(Command):
     """Trigger respawn checks for all areas without despawning existing mobs."""
@@ -11,7 +11,7 @@ class CmdResetWorld(Command):
     help_category = "Admin"
 
     def func(self):
-        script = ScriptDB.objects.filter(db_key="spawn_manager").first()
+        script = get_spawn_manager()
         if not script:
             self.msg("Spawn manager not found.")
             return
@@ -20,14 +20,7 @@ class CmdResetWorld(Command):
             self.msg("No areas found to reset.")
             return
         for key in areas:
-            for entry in script.db.entries:
-                if entry.get("area") == key:
-                    rid = entry.get("room_id")
-                    if rid is None:
-                        rid = entry.get("room")
-                        if isinstance(rid, str) and rid.isdigit():
-                            rid = int(rid)
-                    script.force_respawn(rid)
+            respawn_area(key)
         self.msg(f"World reset complete. [{len(areas)}] areas repopulated.")
 
 class ResetWorldCmdSet(CmdSet):
