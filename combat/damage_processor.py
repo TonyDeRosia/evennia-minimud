@@ -115,7 +115,11 @@ class DamageProcessor:
         if hasattr(target, "at_defeat"):
             target.at_defeat(attacker)
 
-        handle_death(target, attacker)
+        death_hook = getattr(target, "on_death", None)
+        if callable(death_hook):
+            death_hook(attacker)
+        else:
+            handle_death(target, attacker)
 
         if getattr(target, "pk", None) is not None:
             self.update_pos(target)
@@ -161,7 +165,7 @@ class DamageProcessor:
 
         if inst:
             # pull in any other hostile NPCs that were not yet participants
-            room = getattr(target, "location", None)
+            room = getattr(target, "location", None) or prev_loc
             if room:
                 for obj in room.contents:
                     has_hp = hasattr(obj, "hp") or getattr(
@@ -191,7 +195,7 @@ class DamageProcessor:
             ally = participant.actor
             if ally is target:
                 continue
-            if ally.location == getattr(target, "location", None):
+            if ally.location == (getattr(target, "location", None) or prev_loc):
                 hook = getattr(ally, "on_ally_down", None)
                 if callable(hook):
                     hook(target, attacker)
