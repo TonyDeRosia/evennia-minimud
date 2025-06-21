@@ -1202,14 +1202,15 @@ class CmdMSpawn(Command):
         if vnum is not None:
             proto = get_prototype(vnum)
             if not proto:
-                if vnum_registry.validate_vnum(vnum, "npc"):
-                    start, end = vnum_registry.VNUM_RANGES["npc"]
-                    next_v = vnum_registry.peek_next_vnum("npc")
+                start, end = vnum_registry.VNUM_RANGES["npc"]
+                if not (start <= vnum <= end):
+                    self.msg("Invalid VNUM.")
+                elif vnum_registry.validate_vnum(vnum, "npc"):
                     self.msg(
-                        f"Prototype {vnum} not finalized. NPCs use {start}-{end}. Next free: {next_v}."
+                        f"No prototype found for VNUM {vnum}. Use 'medit create {vnum}' to create one."
                     )
                 else:
-                    self.msg("Invalid VNUM.")
+                    self.msg("Unknown NPC prototype.")
                 return
             try:
                 obj = spawn_from_vnum(vnum, location=self.caller.location)
