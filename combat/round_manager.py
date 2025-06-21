@@ -364,8 +364,13 @@ class CombatRoundManager:
         instances = []
         for combatant in combatants:
             inst = self.get_combatant_combat(combatant)
-            if inst and inst not in instances:
-                instances.append(inst)
+            if inst:
+                if inst.combat_ended:
+                    # clean up stale references to ended combat
+                    self.remove_combat(inst.combat_id)
+                    continue
+                if inst not in instances:
+                    instances.append(inst)
 
         if not instances:
             # none of the combatants were already fighting
