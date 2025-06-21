@@ -89,3 +89,15 @@ class TestCombatRoundManager(EvenniaTest):
         self.assertEqual(inst.round_time, 3.5)
         self.assertEqual(inst.engine.round_time, 3.5)
 
+    def test_get_combatant_combat_returns_none_for_ended_instance(self):
+        self.instance.combat_ended = True
+        inst = self.manager.get_combatant_combat(self.char1)
+        self.assertIsNone(inst)
+
+    def test_start_combat_creates_new_when_existing_ended(self):
+        self.instance.combat_ended = True
+        with patch.object(CombatInstance, "start"):
+            new_inst = self.manager.start_combat([self.char1, self.char2])
+        self.assertIsNot(new_inst, self.instance)
+        self.assertIs(self.manager.get_combatant_combat(self.char1), new_inst)
+

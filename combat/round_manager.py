@@ -351,7 +351,10 @@ class CombatRoundManager:
         cid = self.combatant_to_combat.get(combatant)
         if cid is None:
             return None
-        return self.combats.get(cid)
+        inst = self.combats.get(cid)
+        if inst and inst.combat_ended:
+            return None
+        return inst
 
     def start_combat(self, combatants: List[object]) -> CombatInstance:
         """Start combat for the given ``combatants``."""
