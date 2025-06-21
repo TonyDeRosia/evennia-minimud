@@ -245,6 +245,8 @@ class SpawnManager(Script):
         npc = None
         proto = self._normalize_proto(proto)
         proto_is_digit = isinstance(proto, int)
+        room_ref = getattr(room, "dbref", room)
+        room_id = getattr(room.db, "room_id", None)
         try:
             if proto_is_digit:
                 from world.scripts.mob_db import get_mobdb
@@ -257,11 +259,11 @@ class SpawnManager(Script):
                     p_data = prototypes.get_npc_prototypes().get(str(proto))
                     if not p_data:
                         logger.log_warn(
-                            f"SpawnManager: prototype {proto} not found for room {getattr(room, 'dbref', room)}"
+                            f"SpawnManager: prototype {proto} not found for room {room_ref} (id {room_id}) after MobDB and JSON lookup"
                         )
                         return
                     logger.log_warn(
-                        f"SpawnManager: NPC VNUM '{proto}' missing from MobDB; using registry prototype"
+                        f"SpawnManager: NPC VNUM '{proto}' missing from MobDB; using JSON registry prototype for room {room_ref} (id {room_id})"
                     )
                     data = dict(p_data)
                     base_cls = data.get("typeclass", "typeclasses.npcs.BaseNPC")
@@ -277,7 +279,7 @@ class SpawnManager(Script):
                 p_data = prototypes.get_npc_prototypes().get(str(proto))
                 if not p_data:
                     logger.log_warn(
-                        f"SpawnManager: prototype {proto} not found for room {getattr(room, 'dbref', room)}"
+                        f"SpawnManager: prototype {proto} not found for room {room_ref} (id {room_id}) in JSON registry"
                     )
                     return
                 data = dict(p_data)
@@ -291,7 +293,9 @@ class SpawnManager(Script):
                 npc.db.prototype_key = proto
                 apply_proto_items(npc, data)
         except Exception as err:
-            logger.log_err(f"SpawnManager error spawning {proto}: {err}")
+            logger.log_err(
+                f"SpawnManager: failed to spawn {proto} in room {room_ref} (id {room_id}): {err}"
+            )
             return
 
         if npc:
