@@ -24,6 +24,7 @@ from evennia.objects.models import ObjectDB
 from typeclasses.rooms import Room
 from world import prototypes
 from world.scripts.mob_db import get_mobdb
+from functools import wraps
 from .building import DIR_FULL, OPPOSITE
 from .command import Command
 from .room_flags import VALID_ROOM_FLAGS
@@ -73,6 +74,19 @@ def _state_exists(caller) -> bool:
     return True
 
 
+def require_redit_state(func):
+    """Decorator to ensure caller has a valid redit state."""
+
+    @wraps(func)
+    def wrapper(caller, *args, **kwargs):
+        if not _state_exists(caller):
+            caller.msg("Room editing state missing. Exiting.")
+            return None
+        return func(caller, *args, **kwargs)
+
+    return wrapper
+
+
 def _summary(caller) -> str:
     if not _state_exists(caller):
         return ""
@@ -106,10 +120,8 @@ def _summary(caller) -> str:
     return "\n".join(lines)
 
 
+@require_redit_state
 def menunode_main(caller, raw_string="", **kwargs):
-    if not _state_exists(caller):
-        caller.msg("Room editing state missing. Exiting.")
-        return None
     text = _summary(caller)
     options = [
         {"desc": "Edit name", "goto": "menunode_name"},
@@ -128,12 +140,10 @@ def menunode_main(caller, raw_string="", **kwargs):
     return text, options
 
 
+@require_redit_state
 def menunode_view_prototype(caller, raw_string="", **kwargs):
     """Display the saved prototype for a room."""
 
-    if not _state_exists(caller):
-        caller.msg("Room editing state missing. Exiting.")
-        return None
 
     vnum = kwargs.get("vnum", caller.ndb.current_vnum)
     try:
@@ -168,12 +178,10 @@ def menunode_view_prototype(caller, raw_string="", **kwargs):
 menunode_show = menunode_view_prototype
 
 
+@require_redit_state
 def menunode_list_prototypes(caller, raw_string="", **kwargs):
     """Browse all prototypes in the current room's area."""
 
-    if not _state_exists(caller):
-        caller.msg("Room editing state missing. Exiting.")
-        return None
 
     current = caller.ndb.room_protos.get(caller.ndb.current_vnum, {})
     area_name = current.get("area")
@@ -221,20 +229,16 @@ def menunode_list_prototypes(caller, raw_string="", **kwargs):
 menunode_rlist = menunode_list_prototypes
 
 
+@require_redit_state
 def menunode_name(caller, raw_string="", **kwargs):
-    if not _state_exists(caller):
-        caller.msg("Room editing state missing. Exiting.")
-        return None
     default = caller.ndb.room_protos[caller.ndb.current_vnum].get("key", "")
     text = f"|wRoom name|n [current: {default}]"
     options = {"key": "_default", "goto": _set_name}
     return text, options
 
 
+@require_redit_state
 def _set_name(caller, raw_string, **kwargs):
-    if not _state_exists(caller):
-        caller.msg("Room editing state missing. Exiting.")
-        return None
     if not raw_string.strip():
         caller.msg("Name unchanged.")
     else:
@@ -242,28 +246,22 @@ def _set_name(caller, raw_string, **kwargs):
     return "menunode_main"
 
 
+@require_redit_state
 def menunode_desc(caller, raw_string="", **kwargs):
-    if not _state_exists(caller):
-        caller.msg("Room editing state missing. Exiting.")
-        return None
     default = caller.ndb.room_protos[caller.ndb.current_vnum].get("desc", "")
     text = f"|wRoom description|n [current: {default}]"
     options = {"key": "_default", "goto": _set_desc}
     return text, options
 
 
+@require_redit_state
 def _set_desc(caller, raw_string, **kwargs):
-    if not _state_exists(caller):
-        caller.msg("Room editing state missing. Exiting.")
-        return None
     caller.ndb.room_protos[caller.ndb.current_vnum]["desc"] = raw_string.strip()
     return "menunode_main"
 
 
+@require_redit_state
 def menunode_flags(caller, raw_string="", **kwargs):
-    if not _state_exists(caller):
-        caller.msg("Room editing state missing. Exiting.")
-        return None
     current = ", ".join(
         caller.ndb.room_protos[caller.ndb.current_vnum].get("flags", [])
     )
@@ -274,10 +272,8 @@ def menunode_flags(caller, raw_string="", **kwargs):
     return text, options
 
 
+@require_redit_state
 def _set_flags(caller, raw_string, **kwargs):
-    if not _state_exists(caller):
-        caller.msg("Room editing state missing. Exiting.")
-        return None
     flags = [f.strip().lower() for f in raw_string.split(",") if f.strip()]
     invalid = [f for f in flags if f not in VALID_ROOM_FLAGS]
     if invalid:
@@ -287,10 +283,8 @@ def _set_flags(caller, raw_string, **kwargs):
     return "menunode_main"
 
 
+@require_redit_state
 def menunode_exits(caller, raw_string="", **kwargs):
-    if not _state_exists(caller):
-        caller.msg("Room editing state missing. Exiting.")
-        return None
     exits = caller.ndb.room_protos[caller.ndb.current_vnum].get("exits", {})
     lines = ["Current exits:"]
     for d, v in exits.items():
@@ -303,10 +297,8 @@ def menunode_exits(caller, raw_string="", **kwargs):
     return text, options
 
 
+@require_redit_state
 def _handle_exit_cmd(caller, raw_string, **kwargs):
-    if not _state_exists(caller):
-        caller.msg("Room editing state missing. Exiting.")
-        return None
     args = raw_string.strip().split()
     if not args:
         return "menunode_main"
@@ -359,12 +351,9 @@ def _handle_exit_cmd(caller, raw_string, **kwargs):
     return "menunode_exits"
 
 
+@require_redit_state
 def menunode_spawns(caller, raw_string="", **kwargs):
     """Menu node for editing NPC spawn data."""
-
-    if not _state_exists(caller):
-        caller.msg("Room editing state missing. Exiting.")
-        return None
     proto = caller.ndb.room_protos[caller.ndb.current_vnum]
     spawns = proto.get("spawns", [])
     lines = ["Current spawns:"]
@@ -382,10 +371,8 @@ def menunode_spawns(caller, raw_string="", **kwargs):
     return text, options
 
 
+@require_redit_state
 def _handle_spawn_cmd(caller, raw_string, **kwargs):
-    if not _state_exists(caller):
-        caller.msg("Room editing state missing. Exiting.")
-        return None
     string = raw_string.strip()
     proto = caller.ndb.room_protos[caller.ndb.current_vnum]
     spawns = proto.setdefault("spawns", [])
@@ -452,10 +439,8 @@ def _handle_spawn_cmd(caller, raw_string, **kwargs):
     return "menunode_spawns"
 
 
+@require_redit_state
 def menunode_done(caller, raw_string="", **kwargs):
-    if not _state_exists(caller):
-        caller.msg("Room editing state missing. Exiting.")
-        return None
     for vnum, proto in caller.ndb.room_protos.items():
         try:
             existing = load_prototype("room", vnum) or {}
