@@ -19,8 +19,7 @@ from evennia.objects.objects import DefaultObject
 from evennia.contrib.game_systems.clothing import ContribClothing
 from evennia.contrib.game_systems.clothing.clothing import get_worn_clothes
 from evennia.utils import lazy_property
-from world.triggers import TriggerManager
-from utils.mob_utils import mobprogs_to_triggers
+from world.triggers import TriggerMixin
 
 from utils.currency import COIN_VALUES
 
@@ -46,7 +45,7 @@ class ObjectParent:
         return self.db.shortdesc or self.key
 
 
-class Object(ObjectParent, DefaultObject):
+class Object(TriggerMixin, ObjectParent, DefaultObject):
     """
     This is the root typeclass object, implementing an in-game Evennia
     game object, such as having a location, being able to be
@@ -192,6 +191,9 @@ class Object(ObjectParent, DefaultObject):
 
     """
 
+    triggers_attr = "obj_triggers"
+    programs_attr = "obj_programs"
+
     def at_object_creation(self):
         """Set default attributes when object is first created."""
         super().at_object_creation()
@@ -199,22 +201,7 @@ class Object(ObjectParent, DefaultObject):
             self.db.weight = 0
         if getattr(self.db, "display_priority", None) is None:
             self.db.display_priority = "item"
-        if self.db.obj_triggers is None:
-            self.db.obj_triggers = {}
 
-        if self.db.obj_programs and not self.db.obj_triggers:
-            self.db.obj_triggers = mobprogs_to_triggers(self.db.obj_programs)
-
-        if self.db.obj_triggers:
-            self.trigger_manager.start_random_triggers()
-
-    @lazy_property
-    def trigger_manager(self):
-        """Access :class:`~world.triggers.TriggerManager`."""
-        return TriggerManager(self, attr="obj_triggers")
-
-    def check_triggers(self, event, **kwargs):
-        self.trigger_manager.check(event, **kwargs)
 
     def return_appearance(self, looker, **kwargs):
         text = super().return_appearance(looker, **kwargs)

@@ -8,9 +8,40 @@ from random import randint
 
 from datetime import datetime
 from evennia.objects.models import ObjectDB
-from evennia.utils import make_iter, logger, delay
+from evennia.utils import make_iter, logger, delay, lazy_property
 from utils import eval_safe
+from utils.mob_utils import mobprogs_to_triggers
 from world.mpcommands import execute_mpcommand
+
+
+class TriggerMixin:
+    """Mixin adding trigger support to a typeclass."""
+
+    #: Attribute name that stores trigger definitions
+    triggers_attr: str | None = "triggers"
+    #: Optional attribute name holding mob programs to convert on creation
+    programs_attr: str | None = None
+
+    @lazy_property
+    def trigger_manager(self):
+        """Return a :class:`TriggerManager` for this object."""
+        return TriggerManager(self, attr=self.triggers_attr)
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        if self.triggers_attr:
+            if getattr(self.db, self.triggers_attr, None) is None:
+                setattr(self.db, self.triggers_attr, {})
+            if self.programs_attr:
+                progs = getattr(self.db, self.programs_attr, None)
+                triggers = getattr(self.db, self.triggers_attr, None)
+                if progs and not triggers:
+                    setattr(self.db, self.triggers_attr, mobprogs_to_triggers(progs))
+            self.trigger_manager.start_random_triggers()
+
+    def check_triggers(self, event, **kwargs):
+        """Evaluate stored triggers for ``event``."""
+        self.trigger_manager.check(event, **kwargs)
 
 
 class TriggerManager:

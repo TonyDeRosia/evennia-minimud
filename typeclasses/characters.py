@@ -16,7 +16,7 @@ from utils.mob_utils import make_corpse
 from utils.slots import SLOT_ORDER
 from collections.abc import Mapping
 import math
-from world.triggers import TriggerManager
+from world.triggers import TriggerMixin
 from combat.spells import Spell
 from combat.combat_actions import CombatResult
 from world.combat import get_health_description
@@ -30,7 +30,7 @@ _IMMOBILE = ("sitting", "lying down", "unconscious", "sleeping")
 _MOVE_SP_BASE = 1
 
 
-class Character(ObjectParent, ClothedCharacter):
+class Character(TriggerMixin, ObjectParent, ClothedCharacter):
     """
     The base typeclass for all characters, both player characters and NPCs
     """
@@ -44,6 +44,9 @@ class Character(ObjectParent, ClothedCharacter):
     training_points = AttributeProperty(0)
     practice_sessions = AttributeProperty(0)
     auto_assist = AttributeProperty(False)
+
+    triggers_attr = "triggers"
+    programs_attr = "mobprogs"
 
     @property
     def in_combat(self):
@@ -265,6 +268,7 @@ class Character(ObjectParent, ClothedCharacter):
             if profs.get("Hand-to-Hand", 0) < 25:
                 profs["Hand-to-Hand"] = 25
         self.db.proficiencies = profs
+        super().at_object_creation()
 
     def at_post_puppet(self, **kwargs):
         """Ensure stats refresh when a character is controlled."""
@@ -1002,20 +1006,10 @@ class NPC(Character):
     # mapping of event triggers -> reactions
     triggers = AttributeProperty({})
 
-    @lazy_property
-    def trigger_manager(self):
-        """Access :class:`~world.triggers.TriggerManager`."""
-        return TriggerManager(self)
-
     def at_object_creation(self):
         super().at_object_creation()
         if self.db.triggers is None:
             self.db.triggers = {}
-        self.trigger_manager.start_random_triggers()
-
-    def check_triggers(self, event, **kwargs):
-        """Evaluate stored triggers for a given event."""
-        self.trigger_manager.check(event, **kwargs)
 
     def at_death(self, killer, **kwargs):
         """Called when character dies."""
