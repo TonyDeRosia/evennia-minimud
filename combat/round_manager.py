@@ -98,7 +98,8 @@ class CombatInstance:
         if not self.engine:
             return False
 
-        fighters = [p.actor for p in self.engine.participants]
+        fighters = {p.actor for p in self.engine.participants}
+        fighters.update(self.combatants)
 
         active_fighters = []
         for fighter in fighters:
