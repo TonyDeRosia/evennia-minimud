@@ -1127,9 +1127,6 @@ class NPC(Character):
         """
         if not self.location or self.attributes.get("_dead"):
             return
-        self.db._dead = True
-        self.db.dead = True
-        self.db.is_dead = True
 
         from world.mechanics import on_death_manager
 
