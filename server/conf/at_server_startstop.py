@@ -163,11 +163,15 @@ def at_server_start():
             script.start()
         elif getattr(script.db, "_paused_time", None):
             script.unpause()
+
     if hasattr(script, "reload_spawns"):
         script.reload_spawns()
 
     # Ensure mob database script exists
     get_mobdb()
+    from utils.mob_proto import load_npc_prototypes
+
+    load_npc_prototypes()
 
     # Ensure all characters are marked tickable for the global ticker
     from typeclasses.characters import Character
