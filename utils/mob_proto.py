@@ -10,6 +10,7 @@ from world.scripts.mob_db import get_mobdb
 from .vnum_registry import get_next_vnum, register_vnum, validate_vnum
 from world import prototypes
 from world.areas import get_area_vnum_range
+from utils.prototype_manager import save_prototype, load_all_prototypes
 
 
 def register_prototype(
@@ -63,6 +64,7 @@ def register_prototype(
     if area:
         data["area"] = area
     mob_db.add_proto(vnum, data)
+    save_prototype("npc", data, vnum=vnum)
 
     key = data.get("key")
     if key:
@@ -237,3 +239,14 @@ def spawn_from_vnum(vnum: int, location=None):
     # track how often this prototype has spawned
     mob_db.increment_spawn_count(vnum)
     return npc
+
+
+def load_npc_prototypes() -> None:
+    """Load all NPC prototype files into the MobDB."""
+    mob_db = get_mobdb()
+    mob_db.db.vnums = {}
+    protos = load_all_prototypes("npc")
+    for vnum, proto in protos.items():
+        mob_db.add_proto(int(vnum), proto)
+    if protos:
+        mob_db.db.next_vnum = max(int(v) for v in protos) + 1

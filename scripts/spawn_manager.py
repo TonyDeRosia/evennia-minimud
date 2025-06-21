@@ -12,7 +12,7 @@ if not hasattr(logger, "log_debug"):
 from typeclasses.rooms import Room
 
 from typeclasses.scripts import Script
-from utils.mob_proto import apply_proto_items, spawn_from_vnum
+from utils.mob_proto import apply_proto_items, spawn_from_vnum, load_npc_prototypes
 from world import prototypes
 
 
@@ -143,6 +143,7 @@ class SpawnManager(Script):
             entry["last_spawn"] = now
 
     def reload_spawns(self) -> None:
+        load_npc_prototypes()
         self.load_spawn_data()
         logger.log_info(
             f"SpawnManager: loaded {len(self.db.entries)} spawn entries"
