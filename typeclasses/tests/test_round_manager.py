@@ -94,6 +94,14 @@ class TestCombatRoundManager(EvenniaTest):
         inst = self.manager.get_combatant_combat(self.char1)
         self.assertIsNone(inst)
 
+    def test_get_combatant_combat_clears_mapping_for_ended_instance(self):
+        self.instance.combat_ended = True
+        inst = self.manager.get_combatant_combat(self.char1)
+        self.assertIsNone(inst)
+        self.assertNotIn(self.char1, self.manager.combatant_to_combat)
+        # subsequent lookups should remain None since mapping is removed
+        self.assertIsNone(self.manager.get_combatant_combat(self.char1))
+
     def test_start_combat_creates_new_when_existing_ended(self):
         self.instance.combat_ended = True
         with patch.object(CombatInstance, "start"):
