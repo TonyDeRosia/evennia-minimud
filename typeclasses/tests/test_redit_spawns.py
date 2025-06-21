@@ -45,3 +45,25 @@ class TestReditSpawns(EvenniaTest):
 
         assert room1.db.exits == {"north": room2}
 
+    def test_register_room_spawn_uses_proto_vnum(self):
+        room = create.create_object(Room, key="R1", location=self.char1.location, home=self.char1.location)
+        room.db.room_id = 5
+        room.db.area = "zone"
+        self.char1.location = room
+
+        with patch("commands.redit.load_prototype", return_value=None), patch("commands.redit.OLCEditor"):
+            self.char1.execute_cmd("redit 5")
+
+        proto = self.char1.ndb.room_protos[5]
+        proto["spawns"] = [{"prototype": "goblin"}]
+        self.char1.ndb.room_protos[5] = proto
+
+        mock_script = MagicMock()
+        with patch("commands.redit.save_prototype"), patch(
+            "commands.redit.ObjectDB.objects.filter", return_value=[room]
+        ), patch("commands.redit.ScriptDB.objects.filter") as mock_filter:
+            mock_filter.return_value.first.return_value = mock_script
+            redit.menunode_done(self.char1)
+            mock_script.register_room_spawn.assert_called_with(proto)
+            assert proto["vnum"] == 5
+

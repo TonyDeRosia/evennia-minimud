@@ -251,6 +251,39 @@ class TestREditCommand(EvenniaTest):
         assert room.key == "New Room"
         assert room.db.desc == "New desc"
 
+    def test_redit_here_proto_has_vnum(self):
+        from evennia.utils import create
+        from typeclasses.rooms import Room
+        room = create.create_object(Room, location=self.char1.location, home=self.char1.location)
+        self.char1.location = room
+        vnum = 200010
+        with (
+            patch("commands.redit.validate_vnum", return_value=True),
+            patch("commands.redit.register_vnum"),
+            patch("commands.redit.save_prototype"),
+            patch("commands.redit.OLCEditor")
+        ):
+            self.char1.execute_cmd(f"redit here {vnum}")
+        proto = self.char1.ndb.room_protos[vnum]
+        assert proto["vnum"] == vnum
+
+    def test_redit_create_proto_has_vnum(self):
+        from evennia.utils import create
+        from typeclasses.rooms import Room
+        room = create.create_object(Room, location=self.char1.location, home=self.char1.location)
+        with (
+            patch("commands.redit.validate_vnum", return_value=True),
+            patch("commands.redit.register_vnum"),
+            patch("commands.redit.load_prototype", return_value=None),
+            patch("commands.redit.spawner.spawn", return_value=[room]),
+            patch("commands.redit.find_area_by_vnum", return_value=None),
+            patch("commands.redit.save_prototype"),
+            patch("commands.redit.OLCEditor")
+        ):
+            self.char1.execute_cmd("redit create 200011")
+        proto = self.char1.ndb.room_protos[200011]
+        assert proto["vnum"] == 200011
+
     def test_save_live_room_no_area_error(self):
         """Saving a live room with no area should show an error instead of crashing."""
         from evennia.utils import create
