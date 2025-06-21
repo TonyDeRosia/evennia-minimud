@@ -13,36 +13,26 @@ from evennia.objects.models import ObjectDB
 
 from .objects import ObjectParent
 from .scripts import RestockScript
-from world.triggers import TriggerManager
-from utils.mob_utils import mobprogs_to_triggers
+from world.triggers import TriggerMixin
 
 from commands.shops import ShopCmdSet
 from commands.skills import TrainCmdSet
 
 
-class RoomParent(ObjectParent):
+class RoomParent(TriggerMixin, ObjectParent):
     """Mixin with logic shared by all rooms."""
 
     appearance_template = (
         "{name}\n{desc}\n\n{exits}\n\n{characters}\n{things}\n{footer}"
     )
 
+    triggers_attr = "room_triggers"
+    programs_attr = "room_programs"
+
     def at_object_creation(self):
         super().at_object_creation()
         self.db.exits = self.db.exits or {}
-        if self.db.room_triggers is None:
-            self.db.room_triggers = {}
-        if self.db.room_programs and not self.db.room_triggers:
-            self.db.room_triggers = mobprogs_to_triggers(self.db.room_programs)
-        if self.db.room_triggers:
-            self.trigger_manager.start_random_triggers()
 
-    @lazy_property
-    def trigger_manager(self):
-        return TriggerManager(self, attr="room_triggers")
-
-    def check_triggers(self, event, **kwargs):
-        self.trigger_manager.check(event, **kwargs)
 
     def at_object_receive(self, mover, source_location, move_type=None, **kwargs):
         super().at_object_receive(mover, source_location, **kwargs)
