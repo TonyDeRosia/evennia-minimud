@@ -8,7 +8,7 @@ from django.conf import settings
 
 from combat.combatants import CombatParticipant, _current_hp
 from combat.combat_utils import format_combat_message
-from combat.corpse_creation import spawn_corpse
+from world.mechanics.on_death_manager import handle_death
 from combat.engine.turn_manager import TurnManager
 from combat.aggro_tracker import AggroTracker
 from combat.damage_types import DamageType
@@ -106,6 +106,8 @@ class DamageProcessor:
 
     def handle_defeat(self, target, attacker) -> None:
         prev_loc = getattr(target, "location", None)
+        from combat.round_manager import CombatRoundManager
+        inst = CombatRoundManager.get().get_combatant_combat(target)
 
         if hasattr(target, "on_exit_combat"):
             target.on_exit_combat()
@@ -113,41 +115,11 @@ class DamageProcessor:
         if hasattr(target, "at_defeat"):
             target.at_defeat(attacker)
 
-        # award experience for the kill using the combat engine
-        try:
-            self.engine.award_experience(attacker, target)
-        except Exception:
-            pass
-
-        # ensure a corpse exists prior to ``on_death`` in case it removes the NPC
-        if prev_loc:
-            corpse_exists = any(
-                obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
-                and obj.db.corpse_of_id == getattr(target, "dbref", None)
-                for obj in prev_loc.contents
-            )
-            if not corpse_exists:
-                original_loc = getattr(target, "location", None)
-                target.location = prev_loc
-                spawn_corpse(target, attacker)
-                target.location = original_loc
-
-        if hasattr(target, "on_death"):
-            target.on_death(attacker)
+        handle_death(target, attacker)
 
         if getattr(target, "pk", None) is not None:
             self.update_pos(target)
 
-        if getattr(target, "db", None) is not None:
-            try:
-                target.db.in_combat = False
-                target.db.combat_target = None
-            except Exception:
-                pass
-
-        from combat.round_manager import CombatRoundManager
-
-        inst = CombatRoundManager.get().get_combatant_combat(target)
         if inst:
             inst.remove_combatant(target)
 

@@ -12,7 +12,6 @@ from evennia.contrib.game_systems.cooldowns import CooldownHandler
 from evennia.prototypes.spawner import spawn
 from utils.currency import to_copper, from_copper, format_wallet
 from utils import normalize_slot
-from combat.corpse_creation import spawn_corpse
 from utils.mob_utils import make_corpse
 from utils.slots import SLOT_ORDER
 from collections.abc import Mapping
@@ -24,7 +23,6 @@ from world.combat import get_health_description
 from combat import combat_utils
 
 from .objects import ObjectParent
-from world.mob_constants import BODYPARTS
 
 _IMMOBILE = ("sitting", "lying down", "unconscious", "sleeping")
 
@@ -917,30 +915,13 @@ class PlayerCharacter(Character):
         return dmg
 
     def on_death(self, attacker):
-        """Create a corpse with body parts when the player dies."""
+        """Handle player death cleanup and respawn."""
         if not self.location:
             return
 
-        # remove from combat if engaged
-        from combat.round_manager import leave_combat
-        leave_combat(self)
-        corpse = spawn_corpse(self)
-        if not corpse:
-            return
-        corpse.db.corpse_of = self.key
-        corpse.db.corpse_of_id = self.dbref
-        self.at_death(attacker)
-        if attacker:
-            self.msg(f"You are slain by {attacker.get_display_name(self)}!")
-        else:
-            self.msg("You have died.")
-        if self.location:
-            if attacker:
-                self.location.msg_contents(
-                    f"{self.key} is |Rslain|n by |C{attacker.key}|n!"
-                )
-            else:
-                self.location.msg_contents(f"{self.key} dies.")
+        from world.mechanics import on_death_manager
+
+        on_death_manager.handle_death(self, attacker)
 
         # determine recall destination just like the recall command
         dest = self.db.recall_location
@@ -1156,40 +1137,9 @@ class NPC(Character):
         self.db.dead = True
         self.db.is_dead = True
 
-        from combat.round_manager import CombatRoundManager, leave_combat
+        from world.mechanics import on_death_manager
 
-        # store active combat engine before removing the NPC from combat
-        inst = CombatRoundManager.get().get_combatant_combat(self)
-        engine = inst.engine if inst else None
-
-        # remove from combat if engaged
-        leave_combat(self)
-
-        corpse = None
-        if not any(
-            obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
-            and obj.db.corpse_of_id == self.dbref
-            for obj in (self.location.contents if self.location else [])
-        ):
-            corpse = spawn_corpse(self, attacker)
-
-            if corpse:
-                if getattr(self.db, "vnum", None) is not None:
-                    corpse.db.npc_vnum = self.db.vnum
-                corpse.location = self.location
-
-        self.at_death(attacker)
-        if self.location:
-            if attacker:
-                self.location.msg_contents(
-                    f"{self.key} is |Rslain|n by |C{attacker.key}|n!"
-                )
-            else:
-                self.location.msg_contents(f"{self.key} dies.")
-
-        # award experience if no engine is managing combat
-        if not engine:
-            self.award_xp_to(attacker)
+        on_death_manager.handle_death(self, attacker)
 
         if attacker and getattr(attacker.db, "combat_target", None) is self:
             attacker.db.combat_target = None
