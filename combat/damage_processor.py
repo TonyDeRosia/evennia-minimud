@@ -169,12 +169,12 @@ class DamageProcessor:
                     ) is not None
                     if not has_hp:
                         continue
-                    if any(obj is c for c in inst.combatants):
+                    if obj in inst.combatants:
                         continue
                     if _current_hp(obj) <= 0:
                         continue
                     t = getattr(getattr(obj, "db", None), "combat_target", None)
-                    if any(t is c for c in inst.combatants):
+                    if t in inst.combatants:
                         inst.add_combatant(obj)
             inst.sync_participants()
 
