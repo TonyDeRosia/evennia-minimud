@@ -96,18 +96,23 @@ class TurnManager:
             if callable(hook):
                 hook(target)
 
+            # default action resolution
             if participant.next_action:
                 queued = list(participant.next_action)
-            elif target:
-                queued = [AttackAction(actor, target)]
             else:
-                enemies = [p.actor for p in self.participants if p.actor is not actor and _current_hp(p.actor) > 0]
-                if enemies:
-                    queued = [AttackAction(actor, enemies[0])]
+                if target and _current_hp(target) > 0:
+                    queued = [AttackAction(actor, target)]
                 else:
-                    queued = []
-                    if hasattr(actor, "msg"):
-                        actor.msg("You hesitate, unsure of what to do.")
+                    enemy = next(
+                        (p.actor for p in self.participants if p.actor is not actor and _current_hp(p.actor) > 0),
+                        None,
+                    )
+                    if enemy:
+                        queued = [AttackAction(actor, enemy)]
+                    else:
+                        queued = []
+                        if hasattr(actor, "msg"):
+                            actor.msg("You hesitate, unsure of what to do.")
 
             haste = state_manager.get_effective_stat(actor, "haste")
             extra = max(0, haste // HASTE_PER_EXTRA_ATTACK)
