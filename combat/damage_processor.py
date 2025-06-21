@@ -105,16 +105,13 @@ class DamageProcessor:
         return 0
 
     def handle_defeat(self, target, attacker) -> None:
+        prev_loc = getattr(target, "location", None)
+
         if hasattr(target, "on_exit_combat"):
             target.on_exit_combat()
 
         if hasattr(target, "at_defeat"):
             target.at_defeat(attacker)
-
-        prev_loc = getattr(target, "location", None)
-
-        if hasattr(target, "on_death"):
-            target.on_death(attacker)
 
         # award experience for the kill using the combat engine
         try:
@@ -122,7 +119,7 @@ class DamageProcessor:
         except Exception:
             pass
 
-        # ensure a corpse exists if ``on_death`` didn't create one
+        # ensure a corpse exists prior to ``on_death`` in case it removes the NPC
         if prev_loc:
             corpse_exists = any(
                 obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
@@ -134,6 +131,9 @@ class DamageProcessor:
                 target.location = prev_loc
                 spawn_corpse(target, attacker)
                 target.location = original_loc
+
+        if hasattr(target, "on_death"):
+            target.on_death(attacker)
 
         if getattr(target, "pk", None) is not None:
             self.update_pos(target)

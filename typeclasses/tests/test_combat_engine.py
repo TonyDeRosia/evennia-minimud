@@ -644,6 +644,40 @@ class TestCombatDeath(EvenniaTest):
         mock_spawn.assert_called_once_with(npc, self.char1)
         self.assertIs(corpse.location, self.room1)
 
+    def test_engine_kill_still_awards_xp_when_on_death_deletes(self):
+        """NPC deletion inside ``on_death`` should not prevent XP or corpse."""
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        player = self.char1
+        player.db.experience = 0
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+        npc.db.exp_reward = 5
+
+        def _on_death(attacker):
+            npc.delete()
+
+        npc.on_death = _on_death
+
+        engine = CombatEngine([player, npc], round_time=0)
+        engine.queue_action(player, KillAction(player, npc))
+
+        with patch("world.system.state_manager.apply_regen"), patch(
+            "world.system.state_manager.check_level_up"
+        ), patch("random.randint", return_value=0):
+            engine.start_round()
+            engine.process_round()
+
+        corpse = next(
+            obj
+            for obj in self.room1.contents
+            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+        )
+        self.assertEqual(player.db.experience, npc.db.exp_reward)
+        self.assertEqual(corpse.db.corpse_of, npc.key)
+        self.assertNotIn(npc, self.room1.contents)
+
     def test_multi_target_kill_spawns_corpses_and_awards_xp(self):
         """Killing two NPCs at once should create two corpses and grant XP."""
         from evennia.utils import create
