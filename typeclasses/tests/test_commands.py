@@ -807,6 +807,14 @@ class TestAreaMakeCommand(EvenniaTest):
         self.assertEqual(self.char1.location.db.area, "foo")
         self.assertEqual(self.char1.location.db.room_id, 1)
 
+    def test_amake_overlap_hint(self):
+        self.char1.execute_cmd("amake zone 1-5")
+        self.char1.msg = MagicMock()
+        self.char1.execute_cmd("amake other 3-7")
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("Range overlaps", out)
+        self.assertIn("Available ranges", out)
+
 
 class TestRoomMakeCommand(EvenniaTest):
     def setUp(self):
