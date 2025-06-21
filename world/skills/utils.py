@@ -6,7 +6,7 @@ def maybe_start_combat(attacker, target):
     manager = CombatRoundManager.get()
     inst = manager.get_combatant_combat(attacker)
     if inst:
-        if target not in inst.combatants:
+        if all(target is not c for c in inst.combatants):
             inst.add_combatant(target)
     else:
         inst = manager.get_combatant_combat(target)

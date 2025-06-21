@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional
 
 from evennia.utils import delay
 from evennia.utils.logger import log_trace
@@ -23,7 +23,7 @@ class CombatInstance:
 
     combat_id: int
     engine: object  # CombatEngine
-    combatants: Set[object]
+    combatants: List[object]
     round_time: float = 2.0
     round_number: int = 0
     last_round_time: float = field(default_factory=time.time)
@@ -31,18 +31,22 @@ class CombatInstance:
     tick_handle: Optional[object] = field(default=None, init=False, repr=False)
     room: Optional[object] = field(default=None, init=False, repr=False)
 
+    def __post_init__(self):
+        if not isinstance(self.combatants, list):
+            self.combatants = list(self.combatants)
+
     def add_combatant(self, combatant, **kwargs) -> bool:
         """Add ``combatant`` to this combat instance."""
         if not self.engine:
             raise RuntimeError("Combat engine failed to initialize")
         if _current_hp(combatant) <= 0:
             return False
-        current = {p.actor for p in self.engine.participants}
-        if combatant in current:
+        current = [p.actor for p in self.engine.participants]
+        if combatant in current or combatant in self.combatants:
             return True
         if self.room is None:
             self.room = getattr(combatant, "location", None)
-        self.combatants.add(combatant)
+        self.combatants.append(combatant)
         self.engine.add_participant(combatant)
         return True
 
@@ -51,9 +55,9 @@ class CombatInstance:
         if not self.engine:
             return False
         self.engine.remove_participant(combatant)
-        self.combatants.discard(combatant)
+        self.combatants = [c for c in self.combatants if c is not combatant]
         try:
-            CombatRoundManager.get().combatant_to_combat.pop(combatant, None)
+            CombatRoundManager.get().combatant_to_combat.pop(id(combatant), None)
         except Exception:  # pragma: no cover - safety
             pass
         return True
@@ -109,8 +113,10 @@ class CombatInstance:
         if not self.engine:
             return False
 
-        fighters = {p.actor for p in self.engine.participants}
-        fighters.update(self.combatants)
+        fighters = [p.actor for p in self.engine.participants]
+        for fighter in self.combatants:
+            if fighter not in fighters:
+                fighters.append(fighter)
 
         active_fighters = []
         for fighter in fighters:
@@ -141,21 +147,23 @@ class CombatInstance:
             self.end_combat("No fighters available")
             return
 
-        fighters = set(self.combatants)
+        fighters = list(self.combatants)
 
-        current = {p.actor for p in self.engine.participants}
+        current = [p.actor for p in self.engine.participants]
 
         # Add new fighters
-        for actor in fighters - current:
-            self.engine.add_participant(actor)
-            if getattr(actor, "pk", None) is None:
-                setattr(actor, "in_combat", True)
+        for actor in fighters:
+            if actor not in current:
+                self.engine.add_participant(actor)
+                if getattr(actor, "pk", None) is None:
+                    setattr(actor, "in_combat", True)
 
         # Remove fighters no longer present in the combatants set
-        for actor in current - fighters:
-            self.engine.remove_participant(actor)
-            if getattr(actor, "pk", None) is None:
-                setattr(actor, "in_combat", False)
+        for actor in list(current):
+            if actor not in fighters:
+                self.engine.remove_participant(actor)
+                if getattr(actor, "pk", None) is None:
+                    setattr(actor, "in_combat", False)
 
         # Remove defeated combatants after processing their death logic
         for actor in list(fighters):
@@ -271,8 +279,10 @@ class CombatInstance:
 
         # Clean up fighter states
         if self.engine:
-            fighters = set(self.combatants)
-            fighters.update(p.actor for p in self.engine.participants)
+            fighters = list(self.combatants)
+            for p in self.engine.participants:
+                if p.actor not in fighters:
+                    fighters.append(p.actor)
 
             for fighter in fighters:
                 if not fighter:
@@ -295,7 +305,7 @@ class CombatRoundManager:
 
     def __init__(self) -> None:
         self.combats: Dict[int, CombatInstance] = {}
-        self.combatant_to_combat: Dict[object, int] = {}
+        self.combatant_to_combat: Dict[int, int] = {}
         self._next_id = 1
 
     @classmethod
@@ -327,12 +337,12 @@ class CombatRoundManager:
         combat_id = self._next_id
         self._next_id += 1
 
-        inst = CombatInstance(combat_id, engine, set(fighters), round_time or 2.0)
+        inst = CombatInstance(combat_id, engine, list(fighters), round_time or 2.0)
         if fighters:
             inst.room = getattr(fighters[0], "location", None)
         self.combats[combat_id] = inst
         for fighter in fighters:
-            self.combatant_to_combat[fighter] = combat_id
+            self.combatant_to_combat[id(fighter)] = combat_id
 
         inst.start()
 
@@ -344,11 +354,11 @@ class CombatRoundManager:
         if not inst:
             return
         for fighter in list(inst.combatants):
-            self.combatant_to_combat.pop(fighter, None)
+            self.combatant_to_combat.pop(id(fighter), None)
 
     def get_combatant_combat(self, combatant) -> Optional[CombatInstance]:
         """Return the combat instance ``combatant`` is part of."""
-        cid = self.combatant_to_combat.get(combatant)
+        cid = self.combatant_to_combat.get(id(combatant))
         if cid is None:
             return None
         return self.combats.get(cid)
@@ -373,14 +383,14 @@ class CombatRoundManager:
             for fighter in list(other.combatants):
                 other.remove_combatant(fighter)
                 primary.add_combatant(fighter)
-                self.combatant_to_combat[fighter] = primary.combat_id
+                self.combatant_to_combat[id(fighter)] = primary.combat_id
             other.end_combat("Merged into another instance")
 
         # ensure all provided combatants are in the primary instance
         for combatant in combatants:
             if combatant not in primary.combatants:
                 primary.add_combatant(combatant)
-                self.combatant_to_combat[combatant] = primary.combat_id
+                self.combatant_to_combat[id(combatant)] = primary.combat_id
 
         primary.start()
         return primary
