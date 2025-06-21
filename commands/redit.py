@@ -508,6 +508,8 @@ def menunode_done(caller, raw_string="", **kwargs):
             data["exits"] = proto.get("exits") or {}
         if "spawns" in proto:
             data["spawns"] = proto.get("spawns") or []
+        data["vnum"] = proto.get("vnum", vnum)
+        proto["vnum"] = data["vnum"]
         save_prototype("room", data, vnum=vnum)
 
         idx, area = find_area(area_key)
@@ -740,6 +742,7 @@ class CmdREdit(Command):
                 "key": room.key,
                 "desc": room.db.desc or "",
                 "exits": {},
+                "vnum": vnum,
             }
             if area_name:
                 proto["area"] = area_name
@@ -830,6 +833,7 @@ class CmdREdit(Command):
                 "key": f"Room {vnum}",
                 "desc": "",
                 "exits": {},
+                "vnum": vnum,
             }
             if area := find_area_by_vnum(vnum):
                 proto["area"] = area.key
