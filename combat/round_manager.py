@@ -161,16 +161,7 @@ class CombatInstance:
         for actor in list(fighters):
             if _current_hp(actor) <= 0 and not getattr(getattr(actor, "db", None), "is_dead", False):
                 log = getattr(getattr(actor, "ndb", None), "damage_log", None) or {}
-                killer_key = max(log, key=log.get) if log else None
-                killer = None
-                if killer_key is not None:
-                    if isinstance(killer_key, int):
-                        for obj in fighters + [p.actor for p in self.engine.participants]:
-                            if id(obj) == killer_key:
-                                killer = obj
-                                break
-                    else:
-                        killer = killer_key
+                killer = max(log, key=log.get) if log else None
                 try:
                     self.engine.handle_defeat(actor, killer)
                 except Exception as err:  # pragma: no cover - safety
