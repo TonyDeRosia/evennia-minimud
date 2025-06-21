@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, ANY
 from tempfile import TemporaryDirectory
 from pathlib import Path
 from unittest import mock
@@ -51,6 +51,7 @@ class TestMEditCommand(EvenniaTest):
                 self.char1,
                 "commands.rom_mob_editor",
                 startnode="menunode_main",
+                cmd_on_exit=ANY,
             )
         data = self.char1.ndb.mob_proto
         assert data["key"] == "orc"
@@ -66,6 +67,7 @@ class TestMEditCommand(EvenniaTest):
                 self.char1,
                 "commands.rom_mob_editor",
                 startnode="menunode_main",
+                cmd_on_exit=ANY,
             )
         data = self.char1.ndb.mob_proto
         assert data["level"] == 2
@@ -81,6 +83,7 @@ class TestMEditCommand(EvenniaTest):
                 self.char1,
                 "commands.rom_mob_editor",
                 startnode="menunode_main",
+                cmd_on_exit=ANY,
             )
         data = self.char1.ndb.mob_proto
         assert data["key"] == "troll"
@@ -148,6 +151,7 @@ class TestMEditCommand(EvenniaTest):
                 self.char1,
                 "commands.rom_mob_editor",
                 startnode="menunode_main",
+                cmd_on_exit=ANY,
             )
         assert self.char1.ndb.mob_vnum == 5
         assert self.char1.ndb.mob_proto["key"] == "orc"
@@ -167,3 +171,30 @@ class TestMEditCommand(EvenniaTest):
         self.char1.execute_cmd("medit create 10")
         out = self.char1.msg.call_args[0][0]
         assert "Invalid or already used VNUM" in out
+
+    def test_cancel_new_proto_prompts_and_leaves_vnum_free(self):
+        from utils import vnum_registry
+        from commands import rom_mob_editor
+
+        self.char1.ndb.mob_proto = {}
+        self.char1.ndb.mob_vnum = 10
+        self.char1.ndb.mob_saved = False
+
+        result = rom_mob_editor.menunode_cancel(self.char1)
+        assert result == "menunode_unsaved_prompt"
+        assert vnum_registry.validate_vnum(10, "npc")
+
+    def test_on_exit_unsaved_opens_prompt(self):
+        from commands import rom_mob_editor
+
+        self.char1.ndb.mob_proto = {}
+        self.char1.ndb.mob_vnum = 11
+        self.char1.ndb.mob_saved = False
+
+        with patch("commands.rom_mob_editor.EvMenu") as mock_menu:
+            rom_mob_editor._on_exit(self.char1, None)
+            mock_menu.assert_called_with(
+                self.char1,
+                "commands.rom_mob_editor",
+                startnode="menunode_unsaved_prompt",
+            )
