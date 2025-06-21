@@ -191,7 +191,7 @@ def test_npc_attack_uses_natural_weapon(self):
          patch("world.system.state_manager.get_effective_stat", return_value=0), \
          patch("random.randint", return_value=0):
         engine.start_round()
-        engine.process_round()
+        instance.process_round()
 
     self.assertEqual(defender.hp, 5)
 
@@ -338,7 +338,7 @@ def test_auto_attack_uses_combat_target():
          patch("evennia.utils.delay"), \
          patch("random.randint", return_value=0):
         engine.start_round()
-        engine.process_round()
+        instance.process_round()
         assert defender.hp == 1
 
         engine.process_round()
@@ -489,4 +489,66 @@ def test_end_combat_broadcasts_room_message():
         instance.end_combat("done")
 
     room.msg_contents.assert_any_call("Combat ends: done")
+
+
+def test_npc_death_flow_keeps_combat_active_until_end():
+    """NPC death should broadcast, award XP, spawn corpse, then end combat."""
+
+    room = MagicMock()
+    room.contents = []
+    room.msg_contents = MagicMock()
+
+    player = Dummy()
+    npc = Dummy()
+    player.msg = MagicMock()
+    player.location = npc.location = room
+    room.contents.extend([player, npc])
+
+    manager = CombatRoundManager.get()
+    manager.force_end_all_combat()
+    with patch.object(CombatInstance, "start"):
+        instance = manager.start_combat([player, npc])
+
+    engine = instance.engine
+    engine.queue_action(player, KillAction(player, npc))
+
+    order = []
+
+    def room_msg(msg, *args, **kwargs):
+        if "slain" in msg or "dies" in msg:
+            order.append(("msg", instance.combat_ended))
+
+    def xp_award(attacker, victim):
+        order.append(("xp", instance.combat_ended))
+
+    corpse = MagicMock()
+    corpse.location = None
+    room.msg_contents.side_effect = room_msg
+
+    def fake_handle(victim, killer=None):
+        order.append(("handle", instance.combat_ended))
+        engine.award_experience(killer, victim)
+        room.msg_contents(f"{victim.key} is slain by {killer.key}!")
+        corpse.location = room
+        return corpse
+
+    with (
+        patch("world.mechanics.on_death_manager.handle_death", side_effect=fake_handle),
+        patch("combat.damage_processor.handle_death", side_effect=fake_handle),
+        patch.object(engine, "award_experience", side_effect=xp_award) as mock_xp,
+        patch("combat.engine.damage_processor.delay"),
+        patch("world.system.state_manager.apply_regen"),
+        patch("world.system.state_manager.check_level_up"),
+        patch("random.randint", return_value=0),
+    ):
+        engine.start_round()
+        instance.process_round()
+
+    assert corpse.location is room
+    assert mock_xp.called
+    calls = [c.args[0] for c in room.msg_contents.call_args_list]
+    assert any("slain" in msg or "dies" in msg for msg in calls)
+    for _, ended in order:
+        assert not ended
+    assert instance.combat_ended
 
