@@ -391,6 +391,10 @@ class CombatRoundManager:
                 other.remove_combatant(fighter)
                 primary.add_combatant(fighter)
                 self.combatant_to_combat[fighter] = primary.combat_id
+                try:
+                    fighter.db.in_combat = True
+                except Exception:
+                    setattr(fighter, "in_combat", True)
             other.end_combat("Merged into another instance")
 
         # ensure all provided combatants are in the primary instance
@@ -398,6 +402,17 @@ class CombatRoundManager:
             if combatant not in primary.combatants:
                 primary.add_combatant(combatant)
                 self.combatant_to_combat[combatant] = primary.combat_id
+
+        # flag all fighters and verify engine registration
+        current = {p.actor for p in primary.engine.participants}
+        for combatant in combatants:
+            try:
+                combatant.db.in_combat = True
+            except Exception:
+                setattr(combatant, "in_combat", True)
+            if combatant not in current:
+                primary.engine.add_participant(combatant)
+                current.add(combatant)
 
         primary.start()
         return primary
