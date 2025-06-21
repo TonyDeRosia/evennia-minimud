@@ -12,6 +12,7 @@ __all__ = [
     "register_vnum",
     "unregister_vnum",
     "get_next_vnum",
+    "peek_next_vnum",
     "get_next_vnum_for_area",
 ]
 
@@ -103,6 +104,23 @@ def get_next_vnum(category: str) -> int:
     entry["next"] = vnum + 1
     data[category] = entry
     _save(data)
+    return vnum
+
+
+def peek_next_vnum(category: str) -> int:
+    """Return the next available VNUM for ``category`` without reserving it."""
+
+    if category not in VNUM_RANGES:
+        raise KeyError(f"Unknown category: {category}")
+    start, end = VNUM_RANGES[category]
+    data = _load()
+    entry = data.get(category, {"used": [], "next": start})
+    vnum = max(entry.get("next", start), start)
+    used = set(entry.get("used", []))
+    while vnum in used and vnum <= end:
+        vnum += 1
+    if vnum > end:
+        raise ValueError("No available VNUMs in range")
     return vnum
 
 

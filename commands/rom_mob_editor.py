@@ -11,7 +11,12 @@ from world.mob_constants import (
     parse_flag_list,
 )
 from utils.mob_proto import register_prototype, get_prototype
-from utils.vnum_registry import validate_vnum, register_vnum
+from utils.vnum_registry import (
+    validate_vnum,
+    register_vnum,
+    VNUM_RANGES,
+    peek_next_vnum,
+)
 from world.areas import find_area_by_vnum
 from world.templates.mob_templates import get_template
 from .command import Command
@@ -736,7 +741,11 @@ class CmdMEdit(Command):
                 return
             vnum = int(parts[1])
             if get_prototype(vnum) is not None or not validate_vnum(vnum, "npc"):
-                caller.msg("Invalid or already used VNUM.")
+                start, end = VNUM_RANGES["npc"]
+                next_vnum = peek_next_vnum("npc")
+                caller.msg(
+                    f"Invalid or already used VNUM. NPCs use {start}-{end}. Next free: {next_vnum}."
+                )
                 return
             register_vnum(vnum)
             proto = get_template("warrior") or {}

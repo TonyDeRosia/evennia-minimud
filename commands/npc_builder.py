@@ -42,6 +42,7 @@ from world.scripts import classes
 from scripts import BuilderAutosave
 from copy import deepcopy
 from utils import vnum_registry
+from world.areas import get_area_vnum_range
 from utils.mob_utils import generate_base_stats, mobprogs_to_triggers
 from world.triggers import TriggerManager
 from .command import Command
@@ -1044,8 +1045,10 @@ class CmdSpawnNPC(Command):
             proto = get_prototype(vnum)
             if not proto:
                 if vnum_registry.validate_vnum(vnum, "npc"):
+                    start, end = vnum_registry.VNUM_RANGES["npc"]
+                    next_v = vnum_registry.peek_next_vnum("npc")
                     self.msg(
-                        "❌ Invalid VNUM. The prototype was never finalized or saved."
+                        f"❌ Invalid VNUM. NPCs use {start}-{end}. Next free: {next_v}."
                     )
                 else:
                     self.msg("Unknown NPC prototype.")
@@ -1200,8 +1203,10 @@ class CmdMSpawn(Command):
             proto = get_prototype(vnum)
             if not proto:
                 if vnum_registry.validate_vnum(vnum, "npc"):
+                    start, end = vnum_registry.VNUM_RANGES["npc"]
+                    next_v = vnum_registry.peek_next_vnum("npc")
                     self.msg(
-                        f"Prototype {vnum} not finalized. Use editnpc {vnum} and finalize with 'Yes & Save'."
+                        f"Prototype {vnum} not finalized. NPCs use {start}-{end}. Next free: {next_v}."
                     )
                 else:
                     self.msg("Invalid VNUM.")
@@ -1356,6 +1361,9 @@ class CmdQuickMob(Command):
                     builder=self.caller.key,
                 )
             except Exception:
+                rng = get_area_vnum_range(area)
+                if rng:
+                    self.msg(f"Using global range. {area} uses {rng[0]}-{rng[1]}.")
                 vnum = vnum_registry.get_next_vnum("npc")
         else:
             vnum = vnum_registry.get_next_vnum("npc")
