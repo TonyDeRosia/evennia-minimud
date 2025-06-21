@@ -413,13 +413,28 @@ def _edit_loot(caller, raw_string, **kwargs):
         chance = 100
         amount = 1
         guaranteed = None
+        idx = 1
         if len(parts) > 1:
-            if not parts[1].isdigit():
+            if parts[1].isdigit():
+                chance = int(parts[1])
+                idx = 2
+            elif isinstance(proto, str) and proto.lower() in COIN_VALUES:
+                amt = parts[1]
+                if amt.isdigit():
+                    amount = int(amt)
+                else:
+                    try:
+                        roll_dice_string(amt)
+                    except Exception:
+                        caller.msg("Amount must be a number or dice string.")
+                        return "menunode_loot"
+                    amount = amt
+                idx = 2
+            else:
                 caller.msg("Chance must be a number.")
                 return "menunode_loot"
-            chance = int(parts[1])
-        if isinstance(proto, str) and proto.lower() in COIN_VALUES and len(parts) > 2:
-            amt = parts[2]
+        if isinstance(proto, str) and proto.lower() in COIN_VALUES and len(parts) > idx:
+            amt = parts[idx]
             if amt.isdigit():
                 amount = int(amt)
             else:
@@ -429,16 +444,12 @@ def _edit_loot(caller, raw_string, **kwargs):
                     caller.msg("Amount must be a number or dice string.")
                     return "menunode_loot"
                 amount = amt
-            if len(parts) > 3:
-                if not parts[3].isdigit():
-                    caller.msg("Guaranteed count must be a number.")
-                    return "menunode_loot"
-                guaranteed = int(parts[3])
-        elif len(parts) > 2:
-            if not parts[2].isdigit():
+            idx += 1
+        if len(parts) > idx:
+            if not parts[idx].isdigit():
                 caller.msg("Guaranteed count must be a number.")
                 return "menunode_loot"
-            guaranteed = int(parts[2])
+            guaranteed = int(parts[idx])
         for entry in table:
             if entry.get("proto") == proto:
                 entry["chance"] = chance

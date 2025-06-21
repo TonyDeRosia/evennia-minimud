@@ -14,6 +14,7 @@ from utils import vnum_registry
 from utils.prototype_manager import load_prototype
 from world.areas import find_area_by_vnum
 from evennia.utils import dedent
+from utils.dice import roll_dice_string
 import re
 
 # Expose some frequently used constants locally
@@ -733,26 +734,43 @@ def _edit_loot_table(caller, raw_string, **kwargs):
         chance = 100
         amount = 1
         guaranteed = None
+        idx = 1
         if len(parts) > 1:
-            if not parts[1].isdigit():
+            if parts[1].isdigit():
+                chance = int(parts[1])
+                idx = 2
+            elif isinstance(proto, str) and proto.lower() in COIN_VALUES:
+                amt = parts[1]
+                if amt.isdigit():
+                    amount = int(amt)
+                else:
+                    try:
+                        roll_dice_string(amt)
+                    except Exception:
+                        caller.msg("Amount must be a number or dice string.")
+                        return "menunode_loot_table"
+                    amount = amt
+                idx = 2
+            else:
                 caller.msg("Chance must be a number.")
                 return "menunode_loot_table"
-            chance = int(parts[1])
-        if isinstance(proto, str) and proto.lower() in COIN_VALUES and len(parts) > 2:
-            if not parts[2].isdigit():
-                caller.msg("Amount must be a number.")
-                return "menunode_loot_table"
-            amount = int(parts[2])
-            if len(parts) > 3:
-                if not parts[3].isdigit():
-                    caller.msg("Guaranteed count must be a number.")
+        if isinstance(proto, str) and proto.lower() in COIN_VALUES and len(parts) > idx:
+            amt = parts[idx]
+            if amt.isdigit():
+                amount = int(amt)
+            else:
+                try:
+                    roll_dice_string(amt)
+                except Exception:
+                    caller.msg("Amount must be a number or dice string.")
                     return "menunode_loot_table"
-                guaranteed = int(parts[3])
-        elif len(parts) > 2:
-            if not parts[2].isdigit():
+                amount = amt
+            idx += 1
+        if len(parts) > idx:
+            if not parts[idx].isdigit():
                 caller.msg("Guaranteed count must be a number.")
                 return "menunode_loot_table"
-            guaranteed = int(parts[2])
+            guaranteed = int(parts[idx])
         # check if entry exists
         for entry in table:
             if entry.get("proto") == proto:
