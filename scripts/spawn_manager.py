@@ -57,12 +57,17 @@ class SpawnManager(Script):
                 proto_key = self._normalize_proto(proto_key)
                 if isinstance(proto_key, int):
                     if not mob_db.get_proto(proto_key):
-                        logger.log_err(
-                            f"SpawnManager: missing NPC prototype '{proto_key}' for room spawn"
-                        )
-                        continue
+                        if str(proto_key) in npc_registry:
+                            logger.log_warn(
+                                f"SpawnManager: NPC VNUM '{proto_key}' missing from MobDB; using registry prototype"
+                            )
+                        else:
+                            logger.log_warn(
+                                f"SpawnManager: missing NPC prototype '{proto_key}' for room spawn"
+                            )
+                            continue
                 elif str(proto_key) not in npc_registry:
-                    logger.log_err(
+                    logger.log_warn(
                         f"SpawnManager: missing NPC prototype '{proto_key}' for room spawn"
                     )
                     continue
@@ -242,12 +247,38 @@ class SpawnManager(Script):
         proto_is_digit = isinstance(proto, int)
         try:
             if proto_is_digit:
-                npc = spawn_from_vnum(int(proto), location=room)
-                npc.db.prototype_key = int(proto)
+                from world.scripts.mob_db import get_mobdb
+
+                mob_db = get_mobdb()
+                if mob_db.get_proto(proto):
+                    npc = spawn_from_vnum(int(proto), location=room)
+                    npc.db.prototype_key = int(proto)
+                else:
+                    p_data = prototypes.get_npc_prototypes().get(str(proto))
+                    if not p_data:
+                        logger.log_warn(
+                            f"SpawnManager: prototype {proto} not found for room {getattr(room, 'dbref', room)}"
+                        )
+                        return
+                    logger.log_warn(
+                        f"SpawnManager: NPC VNUM '{proto}' missing from MobDB; using registry prototype"
+                    )
+                    data = dict(p_data)
+                    base_cls = data.get("typeclass", "typeclasses.npcs.BaseNPC")
+                    if isinstance(base_cls, str):
+                        module, clsname = base_cls.rsplit(".", 1)
+                        base_cls = getattr(__import__(module, fromlist=[clsname]), clsname)
+                    data["typeclass"] = f"{base_cls.__module__}.{base_cls.__name__}"
+                    npc = spawner.spawn(data)[0]
+                    npc.location = room
+                    npc.db.prototype_key = proto
+                    apply_proto_items(npc, data)
             else:
                 p_data = prototypes.get_npc_prototypes().get(str(proto))
                 if not p_data:
-                    logger.log_warn(f"SpawnManager: prototype {proto} not found for room {getattr(room, 'dbref', room)}")
+                    logger.log_warn(
+                        f"SpawnManager: prototype {proto} not found for room {getattr(room, 'dbref', room)}"
+                    )
                     return
                 data = dict(p_data)
                 base_cls = data.get("typeclass", "typeclasses.npcs.BaseNPC")
