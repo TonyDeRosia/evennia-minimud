@@ -353,6 +353,8 @@ class CombatRoundManager:
             return None
         inst = self.combats.get(cid)
         if inst and inst.combat_ended:
+            # clean up stale reference
+            self.combatant_to_combat.pop(combatant, None)
             return None
         return inst
 
