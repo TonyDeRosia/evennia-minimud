@@ -117,11 +117,8 @@ class CombatInstance:
             if not fighter:
                 continue
             hp = _current_hp(fighter)
-            # check combat status using the persistent db attribute
-            try:
-                in_combat = getattr(fighter.db, "in_combat")
-            except Exception:
-                in_combat = None
+            # safely check combat status using persistent db attribute first
+            in_combat = getattr(getattr(fighter, "db", None), "in_combat", None)
             if in_combat is None:
                 in_combat = getattr(fighter, "in_combat", False)
             logger.debug(
@@ -130,7 +127,7 @@ class CombatInstance:
                 hp,
                 in_combat,
             )
-            if in_combat or (fighter in self.combatants and hp > 0):
+            if hp > 0 and (in_combat is True or fighter in self.combatants):
                 active_fighters.append(fighter)
 
         return len(active_fighters) >= 2
