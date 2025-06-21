@@ -1165,12 +1165,18 @@ class NPC(Character):
         # remove from combat if engaged
         leave_combat(self)
 
-        corpse = spawn_corpse(self, attacker)
+        corpse = None
+        if not any(
+            obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+            and obj.db.corpse_of_id == self.dbref
+            for obj in (self.location.contents if self.location else [])
+        ):
+            corpse = spawn_corpse(self, attacker)
 
-        if corpse:
-            if getattr(self.db, "vnum", None) is not None:
-                corpse.db.npc_vnum = self.db.vnum
-            corpse.location = self.location
+            if corpse:
+                if getattr(self.db, "vnum", None) is not None:
+                    corpse.db.npc_vnum = self.db.vnum
+                corpse.location = self.location
 
         self.at_death(attacker)
         if self.location:
