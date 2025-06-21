@@ -56,7 +56,7 @@ from ..npc_builder import (
 from ..rom_mob_editor import CmdMEdit
 from ..mob_builder_commands import CmdProtoEdit
 from ..cmdmobbuilder import CmdMobProto
-from ..nextvnum import CmdNextVnum
+from ..nextvnum import CmdNextVnum, CmdListVnums
 from ..builder_types import CmdBuilderTypes
 from ..hedit import CmdHEdit
 from ..opedit import CmdOPEdit
@@ -1507,6 +1507,7 @@ class BuilderCmdSet(CmdSet):
         self.add(CmdMobValidate)
         self.add(CmdMobProto)
         self.add(CmdNextVnum)
+        self.add(CmdListVnums)
         self.add(CmdHEdit)
         self.add(CmdOPEdit)
         self.add(CmdRPEdit)
