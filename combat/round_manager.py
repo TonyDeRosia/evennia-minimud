@@ -248,6 +248,12 @@ class CombatInstance:
         if self.combat_ended:
             return
 
+        # ensure any pending defeat or death logic runs first
+        try:
+            self.sync_participants()
+        except Exception as err:  # pragma: no cover - safety
+            log_trace(f"Error syncing participants on end: {err}")
+
         room = getattr(self, "room", None)
         try:
             if self.engine and self.engine.participants:
@@ -258,7 +264,6 @@ class CombatInstance:
         except Exception:  # pragma: no cover - safety
             room = None
 
-        self.combat_ended = True
         self.cancel_tick()
         CombatRoundManager.get().remove_combat(self.combat_id)
 
@@ -286,6 +291,8 @@ class CombatInstance:
 
         if reason:
             log_trace(f"Combat ended: {reason}")
+
+        self.combat_ended = True
 
 
 class CombatRoundManager:
