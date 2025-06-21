@@ -180,6 +180,8 @@ Check server logs for messages from `SpawnManager` about errors or skipped
 rooms. Also confirm each room prototype includes a valid `spawns` field with the
 correct NPC identifiers.
 The `redit` spawn editor now warns if you try to add an unknown prototype.
+It will also alert you when a numeric prototype exists only in memory:
+`Prototype <vnum> is not saved to disk. Use 'Save & write prototype' to persist it.`
 Weapon Creation
 ```bash
 cweapon "longsword" mainhand 1d8 4 STR+2 A reliable longsword.

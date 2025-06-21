@@ -415,7 +415,14 @@ def _handle_spawn_cmd(caller, raw_string, **kwargs):
             return "menunode_spawns"
         proto_exists = False
         if isinstance(proto_key, int):
-            proto_exists = get_mobdb().get_proto(proto_key) is not None
+            mob_db = get_mobdb()
+            proto_exists = mob_db.get_proto(proto_key) is not None
+            if proto_exists:
+                path = CATEGORY_DIRS["npc"] / f"{proto_key}.json"
+                if not path.exists():
+                    caller.msg(
+                        f"Prototype {proto_key} is not saved to disk. Use 'Save & write prototype' to persist it."
+                    )
         else:
             proto_exists = proto_key in prototypes.get_npc_prototypes()
         if not proto_exists:
