@@ -94,26 +94,35 @@ class SpawnManager(Script):
 
     def register_room_spawn(self, proto: Dict[str, Any]) -> None:
         spawns = proto.get("spawns") or []
-        if not spawns:
-            return
         room_id = proto.get("room_id") or proto.get("vnum")
         rid = self._normalize_room_id(room_id)
-        self.db.entries = [e for e in self.db.entries if self._normalize_room_id(e) != rid]
+        # always remove existing entries for this room to keep data in sync
+        self.db.entries = [
+            e for e in self.db.entries if self._normalize_room_id(e) != rid
+        ]
+        if not spawns:
+            return
         for entry in spawns:
             proto_key = entry.get("prototype") or entry.get("proto")
             if not proto_key:
                 continue
             proto_key = self._normalize_proto(proto_key)
             room_val = entry.get("location") or room_id
-            self.db.entries.append({
-                "area": (proto.get("area") or "").lower(),
-                "prototype": proto_key,
-                "room": room_val,
-                "room_id": self._normalize_room_id(room_val),
-                "max_count": int(entry.get("max_spawns", entry.get("max_count", 1))),
-                "respawn_rate": int(entry.get("spawn_interval", entry.get("respawn_rate", 60))),
-                "last_spawn": 0.0,
-            })
+            self.db.entries.append(
+                {
+                    "area": (proto.get("area") or "").lower(),
+                    "prototype": proto_key,
+                    "room": room_val,
+                    "room_id": self._normalize_room_id(room_val),
+                    "max_count": int(
+                        entry.get("max_spawns", entry.get("max_count", 1))
+                    ),
+                    "respawn_rate": int(
+                        entry.get("spawn_interval", entry.get("respawn_rate", 60))
+                    ),
+                    "last_spawn": 0.0,
+                }
+            )
 
     def force_respawn(self, room_vnum: int) -> None:
         now = time.time()

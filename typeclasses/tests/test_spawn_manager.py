@@ -98,6 +98,13 @@ class TestSpawnManager(EvenniaTest):
         self.script.register_room_spawn(self.room_proto)
         self.assertEqual(len(self.script.db.entries), 1)
 
+    def test_register_room_spawn_with_no_spawns_removes_entries(self):
+        self.script.register_room_spawn(self.room_proto)
+        self.assertEqual(len(self.script.db.entries), 1)
+        proto = {"vnum": self.room1.db.room_id, "area": "zone", "spawns": []}
+        self.script.register_room_spawn(proto)
+        self.assertEqual(len(self.script.db.entries), 0)
+
     def test_periodic_spawn_interval(self):
         proto = {
             "vnum": self.room1.db.room_id,
