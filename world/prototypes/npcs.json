@@ -63,6 +63,8 @@
         "prototype_key": "slime",
         "key": "slime",
         "npc_type": "base",
+        "typeclass": "typeclasses.npcs.CombatNPC",
+        "ai_type": "aggressive",
         "race": "human",
         "level": 1,
         "damage_dice": "1d2"
