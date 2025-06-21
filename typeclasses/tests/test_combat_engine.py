@@ -569,6 +569,35 @@ class TestCombatDeath(EvenniaTest):
         self.assertNotIn(npc, [p.actor for p in engine.participants])
         self.assertEqual(corpse.db.corpse_of, npc.key)
 
+    def test_combat_kill_removes_npc_and_broadcasts(self):
+        """NPC death during combat removes it, spawns corpse, and notifies room."""
+        from evennia.utils import create
+        from typeclasses.characters import NPC
+
+        player = self.char1
+        npc = create.create_object(NPC, key="mob", location=self.room1)
+        npc.db.drops = []
+
+        self.room1.msg_contents = MagicMock()
+
+        engine = CombatEngine([player, npc], round_time=0)
+        engine.queue_action(player, KillAction(player, npc))
+
+        with patch("world.system.state_manager.apply_regen"), patch(
+            "world.system.state_manager.check_level_up"
+        ), patch("random.randint", return_value=0):
+            engine.start_round()
+            engine.process_round()
+
+        self.assertNotIn(npc, self.room1.contents)
+        corpse = next(
+            obj
+            for obj in self.room1.contents
+            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+        )
+        calls = [c.args[0] for c in self.room1.msg_contents.call_args_list]
+        self.assertTrue(any("slain" in msg for msg in calls))
+
     def test_player_kills_multiple_npcs_creates_multiple_corpses_and_awards_xp(self):
       """Killing two NPCs should produce two corpses, loot, and combined XP."""
       from evennia.utils import create
