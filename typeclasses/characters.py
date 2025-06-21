@@ -380,10 +380,7 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
         damage = int(max(0, round(damage * (1 - armor / 100))))
         if attacker:
             log = getattr(self.ndb, "damage_log", None) or {}
-            key = attacker
-            if getattr(attacker, "pk", None) is None:
-                key = id(attacker)
-            log[key] = log.get(key, 0) + int(damage)
+            log[attacker] = log.get(attacker, 0) + int(damage)
             self.ndb.damage_log = log
 
         dt = None
