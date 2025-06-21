@@ -156,6 +156,7 @@ Mob Prototype Manager
 @mobproto set 1 level 3
 @mobproto spawn 1
 ```
+Use `@listvnums <npc|room|object> [area]` to see free numbers.
 Spawning and Room Systems
 Room JSONs may include:
 ```json

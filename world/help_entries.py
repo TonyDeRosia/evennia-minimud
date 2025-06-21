@@ -4030,4 +4030,33 @@ Related:
     help ansi
 """,
     },
+    {
+        "key": "listvnums",
+        "category": "Building",
+        "text": """Help for listvnums
+
+Show a few unused VNUMs without reserving them.
+
+Usage:
+    @listvnums <npc|room|object> [area]
+
+Switches:
+    None
+
+Arguments:
+    category - vnum type to check (npc, room, object)
+    area - optional area name to limit the search
+
+Examples:
+    @listvnums npc
+    @listvnums room town
+
+Notes:
+    - Lists the next five free numbers.
+    - Does not reserve the VNUMs.
+
+Related:
+    help vnums
+""",
+    },
 ]
