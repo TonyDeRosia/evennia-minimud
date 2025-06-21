@@ -51,10 +51,9 @@ class TestReditSpawnIntegration(EvenniaTest):
         with (
             patch("commands.redit.save_prototype"),
             patch("commands.redit.ObjectDB.objects.filter", return_value=[self.room]),
-            patch("commands.redit.ScriptDB.objects.filter") as mock_filter,
+            patch("commands.redit.get_spawn_manager", return_value=self.script),
             patch.object(self.script, "_spawn") as mock_spawn,
         ):
-            mock_filter.return_value.first.return_value = self.script
             mock_spawn.side_effect = lambda proto, room: create.create_object(
                 BaseNPC, key=str(proto), location=room
             )

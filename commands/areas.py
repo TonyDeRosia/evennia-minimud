@@ -2,6 +2,7 @@ from evennia.objects.models import ObjectDB
 from evennia.utils.evtable import EvTable
 from evennia import CmdSet
 from evennia.prototypes import spawner
+from utils.script_utils import get_spawn_manager, respawn_area
 
 from .command import Command, MuxCommand
 from world.areas import (
@@ -13,7 +14,6 @@ from world.areas import (
     parse_area_identifier,
 )
 from .aedit import CmdAEdit, CmdAList, CmdASave, CmdAreaReset, CmdAreaAge
-from evennia.scripts.models import ScriptDB
 from typeclasses.rooms import Room
 from utils.prototype_manager import load_prototype, load_all_prototypes
 
@@ -569,18 +569,11 @@ class CmdAreasReset(Command):
                 f"Area '{area_name}' not found. Use 'alist' to view available areas."
             )
             return
-        script = ScriptDB.objects.filter(db_key="spawn_manager").first()
+        script = get_spawn_manager()
         if not script or not hasattr(script, "force_respawn"):
             self.msg("Spawn manager not found.")
             return
-        for entry in script.db.entries:
-            if entry.get("area") == area.key.lower():
-                rid = entry.get("room_id")
-                if rid is None:
-                    rid = entry.get("room")
-                    if isinstance(rid, str) and rid.isdigit():
-                        rid = int(rid)
-                script.force_respawn(rid)
+        respawn_area(area.key.lower())
         self.msg(f"Spawn entries reset for {area.key}.")
 
 

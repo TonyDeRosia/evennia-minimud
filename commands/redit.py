@@ -578,9 +578,9 @@ def menunode_done(caller, raw_string="", **kwargs):
                         exits[dirkey] = dest_obj
                 room.db.exits = exits
 
-        from evennia.scripts.models import ScriptDB
+        from utils.script_utils import get_spawn_manager
 
-        script = ScriptDB.objects.filter(db_key="spawn_manager").first()
+        script = get_spawn_manager()
         if script and hasattr(script, "register_room_spawn"):
             script.register_room_spawn(proto)
             if hasattr(script, "force_respawn"):

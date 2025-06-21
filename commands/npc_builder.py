@@ -1252,8 +1252,8 @@ class CmdMSpawn(Command):
         obj.db.spawn_room = self.caller.location
         obj.db.prototype_key = proto_key
 
-        from evennia.scripts.models import ScriptDB
-        script = ScriptDB.objects.filter(db_key="spawn_manager").first()
+        from utils.script_utils import get_spawn_manager
+        script = get_spawn_manager()
         if script and hasattr(script, "record_spawn"):
             script.record_spawn(proto_key, self.caller.location)
 

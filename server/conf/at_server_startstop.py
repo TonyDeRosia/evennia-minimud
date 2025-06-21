@@ -23,7 +23,7 @@ import time
 from evennia.utils import logger
 from evennia.server.models import ServerConfig
 from utils.prototype_manager import load_all_prototypes
-from utils.script_utils import resume_paused_scripts
+from utils.script_utils import resume_paused_scripts, get_spawn_manager
 
 
 _PROTOTYPE_CACHE = {}
@@ -151,7 +151,7 @@ def at_server_start():
         elif getattr(script.db, "_paused_time", None):
             script.unpause()
 
-    script = ScriptDB.objects.filter(db_key="spawn_manager").first()
+    script = get_spawn_manager()
     if not script or script.typeclass_path != "scripts.spawn_manager.SpawnManager":
         if script:
             script.delete()
