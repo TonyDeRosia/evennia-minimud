@@ -6,6 +6,15 @@ from typeclasses.characters import NPC
 class BaseNPC(NPC):
     """Base NPC typeclass for specialized behaviors."""
 
+    #: Optional greeting message shown when a player enters the room.
+    arrival_message: str | None = None
+
+    def at_character_arrive(self, chara, **kwargs):
+        """Respond to a character entering the room."""
+        super().at_character_arrive(chara, **kwargs)
+        if chara.has_account and self.arrival_message:
+            chara.msg(f"{self.key} says, '{self.arrival_message}'")
+
     def at_object_creation(self):
         super().at_object_creation()
         ai_flags = {"aggressive", "scavenger", "assist", "call_for_help", "wander"}

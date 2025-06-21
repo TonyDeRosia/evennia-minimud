@@ -12,9 +12,5 @@ class BankerNPC(BankerRole, BaseNPC):
     added here.
     """
 
-    def at_character_arrive(self, chara, **kwargs):
-        """Greet arriving characters with a helpful message."""
-        super().at_character_arrive(chara, **kwargs)
-        if chara.has_account:
-            chara.msg(f"{self.key} says, 'Keep your coins safe with me.'")
+    arrival_message = "Keep your coins safe with me."
 

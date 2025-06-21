@@ -12,9 +12,5 @@ class MerchantNPC(MerchantRole, BaseNPC):
     complex shopkeeper behavior.
     """
 
-    def at_character_arrive(self, chara, **kwargs):
-        """Invite players to browse the wares when they arrive."""
-        super().at_character_arrive(chara, **kwargs)
-        if chara.has_account:
-            chara.msg(f"{self.key} says, 'Take a look at my wares!'")
+    arrival_message = "Take a look at my wares!"
 

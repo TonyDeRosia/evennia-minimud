@@ -11,9 +11,5 @@ class TrainerNPC(TrainerRole, BaseNPC):
     behavior can be implemented without altering the core NPC class.
     """
 
-    def at_character_arrive(self, chara, **kwargs):
-        """Offer training when a player enters."""
-        super().at_character_arrive(chara, **kwargs)
-        if chara.has_account:
-            chara.msg(f"{self.key} says, 'Interested in honing your skills?'")
+    arrival_message = "Interested in honing your skills?"
 
