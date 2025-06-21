@@ -108,6 +108,10 @@ class CmdAttack(Command):
         from combat import AttackAction
         instance.engine.queue_action(self.caller, AttackAction(self.caller, target))
 
+        if instance.round_number == 0:
+            instance.cancel_tick()
+            instance.process_round()
+
 
     def at_post_cmd(self):
         """
