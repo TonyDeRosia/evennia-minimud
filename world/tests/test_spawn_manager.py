@@ -259,3 +259,49 @@ class TestSpawnManager(EvenniaTest):
 
         self.assertEqual(npc.location, self.room)
         m_spawn.assert_called_once_with(5, location=self.room)
+
+    def test_spawn_numeric_missing_proto_logs_details(self):
+        with mock.patch("world.scripts.mob_db.get_mobdb") as m_db, \
+             mock.patch("scripts.spawn_manager.prototypes.get_npc_prototypes", return_value={}), \
+             mock.patch("evennia.utils.logger.log_warn") as m_warn:
+            fake_db = mock.Mock()
+            fake_db.get_proto.return_value = None
+            m_db.return_value = fake_db
+
+            self.script._spawn(5, self.room)
+
+        m_warn.assert_called_once()
+        msg = m_warn.call_args[0][0]
+        self.assertIn("5", msg)
+        self.assertIn(str(self.room.db.room_id), msg)
+        self.assertIn("MobDB", msg)
+        self.assertIn("JSON", msg)
+
+    def test_spawn_key_missing_proto_logs_source(self):
+        with mock.patch("scripts.spawn_manager.prototypes.get_npc_prototypes", return_value={}), \
+             mock.patch("evennia.utils.logger.log_warn") as m_warn:
+            self.script._spawn("orc", self.room)
+
+        m_warn.assert_called_once()
+        msg = m_warn.call_args[0][0]
+        self.assertIn("orc", msg)
+        self.assertIn(str(self.room.db.room_id), msg)
+        self.assertIn("JSON registry", msg)
+
+    def test_spawn_exception_logs_details(self):
+        with mock.patch("world.scripts.mob_db.get_mobdb") as m_db, \
+             mock.patch("scripts.spawn_manager.spawn_from_vnum") as m_spawn, \
+             mock.patch("evennia.utils.logger.log_err") as m_err:
+            fake_db = mock.Mock()
+            fake_db.get_proto.return_value = {"key": "x"}
+            m_db.return_value = fake_db
+            m_spawn.side_effect = RuntimeError("boom")
+
+            self.script._spawn(5, self.room)
+
+        m_err.assert_called_once()
+        msg = m_err.call_args[0][0]
+        self.assertIn("5", msg)
+        self.assertIn(str(self.room.db.room_id), msg)
+        self.assertIn("boom", msg)
+
