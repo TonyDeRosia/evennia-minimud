@@ -15,10 +15,7 @@ class GuardPatrol(BaseCombatAI):
         npc = self.obj
         if not npc or not npc.location:
             return None
-        for obj in npc.location.contents:
-            if obj.tags.get("wanted"):
-                return obj
-        return None
+        return self.find_target(lambda obj: obj.tags.get("wanted"))
 
     def move(self):
         npc = self.obj

@@ -12,15 +12,22 @@ class BaseCombatAI(Script):
         # player in the current location.
         self.db.skip_move_if_target = False
 
-    def select_target(self):
-        """Return a valid player character in the same room or ``None``."""
+    def find_target(self, predicate):
+        """Return the first object in the room matching ``predicate``."""
         npc = self.obj
         if not npc or not npc.location:
             return None
         for obj in npc.location.contents:
-            if getattr(obj, "account", None) and not obj.tags.has("unconscious", category="status"):
+            if predicate(obj):
                 return obj
         return None
+
+    def select_target(self):
+        """Return a valid player character in the same room or ``None``."""
+        return self.find_target(
+            lambda obj: getattr(obj, "account", None)
+            and not obj.tags.has("unconscious", category="status")
+        )
 
     def attack_target(self, target):
         npc = self.obj
