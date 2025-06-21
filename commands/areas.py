@@ -51,7 +51,31 @@ class CmdAMake(Command):
         areas = get_areas()
         for area in areas:
             if not (end < area.start or start > area.end):
-                self.msg(f"Range overlaps with {area.key} ({area.start}-{area.end})")
+                gaps: list[tuple[int, int | None]] = []
+                sorted_areas = sorted(areas, key=lambda a: a.start)
+                prev_end: int | None = None
+                for ar in sorted_areas:
+                    if prev_end is None:
+                        if ar.start > 1:
+                            gaps.append((1, ar.start - 1))
+                    else:
+                        if ar.start > prev_end + 1:
+                            gaps.append((prev_end + 1, ar.start - 1))
+                    prev_end = max(prev_end if prev_end is not None else ar.end, ar.end)
+                if prev_end is not None:
+                    gaps.append((prev_end + 1, None))
+
+                range_strs = []
+                for s, e in gaps:
+                    if e is None:
+                        range_strs.append(f"{s}-")
+                    else:
+                        range_strs.append(f"{s}-{e}")
+
+                self.msg(
+                    f"Range overlaps with {area.key} ({area.start}-{area.end}). "
+                    f"Available ranges: {', '.join(range_strs)}"
+                )
                 return
         new_area = Area(key=name, start=start, end=end)
         save_area(new_area)
