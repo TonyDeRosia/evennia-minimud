@@ -21,6 +21,8 @@ from evennia.prototypes import spawner
 from world.areas import find_area
 from evennia.objects.models import ObjectDB
 from typeclasses.rooms import Room
+from world import prototypes
+from world.scripts.mob_db import get_mobdb
 from .building import DIR_FULL, OPPOSITE
 from .command import Command
 
@@ -410,6 +412,14 @@ def _handle_spawn_cmd(caller, raw_string, **kwargs):
             rate = int(parts[3])
         except ValueError:
             caller.msg("Counts and rate must be numbers.")
+            return "menunode_spawns"
+        proto_exists = False
+        if isinstance(proto_key, int):
+            proto_exists = get_mobdb().get_proto(proto_key) is not None
+        else:
+            proto_exists = proto_key in prototypes.get_npc_prototypes()
+        if not proto_exists:
+            caller.msg("Prototype not found.")
             return "menunode_spawns"
         for entry in spawns:
             if (entry.get("prototype") or entry.get("proto")) == proto_key:
