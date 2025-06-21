@@ -44,6 +44,22 @@ def handle_death(victim, killer=None):
         if location:
             location.msg_contents(f"{victim.key} dies.")
 
+    # experience award before corpse creation so messages appear immediately
+    if killer:
+        if engine:
+            try:
+                engine.award_experience(killer, victim)
+            except Exception:  # pragma: no cover - safety
+                logger.log_trace()
+        elif inherits_from(victim, "typeclasses.characters.NPC"):
+            exp = int(getattr(victim.db, "exp_reward", 0) or 0)
+            if exp:
+                exp = state_manager.calculate_xp_reward(killer, victim, exp)
+                if exp:
+                    if hasattr(killer, "msg"):
+                        killer.msg(f"You gain |Y{exp}|n experience points!")
+                    state_manager.gain_xp(killer, exp)
+
     if location:
         corpse = next(
             (
@@ -64,22 +80,6 @@ def handle_death(victim, killer=None):
                     corpse.db.corpse_of_id = victim.dbref
                 if getattr(getattr(victim, "db", None), "vnum", None) is not None:
                     corpse.db.npc_vnum = victim.db.vnum
-
-    # experience award
-    if killer:
-        if engine:
-            try:
-                engine.award_experience(killer, victim)
-            except Exception:  # pragma: no cover - safety
-                logger.log_trace()
-        elif inherits_from(victim, "typeclasses.characters.NPC"):
-            exp = int(getattr(victim.db, "exp_reward", 0) or 0)
-            if exp:
-                exp = state_manager.calculate_xp_reward(killer, victim, exp)
-                if exp:
-                    if hasattr(killer, "msg"):
-                        killer.msg(f"You gain |Y{exp}|n experience points!")
-                    state_manager.gain_xp(killer, exp)
 
     # call at_death hooks
     try:

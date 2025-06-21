@@ -71,6 +71,45 @@ class TestOnDeathManager(EvenniaTest):
         self.assertEqual(order[1], "msg")
         self.assertEqual(order[2], "corpse")
 
+    def test_xp_and_levelup_messages_before_corpse(self):
+        npc = create.create_object(NPC, key="mob", location=self.room)
+        npc.db.drops = []
+        npc.db.exp_reward = 5
+        self.char1.db.level = 1
+        self.char1.db.experience = 118
+        self.char1.db.tnl = 2
+        order = []
+
+        def victim_msg(*args, **kwargs):
+            order.append("msg")
+
+        def room_msg(*args, **kwargs):
+            order.append("msg")
+
+        def killer_msg(message, *args, **kwargs):
+            if "experience" in message:
+                order.append("xp")
+            if "level" in message:
+                order.append("level")
+
+        def drop_loot_side(killer=None):
+            order.append("corpse")
+            corpse = create.create_object("typeclasses.objects.Corpse", key="corpse", location=None)
+            return corpse
+
+        npc.msg = MagicMock(side_effect=victim_msg)
+        self.room.msg_contents = MagicMock(side_effect=room_msg)
+        self.char1.msg = MagicMock(side_effect=killer_msg)
+        npc.drop_loot = MagicMock(side_effect=drop_loot_side)
+
+        on_death_manager.handle_death(npc, self.char1)
+
+        corpse_index = order.index("corpse")
+        xp_index = order.index("xp")
+        level_index = order.index("level")
+        self.assertLess(xp_index, corpse_index)
+        self.assertLess(level_index, corpse_index)
+
 
 if __name__ == "__main__":
     unittest.main()
