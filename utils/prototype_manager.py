@@ -10,7 +10,7 @@ to make sure VNUMs fall within defined ranges.
 
 from pathlib import Path
 import json
-from typing import Dict, Optional
+from typing import Dict, Optional, Mapping, Sequence
 
 from evennia.utils import logger
 
@@ -41,6 +41,18 @@ CATEGORY_DIRS: Dict[str, Path] = {
     "object": _BASE_PATH / "objects",
     "area": _BASE_PATH / "areas",
 }
+
+
+def _json_safe(value):
+    """Return ``value`` converted to JSON-serializable built-ins."""
+
+    if isinstance(value, Mapping):
+        return {k: _json_safe(v) for k, v in value.items()}
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes, bytearray)):
+        return [_json_safe(v) for v in value]
+    if isinstance(value, set):
+        return [_json_safe(v) for v in value]
+    return value
 
 
 def _proto_file(category: str, vnum: int) -> Path:
@@ -96,7 +108,7 @@ def save_prototype(category: str, data: dict, vnum: int | None = None) -> int:
     path = _proto_file(category, vnum)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w") as f:
-        json.dump(data, f, indent=4)
+        json.dump(_json_safe(data), f, indent=4)
     return vnum
 
 
