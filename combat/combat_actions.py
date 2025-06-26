@@ -21,6 +21,7 @@ class CombatResult:
     message: str
     damage: int = 0
     damage_type: object | None = None
+    location: object | None = None
 
 
 class Action:
@@ -160,10 +161,11 @@ class AttackAction(Action):
                 message=f"{attempt}\n{outcome}",
             )
 
-        dmg, dtype = CombatMath.calculate_damage(self.actor, weapon, target)
+        dmg, dtype, location = CombatMath.calculate_damage(self.actor, weapon, target)
         dmg, crit = CombatMath.apply_critical(self.actor, target, dmg)
 
-        msg = f"{attempt}\n{self.actor.key} hits {target.key}!\n"
+        hit_loc = f" {target.key}'s {location.name}" if location else f" {target.key}"
+        msg = f"{attempt}\n{self.actor.key} hits{hit_loc}!\n"
         if crit:
             msg += "Critical hit!\n"
         msg += f"{self.actor.key} deals {dmg} damage to {target.key}."
@@ -174,6 +176,7 @@ class AttackAction(Action):
             message=msg,
             damage=dmg,
             damage_type=dtype,
+            location=location,
         )
 
 

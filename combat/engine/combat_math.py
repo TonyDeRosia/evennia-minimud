@@ -47,10 +47,11 @@ class CombatMath:
         return True, ""
 
     @staticmethod
-    def calculate_damage(attacker, weapon, target) -> Tuple[int, object]:
-        """Return ``(damage, damage_type)`` for ``weapon`` hitting ``target``."""
+    def calculate_damage(attacker, weapon, target) -> Tuple[int, object, object]:
+        """Return ``(damage, damage_type, location)`` for ``weapon`` hitting ``target``."""
         dmg = 0
         dtype = DamageType.BLUDGEONING
+        location = None
 
         hp_trait = getattr(getattr(target, "traits", None), "health", None)
         if hasattr(target, "hp") or hp_trait:
@@ -138,7 +139,12 @@ class CombatMath:
             dex_val = state_manager.get_effective_stat(attacker, "DEX")
             dmg = int(round(dmg * (1 + str_val * 0.05 + dex_val * 0.02)))
 
-        return dmg, dtype
+            from ..body_parts import DEFAULT_HIT_LOCATIONS
+            import random
+            location = random.choice(DEFAULT_HIT_LOCATIONS)
+            dmg = int(round(dmg * location.damage_mod))
+
+        return dmg, dtype, location
 
     @staticmethod
     def apply_critical(attacker, target, damage: int) -> Tuple[int, bool]:
