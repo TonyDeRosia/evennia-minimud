@@ -208,7 +208,8 @@ Supports action queues, status effects, resistances
 
 Fully pluggable and extendable—combat emits Django signals and you can
 override the `DamageProcessor`, `IDeathHandler` or NPC AI routines. See
-`docs/combat_loop_mapping.md` for examples.
+`docs/combat_loop_mapping.md` for examples. For a hands-on demonstration, see
+`docs/quickstart_combat.md`.
 
 The available spells and the ``Spell`` dataclass now live in ``combat.spells``.
 
