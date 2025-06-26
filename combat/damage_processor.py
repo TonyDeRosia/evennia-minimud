@@ -314,9 +314,10 @@ class DamageProcessor:
             self.round_output.extend(summary_lines)
 
     def _broadcast_round_output(self, room=None) -> None:
+        if not self.turn_manager.participants:
+            return
         if room is None:
-            if self.turn_manager.participants:
-                room = getattr(self.turn_manager.participants[0].actor, "location", None)
+            room = getattr(self.turn_manager.participants[0].actor, "location", None)
 
         if room:
             for line in self.round_output:
