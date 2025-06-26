@@ -329,14 +329,22 @@ class CombatRoundManager:
         except ImportError as err:
             raise ImportError("Combat engine could not be imported") from err
 
-        engine = CombatEngine(fighters, round_time=round_time or 2.0)
+        engine = CombatEngine(
+            fighters,
+            round_time=round_time if round_time is not None else 2.0,
+        )
         if not engine:
             raise RuntimeError("CombatEngine failed to initialize")
 
         combat_id = self._next_id
         self._next_id += 1
 
-        inst = CombatInstance(combat_id, engine, set(fighters), round_time or 2.0)
+        inst = CombatInstance(
+            combat_id,
+            engine,
+            set(fighters),
+            round_time if round_time is not None else 2.0,
+        )
         if fighters:
             inst.room = getattr(fighters[0], "location", None)
         self.combats[combat_id] = inst
