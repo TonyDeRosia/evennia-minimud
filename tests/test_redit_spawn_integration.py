@@ -92,3 +92,31 @@ class TestReditSpawnIntegration(EvenniaTest):
         assert result == "menunode_spawns"
         assert not self.char1.ndb.room_protos[5]["spawns"]
         self.char1.msg.assert_any_call("Prototype not found.")
+
+    def test_vnum_updates_spawn_manager(self):
+        """Changing the room vnum should refresh spawn manager entries."""
+        old_proto = {"vnum": 5, "spawns": [{"prototype": "slime"}]}
+        new_proto = {"vnum": 6, "spawns": [{"prototype": "slime"}]}
+        area = Area(key="zone", start=1, end=10, rooms=[5])
+
+        self.script.register_room_spawn = MagicMock()
+        self.script.force_respawn = MagicMock()
+
+        with (
+            patch("commands.redit.load_prototype", side_effect=[old_proto, new_proto]),
+            patch("commands.redit.validate_vnum", return_value=True),
+            patch("commands.redit.save_prototype"),
+            patch("commands.redit.load_all_prototypes", return_value={}),
+            patch("commands.redit.get_areas", return_value=[area]),
+            patch("commands.redit.update_area"),
+            patch("commands.redit.unregister_vnum"),
+            patch("commands.redit.register_vnum"),
+            patch("pathlib.Path.exists", return_value=False),
+            patch("commands.redit.get_spawn_manager", return_value=self.script),
+        ):
+            self.char1.execute_cmd("redit vnum 5 6")
+
+        self.script.register_room_spawn.assert_any_call({"vnum": 5, "spawns": []})
+        self.script.register_room_spawn.assert_any_call(new_proto)
+        self.script.force_respawn.assert_called_with(6)
+

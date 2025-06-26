@@ -697,6 +697,21 @@ class CmdREdit(Command):
                     area.rooms = [new_vnum if r == old_vnum else r for r in area.rooms]
                     update_area(idx, area)
 
+            # update spawn manager entries
+            from utils.script_utils import get_spawn_manager
+
+            script = get_spawn_manager()
+            if script and hasattr(script, "register_room_spawn"):
+                script.register_room_spawn({"vnum": old_vnum, "spawns": []})
+                try:
+                    new_proto = load_prototype("room", new_vnum)
+                except json.JSONDecodeError:
+                    new_proto = None
+                if new_proto:
+                    script.register_room_spawn(new_proto)
+                    if hasattr(script, "force_respawn"):
+                        script.force_respawn(new_vnum)
+
             self.msg(f"Room prototype {old_vnum} moved to {new_vnum}.")
             return
 
