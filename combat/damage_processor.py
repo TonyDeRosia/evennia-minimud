@@ -104,11 +104,8 @@ class DamageProcessor:
             return amount
         return 0
 
-    def handle_defeat(self, target, attacker) -> None:
-        prev_loc = getattr(target, "location", None)
-        from combat.round_manager import CombatRoundManager
-        inst = CombatRoundManager.get().get_combatant_combat(target)
-
+    def _apply_death_hooks(self, target, attacker) -> bool:
+        """Run defeat/death hooks and return deletion status."""
         if hasattr(target, "on_exit_combat"):
             target.on_exit_combat()
 
@@ -122,23 +119,12 @@ class DamageProcessor:
             handle_death(target, attacker)
 
         deleted = getattr(target, "pk", None) is None
-
         if not deleted:
             self.update_pos(target)
+        return deleted
 
-        if inst and not deleted:
-            inst.remove_combatant(target)
-
-        survivors = []
-        if inst:
-            survivors = [c for c in inst.combatants if _current_hp(c) > 0]
-        else:
-            survivors = [
-                p.actor
-                for p in self.turn_manager.participants
-                if p.actor is not target and _current_hp(p.actor) > 0
-            ]
-
+    def _reassign_targets(self, inst, target, survivors, attacker) -> None:
+        """Update combat targets for remaining fighters."""
         for combatant in survivors:
             if combatant is target:
                 continue
@@ -165,42 +151,65 @@ class DamageProcessor:
             except Exception:
                 pass
 
-        if inst:
-            # pull in any other hostile NPCs that were not yet participants
-            room = getattr(target, "location", None) or prev_loc
-            if room:
-                for obj in room.contents:
-                    has_hp = hasattr(obj, "hp") or getattr(
-                        getattr(obj, "traits", None), "health", None
-                    ) is not None
-                    if not has_hp:
-                        continue
-                    if obj in inst.combatants:
-                        continue
-                    if _current_hp(obj) <= 0:
-                        continue
-                    t = getattr(getattr(obj, "db", None), "combat_target", None)
-                    if t in inst.combatants:
-                        inst.add_combatant(obj)
-            inst.sync_participants()
+    def _pull_hostile_npcs(self, inst, target, prev_loc) -> None:
+        """Add hostile bystanders to combat."""
+        if not inst:
+            return
+        room = getattr(target, "location", None) or prev_loc
+        if not room:
+            return
+        for obj in room.contents:
+            has_hp = hasattr(obj, "hp") or getattr(getattr(obj, "traits", None), "health", None) is not None
+            if not has_hp:
+                continue
+            if obj in inst.combatants:
+                continue
+            if _current_hp(obj) <= 0:
+                continue
+            t = getattr(getattr(obj, "db", None), "combat_target", None)
+            if t in inst.combatants:
+                inst.add_combatant(obj)
+        inst.sync_participants()
 
-        # Death notifications are handled by ``on_death`` on the defeated
-        # character, so we avoid broadcasting here to prevent duplicates.
-        # if attacker and attacker.location:
-        #     attacker.location.msg_contents(
-        #         f"{target.key} is defeated by {attacker.key}!"
-        #     )
-
-        self.turn_manager.remove_participant(target)
-
+    def _notify_allies(self, target, attacker) -> None:
+        """Inform allies that a teammate has fallen."""
         for participant in list(self.turn_manager.participants):
             ally = participant.actor
             if ally is target:
                 continue
-            if ally.location == (getattr(target, "location", None) or prev_loc):
+            if ally.location == getattr(target, "location", None):
                 hook = getattr(ally, "on_ally_down", None)
                 if callable(hook):
                     hook(target, attacker)
+
+    def handle_defeat(self, target, attacker) -> None:
+        prev_loc = getattr(target, "location", None)
+        from combat.round_manager import CombatRoundManager
+        inst = CombatRoundManager.get().get_combatant_combat(target)
+
+        deleted = self._apply_death_hooks(target, attacker)
+
+        if inst and not deleted:
+            inst.remove_combatant(target)
+
+        if inst:
+            survivors = [c for c in inst.combatants if _current_hp(c) > 0]
+        else:
+            survivors = [
+                p.actor
+                for p in self.turn_manager.participants
+                if p.actor is not target and _current_hp(p.actor) > 0
+            ]
+
+        self._reassign_targets(inst, target, survivors, attacker)
+
+        self._pull_hostile_npcs(inst, target, prev_loc)
+
+        # Death notifications are handled by ``on_death`` on the defeated
+        # character, so we avoid broadcasting here to prevent duplicates.
+        self.turn_manager.remove_participant(target)
+
+        self._notify_allies(target, attacker)
 
     def cleanup_environment(self) -> None:
         """Remove combatants that are no longer able or willing to fight.
