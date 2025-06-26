@@ -103,7 +103,6 @@ class BareHand:
                 effect, chance = status
                 if stat_manager.roll_status(wielder, target, int(chance)):
                     state_manager.add_status_effect(target, effect, 1)
-        pass
 
 
 class MeleeWeapon(Object):
@@ -219,7 +218,6 @@ class MeleeWeapon(Object):
                 effect, chance = status
                 if stat_manager.roll_status(wielder, target, int(chance)):
                     state_manager.add_status_effect(target, effect, 1)
-        pass
 
 
 class WearableContainer(ContribContainer, ClothingObject):
