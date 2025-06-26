@@ -252,3 +252,35 @@ class TestMobAIBehaviors(EvenniaTest):
         mob_ai.process_mob_ai(npc)
 
         npc.execute_cmd.assert_not_called()
+
+    def test_helper_auto_attacks_when_ally_attacked(self):
+        from typeclasses.npcs import BaseNPC
+        from combat.round_manager import CombatRoundManager, CombatInstance
+
+        manager = CombatRoundManager.get()
+        manager.combats.clear()
+        manager.combatant_to_combat.clear()
+
+        ally = create.create_object(BaseNPC, key="assist_target", location=self.room1, home=self.room1)
+
+        with patch.object(CombatInstance, "start"):
+            instance = manager.start_combat([ally, self.char1])
+
+            ally.db.combat_target = self.char1
+            self.char1.db.combat_target = ally
+
+            helper = create.create_object(BaseNPC, key="helper", location=self.room1, home=self.room1)
+            helper.db.auto_assist = True
+
+            with patch.object(helper, "attack") as mock_attack, \
+                 patch.object(instance, "_npc_auto_attack", wraps=instance._npc_auto_attack) as mock_auto, \
+                 patch.object(helper, "enter_combat", wraps=helper.enter_combat) as mock_enter, \
+                 patch("world.npc_handlers.mob_ai._call_for_help"):
+                mob_ai.process_mob_ai(helper)
+                mock_enter.assert_called_with(self.char1)
+                self.assertTrue(helper.in_combat)
+
+                instance._manual_round_processing()
+
+                mock_auto.assert_called_with(helper)
+                mock_attack.assert_called()
