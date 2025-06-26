@@ -15,6 +15,7 @@ from evennia.utils.logger import log_trace
 import logging
 from combat.combatants import _current_hp
 from combat.events import combat_started, round_processed, combat_ended
+from combat.ai_combat import auto_attack
 
 logger = logging.getLogger(__name__)
 
@@ -239,7 +240,6 @@ class CombatInstance:
 
             # Handle NPC auto-attacks
             if not hasattr(fighter, "has_account") or not fighter.has_account:
-                from combat.ai_combat import auto_attack
                 auto_attack(fighter, self.engine)
 
 
