@@ -178,6 +178,23 @@ class TestCombatEngine(unittest.TestCase):
     def test_schedules_next_round(self):
         a = Dummy()
         b = Dummy()
+        a.db.combat_target = b
+        b.db.combat_target = a
+        with patch('world.system.state_manager.apply_regen'), \
+             patch('world.system.state_manager.get_effective_stat', return_value=0), \
+             patch('combat.engine.damage_processor.delay') as mock_delay, \
+             patch('random.randint', return_value=0):
+            engine = CombatEngine([a, b], round_time=1)
+            engine.start_round()
+            engine.process_round()
+            self.assertEqual(len(engine.participants), 2)
+            mock_delay.assert_called_with(1, engine.process_round)
+
+    def test_zero_round_time_no_schedule(self):
+        a = Dummy()
+        b = Dummy()
+        a.db.combat_target = b
+        b.db.combat_target = a
         with patch('world.system.state_manager.apply_regen'), \
              patch('world.system.state_manager.get_effective_stat', return_value=0), \
              patch('combat.engine.damage_processor.delay') as mock_delay, \
@@ -186,7 +203,7 @@ class TestCombatEngine(unittest.TestCase):
             engine.start_round()
             engine.process_round()
             self.assertEqual(len(engine.participants), 2)
-            mock_delay.assert_called_with(0, engine.process_round)
+            mock_delay.assert_not_called()
 
     def test_condition_messages_broadcast(self):
         class DamageAction(Action):
