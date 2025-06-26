@@ -51,3 +51,6 @@ def colorize_spell(name: str) -> str:
     else:
         color = "|M"
     return f"{color}{name}|n"
+
+
+__all__ = ["Spell", "SPELLS", "colorize_spell"]
