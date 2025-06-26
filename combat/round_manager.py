@@ -267,7 +267,9 @@ class CombatInstance:
         CombatRoundManager.get().remove_combat(self.combat_id)
 
         message = f"Combat ends: {reason}" if reason else "Combat ends:"
-        if room and hasattr(room, "msg_contents"):
+        if reason == "No active fighters remaining":
+            message = ""
+        if room and hasattr(room, "msg_contents") and message:
             try:
                 room.msg_contents(message)
             except Exception:  # pragma: no cover - safety
