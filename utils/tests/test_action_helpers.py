@@ -11,6 +11,7 @@ if getattr(evennia, "SESSION_HANDLER", None) is None:
     evennia._init()
 
 from combat.damage_types import DamageType
+from combat.body_parts import HitLocation
 
 
 class TestActionUtils(unittest.TestCase):
@@ -37,9 +38,10 @@ class TestActionUtils(unittest.TestCase):
     def test_calculate_damage(self):
         from combat.engine import CombatMath
         weapon = {"damage": 4, "damage_type": DamageType.SLASHING}
-        with patch("combat.engine.combat_math.state_manager.get_effective_stat") as mock_get:
+        with patch("combat.engine.combat_math.state_manager.get_effective_stat") as mock_get, \
+             patch("random.choice", return_value=HitLocation("torso", damage_mod=1.0)):
             mock_get.side_effect = lambda obj, stat: 10 if stat == "STR" else 0
-            dmg, dtype = CombatMath.calculate_damage(self.attacker, weapon, self.target)
+            dmg, dtype, _ = CombatMath.calculate_damage(self.attacker, weapon, self.target)
         self.assertEqual(dtype, DamageType.SLASHING)
         self.assertEqual(dmg, int(round(4 * (1 + 10 * 0.05))))
 
@@ -64,14 +66,16 @@ class TestActionUtils(unittest.TestCase):
         }
 
         with patch("combat.engine.combat_math.roll_dice_string", return_value=1), \
-             patch("combat.engine.combat_math.state_manager.get_effective_stat", side_effect=lambda obj, stat: 0):
+             patch("combat.engine.combat_math.state_manager.get_effective_stat", side_effect=lambda obj, stat: 0), \
+             patch("random.choice", return_value=HitLocation("torso", damage_mod=1.0)):
             weapon.db.damage = mapping1
-            dmg1, dtype1 = CombatMath.calculate_damage(self.attacker, weapon, self.target)
+            dmg1, dtype1, _ = CombatMath.calculate_damage(self.attacker, weapon, self.target)
 
         with patch("combat.engine.combat_math.roll_dice_string", return_value=1), \
-             patch("combat.engine.combat_math.state_manager.get_effective_stat", side_effect=lambda obj, stat: 0):
+             patch("combat.engine.combat_math.state_manager.get_effective_stat", side_effect=lambda obj, stat: 0), \
+             patch("random.choice", return_value=HitLocation("torso", damage_mod=1.0)):
             weapon.db.damage = mapping2
-            dmg2, dtype2 = CombatMath.calculate_damage(self.attacker, weapon, self.target)
+            dmg2, dtype2, _ = CombatMath.calculate_damage(self.attacker, weapon, self.target)
 
         self.assertEqual(dmg1, dmg2)
         self.assertEqual(dtype1, dtype2)
@@ -92,8 +96,9 @@ class TestActionUtils(unittest.TestCase):
              patch(
                  "combat.engine.combat_math.state_manager.get_effective_stat",
                  side_effect=lambda obj, stat: 10 if stat == "STR" else 0,
-             ):
-            dmg, dtype = CombatMath.calculate_damage(self.attacker, weapon, self.target)
+             ), \
+             patch("random.choice", return_value=HitLocation("torso", damage_mod=1.0)):
+            dmg, dtype, _ = CombatMath.calculate_damage(self.attacker, weapon, self.target)
 
         expected = int(round((2 + 5) * (1 + 10 * 0.05)))
         self.assertEqual(dmg, expected)
@@ -115,8 +120,9 @@ class TestActionUtils(unittest.TestCase):
              patch(
                  "combat.engine.combat_math.state_manager.get_effective_stat",
                  side_effect=lambda obj, stat: 0,
-             ):
-            dmg, dtype = CombatMath.calculate_damage(self.attacker, weapon, self.target)
+             ), \
+             patch("random.choice", return_value=HitLocation("torso", damage_mod=1.0)):
+            dmg, dtype, _ = CombatMath.calculate_damage(self.attacker, weapon, self.target)
 
         mock_roll.assert_called_once_with("2d6")
         self.assertEqual(dmg, 3)
@@ -128,6 +134,19 @@ class TestActionUtils(unittest.TestCase):
              patch("combat.engine.combat_math.stat_manager.crit_damage", return_value=8):
             dmg, crit = CombatMath.apply_critical(self.attacker, self.target, 5)
         self.assertTrue(crit)
+        self.assertEqual(dmg, 8)
+
+    def test_hit_location_modifies_damage(self):
+        from combat.engine import CombatMath
+        from combat.body_parts import HitLocation
+
+        weapon = {"damage": 4, "damage_type": DamageType.BLUDGEONING}
+        loc = HitLocation("head", damage_mod=2.0)
+        with patch("combat.engine.combat_math.state_manager.get_effective_stat", side_effect=lambda o, s: 0), \
+             patch("random.choice", return_value=loc):
+            dmg, dtype, location = CombatMath.calculate_damage(self.attacker, weapon, self.target)
+
+        self.assertEqual(location, loc)
         self.assertEqual(dmg, 8)
 
 
