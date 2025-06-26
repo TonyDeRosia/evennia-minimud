@@ -1,0 +1,29 @@
+{
+    "level": 10,
+    "combat_class": "Warrior",
+    "hp": 30,
+    "mp": 0,
+    "sp": 10,
+    "primary_stats": {
+        "STR": 25,
+        "CON": 25,
+        "DEX": 25,
+        "INT": 25,
+        "WIS": 25
+    },
+    "actflags": [
+        "aggressive",
+        "wander"
+    ],
+    "skills": {},
+    "equipment": [
+        "IRON_SWORD",
+        "IRON_HAUBERK",
+        "LEATHER_BOOTS"
+    ],
+    "key": "|GSlime|n",
+    "vnum": 503,
+    "desc": "a green slime.",
+    "long_desc": "A nasty green slime oozing around.",
+    "gender": "neutral"
+}

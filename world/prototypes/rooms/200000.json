@@ -1,0 +1,18 @@
+{
+    "typeclass": "typeclasses.rooms.Room",
+    "key": "|GVerdant Field|n",
+    "desc": "",
+    "exits": {
+        "north": 200001
+    },
+    "vnum": 200000,
+    "area": "verdant_overgrowth",
+    "spawns": [
+        {
+            "prototype": 209,
+            "max_spawns": 5,
+            "spawn_interval": 30,
+            "location": 200000
+        }
+    ]
+}

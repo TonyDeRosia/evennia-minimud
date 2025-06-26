@@ -3,7 +3,8 @@
     "key": "|cTemple Steppes|n",
     "desc": "Wide marble steps rise toward an ancient temple crowned with golden spires. Weathered pillars etched with celestial symbols surround the area, glowing faintly with divine energy. A soft breeze stirs the incense drifting from the temple entrance, filling the air with a sense of calm and purpose. This sacred hub stands as the beating heart of Midgard, where adventurers come to seek clarity and divine guidance.",
     "exits": {
-        "south": 200051
+        "south": 200051,
+        "north": 200056
     },
     "vnum": 200050,
     "area": "midgard"

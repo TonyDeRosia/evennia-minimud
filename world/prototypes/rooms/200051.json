@@ -7,5 +7,13 @@
         "south": 200052
     },
     "vnum": 200051,
-    "area": "midgard"
+    "area": "midgard",
+    "spawns": [
+        {
+            "prototype": 503,
+            "max_spawns": 5,
+            "spawn_interval": 60,
+            "location": 200051
+        }
+    ]
 }

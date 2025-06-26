@@ -1,0 +1,21 @@
+{
+    "typeclass": "typeclasses.rooms.Room",
+    "key": "|GVerdant Field|n",
+    "desc": "A luscious verdant field.",
+    "exits": {
+        "south": 200000,
+        "east": 200003,
+        "west": 200002,
+        "north": 200004
+    },
+    "vnum": 200001,
+    "area": "verdant_overgrowth",
+    "spawns": [
+        {
+            "prototype": 209,
+            "max_spawns": 5,
+            "spawn_interval": 30,
+            "location": 200001
+        }
+    ]
+}
