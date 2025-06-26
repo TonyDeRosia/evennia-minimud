@@ -78,11 +78,13 @@ def require_redit_state(func):
     """Decorator to ensure caller has a valid redit state."""
 
     @wraps(func)
-    def wrapper(caller, *args, **kwargs):
+    def wrapper(caller, raw_string=None, *args, **kwargs):
         if not _state_exists(caller):
             caller.msg("Room editing state missing. Exiting.")
             return None
-        return func(caller, *args, **kwargs)
+        if raw_string is None:
+            return func(caller, *args, **kwargs)
+        return func(caller, raw_string, *args, **kwargs)
 
     return wrapper
 
