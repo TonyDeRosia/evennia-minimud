@@ -223,35 +223,9 @@ class CombatInstance:
 
             # Handle NPC auto-attacks
             if not hasattr(fighter, "has_account") or not fighter.has_account:
-                self._npc_auto_attack(fighter)
+                from combat.ai_combat import auto_attack
+                auto_attack(fighter, self.engine)
 
-    def _npc_auto_attack(self, npc) -> None:
-        """Handle NPC automatic attacks."""
-        if not npc or not hasattr(npc, "location"):
-            return
-
-        fighters = [p.actor for p in self.engine.participants]
-        targets = []
-        
-        for fighter in fighters:
-            if (
-                fighter != npc
-                and hasattr(fighter, "has_account")
-                and fighter.has_account
-                and _current_hp(fighter) > 0
-                and getattr(fighter, "in_combat", False)
-            ):
-                targets.append(fighter)
-
-        if not targets:
-            return
-
-        target = targets[0]
-        if hasattr(npc, "attack"):
-            try:
-                npc.attack(target)
-            except Exception as e:
-                log_trace(f"NPC {npc.key} attack failed: {e}")
 
     def end_combat(self, reason: str = "") -> None:
         """Mark this instance as ended and clean up fighter states."""
