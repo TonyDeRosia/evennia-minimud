@@ -123,4 +123,7 @@ from combat.engine import CombatEngine, TurnManager, AggroTracker, DamageProcess
   and issues the `flee` command when triggered.
 - **Dead NPC Cleanup** – combatants flagged with `db.is_dead` skip any queued
   actions and are removed from combat at the end of the round.
+- **Experience Rewards** – when an `AttackAction` drops a combatant to 0 HP,
+  `CombatRoundManager` handles their defeat. The target's `on_death` hook runs
+  and any accumulated XP is distributed to contributors.
 
