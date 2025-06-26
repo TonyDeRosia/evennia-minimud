@@ -31,3 +31,21 @@ class TestCombatTickLogging(unittest.TestCase):
             with self.assertLogs('combat.round_manager', level='DEBUG') as cm:
                 inst._schedule_tick()
         self.assertTrue(any('Scheduling combat tick' in msg for msg in cm.output))
+
+    def test_zero_round_time_skips_schedule(self):
+        engine = MagicMock()
+        engine.participants = []
+        inst = CombatInstance(1, engine, {object(), object()}, round_time=0)
+        with patch('combat.round_manager.delay') as mock_delay:
+            inst._schedule_tick()
+        mock_delay.assert_not_called()
+        self.assertIsNone(inst.tick_handle)
+
+    def test_negative_round_time_skips_schedule(self):
+        engine = MagicMock()
+        engine.participants = []
+        inst = CombatInstance(1, engine, {object(), object()}, round_time=-1)
+        with patch('combat.round_manager.delay') as mock_delay:
+            inst._schedule_tick()
+        mock_delay.assert_not_called()
+        self.assertIsNone(inst.tick_handle)
