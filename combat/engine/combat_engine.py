@@ -7,18 +7,31 @@ from typing import Iterable
 from .turn_manager import TurnManager
 from ..aggro_tracker import AggroTracker
 from ..damage_processor import DamageProcessor
+from world.mechanics.death_handlers import IDeathHandler
 from evennia.utils.logger import log_trace
 
 
 class CombatEngine:
     """Manage combat by delegating to helper classes."""
 
-    def __init__(self, participants: Iterable[object] | None = None, round_time: int = 0, use_initiative: bool = True) -> None:
+    def __init__(
+        self,
+        participants: Iterable[object] | None = None,
+        round_time: int = 0,
+        use_initiative: bool = True,
+        *,
+        death_handler: IDeathHandler | None = None,
+    ) -> None:
         self.round = 0
         self.round_time = round_time
         self.turn_manager = TurnManager(self, participants, use_initiative=use_initiative)
         self.aggro_tracker = AggroTracker()
-        self.processor = DamageProcessor(self, self.turn_manager, self.aggro_tracker)
+        self.processor = DamageProcessor(
+            self,
+            self.turn_manager,
+            self.aggro_tracker,
+            death_handler=death_handler,
+        )
 
     # -------------------------------------------------------------
     # delegate helpers
