@@ -98,6 +98,9 @@ COMBAT_DEBUG_TICKS = False
 # When True, include a damage summary at the end of each combat round
 COMBAT_DEBUG_SUMMARY = False
 
+# Class implementing death cleanup logic
+DEATH_HANDLER_CLASS = "world.mechanics.death_handlers.DefaultDeathHandler"
+
 # Clothing - https://www.evennia.com/docs/latest/Contribs/Contrib-Clothing.html#configuration
 CLOTHING_WEARSTYLE_MAXLENGTH = 40
 CLOTHING_TYPE_ORDERED = [

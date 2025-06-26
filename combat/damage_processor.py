@@ -8,7 +8,8 @@ from django.conf import settings
 
 from combat.combatants import CombatParticipant, _current_hp
 from combat.combat_utils import format_combat_message
-from world.mechanics.on_death_manager import handle_death
+from world.mechanics.death_handlers import get_handler, IDeathHandler
+from world.mechanics import on_death_manager
 from combat.engine.turn_manager import TurnManager
 from combat.aggro_tracker import AggroTracker
 from combat.damage_types import DamageType
@@ -19,10 +20,18 @@ from world.system import state_manager
 class DamageProcessor:
     """Handle action execution and combat round flow."""
 
-    def __init__(self, engine, turn_manager: TurnManager, aggro: AggroTracker) -> None:
+    def __init__(
+        self,
+        engine,
+        turn_manager: TurnManager,
+        aggro: AggroTracker,
+        *,
+        death_handler: IDeathHandler | None = None,
+    ) -> None:
         self.engine = engine
         self.turn_manager = turn_manager
         self.aggro = aggro
+        self.death_handler = death_handler or get_handler()
         self.round_output: List[str] = []
         self._message_buffers: Dict[object, List[str]] = {}
 
@@ -117,7 +126,7 @@ class DamageProcessor:
         if callable(death_hook):
             death_hook(attacker)
         else:
-            handle_death(target, attacker)
+            on_death_manager.handle_death(target, attacker, self.death_handler)
 
         deleted = getattr(target, "pk", None) is None
         if not deleted:
