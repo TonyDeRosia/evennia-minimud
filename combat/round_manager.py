@@ -72,13 +72,14 @@ class CombatInstance:
         """Schedule the next combat round."""
         if self.combat_ended or self.tick_handle:
             return
-        if settings.COMBAT_DEBUG_TICKS:
-            logger.debug(
-                "Scheduling combat tick %s in %s seconds",
-                self.round_number + 1,
-                self.round_time,
-            )
-        self.tick_handle = delay(self.round_time, self._tick)
+        if self.round_time and self.round_time > 0:
+            if settings.COMBAT_DEBUG_TICKS:
+                logger.debug(
+                    "Scheduling combat tick %s in %s seconds",
+                    self.round_number + 1,
+                    self.round_time,
+                )
+            self.tick_handle = delay(self.round_time, self._tick)
 
     def cancel_tick(self) -> None:
         """Cancel any pending tick."""
