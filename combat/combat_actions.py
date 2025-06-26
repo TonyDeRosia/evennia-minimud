@@ -101,7 +101,12 @@ class Action:
 
 
 class AttackAction(Action):
-    """Simple weapon attack."""
+    """Simple weapon attack.
+
+    If this action deals the finishing blow, ``CombatRoundManager``
+    handles defeat and calls the target's ``on_death`` hook. Any
+    experience reward is granted during that callback.
+    """
 
     priority = 1
 
