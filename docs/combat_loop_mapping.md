@@ -19,6 +19,8 @@ File: `combat/round_manager.py`
 
 ## CombatInstance
 
+File: `combat/round_manager.py`
+
 Created by `CombatRoundManager` when a new combat begins.
 - Tracks its participants and keeps them synchronized with the `CombatEngine`.
 - Replaces the old room-attached scripts used in earlier versions.
@@ -69,6 +71,8 @@ engine.queue_action(attacker, AttackAction(attacker, target))
 # The round manager will call `process_round` automatically every tick
 # which resolves queued actions and broadcasts the results to the room.
 ```
+In-game, players typically use the `attack` command (`CmdAttack` in
+`commands/combat.py`) which queues an appropriate `AttackAction` for them.
 
 When the round executes you will see messages such as
 ``Attacker hits Target for 5 damage!`` and the combatants' HP updated.

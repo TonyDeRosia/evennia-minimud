@@ -200,6 +200,10 @@ CombatRoundManager.get().start_combat([fighter1, fighter2])
 The old `combat.combat_manager` module now simply re-exports these
 classes and is considered deprecated.
 
+The primary combat classes `CombatRoundManager` and `CombatInstance` live in
+`combat/round_manager.py`. Player characters start fights using the `CmdAttack`
+command defined in `commands/combat.py`.
+
 Supports action queues, status effects, resistances
 
 Fully pluggable and extendable
