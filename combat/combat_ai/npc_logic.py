@@ -4,9 +4,12 @@ from typing import Iterable
 
 from .ai_controller import Behavior, run_behaviors
 from ..combat_actions import AttackAction
-from ..engine import CombatEngine
+from typing import TYPE_CHECKING
 from ..combat_skills import SKILL_CLASSES
 from ..scripts import queue_skill, queue_spell, get_spell
+
+if TYPE_CHECKING:  # pragma: no cover - imported for type checking
+    from ..engine import CombatEngine
 
 
 def _default_behaviors(npc) -> Iterable[Behavior]:

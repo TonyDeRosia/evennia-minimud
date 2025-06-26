@@ -3,7 +3,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Callable, Iterable
 
-from ..engine import CombatEngine
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:  # pragma: no cover - imported for type checking
+    from ..engine import CombatEngine
 
 
 @dataclass(order=True)
