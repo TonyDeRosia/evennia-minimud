@@ -98,7 +98,7 @@ class Account(ContribChargenAccount):
     def at_account_creation(self):
         super().at_account_creation()
         # Initialize game settings
-        self.db.settings = {"auto prompt": False}
+        self.db.settings = {"auto prompt": True}
 
 
 class Guest(DefaultGuest):
