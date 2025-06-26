@@ -206,7 +206,9 @@ command defined in `commands/combat.py`.
 
 Supports action queues, status effects, resistances
 
-Fully pluggable and extendable
+Fully pluggable and extendable—combat emits Django signals and you can
+override the `DamageProcessor`, `IDeathHandler` or NPC AI routines. See
+`docs/combat_loop_mapping.md` for examples.
 
 The available spells and the ``Spell`` dataclass now live in ``combat.spells``.
 

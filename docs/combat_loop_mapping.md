@@ -152,3 +152,59 @@ def on_defeat(sender, target, attacker, **kwargs):
     print(f"{target} was defeated by {attacker}!")
 ```
 
+## Extending the Combat System
+
+The combat package provides several hooks for customizing behaviour.
+
+### Overriding `DamageProcessor`
+
+Subclass `DamageProcessor` to alter how actions resolve or messages are sent:
+
+```python
+from combat.damage_processor import DamageProcessor
+
+class LoggingProcessor(DamageProcessor):
+    def dam_message(self, attacker, target, damage, **kwargs):
+        super().dam_message(attacker, target, damage, **kwargs)
+        print(f"[LOG] {attacker} hit {target} for {damage}")
+```
+
+Assign your processor when creating a combat engine:
+
+```python
+from combat.engine import CombatEngine
+
+engine = CombatEngine(fighters)
+engine.processor = LoggingProcessor(engine, engine.turn_manager, engine.aggro_tracker)
+```
+
+### Custom Death Handlers
+
+Implement `IDeathHandler` and register it with `set_handler` to change what happens when a combatant dies:
+
+```python
+from world.mechanics.death_handlers import IDeathHandler, set_handler
+
+class SimpleGrimReaper(IDeathHandler):
+    def handle(self, victim, killer=None):
+        victim.location.msg_contents(f"{victim.key} is claimed by the reaper!")
+        return None
+
+set_handler(SimpleGrimReaper())
+```
+
+### Replacing NPC AI
+
+`world.npc_handlers.mob_ai.process_mob_ai` controls standard NPC behaviour. You can wrap or replace it:
+
+```python
+from world.npc_handlers import mob_ai
+
+def berserk_ai(npc):
+    if npc.db.berserk:
+        npc.execute_cmd("bash")
+        return
+    mob_ai.process_mob_ai(npc)
+```
+
+Run your function from the `GlobalNPCAI` script or another scheduler. Combined with the combat signals above, these hooks let you deeply customize the flow of battle.
