@@ -353,11 +353,9 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
         if self.traits.stamina:
             self.traits.stamina.current = max(self.traits.stamina.current - cost, 0)
 
-        # check if we have auto-prompt in account settings
-        if self.account and (acct_settings := self.account.db.settings):
-            if acct_settings.get("auto prompt"):
-                status = self.get_display_status(self)
-                self.msg(prompt=status)
+        from utils import display_auto_prompt
+
+        display_auto_prompt(self.account, self, self.msg)
 
     def at_damage(self, attacker, damage, damage_type=None, critical=False):
         """
