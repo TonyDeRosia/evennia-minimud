@@ -7,6 +7,7 @@ from django.test import override_settings
 
 from world.npc_handlers import mob_ai
 from scripts.global_npc_ai import GlobalNPCAI
+from combat.ai_combat import auto_attack
 
 
 @override_settings(DEFAULT_HOME=None)
@@ -273,7 +274,7 @@ class TestMobAIBehaviors(EvenniaTest):
             helper.db.auto_assist = True
 
             with patch.object(helper, "attack") as mock_attack, \
-                 patch.object(instance, "_npc_auto_attack", wraps=instance._npc_auto_attack) as mock_auto, \
+                 patch("combat.ai_combat.auto_attack", wraps=auto_attack) as mock_auto, \
                  patch.object(helper, "enter_combat", wraps=helper.enter_combat) as mock_enter, \
                  patch("world.npc_handlers.mob_ai._call_for_help"):
                 mob_ai.process_mob_ai(helper)
