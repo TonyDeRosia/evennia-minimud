@@ -12,6 +12,7 @@ from world.mechanics.on_death_manager import handle_death
 from combat.engine.turn_manager import TurnManager
 from combat.aggro_tracker import AggroTracker
 from combat.damage_types import DamageType
+from combat.events import combatant_defeated
 from world.system import state_manager
 
 
@@ -210,6 +211,13 @@ class DamageProcessor:
         self.turn_manager.remove_participant(target)
 
         self._notify_allies(target, attacker)
+
+        combatant_defeated.send(
+            sender=self.__class__,
+            target=target,
+            attacker=attacker,
+            instance=inst,
+        )
 
     def cleanup_environment(self) -> None:
         """Remove combatants that are no longer able or willing to fight.

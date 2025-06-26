@@ -14,6 +14,7 @@ from evennia.utils import delay
 from evennia.utils.logger import log_trace
 import logging
 from combat.combatants import _current_hp
+from combat.events import combat_started, round_processed, combat_ended
 
 logger = logging.getLogger(__name__)
 
@@ -198,6 +199,8 @@ class CombatInstance:
             else:
                 self._manual_round_processing()
 
+            round_processed.send(sender=CombatRoundManager, instance=self)
+
             self.sync_participants()
 
             if not self.has_active_fighters():
@@ -277,6 +280,7 @@ class CombatInstance:
             log_trace(f"Combat ended: {reason}")
 
         self.combat_ended = True
+        combat_ended.send(sender=CombatRoundManager, instance=self, reason=reason)
 
 
 class CombatRoundManager:
@@ -326,6 +330,7 @@ class CombatRoundManager:
             self.combatant_to_combat[fighter] = combat_id
 
         inst.start()
+        combat_started.send(sender=self.__class__, instance=inst)
 
         return inst
 
@@ -399,6 +404,7 @@ class CombatRoundManager:
                 current.add(combatant)
 
         primary.start()
+        combat_started.send(sender=self.__class__, instance=primary)
         return primary
 
 

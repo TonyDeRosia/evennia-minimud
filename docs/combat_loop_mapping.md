@@ -127,3 +127,28 @@ from combat.engine import CombatEngine, TurnManager, AggroTracker, DamageProcess
   `CombatRoundManager` handles their defeat. The target's `on_death` hook runs
   and any accumulated XP is distributed to contributors.
 
+## Combat Signals
+
+Several Django signals are emitted during the combat lifecycle. External
+modules can subscribe to these to trigger custom behaviour.
+
+- `combat.events.combat_started` - sent when `CombatRoundManager.start_combat`
+  begins a new combat instance.
+- `combat.events.round_processed` - fired at the end of every round from
+  `CombatInstance.process_round`.
+- `combat.events.combatant_defeated` - emitted by `DamageProcessor.handle_defeat`
+  when a fighter is taken out.
+- `combat.events.combat_ended` - sent after cleanup in
+  `CombatInstance.end_combat`.
+
+Listeners can connect using Django's `receiver` decorator or the `connect` method:
+
+```python
+from combat.events import combatant_defeated
+from django.dispatch import receiver
+
+@receiver(combatant_defeated)
+def on_defeat(sender, target, attacker, **kwargs):
+    print(f"{target} was defeated by {attacker}!")
+```
+
