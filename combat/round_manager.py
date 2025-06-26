@@ -153,22 +153,28 @@ class CombatInstance:
             return
 
         fighters = set(self.combatants)
-
         current = {p.actor for p in self.engine.participants}
 
-        # Add new fighters
+        self._add_new_fighters(fighters, current)
+        self._remove_missing_fighters(fighters, current)
+        self._remove_defeated_fighters(fighters)
+
+    def _add_new_fighters(self, fighters: Set[object], current: Set[object]) -> None:
+        """Register any fighters missing from the combat engine."""
         for actor in fighters - current:
             self.engine.add_participant(actor)
             if getattr(actor, "pk", None) is None:
                 setattr(actor, "in_combat", True)
 
-        # Remove fighters no longer present in the combatants set
+    def _remove_missing_fighters(self, fighters: Set[object], current: Set[object]) -> None:
+        """Remove engine participants no longer present in this instance."""
         for actor in current - fighters:
             self.engine.remove_participant(actor)
             if getattr(actor, "pk", None) is None:
                 setattr(actor, "in_combat", False)
 
-        # Remove defeated combatants after processing their death logic
+    def _remove_defeated_fighters(self, fighters: Set[object]) -> None:
+        """Handle any fighters that have been defeated."""
         for actor in list(fighters):
             if _current_hp(actor) <= 0 and not getattr(getattr(actor, "db", None), "is_dead", False):
                 log = getattr(getattr(actor, "ndb", None), "damage_log", None) or {}
@@ -187,10 +193,7 @@ class CombatInstance:
         self.last_round_time = time.time()
 
         try:
-            self.sync_participants()
-
-            if not self.has_active_fighters():
-                self.end_combat("No active fighters remaining")
+            if not self._validate_fighters():
                 return
 
             # Use engine's process_round if available
@@ -199,19 +202,28 @@ class CombatInstance:
             else:
                 self._manual_round_processing()
 
-            round_processed.send(sender=CombatRoundManager, instance=self)
-
-            self.sync_participants()
-
-            if not self.has_active_fighters():
-                self.end_combat("No active fighters remaining")
-                return
-
-            self._schedule_tick()
+            self._finalize_round()
 
         except Exception as err:
             log_trace(f"Error in combat round processing: {err}")
             self.end_combat(f"Combat ended due to error: {err}")
+
+    def _validate_fighters(self) -> bool:
+        """Return ``True`` if combat should continue after syncing fighters."""
+        self.sync_participants()
+        if not self.has_active_fighters():
+            self.end_combat("No active fighters remaining")
+            return False
+        return True
+
+    def _finalize_round(self) -> None:
+        """Finalize round processing and schedule the next tick if valid."""
+        round_processed.send(sender=CombatRoundManager, instance=self)
+        self.sync_participants()
+        if not self.has_active_fighters():
+            self.end_combat("No active fighters remaining")
+            return
+        self._schedule_tick()
 
     def _manual_round_processing(self) -> None:
         """Fallback round processing if engine doesn't have process_round."""
