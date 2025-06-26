@@ -8,6 +8,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set
+from django.conf import settings
 
 from evennia.utils import delay
 from evennia.utils.logger import log_trace
@@ -84,6 +85,8 @@ class CombatInstance:
     def _tick(self) -> None:
         """Process a round and schedule the next one."""
         self.tick_handle = None
+        if settings.COMBAT_DEBUG_TICKS:
+            logger.debug("Combat tick %s", self.round_number)
         if not self.is_valid():
             self.end_combat("Invalid combat instance")
             return
