@@ -353,6 +353,10 @@ class DamageProcessor:
         self._broadcast_round_output(room)
 
         self.engine.round += 1
-        if self.engine.round_time is not None and any(_current_hp(p.actor) > 0 for p in self.turn_manager.participants):
+        if (
+            self.engine.round_time
+            and self.engine.round_time > 0
+            and any(_current_hp(p.actor) > 0 for p in self.turn_manager.participants)
+        ):
             delay(self.engine.round_time, self.engine.process_round)
 
