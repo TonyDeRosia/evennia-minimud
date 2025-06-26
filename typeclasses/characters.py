@@ -277,6 +277,9 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
 
         stats.apply_stats(self)
         stat_manager.recalculate_stats(self)
+        self.cmdset.add_default(
+            "commands.default_cmdsets.CharacterCmdSet", permanent=True
+        )
 
     def at_object_receive(self, obj, source_location, **kwargs):
         """Update carry weight when gaining an item."""
