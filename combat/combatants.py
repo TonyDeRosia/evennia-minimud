@@ -20,17 +20,19 @@ def _current_hp(obj):
     if hasattr(obj, "hp"):
         try:
             return int(obj.hp)
-        except Exception as err:  # pragma: no cover - safety
-            raise ValueError(f"invalid hp value on {obj!r}") from err
+        except Exception:  # pragma: no cover - safety
+            # if hp attribute exists but is not an int-like value, treat as 0
+            return 0
 
     hp_trait = getattr(getattr(obj, "traits", None), "health", None)
     if hp_trait is not None:
         try:
             return int(hp_trait.current)
-        except Exception as err:  # pragma: no cover - safety
-            raise ValueError(f"invalid health trait on {obj!r}") from err
+        except Exception:  # pragma: no cover - safety
+            return 0
 
-    raise AttributeError(f"{obj!r} lacks a health trait or hp attribute")
+    # object lacks hp and health trait; treat as having 0 HP
+    return 0
 
 
 # ---------------------------------------------------------------------------
