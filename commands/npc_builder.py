@@ -1255,7 +1255,7 @@ class CmdMSpawn(Command):
         from utils.script_utils import get_spawn_manager
         script = get_spawn_manager()
         if script and hasattr(script, "record_spawn"):
-            script.record_spawn(proto_key, self.caller.location)
+            script.record_spawn(proto_key, self.caller.location, npc_id=obj.id)
 
         self.msg(f"Spawned {obj.key}.")
 

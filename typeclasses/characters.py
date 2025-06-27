@@ -1130,7 +1130,7 @@ class NPC(Character):
 
         manager = get_spawn_manager()
         if manager and hasattr(manager, "record_death"):
-            manager.record_death(self.db.prototype_key, self.db.spawn_room)
+            manager.record_death(self.db.prototype_key, self.db.spawn_room, npc_id=self.id)
 
         self.delete()
 

@@ -131,6 +131,8 @@ class TestSpawnManager(EvenniaTest):
 
             npc = [o for o in self.room1.contents if o.key == "goblin"][0]
             npc.delete()
+            with patch("scripts.spawn_manager.time.time", return_value=1001):
+                self.script.record_death("goblin", self.room1, npc_id=npc.id)
 
             # interval not reached, no spawn
             with patch("scripts.spawn_manager.time.time", return_value=1003):
@@ -175,7 +177,7 @@ class TestSpawnManager(EvenniaTest):
             npc.delete()
 
             with patch("scripts.spawn_manager.time.time", return_value=1001):
-                self.script.record_death("goblin", self.room1)
+                self.script.record_death("goblin", self.room1, npc_id=npc.id)
 
             # not enough time since death
             with patch("scripts.spawn_manager.time.time", return_value=1005):

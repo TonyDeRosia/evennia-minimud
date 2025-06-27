@@ -78,7 +78,8 @@ class TestSpawnControlCommands(TestCase):
                                 "room_id": rid,
                                 "max_count": int(entry.get("max_count", 1)),
                                 "respawn_rate": int(entry.get("respawn_rate", 60)),
-                                "last_spawn": 0.0,
+                                "spawned": [],
+                                "dead_timestamps": [],
                             }
                         )
 
