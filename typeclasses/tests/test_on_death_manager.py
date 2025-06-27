@@ -33,9 +33,10 @@ class TestOnDeathManager(EvenniaTest):
 
         with (
             patch.object(inst.engine, "award_experience") as mock_award,
-            patch("world.mechanics.corpse_manager.create_corpse", return_value=dummy_corpse),
-            patch("world.mechanics.corpse_manager.apply_loot"),
-            patch("world.mechanics.corpse_manager.finalize_corpse", side_effect=finalize_side),
+            patch(
+                "world.mechanics.corpse_manager.make_corpse",
+                side_effect=lambda victim, killer=None: (finalize_side(victim, dummy_corpse) or dummy_corpse),
+            ),
         ):
             on_death_manager.handle_death(npc, self.char1)
 
@@ -59,9 +60,10 @@ class TestOnDeathManager(EvenniaTest):
         with (
             patch("world.system.state_manager.gain_xp") as mock_gain,
             patch.object(inst.engine, "award_experience") as mock_award,
-            patch("world.mechanics.corpse_manager.create_corpse", return_value=dummy_corpse),
-            patch("world.mechanics.corpse_manager.apply_loot"),
-            patch("world.mechanics.corpse_manager.finalize_corpse", side_effect=finalize_side),
+            patch(
+                "world.mechanics.corpse_manager.make_corpse",
+                side_effect=lambda victim, killer=None: (finalize_side(victim, dummy_corpse) or dummy_corpse),
+            ),
         ):
             on_death_manager.handle_death(self.char1, npc)
 
@@ -92,10 +94,14 @@ class TestOnDeathManager(EvenniaTest):
         npc.msg = MagicMock(side_effect=record_msg)
         self.room.msg_contents = MagicMock(side_effect=record_msg)
 
+        def make_corpse_side(victim, killer=None):
+            order.append("corpse")
+            corpse = create.create_object("typeclasses.objects.Object", key="corpse", location=None)
+            apply_loot_side(victim, corpse, killer)
+            return corpse
+
         with (
-            patch("world.mechanics.corpse_manager.create_corpse", side_effect=create_corpse_side),
-            patch("world.mechanics.corpse_manager.apply_loot", side_effect=apply_loot_side),
-            patch("world.mechanics.corpse_manager.finalize_corpse"),
+            patch("world.mechanics.corpse_manager.make_corpse", side_effect=make_corpse_side),
         ):
             corpse = on_death_manager.handle_death(npc, self.char1)
 

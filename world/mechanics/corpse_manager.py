@@ -16,6 +16,7 @@ __all__ = [
     "create_corpse",
     "apply_loot",
     "finalize_corpse",
+    "make_corpse",
 ]
 
 
@@ -133,4 +134,50 @@ def finalize_corpse(victim, corpse):
     if getattr(victim.db, "weight", None) is not None:
         corpse.db.weight = victim.db.weight
     corpse.db.desc = f"The corpse of {victim.key} lies here."
+
+
+def make_corpse(victim, killer=None):
+    """Create and populate a corpse for ``victim``.
+
+    This wraps :func:`create_corpse`, :func:`apply_loot` and
+    :func:`finalize_corpse` for convenience.
+
+    Parameters
+    ----------
+    victim : Object
+        The object that has died.
+    killer : Object, optional
+        The one responsible for the death. Only used when applying loot
+        for NPCs.
+
+    Returns
+    -------
+    Object or None
+        The created corpse, or ``None`` if ``victim`` or its location was
+        invalid or a corpse already existed.
+    """
+
+    if not victim or not getattr(victim, "location", None):
+        return None
+
+    location = victim.location
+
+    existing = next(
+        (
+            obj
+            for obj in location.contents
+            if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+            and obj.db.corpse_of_id == getattr(victim, "dbref", None)
+        ),
+        None,
+    )
+    if existing:
+        return existing
+
+    corpse = create_corpse(victim)
+    apply_loot(victim, corpse, killer)
+    finalize_corpse(victim, corpse)
+    corpse.location = location
+
+    return corpse
 
