@@ -403,6 +403,9 @@ class SpawnManager(Script):
             ready = [ts for ts in entry.get("dead_timestamps", []) if now - ts >= respawn]
             entry["dead_timestamps"] = [ts for ts in entry.get("dead_timestamps", []) if now - ts < respawn]
 
+            if not ready and now - entry.get("last_spawn", 0) >= respawn:
+                ready.append(now)
+
             max_count = entry.get("max_count", 0)
             capacity = max(0, max_count - len(entry.get("spawned", [])))
             logger.log_debug(
@@ -414,6 +417,7 @@ class SpawnManager(Script):
                 npc = self._spawn(proto, room)
                 if npc:
                     entry.setdefault("spawned", []).append(npc.id)
+                    entry["last_spawn"] = now
                 if ready:
                     ready.pop(0)
 
