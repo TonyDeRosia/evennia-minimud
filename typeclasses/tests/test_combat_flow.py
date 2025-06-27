@@ -52,7 +52,6 @@ class Dummy:
         if getattr(self.db, "natural_weapon", None):
             return self.db.natural_weapon
         from typeclasses.gear import BareHand
-
         return BareHand()
 
 
@@ -75,10 +74,8 @@ class TestAttackAction(unittest.TestCase):
 
         engine = CombatEngine([attacker, defender], round_time=0)
         engine.queue_action(attacker, AttackAction(attacker, defender))
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("random.randint", return_value=0),
-        ):
+        with patch("world.system.state_manager.apply_regen"), \
+             patch("random.randint", return_value=0):
             engine.start_round()
             engine.process_round()
 
@@ -97,12 +94,9 @@ class TestAttackAction(unittest.TestCase):
 
         engine = CombatEngine([attacker, defender], round_time=0)
         engine.queue_action(attacker, AttackAction(attacker, defender))
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("random.randint", return_value=0),
-            patch("world.system.state_manager.get_effective_stat") as mock_get,
-        ):
-
+        with patch("world.system.state_manager.apply_regen"), \
+             patch("random.randint", return_value=0), \
+             patch("world.system.state_manager.get_effective_stat") as mock_get:
             def getter(obj, stat):
                 if obj is attacker and stat == "STR":
                     return 10
@@ -129,13 +123,9 @@ class TestAttackAction(unittest.TestCase):
 
         engine = CombatEngine([attacker, defender], round_time=0)
         engine.queue_action(attacker, AttackAction(attacker, defender))
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.get_effective_stat", return_value=0),
-            patch(
-                "combat.engine.combat_math.roll_dice_string", return_value=3
-            ) as mock_roll,
-        ):
+        with patch("world.system.state_manager.apply_regen"), \
+             patch("world.system.state_manager.get_effective_stat", return_value=0), \
+             patch("combat.engine.combat_math.roll_dice_string", return_value=3) as mock_roll:
             engine.start_round()
             engine.process_round()
 
@@ -155,14 +145,10 @@ class TestAttackAction(unittest.TestCase):
 
         engine = CombatEngine([attacker, defender], round_time=0)
         engine.queue_action(attacker, AttackAction(attacker, defender))
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.state_manager.get_effective_stat", return_value=0),
-            patch("random.randint", return_value=0),
-            patch(
-                "combat.combat_actions.roll_dice_string", side_effect=[2, 3]
-            ) as mock_roll,
-        ):
+        with patch("world.system.state_manager.apply_regen"), \
+             patch("world.system.state_manager.get_effective_stat", return_value=0), \
+             patch("random.randint", return_value=0), \
+             patch("combat.combat_actions.roll_dice_string", side_effect=[2, 3]) as mock_roll:
             engine.start_round()
             engine.process_round()
 
@@ -178,17 +164,14 @@ class TestAttackAction(unittest.TestCase):
 
         engine = CombatEngine([attacker, defender], round_time=0)
         engine.queue_action(attacker, AttackAction(attacker, defender))
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("world.system.stat_manager.check_hit", return_value=False),
-            patch("random.randint", return_value=0),
-        ):
+        with patch("world.system.state_manager.apply_regen"), \
+             patch("world.system.stat_manager.check_hit", return_value=False), \
+             patch("random.randint", return_value=0):
             engine.start_round()
             engine.process_round()
 
         calls = [c.args[0] for c in attacker.location.msg_contents.call_args_list]
         self.assertTrue(any("fists" in msg for msg in calls))
-
 
 def test_npc_attack_uses_natural_weapon(self):
     attacker = Dummy()
@@ -204,11 +187,9 @@ def test_npc_attack_uses_natural_weapon(self):
     engine = CombatEngine([attacker, defender], round_time=0)
     engine.queue_action(attacker, AttackAction(attacker, defender))
 
-    with (
-        patch("world.system.state_manager.apply_regen"),
-        patch("world.system.state_manager.get_effective_stat", return_value=0),
-        patch("random.randint", return_value=0),
-    ):
+    with patch("world.system.state_manager.apply_regen"), \
+         patch("world.system.state_manager.get_effective_stat", return_value=0), \
+         patch("random.randint", return_value=0):
         engine.start_round()
         instance.process_round()
 
@@ -225,7 +206,6 @@ def test_barehand_attack_mentions_fists():
     attacker.at_emote.assert_called()
     msg = attacker.at_emote.call_args[0][0]
     assert "fists" in msg
-
 
 class TestCombatVictory(unittest.TestCase):
     def test_handle_defeat_removes_participant(self):
@@ -251,11 +231,9 @@ class TestCombatVictory(unittest.TestCase):
         engine = CombatEngine([a, b, c], round_time=0)
         engine.queue_action(a, KillAction(a, b))
 
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("random.randint", return_value=0),
-            patch("evennia.utils.delay"),
-        ):
+        with patch("world.system.state_manager.apply_regen"), \
+             patch("random.randint", return_value=0), \
+             patch("evennia.utils.delay"):
             engine.start_round()
             engine.process_round()
 
@@ -327,6 +305,8 @@ class TestNPCBehaviors(unittest.TestCase):
         npc.on_low_hp.assert_called()
 
 
+
+
 class TestSpellExample(unittest.TestCase):
     def test_spell_action_calls_cast(self):
         caster = Dummy()
@@ -335,10 +315,7 @@ class TestSpellExample(unittest.TestCase):
         caster.cast_spell = MagicMock()
         engine = CombatEngine([caster, target], round_time=0)
         engine.queue_action(caster, SpellAction(caster, "fireball", target))
-        with (
-            patch("world.system.state_manager.apply_regen"),
-            patch("random.randint", return_value=0),
-        ):
+        with patch("world.system.state_manager.apply_regen"), patch("random.randint", return_value=0):
             engine.start_round()
             engine.process_round()
         caster.cast_spell.assert_called_with("fireball", target)
@@ -356,12 +333,10 @@ def test_auto_attack_uses_combat_target():
 
     engine = CombatEngine([attacker, defender], round_time=0)
 
-    with (
-        patch("world.system.state_manager.apply_regen"),
-        patch("world.system.state_manager.get_effective_stat", return_value=0),
-        patch("evennia.utils.delay"),
-        patch("random.randint", return_value=0),
-    ):
+    with patch("world.system.state_manager.apply_regen"), \
+         patch("world.system.state_manager.get_effective_stat", return_value=0), \
+         patch("evennia.utils.delay"), \
+         patch("random.randint", return_value=0):
         engine.start_round()
         instance.process_round()
         assert defender.hp == 1
@@ -382,13 +357,11 @@ def test_haste_grants_extra_attacks():
 
     engine = CombatEngine([attacker, defender], round_time=0)
 
-    with (
-        patch("world.system.state_manager.apply_regen"),
-        patch("world.system.state_manager.get_effective_stat") as mock_get,
-        patch("evennia.utils.delay"),
-        patch("combat.combat_utils.roll_evade", return_value=False),
-        patch("world.system.stat_manager.randint", return_value=1),
-    ):
+    with patch("world.system.state_manager.apply_regen"), \
+         patch("world.system.state_manager.get_effective_stat") as mock_get, \
+         patch("evennia.utils.delay"), \
+         patch("combat.combat_utils.roll_evade", return_value=False), \
+         patch("world.system.stat_manager.randint", return_value=1):
 
         def getter(obj, stat):
             if obj is attacker and stat == "haste":
@@ -414,19 +387,15 @@ def test_npc_damage_dice_with_bonus():
     engine = CombatEngine([attacker, defender], round_time=0)
     engine.queue_action(attacker, AttackAction(attacker, defender))
 
-    with (
-        patch("world.system.state_manager.apply_regen"),
-        patch("world.system.state_manager.get_effective_stat", return_value=0),
-        patch("world.system.stat_manager.check_hit", return_value=True),
-        patch("world.system.stat_manager.roll_crit", return_value=False),
-        patch("combat.engine.combat_math.roll_evade", return_value=False),
-        patch("combat.engine.combat_math.roll_parry", return_value=False),
-        patch("combat.engine.combat_math.roll_block", return_value=False),
-        patch(
-            "combat.engine.combat_math.roll_dice_string", return_value=4
-        ) as mock_roll,
-        patch("evennia.utils.delay"),
-    ):
+    with patch("world.system.state_manager.apply_regen"), \
+         patch("world.system.state_manager.get_effective_stat", return_value=0), \
+         patch("world.system.stat_manager.check_hit", return_value=True), \
+         patch("world.system.stat_manager.roll_crit", return_value=False), \
+         patch("combat.engine.combat_math.roll_evade", return_value=False), \
+         patch("combat.engine.combat_math.roll_parry", return_value=False), \
+         patch("combat.engine.combat_math.roll_block", return_value=False), \
+         patch("combat.engine.combat_math.roll_dice_string", return_value=4) as mock_roll, \
+         patch("evennia.utils.delay"):
         engine.start_round()
         engine.process_round()
 
@@ -443,19 +412,15 @@ def test_npc_damage_dice_fallback_to_2d6():
     engine = CombatEngine([attacker, defender], round_time=0)
     engine.queue_action(attacker, AttackAction(attacker, defender))
 
-    with (
-        patch("world.system.state_manager.apply_regen"),
-        patch("world.system.state_manager.get_effective_stat", return_value=0),
-        patch("world.system.stat_manager.check_hit", return_value=True),
-        patch("world.system.stat_manager.roll_crit", return_value=False),
-        patch("combat.engine.combat_math.roll_evade", return_value=False),
-        patch("combat.engine.combat_math.roll_parry", return_value=False),
-        patch("combat.engine.combat_math.roll_block", return_value=False),
-        patch(
-            "combat.engine.combat_math.roll_dice_string", return_value=1
-        ) as mock_roll,
-        patch("evennia.utils.delay"),
-    ):
+    with patch("world.system.state_manager.apply_regen"), \
+         patch("world.system.state_manager.get_effective_stat", return_value=0), \
+         patch("world.system.stat_manager.check_hit", return_value=True), \
+         patch("world.system.stat_manager.roll_crit", return_value=False), \
+         patch("combat.engine.combat_math.roll_evade", return_value=False), \
+         patch("combat.engine.combat_math.roll_parry", return_value=False), \
+         patch("combat.engine.combat_math.roll_block", return_value=False), \
+         patch("combat.engine.combat_math.roll_dice_string", return_value=1) as mock_roll, \
+         patch("evennia.utils.delay"):
         engine.start_round()
         engine.process_round()
 
@@ -473,10 +438,8 @@ def test_round_output_blank_line():
     engine = CombatEngine([attacker, defender], round_time=0)
     engine.queue_action(attacker, AttackAction(attacker, defender))
 
-    with (
-        patch("world.system.state_manager.apply_regen"),
-        patch("random.randint", return_value=0),
-    ):
+    with patch("world.system.state_manager.apply_regen"), \
+         patch("random.randint", return_value=0):
         engine.start_round()
         engine.process_round()
 
@@ -496,10 +459,7 @@ def test_round_output_multiple_combatants_separated():
     engine = CombatEngine([a, b, c], round_time=0)
     engine.queue_action(a, AttackAction(a, b))
 
-    with (
-        patch("world.system.state_manager.apply_regen"),
-        patch("random.randint", return_value=0),
-    ):
+    with patch("world.system.state_manager.apply_regen"), patch("random.randint", return_value=0):
         engine.start_round()
         engine.process_round()
 
@@ -528,7 +488,7 @@ def test_end_combat_broadcasts_room_message():
         instance.remove_combatant(b)
         instance.end_combat("done")
 
-    room.msg_contents.assert_not_called()
+    room.msg_contents.assert_any_call("Combat ends: done")
 
 
 def test_npc_death_flow_keeps_combat_active_until_end():
@@ -610,4 +570,7 @@ def test_end_combat_suppresses_no_active_fighters_reason():
     with patch.object(CombatRoundManager, "get", return_value=manager):
         instance.end_combat("No active fighters remaining")
 
-    room.msg_contents.assert_not_called()
+    calls = [c.args[0] for c in room.msg_contents.call_args_list]
+    assert "Combat ends:" in calls
+    assert all("No active fighters remaining" not in msg for msg in calls)
+

@@ -166,9 +166,7 @@ class CombatInstance:
             if getattr(actor, "pk", None) is None:
                 setattr(actor, "in_combat", True)
 
-    def _remove_missing_fighters(
-        self, fighters: Set[object], current: Set[object]
-    ) -> None:
+    def _remove_missing_fighters(self, fighters: Set[object], current: Set[object]) -> None:
         """Remove engine participants no longer present in this instance."""
         for actor in current - fighters:
             self.engine.remove_participant(actor)
@@ -178,17 +176,13 @@ class CombatInstance:
     def _remove_defeated_fighters(self, fighters: Set[object]) -> None:
         """Handle any fighters that have been defeated."""
         for actor in list(fighters):
-            if _current_hp(actor) <= 0 and not getattr(
-                getattr(actor, "db", None), "is_dead", False
-            ):
+            if _current_hp(actor) <= 0 and not getattr(getattr(actor, "db", None), "is_dead", False):
                 log = getattr(getattr(actor, "ndb", None), "damage_log", None) or {}
                 killer = max(log, key=log.get) if log else None
                 try:
                     self.engine.handle_defeat(actor, killer)
                 except Exception as err:  # pragma: no cover - safety
-                    log_trace(
-                        f"Error handling defeat of {getattr(actor, 'key', actor)}: {err}"
-                    )
+                    log_trace(f"Error handling defeat of {getattr(actor, 'key', actor)}: {err}")
 
     def process_round(self) -> None:
         """Process a single combat round for this instance."""
@@ -234,7 +228,7 @@ class CombatInstance:
     def _manual_round_processing(self) -> None:
         """Fallback round processing if engine doesn't have process_round."""
         fighters = [p.actor for p in self.engine.participants]
-
+        
         for fighter in list(fighters):
             if not fighter or _current_hp(fighter) <= 0:
                 continue
@@ -245,8 +239,8 @@ class CombatInstance:
             # Handle NPC auto-attacks
             if not hasattr(fighter, "has_account") or not fighter.has_account:
                 from combat.ai_combat import auto_attack
-
                 auto_attack(fighter, self.engine)
+
 
     def end_combat(self, reason: str = "") -> None:
         """Mark this instance as ended and clean up fighter states."""
@@ -275,7 +269,12 @@ class CombatInstance:
         if reason == "No active fighters remaining":
             reason = ""
 
-        # A combat conclusion no longer broadcasts a room message
+        message = f"Combat ends: {reason}" if reason else "Combat ends:"
+        if room and hasattr(room, "msg_contents"):
+            try:
+                room.msg_contents(message)
+            except Exception:  # pragma: no cover - safety
+                pass
 
         # Clean up fighter states
         if self.engine:
@@ -320,9 +319,7 @@ class CombatRoundManager:
     # ------------------------------------------------------------------
 
     def create_combat(
-        self,
-        combatants: Optional[List[object]] = None,
-        round_time: Optional[float] = None,
+        self, combatants: Optional[List[object]] = None, round_time: Optional[float] = None
     ) -> CombatInstance:
         """Create a new combat with ``combatants``."""
 
@@ -424,6 +421,7 @@ class CombatRoundManager:
         primary.start()
         combat_started.send(sender=self.__class__, instance=primary)
         return primary
+
 
     # ------------------------------------------------------------------
     # debugging helpers
