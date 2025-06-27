@@ -25,7 +25,8 @@ class TestSpawnManager(EvenniaTest):
                 "room": 1,
                 "max_count": 2,
                 "respawn_rate": 5,
-                "last_spawn": 0,
+                "spawned": [],
+                "dead_timestamps": [],
             }
         ]
         npc = create_object(BaseNPC, key="basic_merchant")
@@ -133,7 +134,8 @@ class TestSpawnManager(EvenniaTest):
                 "room_id": 1,
                 "max_count": 1,
                 "respawn_rate": 5,
-                "last_spawn": 0,
+                "spawned": [],
+                "dead_timestamps": [],
             }
         ]
         with mock.patch("scripts.spawn_manager.spawn_from_vnum") as m_spawn:
@@ -176,7 +178,8 @@ class TestSpawnManager(EvenniaTest):
                 "room_id": 1,
                 "max_count": 1,
                 "respawn_rate": 5,
-                "last_spawn": 0,
+                "spawned": [],
+                "dead_timestamps": [],
             },
             {
                 "prototype": "b",
@@ -184,7 +187,8 @@ class TestSpawnManager(EvenniaTest):
                 "room_id": 2,
                 "max_count": 1,
                 "respawn_rate": 5,
-                "last_spawn": 0,
+                "spawned": [],
+                "dead_timestamps": [],
             },
         ]
         with mock.patch.object(self.script, "_spawn") as m_spawn, \
@@ -212,7 +216,8 @@ class TestSpawnManager(EvenniaTest):
                 "room_id": 1,
                 "max_count": 1,
                 "respawn_rate": 5,
-                "last_spawn": 0,
+                "spawned": [],
+                "dead_timestamps": [],
             }
         ]
         npc = create_object(BaseNPC, key="basic_merchant")
@@ -245,7 +250,8 @@ class TestSpawnManager(EvenniaTest):
                 "room_id": 1,
                 "max_count": 1,
                 "respawn_rate": 5,
-                "last_spawn": 0,
+                "spawned": [],
+                "dead_timestamps": [],
             }
         ]
         npc = create_object(BaseNPC, key="num")
