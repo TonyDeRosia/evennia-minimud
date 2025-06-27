@@ -266,7 +266,6 @@ class CombatInstance:
         self.cancel_tick()
         CombatRoundManager.get().remove_combat(self.combat_id)
 
-        send_room_msg = True
         if reason == "No active fighters remaining":
             reason = ""
         if reason == "Invalid combat instance":
@@ -275,14 +274,6 @@ class CombatInstance:
             except Exception:
                 log_trace(reason)
             reason = ""
-            send_room_msg = False
-
-        message = f"Combat ends: {reason}" if reason else "Combat ends."
-        if send_room_msg and room and hasattr(room, "msg_contents"):
-            try:
-                room.msg_contents(message)
-            except Exception:  # pragma: no cover - safety
-                pass
 
         # Clean up fighter states
         if self.engine:

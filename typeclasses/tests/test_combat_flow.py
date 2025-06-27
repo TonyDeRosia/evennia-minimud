@@ -488,7 +488,9 @@ def test_end_combat_broadcasts_room_message():
         instance.remove_combatant(b)
         instance.end_combat("done")
 
-    room.msg_contents.assert_any_call("Combat ends: done")
+    assert not any(
+        "Combat ends" in call.args[0] for call in room.msg_contents.call_args_list
+    )
 
 
 def test_npc_death_flow_keeps_combat_active_until_end():
@@ -570,7 +572,7 @@ def test_end_combat_suppresses_no_active_fighters_reason():
     with patch.object(CombatRoundManager, "get", return_value=manager):
         instance.end_combat("No active fighters remaining")
 
-    calls = [c.args[0] for c in room.msg_contents.call_args_list]
-    assert "Combat ends." in calls
-    assert all("No active fighters remaining" not in msg for msg in calls)
+    assert not any(
+        "Combat ends" in call.args[0] for call in room.msg_contents.call_args_list
+    )
 
