@@ -97,10 +97,11 @@ class DecayScript(Script):
 
     def at_script_creation(self):
         self.key = "decay"
-        self.desc = "Delete the object after a delay"
+        self.interval = 300  # default decay interval in seconds
+        self.repeats = 1
+        self.start_delay = True
         self.persistent = True
-        # keep checking until we delete the object
-        self.repeats = -1
+        self.desc = "Causes corpses to decay and disappear."
         self.db.room_only = False
 
     def at_repeat(self):
