@@ -15,6 +15,7 @@ from utils import normalize_slot
 from utils.slots import SLOT_ORDER
 from collections.abc import Mapping
 import math
+from world.system.constants import MAX_SATED
 from world.triggers import TriggerMixin
 from combat.spells import Spell
 from combat.combat_actions import CombatResult
@@ -260,7 +261,7 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
         self.db.level = 1
         self.db.experience = 0
         self.db.tnl = settings.XP_TO_LEVEL(1)
-        self.db.sated = 5
+        self.db.sated = self.db.sated or MAX_SATED
 
         from world.system import state_manager
         from world.system.class_skills import MELEE_CLASSES
@@ -907,6 +908,11 @@ class PlayerCharacter(Character):
         super().at_object_creation()
         # initialize hands
         self.db._wielded = {"left": None, "right": None}
+
+    def at_post_puppet(self, **kwargs):
+        super().at_post_puppet(**kwargs)
+        if self.db.sated is None:
+            self.db.sated = MAX_SATED
 
     def get_display_name(self, looker, **kwargs):
         """
