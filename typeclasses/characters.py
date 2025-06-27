@@ -219,6 +219,13 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
 
         return True
 
+    def search_first(self, target, candidates=None, **kwargs):
+        """Return the first match from ``search`` if any."""
+        matches = self.search(target, candidates=candidates, quiet=True, **kwargs)
+        if matches:
+            return matches[0] if isinstance(matches, list) else matches
+        return None
+
     def defense(self, damage_type=None):
         """
         Get the total armor defense from equipped items and natural defenses

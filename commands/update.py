@@ -16,7 +16,7 @@ class CmdUpdate(Command):
         if not self.args:
             caller.msg("Usage: update <target>")
             return
-        target = caller.search(self.args.strip(), global_search=True)
+        target = caller.search_first(self.args.strip(), global_search=True)
         if not target:
             return
         charclass = target.db.charclass

@@ -66,7 +66,7 @@ class CmdAwardAchievement(Command):
         if not ach:
             self.msg("Unknown achievement.")
             return
-        target = self.caller.search(player_name, global_search=True)
+        target = self.caller.search_first(player_name, global_search=True)
         if not target:
             return
         earned = target.db.achievements or []

@@ -90,7 +90,9 @@ class CmdBuy(Command):
             return
 
         # we want a stack of the item, matching the parsed count
-        objs = self.caller.search(self.args, location=storage, stacked=self.count)
+        objs = self.caller.search_first(
+            self.args, location=storage, stacked=self.count
+        )
         if not objs:
             # we found nothing, or it was too vague of a search
             return
@@ -171,7 +173,9 @@ class CmdSell(Command):
             return
 
         # we want a stack of the item, matching the parsed count
-        objs = self.caller.search(self.args, location=self.caller, stacked=self.count)
+        objs = self.caller.search_first(
+            self.args, location=self.caller, stacked=self.count
+        )
         if not objs:
             # we found nothing, or it was too vague of a search
             return
@@ -262,7 +266,9 @@ class CmdDonate(Command):
         ]
 
         # we want a stack of the item, matching the parsed count
-        objs = self.caller.search(self.args, candidates=candidates, stacked=self.count)
+        objs = self.caller.search_first(
+            self.args, candidates=candidates, stacked=self.count
+        )
         if not objs:
             # we found nothing, or it was too vague of a search
             return

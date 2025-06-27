@@ -307,7 +307,7 @@ class CmdGAccept(Command):
         if not guild:
             self.msg("You are not in a guild.")
             return
-        target = self.caller.search(self.args.strip(), global_search=True)
+        target = self.caller.search_first(self.args.strip(), global_search=True)
         if not target:
             return
         if target.db.guild:
@@ -347,7 +347,7 @@ class _BaseAdjustHonor(Command):
             self.msg("You are not in a guild.")
             return
         parts = self.args.split(None, 1)
-        target = self.caller.search(parts[0], global_search=True)
+        target = self.caller.search_first(parts[0], global_search=True)
         if not target:
             return
         if target.db.guild != guild:
@@ -427,7 +427,7 @@ class CmdGKick(Command):
         if not guild:
             self.msg("You are not in a guild.")
             return
-        target = self.caller.search(self.args.strip(), global_search=True)
+        target = self.caller.search_first(self.args.strip(), global_search=True)
         if not target:
             return
         if target.db.guild != guild:
