@@ -440,6 +440,7 @@ class Corpse(Object):
             script = self.scripts.add(
                 "typeclasses.scripts.DecayScript",
                 key="decay",
+                start_delay=True,
                 room_only=not settings.ALLOW_CORPSE_DECAY_IN_INVENTORY,
                 autostart=False,
             )
@@ -457,6 +458,7 @@ class Corpse(Object):
             script = self.scripts.add(
                 "typeclasses.scripts.DecayScript",
                 key="decay",
+                start_delay=True,
                 room_only=not settings.ALLOW_CORPSE_DECAY_IN_INVENTORY,
                 autostart=False,
             )
