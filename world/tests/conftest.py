@@ -11,5 +11,6 @@ def mock_timers(monkeypatch):
         return counter["t"]
 
     monkeypatch.setattr("scripts.spawn_manager.time.time", fake_time)
+    monkeypatch.setattr("scripts.mob_respawn_manager.time.time", fake_time)
     yield
 
