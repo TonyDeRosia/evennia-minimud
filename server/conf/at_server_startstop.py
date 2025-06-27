@@ -119,13 +119,20 @@ def at_server_start():
     if not script or script.typeclass_path != "typeclasses.scripts.GlobalTick":
         if script:
             script.delete()
+        logger.log_info("[Startup] Creating global_tick script (key=global_tick)")
         script = create.create_script(
             "typeclasses.scripts.GlobalTick", key="global_tick"
         )
     else:
         if not script.is_active:
+            logger.log_info(
+                f"[Startup] Starting global_tick script {script.dbref}"
+            )
             script.start()
         elif getattr(script.db, "_paused_time", None):
+            logger.log_info(
+                f"[Startup] Unpausing global_tick script {script.dbref}"
+            )
             script.unpause()
 
     script = ScriptDB.objects.filter(db_key="global_npc_ai").first()
