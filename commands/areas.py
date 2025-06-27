@@ -1,21 +1,16 @@
-from evennia.objects.models import ObjectDB
-from evennia.utils.evtable import EvTable
 from evennia import CmdSet
+from evennia.objects.models import ObjectDB
 from evennia.prototypes import spawner
-from utils.script_utils import get_spawn_manager, respawn_area
+from evennia.utils.evtable import EvTable
 
-from .command import Command, MuxCommand
-from world.areas import (
-    Area,
-    get_areas,
-    save_area,
-    update_area,
-    find_area,
-    parse_area_identifier,
-)
-from .aedit import CmdAEdit, CmdAList, CmdASave, CmdAreaReset, CmdAreaAge
 from typeclasses.rooms import Room
-from utils.prototype_manager import load_prototype, load_all_prototypes
+from utils.prototype_manager import load_all_prototypes, load_prototype
+from utils.script_utils import get_respawn_manager, respawn_area
+from world.areas import (Area, find_area, get_areas, parse_area_identifier,
+                         save_area, update_area)
+
+from .aedit import CmdAEdit, CmdAList, CmdAreaAge, CmdAreaReset, CmdASave
+from .command import Command, MuxCommand
 
 
 class CmdAMake(Command):
@@ -175,7 +170,11 @@ class CmdRooms(Command):
             self.msg("This room is not within a registered area.")
             return
         objs = ObjectDB.objects.filter(id__gte=current.start, id__lte=current.end)
-        rooms = {obj.id: obj for obj in objs if obj.is_typeclass("evennia.objects.objects.DefaultRoom", exact=False)}
+        rooms = {
+            obj.id: obj
+            for obj in objs
+            if obj.is_typeclass("evennia.objects.objects.DefaultRoom", exact=False)
+        }
         show_all = self.cmdstring.lower() == "roomsall"
         lines = []
         for num in range(current.start, current.end + 1):
@@ -569,7 +568,7 @@ class CmdAreasReset(Command):
                 f"Area '{area_name}' not found. Use 'alist' to view available areas."
             )
             return
-        script = get_spawn_manager()
+        script = get_respawn_manager()
         if not script or not hasattr(script, "force_respawn"):
             self.msg("Spawn manager not found.")
             return
@@ -599,7 +598,5 @@ class AreaCmdSet(CmdSet):
         self.add(CmdRReg)
         self.add(CmdRRegAll)
         from .redit import CmdREdit
+
         self.add(CmdREdit)
-
-
-

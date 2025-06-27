@@ -1,27 +1,20 @@
-from evennia.utils.evtable import EvTable
 import textwrap
+
 from evennia import CmdSet
 from evennia.objects.models import ObjectDB
 from evennia.server.models import ServerConfig
-from typeclasses.rooms import Room
-from .command import Command, MuxCommand
-from world.areas import (
-    Area,
-    get_areas,
-    save_area,
-    update_area,
-    rename_area,
-    find_area,
-    delete_area,
-    parse_area_identifier,
-)
-from world import area_npcs
+from evennia.utils.evtable import EvTable
+
 from olc.base import OLCValidator
-from utils.prototype_manager import (
-    load_all_prototypes,
-    load_prototype,
-    save_prototype,
-)
+from typeclasses.rooms import Room
+from utils.prototype_manager import (load_all_prototypes, load_prototype,
+                                     save_prototype)
+from world import area_npcs
+from world.areas import (Area, delete_area, find_area, get_areas,
+                         parse_area_identifier, rename_area, save_area,
+                         update_area)
+
+from .command import Command, MuxCommand
 
 
 def _gather_room_ids(area: Area) -> list[int]:
@@ -103,7 +96,9 @@ class CmdAList(Command):
                 name = obj.attributes.get("area")
                 if not name:
                     continue
-                info = area_data.setdefault(name, {"room_ids": [], "room_count": 0, "mob_count": 0})
+                info = area_data.setdefault(
+                    name, {"room_ids": [], "room_count": 0, "mob_count": 0}
+                )
                 info["room_count"] += 1
                 room_id = obj.attributes.get("room_id")
                 if room_id is not None:
@@ -118,7 +113,9 @@ class CmdAList(Command):
                 name = proto.get("area")
                 if not name:
                     continue
-                info = area_data.setdefault(name, {"room_ids": [], "room_count": 0, "mob_count": 0})
+                info = area_data.setdefault(
+                    name, {"room_ids": [], "room_count": 0, "mob_count": 0}
+                )
                 info["room_count"] += 1
                 room_id = proto.get("room_id")
                 if room_id is not None:
@@ -130,12 +127,12 @@ class CmdAList(Command):
                 name = proto.get("area")
                 if not name:
                     continue
-                info = area_data.setdefault(name, {"room_ids": [], "room_count": 0, "mob_count": 0})
+                info = area_data.setdefault(
+                    name, {"room_ids": [], "room_count": 0, "mob_count": 0}
+                )
                 info["mob_count"] += 1
             for name, info in area_data.items():
-                room_ids = sorted(
-                    {rid for rid in info["room_ids"] if rid is not None}
-                )
+                room_ids = sorted({rid for rid in info["room_ids"] if rid is not None})
                 start = min(room_ids) if room_ids else 0
                 end = max(room_ids) if room_ids else 0
                 area = Area(key=name, start=start, end=end)
@@ -173,9 +170,7 @@ class CmdAList(Command):
                         db_attributes__db_key="area",
                         db_attributes__db_strvalue__iexact=area.key,
                     )
-                    rooms = [
-                        obj for obj in objs if obj.is_typeclass(Room, exact=False)
-                    ]
+                    rooms = [obj for obj in objs if obj.is_typeclass(Room, exact=False)]
                     room_count = len(rooms)
                     room_ids = []
                     for room in rooms:
@@ -219,9 +214,10 @@ class CmdASave(Command):
         if self.args.strip().lower() != "changed":
             self.msg("Usage: asave changed")
             return
+        from commands.building import refresh_coordinates
         from commands.redit import proto_from_room
         from utils.prototype_manager import save_prototype
-        from commands.building import refresh_coordinates
+
         updated = 0
         for idx, area in enumerate(get_areas()):
             rooms = []
@@ -240,8 +236,9 @@ class CmdASave(Command):
             for room in rooms:
                 proto = proto_from_room(room)
                 save_prototype("room", proto, vnum=room.db.room_id)
-                from utils.script_utils import get_spawn_manager
-                script = get_spawn_manager()
+                from utils.script_utils import get_respawn_manager
+
+                script = get_respawn_manager()
                 if script and hasattr(script, "register_room_spawn"):
                     script.register_room_spawn(proto)
                     if hasattr(script, "force_respawn"):
@@ -308,7 +305,8 @@ class CmdAEdit(Command):
             if area.desc:
                 lines.append(f"|wDesc|n {area.desc}")
             lines.append(
-                "|wRooms|n " + (", ".join(str(v) for v in room_ids) if room_ids else "-")
+                "|wRooms|n "
+                + (", ".join(str(v) for v in room_ids) if room_ids else "-")
             )
             self.msg("\n".join(lines))
             return
@@ -371,7 +369,7 @@ class CmdAEdit(Command):
                     f"Area '{name}' not found. Use 'alist' to view available areas."
                 )
                 return
-            area.builders = [b.strip() for b in builders.split(',') if b.strip()]
+            area.builders = [b.strip() for b in builders.split(",") if b.strip()]
             update_area(idx, area)
             self.msg("Builders updated.")
             return
@@ -403,7 +401,7 @@ class CmdAEdit(Command):
                     f"Area '{name}' not found. Use 'alist' to view available areas."
                 )
                 return
-            area.flags = [f.strip().lower() for f in flags.split(',') if f.strip()]
+            area.flags = [f.strip().lower() for f in flags.split(",") if f.strip()]
             update_area(idx, area)
             self.msg("Flags updated.")
             return
@@ -623,4 +621,3 @@ class AreaEditCmdSet(CmdSet):
         self.add(CmdADel)
         self.add(CmdAreaReset)
         self.add(CmdAreaAge)
-

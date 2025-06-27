@@ -1,10 +1,12 @@
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from django.test import override_settings
 from evennia.utils.test_resources import EvenniaTest
+
+from commands import aedit
 from commands.admin import BuilderCmdSet
 from typeclasses.rooms import Room
 from world.areas import Area
-from commands import aedit
 
 
 @override_settings(DEFAULT_HOME=None)
@@ -18,14 +20,14 @@ class TestASaveSpawnManager(EvenniaTest):
     @patch("commands.aedit.update_area")
     @patch("commands.aedit.save_prototype")
     @patch("commands.aedit.proto_from_room")
-    @patch("commands.aedit.get_spawn_manager")
+    @patch("commands.aedit.get_respawn_manager")
     @patch("commands.aedit.ObjectDB.objects.filter")
     @patch("commands.aedit.get_areas")
     def test_spawn_manager_called(
         self,
         mock_get_areas,
         mock_obj_filter,
-        mock_get_spawn_manager,
+        mock_get_respawn_manager,
         mock_proto,
         mock_save,
         mock_update,
@@ -39,7 +41,7 @@ class TestASaveSpawnManager(EvenniaTest):
         proto = {"vnum": room.db.room_id}
         mock_proto.return_value = proto
         mock_script = MagicMock()
-        mock_get_spawn_manager.return_value = mock_script
+        mock_get_respawn_manager.return_value = mock_script
 
         cmd = aedit.CmdASave()
         cmd.caller = self.char1

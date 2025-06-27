@@ -1,5 +1,7 @@
 from evennia import CmdSet
-from utils.script_utils import get_spawn_manager
+
+from utils.script_utils import get_respawn_manager
+
 from ..command import Command
 
 
@@ -11,7 +13,7 @@ class CmdSpawnReload(Command):
     help_category = "Admin"
 
     def func(self):
-        script = get_spawn_manager()
+        script = get_respawn_manager()
         if not script or not hasattr(script, "reload_spawns"):
             self.msg("Spawn manager not found.")
             return
@@ -28,7 +30,7 @@ class CmdForceRespawn(Command):
 
     def func(self):
         arg = self.args.strip()
-        script = get_spawn_manager()
+        script = get_respawn_manager()
         if not script or not hasattr(script, "force_respawn"):
             self.msg("Spawn manager not found.")
             return
@@ -57,7 +59,7 @@ class CmdShowSpawns(Command):
 
     def func(self):
         arg = self.args.strip()
-        script = get_spawn_manager()
+        script = get_respawn_manager()
         if not script:
             self.msg("Spawn manager not found.")
             return

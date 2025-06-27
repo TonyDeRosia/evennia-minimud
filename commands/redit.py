@@ -2,32 +2,26 @@
 
 from __future__ import annotations
 
-from olc.base import OLCEditor, OLCState, OLCValidator
 import json
-from utils.prototype_manager import (
-    save_prototype,
-    load_prototype,
-    load_all_prototypes,
-    CATEGORY_DIRS,
-)
-from utils.vnum_registry import (
-    validate_vnum,
-    register_vnum,
-    unregister_vnum,
-    VNUM_RANGES,
-    peek_next_vnum,
-)
-from world.areas import find_area_by_vnum, get_areas, update_area
-from evennia.prototypes import spawner
-from world.areas import find_area
-from evennia.objects.models import ObjectDB
-from typeclasses.rooms import Room
-from world import prototypes
-from world.scripts.mob_db import get_mobdb
 from functools import wraps
+
+from evennia.objects.models import ObjectDB
+from evennia.prototypes import spawner
+
+from olc.base import OLCEditor, OLCState, OLCValidator
+from typeclasses.rooms import Room
+from utils.prototype_manager import (CATEGORY_DIRS, load_all_prototypes,
+                                     load_prototype, save_prototype)
+from utils.vnum_registry import (VNUM_RANGES, peek_next_vnum, register_vnum,
+                                 unregister_vnum, validate_vnum)
+from world import prototypes
+from world.areas import find_area, find_area_by_vnum, get_areas, update_area
+from world.scripts.mob_db import get_mobdb
+
 from .building import DIR_FULL, OPPOSITE
 from .command import Command
 from .room_flags import VALID_ROOM_FLAGS
+
 
 def proto_from_room(room) -> dict:
     """Return a prototype dict generated from ``room``."""
@@ -146,7 +140,6 @@ def menunode_main(caller, raw_string="", **kwargs):
 def menunode_view_prototype(caller, raw_string="", **kwargs):
     """Display the saved prototype for a room."""
 
-
     vnum = kwargs.get("vnum", caller.ndb.current_vnum)
     try:
         proto = load_prototype("room", vnum)
@@ -183,7 +176,6 @@ menunode_show = menunode_view_prototype
 @require_redit_state
 def menunode_list_prototypes(caller, raw_string="", **kwargs):
     """Browse all prototypes in the current room's area."""
-
 
     current = caller.ndb.room_protos.get(caller.ndb.current_vnum, {})
     area_name = current.get("area")
@@ -555,9 +547,9 @@ def menunode_done(caller, raw_string="", **kwargs):
                         exits[dirkey] = dest_obj
                 room.db.exits = exits
 
-        from utils.script_utils import get_spawn_manager
+        from utils.script_utils import get_respawn_manager
 
-        script = get_spawn_manager()
+        script = get_respawn_manager()
         if script and hasattr(script, "register_room_spawn"):
             script.register_room_spawn(proto)
             if hasattr(script, "force_respawn"):
@@ -724,9 +716,7 @@ class CmdREdit(Command):
             if area_name:
                 idx, area = find_area(area_name)
                 if area and not (area.start <= vnum <= area.end):
-                    self.msg(
-                        f"Number outside area range {area.start}-{area.end}."
-                    )
+                    self.msg(f"Number outside area range {area.start}-{area.end}.")
                     _clear_state()
                     return
                 objs = ObjectDB.objects.filter(
