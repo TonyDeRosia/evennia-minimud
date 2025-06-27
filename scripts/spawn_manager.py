@@ -23,6 +23,10 @@ class SpawnManager(Script):
     manager normalizes these using :meth:`_normalize_proto` so values like ``5``
     and ``"5"`` are treated the same when counting existing spawns or looking up
     prototypes.
+
+    The respawn timer for an entry is based on the time of the last recorded
+    death. :meth:`record_death` is called when an NPC dies to update this
+    timestamp.
     """
 
     def at_script_creation(self):
@@ -91,6 +95,19 @@ class SpawnManager(Script):
                 )
 
     def record_spawn(self, prototype: Any, room: Any) -> None:
+        """Record that ``prototype`` was spawned in ``room``."""
+
+        norm = self._normalize_proto(prototype)
+        for entry in self.db.entries:
+            if self._normalize_proto(entry.get("prototype")) == norm and self._room_match(entry, room):
+                # ``last_spawn`` tracks the most recent death for this entry;
+                # updating here ensures brand new spawns respect the timer.
+                entry["last_spawn"] = time.time()
+                break
+
+    def record_death(self, prototype: Any, room: Any) -> None:
+        """Record that ``prototype`` died in ``room``."""
+
         norm = self._normalize_proto(prototype)
         for entry in self.db.entries:
             if self._normalize_proto(entry.get("prototype")) == norm and self._room_match(entry, room):
@@ -355,6 +372,9 @@ class SpawnManager(Script):
             )
             if live >= max_count:
                 continue
+            # ``last_spawn`` stores the time of the last death for this entry
+            # (updated via :meth:`record_death`). We only spawn again once the
+            # respawn interval has elapsed from that moment.
             last = entry.get("last_spawn", 0)
             if now - last >= entry.get("respawn_rate", self.interval):
                 self._spawn(proto, room)
