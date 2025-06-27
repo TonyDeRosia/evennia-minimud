@@ -428,6 +428,7 @@ class Corpse(Object):
     def at_object_creation(self):
         super().at_object_creation()
         self.db.display_priority = "corpse"
+        self.db.can_attack = False
         if getattr(self.db, "weight", None) is None:
             weight = 0
             if self.db.corpse_of and self.location:

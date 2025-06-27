@@ -65,6 +65,20 @@ class TestAttackCommand(EvenniaTest):
 
         self.assertFalse(mob.attributes.has("fleeing"))
 
+    def test_attack_corpse_is_blocked(self):
+        corpse = create.create_object(
+            "typeclasses.objects.Corpse", key="corpse", location=self.room1
+        )
+        self.char1.msg.reset_mock()
+        self.char1.execute_cmd("attack corpse")
+        self.assertTrue(self.char1.msg.called)
+        out = self.char1.msg.call_args[0][0]
+        self.assertIn("can't attack", out)
+        from combat.round_manager import CombatRoundManager
+
+        manager = CombatRoundManager.get()
+        self.assertFalse(manager.combats)
+
     def test_joining_combat_queues_immediately(self):
         """Joining an ongoing fight should allow immediate actions."""
         from typeclasses.characters import PlayerCharacter
