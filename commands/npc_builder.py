@@ -1,67 +1,40 @@
-from evennia.utils import make_iter, dedent, delay
-from olc.base import OLCEditor, OLCState, OLCValidator
+import re
+from copy import deepcopy
+from importlib import import_module
+
+from django.conf import settings
 from evennia import create_object
 from evennia.objects.models import ObjectDB
 from evennia.prototypes import spawner
-from utils.mob_proto import spawn_from_vnum, get_prototype, apply_proto_items
 from evennia.prototypes.prototypes import PROTOTYPE_TAG_CATEGORY
-from typeclasses.characters import NPC
-from world.scripts.mob_db import get_mobdb
-from typeclasses.npcs import (
-    BaseNPC,
-    MerchantNPC,
-    BankerNPC,
-    TrainerNPC,
-    WandererNPC,
-    GuildmasterNPC,
-    GuildReceptionistNPC,
-    QuestGiverNPC,
-    CombatNPC,
-    CombatTrainerNPC,
-    EventNPC,
-)
-from utils.slots import SLOT_ORDER
-from utils.menu_utils import (
-    add_back_skip,
-    add_back_next,
-    add_back_only,
-    toggle_multi_select,
-    format_multi_select,
-)
-from world.npc_roles import (
-    MerchantRole,
-    BankerRole,
-    TrainerRole,
-    GuildmasterRole,
-    GuildReceptionistRole,
-    QuestGiverRole,
-    CombatTrainerRole,
-    EventNPCRole,
-)
-from world.scripts import classes
-from scripts import BuilderAutosave
-from copy import deepcopy
-from utils import vnum_registry
-from world.areas import get_area_vnum_range
-from utils.mob_utils import generate_base_stats, mobprogs_to_triggers
-from world.triggers import TriggerManager
-from .command import Command
-from django.conf import settings
-from importlib import import_module
-from evennia.utils import logger
-import re
-from world.mob_constants import (
-    ACTFLAGS,
-    AFFECTED_BY,
-    LANGUAGES,
-    BODYPARTS,
-    RIS_TYPES,
-    ATTACK_TYPES,
-    DEFENSE_TYPES,
-    NPCType,
-    parse_flag_list,
-)
+from evennia.utils import dedent, delay, logger, make_iter
+
 from combat.combat_skills import SKILL_CLASSES
+from olc.base import OLCEditor, OLCState, OLCValidator
+from scripts import BuilderAutosave
+from typeclasses.characters import NPC
+from typeclasses.npcs import (BankerNPC, BaseNPC, CombatNPC, CombatTrainerNPC,
+                              EventNPC, GuildmasterNPC, GuildReceptionistNPC,
+                              MerchantNPC, QuestGiverNPC, TrainerNPC,
+                              WandererNPC)
+from utils import vnum_registry
+from utils.menu_utils import (add_back_next, add_back_only, add_back_skip,
+                              format_multi_select, toggle_multi_select)
+from utils.mob_proto import apply_proto_items, get_prototype, spawn_from_vnum
+from utils.mob_utils import generate_base_stats, mobprogs_to_triggers
+from utils.slots import SLOT_ORDER
+from world.areas import get_area_vnum_range
+from world.mob_constants import (ACTFLAGS, AFFECTED_BY, ATTACK_TYPES,
+                                 BODYPARTS, DEFENSE_TYPES, LANGUAGES,
+                                 RIS_TYPES, NPCType, parse_flag_list)
+from world.npc_roles import (BankerRole, CombatTrainerRole, EventNPCRole,
+                             GuildmasterRole, GuildReceptionistRole,
+                             MerchantRole, QuestGiverRole, TrainerRole)
+from world.scripts import classes
+from world.scripts.mob_db import get_mobdb
+from world.triggers import TriggerManager
+
+from .command import Command
 
 
 def validate_prototype(data: dict) -> list[str]:
@@ -376,8 +349,6 @@ def format_mob_summary(data: dict) -> str:
     return "\n".join(lines)
 
 
-
-
 def _create_npc(caller, raw_string, register=False, **kwargs):
     data = caller.ndb.buildnpc
     if not isinstance(data, dict):
@@ -675,6 +646,7 @@ def finalize_mob_prototype(caller, npc):
         return
 
     from world import stats as world_stats
+
     world_stats.apply_stats(npc)
 
     meta = npc.db.metadata or {}
@@ -744,6 +716,7 @@ def finalize_mob_prototype(caller, npc):
     msg += " and added to mob list.|n"
 
     from world.system import stat_manager
+
     stat_manager.refresh_stats(npc)
 
     caller.msg(msg)
@@ -782,9 +755,14 @@ class CmdCNPC(Command):
                 self.caller.ndb.buildnpc_orig = dict(self.caller.ndb.buildnpc)
                 self.caller.db.builder_autosave = None
                 _ensure_autosave_script(self.caller)
-                state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
+                state = OLCState(
+                    data=self.caller.ndb.buildnpc,
+                    original=dict(self.caller.ndb.buildnpc),
+                )
                 startnode = (
-                    "menunode_desc" if self.caller.ndb.buildnpc.get("key") else "menunode_key"
+                    "menunode_desc"
+                    if self.caller.ndb.buildnpc.get("key")
+                    else "menunode_key"
                 )
                 OLCEditor(
                     self.caller,
@@ -798,7 +776,9 @@ class CmdCNPC(Command):
                 self.msg("Autosave discarded.")
             return
         if autosave and sub not in ("restore", "discard"):
-            self.msg("Autosave found. Use 'cnpc restore' to continue or 'cnpc discard' to start over.")
+            self.msg(
+                "Autosave found. Use 'cnpc restore' to continue or 'cnpc discard' to start over."
+            )
             return
         use_mob = self.cmdstring.lower() == "mobbuilder"
         if sub == "start":
@@ -833,9 +813,13 @@ class CmdCNPC(Command):
                 self.caller.ndb.buildnpc["use_mob"] = True
             self.caller.ndb.buildnpc_orig = dict(self.caller.ndb.buildnpc)
             _ensure_autosave_script(self.caller)
-            state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
+            state = OLCState(
+                data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc)
+            )
             startnode = (
-                "menunode_desc" if self.caller.ndb.buildnpc.get("key") else "menunode_key"
+                "menunode_desc"
+                if self.caller.ndb.buildnpc.get("key")
+                else "menunode_key"
             )
             OLCEditor(
                 self.caller,
@@ -859,9 +843,13 @@ class CmdCNPC(Command):
             if use_mob:
                 self.caller.ndb.buildnpc["use_mob"] = True
             _ensure_autosave_script(self.caller)
-            state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
+            state = OLCState(
+                data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc)
+            )
             startnode = (
-                "menunode_desc" if self.caller.ndb.buildnpc.get("key") else "menunode_key"
+                "menunode_desc"
+                if self.caller.ndb.buildnpc.get("key")
+                else "menunode_key"
             )
             OLCEditor(
                 self.caller,
@@ -892,7 +880,9 @@ class CmdCNPC(Command):
             if use_mob:
                 self.caller.ndb.buildnpc["use_mob"] = True
             _ensure_autosave_script(self.caller)
-            state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
+            state = OLCState(
+                data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc)
+            )
             OLCEditor(
                 self.caller,
                 "world.menus.mob_builder_menu",
@@ -962,7 +952,9 @@ class CmdEditNPC(Command):
         primary = roles[0] if roles else "-"
         level = data.get("level") or npc.db.level or "-"
         self.msg(f"{status} {primary} L{level}")
-        state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
+        state = OLCState(
+            data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc)
+        )
         OLCEditor(
             self.caller,
             "world.menus.mob_builder_menu",
@@ -1220,7 +1212,9 @@ class CmdMSpawn(Command):
             proto_key = vnum
         else:
             mob_db = get_mobdb()
-            vmatch = next((num for num, p in mob_db.db.vnums.items() if p.get("key") == arg), None)
+            vmatch = next(
+                (num for num, p in mob_db.db.vnums.items() if p.get("key") == arg), None
+            )
             if vmatch is not None:
                 try:
                     obj = spawn_from_vnum(vmatch, location=self.caller.location)
@@ -1252,8 +1246,9 @@ class CmdMSpawn(Command):
         obj.db.spawn_room = self.caller.location
         obj.db.prototype_key = proto_key
 
-        from utils.script_utils import get_spawn_manager
-        script = get_spawn_manager()
+        from utils.script_utils import get_respawn_manager
+
+        script = get_respawn_manager()
         if script and hasattr(script, "record_spawn"):
             script.record_spawn(proto_key, self.caller.location, npc_id=obj.id)
 
@@ -1299,7 +1294,8 @@ class CmdMobPreview(Command):
         self.msg(f"Previewing {obj.key}. It will vanish soon.")
 
 
-from .mob_builder_commands import CmdMStat as CmdMStat, CmdMList as CmdMList
+from .mob_builder_commands import CmdMList as CmdMList
+from .mob_builder_commands import CmdMStat as CmdMStat
 
 
 class CmdMobTemplate(Command):
@@ -1374,7 +1370,9 @@ class CmdQuickMob(Command):
         self.caller.ndb.buildnpc = data
         self.caller.ndb.buildnpc_orig = dict(self.caller.ndb.buildnpc)
         _ensure_autosave_script(self.caller)
-        state = OLCState(data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc))
+        state = OLCState(
+            data=self.caller.ndb.buildnpc, original=dict(self.caller.ndb.buildnpc)
+        )
         OLCEditor(
             self.caller,
             "commands.npc_builder",

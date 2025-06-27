@@ -17,14 +17,13 @@ at_server_cold_stop()
 
 """
 
-
 import time
 
-from evennia.utils import logger
 from evennia.server.models import ServerConfig
-from utils.prototype_manager import load_all_prototypes
-from utils.script_utils import resume_paused_scripts, get_spawn_manager
+from evennia.utils import logger
 
+from utils.prototype_manager import load_all_prototypes
+from utils.script_utils import get_respawn_manager, resume_paused_scripts
 
 _PROTOTYPE_CACHE = {}
 
@@ -67,6 +66,7 @@ def _ensure_room_areas():
     """Assign rooms without area to an appropriate area."""
 
     from django.conf import settings
+
     from typeclasses.rooms import Room
     from world.areas import Area, find_area, save_area
 
@@ -109,10 +109,11 @@ def at_server_start():
     This is called every time the server starts up, regardless of
     how it was shut down.
     """
-    from evennia.utils import create
     from evennia.scripts.models import ScriptDB
-    from world.scripts.mob_db import get_mobdb
+    from evennia.utils import create
+
     from typeclasses.npcs import BaseNPC
+    from world.scripts.mob_db import get_mobdb
 
     script = ScriptDB.objects.filter(db_key="global_tick").first()
     if not script or script.typeclass_path != "typeclasses.scripts.GlobalTick":
@@ -151,12 +152,16 @@ def at_server_start():
         elif getattr(script.db, "_paused_time", None):
             script.unpause()
 
-    spawn_script = get_spawn_manager()
-    if not spawn_script or spawn_script.typeclass_path != "scripts.spawn_manager.SpawnManager":
+    spawn_script = get_respawn_manager()
+    if (
+        not spawn_script
+        or spawn_script.typeclass_path
+        != "scripts.mob_respawn_manager.MobRespawnManager"
+    ):
         if spawn_script:
             spawn_script.delete()
         spawn_script = create.create_script(
-            "scripts.spawn_manager.SpawnManager", key="spawn_manager"
+            "scripts.mob_respawn_manager.MobRespawnManager", key="mob_respawn_manager"
         )
     else:
         if not spawn_script.is_active:
@@ -205,6 +210,7 @@ def at_server_start():
     _ensure_room_areas()
     from typeclasses.rooms import Room
     from world.scripts import create_midgard_area
+
     if not (
         Room.objects.filter(db_tags__db_key__iexact="midgard").exists()
         or Room.objects.filter(
@@ -225,6 +231,7 @@ def at_server_stop():
     """
     logger.log_info("at_server_stop: cleaning up")
     from combat.round_manager import CombatRoundManager
+
     CombatRoundManager.get().force_end_all_combat()
     _clear_caches()
     ServerConfig.objects.conf("server_start_time", delete=True)
@@ -244,6 +251,7 @@ def at_server_reload_stop():
     """
     logger.log_info("at_server_reload_stop: reload complete")
     from combat.round_manager import CombatRoundManager
+
     CombatRoundManager.get().force_end_all_combat()
     ServerConfig.objects.conf("reload_started", delete=True)
 
@@ -264,4 +272,3 @@ def at_server_cold_stop():
     """
     logger.log_info("at_server_cold_stop: shutting down")
     _clear_caches()
-

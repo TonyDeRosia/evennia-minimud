@@ -1,26 +1,25 @@
-from random import randint, choice
-from string import punctuation
-from evennia import AttributeProperty
-from evennia import create_object
-from evennia.utils import lazy_property, iter_to_str, delay, logger
-from evennia.contrib.rpg.traits import TraitHandler
-from evennia.contrib.game_systems.clothing.clothing import (
-    ClothedCharacter,
-    get_worn_clothes,
-)
-from evennia.contrib.game_systems.cooldowns import CooldownHandler
-from evennia.prototypes.spawner import spawn
-from utils.currency import to_copper, from_copper, format_wallet
-from utils import normalize_slot
-from utils.slots import SLOT_ORDER
-from collections.abc import Mapping
 import math
+from collections.abc import Mapping
+from random import choice, randint
+from string import punctuation
+
+from evennia import AttributeProperty, create_object
+from evennia.contrib.game_systems.clothing.clothing import (ClothedCharacter,
+                                                            get_worn_clothes)
+from evennia.contrib.game_systems.cooldowns import CooldownHandler
+from evennia.contrib.rpg.traits import TraitHandler
+from evennia.prototypes.spawner import spawn
+from evennia.utils import delay, iter_to_str, lazy_property, logger
+
+from combat import combat_utils
+from combat.combat_actions import CombatResult
+from combat.spells import Spell
+from utils import normalize_slot
+from utils.currency import format_wallet, from_copper, to_copper
+from utils.slots import SLOT_ORDER
+from world.combat import get_health_description
 from world.system.constants import MAX_SATED
 from world.triggers import TriggerMixin
-from combat.spells import Spell
-from combat.combat_actions import CombatResult
-from world.combat import get_health_description
-from combat import combat_utils
 
 from .objects import ObjectParent
 
@@ -258,6 +257,7 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
         self.db.training_points = 0
         self.db.practice_sessions = 0
         from django.conf import settings
+
         self.db.level = 1
         self.db.experience = 0
         self.db.tnl = settings.XP_TO_LEVEL(1)
@@ -370,20 +370,19 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
         """
         Apply damage, after taking into account damage resistances.
         """
-        from combat.damage_types import (
-            DamageType,
-            ResistanceType,
-            get_damage_multiplier,
-        )
-
-        from world.system import state_manager
         from evennia.utils import utils
+
+        from combat.damage_types import (DamageType, ResistanceType,
+                                         get_damage_multiplier)
+        from world.system import state_manager
 
         # apply armor damage reduction with piercing
         reduction = self.defense(damage_type)
         armor = max(0, reduction)
         if attacker:
-            armor = max(0, armor - state_manager.get_effective_stat(attacker, "piercing"))
+            armor = max(
+                0, armor - state_manager.get_effective_stat(attacker, "piercing")
+            )
         damage = int(max(0, round(damage * (1 - armor / 100))))
         if attacker:
             log = getattr(self.ndb, "damage_log", None) or {}
@@ -407,13 +406,16 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
             damage = int(damage * get_damage_multiplier(resistances, dt))
 
         # magic resist mitigation
-        if dt and dt not in (DamageType.SLASHING, DamageType.PIERCING, DamageType.BLUDGEONING):
+        if dt and dt not in (
+            DamageType.SLASHING,
+            DamageType.PIERCING,
+            DamageType.BLUDGEONING,
+        ):
             mres = state_manager.get_effective_stat(self, "magic_resist")
             if attacker:
                 mres -= state_manager.get_effective_stat(attacker, "spell_penetration")
             if mres > 0:
                 damage = max(0, damage - mres)
-
 
         self.traits.health.current -= damage
         crit_prefix = "|rCritical!|n " if critical else ""
@@ -445,6 +447,7 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
             self.traits.health.rate = 0
             if not self.in_combat and not self.attributes.get("_dead"):
                 from combat.round_manager import leave_combat
+
                 leave_combat(self)
                 if bounty := self.db.bounty:
                     wallet = attacker.db.coins or {}
@@ -453,6 +456,7 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
                 if utils.inherits_from(self, PlayerCharacter):
                     self.on_death(attacker)
         return damage
+
     def at_emote(self, message, **kwargs):
         """
         Execute a room emote as ourself.
@@ -616,6 +620,7 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
         Attempt to use a skill, applying any stat bonus as necessary.
         """
         from world.system import state_manager
+
         target = kwargs.get("target")
 
         # using an active combat skill if a target is provided
@@ -624,17 +629,26 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
 
             skill_cls = SKILL_CLASSES.get(skill_name)
             if not skill_cls:
-                return CombatResult(actor=self, target=target, message="Nothing happens.")
+                return CombatResult(
+                    actor=self, target=target, message="Nothing happens."
+                )
             skill = skill_cls()
             if not self.cooldowns.ready(skill.name):
-                return CombatResult(actor=self, target=self, message="Still recovering.")
+                return CombatResult(
+                    actor=self, target=self, message="Still recovering."
+                )
             if self.traits.stamina.current < skill.stamina_cost:
                 return CombatResult(actor=self, target=self, message="Too exhausted.")
             self.traits.stamina.current -= skill.stamina_cost
             state_manager.add_cooldown(self, skill.name, skill.cooldown)
             from utils.hit_chance import calculate_hit_success
-            if not calculate_hit_success(self, skill.name, getattr(skill, "support_skill", None)):
-                return CombatResult(actor=self, target=target, message="You miss your strike.")
+
+            if not calculate_hit_success(
+                self, skill.name, getattr(skill, "support_skill", None)
+            ):
+                return CombatResult(
+                    actor=self, target=target, message="You miss your strike."
+                )
             result = skill.resolve(self, target)
             for eff in getattr(skill, "effects", []):
                 state_manager.add_status_effect(target, eff.key, eff.duration)
@@ -679,7 +693,10 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
         self.traits.mana.current -= spell.mana_cost
         state_manager.add_cooldown(self, spell.key, spell.cooldown)
         from utils.hit_chance import calculate_hit_success
-        if not calculate_hit_success(self, spell.key, getattr(spell, "support_skill", None)):
+
+        if not calculate_hit_success(
+            self, spell.key, getattr(spell, "support_skill", None)
+        ):
             self.msg("You fail to cast the spell.")
             return False
         colored = colorize_spell(spell.key)
@@ -839,6 +856,7 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
         if getattr(self.db, "natural_weapon", None):
             return self.db.natural_weapon
         from typeclasses.gear import BareHand
+
         return BareHand()
 
     def attack(self, target, weapon, **kwargs):
@@ -856,7 +874,9 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
                 self.msg("You don't see your target.")
             return
 
-        if not getattr(target, "traits", None) or not callable(getattr(target, "at_damage", None)):
+        if not getattr(target, "traits", None) or not callable(
+            getattr(target, "at_damage", None)
+        ):
             if self.sessions.count():
                 self.msg("You can't attack that.")
             return
@@ -878,7 +898,6 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
 
         if hasattr(self, "check_triggers"):
             self.check_triggers("on_attack", target=target, weapon=weapon)
-
 
     def revive(self, reviver, **kwargs):
         """
@@ -925,7 +944,9 @@ class PlayerCharacter(Character):
         return f"|g{name}|n"
 
     def at_damage(self, attacker, damage, damage_type=None, critical=False):
-        dmg = super().at_damage(attacker, damage, damage_type=damage_type, critical=critical)
+        dmg = super().at_damage(
+            attacker, damage, damage_type=damage_type, critical=critical
+        )
         if self.traits.health.value < 50 and self.sessions.count():
             self.refresh_prompt()
         return dmg
@@ -963,7 +984,6 @@ class PlayerCharacter(Character):
             self.traits.stamina.rate = 0.0
         self.msg(prompt=self.get_display_status(self))
 
-
     def respawn(self):
         """
         Resets the character back to the spawn point with full health.
@@ -989,7 +1009,9 @@ class PlayerCharacter(Character):
         for slot, item in self.equipment.items():
             if not item:
                 continue
-            if not item.access(looker, "view") or not item.access(looker, "search", default=True):
+            if not item.access(looker, "view") or not item.access(
+                looker, "search", default=True
+            ):
                 continue
             if hasattr(looker, "can_see") and not looker.can_see(item):
                 continue
@@ -1039,8 +1061,8 @@ class NPC(Character):
             amount.
         """
         from utils.currency import COIN_VALUES
-        from utils.prototype_manager import load_prototype
         from utils.dice import roll_dice_string
+        from utils.prototype_manager import load_prototype
 
         drops = list(self.db.drops or [])
         coin_loot: dict[str, int] = {}
@@ -1068,7 +1090,9 @@ class NPC(Character):
                             amt = int(amount)
                         coin_loot[proto.lower()] = coin_loot.get(proto.lower(), 0) + amt
                     else:
-                        if isinstance(proto, int) or (isinstance(proto, str) and proto.isdigit()):
+                        if isinstance(proto, int) or (
+                            isinstance(proto, str) and proto.isdigit()
+                        ):
                             proto_data = load_prototype("object", int(proto))
                             if proto_data:
                                 drops.append(proto_data)
@@ -1087,6 +1111,7 @@ class NPC(Character):
     def award_xp_to(self, attacker):
         """Grant experience reward to ``attacker``."""
         from world.system import state_manager
+
         exp_reward = getattr(self.db, "exp_reward", 0)
         if exp_reward is None:
             exp_reward = 0
@@ -1126,11 +1151,13 @@ class NPC(Character):
         if attacker and getattr(attacker.db, "combat_target", None) is self:
             attacker.db.combat_target = None
 
-        from utils.script_utils import get_spawn_manager
+        from utils.script_utils import get_respawn_manager
 
-        manager = get_spawn_manager()
+        manager = get_respawn_manager()
         if manager and hasattr(manager, "record_death"):
-            manager.record_death(self.db.prototype_key, self.db.spawn_room, npc_id=self.id)
+            manager.record_death(
+                self.db.prototype_key, self.db.spawn_room, npc_id=self.id
+            )
 
         self.delete()
 
@@ -1212,7 +1239,9 @@ class NPC(Character):
         """
         Apply damage, after taking into account damage resistances.
         """
-        dmg = super().at_damage(attacker, damage, damage_type=damage_type, critical=critical)
+        dmg = super().at_damage(
+            attacker, damage, damage_type=damage_type, critical=critical
+        )
         self.check_triggers("on_attack", attacker=attacker, damage=dmg)
 
         if self.traits.health.value <= 0 and not self.attributes.get("_dead"):
@@ -1224,6 +1253,7 @@ class NPC(Character):
             self.at_emote("flees!")
             self.db.fleeing = True
             from combat.round_manager import leave_combat
+
             leave_combat(self)
             # there's a 50/50 chance the object will escape forever
             if randint(0, 1):
@@ -1244,6 +1274,7 @@ class NPC(Character):
         else:
             self.db.combat_target = attacker
         return dmg
+
     def enter_combat(self, target, **kwargs):
         """
         initiate combat against another character
@@ -1272,6 +1303,7 @@ class NPC(Character):
 
         if engine:
             from combat.combat_actions import AttackAction
+
             engine.queue_action(self, AttackAction(self, target))
         else:
             self.attack(target, weapon)
@@ -1293,7 +1325,9 @@ class NPC(Character):
         """
         attack with your natural weapon
         """
-        if not getattr(target, "traits", None) or not callable(getattr(target, "at_damage", None)):
+        if not getattr(target, "traits", None) or not callable(
+            getattr(target, "at_damage", None)
+        ):
             if hasattr(wielder, "msg"):
                 wielder.msg("You can't attack that.")
             return

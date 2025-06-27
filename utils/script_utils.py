@@ -2,13 +2,15 @@
 
 from typing import Iterable, List
 
-from evennia.utils import logger
 from evennia.scripts.models import ScriptDB
+from evennia.utils import logger
 
 
-def resume_paused_scripts(keys: Iterable[str] | None = None,
-                           paths: Iterable[str] | None = None,
-                           log: bool = True) -> List[ScriptDB]:
+def resume_paused_scripts(
+    keys: Iterable[str] | None = None,
+    paths: Iterable[str] | None = None,
+    log: bool = True,
+) -> List[ScriptDB]:
     """Resume paused scripts.
 
     Parameters
@@ -45,21 +47,23 @@ def resume_paused_scripts(keys: Iterable[str] | None = None,
         resumed.append(script)
         if log:
             obj_name = getattr(script.obj, "key", None)
-            logger.log_info(f"[Startup] Resuming paused script: {script.key} ({obj_name})")
+            logger.log_info(
+                f"[Startup] Resuming paused script: {script.key} ({obj_name})"
+            )
 
     return resumed
 
 
-def get_spawn_manager() -> ScriptDB | None:
-    """Return the global ``SpawnManager`` script if it exists."""
+def get_respawn_manager() -> ScriptDB | None:
+    """Return the global ``MobRespawnManager`` script if it exists."""
 
-    return ScriptDB.objects.filter(db_key="spawn_manager").first()
+    return ScriptDB.objects.filter(db_key="mob_respawn_manager").first()
 
 
 def respawn_area(area_key: str) -> None:
     """Force respawn of all rooms in ``area_key`` using ``SpawnManager``."""
 
-    script = get_spawn_manager()
+    script = get_respawn_manager()
     if not script or not hasattr(script, "force_respawn"):
         return
     key = area_key.lower()
@@ -76,7 +80,7 @@ def respawn_area(area_key: str) -> None:
 def respawn_world() -> None:
     """Force respawn of every defined area."""
 
-    script = get_spawn_manager()
+    script = get_respawn_manager()
     if not script or not hasattr(script, "force_respawn"):
         return
     from evennia.objects.models import ObjectDB

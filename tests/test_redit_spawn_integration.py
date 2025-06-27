@@ -1,13 +1,15 @@
 from unittest.mock import MagicMock, patch
+
 from django.test import override_settings
-from evennia.utils.test_resources import EvenniaTest
 from evennia.utils import create
-from typeclasses.rooms import Room
-from typeclasses.npcs import BaseNPC
-from world.areas import Area
-from scripts.spawn_manager import SpawnManager
+from evennia.utils.test_resources import EvenniaTest
+
 from commands import redit
 from commands.admin import BuilderCmdSet
+from scripts.mob_respawn_manager import MobRespawnManager
+from typeclasses.npcs import BaseNPC
+from typeclasses.rooms import Room
+from world.areas import Area
 
 
 @override_settings(DEFAULT_HOME=None)
@@ -22,7 +24,7 @@ class TestReditSpawnIntegration(EvenniaTest):
         self.room.db.room_id = 5
         self.room.db.area = "zone"
         self.char1.location = self.room
-        self.script = SpawnManager()
+        self.script = MobRespawnManager()
         self.script.at_script_creation()
 
     def test_spawn_manager_integration(self):
@@ -51,7 +53,7 @@ class TestReditSpawnIntegration(EvenniaTest):
         with (
             patch("commands.redit.save_prototype"),
             patch("commands.redit.ObjectDB.objects.filter", return_value=[self.room]),
-            patch("commands.redit.get_spawn_manager", return_value=self.script),
+            patch("commands.redit.get_respawn_manager", return_value=self.script),
             patch.object(self.script, "_spawn") as mock_spawn,
         ):
             mock_spawn.side_effect = lambda proto, room: create.create_object(
@@ -61,7 +63,9 @@ class TestReditSpawnIntegration(EvenniaTest):
 
         self.script.register_room_spawn.assert_called_with(proto)
         self.script.force_respawn.assert_called_with(5)
-        npcs = [obj for obj in self.room.contents if obj.is_typeclass(BaseNPC, exact=False)]
+        npcs = [
+            obj for obj in self.room.contents if obj.is_typeclass(BaseNPC, exact=False)
+        ]
         assert len(npcs) == 1
         assert npcs[0].key == "slime"
         assert proto["vnum"] == 5
