@@ -7,7 +7,7 @@ from django.conf import settings
 from evennia.utils.utils import class_from_module
 from evennia.utils import inherits_from, logger
 
-from combat.corpse_creation import spawn_corpse
+from world.mechanics import corpse_manager
 from combat.round_manager import CombatRoundManager, leave_combat
 from world.system import state_manager
 
@@ -82,15 +82,11 @@ class DefaultDeathHandler(IDeathHandler):
                 None,
             )
             if not corpse:
-                corpse = spawn_corpse(victim, killer)
-                if corpse:
-                    corpse.location = location
-                    if getattr(victim, "key", None):
-                        corpse.db.corpse_of = victim.key
-                    if getattr(victim, "dbref", None):
-                        corpse.db.corpse_of_id = victim.dbref
-                    if getattr(getattr(victim, "db", None), "vnum", None) is not None:
-                        corpse.db.npc_vnum = victim.db.vnum
+                corpse = corpse_manager.create_corpse(victim)
+                if inherits_from(victim, "typeclasses.characters.NPC"):
+                    corpse_manager.apply_loot(victim, corpse, killer)
+                corpse_manager.finalize_corpse(victim, corpse)
+                corpse.location = location
 
         try:
             victim.at_death(killer)

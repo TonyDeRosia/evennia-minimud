@@ -1018,10 +1018,13 @@ class NPC(Character):
     # death handling -----------------------------------------------------
 
     def drop_loot(self, killer=None):
-        """Create a corpse and deposit any drops and coins.
+        """Calculate loot table drops and coin rewards.
 
-        The returned corpse will include ``npc_vnum`` if this NPC has a
-        ``vnum`` Attribute.
+        Returns
+        -------
+        tuple[list, dict]
+            A tuple of object prototypes to spawn and a mapping of coin name to
+            amount.
         """
         from utils.currency import COIN_VALUES
         from utils.prototype_manager import load_prototype
@@ -1037,7 +1040,7 @@ class NPC(Character):
                 chance = int(entry.get("chance", 100))
                 guaranteed = entry.get("guaranteed_after")
                 count = entry.get("_count", 0)
-                
+
                 roll = randint(1, 100)
                 if roll <= chance or (
                     guaranteed is not None and count >= int(guaranteed)
@@ -1063,43 +1066,11 @@ class NPC(Character):
                 else:
                     entry["_count"] = count + 1
 
-        corpse = make_corpse(self)
-
-        objs = spawn(*drops)
-        for obj in objs:
-            if not obj:
-                logger.log_warn(f"Loot drop for {self} returned no object.")
-                continue
-            obj.move_to(corpse, quiet=True)
-
-        # handle coin rewards
-        coin_map = {}
         if self.db.coin_drop:
             for coin, amt in (self.db.coin_drop or {}).items():
-                coin_map[coin] = coin_map.get(coin, 0) + int(amt)
-        for coin, amt in coin_loot.items():
-            coin_map[coin] = coin_map.get(coin, 0) + int(amt)
+                coin_loot[coin] = coin_loot.get(coin, 0) + int(amt)
 
-        if coin_map:
-            total_copper = to_copper(coin_map)
-            if killer:
-                wallet = killer.db.coins or {}
-                killer.db.coins = from_copper(to_copper(wallet) + total_copper)
-                if hasattr(killer, "msg"):
-                    coins = format_wallet(from_copper(total_copper))
-                    killer.msg(f"You receive |Y{coins}|n.")
-            else:
-                for coin, amt in from_copper(total_copper).items():
-                    if amt:
-                        pile = create_object(
-                            "typeclasses.objects.CoinPile",
-                            key=f"{coin} coins",
-                            location=corpse,
-                        )
-                        pile.db.coin_type = coin
-                        pile.db.amount = amt
-
-        return corpse
+        return drops, coin_loot
 
     def award_xp_to(self, attacker):
         """Grant experience reward to ``attacker``."""
