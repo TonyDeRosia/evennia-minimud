@@ -158,15 +158,13 @@ class TestCombatEngineMinimal(unittest.TestCase):
         with patch("world.system.state_manager.apply_regen"), patch(
             "combat.damage_processor.delay"
         ), patch("random.randint", return_value=0), patch(
-            "world.mechanics.corpse_manager.create_corpse", return_value=MagicMock(contents=[])
-        ) as mock_create, patch(
-            "world.mechanics.corpse_manager.apply_loot",
-            side_effect=lambda victim, corp, killer=None: corp.contents.extend(victim.loot),
-        ), patch("world.mechanics.corpse_manager.finalize_corpse"):
+            "world.mechanics.corpse_manager.make_corpse",
+            side_effect=lambda victim, killer=None: MagicMock(contents=list(victim.loot)),
+        ) as mock_make:
             engine.start_round()
             engine.process_round()
 
-        corpse = mock_create.return_value
+        corpse = mock_make.return_value
         self.assertIn(loot, corpse.contents)
         defender.drop_loot.assert_called_once_with(attacker)
 

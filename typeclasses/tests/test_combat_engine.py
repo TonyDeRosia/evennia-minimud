@@ -667,9 +667,7 @@ class TestCombatDeath(EvenniaTest):
         corpse = create.create_object('typeclasses.objects.Object', key='corpse', location=None)
 
         with patch('world.system.state_manager.check_level_up'), \
-             patch('world.mechanics.corpse_manager.create_corpse', return_value=corpse) as mock_spawn, \
-             patch('world.mechanics.corpse_manager.apply_loot'), \
-             patch('world.mechanics.corpse_manager.finalize_corpse'):
+             patch('world.mechanics.corpse_manager.make_corpse', return_value=corpse) as mock_spawn:
             npc.at_damage(self.char1, 0)
 
         mock_spawn.assert_called_once_with(npc)

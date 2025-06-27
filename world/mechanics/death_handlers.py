@@ -82,11 +82,7 @@ class DefaultDeathHandler(IDeathHandler):
                 None,
             )
             if not corpse:
-                corpse = corpse_manager.create_corpse(victim)
-                if inherits_from(victim, "typeclasses.characters.NPC"):
-                    corpse_manager.apply_loot(victim, corpse, killer)
-                corpse_manager.finalize_corpse(victim, corpse)
-                corpse.location = location
+                corpse = corpse_manager.make_corpse(victim, killer)
 
         try:
             victim.at_death(killer)
