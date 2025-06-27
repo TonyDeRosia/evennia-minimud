@@ -552,3 +552,25 @@ def test_npc_death_flow_keeps_combat_active_until_end():
         assert not ended
     assert instance.combat_ended
 
+
+def test_end_combat_suppresses_no_active_fighters_reason():
+    room = MagicMock()
+    room.msg_contents = MagicMock()
+
+    fighter = Dummy()
+    fighter.location = room
+
+    engine = CombatEngine([fighter], round_time=0)
+    instance = CombatInstance(1, engine, {fighter}, round_time=0)
+    instance.room = room
+
+    manager = MagicMock()
+    manager.combatant_to_combat = {}
+
+    with patch.object(CombatRoundManager, "get", return_value=manager):
+        instance.end_combat("No active fighters remaining")
+
+    calls = [c.args[0] for c in room.msg_contents.call_args_list]
+    assert "Combat ends:" in calls
+    assert all("No active fighters remaining" not in msg for msg in calls)
+
