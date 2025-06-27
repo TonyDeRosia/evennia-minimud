@@ -58,7 +58,7 @@ def proto_from_room(room) -> dict:
     except json.JSONDecodeError:
         existing = {}
 
-    for key in ("spawns", "xyz"):
+    for key in ("spawns",):
         if key in existing:
             proto[key] = existing[key]
 
