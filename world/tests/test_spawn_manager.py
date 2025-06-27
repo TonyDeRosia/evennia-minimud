@@ -23,12 +23,25 @@ class TestSpawnManager(EvenniaTest):
                 "area": "testarea",
                 "prototype": "basic_merchant",
                 "room": 1,
+                "room_id": 1,
                 "max_count": 2,
                 "respawn_rate": 5,
-                "spawned": [],
-                "dead_timestamps": [],
+                "idx": 0,
+                "last_spawn": 0.0,
             }
         ]
+        self.room.db.spawn_entries = [
+            {
+                "area": "testarea",
+                "prototype": "basic_merchant",
+                "room_id": 1,
+                "max_count": 2,
+                "respawn_rate": 5,
+                "active_mobs": [],
+                "dead_mobs": [],
+            }
+        ]
+        self.room.save()
         npc = create_object(BaseNPC, key="basic_merchant")
         with mock.patch("scripts.spawn_manager.prototypes.get_npc_prototypes", return_value={"basic_merchant": {"key": "basic_merchant"}}), \
              mock.patch("evennia.prototypes.spawner.spawn", return_value=[npc]):
@@ -134,10 +147,22 @@ class TestSpawnManager(EvenniaTest):
                 "room_id": 1,
                 "max_count": 1,
                 "respawn_rate": 5,
-                "spawned": [],
-                "dead_timestamps": [],
+                "idx": 0,
+                "last_spawn": 0.0,
             }
         ]
+        self.room.db.spawn_entries = [
+            {
+                "area": "testarea",
+                "prototype": "5",
+                "room_id": 1,
+                "max_count": 1,
+                "respawn_rate": 5,
+                "active_mobs": [npc.id],
+                "dead_mobs": [],
+            }
+        ]
+        self.room.save()
         with mock.patch("scripts.spawn_manager.spawn_from_vnum") as m_spawn:
             self.script.force_respawn(1)
 
@@ -178,8 +203,8 @@ class TestSpawnManager(EvenniaTest):
                 "room_id": 1,
                 "max_count": 1,
                 "respawn_rate": 5,
-                "spawned": [],
-                "dead_timestamps": [],
+                "idx": 0,
+                "last_spawn": 0.0,
             },
             {
                 "prototype": "b",
@@ -187,10 +212,29 @@ class TestSpawnManager(EvenniaTest):
                 "room_id": 2,
                 "max_count": 1,
                 "respawn_rate": 5,
-                "spawned": [],
-                "dead_timestamps": [],
+                "idx": 1,
+                "last_spawn": 0.0,
             },
         ]
+        self.room.db.spawn_entries = [
+            {
+                "prototype": "a",
+                "room_id": 1,
+                "max_count": 1,
+                "respawn_rate": 5,
+                "active_mobs": [],
+                "dead_mobs": [],
+            },
+            {
+                "prototype": "b",
+                "room_id": 2,
+                "max_count": 1,
+                "respawn_rate": 5,
+                "active_mobs": [],
+                "dead_mobs": [],
+            },
+        ]
+        self.room.save()
         with mock.patch.object(self.script, "_spawn") as m_spawn, \
              mock.patch("scripts.spawn_manager.time.time", return_value=10), \
              mock.patch("evennia.utils.logger.log_debug") as m_debug:
@@ -216,10 +260,22 @@ class TestSpawnManager(EvenniaTest):
                 "room_id": 1,
                 "max_count": 1,
                 "respawn_rate": 5,
-                "spawned": [],
-                "dead_timestamps": [],
+                "idx": 0,
+                "last_spawn": 0.0,
             }
         ]
+        self.room.db.spawn_entries = [
+            {
+                "area": "testarea",
+                "prototype": "basic_merchant",
+                "room_id": 1,
+                "max_count": 1,
+                "respawn_rate": 5,
+                "active_mobs": [],
+                "dead_mobs": [],
+            }
+        ]
+        self.room.save()
         npc = create_object(BaseNPC, key="basic_merchant")
         with mock.patch(
             "scripts.spawn_manager.prototypes.get_npc_prototypes",
@@ -250,10 +306,22 @@ class TestSpawnManager(EvenniaTest):
                 "room_id": 1,
                 "max_count": 1,
                 "respawn_rate": 5,
-                "spawned": [],
-                "dead_timestamps": [],
+                "idx": 0,
+                "last_spawn": 0.0,
             }
         ]
+        self.room.db.spawn_entries = [
+            {
+                "area": "testarea",
+                "prototype": "5",
+                "room_id": 1,
+                "max_count": 1,
+                "respawn_rate": 5,
+                "active_mobs": [],
+                "dead_mobs": [],
+            }
+        ]
+        self.room.save()
         npc = create_object(BaseNPC, key="num")
         with mock.patch("scripts.spawn_manager.spawn_from_vnum") as m_spawn:
             def side(vnum, location=None):

@@ -73,15 +73,17 @@ class CmdShowSpawns(Command):
                 self.msg("Current room has no VNUM.")
                 return
 
-        lines = []
-        for entry in script.db.entries:
-            if script._normalize_room_id(entry) != target_vnum:
-                continue
+        room = script._get_room({"room": target_vnum, "room_id": target_vnum})
+        if not room:
+            self.msg("Room not found.")
+            return
 
-            obj = script._get_room(entry)
-            live = script._live_count(entry.get("prototype"), obj) if obj else 0
+        lines = []
+        for entry in room.db.spawn_entries or []:
+            proto = entry.get("prototype")
+            live = script._live_count(proto, room)
             lines.append(
-                f"{entry.get('prototype')} (max {entry.get('max_count')}, respawn {entry.get('respawn_rate')}s, live {live})"
+                f"{proto} (max {entry.get('max_count')}, respawn {entry.get('respawn_rate')}s, live {live})"
             )
 
         if lines:

@@ -22,13 +22,16 @@ class TestScriptUtils(unittest.TestCase):
 
     def test_respawn_area_calls_force_respawn(self):
         mock_script = MagicMock()
-        mock_script.db.entries = [
-            {"area": "zone", "room_id": 1},
-            {"area": "town", "room_id": 2},
-            {"area": "zone", "room_id": 3},
-        ]
-        mock_script._normalize_room_id.side_effect = lambda entry: entry.get("room_id")
-        with patch("utils.script_utils.get_spawn_manager", return_value=mock_script):
+        room1 = MagicMock()
+        room1.db.spawn_entries = [1]
+        room1.db.room_id = 1
+        room1.attributes.get.return_value = "zone"
+        room3 = MagicMock()
+        room3.db.spawn_entries = [1]
+        room3.db.room_id = 3
+        room3.attributes.get.return_value = "zone"
+        with patch("utils.script_utils.get_spawn_manager", return_value=mock_script), \
+             patch("utils.script_utils.ObjectDB.objects.get_by_attribute", return_value=[room1, room3]):
             script_utils.respawn_area("zone")
         mock_script.force_respawn.assert_any_call(1)
         mock_script.force_respawn.assert_any_call(3)

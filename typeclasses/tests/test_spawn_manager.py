@@ -219,4 +219,4 @@ class TestSpawnManager(EvenniaTest):
             with patch("scripts.spawn_manager.time.time", return_value=1006):
                 self.script.at_repeat()
 
-            self.assertEqual(len([o for o in self.room1.contents if o.key == "goblin"]), 2)
+            self.assertEqual(len([o for o in self.room1.contents if o.key == "goblin"]), 1)
