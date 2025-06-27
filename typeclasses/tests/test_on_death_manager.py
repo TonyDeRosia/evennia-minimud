@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 from evennia.utils.test_resources import EvenniaTest
 from evennia.utils import create
+from django.test import override_settings
 
 from typeclasses.characters import NPC, PlayerCharacter
 from typeclasses.rooms import Room
@@ -9,6 +10,7 @@ from world.mechanics import on_death_manager
 from combat.round_manager import CombatRoundManager
 
 
+@override_settings(DEFAULT_HOME=None)
 class TestOnDeathManager(EvenniaTest):
     def setUp(self):
         super().setUp()
@@ -24,7 +26,17 @@ class TestOnDeathManager(EvenniaTest):
         manager.force_end_all_combat()
         inst = manager.start_combat([self.char1, npc])
 
-        with patch.object(inst.engine, "award_experience") as mock_award:
+        dummy_corpse = create.create_object("typeclasses.objects.Object", key="corpse", location=None)
+
+        def finalize_side(v, c):
+            c.db.corpse_of = v.key
+
+        with (
+            patch.object(inst.engine, "award_experience") as mock_award,
+            patch("world.mechanics.corpse_manager.create_corpse", return_value=dummy_corpse),
+            patch("world.mechanics.corpse_manager.apply_loot"),
+            patch("world.mechanics.corpse_manager.finalize_corpse", side_effect=finalize_side),
+        ):
             on_death_manager.handle_death(npc, self.char1)
 
         mock_award.assert_called_once_with(self.char1, npc)
@@ -37,9 +49,20 @@ class TestOnDeathManager(EvenniaTest):
         npc.db.drops = []
         manager = CombatRoundManager.get()
         manager.force_end_all_combat()
-        manager.start_combat([self.char1, npc])
+        inst = manager.start_combat([self.char1, npc])
 
-        with patch("world.system.state_manager.gain_xp") as mock_gain:
+        dummy_corpse = create.create_object("typeclasses.objects.Object", key="corpse", location=None)
+
+        def finalize_side(v, c):
+            c.db.corpse_of = v.key
+
+        with (
+            patch("world.system.state_manager.gain_xp") as mock_gain,
+            patch.object(inst.engine, "award_experience") as mock_award,
+            patch("world.mechanics.corpse_manager.create_corpse", return_value=dummy_corpse),
+            patch("world.mechanics.corpse_manager.apply_loot"),
+            patch("world.mechanics.corpse_manager.finalize_corpse", side_effect=finalize_side),
+        ):
             on_death_manager.handle_death(self.char1, npc)
 
         mock_gain.assert_not_called()
@@ -55,21 +78,32 @@ class TestOnDeathManager(EvenniaTest):
         def record_msg(*args, **kwargs):
             order.append("msg")
 
-        def drop_loot_side(killer=None):
+        def create_corpse_side(victim):
             order.append("corpse")
-            corpse = create.create_object("typeclasses.objects.Corpse", key="corpse", location=None)
-            loot = create.create_object("typeclasses.objects.Object", key="loot", location=corpse)
+            corpse = create.create_object("typeclasses.objects.Object", key="corpse", location=None)
             return corpse
+
+        def apply_loot_side(victim, corpse, killer=None):
+            order.append("loot")
+            loot = MagicMock(key="loot")
+            loot.location = corpse
+            corpse.contents.append(loot)
 
         npc.msg = MagicMock(side_effect=record_msg)
         self.room.msg_contents = MagicMock(side_effect=record_msg)
-        npc.drop_loot = MagicMock(side_effect=drop_loot_side)
 
-        on_death_manager.handle_death(npc, self.char1)
+        with (
+            patch("world.mechanics.corpse_manager.create_corpse", side_effect=create_corpse_side),
+            patch("world.mechanics.corpse_manager.apply_loot", side_effect=apply_loot_side),
+            patch("world.mechanics.corpse_manager.finalize_corpse"),
+        ):
+            corpse = on_death_manager.handle_death(npc, self.char1)
 
         self.assertEqual(order[0], "msg")
         self.assertEqual(order[1], "msg")
         self.assertEqual(order[2], "corpse")
+        self.assertEqual(order[3], "loot")
+        self.assertIs(corpse.location, self.room)
 
 
 if __name__ == "__main__":
