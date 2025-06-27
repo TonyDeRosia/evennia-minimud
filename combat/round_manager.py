@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Set
 from django.conf import settings
 
 from evennia.utils import delay
-from evennia.utils.logger import log_trace
+from evennia.utils.logger import log_trace, log_info
 import logging
 from combat.combatants import _current_hp
 from combat.events import combat_started, round_processed, combat_ended
@@ -266,11 +266,19 @@ class CombatInstance:
         self.cancel_tick()
         CombatRoundManager.get().remove_combat(self.combat_id)
 
+        send_room_msg = True
         if reason == "No active fighters remaining":
             reason = ""
+        if reason == "Invalid combat instance":
+            try:
+                log_info(reason)
+            except Exception:
+                log_trace(reason)
+            reason = ""
+            send_room_msg = False
 
         message = f"Combat ends: {reason}" if reason else "Combat ends:"
-        if room and hasattr(room, "msg_contents"):
+        if send_room_msg and room and hasattr(room, "msg_contents"):
             try:
                 room.msg_contents(message)
             except Exception:  # pragma: no cover - safety
