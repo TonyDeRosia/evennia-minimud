@@ -266,6 +266,9 @@ class CombatInstance:
         self.cancel_tick()
         CombatRoundManager.get().remove_combat(self.combat_id)
 
+        if reason == "No active fighters remaining":
+            reason = ""
+
         message = f"Combat ends: {reason}" if reason else "Combat ends:"
         if room and hasattr(room, "msg_contents"):
             try:
