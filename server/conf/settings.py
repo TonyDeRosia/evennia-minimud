@@ -59,10 +59,11 @@ DEFAULT_RECALL_ROOM = "#2"
 # ----------------------------------------------------------------------
 # Corpse decay settings
 # ----------------------------------------------------------------------
-# Minimum and maximum minutes before an NPC corpse decays. The exact
-# duration is chosen randomly for each corpse within this range.
-CORPSE_DECAY_MIN = 5
-CORPSE_DECAY_MAX = 10
+# Minimum and maximum time in seconds before an NPC corpse decays. The exact
+# duration is chosen randomly for each corpse within this range. Increase the
+# minimum to five minutes so corpses persist longer by default.
+CORPSE_DECAY_MIN = 300
+CORPSE_DECAY_MAX = 600
 
 # When ``True`` a corpse will decay even if being carried in someone's
 # inventory. Set to ``False`` to only allow decay when lying in a room.
