@@ -59,7 +59,7 @@ class TestDefeatRewards(unittest.TestCase):
         engine = CombatEngine([attacker, defender], round_time=0)
         inst = CombatInstance(1, engine, {attacker, defender})
         self.manager.combats[1] = inst
-        with patch('world.mechanics.on_death_manager.spawn_corpse') as mock_corpse, \
+        with patch('world.mechanics.death_handlers.spawn_corpse') as mock_corpse, \
              patch.object(CombatEngine, 'award_experience') as mock_xp:
             engine.processor.handle_defeat(defender, attacker)
             mock_corpse.assert_called()
