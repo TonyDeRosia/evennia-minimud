@@ -84,76 +84,10 @@ def mobprogs_to_triggers(mobprogs: list[dict]) -> Dict[str, list[dict]]:
     return result
 
 
+from world.mechanics import corpse_manager
+
+
 def make_corpse(npc):
-    """Create a corpse object for ``npc`` and transfer belongings.
-
-    If ``npc.db.vnum`` is defined, it will be copied to the corpse as the
-    ``npc_vnum`` Attribute.
-    """
-
-    from evennia import create_object
-    from world.mob_constants import ACTFLAGS
-
-    if not npc or not npc.location:
-        return None
-
-    # avoid multiple corpses if on_death is called repeatedly for the same npc
-    existing = [
-        obj
-        for obj in npc.location.contents
-        if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
-        and obj.db.corpse_of_id == npc.dbref
-    ]
-    if existing:
-        return existing[0]
-
-    attrs = [("corpse_of", npc.key), ("corpse_of_id", npc.dbref), ("is_corpse", True)]
-    if getattr(npc.db, "vnum", None) is not None:
-        attrs.append(("npc_vnum", npc.db.vnum))
-    decay = getattr(npc.db, "corpse_decay_time", None)
-    if decay is None:
-        from django.conf import settings
-        from random import randint
-
-        decay = randint(
-            getattr(settings, "CORPSE_DECAY_MIN", 5),
-            getattr(settings, "CORPSE_DECAY_MAX", 10),
-        )
-    attrs.append(("decay_time", decay))
-    corpse = create_object(
-        "typeclasses.objects.Corpse",
-        key=f"corpse of {npc.key}",
-        location=npc.location,
-        attributes=attrs,
-    )
-    # store the vnum of the NPC on the corpse for bookkeeping
-    if hasattr(npc.db, "vnum"):
-        corpse.db.npc_vnum = npc.db.vnum
-
-    no_loot = ACTFLAGS.NOLOOT.value in (npc.db.actflags or [])
-
-    if not no_loot:
-        # move carried items
-        for obj in list(npc.contents):
-            obj.location = corpse
-
-        moved = set()
-        for item in npc.equipment.values():
-            if item and item not in moved:
-                item.location = corpse
-                moved.add(item)
-
-    # drop carried coins unless flagged NOLOOT
-    if not no_loot:
-        for coin, amt in (npc.db.coins or {}).items():
-            if int(amt):
-                pile = create_object(
-                    "typeclasses.objects.CoinPile",
-                    key=f"{coin} coins",
-                    location=corpse,
-                )
-                pile.db.coin_type = coin
-                pile.db.amount = int(amt)
-
-    return corpse
+    """Create a corpse for ``npc`` using :mod:`corpse_manager`."""
+    return corpse_manager.make_corpse(npc)
 

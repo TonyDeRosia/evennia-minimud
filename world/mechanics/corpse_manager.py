@@ -9,61 +9,96 @@ from evennia.utils import inherits_from, logger
 from evennia.prototypes.spawner import spawn
 
 from utils.currency import to_copper, from_copper, format_wallet
-from world.mob_constants import BODYPARTS
+from world.mob_constants import BODYPARTS, ACTFLAGS
 
 
 __all__ = [
+    "make_corpse",
     "create_corpse",
     "apply_loot",
     "finalize_corpse",
 ]
 
 
-def create_corpse(victim):
-    """Instantiate a bare corpse for ``victim``.
-
-    Only base attributes such as ``decay_time`` and ``is_corpse`` are set. The
-    caller is responsible for finalizing attributes like ``corpse_of``.
-    """
-    if not victim:
+def make_corpse(npc):
+    """Create and populate a corpse object for ``npc``."""
+    if not npc or not npc.location:
         return None
 
-    decay = getattr(victim.db, "corpse_decay_time", None)
+    existing = [
+        obj
+        for obj in npc.location.contents
+        if obj.is_typeclass("typeclasses.objects.Corpse", exact=False)
+        and obj.db.corpse_of_id == npc.dbref
+    ]
+    if existing:
+        return existing[0]
+
+    decay = getattr(npc.db, "corpse_decay_time", None)
     if decay is None:
         decay = randint(
             getattr(settings, "CORPSE_DECAY_MIN", 5),
             getattr(settings, "CORPSE_DECAY_MAX", 10),
         )
 
+    attrs = [
+        ("corpse_of", npc.key),
+        ("corpse_of_id", npc.dbref),
+        ("is_corpse", True),
+        ("decay_time", decay),
+    ]
+    if getattr(npc.db, "vnum", None) is not None:
+        attrs.append(("npc_vnum", npc.db.vnum))
+
     corpse = create_object(
         "typeclasses.objects.Corpse",
-        key=f"corpse of {victim.key}",
-        location=None,
-        attributes=[("decay_time", decay), ("is_corpse", True)],
+        key=f"corpse of {npc.key}",
+        location=npc.location,
+        attributes=attrs,
     )
+
+    no_loot = ACTFLAGS.NOLOOT.value in (npc.db.actflags or [])
+    if not no_loot:
+        for obj in list(npc.contents):
+            obj.location = corpse
+
+        moved = set()
+        if hasattr(npc, "equipment"):
+            for item in npc.equipment.values():
+                if item and item not in moved:
+                    item.location = corpse
+                    moved.add(item)
+
+        if npc.db.coin_drop:
+            for coin, amt in npc.db.coin_drop.items():
+                if int(amt):
+                    pile = create_object(
+                        "typeclasses.objects.CoinPile",
+                        key=f"{coin} coins",
+                        location=corpse,
+                    )
+                    pile.db.coin_type = coin
+                    pile.db.amount = int(amt)
+
+    corpse.db.desc = f"The corpse of {npc.key} lies here."
 
     return corpse
 
 
+def create_corpse(victim):
+    """Create and return a corpse for ``victim``."""
+    if not victim:
+        return None
+    return make_corpse(victim)
+
+
 def apply_loot(victim, corpse, killer=None):
-    """Move inventory/equipment and generate loot for ``victim``."""
+    """Generate additional loot for ``victim``."""
     if not victim or not corpse:
         return
 
-    # Move carried objects unless flagged NOLOOT
     actflags = getattr(victim.db, "actflags", []) or []
     no_loot = "noloot" in [str(f).lower() for f in actflags]
-
-    if not no_loot:
-        for obj in list(victim.contents):
-            obj.location = corpse
-
-        moved = set()
-        if hasattr(victim, "equipment"):
-            for item in victim.equipment.values():
-                if item and item not in moved:
-                    item.location = corpse
-                    moved.add(item)
 
     if inherits_from(victim, "typeclasses.characters.PlayerCharacter"):
         # spawn random body parts
