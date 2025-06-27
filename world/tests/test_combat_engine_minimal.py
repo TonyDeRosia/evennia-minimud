@@ -143,17 +143,10 @@ class TestCombatEngineMinimal(unittest.TestCase):
             def __init__(self, *args, **kwargs):
                 super().__init__(*args, **kwargs)
                 self.loot = [loot]
-                self.drop_loot = MagicMock(side_effect=self._drop)
-
-            def _drop(self, killer=None):
-                corpse = MagicMock()
-                corpse.contents = list(self.loot)
-                if self.location:
-                    self.location.contents.append(corpse)
-                return corpse
+                self.drop_loot = MagicMock(return_value=([], {}))
 
             def on_death(self, killer):
-                return self.drop_loot(killer)
+                self.drop_loot(killer)
 
         defender = LootNPC(key="defender")
         room = MagicMock()
@@ -164,11 +157,16 @@ class TestCombatEngineMinimal(unittest.TestCase):
         engine.queue_action(attacker, KillAction(attacker, defender))
         with patch("world.system.state_manager.apply_regen"), patch(
             "combat.damage_processor.delay"
-        ), patch("random.randint", return_value=0):
+        ), patch("random.randint", return_value=0), patch(
+            "world.mechanics.corpse_manager.create_corpse", return_value=MagicMock(contents=[])
+        ) as mock_create, patch(
+            "world.mechanics.corpse_manager.apply_loot",
+            side_effect=lambda victim, corp, killer=None: corp.contents.extend(victim.loot),
+        ), patch("world.mechanics.corpse_manager.finalize_corpse"):
             engine.start_round()
             engine.process_round()
 
-        corpse = next(obj for obj in room.contents if obj not in (attacker, defender))
+        corpse = mock_create.return_value
         self.assertIn(loot, corpse.contents)
         defender.drop_loot.assert_called_once_with(attacker)
 

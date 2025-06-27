@@ -667,10 +667,12 @@ class TestCombatDeath(EvenniaTest):
         corpse = create.create_object('typeclasses.objects.Object', key='corpse', location=None)
 
         with patch('world.system.state_manager.check_level_up'), \
-             patch('world.mechanics.death_handlers.spawn_corpse', return_value=corpse) as mock_spawn:
+             patch('world.mechanics.corpse_manager.create_corpse', return_value=corpse) as mock_spawn, \
+             patch('world.mechanics.corpse_manager.apply_loot'), \
+             patch('world.mechanics.corpse_manager.finalize_corpse'):
             npc.at_damage(self.char1, 0)
 
-        mock_spawn.assert_called_once_with(npc, self.char1)
+        mock_spawn.assert_called_once_with(npc)
         self.assertIs(corpse.location, self.room1)
 
     def test_engine_kill_still_awards_xp_when_on_death_deletes(self):
