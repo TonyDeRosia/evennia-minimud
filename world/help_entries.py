@@ -1250,6 +1250,10 @@ Arguments:
 Examples:
     @showspawns
     @showspawns 200001
+
+Notes:
+    - Room prototypes use |wspawn_interval|n. SpawnManager stores this as
+      |wrespawn_rate|n, which is what this command displays.
 """,
     },
     {
@@ -1263,7 +1267,7 @@ This describes how to make NPCs automatically appear in a room.
 1. Create or edit a mob prototype using |wcnpc|n or |wmobbuilder|n.
 2. Save the prototype with a VNUM.
 3. Use |wredit <room_vnum>|n and choose |wEdit spawns|n to add the prototype,
-   max count and respawn interval.
+   max count and spawn interval (stored at runtime as |wrespawn_rate|n).
 4. Save the room prototype. Spawns are registered automatically, but you can
    use |w@spawnreload|n or |wasave changed|n to refresh them manually.
 5. Check spawns with |w@showspawns <room_vnum>|n.
