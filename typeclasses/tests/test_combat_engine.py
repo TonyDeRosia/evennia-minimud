@@ -443,7 +443,7 @@ class TestCombatDeath(EvenniaTest):
         npc.db.vnum = 77
 
         with patch.object(npc, "delete") as mock_delete:
-            npc.on_death(self.char1)
+            corpse_returned = npc.on_death(self.char1)
             corpse = next(
                 obj
                 for obj in self.room1.contents
@@ -452,6 +452,7 @@ class TestCombatDeath(EvenniaTest):
             self.assertEqual(corpse.db.npc_vnum, 77)
             self.assertTrue(npc.db.is_dead)
             mock_delete.assert_called_once()
+            self.assertIs(corpse_returned, corpse)
 
     def test_unsaved_npc_death_creates_corpse_and_awards_xp(self):
         from evennia.utils import create
