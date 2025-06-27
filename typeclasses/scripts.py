@@ -78,18 +78,22 @@ class GlobalTick(Script):
         from .characters import PlayerCharacter
         from world.system import state_manager
 
-        # Advance timers on all characters before applying regen
-        state_manager.tick_all()
+        try:
+            # Advance timers on all characters before applying regen
+            state_manager.tick_all()
 
-        tickables = search_tag(key="tickable")
-        for obj in tickables:
-            if not hasattr(obj, "traits"):
-                continue
+            tickables = search_tag(key="tickable")
+            for obj in tickables:
+                if not hasattr(obj, "traits"):
+                    continue
 
-            state_manager.apply_regen(obj)
+                state_manager.apply_regen(obj)
 
-            if hasattr(obj, "refresh_prompt"):
-                obj.refresh_prompt()
+                if hasattr(obj, "refresh_prompt"):
+                    obj.refresh_prompt()
+        except Exception as err:  # pragma: no cover - log errors
+            target = locals().get("obj")
+            logger.log_err(f"GlobalTick error on {target}: {err}")
 
 
 
