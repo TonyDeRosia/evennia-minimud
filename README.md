@@ -219,20 +219,23 @@ queue a `SpellAction` or `SkillAction` on the active combat engine or
 resolve the effect immediately when outside of combat.
 
 Running Tests
-Install dependencies first. You can run the helper script:
+Before running `pytest`, you **must** install the testing requirements so Django
+and Evennia are available. Use the helper script:
 
 ```bash
 scripts/setup_test_env.sh
 ```
 
-which installs Django, Evennia and the rest of the testing requirements. Alternatively, install them manually:
+which installs Django, Evennia and the rest of the test dependencies. You can
+also install them manually:
 
 ```bash
 pip install -r requirements-test.txt
 pip install -e .
 ```
 
-If these packages are not installed before running `pytest`, test collection will fail with import errors for Django/Evennia. Once dependencies are installed run:
+Skipping this step will cause `pytest` to fail during collection with missing
+Django or Evennia modules. After the environment is prepared, run:
 
 ```bash
 pytest -q
