@@ -152,6 +152,17 @@ def at_server_start():
         elif getattr(script.db, "_paused_time", None):
             script.unpause()
 
+    # remove legacy SpawnManager script if it still exists
+    legacy_script = (
+        ScriptDB.objects.filter(db_key="spawn_manager").first()
+        or ScriptDB.objects.filter(
+            typeclass_path="scripts.spawn_manager.SpawnManager"
+        ).first()
+    )
+    if legacy_script:
+        logger.log_info("[Startup] Removing legacy SpawnManager script")
+        legacy_script.delete()
+
     spawn_script = get_respawn_manager()
     if (
         not spawn_script
