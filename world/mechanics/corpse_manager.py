@@ -7,6 +7,7 @@ from django.conf import settings
 from evennia import create_object
 from evennia.utils import inherits_from, logger
 from evennia.prototypes.spawner import spawn
+import time
 
 from utils.currency import to_copper, from_copper, format_wallet
 from world.mob_constants import BODYPARTS
@@ -42,6 +43,11 @@ def create_corpse(victim):
         location=None,
         attributes=[("decay_time", decay), ("is_corpse", True)],
     )
+
+    corpse.tags.add("corpse", category="corpse_decay")
+    corpse.db.created_at = time.time()
+    if corpse.db.decay_time is None:
+        corpse.db.decay_time = 300
 
     return corpse
 
