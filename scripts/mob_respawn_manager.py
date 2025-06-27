@@ -39,26 +39,32 @@ class MobRespawnTracker:
         norm = self._normalize_proto(prototype)
         entries = room.db.spawn_entries or []
         now = time.time()
+        changed = False
         for idx, entry in enumerate(entries):
             if self._normalize_proto(entry.get("prototype")) != norm:
                 continue
             active = [sid for sid in entry.get("active_mobs", []) if sid != npc_id]
-            entry["active_mobs"] = active
+            if active != entry.get("active_mobs", []):
+                entry["active_mobs"] = active
+                changed = True
             if npc_id is not None:
                 dead = entry.get("dead_mobs", [])
                 dead.append({"id": npc_id, "time_of_death": now})
                 entry["dead_mobs"] = dead
+                changed = True
             entry["last_spawn"] = now
             entries[idx] = entry
             break
-        room.db.spawn_entries = entries
-        room.save()
+        if changed:
+            room.db.spawn_entries = entries
+            room.save()
 
     def record_spawn(
         self, prototype: Any, room: Room, npc_id: int | None = None
     ) -> None:
         norm = self._normalize_proto(prototype)
         entries = room.db.spawn_entries or []
+        changed = False
         for idx, entry in enumerate(entries):
             if self._normalize_proto(entry.get("prototype")) != norm:
                 continue
@@ -67,11 +73,13 @@ class MobRespawnTracker:
                 if npc_id not in active:
                     active.append(npc_id)
                     entry["active_mobs"] = active
+                    changed = True
             entry["last_spawn"] = time.time()
             entries[idx] = entry
             break
-        room.db.spawn_entries = entries
-        room.save()
+        if changed:
+            room.db.spawn_entries = entries
+            room.save()
 
     def process_room(self, room: Room) -> None:
         now = time.time()
@@ -269,8 +277,9 @@ class MobRespawnManager(Script):
                     "last_spawn": 0.0,
                 }
             )
-        room.db.spawn_entries = entries
-        room.save()
+        if entries != (room.db.spawn_entries or []):
+            room.db.spawn_entries = entries
+            room.save()
         tracker = self.get_tracker(room.db.area)
         tracker.add_room(room)
 

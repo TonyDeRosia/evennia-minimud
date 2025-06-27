@@ -51,12 +51,19 @@ class SpawnManager(Script):
                 continue
             entries = room.db.spawn_entries or []
             idx = entry.get("idx", i)
+            changed = False
             while len(entries) <= idx:
                 entries.append({})
-            entries[idx].setdefault("active_mobs", [])
-            entries[idx].setdefault("dead_mobs", [])
-            room.db.spawn_entries = entries
-            room.save()
+                changed = True
+            if "active_mobs" not in entries[idx]:
+                entries[idx]["active_mobs"] = []
+                changed = True
+            if "dead_mobs" not in entries[idx]:
+                entries[idx]["dead_mobs"] = []
+                changed = True
+            if changed:
+                room.db.spawn_entries = entries
+                room.save()
         self.db.batch_size = self.db.batch_size or 1
         self.db.tick_count = self.db.tick_count or 0
 
@@ -161,11 +168,14 @@ class SpawnManager(Script):
                 room_entries = room.db.spawn_entries or []
                 if idx < len(room_entries):
                     active = room_entries[idx].get("active_mobs", [])
+                    changed = False
                     if npc_id is not None and npc_id not in active:
                         active.append(npc_id)
-                    room_entries[idx]["active_mobs"] = active
-                    room.db.spawn_entries = room_entries
-                    room.save()
+                        room_entries[idx]["active_mobs"] = active
+                        changed = True
+                    if changed:
+                        room.db.spawn_entries = room_entries
+                        room.save()
                 entry["last_spawn"] = time.time()
                 break
 
@@ -182,15 +192,20 @@ class SpawnManager(Script):
                 room_entries = room.db.spawn_entries or []
                 if idx < len(room_entries):
                     rm_entry = room_entries[idx]
+                    changed = False
                     active = [sid for sid in rm_entry.get("active_mobs", []) if sid != npc_id]
-                    rm_entry["active_mobs"] = active
+                    if active != rm_entry.get("active_mobs", []):
+                        rm_entry["active_mobs"] = active
+                        changed = True
                     if npc_id is not None:
                         dead = rm_entry.get("dead_mobs", [])
                         dead.append({"id": npc_id, "time_of_death": now})
                         rm_entry["dead_mobs"] = dead
+                        changed = True
                     room_entries[idx] = rm_entry
-                    room.db.spawn_entries = room_entries
-                    room.save()
+                    if changed:
+                        room.db.spawn_entries = room_entries
+                        room.save()
                 entry["last_spawn"] = now
                 break
 
@@ -203,7 +218,7 @@ class SpawnManager(Script):
         self.db.entries = [e for e in self.db.entries if self._normalize_room_id(e) != rid]
         room_entries: list[dict] = []
         if not spawns:
-            if room:
+            if room and (room.db.spawn_entries or []):
                 room.db.spawn_entries = room_entries
                 room.save()
             return
@@ -245,7 +260,7 @@ class SpawnManager(Script):
                     "dead_mobs": [],
                 }
             )
-        if room:
+        if room and room_entries != (room.db.spawn_entries or []):
             room.db.spawn_entries = room_entries
             room.save()
 
@@ -429,10 +444,11 @@ class SpawnManager(Script):
                 entries = room.db.spawn_entries or []
                 if idx < len(entries):
                     active = entries[idx].get("active_mobs", [])
-                    active.append(npc.id)
-                    entries[idx]["active_mobs"] = active
-                    room.db.spawn_entries = entries
-                    room.save()
+                    if npc.id not in active:
+                        active.append(npc.id)
+                        entries[idx]["active_mobs"] = active
+                        room.db.spawn_entries = entries
+                        room.save()
             if not proto_is_digit:
                 try:
                     from commands.npc_builder import finalize_mob_prototype
@@ -506,10 +522,15 @@ class SpawnManager(Script):
                 == self._normalize_proto(proto)
                 and obj.db.spawn_room == room
             ]
-            rm_entry["active_mobs"] = [obj.id for obj in live_objs]
+            changed = False
+            active_ids = [obj.id for obj in live_objs]
+            if active_ids != rm_entry.get("active_mobs", []):
+                rm_entry["active_mobs"] = active_ids
+                changed = True
             room_entries[idx] = rm_entry
-            room.db.spawn_entries = room_entries
-            room.save()
+            if changed:
+                room.db.spawn_entries = room_entries
+                room.save()
 
             max_count = entry.get("max_count", 0)
             live_count = len(live_objs)
@@ -526,7 +547,9 @@ class SpawnManager(Script):
                 self._spawn(proto, room, idx=idx)
                 entry["last_spawn"] = now
                 ready.pop(0)
-            rm_entry["dead_mobs"] = remaining + ready
-            room_entries[idx] = rm_entry
-            room.db.spawn_entries = room_entries
-            room.save()
+            new_dead = remaining + ready
+            if new_dead != rm_entry.get("dead_mobs", []):
+                rm_entry["dead_mobs"] = new_dead
+                room_entries[idx] = rm_entry
+                room.db.spawn_entries = room_entries
+                room.save()
