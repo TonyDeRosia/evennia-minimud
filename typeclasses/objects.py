@@ -27,6 +27,7 @@ from commands.interact import GatherCmdSet
 from world.system import stat_manager
 from utils import normalize_slot
 from django.conf import settings
+import time
 
 
 class ObjectParent:
@@ -435,33 +436,15 @@ class Corpse(Object):
                         weight = getattr(obj.db, "weight", 0)
                         break
             self.db.weight = weight
-        if (decay := self.db.decay_time):
-            # start auto-decay timer in minutes
-            script = self.scripts.add(
-                "typeclasses.scripts.DecayScript",
-                key="decay",
-            )
-            if isinstance(script, list):
-                script = script[0]
-            script.db.room_only = not settings.ALLOW_CORPSE_DECAY_IN_INVENTORY
-            script.interval = int(decay) * 60
-            script.start()
+        self.tags.add("corpse", category="corpse_decay")
+        self.db.created_at = time.time()
+        if self.db.decay_time is None:
+            self.db.decay_time = 300
 
     def at_object_post_creation(self):
         super().at_object_post_creation()
         name = self.db.corpse_of or self.key or "someone"
         self.db.desc = f"The corpse of {name} lies here."
-        decay = self.db.decay_time
-        if decay and not self.scripts.get("decay"):
-            script = self.scripts.add(
-                "typeclasses.scripts.DecayScript",
-                key="decay",
-            )
-            if isinstance(script, list):
-                script = script[0]
-            script.db.room_only = not settings.ALLOW_CORPSE_DECAY_IN_INVENTORY
-            script.interval = int(decay) * 60
-            script.start()
 
     def get_display_name(self, looker, **kwargs):
         name = self.db.corpse_of or self.key or "corpse"

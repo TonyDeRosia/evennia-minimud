@@ -92,40 +92,31 @@ class GlobalTick(Script):
                 obj.refresh_prompt()
 
 
-class DecayScript(Script):
-    """Delete the attached object after a delay."""
+
+class CorpseDecayManager(Script):
+    """Periodic cleanup of corpses based on a decay timer."""
 
     def at_script_creation(self):
-        self.key = "decay"
-        self.interval = 300  # default decay interval in seconds
-        self.repeats = 1
-        self.start_delay = True
+        self.interval = 60
         self.persistent = True
-        self.desc = "Causes corpses to decay and disappear."
-        self.db.room_only = False
 
     def at_repeat(self):
-        obj = self.obj
-        if not obj:
-            self.stop()
-            return
+        from evennia.utils.search import search_tag
+        import time
 
-        if self.db.room_only:
-            location = obj.location
-            if location:
-                from typeclasses.rooms import Room
+        corpses = search_tag("corpse", category="corpse_decay")
+        for corpse in corpses:
+            try:
+                created = float(corpse.db.created_at or 0)
+                decay = int(corpse.db.decay_time or 0)
+            except Exception:
+                continue
 
-                if not inherits_from(location, Room):
-                    return
-            else:
-                return
-
-        location = obj.location
-        if location and getattr(obj.db, "is_corpse", False):
-            name = obj.db.corpse_of or obj.key
-            location.msg_contents(
-                f"|gThe corpse of {name} decomposes and crumbles to dust.|n"
-            )
-
-        obj.delete()
-        self.stop()
+            if time.time() >= created + decay:
+                location = corpse.location
+                if location:
+                    name = corpse.db.corpse_of or corpse.key
+                    location.msg_contents(
+                        f"The corpse of {name} decays into dust and vanishes."
+                    )
+                corpse.delete()

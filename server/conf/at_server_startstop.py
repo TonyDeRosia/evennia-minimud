@@ -151,12 +151,25 @@ def at_server_start():
         elif getattr(script.db, "_paused_time", None):
             script.unpause()
 
-    script = get_spawn_manager()
-    if not script or script.typeclass_path != "scripts.spawn_manager.SpawnManager":
+    spawn_script = get_spawn_manager()
+    if not spawn_script or spawn_script.typeclass_path != "scripts.spawn_manager.SpawnManager":
+        if spawn_script:
+            spawn_script.delete()
+        spawn_script = create.create_script(
+            "scripts.spawn_manager.SpawnManager", key="spawn_manager"
+        )
+    else:
+        if not spawn_script.is_active:
+            spawn_script.start()
+        elif getattr(spawn_script.db, "_paused_time", None):
+            spawn_script.unpause()
+
+    script = ScriptDB.objects.filter(db_key="corpse_decay").first()
+    if not script or script.typeclass_path != "typeclasses.scripts.CorpseDecayManager":
         if script:
             script.delete()
         script = create.create_script(
-            "scripts.spawn_manager.SpawnManager", key="spawn_manager"
+            "typeclasses.scripts.CorpseDecayManager", key="corpse_decay"
         )
     else:
         if not script.is_active:
@@ -164,8 +177,8 @@ def at_server_start():
         elif getattr(script.db, "_paused_time", None):
             script.unpause()
 
-    if hasattr(script, "reload_spawns"):
-        script.reload_spawns()
+    if hasattr(spawn_script, "reload_spawns"):
+        spawn_script.reload_spawns()
 
     # Ensure mob database script exists
     get_mobdb()
