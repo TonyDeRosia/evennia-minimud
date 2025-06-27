@@ -440,11 +440,10 @@ class Corpse(Object):
             script = self.scripts.add(
                 "typeclasses.scripts.DecayScript",
                 key="decay",
-                room_only=not settings.ALLOW_CORPSE_DECAY_IN_INVENTORY,
-                autostart=False,
             )
             if isinstance(script, list):
                 script = script[0]
+            script.db.room_only = not settings.ALLOW_CORPSE_DECAY_IN_INVENTORY
             script.interval = int(decay) * 60
             script.start()
 
@@ -457,11 +456,10 @@ class Corpse(Object):
             script = self.scripts.add(
                 "typeclasses.scripts.DecayScript",
                 key="decay",
-                room_only=not settings.ALLOW_CORPSE_DECAY_IN_INVENTORY,
-                autostart=False,
             )
             if isinstance(script, list):
                 script = script[0]
+            script.db.room_only = not settings.ALLOW_CORPSE_DECAY_IN_INVENTORY
             script.interval = int(decay) * 60
             script.start()
 
