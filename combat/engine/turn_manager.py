@@ -104,14 +104,22 @@ class TurnManager:
                     queued = [AttackAction(actor, target)]
                 else:
                     enemy = next(
-                        (p.actor for p in self.participants if p.actor is not actor and _current_hp(p.actor) > 0),
+                        (
+                            p.actor
+                            for p in self.participants
+                            if p.actor is not actor and _current_hp(p.actor) > 0
+                        ),
                         None,
                     )
                     if enemy:
                         queued = [AttackAction(actor, enemy)]
                     else:
                         queued = []
-                        if hasattr(actor, "msg"):
+                        living = any(
+                            _current_hp(p.actor) > 0 and p.actor is not actor
+                            for p in self.participants
+                        )
+                        if living and hasattr(actor, "msg"):
                             actor.msg("You hesitate, unsure of what to do.")
 
             haste = state_manager.get_effective_stat(actor, "haste")
