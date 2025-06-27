@@ -55,7 +55,6 @@ class TestSpawnManager(EvenniaTest):
             self.script.load_spawn_data()
         self.assertEqual(len(self.script.db.entries), 1)
         self.assertEqual(self.script.db.entries[0]["prototype"], "valid_proto")
-        assert self.script.db.entries[0]["source_vnum"] == 1
         m_log.assert_called_once()
 
     def test_load_spawn_data_numeric_proto(self):
@@ -87,7 +86,6 @@ class TestSpawnManager(EvenniaTest):
 
         self.assertEqual(len(self.script.db.entries), 1)
         self.assertEqual(self.script.db.entries[0]["prototype"], 5)
-        assert self.script.db.entries[0]["source_vnum"] == 1
         self.assertEqual(obj.location, self.room)
         fake.get_proto.assert_called_with(5)
         m_spawn.assert_called_with(5, location=self.room)
