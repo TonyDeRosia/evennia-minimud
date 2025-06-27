@@ -167,8 +167,8 @@ Room JSONs may include:
 ```
 See `docs/mob_respawn.md` for a full overview of how these entries are stored
 and managed at runtime.
-SpawnManager automatically registers spawns when a room prototype is saved.
-The `spawn_interval` value is stored internally on SpawnManager entries as
+MobRespawnManager automatically registers spawns when a room prototype is saved.
+The `spawn_interval` value is stored internally on MobRespawnManager entries as
 `respawn_rate`. Commands like `@showspawns` display this runtime field. If
 spawns appear to be missing (for example after a server restart), use:
 
@@ -181,7 +181,7 @@ Troubleshooting Mob Spawns
 If NPCs do not appear as expected, inspect `scripts/spawn_manager.py` to ensure
 the global spawn manager is running. Use `@spawnreload` to reload spawn entries
 from room prototypes and `@showspawns <room_vnum>` to list registered spawns.
-Check server logs for messages from `SpawnManager` about errors or skipped
+Check server logs for messages from `MobRespawnManager` about errors or skipped
 rooms. Also confirm each room prototype includes a valid `spawns` field with the
 correct NPC identifiers.
 The `redit` spawn editor now warns if you try to add an unknown prototype.
