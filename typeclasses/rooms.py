@@ -32,6 +32,7 @@ class RoomParent(TriggerMixin, ObjectParent):
     def at_object_creation(self):
         super().at_object_creation()
         self.db.exits = self.db.exits or {}
+        self.db.spawn_entries = self.db.spawn_entries or []
 
 
     def at_object_receive(self, mover, source_location, move_type=None, **kwargs):

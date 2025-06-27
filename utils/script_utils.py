@@ -63,9 +63,12 @@ def respawn_area(area_key: str) -> None:
     if not script or not hasattr(script, "force_respawn"):
         return
     key = area_key.lower()
-    for entry in getattr(script.db, "entries", []):
-        if entry.get("area") == key:
-            rid = script._normalize_room_id(entry)
+    from evennia.objects.models import ObjectDB
+
+    objs = ObjectDB.objects.get_by_attribute(key="area", value=key)
+    for room in objs:
+        if hasattr(room.db, "spawn_entries") and room.db.spawn_entries:
+            rid = getattr(room.db, "room_id", None)
             if rid is not None:
                 script.force_respawn(rid)
 
@@ -76,7 +79,10 @@ def respawn_world() -> None:
     script = get_spawn_manager()
     if not script or not hasattr(script, "force_respawn"):
         return
-    areas = {entry.get("area") for entry in getattr(script.db, "entries", [])}
+    from evennia.objects.models import ObjectDB
+
+    objs = ObjectDB.objects.get_by_attribute(key="spawn_entries")
+    areas = {room.attributes.get("area") for room in objs}
     for area in areas:
         if area:
             respawn_area(area)
