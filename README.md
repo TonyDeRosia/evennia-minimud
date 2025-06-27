@@ -165,6 +165,8 @@ Room JSONs may include:
   {"proto": "mob_goblin", "max_spawns": 2, "spawn_interval": 300}
 ]
 ```
+See `docs/mob_respawn.md` for a full overview of how these entries are stored
+and managed at runtime.
 SpawnManager automatically registers spawns when a room prototype is saved.
 The `spawn_interval` value is stored internally on SpawnManager entries as
 `respawn_rate`. Commands like `@showspawns` display this runtime field. If
