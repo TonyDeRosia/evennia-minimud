@@ -46,7 +46,7 @@ class TestCombatEndOrder(EvenniaTest):
 
         with (
             patch("world.mechanics.on_death_manager.handle_death", side_effect=wrapped_handle),
-            patch("world.mechanics.on_death_manager.spawn_corpse", return_value=corpse),
+            patch("world.mechanics.death_handlers.spawn_corpse", return_value=corpse),
             patch("combat.engine.damage_processor.delay"),
             patch("world.system.state_manager.apply_regen"),
             patch("world.system.state_manager.check_level_up"),
