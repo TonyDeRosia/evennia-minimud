@@ -164,8 +164,10 @@ Room JSONs may include:
 "spawns": [
   {"proto": "mob_goblin", "max_spawns": 2, "spawn_interval": 300}
 ]
-SpawnManager automatically registers spawns when a room prototype is saved. If
 ```
+SpawnManager automatically registers spawns when a room prototype is saved.
+The `spawn_interval` value is stored internally on SpawnManager entries as
+`respawn_rate`. Commands like `@showspawns` display this runtime field. If
 spawns appear to be missing (for example after a server restart), use:
 
 ```bash
