@@ -571,6 +571,6 @@ def test_end_combat_suppresses_no_active_fighters_reason():
         instance.end_combat("No active fighters remaining")
 
     calls = [c.args[0] for c in room.msg_contents.call_args_list]
-    assert "Combat ends:" in calls
+    assert "Combat ends." in calls
     assert all("No active fighters remaining" not in msg for msg in calls)
 

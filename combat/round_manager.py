@@ -277,7 +277,7 @@ class CombatInstance:
             reason = ""
             send_room_msg = False
 
-        message = f"Combat ends: {reason}" if reason else "Combat ends:"
+        message = f"Combat ends: {reason}" if reason else "Combat ends."
         if send_room_msg and room and hasattr(room, "msg_contents"):
             try:
                 room.msg_contents(message)

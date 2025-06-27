@@ -188,3 +188,35 @@ class TestSpawnManager(EvenniaTest):
             with patch("scripts.spawn_manager.time.time", return_value=1006):
                 self.script.at_repeat()
             self.assertEqual(len([o for o in self.room1.contents if o.key == "goblin"]), 2)
+
+    def test_respawn_missing_npc_without_death_record(self):
+        proto = {
+            "vnum": self.room1.db.room_id,
+            "area": "zone",
+            "spawns": [
+                {
+                    "prototype": "goblin",
+                    "max_spawns": 2,
+                    "spawn_interval": 5,
+                    "location": f"#{self.room1.db.room_id}",
+                }
+            ],
+        }
+        with patch("evennia.prototypes.spawner.spawn", side_effect=self._fake_spawn), patch(
+            "evennia.utils.delay",
+            lambda t, func, *a, **kw: None,
+        ), patch(
+            "world.prototypes.get_npc_prototypes",
+            return_value={"goblin": {"key": "goblin"}},
+        ):
+            with patch("scripts.spawn_manager.time.time", return_value=1000):
+                self.script.register_room_spawn(proto)
+                self.script.at_start()
+
+            npc = [o for o in self.room1.contents if o.key == "goblin"][0]
+            npc.delete()
+
+            with patch("scripts.spawn_manager.time.time", return_value=1006):
+                self.script.at_repeat()
+
+            self.assertEqual(len([o for o in self.room1.contents if o.key == "goblin"]), 2)
