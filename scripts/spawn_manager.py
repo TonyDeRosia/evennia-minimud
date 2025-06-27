@@ -518,6 +518,9 @@ class SpawnManager(Script):
                 f"SpawnManager: processing room {self._normalize_room_id(entry)} for {proto} - {live_count}/{max_count}"
             )
 
+            if not ready and capacity > 0 and now - entry.get("last_spawn", 0) >= respawn:
+                ready.append({})
+
             to_spawn = min(capacity, len(ready))
             for _ in range(to_spawn):
                 self._spawn(proto, room, idx=idx)
