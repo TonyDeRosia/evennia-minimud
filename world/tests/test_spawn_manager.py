@@ -311,3 +311,13 @@ class TestSpawnManager(EvenniaTest):
         self.assertIn(str(self.room.db.room_id), msg)
         self.assertIn("boom", msg)
 
+    def test_npc_on_death_falls_back_to_location(self):
+        npc = create_object(BaseNPC, key="mob", location=self.room)
+        npc.db.prototype_key = "goblin"
+        with mock.patch("world.mechanics.on_death_manager.handle_death"), \
+             mock.patch("utils.script_utils.get_spawn_manager", return_value=self.script), \
+             mock.patch.object(self.script, "record_death") as mock_record:
+            npc.on_death(self.char1)
+
+        mock_record.assert_called_with("goblin", self.room, npc_id=npc.id)
+
