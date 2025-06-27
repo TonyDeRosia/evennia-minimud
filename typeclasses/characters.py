@@ -1124,6 +1124,11 @@ class NPC(Character):
 
         The corpse created during this process stores this NPC's ``vnum``
         as ``npc_vnum`` when available.
+
+        Returns
+        -------
+        object or None
+            The newly created corpse or ``None`` if no corpse was made.
         """
         if not self.location or self.attributes.get("_dead"):
             return None
