@@ -1126,16 +1126,18 @@ class NPC(Character):
         as ``npc_vnum`` when available.
         """
         if not self.location or self.attributes.get("_dead"):
-            return
+            return None
 
         from world.mechanics import on_death_manager
 
-        on_death_manager.handle_death(self, attacker)
+        corpse = on_death_manager.handle_death(self, attacker)
 
         if attacker and getattr(attacker.db, "combat_target", None) is self:
             attacker.db.combat_target = None
 
         self.delete()
+
+        return corpse
 
     # property to mimic weapons
     @property
