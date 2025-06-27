@@ -1109,9 +1109,7 @@ class NPC(Character):
         as ``npc_vnum`` when available.
 
         Respawn timing is based on when this method records the death in the
-        global :class:`~scripts.spawn_manager.SpawnManager`.  If ``db.spawn_room``
-        is missing, the current location is used to ensure the room's respawn
-        timers update correctly.
+        global :class:`~scripts.spawn_manager.SpawnManager`.
 
         Returns
         -------
@@ -1132,10 +1130,7 @@ class NPC(Character):
 
         manager = get_spawn_manager()
         if manager and hasattr(manager, "record_death"):
-            room = self.db.spawn_room or self.location
-            if room and not self.db.spawn_room:
-                self.db.spawn_room = room
-            manager.record_death(self.db.prototype_key, room, npc_id=self.id)
+            manager.record_death(self.db.prototype_key, self.db.spawn_room, npc_id=self.id)
 
         self.delete()
 
