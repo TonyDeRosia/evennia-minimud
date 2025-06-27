@@ -1125,6 +1125,9 @@ class NPC(Character):
         The corpse created during this process stores this NPC's ``vnum``
         as ``npc_vnum`` when available.
 
+        Respawn timing is based on when this method records the death in the
+        global :class:`~scripts.spawn_manager.SpawnManager`.
+
         Returns
         -------
         object or None
@@ -1139,6 +1142,12 @@ class NPC(Character):
 
         if attacker and getattr(attacker.db, "combat_target", None) is self:
             attacker.db.combat_target = None
+
+        from utils.script_utils import get_spawn_manager
+
+        manager = get_spawn_manager()
+        if manager and hasattr(manager, "record_death"):
+            manager.record_death(self.db.prototype_key, self.db.spawn_room)
 
         self.delete()
 
