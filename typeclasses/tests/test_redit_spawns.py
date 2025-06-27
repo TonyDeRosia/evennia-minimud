@@ -10,6 +10,9 @@ from commands.admin import BuilderCmdSet
 @override_settings(DEFAULT_HOME=None)
 class TestReditSpawns(EvenniaTest):
     def setUp(self):
+        from django.conf import settings
+
+        settings.TEST_ENVIRONMENT = True
         super().setUp()
         self.char1.msg = MagicMock()
         self.char1.cmdset.add_default(BuilderCmdSet)
@@ -65,4 +68,19 @@ class TestReditSpawns(EvenniaTest):
             redit.menunode_done(self.char1)
             mock_script.register_room_spawn.assert_called_with(proto)
             assert proto["vnum"] == 5
+
+    def test_spawn_rate_must_be_positive(self):
+        self.char1.ndb.room_protos = {5: {"vnum": 5}}
+        self.char1.ndb.current_vnum = 5
+        self.char1.msg.reset_mock()
+
+        with patch(
+            "commands.redit.prototypes.get_npc_prototypes",
+            return_value={"goblin": {}},
+        ):
+            result = redit._handle_spawn_cmd(self.char1, "add goblin 1 0")
+
+        assert result == "menunode_spawns"
+        self.char1.msg.assert_called_with("Spawn rate must be positive.")
+        assert self.char1.ndb.room_protos[5].get("spawns", []) == []
 

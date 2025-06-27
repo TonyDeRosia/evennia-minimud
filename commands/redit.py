@@ -394,6 +394,9 @@ def _handle_spawn_cmd(caller, raw_string, **kwargs):
         except ValueError:
             caller.msg("Counts and rate must be numbers.")
             return "menunode_spawns"
+        if rate <= 0:
+            caller.msg("Spawn rate must be positive.")
+            return "menunode_spawns"
         proto_exists = False
         if isinstance(proto_key, int):
             mob_db = get_mobdb()
