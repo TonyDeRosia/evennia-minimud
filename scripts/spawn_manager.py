@@ -30,8 +30,13 @@ class SpawnManager(Script):
     """
 
     def at_script_creation(self):
-        self.key = "spawn_manager"
-        self.desc = "Handles mob respawning for rooms"
+        if self.pk:
+            self.key = "spawn_manager"
+            self.desc = "Handles mob respawning for rooms"
+        else:
+            # avoid saving during tests where the Script isn't persisted
+            self.db_key = "spawn_manager"
+            self.db_desc = "Handles mob respawning for rooms"
         # run frequently so short spawn intervals are respected
         self.interval = 5
         self.persistent = True
@@ -81,7 +86,9 @@ class SpawnManager(Script):
                     )
                     continue
 
-                room_loc = entry.get("location") or proto.get("vnum") or proto.get("room_id")
+                room_loc = (
+                    entry.get("location") or proto.get("vnum") or proto.get("room_id")
+                )
                 rid = self._normalize_room_id(room_loc)
                 self.db.entries.append(
                     {
@@ -101,7 +108,9 @@ class SpawnManager(Script):
                     }
                 )
 
-    def record_spawn(self, prototype: Any, room: Any, npc_id: int | None = None) -> None:
+    def record_spawn(
+        self, prototype: Any, room: Any, npc_id: int | None = None
+    ) -> None:
         """Record that ``prototype`` was spawned in ``room``.
 
         Parameters
@@ -116,7 +125,9 @@ class SpawnManager(Script):
 
         norm = self._normalize_proto(prototype)
         for entry in self.db.entries:
-            if self._normalize_proto(entry.get("prototype")) == norm and self._room_match(entry, room):
+            if self._normalize_proto(
+                entry.get("prototype")
+            ) == norm and self._room_match(entry, room):
                 entry.setdefault("spawned", [])
                 if npc_id is not None:
                     if npc_id not in entry["spawned"]:
@@ -124,13 +135,17 @@ class SpawnManager(Script):
                 entry["last_spawn"] = time.time()
                 break
 
-    def record_death(self, prototype: Any, room: Any, npc_id: int | None = None) -> None:
+    def record_death(
+        self, prototype: Any, room: Any, npc_id: int | None = None
+    ) -> None:
         """Record that ``prototype`` died in ``room``."""
 
         norm = self._normalize_proto(prototype)
         now = time.time()
         for entry in self.db.entries:
-            if self._normalize_proto(entry.get("prototype")) == norm and self._room_match(entry, room):
+            if self._normalize_proto(
+                entry.get("prototype")
+            ) == norm and self._room_match(entry, room):
                 entry.setdefault("dead_timestamps", []).append(now)
                 if npc_id is not None:
                     spawned = [sid for sid in entry.get("spawned", []) if sid != npc_id]
@@ -184,7 +199,9 @@ class SpawnManager(Script):
             count = self._live_count(proto, room)
             missing = max(0, entry.get("max_count", 0) - count)
             if missing <= 0:
-                logger.log_info(f"SpawnManager: room {room_vnum} at max population for {proto}")
+                logger.log_info(
+                    f"SpawnManager: room {room_vnum} at max population for {proto}"
+                )
                 continue
             for _ in range(missing):
                 npc = self._spawn(proto, room)
@@ -195,9 +212,7 @@ class SpawnManager(Script):
     def reload_spawns(self) -> None:
         load_npc_prototypes()
         self.load_spawn_data()
-        logger.log_info(
-            f"SpawnManager: loaded {len(self.db.entries)} spawn entries"
-        )
+        logger.log_info(f"SpawnManager: loaded {len(self.db.entries)} spawn entries")
         self.at_start()
         for entry in self.db.entries:
             room_vnum = self._normalize_room_id(entry)
@@ -281,7 +296,8 @@ class SpawnManager(Script):
             [
                 obj
                 for obj in room.contents
-                if self._normalize_proto(getattr(obj.db, "prototype_key", None)) == target
+                if self._normalize_proto(getattr(obj.db, "prototype_key", None))
+                == target
                 and obj.db.spawn_room == room
             ]
         )
@@ -314,7 +330,9 @@ class SpawnManager(Script):
                     base_cls = data.get("typeclass", "typeclasses.npcs.BaseNPC")
                     if isinstance(base_cls, str):
                         module, clsname = base_cls.rsplit(".", 1)
-                        base_cls = getattr(__import__(module, fromlist=[clsname]), clsname)
+                        base_cls = getattr(
+                            __import__(module, fromlist=[clsname]), clsname
+                        )
                     data["typeclass"] = f"{base_cls.__module__}.{base_cls.__name__}"
                     npc = spawner.spawn(data)[0]
                     npc.location = room
@@ -349,6 +367,7 @@ class SpawnManager(Script):
             if not proto_is_digit:
                 try:
                     from commands.npc_builder import finalize_mob_prototype
+
                     finalize_mob_prototype(npc, npc)
                 except Exception as err:
                     logger.log_err(f"Finalize error on {npc}: {err}")
@@ -362,12 +381,16 @@ class SpawnManager(Script):
             room = self._get_room(entry)
             proto = entry.get("prototype")
             if not room:
-                logger.log_warn(f"SpawnManager: room {entry.get('room')} not found for {proto}")
+                logger.log_warn(
+                    f"SpawnManager: room {entry.get('room')} not found for {proto}"
+                )
                 continue
             existing = self._live_count(proto, room)
             max_count = entry.get("max_count", 1)
             if existing >= max_count:
-                logger.log_info(f"SpawnManager: skipping spawn in room {room.dbref} for {proto}; capacity {existing}/{max_count}")
+                logger.log_info(
+                    f"SpawnManager: skipping spawn in room {room.dbref} for {proto}; capacity {existing}/{max_count}"
+                )
                 continue
             to_spawn = max(0, max_count - existing)
             for _ in range(to_spawn):
@@ -376,7 +399,9 @@ class SpawnManager(Script):
                     if npc:
                         entry.setdefault("spawned", []).append(npc.id)
                     entry["last_spawn"] = time.time()
-                    logger.log_info(f"SpawnManager: spawned {proto} in room {room.dbref}")
+                    logger.log_info(
+                        f"SpawnManager: spawned {proto} in room {room.dbref}"
+                    )
 
     def at_repeat(self):
         self.db.tick_count = (self.db.tick_count or 0) + 1
@@ -395,21 +420,40 @@ class SpawnManager(Script):
             room = self._get_room(entry)
             proto = entry.get("prototype")
             if not room:
-                logger.log_warn(f"SpawnManager: room {entry.get('room')} not found for {proto}")
+                logger.log_warn(
+                    f"SpawnManager: room {entry.get('room')} not found for {proto}"
+                )
                 continue
 
             # clean out any expired death timers
             respawn = entry.get("respawn_rate", self.interval)
-            ready = [ts for ts in entry.get("dead_timestamps", []) if now - ts >= respawn]
-            entry["dead_timestamps"] = [ts for ts in entry.get("dead_timestamps", []) if now - ts < respawn]
+            ready = [
+                ts for ts in entry.get("dead_timestamps", []) if now - ts >= respawn
+            ]
+            entry["dead_timestamps"] = [
+                ts for ts in entry.get("dead_timestamps", []) if now - ts < respawn
+            ]
 
             if not ready and now - entry.get("last_spawn", 0) >= respawn:
                 ready.append(now)
 
             max_count = entry.get("max_count", 0)
-            capacity = max(0, max_count - len(entry.get("spawned", [])))
+            live_objs = [
+                obj
+                for obj in room.contents
+                if self._normalize_proto(getattr(obj.db, "prototype_key", None))
+                == self._normalize_proto(proto)
+                and obj.db.spawn_room == room
+            ]
+            live_ids = {obj.id for obj in live_objs}
+            entry["spawned"] = [
+                sid for sid in entry.get("spawned", []) if sid in live_ids
+            ]
+
+            live_count = len(live_objs)
+            capacity = max(0, max_count - live_count)
             logger.log_debug(
-                f"SpawnManager: processing room {self._normalize_room_id(entry)} for {proto} - {len(entry.get('spawned', []))}/{max_count}"
+                f"SpawnManager: processing room {self._normalize_room_id(entry)} for {proto} - {live_count}/{max_count}"
             )
 
             to_spawn = min(capacity, len(ready))
@@ -420,6 +464,3 @@ class SpawnManager(Script):
                     entry["last_spawn"] = now
                 if ready:
                     ready.pop(0)
-
-
-
