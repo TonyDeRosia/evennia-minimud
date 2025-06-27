@@ -1252,7 +1252,7 @@ Examples:
     @showspawns 200001
 
 Notes:
-    - Room prototypes use |wspawn_interval|n. SpawnManager stores this as
+    - Room prototypes use |wspawn_interval|n. MobRespawnManager stores this as
       |wrespawn_rate|n, which is what this command displays.
 """,
     },
