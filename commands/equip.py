@@ -28,16 +28,22 @@ class CmdWear(ContribCmdWear):
         # The following replicates the search logic of the parent command so we
         # can operate on the item before it's worn.
         if not self.rhs:
-            clothing = self.caller.search(self.lhs, candidates=self.caller.contents, quiet=True)
+            clothing = self.caller.search_first(
+                self.lhs, candidates=self.caller.contents, quiet=True
+            )
             if not clothing:
                 argslist = self.lhs.split()
                 self.lhs = argslist[0]
                 self.rhs = " ".join(argslist[1:])
-                clothing = self.caller.search(self.lhs, candidates=self.caller.contents)
+                clothing = self.caller.search_first(
+                    self.lhs, candidates=self.caller.contents
+                )
             else:
                 clothing = at_search_result(clothing, self.caller, self.lhs)
         else:
-            clothing = self.caller.search(self.lhs, candidates=self.caller.contents)
+            clothing = self.caller.search_first(
+                self.lhs, candidates=self.caller.contents
+            )
 
         if not clothing:
             return

@@ -155,7 +155,7 @@ class CmdQAssign(Command):
             return
         npc_key, quest_key = parts
         quest_key = normalize_quest_key(quest_key)
-        npc = self.caller.search(npc_key, global_search=True)
+        npc = self.caller.search_first(npc_key, global_search=True)
         if not npc or npc.has_account:
             self.msg("Invalid NPC.")
             return
@@ -474,7 +474,7 @@ class CmdTalk(Command):
             self.msg("Usage: talk <npc>")
             return
 
-        npc = caller.search(self.args.strip())
+        npc = caller.search_first(self.args.strip())
         if not npc:
             return
 

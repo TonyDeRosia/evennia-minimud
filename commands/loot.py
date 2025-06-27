@@ -26,7 +26,7 @@ class CmdLoot(Command):
                 caller.msg("Loot what?")
                 return
         else:
-            target = caller.search(self.args.strip())
+            target = caller.search_first(self.args.strip())
         if not target:
             return
         if not target.is_typeclass("typeclasses.objects.Corpse", exact=False):
@@ -56,7 +56,7 @@ class CmdLootCorpse(Command):
         if not self.args:
             caller.msg("Loot what?")
             return
-        target = caller.search(self.args.strip())
+        target = caller.search_first(self.args.strip())
         if not target:
             return
         if not target.is_typeclass("typeclasses.objects.Corpse", exact=False):

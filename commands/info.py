@@ -140,7 +140,7 @@ class CmdFinger(Command):
         if not self.args or self.args.strip().lower() in {"self", "me"}:
             target = self.caller
         else:
-            target = self.caller.search(self.args.strip(), global_search=True)
+            target = self.caller.search_first(self.args.strip(), global_search=True)
             if not target:
                 return
         # gather lines of information
@@ -220,7 +220,7 @@ class CmdBounty(Command):
 
         amount = int(amount_str)
         amount_copper = amount * COIN_VALUES[coin]
-        target = self.caller.search(target_name, global_search=True)
+        target = self.caller.search_first(target_name, global_search=True)
         if not target:
             return
 
@@ -331,7 +331,7 @@ class CmdDrop(Command):
             caller.msg(f"You drop {amount} {ctype} coin{'s' if amount != 1 else ''}.")
             return
 
-        obj = caller.search(self.args, location=caller)
+        obj = caller.search_first(self.args, location=caller)
         if not obj:
             return
         obj.move_to(caller.location, quiet=True, move_type="drop")
@@ -366,7 +366,7 @@ class CmdGive(Command):
             caller.msg("Give <item|amount coin> <target>")
             return
 
-        target = caller.search(self.rhs)
+        target = caller.search_first(self.rhs)
         if not target:
             return
 
@@ -397,7 +397,7 @@ class CmdGive(Command):
             )
             return
 
-        obj = caller.search(self.lhs, location=caller)
+        obj = caller.search_first(self.lhs, location=caller)
         if not obj:
             caller.msg("You aren't carrying that.")
             return
@@ -518,7 +518,7 @@ class CmdInspect(Command):
             else:
                 obj = matches
         if not obj:
-            obj = caller.search(query)
+            obj = caller.search_first(query)
             if not obj:
                 return
 

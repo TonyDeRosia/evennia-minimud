@@ -16,7 +16,7 @@ def get_equipped_item_by_name(caller, itemname):
 
     # fall back to searching by item name
     candidates = [item for item in eq.values() if item]
-    obj = caller.search(searchstr, candidates=candidates)
+    obj = caller.search_first(searchstr, candidates=candidates)
     if not obj:
         return None, None
     for slt, itm in eq.items():

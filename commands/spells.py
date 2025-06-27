@@ -108,7 +108,7 @@ class CmdCast(Command):
             return
         target = None
         if self.target:
-            target = self.caller.search(self.target)
+            target = self.caller.search_first(self.target)
             if not target:
                 return
         if target:

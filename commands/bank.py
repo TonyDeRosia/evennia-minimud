@@ -108,7 +108,7 @@ class CmdBank(Command):
                 caller.msg(f"Unknown coin type: {coin}.")
                 return
             amount = amt * COIN_VALUES[coin]
-            target = caller.search(target_name, global_search=True)
+            target = caller.search_first(target_name, global_search=True)
             if not target:
                 return
             if not transfer_coins(caller, target, amount):

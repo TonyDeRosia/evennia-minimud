@@ -53,7 +53,7 @@ class CmdEat(Command):
 
     def func(self):
         caller = self.caller
-        obj = caller.search(self.args.strip(), stacked=1)
+        obj = caller.search_first(self.args.strip(), stacked=1)
         if not obj:
             return
         # stacked sometimes returns a list, so make sure it is one for consistent handling

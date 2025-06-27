@@ -463,7 +463,7 @@ class CmdRReg(Command):
             room = self.caller.location
         elif len(parts) == 3:
             room_name, area_name, num_str = parts
-            room = self.caller.search(room_name, global_search=True)
+            room = self.caller.search_first(room_name, global_search=True)
             if not room:
                 return
             if not room.is_typeclass(Room, exact=False):

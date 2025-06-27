@@ -158,7 +158,7 @@ class CmdSetStat(Command):
             self.msg("Usage: setstat <target> <stat> <value>")
             return
         target_name, stat_key, value_str = parts
-        target = self.caller.search(target_name, global_search=True)
+        target = self.caller.search_first(target_name, global_search=True)
         if not target:
             return
         value = int(value_str)
@@ -247,7 +247,7 @@ class CmdSetAttr(Command):
             self.msg("Usage: setattr <target> <attr> <value>")
             return
         target_name, attr, value = parts
-        target = self.caller.search(target_name, global_search=True)
+        target = self.caller.search_first(target_name, global_search=True)
         if not target:
             return
         target.attributes.add(attr, value)
@@ -280,7 +280,7 @@ class CmdSetBounty(Command):
             self.msg("Usage: setbounty <target> <amount>")
             return
         target_name, amt_str = parts
-        target = self.caller.search(target_name, global_search=True)
+        target = self.caller.search_first(target_name, global_search=True)
         if not target:
             return
         target.db.bounty = int(amt_str)
@@ -305,7 +305,7 @@ class CmdSlay(Command):
         if not self.args:
             self.msg("Usage: slay <target>")
             return
-        target = self.caller.search(self.args.strip(), global_search=True)
+        target = self.caller.search_first(self.args.strip(), global_search=True)
         if not target:
             return
         if not target.traits.get("health"):
@@ -335,7 +335,7 @@ class CmdSmite(Command):
         if not self.args:
             self.msg("Usage: smite <target>")
             return
-        target = self.caller.search(self.args.strip(), global_search=True)
+        target = self.caller.search_first(self.args.strip(), global_search=True)
         if not target:
             return
         if not target.traits.get("health"):
@@ -414,7 +414,7 @@ class CmdPurge(Command):
                 caller.msg("Nothing to purge.")
             return
 
-        target = caller.search(self.args.strip(), global_search=True)
+        target = caller.search_first(self.args.strip(), global_search=True)
         if not target:
             return
         if (
@@ -477,7 +477,7 @@ class CmdForceMobReport(Command):
             self.msg("Usage: force mob report <target>")
             return
 
-        target = self.caller.search(self.args.strip())
+        target = self.caller.search_first(self.args.strip())
         if not target:
             return
 
@@ -512,7 +512,7 @@ class CmdDebugCombat(Command):
         if not self.args:
             caller.msg("Usage: @debug_combat <target>")
             return
-        target = caller.search(self.args.strip(), global_search=True)
+        target = caller.search_first(self.args.strip(), global_search=True)
         if not target:
             return
         db_in_combat = getattr(target.db, "in_combat", None)
