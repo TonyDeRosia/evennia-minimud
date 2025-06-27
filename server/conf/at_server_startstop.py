@@ -161,7 +161,9 @@ def at_server_start():
         if spawn_script:
             spawn_script.delete()
         spawn_script = create.create_script(
-            "scripts.mob_respawn_manager.MobRespawnManager", key="mob_respawn_manager"
+            "scripts.mob_respawn_manager.MobRespawnManager",
+            key="mob_respawn_manager",
+            interval=60,
         )
     else:
         if not spawn_script.is_active:
