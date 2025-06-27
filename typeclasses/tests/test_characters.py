@@ -6,6 +6,8 @@ from unittest.mock import MagicMock, call, patch
 from evennia.utils.test_resources import EvenniaTest
 from django.test import override_settings
 from evennia.utils import create
+from evennia.scripts.models import ScriptDB
+from server.conf import at_server_startstop
 
 
 @override_settings(DEFAULT_HOME=None)
@@ -179,6 +181,7 @@ class TestCharacterProperties(EvenniaTest):
         self.assertTrue(self.char1.in_combat)
 
 
+@override_settings(DEFAULT_HOME=None)
 class TestGlobalTick(EvenniaTest):
     def test_interval(self):
         from typeclasses.scripts import GlobalTick
@@ -271,6 +274,37 @@ class TestGlobalTick(EvenniaTest):
 
         state_manager.tick_all.assert_called_once()
         self.assertFalse(self.char1.tags.has("stunned", category="status"))
+
+    def test_at_server_start_keeps_global_tick_active(self):
+        ScriptDB.objects.filter(db_key="global_tick").delete()
+
+        from evennia.scripts import manager as scripts_manager
+        original_filter = scripts_manager.ScriptDBManager.filter
+
+        def filter_proxy(self, *args, **kwargs):
+            if "typeclass_path" in kwargs:
+                kwargs["db_typeclass_path"] = kwargs.pop("typeclass_path")
+            return original_filter(self, *args, **kwargs)
+
+        with (
+            patch(
+                "evennia.scripts.manager.ScriptDBManager.filter",
+                new=filter_proxy,
+            ),
+            patch("utils.mob_proto.load_npc_prototypes"),
+            patch("server.conf.at_server_startstop._migrate_experience"),
+            patch("server.conf.at_server_startstop._build_caches"),
+            patch("server.conf.at_server_startstop._ensure_room_areas"),
+            patch("server.conf.at_server_startstop.resume_paused_scripts"),
+            patch("world.scripts.mob_db.get_mobdb"),
+            patch("server.conf.at_server_startstop.get_respawn_manager"),
+            patch("world.scripts.create_midgard_area.create"),
+        ):
+            at_server_startstop.at_server_start()
+
+        script = ScriptDB.objects.filter(db_key="global_tick").first()
+        self.assertIsNotNone(script)
+        self.assertTrue(script.is_active)
 
 
 class TestRegeneration(EvenniaTest):
