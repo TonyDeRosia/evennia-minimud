@@ -90,9 +90,11 @@ class SpawnManager(Script):
                     entry.get("location") or proto.get("vnum") or proto.get("room_id")
                 )
                 rid = self._normalize_room_id(room_loc)
+                source_vnum = self._normalize_room_id(proto.get("vnum") or proto.get("room_id"))
                 self.db.entries.append(
                     {
                         "area": (proto.get("area") or "").lower(),
+                        "source_vnum": source_vnum,
                         "prototype": proto_key,
                         "room": room_loc,
                         "room_id": rid,
@@ -157,9 +159,17 @@ class SpawnManager(Script):
         spawns = proto.get("spawns") or []
         room_id = proto.get("room_id") or proto.get("vnum")
         rid = self._normalize_room_id(room_id)
-        # always remove existing entries for this room to keep data in sync
+        # remove only entries created from this prototype
         self.db.entries = [
-            e for e in self.db.entries if self._normalize_room_id(e) != rid
+            e
+            for e in self.db.entries
+            if (
+                self._normalize_room_id(e.get("source_vnum")) != rid
+                and not (
+                    e.get("source_vnum") is None
+                    and self._normalize_room_id(e) == rid
+                )
+            )
         ]
         if not spawns:
             return
@@ -172,6 +182,7 @@ class SpawnManager(Script):
             self.db.entries.append(
                 {
                     "area": (proto.get("area") or "").lower(),
+                    "source_vnum": rid,
                     "prototype": proto_key,
                     "room": room_val,
                     "room_id": self._normalize_room_id(room_val),

@@ -105,6 +105,32 @@ class TestSpawnManager(EvenniaTest):
         self.script.register_room_spawn(proto)
         self.assertEqual(len(self.script.db.entries), 0)
 
+    def test_multiple_protos_same_room_preserve_entries(self):
+        proto1 = {
+            "vnum": self.room1.db.room_id,
+            "area": "zone",
+            "spawns": [{"prototype": "goblin", "location": self.room1.db.room_id}],
+        }
+        proto2 = {
+            "vnum": self.room1.db.room_id + 1,
+            "area": "zone",
+            "spawns": [{"prototype": "orc", "location": self.room1.db.room_id}],
+        }
+
+        self.script.register_room_spawn(proto1)
+        self.script.register_room_spawn(proto2)
+
+        assert {e["prototype"] for e in self.script.db.entries} == {"goblin", "orc"}
+
+        # re-register first proto; second entry should remain
+        self.script.register_room_spawn(proto1)
+        assert {e["prototype"] for e in self.script.db.entries} == {"goblin", "orc"}
+        for entry in self.script.db.entries:
+            if entry["prototype"] == "goblin":
+                assert entry["source_vnum"] == self.room1.db.room_id
+            if entry["prototype"] == "orc":
+                assert entry["source_vnum"] == self.room1.db.room_id + 1
+
     def test_periodic_spawn_interval(self):
         proto = {
             "vnum": self.room1.db.room_id,
