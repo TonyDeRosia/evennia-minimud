@@ -35,6 +35,8 @@ class SpawnManager(Script):
         # run frequently so short spawn intervals are respected
         self.interval = 5
         self.persistent = True
+        self.repeats = -1
+        self.start_delay = False
         self.db.entries = self.db.entries or []
         self.db.batch_size = self.db.batch_size or 1
         self.db.tick_count = self.db.tick_count or 0
