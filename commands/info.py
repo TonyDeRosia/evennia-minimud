@@ -775,6 +775,7 @@ class CmdPrompt(Command):
     """
 
     key = "prompt"
+    priority = 1  # override Evennia's default prompt command
     help_category = "General"
 
     def func(self):

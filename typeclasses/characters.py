@@ -34,6 +34,8 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
     The base typeclass for all characters, both player characters and NPCs
     """
 
+    PROMPT_VERSION = 1
+
     gender = AttributeProperty("plural")
     guild = AttributeProperty("")
     guild_points = AttributeProperty({})
@@ -930,11 +932,16 @@ class PlayerCharacter(Character):
         super().at_object_creation()
         # initialize hands
         self.db._wielded = {"left": None, "right": None}
+        self.db.prompt_version = self.PROMPT_VERSION
 
     def at_post_puppet(self, **kwargs):
         super().at_post_puppet(**kwargs)
         if self.db.sated is None:
             self.db.sated = MAX_SATED
+        if (self.db.prompt_version or 0) < self.PROMPT_VERSION:
+            self.db.prompt_version = self.PROMPT_VERSION
+        # ensure the new prompt format is displayed for existing characters
+        self.refresh_prompt()
 
     def get_display_name(self, looker, **kwargs):
         """
