@@ -775,6 +775,7 @@ class CmdPrompt(Command):
     """
 
     key = "prompt"
+    priority = 1  # override Evennia's default prompt command
     help_category = "General"
 
     def func(self):
@@ -783,6 +784,11 @@ class CmdPrompt(Command):
             current = caller.db.prompt_format or caller.get_resource_prompt()
             caller.msg(f"Current prompt: {current}")
             caller.msg("Set a new prompt with |wprompt <format>|n.")
+            return
+        if self.args.strip().lower() == "reset":
+            caller.db.prompt_format = None
+            caller.msg("Prompt reset to default.")
+            caller.refresh_prompt()
             return
         caller.db.prompt_format = self.args.strip()
         caller.msg("Prompt updated.")
