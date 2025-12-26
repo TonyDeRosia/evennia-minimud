@@ -890,6 +890,9 @@ class CmdScan(Command):
 
 class InfoCmdSet(CmdSet):
     key = "Info CmdSet"
+    # Give this cmdset higher priority than the base CharacterCmdSet so our
+    # prompt command reliably overrides the stock Evennia handler.
+    priority = 1
 
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
