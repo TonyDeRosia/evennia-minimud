@@ -784,6 +784,11 @@ class CmdPrompt(Command):
             caller.msg(f"Current prompt: {current}")
             caller.msg("Set a new prompt with |wprompt <format>|n.")
             return
+        if self.args.strip().lower() == "reset":
+            caller.db.prompt_format = None
+            caller.msg("Prompt reset to default.")
+            caller.refresh_prompt()
+            return
         caller.db.prompt_format = self.args.strip()
         caller.msg("Prompt updated.")
         caller.refresh_prompt()
