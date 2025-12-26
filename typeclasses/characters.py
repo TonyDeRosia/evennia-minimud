@@ -34,6 +34,8 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
     The base typeclass for all characters, both player characters and NPCs
     """
 
+    PROMPT_VERSION = 1
+
     gender = AttributeProperty("plural")
     guild = AttributeProperty("")
     guild_points = AttributeProperty({})
@@ -765,6 +767,7 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
         mp_max = int(self.traits.mana.max)
         sp_cur = int(self.traits.stamina.current)
         sp_max = int(self.traits.stamina.max)
+        tnl = int(self.db.tnl or 0)
 
         coins = self.db.coins or {}
         data = {
@@ -777,6 +780,7 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
             "level": self.db.level or 1,
             "xp": self.db.experience or 0,
             "experience": self.db.experience or 0,
+            "tnl": tnl,
             "copper": coins.get("copper", 0),
             "silver": coins.get("silver", 0),
             "gold": coins.get("gold", 0),
@@ -795,7 +799,8 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
         return (
             f"[|r{hp_cur}|n/{hp_max}] "
             f"[|b{mp_cur}|n/{mp_max}] "
-            f"[|g{sp_cur}|n/{sp_max}] >"
+            f"[|g{sp_cur}|n/{sp_max}] "
+            f"[|y{self.db.experience or 0}|n tnl {tnl}] >"
         )
 
     def at_character_arrive(self, chara, **kwargs):
@@ -927,11 +932,16 @@ class PlayerCharacter(Character):
         super().at_object_creation()
         # initialize hands
         self.db._wielded = {"left": None, "right": None}
+        self.db.prompt_version = self.PROMPT_VERSION
 
     def at_post_puppet(self, **kwargs):
         super().at_post_puppet(**kwargs)
         if self.db.sated is None:
             self.db.sated = MAX_SATED
+        if (self.db.prompt_version or 0) < self.PROMPT_VERSION:
+            self.db.prompt_version = self.PROMPT_VERSION
+        # ensure the new prompt format is displayed for existing characters
+        self.refresh_prompt()
 
     def get_display_name(self, looker, **kwargs):
         """
