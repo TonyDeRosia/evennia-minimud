@@ -765,6 +765,7 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
         mp_max = int(self.traits.mana.max)
         sp_cur = int(self.traits.stamina.current)
         sp_max = int(self.traits.stamina.max)
+        tnl = int(self.db.tnl or 0)
 
         coins = self.db.coins or {}
         data = {
@@ -777,6 +778,7 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
             "level": self.db.level or 1,
             "xp": self.db.experience or 0,
             "experience": self.db.experience or 0,
+            "tnl": tnl,
             "copper": coins.get("copper", 0),
             "silver": coins.get("silver", 0),
             "gold": coins.get("gold", 0),
@@ -795,7 +797,8 @@ class Character(TriggerMixin, ObjectParent, ClothedCharacter):
         return (
             f"[|r{hp_cur}|n/{hp_max}] "
             f"[|b{mp_cur}|n/{mp_max}] "
-            f"[|g{sp_cur}|n/{sp_max}] >"
+            f"[|g{sp_cur}|n/{sp_max}] "
+            f"[|y{self.db.experience or 0}|n tnl {tnl}] >"
         )
 
     def at_character_arrive(self, chara, **kwargs):
